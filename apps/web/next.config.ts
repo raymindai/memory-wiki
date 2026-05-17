@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   // works. pdf-parse stays because its types are referenced in a
   // couple of legacy spots; the active parser is pdfjs-dist.
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "officeparser"],
+  // pdf.worker.mjs isn't reachable through static analysis (pdfjs-dist
+  // imports it lazily at runtime through its fake-worker path). Force
+  // Vercel's output file tracer to bundle it with the PDF route or the
+  // function deploys without the file and getDocument throws
+  // "Setting up fake worker failed".
+  outputFileTracingIncludes: {
+    "/api/import/pdf": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+  },
   // Long-slug explainer docs (mdfy.app/how-mdfy-works, etc.) live in the
   // documents table the same as any other doc, but their ids exceed the
   // 12-char nanoid pattern Vercel's top-level rewrite assumes. Map each

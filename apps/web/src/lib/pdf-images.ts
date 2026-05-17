@@ -40,6 +40,19 @@ export async function parsePdfText(buffer: Buffer): Promise<PdfParseResult> {
   const pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs") = await import(
     /* webpackIgnore: true */ "pdfjs-dist/legacy/build/pdf.mjs"
   );
+  // pdfjs-dist needs pdf.worker.mjs even when running server-side
+  // (its "fake worker" path imports the worker module to grab the
+  // parsing code). Vercel's trace pulls pdf.mjs but skips
+  // pdf.worker.mjs unless we point GlobalWorkerOptions.workerSrc at
+  // the resolved file — that resolve() call is what the tracer
+  // follows to include the file in the deploy.
+  try {
+    const { createRequire } = await import("module");
+    const require = createRequire(import.meta.url);
+    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve(
+      "pdfjs-dist/legacy/build/pdf.worker.mjs",
+    );
+  } catch { /* leave default; getDocument will throw with a clearer error */ }
   const uint8 = new Uint8Array(buffer);
   const doc = await pdfjs.getDocument({
     data: uint8,
@@ -114,6 +127,19 @@ export async function extractPdfImages(
   const pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs") = await import(
     /* webpackIgnore: true */ "pdfjs-dist/legacy/build/pdf.mjs"
   );
+  // pdfjs-dist needs pdf.worker.mjs even when running server-side
+  // (its "fake worker" path imports the worker module to grab the
+  // parsing code). Vercel's trace pulls pdf.mjs but skips
+  // pdf.worker.mjs unless we point GlobalWorkerOptions.workerSrc at
+  // the resolved file — that resolve() call is what the tracer
+  // follows to include the file in the deploy.
+  try {
+    const { createRequire } = await import("module");
+    const require = createRequire(import.meta.url);
+    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve(
+      "pdfjs-dist/legacy/build/pdf.worker.mjs",
+    );
+  } catch { /* leave default; getDocument will throw with a clearer error */ }
   const sharp: typeof sharpType = (await import("sharp")).default;
 
   const uint8 = new Uint8Array(buffer);
