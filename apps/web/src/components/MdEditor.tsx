@@ -2141,24 +2141,31 @@ function suggestBundleTitle(docs: Array<{ title: string }>): string {
 function BundleCreatorModal({
   allDocs,
   initiallySelected,
-  defaultTitle,
   authHeaders,
   onClose,
   onCreate,
 }: {
   allDocs: Array<{ id: string; title: string; lastOpenedAt?: number }>;
   initiallySelected: Array<{ id: string; title: string }>;
-  defaultTitle?: string;
   authHeaders: Record<string, string>;
   onClose: () => void;
   onCreate: (args: { title: string; description?: string; docIds: string[]; annotationByDocId?: Record<string, string> }) => void | Promise<void>;
 }) {
-  const [title, setTitle] = useState(defaultTitle || "");
+  const [title, setTitle] = useState("");
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>(() => initiallySelected.map(d => d.id));
   const [creating, setCreating] = useState(false);
 
-  // AI Bundle Generation state
+  // Ask AI section — collapsed by default so the Documents picker
+  // gets the panel's full attention. User clicks the header to open.
+  const [showAskAI, setShowAskAI] = useState(false);
+
+  // AI title suggester state — wired to /api/bundles/suggest-title.
+  // Reads the selected docs' content and fills the title field.
+  const [suggestingTitle, setSuggestingTitle] = useState(false);
+  const [titleSuggestError, setTitleSuggestError] = useState<string | null>(null);
+
+  // AI Bundle Generation state (Ask AI prompt → docs + title)
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -2169,6 +2176,47 @@ function BundleCreatorModal({
   // was crowding the Documents panel below and pushing the document
   // picker into a 2-3-row sliver.
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Title placeholder — heuristic from currently-selected docs, used
+  // as the visible hint in the input. If the user clicks Create with
+  // the field empty, this is what gets submitted.
+  const selectedDocsForTitle = useMemo(() => {
+    const idSet = new Set(selectedIds);
+    return allDocs.filter((d) => idSet.has(d.id)).map((d) => ({ title: d.title }));
+  }, [selectedIds, allDocs]);
+  const titlePlaceholder = useMemo(() => {
+    if (selectedDocsForTitle.length === 0) return "My Bundle";
+    return suggestBundleTitle(selectedDocsForTitle);
+  }, [selectedDocsForTitle]);
+
+  const requestAITitle = useCallback(async () => {
+    if (suggestingTitle) return;
+    if (selectedIds.length === 0) {
+      setTitleSuggestError("Pick at least one document first.");
+      return;
+    }
+    setTitleSuggestError(null);
+    setSuggestingTitle(true);
+    try {
+      const res = await fetch("/api/bundles/suggest-title", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify({ documentIds: selectedIds.slice(0, 25) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
+      if (typeof data?.title === "string" && data.title.trim()) {
+        setTitle(data.title.trim());
+      } else {
+        throw new Error("Empty response from AI");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to suggest title";
+      setTitleSuggestError(msg);
+    } finally {
+      setSuggestingTitle(false);
+    }
+  }, [authHeaders, selectedIds, suggestingTitle]);
 
   // Fetch suggestion prompts on mount — fire once, keep result for the
   // life of the modal. Empty list (cold hub / AI unavailable) hides
@@ -2278,9 +2326,17 @@ function BundleCreatorModal({
           <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Create Bundle</h3>
           <p className="text-caption mt-1" style={{ color: "var(--text-muted)" }}>Pick documents to bundle, or ask AI to suggest from your hub.</p>
         </div>
-        {/* AI Bundle Generation strip — describe what you want, AI picks from hub. */}
-        <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)", background: "color-mix(in srgb, var(--accent-dim) 25%, var(--surface))" }}>
-          <div className="flex items-center gap-2 mb-1">
+        {/* AI Bundle Generation strip — collapsed by default. Header
+            row is a clickable toggle so the Documents picker gets the
+            full panel by default; users who want AI to assemble a
+            bundle from a prompt expand it on demand. */}
+        <div className="shrink-0" style={{ borderBottom: "1px solid var(--border-dim)", background: showAskAI ? "color-mix(in srgb, var(--accent-dim) 25%, var(--surface))" : "var(--surface)" }}>
+          <button
+            type="button"
+            onClick={() => setShowAskAI((s) => !s)}
+            className="w-full flex items-center gap-2 px-5 py-3 transition-colors hover:bg-[var(--accent-dim)]"
+            aria-expanded={showAskAI}
+          >
             <span
               className="flex items-center justify-center shrink-0"
               style={{ width: 22, height: 22, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
@@ -2288,8 +2344,21 @@ function BundleCreatorModal({
               <Sparkles width={12} height={12} aria-hidden />
             </span>
             <span className="text-caption font-semibold" style={{ color: "var(--accent)" }}>Ask AI</span>
-            <span className="text-caption" style={{ color: "var(--text-faint)" }}>— optional</span>
-          </div>
+            <span className="text-caption" style={{ color: "var(--text-faint)" }}>— describe a topic, AI picks docs + title</span>
+            <span style={{ flex: 1 }} />
+            <ChevronDown
+              width={12}
+              height={12}
+              style={{
+                color: "var(--text-faint)",
+                transform: showAskAI ? "rotate(0deg)" : "rotate(-90deg)",
+                transition: "transform 0.15s",
+              }}
+            />
+          </button>
+        </div>
+        {showAskAI && (
+        <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)", background: "color-mix(in srgb, var(--accent-dim) 25%, var(--surface))" }}>
           <p className="text-caption leading-relaxed mb-3" style={{ color: "var(--text-muted)" }}>
             Describe a topic and AI picks matching docs + writes a title from your hub.
           </p>
@@ -2427,17 +2496,56 @@ function BundleCreatorModal({
             </div>
           )}
         </div>
+        )}
         <div className="px-5 py-4 shrink-0">
           <label className="text-caption font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>Bundle Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="My Bundle"
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-            style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
-            autoFocus
-          />
+          {/* Title field with an AI button on the right. Empty by
+              default; placeholder shows a heuristic from selected
+              docs (used as the submitted title if user creates
+              without typing). AI button reads the selected docs'
+              content and fills the field. */}
+          <div
+            className="flex items-stretch rounded-lg overflow-hidden"
+            style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+          >
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={titlePlaceholder}
+              className="flex-1 px-3 py-2 text-sm outline-none bg-transparent"
+              style={{ color: "var(--text-primary)" }}
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={requestAITitle}
+              disabled={suggestingTitle || selectedIds.length === 0}
+              className="flex items-center gap-1 px-3 text-caption font-semibold shrink-0 transition-colors"
+              style={{
+                background: suggestingTitle ? "transparent" : "var(--accent-dim)",
+                color: selectedIds.length === 0 ? "var(--text-faint)" : "var(--accent)",
+                cursor: suggestingTitle || selectedIds.length === 0 ? "not-allowed" : "pointer",
+                borderLeft: "1px solid var(--border-dim)",
+              }}
+              title={selectedIds.length === 0 ? "Pick a document first" : "Let AI suggest a title from the selected docs"}
+            >
+              {suggestingTitle ? (
+                <>
+                  <Loader2 width={11} height={11} className="animate-spin" />
+                  <span>Thinking</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles width={11} height={11} />
+                  <span>AI</span>
+                </>
+              )}
+            </button>
+          </div>
+          {titleSuggestError && (
+            <p className="text-caption mt-1.5" style={{ color: "var(--color-danger)" }}>{titleSuggestError}</p>
+          )}
         </div>
         <div className="px-5 shrink-0">
           <div className="flex items-center justify-between mb-1.5">
@@ -2546,7 +2654,7 @@ function BundleCreatorModal({
               setCreating(true);
               try {
                 await onCreate({
-                  title: title.trim() || "Untitled Bundle",
+                  title: title.trim() || titlePlaceholder || "Untitled Bundle",
                   description: aiDescription.trim() || undefined,
                   docIds: selectedIds,
                   annotationByDocId: Object.keys(aiAnnotations).length > 0 ? aiAnnotations : undefined,
@@ -4235,10 +4343,6 @@ export default function MdEditor() {
   const [confirmTrash, setConfirmTrash] = useState(false);
   const [showBundleCreator, setShowBundleCreator] = useState(false);
   const [bundleCreatorDocs, setBundleCreatorDocs] = useState<Array<{ id: string; title: string }>>([]);
-  // Suggested title for the next BundleCreator open. Auto-derived
-  // from the selected docs (multi-select bundling) so the user
-  // doesn't start from a blank field.
-  const [bundleCreatorDefaultTitle, setBundleCreatorDefaultTitle] = useState<string>("");
   const [_renderPaneNarrow, setRenderPaneNarrow] = useState(false);
   const [renderPaneUnderNarrowWidth, setRenderPaneUnderNarrowWidth] = useState(false);
   const [_editorPaneNarrow, setEditorPaneNarrow] = useState(false);
@@ -11853,7 +11957,6 @@ ${clone.innerHTML}
                       onClick={() => {
                         const docs = bundleable.map(t => ({ id: t.cloudId!, title: t.title || "Untitled" }));
                         setBundleCreatorDocs(docs);
-                        setBundleCreatorDefaultTitle(suggestBundleTitle(docs));
                         setShowMyBundles(true);
                         setShowBundleCreator(true);
                         setSelectedTabIds(new Set());
@@ -14842,7 +14945,6 @@ ${clone.innerHTML}
                   const docs = multiTabs.map(t => ({ id: t.cloudId!, title: t.title || "Untitled" }));
                   return [{ label: `Bundle these ${multiTabs.length} docs…`, action: () => {
                     setBundleCreatorDocs(docs);
-                    setBundleCreatorDefaultTitle(suggestBundleTitle(docs));
                     setShowMyBundles(true);
                     setShowBundleCreator(true);
                     setSelectedTabIds(new Set());
@@ -14850,7 +14952,6 @@ ${clone.innerHTML}
                 }
                 return [{ label: "Create bundle…", action: () => {
                   setBundleCreatorDocs([{ id: tab.cloudId!, title: tab.title || "Untitled" }]);
-                  setBundleCreatorDefaultTitle(suggestBundleTitle([{ title: tab.title || "Untitled" }]));
                   setShowMyBundles(true);
                   setShowBundleCreator(true);
                 }}];
@@ -16613,9 +16714,8 @@ ${clone.innerHTML}
         <BundleCreatorModal
           allDocs={tabs.filter(t => t.cloudId && !t.deleted && !t.readonly && t.permission !== "readonly" && t.permission !== "editable" && t.kind !== "bundle").map(t => ({ id: t.cloudId!, title: t.title || "Untitled", lastOpenedAt: t.lastOpenedAt }))}
           initiallySelected={bundleCreatorDocs}
-          defaultTitle={bundleCreatorDefaultTitle}
           authHeaders={authHeaders}
-          onClose={() => { setShowBundleCreator(false); setBundleCreatorDocs([]); setBundleCreatorDefaultTitle(""); setPendingNewBundleFolderId(null); }}
+          onClose={() => { setShowBundleCreator(false); setBundleCreatorDocs([]); setPendingNewBundleFolderId(null); }}
           onCreate={async ({ title, description, docIds, annotationByDocId }) => {
             try {
               const targetFolderId = pendingNewBundleFolderId;
