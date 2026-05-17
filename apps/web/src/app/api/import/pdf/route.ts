@@ -277,7 +277,14 @@ export async function POST(req: NextRequest) {
     return res;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("PDF parse error:", msg);
-    return NextResponse.json({ error: "PDF parse failed. The file may be corrupted or unsupported." }, { status: 500 });
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("PDF parse error:", msg, stack);
+    // Temporarily surface the real error so we can diagnose the Vercel
+    // pdfjs-dist trace issue from the response. Revert to the generic
+    // message once the import path is confirmed working in production.
+    return NextResponse.json({
+      error: "PDF parse failed. The file may be corrupted or unsupported.",
+      _diag: { msg, stackHead: stack?.split("\n").slice(0, 6).join(" / ") },
+    }, { status: 500 });
   }
 }
