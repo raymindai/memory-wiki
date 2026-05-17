@@ -81,11 +81,23 @@ export async function GET(
   void isDigestRequested;
 
   if (digest) {
+    // ?since=YYYY-MM-DD — filter concepts to those born after that date.
+    // Validate strictly; anything that's not a parseable ISO date is
+    // dropped (treated as "no filter").
+    let since: string | null = null;
+    try {
+      const raw = new URL(request.url).searchParams.get("since");
+      if (raw) {
+        const parsed = new Date(raw);
+        if (!Number.isNaN(parsed.getTime())) since = parsed.toISOString();
+      }
+    } catch { /* malformed URL — no filter */ }
     const body = await renderDigest({
       supabase,
       profile,
       slug,
       compact,
+      since,
     });
     const sig = extractRequestSignals(request);
     logRawFetch({
@@ -265,20 +277,26 @@ interface DigestArgs {
   profile: DigestProfile;
   slug: string;
   compact: boolean;
+  /** ISO date — when set, only concepts whose created_at >= since are
+   *  surfaced. Use case: "what's new in this hub since last month",
+   *  agentic crawlers that want diff-style updates. */
+  since: string | null;
 }
 
-async function renderDigest({ supabase, profile, slug, compact }: DigestArgs): Promise<string> {
+async function renderDigest({ supabase, profile, slug, compact, since }: DigestArgs): Promise<string> {
   const author = (profile.display_name || slug).replace(/"/g, '\\"');
   const description = (profile.hub_description || "").trim();
 
   // Top concepts by weight × occurrence — central themes first. Capped
   // at 40 so a 500-doc hub still fits comfortably under 4k tokens.
-  const { data: rawConcepts } = await supabase
+  let q = supabase
     .from("concept_index")
     .select("id, label, concept_type, description, weight, occurrence_count, doc_ids")
     .eq("user_id", profile.id)
     .order("weight", { ascending: false })
     .limit(40);
+  if (since) q = q.gte("created_at", since);
+  const { data: rawConcepts } = await q;
   const concepts = (rawConcepts as ConceptRow[] | null) || [];
 
   // Resolve doc titles in one round-trip, only for the docs referenced
@@ -300,6 +318,73 @@ async function renderDigest({ supabase, profile, slug, compact }: DigestArgs): P
     );
   }
 
+  // ── concept_relations — typed edges between concepts.
+  // Already shipped to the canvas/galaxy viz; surfacing them here turns
+  // the hub digest from a flat *list* of concepts into a real concept
+  // *map*. Both endpoints must be inside the top-40 set we're rendering
+  // so the edges never reference a concept the AI can't follow.
+  const conceptIdList = concepts.map((c) => c.id);
+  type RelationRow = {
+    source_concept_id: number;
+    target_concept_id: number;
+    relation_label: string | null;
+    weight: number | null;
+  };
+  let outgoingByConcept = new Map<number, RelationRow[]>();
+  let topRelations: RelationRow[] = [];
+  if (conceptIdList.length > 0) {
+    const { data: relRows } = await supabase
+      .from("concept_relations")
+      .select("source_concept_id, target_concept_id, relation_label, weight")
+      .eq("user_id", profile.id)
+      .in("source_concept_id", conceptIdList)
+      .in("target_concept_id", conceptIdList)
+      .order("weight", { ascending: false })
+      .limit(200);
+    const relations = (relRows as RelationRow[] | null) || [];
+    for (const r of relations) {
+      const arr = outgoingByConcept.get(r.source_concept_id) || [];
+      arr.push(r);
+      outgoingByConcept.set(r.source_concept_id, arr);
+    }
+    topRelations = relations.slice(0, 20);
+  }
+  const conceptLabelById = new Map(concepts.map((c) => [c.id, c.label]));
+
+  // ── bundle membership — which bundles is each concept "in"?
+  // For each concept's doc_ids, look up which bundles contain those
+  // docs. Surfaces the bundle URLs the AI should fetch next if it
+  // wants a richer payload (bundle digests include the AI graph
+  // analysis, which single-doc fetches do not).
+  type BundleDocRow = { bundle_id: string; document_id: string };
+  let bundleByDoc = new Map<string, string[]>();
+  let bundleTitleById = new Map<string, string>();
+  if (docIdSet.size > 0) {
+    const { data: bdRows } = await supabase
+      .from("bundle_documents")
+      .select("bundle_id, document_id")
+      .in("document_id", Array.from(docIdSet));
+    const bd = (bdRows as BundleDocRow[] | null) || [];
+    for (const row of bd) {
+      const arr = bundleByDoc.get(row.document_id) || [];
+      arr.push(row.bundle_id);
+      bundleByDoc.set(row.document_id, arr);
+    }
+    const bundleIds = Array.from(new Set(bd.map((r) => r.bundle_id)));
+    if (bundleIds.length > 0) {
+      const { data: bundleRows } = await supabase
+        .from("bundles")
+        .select("id, title, is_draft, password_hash, allowed_emails, deleted_at")
+        .in("id", bundleIds);
+      bundleTitleById = new Map(
+        (bundleRows || [])
+          .filter((b) => !b.is_draft && !b.deleted_at && !b.password_hash &&
+            !(Array.isArray(b.allowed_emails) && b.allowed_emails.length > 0))
+          .map((b) => [b.id as string, (b.title as string) || "Untitled bundle"]),
+      );
+    }
+  }
+
   const updatedAt = new Date().toISOString();
 
   const frontmatter = [
@@ -310,6 +395,7 @@ async function renderDigest({ supabase, profile, slug, compact }: DigestArgs): P
     `author: "${author}"`,
     `url: https://mdfy.app/hub/${slug}`,
     `concept_count: ${concepts.length}`,
+    ...(since ? [`since: ${since}`] : []),
     `updated: ${updatedAt}`,
     'source: "mdfy.app"',
     "---",
@@ -342,6 +428,63 @@ async function renderDigest({ supabase, profile, slug, compact }: DigestArgs): P
       sections.push(`### ${c.label}\n*${meta}*`);
       if (c.description) sections.push(`> ${c.description.split("\n")[0]}`);
       sections.push(visibleDocs.map((id) => `- [${docTitleById.get(id)}](https://mdfy.app/${id})`).join("\n"));
+
+      // Related concepts inside the top-40 set — gives the AI
+      // first-class navigation between ideas without needing to read
+      // every doc.
+      const out = (outgoingByConcept.get(c.id) || []).slice(0, 5);
+      if (out.length > 0) {
+        const rels = out
+          .map((r) => {
+            const tgt = conceptLabelById.get(r.target_concept_id);
+            if (!tgt) return null;
+            const lbl = (r.relation_label || "related to").trim();
+            return `${lbl} → **${tgt}**`;
+          })
+          .filter((s): s is string => !!s);
+        if (rels.length > 0) {
+          sections.push(`_Related:_ ${rels.join(" · ")}`);
+        }
+      }
+
+      // Bundles that contain this concept's supporting docs. AI follows
+      // the URL to inherit the bundle's full AI graph (themes,
+      // insights, takeaways) instead of stitching together loose docs.
+      const bundleCounts = new Map<string, number>();
+      for (const docId of visibleDocs) {
+        for (const bid of bundleByDoc.get(docId) || []) {
+          if (!bundleTitleById.has(bid)) continue;
+          bundleCounts.set(bid, (bundleCounts.get(bid) || 0) + 1);
+        }
+      }
+      if (bundleCounts.size > 0) {
+        const bundleLine = Array.from(bundleCounts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([bid, count]) => `[${bundleTitleById.get(bid)}](https://mdfy.app/b/${bid}) (${count} doc${count === 1 ? "" : "s"})`)
+          .join(" · ");
+        sections.push(`_In bundles:_ ${bundleLine}`);
+      }
+    }
+
+    // Top concept-to-concept edges as a free-standing section. Lets the
+    // AI grasp the *shape* of the hub (what depends on what, what
+    // contradicts what) before reading individual concept entries.
+    const renderableTopRels = topRelations
+      .map((r) => {
+        const src = conceptLabelById.get(r.source_concept_id);
+        const tgt = conceptLabelById.get(r.target_concept_id);
+        if (!src || !tgt) return null;
+        const lbl = (r.relation_label || "related to").trim();
+        return `- **${src}** ${lbl} **${tgt}**`;
+      })
+      .filter((s): s is string => !!s);
+    if (renderableTopRels.length > 0) {
+      sections.push(
+        "## Concept relations\n" +
+        `_${renderableTopRels.length} highest-weight edge${renderableTopRels.length === 1 ? "" : "s"} between the top concepts._\n\n` +
+        renderableTopRels.join("\n"),
+      );
     }
   }
 
