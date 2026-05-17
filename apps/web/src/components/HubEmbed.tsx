@@ -535,31 +535,23 @@ export default function HubEmbed({
           })()}
         </header>
 
-        {/* Deploy URL card — clearly labeled as DEPLOY so its
-            purpose is unambiguous. Header + variant chips + ONE
-            large URL row with embedded Copy. Footer info (meta /
-            Galaxy CTA) lives in the identity hero above to avoid
-            duplicating identifiers. */}
+        {/* Deploy URL card — proper section heading (no decorative
+            icon, no caption-mono label) so it reads as a real title.
+            Variant chips + ONE large URL row with embedded Copy.
+            Meta + Galaxy live in the identity hero above. */}
         <section
-          className="mb-6 rounded-xl"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "16px 18px" }}
+          className="mb-8 rounded-xl"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "20px 20px 18px" }}
         >
-          <div className="flex items-start gap-3 mb-3">
-            <span
-              className="flex items-center justify-center shrink-0 mt-0.5"
-              style={{ width: 24, height: 24, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
-            >
-              <Globe width={14} height={14} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
-                Deploy this hub to any AI
-              </p>
-              <p className="text-caption mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                Paste the URL into <strong>Claude</strong>, <strong>ChatGPT</strong>, or <strong>Cursor</strong> — the AI fetches a structured index and follows inline links.
-              </p>
-            </div>
-          </div>
+          <h2
+            className="text-heading font-semibold"
+            style={{ color: "var(--text-primary)", margin: 0 }}
+          >
+            Deploy to any AI
+          </h2>
+          <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
+            Paste this URL into Claude, ChatGPT, or Cursor. The AI fetches a structured index and follows inline links to specific docs.
+          </p>
           <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
             <div className="flex items-center gap-1">
               {(["digest", "full"] as const).map((v) => {
@@ -578,7 +570,7 @@ export default function HubEmbed({
                       border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
                     }}
                   >
-                    {v === "digest" ? "Digest" : "Full"}
+                    {v === "digest" ? "Compact" : "Full"}
                   </button>
                 );
               })}
@@ -681,7 +673,7 @@ mdfy hub`;
                 hint: "Drop the URL into a Claude chat",
                 snippet: url,
                 explanation:
-                  "Works the same in Claude.ai (web) and the Mac / Windows desktop app. Claude fetches the digest — a compact concept map of your hub — and follows the inline links to specific docs as needed. Append ?full=1 if you want every doc inlined up-front.",
+                  "Works the same in Claude.ai (web) and the Mac / Windows desktop app. Claude fetches the compact view — a concept map of your hub — and follows the inline links to specific docs as needed. Append ?full=1 if you want every doc inlined up-front.",
                 docHref: "/docs/integrate",
               },
               {
@@ -691,7 +683,7 @@ mdfy hub`;
                 hint: "Drop the URL into a ChatGPT chat",
                 snippet: url,
                 explanation:
-                  "Works in ChatGPT web and the Mac desktop app. ChatGPT fetches the URL with its built-in browser tool, reads the digest, and follows the inline links into specific docs when it needs more context.",
+                  "Works in ChatGPT web and the Mac desktop app. ChatGPT fetches the URL with its built-in browser tool, reads the compact view, and follows the inline links into specific docs when it needs more context.",
                 docHref: "/docs/integrate",
               },
               {
@@ -792,11 +784,19 @@ mdfy hub`;
 
             return (
               <div className="mb-3">
-                {/* Section label */}
-                <div className="text-caption font-mono uppercase tracking-wider mb-2"
-                  style={{ color: "var(--text-faint)", fontSize: 10, letterSpacing: 0.5 }}>
-                  Setup snippet for your tool
-                </div>
+                {/* Section heading — proper h2 with subtitle, not a
+                    tiny mono caption. Same treatment as the Deploy
+                    card above so the page reads as a list of real
+                    sections, each with its own title. */}
+                <h2
+                  className="text-heading font-semibold"
+                  style={{ color: "var(--text-primary)", margin: 0 }}
+                >
+                  Set it up in your tool
+                </h2>
+                <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
+                  Pick where you do AI. Each tool gets a copy-paste snippet — save it once and your AI auto-loads the hub on every session.
+                </p>
 
                 {/* Row 1 — user surfaces */}
                 <div className="flex flex-wrap gap-1.5 items-center mb-1.5">
@@ -818,10 +818,16 @@ mdfy hub`;
                   {/* Header: where to put it + tool name */}
                   <div className="flex items-baseline justify-between px-3 py-2 gap-2"
                     style={{ borderBottom: "1px solid var(--border-dim)" }}>
-                    <span className="text-caption font-mono uppercase tracking-wider truncate"
-                      style={{ color: "var(--accent)", fontSize: 10, letterSpacing: 0.5 }}>
+                    {/* Inner sub-context — not uppercase, sentence
+                        case, lower visual weight than the section
+                        title above. */}
+                    <span className="text-caption truncate"
+                      style={{ color: "var(--text-secondary)" }}>
                       {active.savePath ? (
-                        <>Save to <span style={{ color: "var(--text-primary)" }}>{active.savePath}</span></>
+                        <>
+                          Save to{" "}
+                          <code className="font-mono" style={{ color: "var(--accent)" }}>{active.savePath}</code>
+                        </>
                       ) : (
                         <>{active.hint}</>
                       )}
@@ -924,7 +930,7 @@ mdfy hub`;
                 style={{ color: "var(--text-faint)", fontSize: 10 }}
                 title="Estimated tokens an AI pays to consume this hub. The digest path uses your concept ontology so broad queries can be answered without reading every doc."
               >
-                {digestTokens > 0 ? `Digest ≈ ${fmt(digestTokens)} tokens   ` : ""}Full ≈ {fmt(indexTokens)} tokens
+                {digestTokens > 0 ? `Compact ≈ ${fmt(digestTokens)} tokens   ` : ""}Full ≈ {fmt(indexTokens)} tokens
               </p>
             );
           })()}

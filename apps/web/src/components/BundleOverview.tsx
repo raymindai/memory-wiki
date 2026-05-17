@@ -236,25 +236,18 @@ export default function BundleOverview({
           };
           return (
             <section
-              className="mb-6 rounded-xl"
-              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "16px 18px" }}
+              className="mb-8 rounded-xl"
+              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "20px 20px 18px" }}
             >
-              <div className="flex items-start gap-3 mb-3">
-                <span
-                  className="flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ width: 24, height: 24, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
-                >
-                  <Globe width={14} height={14} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
-                    Deploy this bundle to any AI
-                  </p>
-                  <p className="text-caption mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                    Paste the URL into <strong>Claude</strong>, <strong>ChatGPT</strong>, or <strong>Cursor</strong> — the AI fetches the markdown payload directly.
-                  </p>
-                </div>
-              </div>
+              <h2
+                className="text-heading font-semibold"
+                style={{ color: "var(--text-primary)", margin: 0 }}
+              >
+                Deploy to any AI
+              </h2>
+              <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
+                Paste this URL into Claude, ChatGPT, or Cursor. The AI fetches the markdown payload directly.
+              </p>
               <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
                 <div className="flex items-center gap-1">
                   {(["digest", "full"] as const).map((v) => {
@@ -273,7 +266,7 @@ export default function BundleOverview({
                           border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
                         }}
                       >
-                        {v === "digest" ? "Digest" : "Full"}
+                        {v === "digest" ? "Compact" : "Full"}
                       </button>
                     );
                   })}
