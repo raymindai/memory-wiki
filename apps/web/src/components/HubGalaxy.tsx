@@ -558,6 +558,10 @@ export default function HubGalaxy({ authHeaders }: Props) {
   const cameraAnimRef = useRef<number | null>(null);
   const dragRef = useRef<{ startX: number; startY: number; viewX: number; viewY: number; moved: boolean } | null>(null);
   const prevVisibleIdsRef = useRef<Set<string>>(new Set());
+  // Auto-play guard — first load triggers Growth playback once positions
+  // are ready. Subsequent state changes (search, filter, scrub) must not
+  // re-trigger it; the user can replay via the Growth button.
+  const autoPlayedRef = useRef(false);
   // Pan throttle — coalesce many mousemoves into one setView per frame.
   const pendingViewRef = useRef<{ x: number; y: number } | null>(null);
   const moveRafRef = useRef<number | null>(null);
@@ -593,6 +597,20 @@ export default function HubGalaxy({ authHeaders }: Props) {
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-play once layout is ready — the time-lapse is the most
+  // legible way to introduce the hub on first view (a fully-formed
+  // dense galaxy doesn't communicate "this is YOUR hub growing").
+  useEffect(() => {
+    if (autoPlayedRef.current) return;
+    if (!data || !positions || data.nodes.length === 0) return;
+    autoPlayedRef.current = true;
+    // Small defer so the first paint completes before kicking off the
+    // staggered fade-in — otherwise the play start coincides with the
+    // initial mount + layout-fit and can feel laggy.
+    const t = setTimeout(() => setPlaying(true), 120);
+    return () => clearTimeout(t);
+  }, [data, positions]);
 
   // Layout once
   useEffect(() => {
@@ -753,6 +771,16 @@ export default function HubGalaxy({ authHeaders }: Props) {
     if (data) for (const c of data.clusters) m.set(c.id, new Date(c.createdAt).getTime());
     return m;
   }, [data]);
+
+  // Counts for the sidebar — visible-set elements that are also past
+  // the time cursor. Lightweight per-scrub recomputation (single pass).
+  const timeVisibleCounts = useMemo(() => {
+    let nodes = 0;
+    for (const n of visible.nodes) if ((nodeMs.get(n.id) ?? 0) <= cutoffMs) nodes++;
+    let edges = 0;
+    for (const e of visible.edges) if ((edgeMs.get(e.id) ?? 0) <= cutoffMs) edges++;
+    return { nodes, edges };
+  }, [visible.nodes, visible.edges, nodeMs, edgeMs, cutoffMs]);
 
   // Nebulae — stable centroid based on the bundle's full member set.
   // (Previously recomputed against time-visible members on every scrub
@@ -1468,11 +1496,11 @@ export default function HubGalaxy({ authHeaders }: Props) {
 
           <div style={{ borderTop: "1px solid var(--border-dim)", paddingTop: 12, marginTop: "auto" }}>
             <p className="text-caption font-mono" style={{ color: "var(--text-muted)", lineHeight: 1.7, margin: 0, letterSpacing: 0.3 }}>
-              <span style={{ color: "var(--text-primary)" }}>{visible.nodes.length}</span>
+              <span style={{ color: "var(--text-primary)" }}>{timeVisibleCounts.nodes}</span>
               {" / "}
               {data.nodes.length} stars
               <br />
-              <span style={{ color: "var(--text-primary)" }}>{visible.edges.length}</span>
+              <span style={{ color: "var(--text-primary)" }}>{timeVisibleCounts.edges}</span>
               {" / "}
               {data.edges.length} threads
             </p>
@@ -1679,6 +1707,7 @@ export default function HubGalaxy({ authHeaders }: Props) {
                       const cx = (a.x + b.x) / 2 + (-dy / len) * bend;
                       const cy = (a.y + b.y) / 2 + (dx / len) * bend;
                       const d = `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
+                      const isTimeVisible = (edgeMs.get(e.id) ?? 0) <= cutoffMs;
                       return (
                         <path
                           key={e.id}
@@ -1689,6 +1718,10 @@ export default function HubGalaxy({ authHeaders }: Props) {
                           strokeWidth={0.95 / Math.max(0.5, view.k * 0.7)}
                           strokeLinecap="round"
                           filter="url(#thread-glow)"
+                          style={{
+                            opacity: isTimeVisible ? 1 : 0,
+                            transition: "opacity 0.18s ease-out",
+                          }}
                         />
                       );
                     })}
