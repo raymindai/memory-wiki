@@ -257,6 +257,15 @@ export default function HubEmbed({
   const [ontologyBuilding, setOntologyBuilding] = useState(false);
   const [ontologyProgress, setOntologyProgress] = useState<{ processed: number; concepts: number } | null>(null);
   const [ontologyError, setOntologyError] = useState<string | null>(null);
+  // Background-queue status for the Compact CTA. Populated by a
+  // poll while the section is on screen so "Building…" / "Failed
+  // — retry" / "Last built X ago" surface accurately.
+  const [jobStatus, setJobStatus] = useState<{
+    pending: number;
+    running: number;
+    failed: number;
+    lastBuiltAt: string | null;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -348,6 +357,26 @@ export default function HubEmbed({
       setTimeout(() => setCopied(false), 1500);
     } catch { /* ignore */ }
   };
+
+  // Poll the job queue status. Tightens to 4s while there's pending
+  // or running work (so the Compact CTA flips to "Built X ago" the
+  // moment the cron worker finishes), backs off to 60s at rest.
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const res = await fetch(`/api/user/jobs/status?kind=doc_ontology`, {
+          credentials: "include",
+        });
+        if (!res.ok || cancelled) return;
+        const j = await res.json();
+        if (!cancelled) setJobStatus(j);
+      } catch { /* silent — UI just shows stale info */ }
+    };
+    tick();
+    const interval = setInterval(tick, jobStatus && (jobStatus.pending > 0 || jobStatus.running > 0) ? 4000 : 60000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [jobStatus?.pending, jobStatus?.running]);
 
   // Bulk-extract concepts across the user's docs. Loops the endpoint in
   // batches of 50 until `remaining: 0` so a hub with hundreds of docs
@@ -796,8 +825,17 @@ mdfy hub`;
                             const isActive = urlVariant === v;
                             const isCompact = v === "digest";
                             const compactMissing = isCompact && !compactAvailable;
+                            // Queue-aware label: building vs failed
+                            // vs the actual token count once it's
+                            // populated. Reflects extraction_jobs
+                            // state surfaced via /api/user/jobs/status.
+                            const queueBuilding = !!jobStatus && (jobStatus.pending + jobStatus.running) > 0;
+                            const queueFailed = !!jobStatus && jobStatus.failed > 0 && !compactAvailable;
                             const tokenLabel = isCompact
-                              ? (compactAvailable ? `≈ ${fmtTok(compactTokens)} tok` : "not built")
+                              ? (compactAvailable ? `≈ ${fmtTok(compactTokens)} tok`
+                                : queueBuilding ? "building…"
+                                : queueFailed ? "failed"
+                                : "not built")
                               : `≈ ${fmtTok(fullTokens)} tok`;
                             return (
                               <button
@@ -824,10 +862,11 @@ mdfy hub`;
                         </span>
                       </div>
                       {urlVariant === "digest" && !compactAvailable ? (
-                        /* Compact isn't built yet — show an inline
-                           CTA instead of a non-functional URL row.
-                           Clicking Build runs the concept-extractor
-                           and refreshes the hub data on completion. */
+                        /* Compact isn't built yet — three sub-states:
+                           queue is working (pending/running) → show
+                           "Building..."; previous build failed → show
+                           "Failed, retry"; nothing tried → show the
+                           original Build CTA. */
                         <div
                           className="rounded-lg px-3 py-3"
                           style={{
@@ -835,12 +874,35 @@ mdfy hub`;
                             border: "1px dashed var(--accent)",
                           }}
                         >
-                          <p className="text-caption mb-1" style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                            Compact view isn&apos;t built yet
-                          </p>
-                          <p className="text-caption mb-3" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                            Your hub&apos;s concept index is empty. Build it once and Compact will fetch a small concept map (~95% cheaper than Full).
-                          </p>
+                          {jobStatus && (jobStatus.pending + jobStatus.running) > 0 ? (
+                            <>
+                              <p className="text-caption mb-1" style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                                Building Compact view…
+                              </p>
+                              <p className="text-caption mb-3" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                                {jobStatus.running > 0 ? "Extractor is running now." : `${jobStatus.pending} doc${jobStatus.pending === 1 ? "" : "s"} queued.`}
+                                {" "}Compact will light up when it&apos;s done — this page polls automatically.
+                              </p>
+                            </>
+                          ) : jobStatus && jobStatus.failed > 0 ? (
+                            <>
+                              <p className="text-caption mb-1" style={{ color: "var(--color-danger)", fontWeight: 600 }}>
+                                Compact build failed
+                              </p>
+                              <p className="text-caption mb-3" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                                {jobStatus.failed} extraction{jobStatus.failed === 1 ? "" : "s"} failed (usually a transient LLM rate-limit). Retry below to re-queue them.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-caption mb-1" style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                                Compact view isn&apos;t built yet
+                              </p>
+                              <p className="text-caption mb-3" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                                Your hub&apos;s concept index is empty. Build it once and Compact will fetch a small concept map (~95% cheaper than Full).
+                              </p>
+                            </>
+                          )}
                           <button
                             onClick={buildOntology}
                             disabled={ontologyBuilding}
