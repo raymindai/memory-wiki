@@ -1,7 +1,7 @@
 {
   "name": "mdfy-mcp",
-  "version": "1.4.0",
-  "description": "MCP server for mdfy.app — 26 tools for AI agents to create, edit, organize, share, and version Markdown documents",
+  "version": "1.5.0",
+  "description": "MCP server for mdfy.app — 28 tools for AI agents to create, edit, organize, share, and version Markdown documents",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
