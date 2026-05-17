@@ -1,4 +1,4 @@
-#  System Design: Real-Time Notification Service
+# System Design: Real-Time Notification Service
 
 ## Overview
 
@@ -16,7 +16,7 @@ This document outlines the architecture for a scalable notification service hand
 
 ### Non-Functional
 
-- **Latency**: P99 < 500ms for in-app notifications
+- **Latency**: P99 &lt; 500ms for in-app notifications
 - **Throughput**: 100K notifications/second at peak
 - **Availability**: 99.99% uptime
 - **Durability**: No notification loss
@@ -43,12 +43,12 @@ graph TD
 
 ## Data Model
 
-| Entity       | Fields                                                          | Storage            |
-| ------------ | --------------------------------------------------------------- | ------------------ |
-| Notification | id, user_id, channel, template_id, payload, status, created_at  | PostgreSQL         |
-| Preference   | user_id, channel, enabled, quiet_hours, frequency               | Redis + PostgreSQL |
-| Template     | id, name, subject, body, variables, version                     | PostgreSQL         |
-| Delivery Log | notification_id, channel, status, provider_response, latency_ms | TimescaleDB        |
+| Entity | Fields | Storage |
+| --- | --- | --- |
+| Notification | id, user_id, channel, template_id, payload, status, created_at | PostgreSQL |
+| Preference | user_id, channel, enabled, quiet_hours, frequency | Redis + PostgreSQL |
+| Template | id, name, subject, body, variables, version | PostgreSQL |
+| Delivery Log | notification_id, channel, status, provider_response, latency_ms | TimescaleDB |
 
 ## Rate Limiting Strategy
 
@@ -77,19 +77,15 @@ class NotificationRateLimiter:
 1. **Retry with exponential backoff**: 1s, 2s, 4s, 8s, 16s (max 5 attempts)
 2. **Dead letter queue**: Failed notifications after max retries
 3. **Circuit breaker**: Per-provider, opens after 50% failure rate in 60s window
-4. **Fallback channels**: Push failure -> in-app, SMS failure -> email
+4. **Fallback channels**: Push failure -&gt; in-app, SMS failure -&gt; email
 
 ## Capacity Planning
 
-| Metric                     | Value   |
-| -------------------------- | ------- |
+| Metric | Value |
+| --- | --- |
 
-| Avg notifications/user/day | 8       |
-| Peak multiplier            | 3x      |
-| Messages/second (peak)     | ~140K   |
-| Storage/day                | ~12 GB  |
-| Monthly storage            | ~360 GB |
+| Avg notifications/user/day | 8 | | Peak multiplier | 3x | | Messages/second (peak) | \~140K | | Storage/day | \~12 GB | | Monthly storage | \~360 GB |
 
 ---
 
-_Last updated: April 2026_
+*Last updated: April 2026*

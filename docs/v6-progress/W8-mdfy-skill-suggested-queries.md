@@ -1,4 +1,4 @@
-# W8: `/mdfy` slash skill (Claude Code) + suggested queries panel
+# W8: /mdfy slash skill (Claude Code) + suggested queries panel
 
 **Commit.** `369e7755`. *W8: /mdfy slash skill (Claude Code) + suggested queries panel*
 
@@ -20,24 +20,24 @@ with one-line rationales. Strict JSON output, defensive parser.
 Surfaces:
 
 - `GET /api/user/hub/suggested-queries`. Owner-only. Computed on
-  demand.
+demand.
 - `/raw/hub/<slug>/suggested-queries.md`. Public Karpathy-shaped
-  surface for AI fetchers. 5-minute cache. Public hubs only.
+surface for AI fetchers. 5-minute cache. Public hubs only.
 - `vercel.json` rewrite: `/hub/<slug>/suggested-queries.md` to the
-  raw route.
+raw route.
 
 ### Verified live on yc-demo (25 docs)
 
 5 specific, hub-aware questions returned. Examples:
 
 - "What are the key technical risks in my Project Acme timeline and
-  how should I mitigate them?" -> rationale: "Combines project
-  planning documents with technical architecture to identify
-  potential bottlenecks before launch."
+how should I mitigate them?" -> rationale: "Combines project
+planning documents with technical architecture to identify
+potential bottlenecks before launch."
 - "What memory architecture trade-offs should I consider between
-  Letta, Mem0, and OpenAI's approach?" -> rationale: "Uses
-  comparative research to make informed technical decisions for AI
-  memory implementation."
+Letta, Mem0, and OpenAI's approach?" -> rationale: "Uses
+comparative research to make informed technical decisions for AI
+memory implementation."
 
 Each question ties to a real cluster of docs in the hub. Each
 rationale explains why the question is productive given the hub's
@@ -50,13 +50,13 @@ question-as-section-heading layout.
 ### Files
 
 | Path | Role |
-|------|------|
-| `apps/web/src/lib/hub-suggested-queries.ts` | Provider-chained generator + markdown formatter |
-| `apps/web/src/app/api/user/hub/suggested-queries/route.ts` | Owner JSON endpoint |
-| `apps/web/src/app/raw/hub/[slug]/suggested-queries.md/route.ts` | Public markdown surface |
-| `vercel.json` | Rewrite for the canonical user-facing URL |
+| --- | --- |
+| apps/web/src/lib/hub-suggested-queries.ts | Provider-chained generator + markdown formatter |
+| apps/web/src/app/api/user/hub/suggested-queries/route.ts | Owner JSON endpoint |
+| apps/web/src/app/raw/hub/[slug]/suggested-queries.md/route.ts | Public markdown surface |
+| vercel.json | Rewrite for the canonical user-facing URL |
 
-## `/mdfy` slash skill for Claude Code
+## /mdfy slash skill for Claude Code
 
 ### What ships
 
@@ -64,11 +64,11 @@ question-as-section-heading layout.
 defines three actions:
 
 - `/mdfy capture <title>`. Saves the most recent assistant message
-  (or a user-selected range) to the user's mdfy hub as a public
-  doc. Returns the URL the user can paste into any other AI.
+(or a user-selected range) to the user's mdfy hub as a public
+doc. Returns the URL the user can paste into any other AI.
 - `/mdfy bundle <topic>`. Calls the AI Bundle Generation
-  endpoint with the topic, returns suggested doc ids and lets
-  the user accept.
+endpoint with the topic, returns suggested doc ids and lets
+the user accept.
 - `/mdfy hub`. Returns the user's hub URL.
 
 `public/skills/mdfy/install.sh` is a one-line installer that
@@ -91,15 +91,15 @@ sign-in the existing `/api/user/migrate` flow claims everything.
 - `/skills/mdfy/SKILL.md` served (3526 bytes, HTTP 200).
 - `/skills/mdfy/install.sh` served (1079 bytes, HTTP 200).
 - `/install` page renders with all three action descriptions and
-  the install command.
+the install command.
 
 ### Files
 
 | Path | Role |
-|------|------|
-| `apps/web/public/skills/mdfy/SKILL.md` | The Claude Code skill itself |
-| `apps/web/public/skills/mdfy/install.sh` | One-line installer |
-| `apps/web/src/app/install/page.tsx` | Landing page with install instructions |
+| --- | --- |
+| apps/web/public/skills/mdfy/SKILL.md | The Claude Code skill itself |
+| apps/web/public/skills/mdfy/install.sh | One-line installer |
+| apps/web/src/app/install/page.tsx | Landing page with install instructions |
 
 ## Test status
 
@@ -108,11 +108,11 @@ All previous regression suites still pass: `test:share` 56/56,
 
 ## Deferred
 
-- **Cursor / Codex / Aider versions** of the skill. The SKILL.md
-  shape ports across with minor adjustments. W9 and W10 work.
+- **Cursor / Codex / Aider versions** of the skill. The [SKILL.md](http://SKILL.md)
+shape ports across with minor adjustments. W9 and W10 work.
 - **Programmatic auth flow**. Right now the user grabs a token
-  from the web app and exports it. A `mdfy login` flow that opens
-  a browser tab and stores the token in `~/.config/mdfy/token`
-  is post-launch.
+from the web app and exports it. A `mdfy login` flow that opens
+a browser tab and stores the token in `~/.config/mdfy/token`
+is post-launch.
 - **In-app suggested queries panel**. Backend is wired; the React
-  component on the hub page is a separate UI chunk.
+component on the hub page is a separate UI chunk.
