@@ -300,6 +300,145 @@ server.tool(
   }
 );
 
+server.tool(
+  "mdfy_hub_constellation",
+  "Get the user's hub as a structured graph (concept nodes + typed edges + doc clusters). " +
+    "Use this when an answer needs to navigate the user's knowledge by relationship — e.g. " +
+    "'what depends on X', 'which docs cover X and Y together', 'what's at the center of this hub'. " +
+    "URL-fetch (mdfy.app/hub/<slug>) gives the same data rendered as markdown; this returns the " +
+    "underlying JSON so you can traverse it programmatically.",
+  {
+    limit_concepts: z.number().int().min(1).max(200).optional()
+      .describe("Cap on concept nodes returned, ordered by weight (default 60)."),
+    include_docs: z.boolean().optional()
+      .describe("Include per-doc nodes alongside concepts (default true)."),
+  },
+  async ({ limit_concepts, include_docs }) => {
+    if (!isLoggedIn()) return loginRequiredResult();
+    try {
+      type Node = {
+        id: string;
+        label: string;
+        kind: "concept" | "entity" | "tag" | "doc";
+        weight: number;
+        description?: string | null;
+        occurrence?: number;
+        createdAt: string;
+        docIds?: string[];
+        bundleId?: string | null;
+        intent?: string | null;
+      };
+      type Edge = {
+        id: string;
+        source: string;
+        target: string;
+        kind: "concept_doc" | "concept_concept";
+        weight: number;
+        label?: string;
+      };
+      const data = await api<{ nodes: Node[]; edges: Edge[] }>("/api/user/hub/constellation");
+      const allNodes = data.nodes || [];
+      const allEdges = data.edges || [];
+      const conceptCap = limit_concepts ?? 60;
+      const wantDocs = include_docs !== false;
+
+      const concepts = allNodes
+        .filter((n) => n.kind !== "doc")
+        .sort((a, b) => (b.weight || 0) - (a.weight || 0))
+        .slice(0, conceptCap);
+      const conceptIdSet = new Set(concepts.map((c) => c.id));
+      const docs = wantDocs ? allNodes.filter((n) => n.kind === "doc") : [];
+
+      // Only emit edges whose endpoints survive the cap so the LLM can
+      // resolve every reference without re-fetching.
+      const visibleIds = new Set<string>([...conceptIdSet, ...docs.map((d) => d.id)]);
+      const edges = allEdges.filter((e) => visibleIds.has(e.source) && visibleIds.has(e.target));
+
+      const payload = {
+        meta: {
+          total_concepts: allNodes.filter((n) => n.kind !== "doc").length,
+          returned_concepts: concepts.length,
+          total_docs: allNodes.filter((n) => n.kind === "doc").length,
+          returned_docs: docs.length,
+          total_edges: allEdges.length,
+          returned_edges: edges.length,
+          generated_at: new Date().toISOString(),
+        },
+        concepts: concepts.map((c) => ({
+          id: c.id,
+          label: c.label,
+          kind: c.kind,
+          weight: c.weight,
+          occurrence: c.occurrence,
+          description: c.description || undefined,
+          docIds: c.docIds || undefined,
+          createdAt: c.createdAt,
+        })),
+        docs: docs.map((d) => ({
+          id: d.id,
+          label: d.label,
+          bundleId: d.bundleId || undefined,
+          intent: d.intent || undefined,
+          createdAt: d.createdAt,
+        })),
+        edges: edges.map((e) => ({
+          source: e.source,
+          target: e.target,
+          kind: e.kind,
+          weight: e.weight,
+          label: e.label || undefined,
+        })),
+      };
+      return textResult(JSON.stringify(payload, null, 2));
+    } catch (err) { return errorResult(err); }
+  }
+);
+
+server.tool(
+  "mdfy_bundle_constellation",
+  "Get a single bundle as a structured concept graph (nodes + edges) scoped to " +
+    "the concepts whose docs are bundle members. Returns the same shape as " +
+    "mdfy_hub_constellation but bounded to one bundle — use this when an answer " +
+    "needs to reason within a curated set, e.g. 'how do the ideas in this bundle " +
+    "connect', 'which concept is central to this bundle'. URL-fetch " +
+    "(mdfy.app/b/<id>) gives you the LLM-extracted graph_data narrative; this " +
+    "returns the user's hub-level ontology sliced to the bundle's docs.",
+  {
+    bundle_id: z.string().describe("Bundle ID (the part after mdfy.app/b/)"),
+  },
+  async ({ bundle_id }) => {
+    if (!isLoggedIn()) return loginRequiredResult();
+    try {
+      type Node = {
+        id: string;
+        label: string;
+        kind: "concept" | "entity" | "tag" | "doc";
+        weight: number;
+        description?: string | null;
+        occurrence?: number | null;
+        docIds?: string[];
+        createdAt: string;
+      };
+      type Edge = {
+        id: string;
+        source: string;
+        target: string;
+        kind: "concept_doc" | "concept_concept";
+        weight: number;
+        label?: string | null;
+      };
+      const data = await api<{
+        bundleId: string;
+        nodes: Node[];
+        edges: Edge[];
+        counts: { concepts: number; docs: number; edges: number; cappedConcepts: boolean };
+        note?: string;
+      }>(`/api/bundles/${encodeURIComponent(bundle_id)}/constellation`);
+      return textResult(JSON.stringify(data, null, 2));
+    } catch (err) { return errorResult(err); }
+  }
+);
+
 // ──────────────────────────────────────────────────────────────────
 // Append / Prepend
 // ──────────────────────────────────────────────────────────────────

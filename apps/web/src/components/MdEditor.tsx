@@ -33,9 +33,7 @@ import RelatedDocsWidget from "@/components/RelatedDocsWidget";
 import ImportModal from "@/components/ImportModal";
 import { loadCuratorSettings, autoHandles, type CuratorSettings, defaultCuratorSettings } from "@/lib/curator-options";
 import { extractTitleFromMd } from "@/lib/extract-title";
-import { readCompileSources } from "@/lib/compile-sources";
 import { useCodeMirror } from "@/components/useCodeMirror";
-import FloatingToolbar from "@/components/FloatingToolbar";
 import ShareModal from "@/components/ShareModal";
 import ToastContainer, { showToast } from "@/components/Toast";
 import { FEATURES } from "@/lib/feature-flags";
@@ -43,11 +41,11 @@ import { importFile, getSupportedAcceptString, mdfyText } from "@/lib/file-impor
 import { isCliOutput, cliToMarkdown } from "@/lib/cli-to-md";
 import {
   Undo2, Redo2, List, ListOrdered, Indent, Outdent, Quote, Minus, Link,
-  Image as ImageIcon, RemoveFormatting, Table, Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pencil, Copy, Eye,
+  Image as ImageIcon, RemoveFormatting, Table, Code, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Copy, Eye,
   Columns2, Bell, Share2, Menu, PanelLeft, Download, Plus, ArrowUpDown,
   FolderPlus, Folder, FolderOpen, File as FileIcon, MoreHorizontal,
   User, Users, Search, X, Trash2, RefreshCw, Lock, ShieldAlert, FileX,
-  LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, Bookmark, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus,
+  LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus,
   ChevronsDownUp, ChevronsUpDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
@@ -1551,7 +1549,6 @@ type Theme = "dark" | "light";
 import {
   ACCENT_COLORS,
   COLOR_SCHEMES,
-  SCHEME_ACCENT_MAP,
   type AccentColor,
   type ColorScheme,
 } from "@/lib/theme-options";
@@ -2733,7 +2730,7 @@ function BundleShareModal({
   onClose: () => void;
   onBundleUpdated: (changes: { is_draft?: boolean; allowed_emails_count?: number }) => void;
 }) {
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [docs, setDocs] = useState<BundleDocStatus[]>([]);
   const [editMode, setEditMode] = useState<string>("owner");
   const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
@@ -3132,7 +3129,7 @@ export default function MdEditor() {
   const [showMyDocs, setShowMyDocs] = useState(true);
   const [showMyBundles, setShowMyBundles] = useState(true);
   const [bundleView, setBundleView] = useState<"overview" | "canvas" | "list">("overview");
-  const [showBundleChat, setShowBundleChat] = useState(false);
+  const [_showBundleChat, setShowBundleChat] = useState(false);
   // Conversational-query → canvas filter: BundleChat's "Show on
   // canvas" action stores the cited doc ids here keyed by bundle id,
   // BundleEmbed consumes them as a highlight filter on BundleCanvas.
@@ -3461,8 +3458,8 @@ export default function MdEditor() {
     return saved;
   });
   const activeTabIdRef = useRef(activeTabId);
-  const [reorderedTabId, setReorderedTabId] = useState<string | null>(null);
-  const sidebarItemRectsRef = useRef<Map<string, DOMRect>>(new Map());
+  const [_reorderedTabId, _setReorderedTabId] = useState<string | null>(null);
+  const _sidebarItemRectsRef = useRef<Map<string, DOMRect>>(new Map());
   activeTabIdRef.current = activeTabId;
   // activeTab fallback was `tabs[0]` which is the Welcome example tab
   // (INITIAL_TABS[0] = tab-welcome). That meant every fresh load with
@@ -3770,7 +3767,6 @@ export default function MdEditor() {
       cmSetDocRef.current?.(md);
       doRenderRef.current(md);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode]);
   const [isSharedDoc, setIsSharedDoc] = useState(false); // opened from URL — read-only unless owner
   const [isDragging, setIsDragging] = useState(false);
@@ -3881,7 +3877,7 @@ export default function MdEditor() {
     cmSetDocRef.current?.(newMarkdown);
     triggerAutoSave(newMarkdown);
   }, [triggerAutoSave]);
-  const { applyLocalChange: collabApplyLocal, forceReset: collabForceReset, peerCount: collabPeerCount, isCollaborating } = useCollaboration(
+  const { applyLocalChange: collabApplyLocal, forceReset: collabForceReset, peerCount: _collabPeerCount, isCollaborating } = useCollaboration(
     docId,
     markdown,
     collabRemoteHandler,
@@ -3894,7 +3890,7 @@ export default function MdEditor() {
   const [isOwner, setIsOwner] = useState(false);
   const [docEditMode, setDocEditMode] = useState<"owner" | "account" | "token" | "view" | "public">("token");
   // Can edit: not shared, or owner (owner-only permission model)
-  const [isEditor, setIsEditor] = useState(false);
+  const [_isEditor, setIsEditor] = useState(false);
   // Only the document owner can edit. Non-owners must duplicate to edit.
   const canEdit = !isSharedDoc || isOwner;
   const [showQr, setShowQr] = useState(false);
@@ -4004,7 +4000,7 @@ export default function MdEditor() {
   const [dragFolderId, setDragFolderId] = useState<string | null>(null);
   // Global Library sort (legacy — drives the small Library-header
   // button). Kept as a fallback / "set both at once" affordance.
-  const [sortMode, setSortMode] = useState<"az" | "za" | "custom">(() => {
+  const [sortMode, _setSortMode] = useState<"az" | "za" | "custom">(() => {
     if (typeof window === "undefined") return "az";
     const saved = localStorage.getItem("mdfy-sort-mode");
     return (saved === "az" || saved === "za" || saved === "custom") ? saved : "az";
@@ -4079,8 +4075,8 @@ export default function MdEditor() {
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mdfy-show-recent", String(showRecent));
   }, [showRecent]);
-  const [showSortMenu, setShowSortMenu] = useState(false);
-  const [sharedSortMode, setSharedSortMode] = useState<"newest" | "oldest" | "az" | "za">("newest");
+  const [_showSortMenu, _setShowSortMenu] = useState(false);
+  const [_sharedSortMode, _setSharedSortMode] = useState<"newest" | "oldest" | "az" | "za">("newest");
   const [docFilter, setDocFilter] = useState<"all" | "private" | "shared" | "synced">(() => {
     if (typeof window === "undefined") return "all";
     return (localStorage.getItem("mdfy-doc-filter") as "all" | "private" | "shared" | "synced") || "all";
@@ -4115,7 +4111,6 @@ export default function MdEditor() {
     headers.forEach(h => obs.observe(h));
     return () => obs.disconnect();
   // Re-observe when section visibility (collapsed state of major toggles) changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showRecent, showMyBundles, showMyDocs, showSharedDocs, showTrash]);
   // Debounced version used in heavy filter/sort paths. Raw `sidebarSearch` is
   // only for the input element value; the rest of the tree filters off the
@@ -4142,9 +4137,9 @@ export default function MdEditor() {
   const [cloudSearchResults, setCloudSearchResults] = useState<Array<{ id: string; title: string; snippet: string; isDraft: boolean; viewCount: number; source: string | null; updatedAt: string }>>([]);
   const [isCloudSearching, setIsCloudSearching] = useState(false);
   const cloudSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [showAllDocs, setShowAllDocs] = useState(false);
+  const [_showAllDocs, _setShowAllDocs] = useState(false);
   const [showSidebarHelp, setShowSidebarHelp] = useState(false);
-  const [showSidebarSearch, setShowSidebarSearch] = useState(false);
+  const [_showSidebarSearch, _setShowSidebarSearch] = useState(false);
 
   // ─── Cross-doc concept index ("knowledge compounds") ───
   // Aggregated from semantic_chunks across the user's docs by /api/user/concepts.
@@ -4232,8 +4227,8 @@ export default function MdEditor() {
     if (!isAuthenticated) { setConceptIndex(null); return; }
     refreshConcepts();
   }, [isAuthenticated, refreshConcepts]);
-  const [showLibraryNewMenu, setShowLibraryNewMenu] = useState(false);
-  const [showSharedOwner, setShowSharedOwner] = useState(false);
+  const [_showLibraryNewMenu, _setShowLibraryNewMenu] = useState(false);
+  const [showSharedOwner, _setShowSharedOwner] = useState(false);
   const [sidebarMode, setSidebarModeRaw] = useState<"simple" | "detailed">(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("mdfy-sidebar-mode") as "simple" | "detailed") || "simple";
@@ -4440,7 +4435,6 @@ export default function MdEditor() {
       showToast(e instanceof DOMException && e.name === "AbortError" ? "Upload timed out" : "Upload failed", "error");
       return null;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, compressImage, showImagePanel, authHeaders]);
 
   // CodeMirror 6 editor — replaces plain textarea
@@ -4853,7 +4847,7 @@ export default function MdEditor() {
   // line-level diff, then PATCHes the doc on Accept. This is the
   // capability Karpathy's regenerate-only pattern can't offer.
   const [synthesisDiffDocId, setSynthesisDiffDocId] = useState<string | null>(null);
-  const openSynthesisDiff = useCallback((docId: string) => {
+  const _openSynthesisDiff = useCallback((docId: string) => {
     setSynthesisDiffDocId(docId);
   }, []);
   const closeSynthesisDiff = useCallback(() => {
@@ -4881,8 +4875,8 @@ export default function MdEditor() {
   }, [synthesisDiffDocId, tabs]);
 
   // ─── Recompile a compiled doc (Memo / FAQ / Brief) from its source bundle ───
-  const [recompilingDocId, setRecompilingDocId] = useState<string | null>(null);
-  const recompileDoc = useCallback(async (docId: string) => {
+  const [_recompilingDocId, setRecompilingDocId] = useState<string | null>(null);
+  const _recompileDoc = useCallback(async (docId: string) => {
     setRecompilingDocId(docId);
     try {
       const res = await fetch(`/api/docs/${docId}/recompile`, {
@@ -5128,7 +5122,7 @@ export default function MdEditor() {
   // animates back to identity — so the row visibly slides from its
   // old slot to the top while the others shift down.
   const recentRowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const recentFlipPending = useRef(false);
+  const _recentFlipPending = useRef(false);
   const recentFlipRects = useRef<Map<string, DOMRect>>(new Map());
   // Tracks which Recent ids have rendered at least once, so a new
   // entry — opening a doc that wasn't in the list — can fade + slide
@@ -7399,7 +7393,7 @@ export default function MdEditor() {
   void wysiwygEditingRef; void wysiwygDebounce; // suppress unused warnings
 
   // Handle paste in Preview — LEGACY (kept for reference, not used)
-  const handleWysiwygPaste = useCallback((e: React.ClipboardEvent) => {
+  const _handleWysiwygPaste = useCallback((e: React.ClipboardEvent) => {
     // Helper: after paste processing via saveInsertPosition → insertBlockAtCursor,
     // the marker DOM mutation triggers handleWysiwygInput which sets wysiwygEditingRef=true
     // and starts a debounce. We must clear both so that:
@@ -7643,7 +7637,7 @@ export default function MdEditor() {
   }, [setMarkdown, doRender, cmSetDoc, cleanupWysiwygState]);
 
   // Keyboard handler for LIVE view contentEditable
-  const handleWysiwygKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const _handleWysiwygKeyDown = useCallback((e: React.KeyboardEvent) => {
     const article = previewRef.current?.querySelector("article");
     if (!article) return;
 
@@ -7678,7 +7672,7 @@ export default function MdEditor() {
     }
   }, [findTrappingBlock, escapeTrappingBlock]);
 
-  const handleWysiwygInput = useCallback(() => {
+  const _handleWysiwygInput = useCallback(() => {
     // Skip if suppressed (after paste/programmatic changes — prevents stale DOM reconversion)
     if (suppressInputRef.current) return;
     wysiwygEditingRef.current = true;
@@ -8887,7 +8881,7 @@ ${clone.innerHTML}
   // Legacy ce-spacer + non-editable islands — DISABLED (Tiptap handles natively)
   useEffect(() => {
     // Tiptap manages editing DOM — skip legacy contentEditable setup
-    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     if (true as unknown as boolean) return; // short-circuit: all code below is dead
     const article = (null as unknown as HTMLElement).querySelector("article");
     if (!article) return;
