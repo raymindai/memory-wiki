@@ -42,14 +42,41 @@ export interface OntologyRefreshArgs {
  * attribute concepts to) and tiny docs that wouldn't yield useful
  * concepts anyway.
  *
+ * Auto-promotes to force=true when the user's concept_index is
+ * empty — i.e. the very first ontology-eligible doc gets extracted
+ * immediately so Compact view comes alive on day one. Subsequent
+ * docs use the normal per-doc cooldown.
+ *
  * Returns void — callers should not await this in latency-critical
  * paths. Use Next.js `after(() => enqueueOntologyRefresh(...))`.
  */
 export async function enqueueOntologyRefresh(args: OntologyRefreshArgs): Promise<void> {
-  const { supabase, userId, docId, title, markdown, force } = args;
+  const { supabase, userId, docId, title, markdown } = args;
+  let force = args.force;
   if (!userId) return;
   const md = (markdown || "").trim();
   if (md.length < MIN_DELTA_CHARS) return;
+
+  // First-doc kickoff — if the user has no concept_index rows yet,
+  // bypass the cooldown so a brand new hub gets its Compact view
+  // built on the first substantive save instead of waiting for a
+  // second one to land. One extra count query per save, but only
+  // until the first concept is written; harmless after that.
+  let firstBuild = false;
+  if (!force) {
+    try {
+      const { count } = await supabase
+        .from("concept_index")
+        .select("user_id", { count: "exact", head: true })
+        .eq("user_id", userId);
+      if ((count ?? 0) === 0) {
+        force = true;
+        firstBuild = true;
+      }
+    } catch {
+      /* count failures shouldn't block extraction — fall through */
+    }
+  }
 
   const key = `${userId}:${docId}`;
   const now = Date.now();
@@ -75,10 +102,23 @@ export async function enqueueOntologyRefresh(args: OntologyRefreshArgs): Promise
       title: title || "Untitled",
       markdown: md,
     });
+    if (firstBuild) {
+      // Structured log so the first-build outcome is easy to grep
+      // in Vercel logs ("why is Compact still empty for this user?").
+      console.info(
+        "ontology refresh first-build",
+        JSON.stringify({
+          userId,
+          docId,
+          conceptsWritten: result.conceptsWritten,
+          relationsWritten: result.relationsWritten,
+          skipped: result.skipped || null,
+        }),
+      );
+    }
     // AI-inferred doc intent. Only write when the row currently has
     // NO intent set — never override a user's manual choice from
-    // the chip dropdown. This is the "alaesoecho-set, change if you
-    // want" behaviour the founder asked for.
+    // the chip dropdown.
     if (result.inferredIntent) {
       try {
         const { data: row } = await supabase
@@ -97,6 +137,14 @@ export async function enqueueOntologyRefresh(args: OntologyRefreshArgs): Promise
     // Roll back the cooldown on failure so the next save retries
     // instead of waiting 30 minutes.
     docState.delete(key);
-    console.warn("ontology refresh failed", { docId, err: err instanceof Error ? err.message : err });
+    console.warn(
+      "ontology refresh failed",
+      JSON.stringify({
+        userId,
+        docId,
+        firstBuild,
+        err: err instanceof Error ? err.message : String(err),
+      }),
+    );
   }
 }
