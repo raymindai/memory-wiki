@@ -559,6 +559,17 @@ export default function HubEmbed({
               to the relevant /docs page. */}
           {(() => {
             const url = data.hub.url;
+            // Token estimates for the variant chips. compactTokens is
+            // the digest path (concept-clustered, ~30x cheaper);
+            // fullTokens is every doc inlined. Surfaced inside the
+            // chip itself so the trade-off is visible the moment the
+            // user is choosing — not buried at the bottom.
+            const fmtTok = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+            const totalWords = data.counts.totalWords ?? 0;
+            const docCountTok = data.counts.documents ?? 0;
+            const conceptCountTok = Math.min(data.counts.concepts ?? 0, 40);
+            const fullTokens = totalWords > 0 ? Math.round(totalWords * 1.3 + docCountTok * 8) : 0;
+            const compactTokens = conceptCountTok > 0 ? Math.round(conceptCountTok * 25 + 200) : 0;
             const projCtx = `# Project context
 
 mdfy hub: ${url}
@@ -776,30 +787,34 @@ mdfy hub`;
                   {isUrlTool ? (
                     <div className="px-3 py-3">
                       <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           {(["digest", "full"] as const).map((v) => {
                             const isActive = urlVariant === v;
+                            const tokenLabel = v === "digest"
+                              ? (compactTokens > 0 ? `≈ ${fmtTok(compactTokens)} tok` : "cheap")
+                              : (fullTokens > 0 ? `≈ ${fmtTok(fullTokens)} tok` : "heavy");
                             return (
                               <button
                                 key={v}
                                 type="button"
                                 onClick={() => setUrlVariant(v)}
-                                className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                                className="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded transition-colors"
                                 style={{
-                                  fontSize: 10,
-                                  letterSpacing: 0.5,
                                   color: isActive ? "var(--accent)" : "var(--text-muted)",
                                   background: isActive ? "var(--accent-dim)" : "transparent",
                                   border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
                                 }}
                               >
-                                {v === "digest" ? "Compact" : "Full"}
+                                <span className="uppercase" style={{ fontSize: 10, letterSpacing: 0.5, fontWeight: 600 }}>
+                                  {v === "digest" ? "Compact" : "Full"}
+                                </span>
+                                <span style={{ fontSize: 10, opacity: 0.6 }}>{tokenLabel}</span>
                               </button>
                             );
                           })}
                         </div>
                         <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-                          {urlVariant === "digest" ? "compact concept map, cheap to paste" : "every doc inline, heavier"}
+                          {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
                         </span>
                       </div>
                       <button
@@ -838,7 +853,7 @@ mdfy hub`;
                   <div className="px-3 py-2.5 text-caption leading-relaxed"
                     style={{ color: "var(--text-secondary)", background: "var(--surface)", borderTop: "1px solid var(--border-dim)" }}>
                     {active.explanation.split("\n").map((line, i) => (
-                      <div key={i} style={{ whiteSpace: "pre" }}>{line || " "}</div>
+                      <div key={i} style={{ whiteSpace: "pre-wrap" }}>{line || " "}</div>
                     ))}
                   </div>
 
@@ -884,53 +899,41 @@ mdfy hub`;
               </div>
             );
           })()}
-          {/* Secondary actions sit on the surface-tinted card, so a
-              bordered-only treatment fades into the card background.
-              Adding var(--background) fill puts them one step darker
-              than the surrounding card; the dim border still says
-              "secondary action, not the lead". */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Link
-              href={`/hub/${slug}`}
-              target="_blank"
-              className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-              style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
-            >
-              <Eye width={11} height={11} />
-              View as visitor
-            </Link>
-            <Link
-              href={`/hub/${slug}.md`}
-              target="_blank"
-              className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-              style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
-            >
-              <ExternalLink width={11} height={11} />
-              Raw .md
-            </Link>
-          </div>
-          {/* Token economy badge — author-facing feedback loop. The
-              number is what an AI actually pays to read this hub.
-              When the digest path is populated (concept_index has
-              rows), we surface BOTH so authors can see how much
-              cheaper the dense path is vs. the full index. */}
-          {(() => {
-            const totalWords = data.counts.totalWords ?? 0;
-            if (totalWords === 0) return null;
-            const indexTokens = Math.round(totalWords * 1.3 + (data.counts.documents ?? 0) * 8);
-            const conceptCount = Math.min(data.counts.concepts ?? 0, 40);
-            const digestTokens = conceptCount > 0 ? Math.round(conceptCount * 25 + 200) : 0;
-            const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-            return (
-              <p
-                className="text-caption mt-1 font-mono leading-relaxed"
-                style={{ color: "var(--text-faint)", fontSize: 10 }}
-                title="Estimated tokens an AI pays to consume this hub. The digest path uses your concept ontology so broad queries can be answered without reading every doc."
+          {/* Preview row — what humans see (rendered page) and what
+              AI gets as raw markdown. Labeled so the buttons don't
+              float context-less. Token estimate moved up into the
+              variant chip so this row is purely "preview / inspect". */}
+          <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-dim)" }}>
+            <div className="text-caption font-mono uppercase mb-1.5"
+              style={{ color: "var(--text-faint)", fontSize: 10, letterSpacing: 0.5 }}>
+              Preview
+            </div>
+            <p className="text-caption mb-2" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
+              See this hub the way a visitor renders it in a browser, or peek at the raw markdown payload an AI would receive.
+            </p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Link
+                href={`/hub/${slug}`}
+                target="_blank"
+                className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                title="Rendered HTML — what a human visitor sees"
               >
-                {digestTokens > 0 ? `Compact ≈ ${fmt(digestTokens)} tokens   ` : ""}Full ≈ {fmt(indexTokens)} tokens
-              </p>
-            );
-          })()}
+                <Eye width={11} height={11} />
+                View as visitor
+              </Link>
+              <Link
+                href={`/hub/${slug}.md`}
+                target="_blank"
+                className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                title="Raw .md payload — exactly what an AI fetching this URL receives"
+              >
+                <ExternalLink width={11} height={11} />
+                Raw .md (what the AI sees)
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* ── Stat strip — counts by access tier ──────────────────── */}

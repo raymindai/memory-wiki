@@ -341,32 +341,32 @@ mdfy search "topic"`;
                 {isUrlTool ? (
                   <div className="px-3 py-3">
                     <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1.5">
                         {(["digest", "full"] as const).map((v) => {
                           const isActive = urlVariant === v;
+                          const tokenLabel = v === "digest" ? `≈ ${fmt(digestTokens)} tok` : `≈ ${fmt(fullTokens)} tok`;
                           return (
                             <button
                               key={v}
                               type="button"
                               onClick={() => setUrlVariant(v)}
-                              className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                              className="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded transition-colors"
                               style={{
-                                fontSize: 10,
-                                letterSpacing: 0.5,
                                 color: isActive ? "var(--accent)" : "var(--text-muted)",
                                 background: isActive ? "var(--accent-dim)" : "transparent",
                                 border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
                               }}
                             >
-                              {v === "digest" ? "Compact" : "Full"}
+                              <span className="uppercase" style={{ fontSize: 10, letterSpacing: 0.5, fontWeight: 600 }}>
+                                {v === "digest" ? "Compact" : "Full"}
+                              </span>
+                              <span style={{ fontSize: 10, opacity: 0.6 }}>{tokenLabel}</span>
                             </button>
                           );
                         })}
                       </div>
-                      <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                        {urlVariant === "digest"
-                          ? `≈ ${fmt(digestTokens)} tokens / cheap concept map`
-                          : `≈ ${fmt(fullTokens)} tokens / every doc inline`}
+                      <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+                        {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
                       </span>
                     </div>
                     <button
