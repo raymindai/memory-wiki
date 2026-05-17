@@ -7864,8 +7864,17 @@ export default function MdEditor() {
       }
 
       for (let idx = 0; idx < files.length; idx++) {
+        const file = files[idx];
+        const isPdf = /\.pdf$/i.test(file.name);
+        const isOffice = /\.(pptx?|xlsx?|od[pst]|rtf)$/i.test(file.name);
         try {
-          const file = files[idx];
+          // Stage 1: parsing / extracting. PDF + Office hit a server
+          // route and can take several seconds — surface the stage
+          // so the user knows something is happening.
+          if (isPdf) showToast(`Reading PDF: ${file.name}…`, "info");
+          else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
+          else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
+
           const { markdown: md, title: name } = await importFile(file);
           if (!md) {
             showToast(`${file.name} appears to be empty`, "info");
@@ -7880,7 +7889,8 @@ export default function MdEditor() {
           if (isPlainFormat && md.length > 50) {
             setMdfyPrompt({ text: md, filename: file.name, tabId });
           }
-          // BUG 7 fix: Create cloud document for imported files
+          // Stage 2: saving to cloud.
+          showToast(`Saving ${name}…`, "info");
           const anonId = user?.id ? undefined : ensureAnonymousId();
           autoSave.createDocument({
             markdown: md,
@@ -7893,12 +7903,21 @@ export default function MdEditor() {
                 const withoutDup = prev.filter(t => !(t.cloudId === result.id && t.id !== tabId));
                 return withoutDup.map(t => t.id === tabId ? { ...t, cloudId: result.id, editToken: result.editToken } : t);
               });
+              showToast(`Imported ${name}`, "success");
+              // Refresh the sidebar's MDs section so it picks up the
+              // freshly imported doc without a page reload. Without
+              // this, dropped/picked imports only show up after the
+              // user refreshes — same fix as the modal flow above.
+              fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
+                .then((r) => (r.ok ? r.json() : null))
+                .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+                .catch(() => {});
             }
           });
         } catch (err) {
-          console.error(`Failed to import ${files[idx].name}:`, err);
+          console.error(`Failed to import ${file.name}:`, err);
           const message = err instanceof Error ? err.message : "Failed to import file";
-          showToast(`${files[idx].name}: ${message}`, "error");
+          showToast(`${file.name}: ${message}`, "error");
         }
       }
     },
@@ -10152,8 +10171,14 @@ ${clone.innerHTML}
             onChange={async (e) => {
               const files = Array.from(e.target.files || []);
               for (let idx = 0; idx < files.length; idx++) {
+                const file = files[idx];
+                const isPdf = /\.pdf$/i.test(file.name);
+                const isOffice = /\.(pptx?|xlsx?|od[pst]|rtf)$/i.test(file.name);
                 try {
-                  const file = files[idx];
+                  if (isPdf) showToast(`Reading PDF: ${file.name}…`, "info");
+                  else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
+                  else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
+
                   const { markdown: md, title: name } = await importFile(file);
                   if (!md) {
                     showToast(`${file.name} appears to be empty`, "info");
@@ -10168,7 +10193,7 @@ ${clone.innerHTML}
                   if (isPlainFormat && md.length > 50) {
                     setMdfyPrompt({ text: md, filename: file.name, tabId });
                   }
-                  // BUG 7 fix: Create cloud document for imported files
+                  showToast(`Saving ${name}…`, "info");
                   const anonId = user?.id ? undefined : ensureAnonymousId();
                   autoSave.createDocument({
                     markdown: md,
@@ -10181,12 +10206,19 @@ ${clone.innerHTML}
                         const withoutDup = prev.filter(t => !(t.cloudId === result.id && t.id !== tabId));
                         return withoutDup.map(t => t.id === tabId ? { ...t, cloudId: result.id, editToken: result.editToken } : t);
                       });
+                      showToast(`Imported ${name}`, "success");
+                      // Refresh sidebar serverDocs so MDs section
+                      // reflects the import without a page reload.
+                      fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
+                        .then((r) => (r.ok ? r.json() : null))
+                        .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+                        .catch(() => {});
                     }
                   });
                 } catch (err) {
-                  console.error(`Failed to import ${files[idx].name}:`, err);
+                  console.error(`Failed to import ${file.name}:`, err);
                   const message = err instanceof Error ? err.message : "Failed to import file";
-                  showToast(`${files[idx].name}: ${message}`, "error");
+                  showToast(`${file.name}: ${message}`, "error");
                 }
               }
               e.target.value = "";
@@ -16748,18 +16780,31 @@ ${clone.innerHTML}
         authHeaders={authHeaders}
         showToast={showToast}
         onImported={(docId) => {
+          // Refresh server docs so the sidebar's MDs section reflects
+          // the new import immediately (without a page reload).
           fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
             .then((r) => (r.ok ? r.json() : null))
             .then((data) => { if (data?.documents) setServerDocs(data.documents); })
             .catch(() => {});
-          // Auto-open the freshly imported doc. The editor's
-          // URL-load effect picks up `/<id>` on mount and loads
-          // that doc into a tab. Page reload is acceptable here —
-          // tabs persist via localStorage so the user only loses
-          // unsaved scratch state (and import always lands a saved
-          // cloud doc anyway).
+          // Auto-open the freshly imported doc IN PLACE. Used to do
+          // window.location.href = `/${docId}` which forced a full
+          // page reload — the user reads that as "import requires
+          // a refresh". This path mirrors openDocById (defined in the
+          // command palette scope): switch to the existing tab if
+          // we already have one for this cloudId, otherwise spawn a
+          // fresh cloud tab.
           if (docId) {
-            try { window.location.href = `/${docId}`; } catch { /* ignore */ }
+            const tabId = `cloud-${docId}`;
+            const existing = tabs.find((t) => t.id === tabId || t.cloudId === docId);
+            if (existing) {
+              switchTab(existing.id);
+            } else {
+              setTabs((prev) => [
+                ...prev,
+                { id: tabId, title: "", markdown: "", cloudId: docId, isDraft: false, permission: "mine" },
+              ]);
+              setTimeout(() => switchTab(tabId), 50);
+            }
           }
         }}
         onPickFiles={(files) => {
