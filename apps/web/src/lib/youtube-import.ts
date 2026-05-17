@@ -115,26 +115,42 @@ export async function importFromYouTube(
     if (m) description = decodeHtmlEntities(m[1]).trim() || null;
   }
 
-  // Step 3 — extract the transcript.
+  // Step 3 — extract the transcript. Tries paths in order until one
+  // returns text. As of 2026 YouTube's anti-bot enforcement blocks
+  // every public scrape path from datacenter IPs (Vercel/AWS/etc) —
+  // ANDROID/IOS/TVHTML5 innertube all hit `LOGIN_REQUIRED: Sign in to
+  // confirm you're not a bot`. The Supadata path is the only one that
+  // works reliably from server functions; it stays opt-in so we don't
+  // force a paid dependency on every deploy.
   //
-  // Path A (preferred, works in 2026): hit /youtubei/v1/player with the
-  // ANDROID client. The web-page captionTracks baseUrl is signed but
-  // YouTube's anti-scraping returns 200 with an empty body for those
-  // signed URLs when the request doesn't come from a real browser
-  // session (the bot-block they tightened in 2024). The ANDROID client
-  // returns a NEW set of baseUrls in the same response that actually
-  // serve content — same workaround the modern youtube-transcript libs
-  // use. We then fetch with &fmt=json3 for clean JSON.
-  //
-  // Path B (fallback): the legacy watch-page scrape. Kept as a backup
-  // for cases where the Android endpoint shape changes overnight.
+  //   A) Supadata (SUPADATA_API_KEY env) — paid 3rd-party with free
+  //      tier. Returns clean transcript directly.
+  //   B) ANDROID innertube — works from residential IPs; usually
+  //      blocked from Vercel. Kept as a free-tier path for non-Vercel
+  //      deployments and for the eventual day YouTube relaxes.
+  //   C) Legacy watch-page scrape — same block applies, but free, so
+  //      worth a last shot.
   let transcript = "";
   let transcriptAvailable = false;
-  try {
-    transcript = await fetchTranscriptViaAndroidPlayer(videoId);
-    transcriptAvailable = transcript.length > 0;
-  } catch (err) {
-    console.warn("youtube-import: android-player transcript fetch failed", err instanceof Error ? err.message : err);
+  let transcriptBlockReason: "login_required" | "unknown" | null = null;
+
+  if (process.env.SUPADATA_API_KEY) {
+    try {
+      transcript = await fetchTranscriptViaSupadata(videoId, process.env.SUPADATA_API_KEY);
+      transcriptAvailable = transcript.length > 0;
+    } catch (err) {
+      console.warn("youtube-import: supadata fetch failed", err instanceof Error ? err.message : err);
+    }
+  }
+  if (!transcriptAvailable) {
+    try {
+      const r = await fetchTranscriptViaAndroidPlayer(videoId);
+      transcript = r.transcript;
+      transcriptAvailable = transcript.length > 0;
+      if (!transcriptAvailable && r.blocked) transcriptBlockReason = "login_required";
+    } catch (err) {
+      console.warn("youtube-import: android-player transcript fetch failed", err instanceof Error ? err.message : err);
+    }
   }
   if (!transcriptAvailable && watchHtml) {
     try {
@@ -167,11 +183,24 @@ export async function importFromYouTube(
   if (transcriptAvailable) {
     lines.push(transcript);
   } else {
-    // YouTube tightened access to the public timedtext endpoint in
-    // 2024 — bot-like fetches get a 200 with an empty body. Until
-    // we ship an innertube-emulating fetcher, fall back to a clear
-    // pointer so the user knows it isn't a mdfy bug.
-    lines.push("_Transcript not auto-fetched — YouTube restricts public access to caption data. Open the video's transcript panel on YouTube, copy, and paste below._");
+    // Honest fallback. YouTube blocks every public scrape path from
+    // datacenter IPs (where mdfy.app runs). Two one-click recovery
+    // paths the user can take right now:
+    //   1. youtubetranscript.com gives a plain-text transcript page
+    //      they can copy in one drag.
+    //   2. youtube.com itself shows a "transcript" panel under the
+    //      video they can copy from.
+    // We point at both and clearly mark this as a known limitation,
+    // not a mdfy bug, so support questions land softly.
+    const transcriptHelperUrl = `https://youtubetranscript.com/?server_vid2=${videoId}`;
+    const why = transcriptBlockReason === "login_required"
+      ? "YouTube now blocks server-side transcript fetches from datacenter IPs (it asks for a sign-in to prove the request isn't a bot)."
+      : "YouTube didn't return a transcript for this video.";
+    lines.push(`> **Transcript not auto-fetched.** ${why}`);
+    lines.push(">");
+    lines.push(`> One-click recovery: open [the transcript here](${transcriptHelperUrl}), copy, paste below this line. The video also has a built-in "Show transcript" panel on [its YouTube page](${videoUrl}) if you prefer.`);
+    lines.push("");
+    lines.push("<!-- Paste transcript below this comment -->");
   }
   lines.push("");
 
@@ -198,12 +227,32 @@ const ANDROID_UA = "com.google.android.youtube/20.10.38 (Linux; U; Android 11) g
 const ANDROID_CLIENT_NAME = "ANDROID";
 const ANDROID_CLIENT_VERSION = "20.10.38";
 
-/** Modern transcript path. POSTs the ANDROID client payload to
- *  /youtubei/v1/player and pulls captionTracks out of the response —
- *  those baseUrls actually serve content (unlike the bot-blocked
- *  watch-page ones). Picks the best track (English → original ASR →
- *  first available), fetches as json3, parses events to plain text. */
-async function fetchTranscriptViaAndroidPlayer(videoId: string): Promise<string> {
+/** Paid path. Supadata.ai's free tier covers ~100 videos/month and
+ *  works from datacenter IPs (they handle the bot-bypass on their
+ *  side). Activated when SUPADATA_API_KEY is set. */
+async function fetchTranscriptViaSupadata(videoId: string, apiKey: string): Promise<string> {
+  // Their docs: GET https://api.supadata.ai/v1/youtube/transcript?videoId=<id>&text=true
+  // Response shape: { content: "…full transcript text…", lang: "en", availableLangs: [...] }
+  const url = `https://api.supadata.ai/v1/youtube/transcript?videoId=${encodeURIComponent(videoId)}&text=true`;
+  const res = await fetch(url, { headers: { "x-api-key": apiKey } });
+  if (!res.ok) return "";
+  const j = await res.json().catch(() => null) as { content?: string } | null;
+  const raw = (j?.content || "").trim();
+  if (!raw) return "";
+  // Supadata returns continuous prose. Re-break into ~10-line
+  // paragraphs to match the rest of the pipeline.
+  const lines = raw.split(/(?<=[.?!。？！])\s+/);
+  const chunks: string[] = [];
+  for (let i = 0; i < lines.length; i += 10) chunks.push(lines.slice(i, i + 10).join(" "));
+  return chunks.join("\n\n");
+}
+
+/** Free path. POSTs the ANDROID client payload to /youtubei/v1/player
+ *  and pulls captionTracks out of the response. Works from residential
+ *  IPs; in 2026 YouTube blocks this from most datacenter IPs with
+ *  LOGIN_REQUIRED. Returns the empty string AND a `blocked` flag so
+ *  the caller can render an honest fallback message. */
+async function fetchTranscriptViaAndroidPlayer(videoId: string): Promise<{ transcript: string; blocked: boolean }> {
   const body = {
     context: {
       client: {
@@ -228,17 +277,21 @@ async function fetchTranscriptViaAndroidPlayer(videoId: string): Promise<string>
     },
     body: JSON.stringify(body),
   });
-  if (!res.ok) return "";
-  const j = await res.json().catch(() => null) as { captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ baseUrl?: string; languageCode?: string; kind?: string }> } } } | null;
+  if (!res.ok) return { transcript: "", blocked: false };
+  const j = await res.json().catch(() => null) as {
+    captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ baseUrl?: string; languageCode?: string; kind?: string }> } };
+    playabilityStatus?: { status?: string; reason?: string };
+  } | null;
+  const blocked = j?.playabilityStatus?.status === "LOGIN_REQUIRED";
   const tracks = j?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-  if (!tracks || tracks.length === 0) return "";
+  if (!tracks || tracks.length === 0) return { transcript: "", blocked };
 
   const pick =
     tracks.find((t) => t.languageCode === "en" && !t.kind) ||
     tracks.find((t) => t.languageCode === "en") ||
     tracks.find((t) => !t.kind) ||
     tracks[0];
-  if (!pick?.baseUrl) return "";
+  if (!pick?.baseUrl) return { transcript: "", blocked };
 
   // YouTube ignores ?fmt=json3 from the Android-issued baseUrls in
   // 2026 and serves format-3 XML regardless — same response, different
@@ -247,19 +300,19 @@ async function fetchTranscriptViaAndroidPlayer(videoId: string): Promise<string>
   //   <p t="80" d="4239"><s>안녕</s><s t="680"> 하세요</s></p>
   //                                      ^ next-segment offset (ignored)
   const tRes = await fetch(pick.baseUrl, { headers: { "User-Agent": ANDROID_UA } });
-  if (!tRes.ok) return "";
+  if (!tRes.ok) return { transcript: "", blocked };
   const xml = await tRes.text();
-  if (!xml) return "";
+  if (!xml) return { transcript: "", blocked };
 
   const lines = parseTimedtextXml(xml);
-  if (lines.length === 0) return "";
+  if (lines.length === 0) return { transcript: "", blocked };
   // Same paragraph grouping as the legacy path — readable prose
   // instead of 200 newline-separated fragments.
   const chunks: string[] = [];
   for (let i = 0; i < lines.length; i += 10) {
     chunks.push(lines.slice(i, i + 10).join(" "));
   }
-  return chunks.join("\n\n");
+  return { transcript: chunks.join("\n\n"), blocked: false };
 }
 
 /** Parse a YouTube timedtext XML payload into ordered caption lines.
