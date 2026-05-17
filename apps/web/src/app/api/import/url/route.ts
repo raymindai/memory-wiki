@@ -71,25 +71,35 @@ export async function POST(req: NextRequest) {
   }
 
   // Rehost every absolute image URL the Turndown pass left behind.
-  // Same pattern as the Notion import: fetch the original, upload to
-  // our document-images bucket, swap the reference. Without this the
-  // imported doc rots when the source page rearranges its asset
-  // paths (which it always eventually does).
+  // Two reasons this needs parallel chunking + caps:
+  //   1. Serial rehost of large image sets hits the Vercel function
+  //      timeout (eopla.net articles can carry 50+ images).
+  //   2. Pre-signed S3 URLs (X-Amz-Expires=600) are common and start
+  //      expiring while a serial loop is still walking the list,
+  //      causing late-image fetches to silently fail.
+  // Cap total work at IMAGE_CAP — beyond that we keep the original
+  // URLs (will rot eventually but at least the doc imports).
   const remoteImageUrls = findRemoteImages(fetched.markdown);
   const rehostMap = new Map<string, string>();
-  for (const u of remoteImageUrls) {
+  const IMAGE_CAP = 60;
+  const PER_IMAGE_TIMEOUT_MS = 12_000;
+  const CONCURRENCY = 8;
+
+  const targets = remoteImageUrls.slice(0, IMAGE_CAP);
+  const rehostOne = async (u: string): Promise<void> => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), PER_IMAGE_TIMEOUT_MS);
     try {
       const r = await fetch(u, {
         headers: { "User-Agent": "mdfy.app/1.0 (Image rehost)" },
-        // Don't follow redirect to a non-image — most CDNs will serve
-        // the image directly under the same URL anyway.
         redirect: "follow",
+        signal: ctrl.signal,
       });
-      if (!r.ok) continue;
+      if (!r.ok) return;
       const buf = Buffer.from(await r.arrayBuffer());
       const declared = r.headers.get("content-type") || "";
       const mime = declared.startsWith("image/") ? declared : mimeFromMagic(buf);
-      if (!mime) continue;
+      if (!mime) return;
       const filename = u.split("?")[0].split("/").pop() || "image";
       const out = await uploadImageBuffer(buf, filename, mime, {
         supabase, ownerId: userId, trackQuota: false,
@@ -97,7 +107,15 @@ export async function POST(req: NextRequest) {
       if (out) rehostMap.set(u, out.url);
     } catch (err) {
       console.warn(`url-import: rehost failed for ${u}:`, err instanceof Error ? err.message : err);
+    } finally {
+      clearTimeout(t);
     }
+  };
+
+  // Bounded-concurrency runner — process the queue in chunks of
+  // CONCURRENCY without spawning all 60 fetches at once.
+  for (let i = 0; i < targets.length; i += CONCURRENCY) {
+    await Promise.all(targets.slice(i, i + CONCURRENCY).map(rehostOne));
   }
   const rehostedMarkdown = rewriteMarkdownImages(fetched.markdown, rehostMap).markdown;
 
