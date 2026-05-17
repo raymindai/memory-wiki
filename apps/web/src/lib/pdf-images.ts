@@ -37,69 +37,32 @@ export interface PdfParseResult {
  * accepts every PDF the spec permits.
  */
 export async function parsePdfText(buffer: Buffer): Promise<PdfParseResult> {
-  const pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs") = await import(
-    /* webpackIgnore: true */ "pdfjs-dist/legacy/build/pdf.mjs"
-  );
-  // pdfjs-dist needs pdf.worker.mjs even when running server-side
-  // (its "fake worker" path imports the worker module to grab the
-  // parsing code). Vercel's trace pulls pdf.mjs but skips
-  // pdf.worker.mjs unless we point GlobalWorkerOptions.workerSrc at
-  // the resolved file — that resolve() call is what the tracer
-  // follows to include the file in the deploy.
-  try {
-    const { createRequire } = await import("module");
-    const require = createRequire(import.meta.url);
-    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve(
-      "pdfjs-dist/legacy/build/pdf.worker.mjs",
-    );
-  } catch { /* leave default; getDocument will throw with a clearer error */ }
+  // unpdf wraps pdfjs-dist's serverless build and ships a self-
+  // contained no-worker bundle, sidestepping the "Setting up fake
+  // worker failed: Cannot find module .../pdf.worker.mjs" error
+  // pdfjs-dist's legacy build throws on Vercel (where outputFileTracing
+  // doesn't pull the worker file even with serverExternalPackages +
+  // outputFileTracingIncludes hints). Same Mozilla parsing core under
+  // the hood, just bundled for serverless. Image extraction below
+  // still uses pdfjs-dist directly — text is the critical path.
+  const { extractText, getDocumentProxy } = await import("unpdf");
   const uint8 = new Uint8Array(buffer);
-  const doc = await pdfjs.getDocument({
-    data: uint8,
-    disableFontFace: true,
-    isEvalSupported: false,
-    useSystemFonts: false,
-  }).promise;
+  const doc = await getDocumentProxy(uint8);
 
-  const meta = await doc.getMetadata().catch(() => null);
-  // pdfjs metadata.info is a Record<string, string> when present.
-  const info = (meta?.info as Record<string, string> | null) || null;
-  const title = info && typeof info.Title === "string" && info.Title.trim() ? info.Title.trim() : null;
-  const pageCount = doc.numPages;
-
-  const pieces: string[] = [];
-  for (let p = 1; p <= pageCount; p++) {
-    try {
-      const page = await doc.getPage(p);
-      const content = await page.getTextContent();
-      // Each item is a TextItem with `str` + `transform` + `hasEOL`.
-      // We join with spaces inside a line and a newline after each
-      // EOL-flagged item — same shape pdf-parse produced.
-      let line = "";
-      const lines: string[] = [];
-      for (const item of content.items) {
-        // TextMarkedContent items have no `str`; skip them.
-        if (!("str" in item)) continue;
-        line += item.str;
-        if (item.hasEOL) {
-          lines.push(line);
-          line = "";
-        } else {
-          line += " ";
-        }
-      }
-      if (line) lines.push(line);
-      pieces.push(lines.join("\n"));
-      try { page.cleanup(); } catch { /* ignore */ }
-    } catch (err) {
-      console.warn(`[pdf-images] text extract failed for page ${p}:`, err);
+  let title: string | null = null;
+  try {
+    const meta = await doc.getMetadata();
+    const info = (meta?.info as Record<string, unknown> | null) || null;
+    if (info && typeof info.Title === "string" && (info.Title as string).trim()) {
+      title = (info.Title as string).trim();
     }
-  }
+  } catch { /* metadata is best-effort */ }
 
-  try { await doc.destroy(); } catch { /* ignore */ }
+  const { text, totalPages } = await extractText(doc, { mergePages: true });
+  const joined: string = Array.isArray(text) ? text.join("\n\n") : (text as string);
   return {
-    text: pieces.join("\n\n").trim(),
-    pages: pageCount,
+    text: joined.trim(),
+    pages: totalPages,
     title,
   };
 }

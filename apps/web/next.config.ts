@@ -1,23 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // pdfjs-dist MUST be listed here. The PDF parser loads
-  // pdfjs-dist/legacy/build/pdf.mjs via a dynamic import with
-  // /* webpackIgnore: true */, so webpack doesn't bundle it — and
-  // without listing the package as a server external, Vercel's
-  // output file tracer misses the module entirely. Result: prod
-  // returns "PDF parse failed" for every upload while local dev
-  // works. pdf-parse stays because its types are referenced in a
-  // couple of legacy spots; the active parser is pdfjs-dist.
+  // Text extraction now goes through unpdf, which bundles its own
+  // serverless build and doesn't need pdf.worker.mjs at runtime.
+  // pdfjs-dist stays in the list because extractPdfImages still uses
+  // it (best-effort, image extraction is non-critical and silently
+  // skips if the worker setup fails on Vercel).
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "officeparser"],
-  // pdf.worker.mjs isn't reachable through static analysis (pdfjs-dist
-  // imports it lazily at runtime through its fake-worker path). Force
-  // Vercel's output file tracer to bundle it with the PDF route or the
-  // function deploys without the file and getDocument throws
-  // "Setting up fake worker failed".
-  outputFileTracingIncludes: {
-    "/api/import/pdf": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
-  },
   // Long-slug explainer docs (mdfy.app/how-mdfy-works, etc.) live in the
   // documents table the same as any other doc, but their ids exceed the
   // 12-char nanoid pattern Vercel's top-level rewrite assumes. Map each
