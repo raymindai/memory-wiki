@@ -115,17 +115,33 @@ export async function importFromYouTube(
     if (m) description = decodeHtmlEntities(m[1]).trim() || null;
   }
 
-  // Step 3 — extract the transcript. captionTracks is embedded in the
-  // page as JSON inside ytInitialPlayerResponse. The pattern is
-  // resilient to minor formatting changes around it.
+  // Step 3 — extract the transcript.
+  //
+  // Path A (preferred, works in 2026): hit /youtubei/v1/player with the
+  // ANDROID client. The web-page captionTracks baseUrl is signed but
+  // YouTube's anti-scraping returns 200 with an empty body for those
+  // signed URLs when the request doesn't come from a real browser
+  // session (the bot-block they tightened in 2024). The ANDROID client
+  // returns a NEW set of baseUrls in the same response that actually
+  // serve content — same workaround the modern youtube-transcript libs
+  // use. We then fetch with &fmt=json3 for clean JSON.
+  //
+  // Path B (fallback): the legacy watch-page scrape. Kept as a backup
+  // for cases where the Android endpoint shape changes overnight.
   let transcript = "";
   let transcriptAvailable = false;
-  if (watchHtml) {
+  try {
+    transcript = await fetchTranscriptViaAndroidPlayer(videoId);
+    transcriptAvailable = transcript.length > 0;
+  } catch (err) {
+    console.warn("youtube-import: android-player transcript fetch failed", err instanceof Error ? err.message : err);
+  }
+  if (!transcriptAvailable && watchHtml) {
     try {
       transcript = await fetchTranscript(watchHtml);
       transcriptAvailable = transcript.length > 0;
     } catch (err) {
-      console.warn("youtube-import: transcript fetch failed", err instanceof Error ? err.message : err);
+      console.warn("youtube-import: legacy transcript fetch failed", err instanceof Error ? err.message : err);
     }
   }
 
@@ -177,6 +193,109 @@ export async function importFromYouTube(
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
+
+const ANDROID_UA = "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip";
+const ANDROID_CLIENT_NAME = "ANDROID";
+const ANDROID_CLIENT_VERSION = "20.10.38";
+
+/** Modern transcript path. POSTs the ANDROID client payload to
+ *  /youtubei/v1/player and pulls captionTracks out of the response —
+ *  those baseUrls actually serve content (unlike the bot-blocked
+ *  watch-page ones). Picks the best track (English → original ASR →
+ *  first available), fetches as json3, parses events to plain text. */
+async function fetchTranscriptViaAndroidPlayer(videoId: string): Promise<string> {
+  const body = {
+    context: {
+      client: {
+        clientName: ANDROID_CLIENT_NAME,
+        clientVersion: ANDROID_CLIENT_VERSION,
+        androidSdkVersion: 30,
+        userAgent: ANDROID_UA,
+        hl: "en",
+        gl: "US",
+        platform: "MOBILE",
+      },
+    },
+    videoId,
+  };
+  const res = await fetch("https://www.youtube.com/youtubei/v1/player", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": ANDROID_UA,
+      "X-YouTube-Client-Name": "3",
+      "X-YouTube-Client-Version": ANDROID_CLIENT_VERSION,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) return "";
+  const j = await res.json().catch(() => null) as { captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ baseUrl?: string; languageCode?: string; kind?: string }> } } } | null;
+  const tracks = j?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+  if (!tracks || tracks.length === 0) return "";
+
+  const pick =
+    tracks.find((t) => t.languageCode === "en" && !t.kind) ||
+    tracks.find((t) => t.languageCode === "en") ||
+    tracks.find((t) => !t.kind) ||
+    tracks[0];
+  if (!pick?.baseUrl) return "";
+
+  // YouTube ignores ?fmt=json3 from the Android-issued baseUrls in
+  // 2026 and serves format-3 XML regardless — same response, different
+  // structure from the legacy `<text>` blocks. Parse it directly:
+  //
+  //   <p t="80" d="4239"><s>안녕</s><s t="680"> 하세요</s></p>
+  //                                      ^ next-segment offset (ignored)
+  const tRes = await fetch(pick.baseUrl, { headers: { "User-Agent": ANDROID_UA } });
+  if (!tRes.ok) return "";
+  const xml = await tRes.text();
+  if (!xml) return "";
+
+  const lines = parseTimedtextXml(xml);
+  if (lines.length === 0) return "";
+  // Same paragraph grouping as the legacy path — readable prose
+  // instead of 200 newline-separated fragments.
+  const chunks: string[] = [];
+  for (let i = 0; i < lines.length; i += 10) {
+    chunks.push(lines.slice(i, i + 10).join(" "));
+  }
+  return chunks.join("\n\n");
+}
+
+/** Parse a YouTube timedtext XML payload into ordered caption lines.
+ *  Handles both formats served in 2026:
+ *
+ *    Legacy: <text start="0" dur="3">Hello</text>
+ *    Format 3: <p t="80" d="4239"><s>Hello</s><s t="680"> world</s></p>
+ *
+ *  Returns one trimmed line per caption frame, empties dropped. */
+function parseTimedtextXml(xml: string): string[] {
+  const lines: string[] = [];
+  // Format-3 paragraphs — each <p>…</p> is one caption line, with
+  // <s>…</s> as word/phrase segments concatenated end-to-end.
+  const pRe = /<p\b[^>]*>([\s\S]*?)<\/p>/g;
+  let pm: RegExpExecArray | null;
+  while ((pm = pRe.exec(xml)) !== null) {
+    const inner = pm[1];
+    if (!inner) continue;
+    const segments: string[] = [];
+    const sRe = /<s\b[^>]*>([\s\S]*?)<\/s>/g;
+    let sm: RegExpExecArray | null;
+    while ((sm = sRe.exec(inner)) !== null) segments.push(sm[1]);
+    const raw = segments.length > 0 ? segments.join("") : inner.replace(/<[^>]+>/g, "");
+    const text = decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
+    if (text) lines.push(text);
+  }
+  if (lines.length > 0) return lines;
+  // Legacy <text> fallback.
+  const textRe = /<text\b[^>]*>([\s\S]*?)<\/text>/g;
+  let tm: RegExpExecArray | null;
+  while ((tm = textRe.exec(xml)) !== null) {
+    const text = decodeHtmlEntities(tm[1]).replace(/\s+/g, " ").trim();
+    if (text) lines.push(text);
+  }
+  return lines;
+}
 
 async function fetchTranscript(watchHtml: string): Promise<string> {
   const rawTracks = extractCaptionTracksJson(watchHtml);
