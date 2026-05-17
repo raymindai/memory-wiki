@@ -16,7 +16,7 @@ import { FEATURES } from "@/lib/feature-flags";
 import Tooltip from "@/components/Tooltip";
 import { Button, Chip, Badge, ModalShell, EmptyState } from "@/components/ui";
 import BundleOverview from "@/components/BundleOverview";
-import { Layers, AlertTriangle, HelpCircle, GitBranch, Sparkles, Lightbulb, Zap, CheckSquare, Tag, FileText, X as XIcon, PanelLeft } from "lucide-react";
+import { Layers, AlertTriangle, HelpCircle, GitBranch, Sparkles, Lightbulb, Zap, CheckSquare, Tag, FileText, X as XIcon, PanelLeft, List } from "lucide-react";
 
 // Module-level cache so re-mounting a bundle tab paints instantly
 // (stale-while-revalidate). Same pattern as HubEmbed. Cleared on full
@@ -95,6 +95,24 @@ interface BundleEmbedProps {
   onClearHighlight?: () => void;
 }
 
+/** Quiet pulsing placeholder used by the bundle's loading skeleton.
+ *  Single source so List, Overview, and any future variant share
+ *  exactly the same rhythm — no surprise mismatch when the loading
+ *  state swaps in. */
+function SkeletonBar({ width, height }: { width: number | string; height: number }) {
+  return (
+    <div
+      style={{
+        width,
+        height,
+        borderRadius: 6,
+        background: "var(--toggle-bg)",
+        animation: "mdfySkelPulse 1.4s ease-in-out infinite",
+      }}
+    />
+  );
+}
+
 export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, onOpenDoc, aiPanelOpen, onSelectNodeInfo, onDocCreated, authHeaders: parentAuthHeaders, highlightedDocIds, onClearHighlight }: BundleEmbedProps) {
   const [documents, setDocuments] = useState<BundleDocument[]>([]);
   const [aiGraph, setAiGraph] = useState<any>(null);
@@ -148,13 +166,17 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     documentSummary?: string;
   } | null>(null);
 
-  // Fetch bundle data — stale-while-revalidate. If we already have a
-  // snapshot in the module cache, paint it instantly and skip the
-  // loading spinner; the network refresh runs in the background and
-  // updates state when it returns.
+  // Fetch bundle data — stale-while-revalidate. The cache paint is
+  // only used when fresh enough (≤ 30s old). Beyond that, we hold the
+  // loading spinner until the network refresh lands — without this
+  // cutoff users saw a flash of stale metadata ("Updated" missing or
+  // showing an out-of-date timestamp) for the full duration of the
+  // background refetch, which read as a bug rather than a fast paint.
+  const CACHE_PAINT_TTL_MS = 30_000;
   useEffect(() => {
     const cached = bundleDataCache.get(bundleId);
-    if (cached) {
+    const cacheFresh = !!cached && (Date.now() - cached.ts) < CACHE_PAINT_TTL_MS;
+    if (cached && cacheFresh) {
       const data = cached.data;
       setDocuments(data.documents || []);
       if (data.editToken) setEditToken(data.editToken);
@@ -1054,6 +1076,62 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
   }, [onOpenDoc, aiGraph, documents, openNodeInfo, graphGeneratedAt]);
 
   if (isLoading) {
+    // Layout-aware skeleton — mirrors the eventual frame (List has a
+    // Contents rail + doc column; Overview has a centered hero) so
+    // the swap to real content doesn't feel like a layout shift.
+    if (view === "list") {
+      return (
+        <div className="w-full h-full flex flex-col" style={{ background: "var(--background)" }}>
+          <div className="shrink-0 h-0.5" style={{ background: "var(--border-dim)" }} />
+          <div className="flex-1 flex min-h-0">
+            <aside className="shrink-0 w-64 overflow-hidden" style={{ borderRight: "1px solid var(--border-dim)" }}>
+              <div className="flex items-center gap-1.5 px-2 py-1.5 text-caption font-mono" style={{ color: "var(--accent)" }}>
+                <List width={14} height={14} />
+                <span>CONTENTS</span>
+              </div>
+              <div className="px-3 py-3 flex flex-col gap-3">
+                <SkeletonBar width="100%" height={28} />
+                <SkeletonBar width="85%" height={36} />
+                <SkeletonBar width="78%" height={36} />
+                <SkeletonBar width="92%" height={36} />
+              </div>
+            </aside>
+            <div className="flex-1 overflow-hidden">
+              <div className="max-w-3xl mx-auto px-8 py-10 flex flex-col gap-3">
+                <SkeletonBar width="55%" height={32} />
+                <SkeletonBar width="40%" height={14} />
+                <div className="mt-8 flex flex-col gap-2">
+                  <SkeletonBar width="60%" height={22} />
+                  <SkeletonBar width="100%" height={14} />
+                  <SkeletonBar width="95%" height={14} />
+                  <SkeletonBar width="88%" height={14} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (view === "overview") {
+      return (
+        <div className="h-full overflow-y-auto" style={{ background: "var(--background)" }}>
+          <div className="max-w-3xl mx-auto px-6 py-10 flex flex-col items-center gap-3">
+            <div
+              className="rounded-2xl"
+              style={{ width: 80, height: 80, background: "var(--accent-dim)", opacity: 0.5 }}
+            />
+            <SkeletonBar width={240} height={32} />
+            <SkeletonBar width={320} height={14} />
+            <SkeletonBar width={160} height={12} />
+            <div className="w-full mt-8 flex flex-col gap-2">
+              <SkeletonBar width="100%" height={42} />
+              <SkeletonBar width="100%" height={120} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    // Canvas (default) — generic centered spinner.
     return (
       <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--background)" }}>
         <div className="flex flex-col items-center gap-3">
@@ -1085,17 +1163,13 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         isAnalysisStale={isAnalysisStale}
         themeCount={Array.isArray(aiGraph?.themes) ? aiGraph.themes.length : 0}
         insightCount={Array.isArray(aiGraph?.insights) ? aiGraph.insights.length : 0}
-        lastUpdatedAt={
-          documents.length > 0
-            ? new Date(
-                Math.max(
-                  ...documents
-                    .map(d => (d.updated_at ? new Date(d.updated_at).getTime() : 0))
-                    .filter(t => t > 0),
-                ),
-              ).toISOString()
-            : null
-        }
+        lastUpdatedAt={(() => {
+          const stamps = documents
+            .map(d => (d.updated_at ? new Date(d.updated_at).getTime() : 0))
+            .filter(t => t > 0);
+          if (stamps.length === 0) return null;
+          return new Date(Math.max(...stamps)).toISOString();
+        })()}
         onOpenDoc={onOpenDoc}
         onSwitchToCanvas={() => onChangeView?.("canvas")}
         onSwitchToList={() => onChangeView?.("list")}
@@ -3484,32 +3558,42 @@ function BundleListView({
             shut. ─── */}
       {contentsCollapsed ? (
         <aside
-          className="shrink-0 flex flex-col items-center pt-3"
+          className="shrink-0 flex flex-col items-center pt-1.5"
           style={{ width: 28, borderRight: "1px solid var(--border-dim)" }}
         >
-          <button
-            onClick={() => setContentsCollapsed(false)}
-            className="p-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-            style={{ color: "var(--accent)" }}
-            title="Open Contents"
-          >
-            <PanelLeft width={14} height={14} />
-          </button>
+          <Tooltip text="Open Contents">
+            <button
+              onClick={() => setContentsCollapsed(false)}
+              className="p-1 rounded transition-colors shrink-0"
+              style={{ color: "var(--accent)" }}
+            >
+              <List width={14} height={14} />
+            </button>
+          </Tooltip>
         </aside>
       ) : (
       <aside className="shrink-0 w-64 overflow-auto" style={{ borderRight: "1px solid var(--border-dim)" }}>
-        <div className="px-3 py-4">
-          <div className="flex items-center justify-between mb-2 gap-1">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <button
-                onClick={() => setContentsCollapsed(true)}
-                className="p-1 rounded transition-colors shrink-0 hover:bg-[var(--toggle-bg)]"
-                style={{ color: "var(--accent)" }}
-                title="Close Contents"
-              >
-                <PanelLeft width={14} height={14} />
-              </button>
-              <h3 className="text-caption font-semibold uppercase tracking-wider truncate" style={{ color: "var(--text-faint)" }}>Contents</h3>
+        {/* Header — matches the LIBRARY rail header verbatim: same
+            padding, same font-mono caption, same accent treatment. The
+            only intentional difference is the icon (List vs
+            PanelLeft) so the two rails are distinguishable at a
+            glance. */}
+        <div className="shrink-0 select-none">
+          <div
+            className="flex items-center justify-between px-2 py-1.5 text-caption font-mono"
+            style={{ color: "var(--text-muted)", cursor: "default" }}
+          >
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <Tooltip text="Close Contents">
+                <button
+                  onClick={() => setContentsCollapsed(true)}
+                  className="p-1 rounded transition-colors shrink-0"
+                  style={{ color: "var(--accent)" }}
+                >
+                  <List width={14} height={14} />
+                </button>
+              </Tooltip>
+              <span style={{ color: "var(--accent)" }} className="shrink-0">CONTENTS</span>
             </div>
             {onSwitchToBundle && (
               <button
@@ -3522,6 +3606,8 @@ function BundleListView({
               </button>
             )}
           </div>
+        </div>
+        <div className="px-3 py-3">
           <input
             type="text"
             value={tocFilter}

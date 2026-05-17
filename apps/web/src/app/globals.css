@@ -2537,6 +2537,13 @@ textarea::selection {
   0%   { left: -40%; }
   100% { left: 100%; }
 }
+/* Skeleton placeholder pulse — used by BundleEmbed's layout-aware
+   loading state. Subtle opacity oscillation that reads as "data is
+   on its way" without competing visually with the surrounding chrome. */
+@keyframes mdfySkelPulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.9; }
+}
 @keyframes mdfyLoaderEnter {
   from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }
