@@ -569,13 +569,11 @@ export default function HubEmbed({
             const docCountTok = data.counts.documents ?? 0;
             const conceptCountTok = Math.min(data.counts.concepts ?? 0, 40);
             const fullTokens = totalWords > 0 ? Math.round(totalWords * 1.3 + docCountTok * 8) : 0;
-            // Compact = concept-index summary. If concept index isn't
-            // populated yet, fall back to ~5% of full so the chip
-            // still shows a distinct number (was showing same as Full
-            // or "cheap" placeholder when concept count was 0).
-            const compactTokens = conceptCountTok > 0
-              ? Math.round(conceptCountTok * 25 + 200)
-              : (fullTokens > 0 ? Math.max(300, Math.round(fullTokens * 0.05)) : 0);
+            // Compact = concept-index summary. If concept_index is
+            // empty, this variant ISN'T available — surface a
+            // build-now CTA instead of faking a token count.
+            const compactTokens = conceptCountTok > 0 ? Math.round(conceptCountTok * 25 + 200) : 0;
+            const compactAvailable = compactTokens > 0;
             const projCtx = `# Project context
 
 mdfy hub: ${url}
@@ -796,9 +794,11 @@ mdfy hub`;
                         <div className="flex items-center gap-1.5">
                           {(["digest", "full"] as const).map((v) => {
                             const isActive = urlVariant === v;
-                            const tokenLabel = v === "digest"
-                              ? (compactTokens > 0 ? `≈ ${fmtTok(compactTokens)} tok` : "cheap")
-                              : (fullTokens > 0 ? `≈ ${fmtTok(fullTokens)} tok` : "heavy");
+                            const isCompact = v === "digest";
+                            const compactMissing = isCompact && !compactAvailable;
+                            const tokenLabel = isCompact
+                              ? (compactAvailable ? `≈ ${fmtTok(compactTokens)} tok` : "not built")
+                              : `≈ ${fmtTok(fullTokens)} tok`;
                             return (
                               <button
                                 key={v}
@@ -806,15 +806,15 @@ mdfy hub`;
                                 onClick={() => setUrlVariant(v)}
                                 className="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded transition-colors"
                                 style={{
-                                  color: isActive ? "var(--accent)" : "var(--text-muted)",
+                                  color: isActive ? "var(--accent)" : (compactMissing ? "var(--text-faint)" : "var(--text-muted)"),
                                   background: isActive ? "var(--accent-dim)" : "transparent",
                                   border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
                                 }}
                               >
                                 <span className="uppercase" style={{ fontSize: 10, letterSpacing: 0.5, fontWeight: 600 }}>
-                                  {v === "digest" ? "Compact" : "Full"}
+                                  {isCompact ? "Compact" : "Full"}
                                 </span>
-                                <span style={{ fontSize: 10, opacity: 0.6 }}>{tokenLabel}</span>
+                                <span style={{ fontSize: 10, opacity: compactMissing ? 0.5 : 0.6 }}>{tokenLabel}</span>
                               </button>
                             );
                           })}
@@ -823,30 +823,73 @@ mdfy hub`;
                           {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
                         </span>
                       </div>
-                      <button
-                        onClick={async () => {
-                          if (typeof navigator === "undefined" || !navigator.clipboard) return;
-                          try {
-                            await navigator.clipboard.writeText(activeUrl);
-                            setCopiedTool(active.id);
-                            setTimeout(() => setCopiedTool(null), 1500);
-                          } catch { /* clipboard blocked */ }
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                        style={{
-                          fontSize: 13,
-                          background: "var(--surface)",
-                          color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
-                          border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-                        }}
-                        title="Copy URL"
-                      >
-                        <span className="flex-1 text-left truncate">{activeUrl}</span>
-                        <span className="flex items-center gap-1 shrink-0" style={{ color: copiedTool === active.id ? "#22c55e" : "var(--text-faint)" }}>
-                          {copiedTool === active.id ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-                          <span className="text-caption">{copiedTool === active.id ? "Copied" : "Copy"}</span>
-                        </span>
-                      </button>
+                      {urlVariant === "digest" && !compactAvailable ? (
+                        /* Compact isn't built yet — show an inline
+                           CTA instead of a non-functional URL row.
+                           Clicking Build runs the concept-extractor
+                           and refreshes the hub data on completion. */
+                        <div
+                          className="rounded-lg px-3 py-3"
+                          style={{
+                            background: "color-mix(in srgb, var(--accent-dim) 40%, var(--background))",
+                            border: "1px dashed var(--accent)",
+                          }}
+                        >
+                          <p className="text-caption mb-1" style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                            Compact view isn&apos;t built yet
+                          </p>
+                          <p className="text-caption mb-3" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                            Your hub&apos;s concept index is empty. Build it once and Compact will fetch a small concept map (~95% cheaper than Full).
+                          </p>
+                          <button
+                            onClick={buildOntology}
+                            disabled={ontologyBuilding}
+                            className="inline-flex items-center gap-1.5 text-caption font-mono px-3 py-1.5 rounded transition-colors"
+                            style={{
+                              background: ontologyBuilding ? "var(--toggle-bg)" : "var(--accent)",
+                              color: ontologyBuilding ? "var(--text-muted)" : "var(--background)",
+                              border: "none",
+                              cursor: ontologyBuilding ? "not-allowed" : "pointer",
+                              fontWeight: 600,
+                              letterSpacing: 0.3,
+                            }}
+                          >
+                            {ontologyBuilding ? (
+                              <>Building{ontologyProgress ? ` — ${ontologyProgress.processed} docs, ${ontologyProgress.concepts} concepts` : "…"}</>
+                            ) : (
+                              <>Build concept index now</>
+                            )}
+                          </button>
+                          {ontologyError && (
+                            <p className="text-caption mt-2" style={{ color: "var(--color-danger)" }}>{ontologyError}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            if (typeof navigator === "undefined" || !navigator.clipboard) return;
+                            try {
+                              await navigator.clipboard.writeText(activeUrl);
+                              setCopiedTool(active.id);
+                              setTimeout(() => setCopiedTool(null), 1500);
+                            } catch { /* clipboard blocked */ }
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{
+                            fontSize: 13,
+                            background: "var(--surface)",
+                            color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
+                            border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                          }}
+                          title="Copy URL"
+                        >
+                          <span className="flex-1 text-left truncate">{activeUrl}</span>
+                          <span className="flex items-center gap-1 shrink-0" style={{ color: copiedTool === active.id ? "#22c55e" : "var(--text-faint)" }}>
+                            {copiedTool === active.id ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
+                            <span className="text-caption">{copiedTool === active.id ? "Copied" : "Copy"}</span>
+                          </span>
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <pre
