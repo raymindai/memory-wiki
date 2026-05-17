@@ -2110,20 +2110,50 @@ function WysiwygToolbar({ onInsert, onInsertTable, onInputPopup, cmWrap, cmInser
   );
 }
 
+// Heuristic title suggestion for a multi-doc bundle. Looks for tokens
+// that appear in 2+ titles (case-insensitive, stopwords filtered);
+// joins the top 2 with " + ". Falls back to "<first title> + N more".
+function suggestBundleTitle(docs: Array<{ title: string }>): string {
+  if (docs.length === 0) return "";
+  if (docs.length === 1) return docs[0].title || "Untitled";
+  const stop = new Set(["a","an","the","and","or","of","in","on","at","to","for","with","from","by","is","are","was","were","be","been","as","my","your","our","this","that"]);
+  const counts = new Map<string, number>();
+  for (const d of docs) {
+    const seen = new Set<string>();
+    for (const tok of (d.title || "").toLowerCase().split(/[\s\-_,.;:()[\]/]+/)) {
+      if (tok.length < 3 || stop.has(tok)) continue;
+      if (seen.has(tok)) continue;
+      seen.add(tok);
+      counts.set(tok, (counts.get(tok) || 0) + 1);
+    }
+  }
+  const common = Array.from(counts.entries())
+    .filter(([, c]) => c >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
+  if (common.length === 0) {
+    return `${docs[0].title || "Untitled"} + ${docs.length - 1} more`;
+  }
+  return `${common.join(" + ")} (${docs.length})`;
+}
+
 function BundleCreatorModal({
   allDocs,
   initiallySelected,
+  defaultTitle,
   authHeaders,
   onClose,
   onCreate,
 }: {
   allDocs: Array<{ id: string; title: string; lastOpenedAt?: number }>;
   initiallySelected: Array<{ id: string; title: string }>;
+  defaultTitle?: string;
   authHeaders: Record<string, string>;
   onClose: () => void;
   onCreate: (args: { title: string; description?: string; docIds: string[]; annotationByDocId?: Record<string, string> }) => void | Promise<void>;
 }) {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(defaultTitle || "");
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>(() => initiallySelected.map(d => d.id));
   const [creating, setCreating] = useState(false);
@@ -4205,6 +4235,10 @@ export default function MdEditor() {
   const [confirmTrash, setConfirmTrash] = useState(false);
   const [showBundleCreator, setShowBundleCreator] = useState(false);
   const [bundleCreatorDocs, setBundleCreatorDocs] = useState<Array<{ id: string; title: string }>>([]);
+  // Suggested title for the next BundleCreator open. Auto-derived
+  // from the selected docs (multi-select bundling) so the user
+  // doesn't start from a blank field.
+  const [bundleCreatorDefaultTitle, setBundleCreatorDefaultTitle] = useState<string>("");
   const [_renderPaneNarrow, setRenderPaneNarrow] = useState(false);
   const [renderPaneUnderNarrowWidth, setRenderPaneUnderNarrowWidth] = useState(false);
   const [_editorPaneNarrow, setEditorPaneNarrow] = useState(false);
@@ -11804,6 +11838,35 @@ ${clone.innerHTML}
                     </div>
                   </div>
                 )}
+                {/* Bundle — pre-fills BundleCreator with the
+                    selected docs and an auto-suggested title. Only
+                    visible when ≥ 2 docs with cloudId are selected
+                    (single-doc bundling is reachable via the right-
+                    click "Create bundle…" instead). */}
+                {(() => {
+                  const bundleable = tabs.filter(t =>
+                    selectedTabIds.has(t.id) && t.cloudId && !t.deleted && t.kind !== "bundle",
+                  );
+                  if (bundleable.length < 2) return null;
+                  return (
+                    <button
+                      onClick={() => {
+                        const docs = bundleable.map(t => ({ id: t.cloudId!, title: t.title || "Untitled" }));
+                        setBundleCreatorDocs(docs);
+                        setBundleCreatorDefaultTitle(suggestBundleTitle(docs));
+                        setShowMyBundles(true);
+                        setShowBundleCreator(true);
+                        setSelectedTabIds(new Set());
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]"
+                      style={{ color: "var(--accent)", border: "1px solid var(--accent-dim)" }}
+                      title={`Bundle ${bundleable.length} selected docs`}
+                    >
+                      <Layers width={11} height={11} />
+                      <span>Bundle</span>
+                    </button>
+                  );
+                })()}
                 <button onClick={() => {
                   if (!confirmTrash) {
                     setConfirmTrash(true);
@@ -14762,14 +14825,31 @@ ${clone.innerHTML}
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
                 if (tab) { switchTab(tab.id); setTimeout(() => handleShare(), 100); }
               }},
-              // Create a new bundle pre-seeded with this single doc.
-              // Gated on having a cloudId (the bundle picker keys off
-              // server-side doc ids, not local tab ids).
+              // Create a new bundle. When the user has multi-selected
+              // tabs AND the right-clicked tab is part of the
+              // selection, batch the whole selection into one bundle
+              // with an auto-suggested title. Otherwise fall back to
+              // a single-doc seed.
               ...((() => {
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
                 if (!tab?.cloudId) return [];
+                const selectedInMenu = selectedTabIds.has(tab.id);
+                const multiTabs = (selectedInMenu && selectedTabIds.size > 1)
+                  ? tabs.filter(t => selectedTabIds.has(t.id) && t.cloudId && !t.deleted && t.kind !== "bundle")
+                  : [];
+                if (multiTabs.length > 1) {
+                  const docs = multiTabs.map(t => ({ id: t.cloudId!, title: t.title || "Untitled" }));
+                  return [{ label: `Bundle these ${multiTabs.length} docs…`, action: () => {
+                    setBundleCreatorDocs(docs);
+                    setBundleCreatorDefaultTitle(suggestBundleTitle(docs));
+                    setShowMyBundles(true);
+                    setShowBundleCreator(true);
+                    setSelectedTabIds(new Set());
+                  }}];
+                }
                 return [{ label: "Create bundle…", action: () => {
                   setBundleCreatorDocs([{ id: tab.cloudId!, title: tab.title || "Untitled" }]);
+                  setBundleCreatorDefaultTitle(suggestBundleTitle([{ title: tab.title || "Untitled" }]));
                   setShowMyBundles(true);
                   setShowBundleCreator(true);
                 }}];
@@ -16532,8 +16612,9 @@ ${clone.innerHTML}
         <BundleCreatorModal
           allDocs={tabs.filter(t => t.cloudId && !t.deleted && !t.readonly && t.permission !== "readonly" && t.permission !== "editable" && t.kind !== "bundle").map(t => ({ id: t.cloudId!, title: t.title || "Untitled", lastOpenedAt: t.lastOpenedAt }))}
           initiallySelected={bundleCreatorDocs}
+          defaultTitle={bundleCreatorDefaultTitle}
           authHeaders={authHeaders}
-          onClose={() => { setShowBundleCreator(false); setBundleCreatorDocs([]); setPendingNewBundleFolderId(null); }}
+          onClose={() => { setShowBundleCreator(false); setBundleCreatorDocs([]); setBundleCreatorDefaultTitle(""); setPendingNewBundleFolderId(null); }}
           onCreate={async ({ title, description, docIds, annotationByDocId }) => {
             try {
               const targetFolderId = pendingNewBundleFolderId;
