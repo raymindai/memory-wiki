@@ -2653,3 +2653,13 @@ textarea::selection {
 .mdfy-loader-enter {
   animation: mdfyLoaderEnter 480ms ease-out both;
 }
+
+/* Sidebar multi-select toolbar — labels collapse to icon-only when
+   the container gets narrow. The wrapper sets container-type:
+   inline-size so children can query its width. */
+.mdfy-multiselect-bar {
+  container-type: inline-size;
+}
+@container (max-width: 240px) {
+  .mdfy-collapse-label { display: none; }
+}

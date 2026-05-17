@@ -11809,7 +11809,7 @@ ${clone.innerHTML}
 
           {/* Multi-select action bar */}
           {selectedTabIds.size > 0 && (
-            <div className="shrink-0 px-3 py-2.5" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
+            <div className="shrink-0 px-3 py-2.5 mdfy-multiselect-bar" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
               {/* Header: count + clear */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-caption font-semibold" style={{ color: "var(--accent)" }}>{selectedTabIds.size} document{selectedTabIds.size > 1 ? "s" : ""} selected</span>
@@ -11822,7 +11822,7 @@ ${clone.innerHTML}
                 {folders.filter(f => !f.section || f.section === "my").length > 0 && (
                   <div className="relative group/move flex-1">
                     <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]" style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }} title="Move to folder">
-                      <Folder width={11} height={11} /><span>Move</span><ChevronDown width={8} height={8} />
+                      <Folder width={11} height={11} /><span className="mdfy-collapse-label">Move</span><ChevronDown width={8} height={8} />
                     </button>
                     <div className="absolute bottom-full left-0 right-0 mb-1 rounded-lg py-1 hidden group-hover/move:block" style={{ background: "var(--menu-bg)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 9999 }}>
                       {folders.filter(f => !f.section || f.section === "my").map(f => (
@@ -11863,7 +11863,7 @@ ${clone.innerHTML}
                       title={`Bundle ${bundleable.length} selected docs`}
                     >
                       <Layers width={11} height={11} />
-                      <span>Bundle</span>
+                      <span className="mdfy-collapse-label">Bundle</span>
                     </button>
                   );
                 })()}
@@ -11880,10 +11880,11 @@ ${clone.innerHTML}
                   setTabs(prev => prev.map(t => ids.has(t.id) ? { ...t, deleted: true, deletedAt: Date.now() } : t));
                   if (ids.has(activeTabId)) { const rem = tabs.filter(t => !t.deleted && !ids.has(t.id)); if (rem.length) switchTab(rem[0].id); }
                   setSelectedTabIds(new Set());
-                }} className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors ${confirmTrash ? "bg-[#ef4444]" : ""}`}
+                }} className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-md text-caption font-medium transition-colors shrink-0 ${confirmTrash ? "bg-[#ef4444]" : ""}`}
                   style={{ color: confirmTrash ? "#fff" : "#ef4444", border: confirmTrash ? "1px solid #ef4444" : "1px solid rgba(239,68,68,0.3)" }}
                   title="Move to Trash">
-                  <Trash2 width={11} height={11} /><span>{confirmTrash ? "Confirm?" : "Trash"}</span>
+                  <Trash2 width={11} height={11} />
+                  {confirmTrash && <span>Confirm?</span>}
                 </button>
               </div>
             </div>
