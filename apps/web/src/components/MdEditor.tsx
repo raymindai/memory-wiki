@@ -8095,16 +8095,20 @@ export default function MdEditor() {
         newMd = trimmed.replace(/^EDIT:\s*/, "");
         showToast("Document updated", "success");
       } else {
-        // Polish, translate — replace entire document
+        // Polish, translate, compact — replace entire document
         newMd = result;
-        const labels: Record<string, string> = { polish: "Document polished", translate: "Document translated" };
+        const labels: Record<string, string> = {
+          polish: "Document polished",
+          translate: "Document translated",
+          compact: "Document compacted",
+        };
         showToast(labels[action] || "Done", "success");
       }
       // Add AI response to chat history
       if (action === "chat") {
         setAiChatHistory(prev => [...prev, { role: "ai", text: "Done — document updated.", canUndo: true }]);
       } else {
-        const actionLabels: Record<string, string> = { polish: "Polished", summary: "Summary added", tldr: "TL;DR added", translate: "Translated" };
+        const actionLabels: Record<string, string> = { polish: "Polished", summary: "Summary added", tldr: "TL;DR added", translate: "Translated", compact: "Compacted" };
         setAiChatHistory(prev => [...prev, { role: "ai", text: actionLabels[action] || "Done", canUndo: true }]);
       }
       // Update title from new content
@@ -13153,7 +13157,7 @@ ${clone.innerHTML}
                   >
                     {aiProcessing ? <Loader2 width={11} height={11} className="animate-spin" /> : <Sparkles width={11} height={11} />}
                     {aiProcessing ? <span className="text-caption hidden sm:inline">
-                      {(({ polish: "Polishing", summary: "Summarizing", tldr: "Generating", translate: "Translating", chat: "Editing" } as Record<string, string>)[aiProcessing as string]) || "Processing"}...
+                      {(({ polish: "Polishing", summary: "Summarizing", tldr: "Generating", translate: "Translating", chat: "Editing", compact: "Compacting" } as Record<string, string>)[aiProcessing as string]) || "Processing"}...
                     </span> : <span className="hidden sm:inline text-caption">Chat</span>}
                   </button>
                   {!showAIPanel && !aiProcessing && (
@@ -14011,6 +14015,7 @@ ${clone.innerHTML}
                     <div className="grid grid-cols-2 gap-1">
                       {([
                         { action: "polish", icon: <Sparkles width={11} height={11} style={{ color: "var(--accent)" }} />, label: "Polish", desc: "Fix grammar, spelling, and improve clarity. Preserves meaning." },
+                        { action: "compact", icon: <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round"><path d="M3 4h10M3 8h10M3 12h7"/><path d="M14 6l-2 2 2 2"/></svg>, label: "Compact", desc: "Halve the length while keeping every heading, code block, table, and diagram intact." },
                         { action: "summary", icon: <AlignLeft width={11} height={11} style={{ color: "#60a5fa" }} />, label: "Summary", desc: "Generate a 2-4 sentence summary and add it to the top of the document." },
                         { action: "tldr", icon: <List width={11} height={11} style={{ color: "#fbbf24" }} />, label: "TL;DR", desc: "Create 2-5 bullet points of key takeaways and add to the top." },
                         { action: "translate", icon: <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><path d="M2 3h7M5.5 3v9M3 6c1 3 3.5 5 5.5 6M8 6c-1 3-3.5 5-5.5 6"/><path d="M10 8l2 5 2-5M10.5 11.5h3"/></svg>, label: "Translate", desc: "Translate the entire document to another language. Code blocks stay unchanged." },
@@ -14111,7 +14116,7 @@ ${clone.innerHTML}
                         <div className="px-3 py-2 rounded-lg text-caption flex items-center gap-2"
                           style={{ background: "var(--toggle-bg)", color: "var(--text-faint)" }}>
                           <Loader2 width={10} height={10} className="animate-spin" />
-                          {{ polish: "Polishing document...", summary: "Writing summary...", tldr: "Extracting key points...", translate: "Translating...", chat: "Thinking..." }[aiProcessing] || "Processing..."}
+                          {{ polish: "Polishing document...", summary: "Writing summary...", tldr: "Extracting key points...", translate: "Translating...", chat: "Thinking...", compact: "Compacting document..." }[aiProcessing] || "Processing..."}
                         </div>
                       </div>
                     )}

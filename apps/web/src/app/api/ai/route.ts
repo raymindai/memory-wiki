@@ -4,7 +4,19 @@ import { getSupabaseClient } from "@/lib/supabase";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type AIAction = "polish" | "summary" | "tldr" | "translate" | "chat" | "beautify";
+type AIAction =
+  | "polish"
+  | "summary"
+  | "tldr"
+  | "translate"
+  | "chat"
+  | "beautify"
+  | "compact"
+  | "selection_polish"
+  | "selection_shorten"
+  | "selection_expand"
+  | "selection_rewrite"
+  | "selection_translate";
 
 // ─── AI Model Config (cached from site_config table) ───
 const DEFAULT_PRIMARY_MODEL = "gemini-3-flash-preview";
@@ -42,7 +54,7 @@ async function getAIModels(): Promise<{ primary: string; lite: string }> {
   return cachedModels;
 }
 
-const PROMPTS: Record<Exclude<AIAction, "chat" | "translate">, string> = {
+const PROMPTS: Record<Exclude<AIAction, "chat" | "translate" | "selection_rewrite" | "selection_translate">, string> = {
   polish: `You are an expert editor. Polish the following Markdown document:
 - Fix grammar, spelling, and punctuation errors
 - Improve clarity and readability
@@ -88,6 +100,37 @@ Output ONLY the final Markdown — no commentary, no explanations, no surroundin
 - Output ONLY the bullet list — no headings, no "TL;DR:" prefix, no wrapping, no explanations
 - Do NOT include any part of the original document in your output
 - Do NOT include code blocks, diagrams, or any content from the source — only the bullet points`,
+
+  compact: `You are an expert editor specializing in concise writing. Compact the following Markdown document:
+- Cut the length by roughly half while preserving every distinct idea
+- Keep ALL headings, code blocks, math, diagrams (mermaid), tables, and links exactly as they are
+- Tighten prose: remove filler, redundancy, throat-clearing, hedges
+- Merge short adjacent paragraphs when they cover one idea
+- Convert long enumerations to tighter bullet lists when it shortens them
+- Preserve the original language, structure, and section order
+- Do NOT drop any heading, code block, table, image, math expression, or diagram
+- Do NOT add new information, opinions, or sections
+- Output ONLY the compacted Markdown — no commentary, no wrapping fences`,
+
+  selection_polish: `You are an expert editor. Polish ONLY the snippet below:
+- Fix grammar, spelling, punctuation
+- Improve clarity and flow
+- Preserve meaning, tone, language, and any inline Markdown formatting
+- Do NOT add new ideas, do NOT explain
+- Output ONLY the polished snippet text — no quotes, no wrapping, no "Here is…"`,
+
+  selection_shorten: `You are an expert editor. Shorten the snippet below:
+- Cut length by roughly half while preserving the core meaning
+- Preserve language and any inline Markdown formatting
+- Do NOT add information
+- Output ONLY the shortened snippet — no quotes, no wrapping, no explanations`,
+
+  selection_expand: `You are an expert writer. Expand the snippet below with substance:
+- Add concrete detail, examples, or clarification that genuinely deepen the idea
+- Do NOT pad with filler, repetition, or generic statements
+- Preserve language, tone, and the original meaning
+- Preserve any inline Markdown formatting
+- Output ONLY the expanded snippet — no quotes, no wrapping, no explanations`,
 };
 
 function buildTranslatePrompt(targetLang: string): string {
@@ -98,6 +141,30 @@ function buildTranslatePrompt(targetLang: string): string {
 - Do NOT translate URLs
 - Preserve the document structure exactly
 - Output ONLY the translated Markdown — no explanations, no wrapping`;
+}
+
+function buildSelectionTranslatePrompt(targetLang: string): string {
+  return `You are an expert translator. Translate the snippet below into ${targetLang}:
+- Translate accurately and naturally
+- Preserve any inline Markdown formatting (bold, italic, code, links)
+- Do NOT translate code inside code blocks or URLs
+- Output ONLY the translated snippet — no quotes, no wrapping, no explanations`;
+}
+
+function buildSelectionRewritePrompt(instruction: string): string {
+  const sanitized = instruction
+    .replace(/["""]/g, "'")
+    .replace(/\n/g, " ")
+    .slice(0, 500);
+  return `You are an expert editor. Rewrite the snippet below according to the user's instruction.
+
+<instruction>${sanitized}</instruction>
+
+Rules:
+- Apply the instruction faithfully to the snippet
+- Preserve any inline Markdown formatting unless the instruction says otherwise
+- Do NOT explain what you did, do NOT prefix or wrap with quotes
+- Output ONLY the rewritten snippet`;
 }
 
 function buildChatPrompt(instruction: string): string {
@@ -149,25 +216,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "action and markdown are required" }, { status: 400 });
   }
 
-  const validActions: AIAction[] = ["polish", "summary", "tldr", "translate", "chat", "beautify"];
+  const validActions: AIAction[] = [
+    "polish", "summary", "tldr", "translate", "chat", "beautify", "compact",
+    "selection_polish", "selection_shorten", "selection_expand",
+    "selection_rewrite", "selection_translate",
+  ];
   if (!validActions.includes(action)) {
     return NextResponse.json({ error: `Invalid action: ${action}` }, { status: 400 });
   }
 
-  if (action === "translate" && !language) {
+  if ((action === "translate" || action === "selection_translate") && !language) {
     return NextResponse.json({ error: "language is required for translate" }, { status: 400 });
   }
 
-  if (action === "chat" && !instruction) {
-    return NextResponse.json({ error: "instruction is required for chat" }, { status: 400 });
+  if ((action === "chat" || action === "selection_rewrite") && !instruction) {
+    return NextResponse.json({ error: "instruction is required" }, { status: 400 });
   }
 
   // Build prompt based on action
   let systemPrompt: string;
   if (action === "translate") {
     systemPrompt = buildTranslatePrompt(language!);
+  } else if (action === "selection_translate") {
+    systemPrompt = buildSelectionTranslatePrompt(language!);
   } else if (action === "chat") {
     systemPrompt = buildChatPrompt(instruction!);
+  } else if (action === "selection_rewrite") {
+    systemPrompt = buildSelectionRewritePrompt(instruction!);
   } else {
     systemPrompt = PROMPTS[action];
   }
@@ -179,11 +254,13 @@ Document:
 ${markdown.slice(0, 3 * 1024 * 1024)}
 ---
 
-${action === "chat" ? "Modified document:" : action === "polish" || action === "translate" ? "Result:" : "Output:"}`;
+${action === "chat" ? "Modified document:" : action.startsWith("selection_") ? "Snippet:" : action === "polish" || action === "translate" || action === "compact" ? "Result:" : "Output:"}`;
 
-  // Resolve model from site_config (cached 5 min)
+  // Resolve model from site_config (cached 5 min). Snippet ops are
+  // small so they stay on the lite model for cost.
   const models = await getAIModels();
-  const modelName = (action === "chat" || action === "polish" || action === "translate" || action === "beautify") ? models.primary : models.lite;
+  const useLite = action === "summary" || action === "tldr" || action.startsWith("selection_");
+  const modelName = useLite ? models.lite : models.primary;
 
   const callGemini = async (attempt: number): Promise<Response> => {
     const res = await fetch(
@@ -194,8 +271,17 @@ ${action === "chat" ? "Modified document:" : action === "polish" || action === "
         body: JSON.stringify({
           contents: [{ parts: [{ text: fullPrompt }] }],
           generationConfig: {
-            temperature: action === "polish" || action === "translate" ? 0.1 : 0.3,
-            maxOutputTokens: action === "summary" || action === "tldr" ? 2048 : 65536,
+            temperature:
+              action === "polish" || action === "translate" || action === "compact"
+                || action === "selection_polish" || action === "selection_translate"
+                ? 0.1
+                : 0.3,
+            maxOutputTokens:
+              action === "summary" || action === "tldr"
+                ? 2048
+                : action.startsWith("selection_")
+                  ? 8192
+                  : 65536,
           },
         }),
       }
