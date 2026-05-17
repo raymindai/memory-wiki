@@ -3586,7 +3586,21 @@ export default function MdEditor() {
   const [shareState, setShareState] = useState<
     "idle" | "sharing" | "copied" | "error"
   >("idle");
-  const [viewMode, setViewMode] = useState<ViewMode>("preview");
+  // Persisted across reloads — without this, hitting refresh on a
+  // doc URL forced the user back into Live view ("preview") even
+  // when they'd been working in Split or Source. Reads at mount,
+  // writes whenever viewMode changes (see effect below).
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window === "undefined") return "preview";
+    try {
+      const saved = localStorage.getItem("mdfy-view-mode");
+      if (saved === "preview" || saved === "split" || saved === "editor") return saved;
+    } catch { /* localStorage unavailable */ }
+    return "preview";
+  });
+  useEffect(() => {
+    try { localStorage.setItem("mdfy-view-mode", viewMode); } catch { /* ignore */ }
+  }, [viewMode]);
   // Sync editors on view switch
   const prevViewModeRef = useRef<ViewMode>("preview");
   useEffect(() => {
@@ -5903,12 +5917,15 @@ export default function MdEditor() {
               perm = "mine";
               setIsOwner(true);
               setIsSharedDoc(false);
-              setViewMode("preview"); // Show Live view when opening own doc via URL
+              // Keep the user's persisted viewMode (Live / Split / Source).
+              // Previously this forced "preview" — so a refresh on a doc URL
+              // dropped users out of Split/Source back into Live view, which
+              // read as "the editor turned into a viewer."
             } else {
               perm = "readonly";
               setIsSharedDoc(true);
               setIsEditor(false);
-              setViewMode("preview");
+              setViewMode("preview"); // readonly users get the rendered view
             }
 
             const docIsSharedByMe = perm === "mine" && (
