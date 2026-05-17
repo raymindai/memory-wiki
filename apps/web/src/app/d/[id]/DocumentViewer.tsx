@@ -325,7 +325,7 @@ export default function DocumentViewer({
       {/* Content */}
       <div className="flex-1 overflow-auto" ref={previewRef}>
         {accessRevoked ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
+          <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4 px-6">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.3 }}>
               <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/>
             </svg>
@@ -345,7 +345,7 @@ export default function DocumentViewer({
         ) : isRestricted && !unlocked && !authChecked ? (
           // Auth check still in flight — show neutral loading state instead of
           // flashing the "You need access" gate to owners about to be redirected.
-          <div className="flex flex-col items-center justify-center h-full gap-3">
+          <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3">
             <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}>
               <circle cx="8" cy="8" r="6" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round"/>
             </svg>
@@ -354,7 +354,7 @@ export default function DocumentViewer({
             </span>
           </div>
         ) : isRestricted && !unlocked ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 px-6" style={{ maxWidth: 440, margin: "0 auto" }}>
+          <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4 px-6" style={{ maxWidth: 440, margin: "0 auto" }}>
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.3 }}>
               <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/>
             </svg>
@@ -409,7 +409,7 @@ export default function DocumentViewer({
             </Link>
           </div>
         ) : isExpired ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
+          <div className="flex flex-col items-center justify-center min-h-[70vh] gap-4 px-6">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.3 }}>
               <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
             </svg>
@@ -427,7 +427,7 @@ export default function DocumentViewer({
             </Link>
           </div>
         ) : isLoading ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3">
+          <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3">
             <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}>
               <circle cx="8" cy="8" r="6" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round"/>
             </svg>
