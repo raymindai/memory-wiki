@@ -38,6 +38,60 @@ function fetchProfile(
     });
 }
 
+/**
+ * Migrate any anonymously-captured docs / bundles to the now-signed-in
+ * user. Idempotent — safe to call on every auth load. Used to fire only
+ * on the SIGNED_IN event, which meant a user who was already signed in
+ * before visiting an anonymous doc URL never got the auto-claim. Now we
+ * also call it on the initial getSession() pass, with a one-shot
+ * sessionStorage guard so it doesn't thrash the API on every navigation.
+ */
+function tryClaimAnonymousContent(accessToken: string | null) {
+  if (typeof window === "undefined") return;
+  const localAnon = getAnonymousId();
+  const cookieAnon = readMdfyAnonCookie();
+  if (!localAnon && !cookieAnon) return;
+  // Per-tab guard — once we've attempted claim for this tab, don't
+  // retry on every onAuthStateChange (TOKEN_REFRESHED fires often).
+  // A real new sign-in flow resets the tab (OAuth redirect) so this
+  // doesn't block legitimate re-attempts.
+  try {
+    if (sessionStorage.getItem("mdfy-claim-attempted") === "1") return;
+    sessionStorage.setItem("mdfy-claim-attempted", "1");
+  } catch { /* private mode etc. — fall through, still safe */ }
+
+  fetch("/api/user/migrate", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify({
+      anonymousId: localAnon || undefined,
+      cookieAnonymousId: cookieAnon || undefined,
+    }),
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      if (!data) return;
+      const total = (data.documentsMigrated || 0) + (data.bundlesMigrated || 0);
+      if (total > 0) {
+        if (localAnon) clearAnonymousId();
+        if (cookieAnon) clearMdfyAnonCookie();
+        window.dispatchEvent(
+          new CustomEvent("mdfy-anon-claimed", {
+            detail: {
+              documents: data.documentsMigrated || 0,
+              bundles: data.bundlesMigrated || 0,
+            },
+          })
+        );
+      }
+    })
+    .catch(() => { /* best-effort */ });
+}
+
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -59,6 +113,10 @@ export function useAuth() {
       if (session?.user) {
         setState((prev) => ({ ...prev, user: session.user, accessToken: session.access_token || null, loading: false }));
         fetchProfile(supabase, session.user.id, setState);
+        // Already-signed-in path: SIGNED_IN event won't fire, so trigger
+        // the anonymous-content claim here too. Per-tab guarded so the
+        // API isn't hit on every page navigation.
+        tryClaimAnonymousContent(session.access_token || null);
       } else {
         setState({ user: null, profile: null, loading: false, accessToken: null });
       }
@@ -71,46 +129,14 @@ export function useAuth() {
         if (session?.user) {
           setState((prev) => ({ ...prev, user: session.user, accessToken: session.access_token || null, loading: false }));
           fetchProfile(supabase, session.user.id, setState);
-          // SIGNED_IN: claim everything the user captured anonymously
-          // (legacy localStorage + new cross-origin cookie). Idempotent;
-          // running it twice is harmless.
+          // SIGNED_IN (fresh login) AND repeat events both go through the
+          // same idempotent helper. The sessionStorage guard inside
+          // tryClaimAnonymousContent prevents repeated API hits per tab.
           if (event === "SIGNED_IN") {
-            const localAnon = getAnonymousId();
-            const cookieAnon = readMdfyAnonCookie();
-            if (localAnon || cookieAnon) {
-              fetch("/api/user/migrate", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({
-                  anonymousId: localAnon || undefined,
-                  cookieAnonymousId: cookieAnon || undefined,
-                }),
-              })
-                .then((r) => (r.ok ? r.json() : null))
-                .then((data) => {
-                  if (!data) return;
-                  const total = (data.documentsMigrated || 0) + (data.bundlesMigrated || 0);
-                  if (total > 0) {
-                    if (localAnon) clearAnonymousId();
-                    if (cookieAnon) clearMdfyAnonCookie();
-                    if (typeof window !== "undefined") {
-                      window.dispatchEvent(
-                        new CustomEvent("mdfy-anon-claimed", {
-                          detail: {
-                            documents: data.documentsMigrated || 0,
-                            bundles: data.bundlesMigrated || 0,
-                          },
-                        })
-                      );
-                    }
-                  }
-                })
-                .catch(() => { /* migration is best-effort */ });
-            }
+            // Fresh sign-in: reset the per-tab guard so the migrate fires
+            // even if a previous page load already attempted it.
+            try { sessionStorage.removeItem("mdfy-claim-attempted"); } catch { /* ignore */ }
+            tryClaimAnonymousContent(session.access_token || null);
           }
         } else {
           setState({ user: null, profile: null, loading: false, accessToken: null });
