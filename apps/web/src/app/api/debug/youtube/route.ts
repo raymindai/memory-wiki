@@ -103,5 +103,73 @@ export async function GET(req: NextRequest) {
     out.watchPageError = err instanceof Error ? err.message : String(err);
   }
 
+  // Step 4 — IOS client. Different fingerprint than ANDROID; sometimes
+  // bypasses the bot check when ANDROID is blocked.
+  try {
+    const iosRes = await fetch("https://www.youtube.com/youtubei/v1/player", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)",
+        "X-YouTube-Client-Name": "5",
+        "X-YouTube-Client-Version": "19.45.4",
+      },
+      body: JSON.stringify({
+        context: {
+          client: {
+            clientName: "IOS",
+            clientVersion: "19.45.4",
+            deviceModel: "iPhone16,2",
+            userAgent: "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)",
+            hl: "en", gl: "US", platform: "MOBILE",
+          },
+        },
+        videoId: id,
+      }),
+    });
+    const j = await iosRes.json().catch(() => null) as { captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ baseUrl?: string; languageCode?: string }> } }; playabilityStatus?: { status?: string; reason?: string } } | null;
+    out.iosPlayer = {
+      status: iosRes.status,
+      trackCount: j?.captions?.playerCaptionsTracklistRenderer?.captionTracks?.length || 0,
+      playability: j?.playabilityStatus?.status,
+      reason: j?.playabilityStatus?.reason,
+    };
+  } catch (err) {
+    out.iosPlayerError = err instanceof Error ? err.message : String(err);
+  }
+
+  // Step 5 — TVHTML5 embedded client. Used by youtube-dl as a
+  // last-resort bypass historically.
+  try {
+    const tvRes = await fetch("https://www.youtube.com/youtubei/v1/player", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-YouTube-Client-Name": "85",
+        "X-YouTube-Client-Version": "2.0",
+      },
+      body: JSON.stringify({
+        context: {
+          client: {
+            clientName: "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
+            clientVersion: "2.0",
+            hl: "en", gl: "US",
+          },
+          thirdParty: { embedUrl: `https://www.youtube.com/watch?v=${id}` },
+        },
+        videoId: id,
+      }),
+    });
+    const j = await tvRes.json().catch(() => null) as { captions?: { playerCaptionsTracklistRenderer?: { captionTracks?: Array<{ baseUrl?: string }> } }; playabilityStatus?: { status?: string; reason?: string } } | null;
+    out.tvEmbeddedPlayer = {
+      status: tvRes.status,
+      trackCount: j?.captions?.playerCaptionsTracklistRenderer?.captionTracks?.length || 0,
+      playability: j?.playabilityStatus?.status,
+      reason: j?.playabilityStatus?.reason,
+    };
+  } catch (err) {
+    out.tvEmbeddedPlayerError = err instanceof Error ? err.message : String(err);
+  }
+
   return NextResponse.json(out);
 }
