@@ -20,6 +20,14 @@ import { enqueueJob, claimNextJob, completeJob, failJob, type JobRow } from "@/l
 import { extractDocOntology } from "@/lib/extract-doc-ontology";
 
 const MIN_DELTA_CHARS = 200;
+// Per-(user, doc) re-extract throttle. Old in-process Map enforced
+// this at 30 min; we now check the most recent `done` row in the
+// queue. Autosave bursts plus the per-target unique index already
+// dedupe pending/running, but without this throttle a back-and-
+// forth edit pattern (save → extract → done → save → extract → done)
+// would re-run Haiku every few seconds. `force: true` bypasses for
+// explicit rebuild CTAs.
+const RE_EXTRACT_COOLDOWN_MS = 30 * 60 * 1000;
 
 export interface OntologyRefreshArgs {
   supabase: SupabaseClient;
@@ -46,10 +54,34 @@ export interface OntologyRefreshArgs {
  *
  *  Returns the queued job id (or null on enqueue failure). */
 export async function enqueueOntologyRefresh(args: OntologyRefreshArgs): Promise<string | null> {
-  const { supabase, userId, docId, title, markdown } = args;
+  const { supabase, userId, docId, title, markdown, force } = args;
   if (!userId) return null;
   const md = (markdown || "").trim();
   if (md.length < MIN_DELTA_CHARS) return null;
+
+  // Throttle re-extraction of the same doc. Pending/running is
+  // already deduped by the unique index; this layer prevents
+  // back-to-back `done → save → done` LLM bursts on actively-
+  // edited docs. One small SELECT per save is cheap relative to
+  // the LLM call we're guarding.
+  if (!force) {
+    const { data: recent } = await supabase
+      .from("extraction_jobs")
+      .select("finished_at")
+      .eq("user_id", userId)
+      .eq("kind", "doc_ontology")
+      .eq("target_doc_id", docId)
+      .eq("status", "done")
+      .order("finished_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (recent?.finished_at) {
+      const sinceMs = Date.now() - new Date(recent.finished_at).getTime();
+      if (sinceMs < RE_EXTRACT_COOLDOWN_MS) {
+        return null;
+      }
+    }
+  }
 
   const jobId = await enqueueJob({
     supabase,
