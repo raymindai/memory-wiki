@@ -707,6 +707,11 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
+  // Cached preview of the saved selection — shown at the top of the
+  // AI popup. The native browser selection highlight clears when the
+  // popup input takes focus, so without this it looks like the
+  // selection was lost.
+  const [aiSnippetPreview, setAiSnippetPreview] = useState("");
   // Stash the range — Tiptap selection collapses to the input when
   // we focus the prompt field, but we still need the original
   // (from, to) to replace.
@@ -749,7 +754,11 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
 
   const openAiMenu = useCallback(() => {
     const { from, to } = editor.state.selection;
-    if (from !== to) savedRangeRef.current = { from, to };
+    if (from !== to) {
+      savedRangeRef.current = { from, to };
+      const snippet = editor.state.doc.textBetween(from, to, "\n").trim();
+      setAiSnippetPreview(snippet);
+    }
     setAiError(null);
     setAiMenu("root");
   }, [editor]);
@@ -758,6 +767,7 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
     setAiMenu(null);
     setAiError(null);
     setAiPrompt("");
+    setAiSnippetPreview("");
     savedRangeRef.current = null;
   }, []);
 
@@ -772,9 +782,23 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
     // If the original selection was inline (single line, no leading
     // hashes / list markers), strip the wrapping <p> tag so we don't
     // accidentally split a paragraph mid-sentence.
-    const isLikelyInline = !/\n/.test(mdResult.trim()) && !/^(#|>|\*|-|\d+\.|\||\s*```)/.test(mdResult.trim());
-    if (isLikelyInline) {
-      html = html.replace(/^\s*<p>/, "").replace(/<\/p>\s*$/, "");
+    // Decide whether to unwrap markdown-it's outer <p>:
+    //   - If the rendered HTML is a SINGLE top-level <p> with no other
+    //     block siblings, peel it off so the result lives inside the
+    //     existing paragraph instead of splitting it.
+    //   - If there are multiple blocks (list, multi-paragraph, code,
+    //     heading…) keep the HTML so structure survives.
+    if (typeof document !== "undefined") {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html.trim();
+      const children = Array.from(tmp.children);
+      if (children.length === 1 && children[0].tagName === "P") {
+        html = (children[0] as HTMLElement).innerHTML;
+      }
+    } else {
+      // SSR fallback — same conservative regex as before.
+      const oneP = /^\s*<p>([\s\S]*?)<\/p>\s*$/.exec(html);
+      if (oneP) html = oneP[1];
     }
     editor
       .chain()
@@ -785,13 +809,13 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
     return true;
   }, [editor]);
 
-  const runAi = useCallback(async (action: string, opts: { language?: string; instruction?: string } = {}) => {
+  const runAi = useCallback(async (action: string, opts: { language?: string; instruction?: string } = {}, busyKey?: string) => {
     const range = savedRangeRef.current;
     if (!range) { setAiError("Selection lost — try again."); return; }
     const snippet = editor.state.doc.textBetween(range.from, range.to, "\n");
     if (!snippet.trim()) { setAiError("Empty selection."); return; }
     if (snippet.length > 8000) { setAiError("Selection too long (max 8k chars)."); return; }
-    setAiBusy(action);
+    setAiBusy(busyKey || action);
     setAiError(null);
     try {
       const res = await fetch("/api/ai", {
@@ -915,6 +939,34 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
             zIndex: 10000,
           }}
         >
+          {aiSnippetPreview && (
+            <div
+              className="px-2 py-1.5 rounded-md mb-1 flex items-start gap-1.5"
+              style={{
+                background: "var(--accent-dim)",
+                border: "1px solid var(--border-dim)",
+                fontSize: 11,
+                lineHeight: 1.4,
+                color: "var(--text-secondary)",
+              }}
+            >
+              <span className="font-mono uppercase tracking-wider shrink-0" style={{ color: "var(--accent)", fontSize: 9, paddingTop: 1 }}>
+                On
+              </span>
+              <span
+                className="flex-1"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  wordBreak: "break-word",
+                }}
+              >
+                {aiSnippetPreview.length > 200 ? aiSnippetPreview.slice(0, 200) + "…" : aiSnippetPreview}
+              </span>
+            </div>
+          )}
           {aiMenu === "root" && (
             <>
               <div
@@ -999,20 +1051,23 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
                 ‹ Back
               </button>
               <div className="grid grid-cols-2 gap-0.5 mt-1">
-                {AI_LANGS.map(([label, lang]) => (
-                  <button
-                    key={lang}
-                    disabled={!!aiBusy}
-                    onClick={() => runAi("selection_translate", { language: lang })}
-                    className="px-2 py-1 rounded flex items-center justify-between gap-1"
-                    style={{ color: "var(--text-secondary)", background: "transparent", border: "none", fontSize: 12, cursor: aiBusy ? "default" : "pointer" }}
-                    onMouseEnter={(e) => { if (!aiBusy) (e.currentTarget as HTMLElement).style.background = "var(--menu-hover)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                  >
-                    <span>{label}</span>
-                    {aiBusy === "selection_translate" && <Loader2 size={10} className="animate-spin" />}
-                  </button>
-                ))}
+                {AI_LANGS.map(([label, lang]) => {
+                  const langKey = `translate:${lang}`;
+                  return (
+                    <button
+                      key={lang}
+                      disabled={!!aiBusy}
+                      onClick={() => runAi("selection_translate", { language: lang }, langKey)}
+                      className="px-2 py-1 rounded flex items-center justify-between gap-1"
+                      style={{ color: "var(--text-secondary)", background: "transparent", border: "none", fontSize: 12, cursor: aiBusy ? "default" : "pointer" }}
+                      onMouseEnter={(e) => { if (!aiBusy) (e.currentTarget as HTMLElement).style.background = "var(--menu-hover)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                    >
+                      <span>{label}</span>
+                      {aiBusy === langKey && <Loader2 size={10} className="animate-spin" />}
+                    </button>
+                  );
+                })}
               </div>
             </>
           )}
