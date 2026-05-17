@@ -75,7 +75,19 @@ export default function DocumentViewer({
       try {
         const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
         const supabase = getSupabaseBrowserClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        let { data: { user } } = await supabase.auth.getUser();
+        // Stale session: getUser() returned null but a refresh token may
+        // still be valid. Attempt one silent refresh before giving up —
+        // otherwise the user sees the "You need access" gate on their own
+        // doc and has to manually click Sign in to recover.
+        if (!user) {
+          try {
+            const { data: refreshed, error: refreshErr } = await supabase.auth.refreshSession();
+            if (!refreshErr && refreshed?.user) {
+              user = refreshed.user;
+            }
+          } catch { /* refresh failed — treat as logged out */ }
+        }
         if (!user) return;
 
         const res = await fetch(`/api/docs/${id}`, {
