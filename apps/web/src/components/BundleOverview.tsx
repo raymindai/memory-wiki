@@ -16,7 +16,7 @@
 //   - Suggestions (TODO once we have a /api/bundles/[id]/suggestions surface)
 
 import { useEffect, useState, useMemo } from "react";
-import { Layers, Copy, Check, Eye, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, ArrowUpRight } from "lucide-react";
+import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock } from "lucide-react";
 
 interface BundleDoc {
   id: string;
@@ -180,8 +180,7 @@ export default function BundleOverview({
               Intent: {bundleIntent}
             </p>
           )}
-          {/* Meta + Open-in-browser CTA — centered row. Matches
-              Hub's "meta + Galaxy" row. */}
+          {/* Meta strip — centered row. */}
           <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
             <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
               <Layers width={11} height={11} />
@@ -199,24 +198,6 @@ export default function BundleOverview({
                 Shared with {bundleAllowedEmails.length}
               </span>
             )}
-            <a
-              href={bundleUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
-              style={{
-                color: "var(--accent)",
-                background: "var(--accent-dim)",
-                border: "1px solid var(--accent-dim)",
-                textDecoration: "none",
-                letterSpacing: 0.3,
-              }}
-              title="Open the rendered HTML view"
-            >
-              <Eye width={11} height={11} />
-              <span>Open in browser</span>
-              <ArrowUpRight width={11} height={11} />
-            </a>
           </div>
         </header>
 
@@ -299,23 +280,30 @@ mdfy search "topic"`;
                 Pick your AI tool. Each one shows exactly what to paste and where.
               </p>
 
-              {/* Flat tab row */}
-              <div className="flex flex-wrap gap-1.5 items-center mb-3">
+              {/* Flat tab row — same style as the canvas's
+                  Document / Insights / Decompose tabs. Active = text
+                  + 2px accent underline, no chip backgrounds. */}
+              <div className="flex flex-wrap items-center mb-3" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                 {TOOLS.map((t) => {
                   const isActive = activeTool === t.id;
                   return (
                     <button
                       key={t.id}
                       onClick={() => setActiveTool(t.id)}
-                      className="text-caption font-mono px-2.5 py-1 rounded transition-colors"
+                      className="px-3 pt-1.5 pb-2 text-caption font-medium transition-colors relative"
                       style={{
-                        background: isActive ? "var(--accent-dim)" : "transparent",
-                        color: isActive ? "var(--accent)" : "var(--text-muted)",
-                        border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                        letterSpacing: 0.3,
+                        color: isActive ? "var(--text-primary)" : "var(--text-faint)",
+                        background: "transparent",
+                        border: "none",
                       }}
                     >
                       {t.label}
+                      {isActive && (
+                        <div
+                          className="absolute left-0 right-0 -bottom-px h-[2px]"
+                          style={{ background: "var(--accent)" }}
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -340,8 +328,8 @@ mdfy search "topic"`;
 
                 {isUrlTool ? (
                   <div className="px-3 py-3">
-                    <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5">
+                    <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2" style={{ borderBottom: "1px solid var(--border-dim)" }}>
+                      <div className="flex items-center">
                         {(["digest", "full"] as const).map((v) => {
                           const isActive = urlVariant === v;
                           const tokenLabel = v === "digest" ? `≈ ${fmt(digestTokens)} tok` : `≈ ${fmt(fullTokens)} tok`;
@@ -350,22 +338,28 @@ mdfy search "topic"`;
                               key={v}
                               type="button"
                               onClick={() => setUrlVariant(v)}
-                              className="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded transition-colors"
+                              className="px-3 pt-1.5 pb-2 transition-colors relative flex items-center gap-1.5"
                               style={{
-                                color: isActive ? "var(--accent)" : "var(--text-muted)",
-                                background: isActive ? "var(--accent-dim)" : "transparent",
-                                border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                                color: isActive ? "var(--text-primary)" : "var(--text-faint)",
+                                background: "transparent",
+                                border: "none",
                               }}
                             >
-                              <span className="uppercase" style={{ fontSize: 10, letterSpacing: 0.5, fontWeight: 600 }}>
+                              <span className="font-medium" style={{ fontSize: 12 }}>
                                 {v === "digest" ? "Compact" : "Full"}
                               </span>
-                              <span style={{ fontSize: 10, opacity: 0.6 }}>{tokenLabel}</span>
+                              <span style={{ fontSize: 10, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{tokenLabel}</span>
+                              {isActive && (
+                                <div
+                                  className="absolute left-0 right-0 -bottom-px h-[2px]"
+                                  style={{ background: "var(--accent)" }}
+                                />
+                              )}
                             </button>
                           );
                         })}
                       </div>
-                      <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+                      <span className="text-caption pb-1.5" style={{ color: "var(--text-faint)" }}>
                         {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
                       </span>
                     </div>

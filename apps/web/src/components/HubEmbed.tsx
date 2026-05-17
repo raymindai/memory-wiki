@@ -756,15 +756,20 @@ mdfy hub`;
                 <button
                   key={t.id}
                   onClick={() => setActiveTool(t.id)}
-                  className="text-caption font-mono px-2.5 py-1 rounded transition-colors"
+                  className="px-3 pt-1.5 pb-2 text-caption font-medium transition-colors relative"
                   style={{
-                    background: isActive ? "var(--accent-dim)" : "transparent",
-                    color: isActive ? "var(--accent)" : "var(--text-muted)",
-                    border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                    letterSpacing: 0.3,
+                    color: isActive ? "var(--text-primary)" : "var(--text-faint)",
+                    background: "transparent",
+                    border: "none",
                   }}
                 >
                   {t.label}
+                  {isActive && (
+                    <div
+                      className="absolute left-0 right-0 -bottom-px h-[2px]"
+                      style={{ background: "var(--accent)" }}
+                    />
+                  )}
                 </button>
               );
             };
@@ -785,9 +790,10 @@ mdfy hub`;
                   Pick your AI tool. Each one shows exactly what to paste and where.
                 </p>
 
-                {/* Single flat tab row — all tools same level, no
-                    "via mdfy:" group label. Wraps freely. */}
-                <div className="flex flex-wrap gap-1.5 items-center mb-3">
+                {/* Single flat tab row — same style as the canvas's
+                    Document / Insights / Decompose tabs. Active tab
+                    gets a 2px accent underline, no chip backgrounds. */}
+                <div className="flex flex-wrap items-center mb-3" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                   {TOOLS.map((t) => <TabBtn key={t.id} t={t} />)}
                 </div>
 
@@ -819,8 +825,8 @@ mdfy hub`;
                   {/* BODY — URL mode for chat tools, snippet for others. */}
                   {isUrlTool ? (
                     <div className="px-3 py-3">
-                      <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                        <div className="flex items-center gap-1.5">
+                      <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2" style={{ borderBottom: "1px solid var(--border-dim)" }}>
+                        <div className="flex items-center">
                           {(["digest", "full"] as const).map((v) => {
                             const isActive = urlVariant === v;
                             const isCompact = v === "digest";
@@ -842,22 +848,29 @@ mdfy hub`;
                                 key={v}
                                 type="button"
                                 onClick={() => setUrlVariant(v)}
-                                className="flex items-center gap-1.5 font-mono px-2.5 py-1 rounded transition-colors"
+                                className="px-3 pt-1.5 pb-2 transition-colors relative flex items-center gap-1.5"
                                 style={{
-                                  color: isActive ? "var(--accent)" : (compactMissing ? "var(--text-faint)" : "var(--text-muted)"),
-                                  background: isActive ? "var(--accent-dim)" : "transparent",
-                                  border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                                  color: isActive ? "var(--text-primary)" : (compactMissing ? "var(--text-faint)" : "var(--text-faint)"),
+                                  background: "transparent",
+                                  border: "none",
+                                  opacity: compactMissing && !isActive ? 0.6 : 1,
                                 }}
                               >
-                                <span className="uppercase" style={{ fontSize: 10, letterSpacing: 0.5, fontWeight: 600 }}>
+                                <span className="font-medium" style={{ fontSize: 12 }}>
                                   {isCompact ? "Compact" : "Full"}
                                 </span>
-                                <span style={{ fontSize: 10, opacity: compactMissing ? 0.5 : 0.6 }}>{tokenLabel}</span>
+                                <span style={{ fontSize: 10, opacity: compactMissing ? 0.6 : 0.7, fontFamily: "var(--font-mono)" }}>{tokenLabel}</span>
+                                {isActive && (
+                                  <div
+                                    className="absolute left-0 right-0 -bottom-px h-[2px]"
+                                    style={{ background: "var(--accent)" }}
+                                  />
+                                )}
                               </button>
                             );
                           })}
                         </div>
-                        <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+                        <span className="text-caption pb-1.5" style={{ color: "var(--text-faint)" }}>
                           {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
                         </span>
                       </div>
