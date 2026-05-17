@@ -688,8 +688,8 @@ body {
    ======================================== */
 .mdcore-rendered {
   color: var(--text-secondary);
-  font-size: 0.75rem;      /* 12px — matches sidebar + chrome body baseline */
-  line-height: 1.65;       /* tightened from 1.7 since 12px doesn't need as much air */
+  font-size: 0.875rem;     /* 14px — reading body for both editor + viewer */
+  line-height: 1.7;
   word-wrap: break-word;
 }
 .mdcore-rendered[data-placeholder="true"]:empty::before {
@@ -727,21 +727,21 @@ body {
 }
 
 .mdcore-rendered h4 {
-  font-size: 0.8125rem;     /* 16 → 13 */
+  font-size: 1rem;          /* 16px — stays visibly above body (14) */
   font-weight: 600;
   color: var(--h2-color);
   margin: 1.25rem 0 0.5rem;
 }
 
 .mdcore-rendered h5 {
-  font-size: 0.75rem;       /* 15 → 12 (matches body) */
+  font-size: 0.875rem;      /* matches body */
   font-weight: 600;
   color: var(--text-tertiary);
   margin: 1rem 0 0.375rem;
 }
 
 .mdcore-rendered h6 {
-  font-size: 0.75rem;       /* 14 → 12 */
+  font-size: 0.875rem;      /* matches body */
   font-weight: 600;
   color: var(--text-muted);
   margin: 1rem 0 0.375rem;
@@ -842,7 +842,7 @@ body {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.75rem;       /* 14 → 12 */
+  font-size: 0.875rem;      /* matches body */
 }
 
 .mdcore-rendered th {
