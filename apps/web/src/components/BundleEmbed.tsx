@@ -14,6 +14,7 @@ import { aggregateDiscoveries, type ChunkRef, type TensionItem, type ThreadItem 
 import { stripMarkdownPreview } from "@/lib/strip-markdown-preview";
 import { FEATURES } from "@/lib/feature-flags";
 import Tooltip from "@/components/Tooltip";
+import { showToast } from "@/components/Toast";
 import { Button, Chip, Badge, ModalShell, EmptyState } from "@/components/ui";
 import BundleOverview from "@/components/BundleOverview";
 import { Layers, AlertTriangle, HelpCircle, GitBranch, Sparkles, Lightbulb, Zap, CheckSquare, Tag, FileText, X as XIcon, PanelLeft, List } from "lucide-react";
@@ -243,8 +244,12 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
           });
         }
 
-        // Auto-trigger AI analysis if no cached graph
-        if (!data.graph_data && data.documents?.length >= 2) {
+        // Auto-trigger AI analysis when there's no cached graph and at
+        // least one member doc. Threshold used to be 2 — a single-doc
+        // bundle was left unanalyzed, which read as "feature broken"
+        // to founders adding docs one at a time. Owner-only: viewers
+        // shouldn't pay for analysis on someone else's bundle.
+        if (data.isOwner && !data.graph_data && (data.documents?.length || 0) >= 1) {
           setIsAnalyzing(true);
           try {
             const res = await fetch(`/api/bundles/${bundleId}/graph`, {
@@ -256,8 +261,13 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
               const g = await res.json();
               setAiGraph(g.graphData);
               setGraphGeneratedAt(g.generatedAt || new Date().toISOString());
+            } else {
+              const errBody = await res.json().catch(() => ({}));
+              console.warn(`[bundle-auto-analyze] failed status=${res.status}`, errBody);
             }
-          } catch { /* AI not available */ }
+          } catch (err) {
+            console.warn(`[bundle-auto-analyze] threw`, err);
+          }
           setIsAnalyzing(false);
         }
       })
@@ -305,13 +315,35 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
       const anonId = localStorage.getItem("mdfy-anonymous-id");
       if (anonId && !headers["x-anonymous-id"]) headers["x-anonymous-id"] = anonId;
       const res = await fetch(`/api/embed/bundle/${bundleId}`, { method: "POST", headers });
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        // Only mark fresh when the server actually re-embedded; "skipped"
-        // (hash unchanged or empty) keeps the existing timestamp truthful.
-        if (data.embedded) setEmbeddingUpdatedAt(new Date().toISOString());
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) {
+        // Surface so the user doesn't think the click did nothing.
+        const msg = typeof data.error === "string"
+          ? data.error
+          : `Embed failed (${res.status})`;
+        showToast(msg, "error");
+      } else if (data.embedded) {
+        setEmbeddingUpdatedAt(new Date().toISOString());
+        showToast("Bundle embedded", "success");
+      } else if (data.skipped) {
+        // Idempotent skip (hash unchanged or composite too short) —
+        // surface the existing embedding_updated_at if any so the
+        // chip stops reading "Not yet" when the bundle is already
+        // embedded. If the row never had a timestamp at all, leave
+        // it null so the chip honestly says "Not yet".
+        if (typeof data.embedding_updated_at === "string" && data.embedding_updated_at) {
+          setEmbeddingUpdatedAt(data.embedding_updated_at);
+        }
+        showToast(
+          data.reason === "empty"
+            ? "Nothing to embed — bundle has no title or members yet"
+            : "Bundle is already up to date",
+          "info",
+        );
       }
-    } catch { /* network error */ }
+    } catch {
+      showToast("Embed failed — network error", "error");
+    }
     setIsEmbedding(false);
   }, [bundleId, bundleIsOwner, parentAuthHeaders]);
 

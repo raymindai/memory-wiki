@@ -34,7 +34,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
   const { data: bundle, error: fetchErr } = await supabase
     .from("bundles")
-    .select("id, title, description, user_id, anonymous_id, embedding_source_hash")
+    .select("id, title, description, user_id, anonymous_id, embedding_source_hash, embedding_updated_at")
     .eq("id", id)
     .single();
   if (fetchErr || !bundle) return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -76,13 +76,21 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   const composite = [titleStr, descStr, memberLine].filter(Boolean).join("\n\n");
 
   if (composite.length < 8) {
-    return NextResponse.json({ skipped: true, reason: "empty" });
+    return NextResponse.json({
+      skipped: true,
+      reason: "empty",
+      embedding_updated_at: bundle.embedding_updated_at || null,
+    });
   }
 
   const input = prepareEmbeddingInput(null, composite);
   const hash = hashEmbeddingSource(input);
   if (bundle.embedding_source_hash === hash) {
-    return NextResponse.json({ skipped: true, reason: "unchanged" });
+    return NextResponse.json({
+      skipped: true,
+      reason: "unchanged",
+      embedding_updated_at: bundle.embedding_updated_at || null,
+    });
   }
 
   let vec: number[];
