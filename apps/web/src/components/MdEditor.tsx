@@ -8137,11 +8137,19 @@ export default function MdEditor() {
         }
       }
       redoStack.current = [];
-      // Update markdown + tab
+      // Update markdown + tab. We must push to all three writers
+      // because each owns its own DOM:
+      //   - setMarkdown / doRender — react state + the legacy preview
+      //   - cmSetDocRef — the source-view CodeMirror buffer
+      //   - tiptapRef.setMarkdown — the Live-view WYSIWYG editor
+      // Skipping the last call left users staring at the *old*
+      // document in the Live tab after Compact / Polish / Translate
+      // / Summary / TL;DR / chat, which read as "the AI did nothing".
       const oldMd = md;
       setMarkdown(newMd);
       doRender(newMd);
       cmSetDocRef.current?.(newMd);
+      tiptapRef.current?.setMarkdown(newMd);
       setTabs(prev => prev.map(t => t.id === activeTabIdRef.current ? { ...t, markdown: newMd } : t));
 
       // Highlight changes in preview after render
