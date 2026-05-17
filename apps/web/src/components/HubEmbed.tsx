@@ -17,7 +17,7 @@ import Link from "next/link";
 import {
   Layers, Copy, Check, ExternalLink, Globe, Eye, Cloud, Users,
   ShieldAlert, Sparkles, ArrowUpRight, Lightbulb, FileWarning,
-  Network,
+  Network, Clock, FolderClosed,
 } from "lucide-react";
 import DocStatusIcon from "@/components/DocStatusIcon";
 import MdfyLogo from "@/components/MdfyLogo";
@@ -450,48 +450,90 @@ export default function HubEmbed({
               (/hub/<slug>) and the Deploy-to-AI block already say
               the same thing — removing it keeps the page top
               quieter. */}
-        <header className="flex items-start gap-4 mb-8">
+        {/* Hero — mirrors BundleOverview's hero shape so Hub and
+            Bundle read as the same "identity strip" family. Avatar +
+            (title, slug, optional bio, meta row, actions row). */}
+        <header className="flex items-start gap-4 mb-7">
           <img
             src={data.hub.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(slug)}`}
             alt=""
-            className="w-16 h-16 rounded-full shrink-0"
-            style={{ border: "1px solid var(--border-dim)" }}
+            className="shrink-0 rounded-2xl"
+            style={{ width: 56, height: 56, border: "1px solid var(--border-dim)" }}
           />
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-display font-bold tracking-tight" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
               {data.hub.display_name || slug}
             </h1>
-            <div className="text-caption font-mono mt-1" style={{ color: "var(--text-faint)" }}>
+            <p className="text-caption mt-1 font-mono" style={{ color: "var(--text-faint)" }}>
               /hub/{slug}
-            </div>
+            </p>
             {data.hub.description && (
-              <p className="text-body mt-3 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-body mt-2.5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 {data.hub.description}
               </p>
             )}
-            {/* Galaxy CTA — owner-only entry into /galaxy. Sits right
-                under the bio so the visual rhythm is "who am I" → "see
-                this as a constellation." Opens in a new tab; /galaxy
-                is its own full-canvas surface, not an overlay. */}
-            <Link
-              href="/galaxy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-caption font-mono mt-3 px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-              style={{
-                color: "var(--accent)",
-                background: "var(--accent-dim)",
-                border: "1px solid var(--accent-dim)",
-                textDecoration: "none",
-                letterSpacing: 0.3,
-                width: "fit-content",
-              }}
-              title="Open your hub as a constellation"
-            >
-              <Network width={11} height={11} />
-              <span>Dive into my Galaxy</span>
-              <ArrowUpRight width={11} height={11} />
-            </Link>
+            {/* Meta strip — totals + freshness in mono so the page
+                top tells you "what is this" without scrolling. */}
+            {(() => {
+              if (!ov) return null;
+              const docCount = ov.documents.public.length + ov.documents.shared.length + ov.documents.private.length;
+              const bundleCount = ov.bundles.public.length + ov.bundles.shared.length + ov.bundles.private.length;
+              // Latest of all docs + bundles, owner-view scope.
+              let latest: string | null = null;
+              const consider = (iso?: string | null) => {
+                if (!iso) return;
+                if (!latest || iso > latest) latest = iso;
+              };
+              for (const d of ov.documents.public) consider(d.updated_at);
+              for (const d of ov.documents.shared) consider(d.updated_at);
+              for (const d of ov.documents.private) consider(d.updated_at);
+              for (const b of ov.bundles.public) consider(b.updated_at);
+              for (const b of ov.bundles.shared) consider(b.updated_at);
+              for (const b of ov.bundles.private) consider(b.updated_at);
+              return (
+                <div className="flex items-center gap-3 mt-3 flex-wrap">
+                  <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                    <FolderClosed width={11} height={11} />
+                    {docCount} {docCount === 1 ? "doc" : "docs"}
+                  </span>
+                  {bundleCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                      <Layers width={11} height={11} />
+                      {bundleCount} {bundleCount === 1 ? "bundle" : "bundles"}
+                    </span>
+                  )}
+                  {latest && (
+                    <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                      <Clock width={11} height={11} />
+                      Updated {relativeTime(latest)}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+            {/* Actions row — Galaxy entry. Sits as a sibling row to
+                the meta so the hero ends with "here's how to open
+                this in a new view." */}
+            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+              <Link
+                href="/galaxy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{
+                  color: "var(--accent)",
+                  background: "var(--accent-dim)",
+                  border: "1px solid var(--accent-dim)",
+                  textDecoration: "none",
+                  letterSpacing: 0.3,
+                }}
+                title="Open your hub as a constellation"
+              >
+                <Network width={11} height={11} />
+                <span>Dive into my Galaxy</span>
+                <ArrowUpRight width={11} height={11} />
+              </Link>
+            </div>
           </div>
         </header>
 
