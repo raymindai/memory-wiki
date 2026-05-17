@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["pdf-parse", "officeparser"],
+  // pdfjs-dist MUST be listed here. The PDF parser loads
+  // pdfjs-dist/legacy/build/pdf.mjs via a dynamic import with
+  // /* webpackIgnore: true */, so webpack doesn't bundle it — and
+  // without listing the package as a server external, Vercel's
+  // output file tracer misses the module entirely. Result: prod
+  // returns "PDF parse failed" for every upload while local dev
+  // works. pdf-parse stays because its types are referenced in a
+  // couple of legacy spots; the active parser is pdfjs-dist.
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist", "officeparser"],
   // Long-slug explainer docs (mdfy.app/how-mdfy-works, etc.) live in the
   // documents table the same as any other doc, but their ids exceed the
   // 12-char nanoid pattern Vercel's top-level rewrite assumes. Map each
