@@ -114,6 +114,10 @@ export default function BundleOverview({
   // digest (default) or ?full=1. Single Copy means single "Copied"
   // flash, no juggling.
   const [urlVariant, setUrlVariant] = useState<"digest" | "full">("digest");
+  // Per-tool tab inside the unified "How to use this bundle" panel.
+  // Mirrors HubEmbed's surface so Hub + Bundle read as one family.
+  const [activeTool, setActiveTool] = useState<string>("claude");
+  const [copiedTool, setCopiedTool] = useState<string | null>(null);
 
   const bundleUrl = useMemo(() => `https://mdfy.app/b/${bundleId}`, [bundleId]);
 
@@ -216,117 +220,237 @@ export default function BundleOverview({
           </div>
         </header>
 
-        {/* Deploy URL card — clearly labeled. Header + variant
-            chips + ONE URL row + a small "Agent payload" link.
-            Meta + Open-in-browser already live in the identity
-            hero so they're not duplicated here. */}
+        {/* Unified "How to use this bundle" — pick the tool, see
+            exactly what to do. Mirrors HubEmbed: URL tools (chat
+            AIs + Generic) show variant chip + URL row + Copy;
+            snippet tools show their save-to-file snippet. Flat
+            tab row, no "via mdfy:" grouping. */}
         {(() => {
           const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
           const digestTokens = 50 + documents.length * 35;
           const fullTokens = Math.max(tokens, digestTokens);
           const activeUrl = urlVariant === "full" ? `${bundleUrl}?full=1` : bundleUrl;
           const rawHref = urlVariant === "full" ? `/b/${bundleId}.md?full=1` : `/b/${bundleId}.md`;
-          const onCopy = () => {
-            if (typeof navigator === "undefined") return;
-            navigator.clipboard.writeText(activeUrl).then(() => {
-              setCopied(true);
-              setShowCopyHint(true);
-              setTimeout(() => setCopied(false), 1200);
-            });
+
+          const projCtx = `# Project context
+
+mdfy bundle: ${bundleUrl}
+
+Fetch this URL on every session. The response carries the bundle's
+markdown payload — title, annotations, links + concept analysis —
+ready to paste as project context.`;
+          const cursorRule = `---
+description: mdfy bundle context
+alwaysApply: true
+---
+mdfy bundle: ${bundleUrl}
+
+Fetch this URL on every session for project-scoped context.`;
+          const mcpConfig = `{
+  "mcpServers": {
+    "mdfy": {
+      "command": "npx",
+      "args": ["-y", "mdfy-mcp"]
+    }
+  }
+}`;
+          const skillUse = `# Install once
+claude skill install mdfy
+
+# Inside any Claude Code session
+/mdfy bundle ${bundleId}
+/mdfy search "topic"`;
+          const cliUse = `npm install -g mdfy-cli
+
+mdfy bundle ${bundleId}
+mdfy search "topic"`;
+
+          type Tool = {
+            id: string;
+            label: string;
+            hint: string;
+            savePath?: string;
+            snippet: string;
+            explanation: string;
+            docHref: string;
           };
+          const TOOLS: Tool[] = [
+            { id: "claude", label: "Claude", hint: "Drop the URL into a Claude chat", snippet: bundleUrl, explanation: "Works the same in Claude.ai (web) and the Mac / Windows desktop app. Claude fetches the bundle payload and follows inline doc links as needed.", docHref: "/docs/integrate" },
+            { id: "chatgpt", label: "ChatGPT", hint: "Drop the URL into a ChatGPT chat", snippet: bundleUrl, explanation: "Works in ChatGPT web and the Mac desktop app. ChatGPT fetches the URL via its built-in browser tool and reads the bundle's markdown.", docHref: "/docs/integrate" },
+            { id: "gemini", label: "Gemini", hint: "Drop the URL into Gemini (web or app)", snippet: bundleUrl, explanation: "Gemini reads the URL via its built-in tool use. Same payload format as Claude and ChatGPT.", docHref: "/docs/integrate#gemini" },
+            { id: "claude-code", label: "Claude Code", hint: "Save as CLAUDE.md in your project root", savePath: "CLAUDE.md", snippet: projCtx, explanation: "Claude Code auto-loads CLAUDE.md at the start of every session. Save this snippet to your project root and the bundle becomes ambient context for every conversation in the repo.", docHref: "/docs/integrate#claude-code" },
+            { id: "cursor", label: "Cursor", hint: "Save as .cursor/rules/mdfy.mdc", savePath: ".cursor/rules/mdfy.mdc", snippet: cursorRule, explanation: "Cursor's Rules feature reads .mdc files from .cursor/rules/. alwaysApply: true keeps the bundle URL in context on every chat, including ad-hoc questions.", docHref: "/docs/integrate#cursor" },
+            { id: "generic", label: "Generic", hint: "Paste the URL into any AI that can fetch a webpage", snippet: bundleUrl, explanation: "Any LLM with web-fetch (or a configured browser tool) works. Append ?full=1 for every doc inline, or use /b/<id>.md for the raw markdown payload.", docHref: "/docs/integrate" },
+            { id: "mcp", label: "MCP", hint: "Add mdfy-mcp to your MCP host config", snippet: mcpConfig, explanation: "Compatible with Claude Desktop, Cursor, Cline, Windsurf, and any MCP-capable host. Exposes 26 tools across capture / bundle / search / share / version history.", docHref: "/docs/mcp" },
+            { id: "skill", label: "Skill", hint: "Use /mdfy slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install mdfy`. Then inside any Claude Code session, run /mdfy bundle <id> or /mdfy search to pull this bundle in.", docHref: "/docs/integrate" },
+            { id: "cli", label: "CLI", hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run mdfy bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
+          ];
+          const active = TOOLS.find((t) => t.id === activeTool) || TOOLS[0];
+          const URL_TOOL_IDS = new Set(["claude", "chatgpt", "gemini", "generic"]);
+          const isUrlTool = URL_TOOL_IDS.has(active.id);
+
           return (
-            <section
-              className="mb-8 rounded-xl"
-              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "20px 20px 18px" }}
-            >
-              <h2
-                className="text-heading font-semibold"
-                style={{ color: "var(--text-primary)", margin: 0 }}
-              >
-                Deploy to any AI
+            <section className="mb-8 rounded-xl"
+              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "20px 20px 18px" }}>
+              <h2 className="text-heading font-semibold" style={{ color: "var(--text-primary)", margin: 0 }}>
+                How to use this bundle
               </h2>
               <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
-                Paste this URL into Claude, ChatGPT, or Cursor. The AI fetches the markdown payload directly.
+                Pick your AI tool. Each one shows exactly what to paste and where.
               </p>
-              <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                <div className="flex items-center gap-1">
-                  {(["digest", "full"] as const).map((v) => {
-                    const active = urlVariant === v;
-                    return (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setUrlVariant(v)}
-                        className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
-                        style={{
-                          fontSize: 10,
-                          letterSpacing: 0.5,
-                          color: active ? "var(--accent)" : "var(--text-muted)",
-                          background: active ? "var(--accent-dim)" : "transparent",
-                          border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                        }}
-                      >
-                        {v === "digest" ? "Compact" : "Full"}
-                      </button>
-                    );
-                  })}
-                </div>
-                <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                  {urlVariant === "digest"
-                    ? `≈ ${fmt(digestTokens)} tokens / cheap concept map`
-                    : `≈ ${fmt(fullTokens)} tokens / every doc inline`}
-                </span>
+
+              {/* Flat tab row */}
+              <div className="flex flex-wrap gap-1.5 items-center mb-3">
+                {TOOLS.map((t) => {
+                  const isActive = activeTool === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveTool(t.id)}
+                      className="text-caption font-mono px-2.5 py-1 rounded transition-colors"
+                      style={{
+                        background: isActive ? "var(--accent-dim)" : "transparent",
+                        color: isActive ? "var(--accent)" : "var(--text-muted)",
+                        border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                        letterSpacing: 0.3,
+                      }}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
               </div>
-              <button
-                onClick={onCopy}
-                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{
-                  fontSize: 13,
-                  background: "var(--background)",
-                  color: copied ? "#22c55e" : "var(--text-primary)",
-                  border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-                }}
-                title="Copy URL"
-              >
-                <span className="flex-1 text-left truncate">{activeUrl}</span>
-                <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
-                  {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-                  <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
-                </span>
-              </button>
-              {/* Small "agent payload" peek — what the AI receives.
-                  Single thin link, not a footer row, so the URL stays
-                  the only visual emphasis. */}
-              <a
-                href={rawHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-caption mt-2 transition-colors hover:underline"
-                style={{ color: "var(--text-muted)" }}
-                title="Raw .md payload — exactly what an AI sees"
-              >
-                <ExternalLink width={11} height={11} />
-                See what the AI sees (raw payload)
-              </a>
+
+              {/* Active tab content card */}
+              <div className="rounded-lg overflow-hidden"
+                style={{ background: "var(--background)", border: "1px solid var(--border-dim)" }}>
+                <div className="flex items-baseline justify-between px-3 py-2 gap-2"
+                  style={{ borderBottom: "1px solid var(--border-dim)" }}>
+                  <span className="text-caption truncate" style={{ color: "var(--text-secondary)" }}>
+                    {active.savePath ? (
+                      <>Save to{" "}<code className="font-mono" style={{ color: "var(--accent)" }}>{active.savePath}</code></>
+                    ) : (
+                      <>{active.hint}</>
+                    )}
+                  </span>
+                  <span className="text-caption shrink-0" style={{ color: "var(--text-faint)" }}>
+                    {active.label}
+                  </span>
+                </div>
+
+                {isUrlTool ? (
+                  <div className="px-3 py-3">
+                    <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+                      <div className="flex items-center gap-1">
+                        {(["digest", "full"] as const).map((v) => {
+                          const isActive = urlVariant === v;
+                          return (
+                            <button
+                              key={v}
+                              type="button"
+                              onClick={() => setUrlVariant(v)}
+                              className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                              style={{
+                                fontSize: 10,
+                                letterSpacing: 0.5,
+                                color: isActive ? "var(--accent)" : "var(--text-muted)",
+                                background: isActive ? "var(--accent-dim)" : "transparent",
+                                border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                              }}
+                            >
+                              {v === "digest" ? "Compact" : "Full"}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                        {urlVariant === "digest"
+                          ? `≈ ${fmt(digestTokens)} tokens / cheap concept map`
+                          : `≈ ${fmt(fullTokens)} tokens / every doc inline`}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (typeof navigator === "undefined") return;
+                        navigator.clipboard.writeText(activeUrl).then(() => {
+                          setCopied(true);
+                          setShowCopyHint(true);
+                          setCopiedTool(active.id);
+                          setTimeout(() => { setCopied(false); setCopiedTool(null); }, 1500);
+                        });
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+                      style={{
+                        fontSize: 13,
+                        background: "var(--surface)",
+                        color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
+                        border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                      }}
+                      title="Copy URL"
+                    >
+                      <span className="flex-1 text-left truncate">{activeUrl}</span>
+                      <span className="flex items-center gap-1 shrink-0" style={{ color: copiedTool === active.id ? "#22c55e" : "var(--text-faint)" }}>
+                        {copiedTool === active.id ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
+                        <span className="text-caption">{copiedTool === active.id ? "Copied" : "Copy"}</span>
+                      </span>
+                    </button>
+                  </div>
+                ) : (
+                  <pre
+                    className="px-3 py-2 text-caption font-mono whitespace-pre-wrap"
+                    style={{ color: "var(--text-primary)", margin: 0, fontSize: 11, lineHeight: 1.6 }}
+                  >{active.snippet}</pre>
+                )}
+
+                <div className="px-3 py-2.5 text-caption leading-relaxed"
+                  style={{ color: "var(--text-secondary)", background: "var(--surface)", borderTop: "1px solid var(--border-dim)" }}>
+                  {active.explanation}
+                </div>
+
+                <div className="flex items-center justify-between gap-2 px-3 py-2"
+                  style={{ borderTop: "1px solid var(--border-dim)" }}>
+                  {isUrlTool ? (
+                    <a
+                      href={rawHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-caption transition-colors hover:underline"
+                      style={{ color: "var(--text-muted)" }}
+                      title="Raw .md payload — what the AI actually sees"
+                    >
+                      <ExternalLink width={11} height={11} />
+                      See raw payload
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (typeof navigator === "undefined") return;
+                        navigator.clipboard.writeText(active.snippet).then(() => {
+                          setCopiedTool(active.id);
+                          setTimeout(() => setCopiedTool(null), 1500);
+                        });
+                      }}
+                      className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                      style={{
+                        background: "var(--surface)",
+                        color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
+                        border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                      }}
+                      title="Copy snippet"
+                    >
+                      {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
+                      <span>{copiedTool === active.id ? "Copied" : "Copy"}</span>
+                    </button>
+                  )}
+                  <a href={active.docHref} target="_blank" rel="noopener noreferrer"
+                    className="text-caption font-mono" style={{ color: "var(--accent)" }}>
+                    Full guide →
+                  </a>
+                </div>
+              </div>
             </section>
           );
         })()}
-
-        {/* Wire-it hint — small standalone link, no longer a card.
-            Bundles don't have per-tool tabs (only Hub does), so this
-            sits between the Deploy URL and the stat strip as a thin
-            "want to automate? read this" pointer. */}
-        <a
-          href="/docs/integrate"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-caption mb-6 transition-colors hover:underline"
-          style={{ color: "var(--text-muted)" }}
-        >
-          <Sparkles width={11} height={11} />
-          <span>Wire it into AGENTS.md / CLAUDE.md / .cursor/rules</span>
-          <span style={{ color: "var(--accent)" }}>→</span>
-        </a>
 
         {/* ─── Stat strip ─── */}
         <section className="grid grid-cols-3 gap-2 mb-7">

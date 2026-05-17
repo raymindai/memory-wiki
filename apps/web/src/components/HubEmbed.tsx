@@ -535,73 +535,13 @@ export default function HubEmbed({
           })()}
         </header>
 
-        {/* Deploy URL card — proper section heading (no decorative
-            icon, no caption-mono label) so it reads as a real title.
-            Variant chips + ONE large URL row with embedded Copy.
-            Meta + Galaxy live in the identity hero above. */}
-        <section
-          className="mb-8 rounded-xl"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "20px 20px 18px" }}
-        >
-          <h2
-            className="text-heading font-semibold"
-            style={{ color: "var(--text-primary)", margin: 0 }}
-          >
-            Deploy to any AI
-          </h2>
-          <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
-            Paste this URL into Claude, ChatGPT, or Cursor. The AI fetches a structured index and follows inline links to specific docs.
-          </p>
-          <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-            <div className="flex items-center gap-1">
-              {(["digest", "full"] as const).map((v) => {
-                const active = urlVariant === v;
-                return (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setUrlVariant(v)}
-                    className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
-                    style={{
-                      fontSize: 10,
-                      letterSpacing: 0.5,
-                      color: active ? "var(--accent)" : "var(--text-muted)",
-                      background: active ? "var(--accent-dim)" : "transparent",
-                      border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                    }}
-                  >
-                    {v === "digest" ? "Compact" : "Full"}
-                  </button>
-                );
-              })}
-            </div>
-            <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-              {urlVariant === "digest" ? "compact concept map, cheap to paste" : "every doc inline, heavier"}
-            </span>
-          </div>
-          <button
-            onClick={copyUrl}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-            style={{
-              fontSize: 13,
-              background: "var(--background)",
-              color: copied ? "#22c55e" : "var(--text-primary)",
-              border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-            }}
-            title="Copy URL"
-          >
-            <span className="flex-1 text-left truncate">
-              {urlVariant === "full" ? `${data.hub.url}?full=1` : data.hub.url}
-            </span>
-            <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
-              {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-              <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
-            </span>
-          </button>
-        </section>
-
-        {/* Setup card — per-tool snippets. Demoted to a secondary
-            card so the Deploy URL above stays the focal point. */}
+        {/* Unified "How to use this hub" — replaces the old
+            Deploy + Setup split. One panel: pick the tool, see
+            exactly what to do, copy, done. URL tools (chat AIs +
+            Generic) show a URL row with the Compact/Full chip
+            toggle; snippet tools (editor + mdfy native) show their
+            specific snippet. No "via mdfy:" group label — every
+            tool sits at the same level. */}
         <section
           className="mb-8 px-5 py-4 rounded-xl"
           style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
@@ -760,8 +700,11 @@ mdfy hub`;
               },
             ];
             const active = TOOLS.find((t) => t.id === activeTool) || TOOLS[0];
-            const userTools = TOOLS.filter((t) => t.group === "user");
-            const nativeTools = TOOLS.filter((t) => t.group === "native");
+            // URL tools render a URL row with the Compact/Full chip
+            // toggle. Snippet tools render their save-to-file snippet.
+            const URL_TOOL_IDS = new Set(["claude", "chatgpt", "gemini", "generic"]);
+            const isUrlTool = URL_TOOL_IDS.has(active.id);
+            const activeUrl = urlVariant === "full" ? `${url}?full=1` : url;
 
             const TabBtn = ({ t }: { t: Tool }) => {
               const isActive = activeTool === t.id;
@@ -792,24 +735,16 @@ mdfy hub`;
                   className="text-heading font-semibold"
                   style={{ color: "var(--text-primary)", margin: 0 }}
                 >
-                  Set it up in your tool
+                  How to use this hub
                 </h2>
                 <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
-                  Pick where you do AI. Each tool gets a copy-paste snippet — save it once and your AI auto-loads the hub on every session.
+                  Pick your AI tool. Each one shows exactly what to paste and where.
                 </p>
 
-                {/* Row 1 — user surfaces */}
-                <div className="flex flex-wrap gap-1.5 items-center mb-1.5">
-                  {userTools.map((t) => <TabBtn key={t.id} t={t} />)}
-                </div>
-
-                {/* Row 2 — mdfy native runtime */}
+                {/* Single flat tab row — all tools same level, no
+                    "via mdfy:" group label. Wraps freely. */}
                 <div className="flex flex-wrap gap-1.5 items-center mb-3">
-                  <span className="text-caption font-mono mr-1"
-                    style={{ color: "var(--text-faint)", letterSpacing: 0.3 }}>
-                    via mdfy:
-                  </span>
-                  {nativeTools.map((t) => <TabBtn key={t.id} t={t} />)}
+                  {TOOLS.map((t) => <TabBtn key={t.id} t={t} />)}
                 </div>
 
                 {/* Active tab card */}
@@ -837,11 +772,67 @@ mdfy hub`;
                     </span>
                   </div>
 
-                  {/* Snippet */}
-                  <pre
-                    className="px-3 py-2 text-caption font-mono whitespace-pre-wrap"
-                    style={{ color: "var(--text-primary)", margin: 0, fontSize: 11, lineHeight: 1.6 }}
-                  >{active.snippet}</pre>
+                  {/* BODY — URL mode for chat tools, snippet for others. */}
+                  {isUrlTool ? (
+                    <div className="px-3 py-3">
+                      <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+                        <div className="flex items-center gap-1">
+                          {(["digest", "full"] as const).map((v) => {
+                            const isActive = urlVariant === v;
+                            return (
+                              <button
+                                key={v}
+                                type="button"
+                                onClick={() => setUrlVariant(v)}
+                                className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                                style={{
+                                  fontSize: 10,
+                                  letterSpacing: 0.5,
+                                  color: isActive ? "var(--accent)" : "var(--text-muted)",
+                                  background: isActive ? "var(--accent-dim)" : "transparent",
+                                  border: `1px solid ${isActive ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                                }}
+                              >
+                                {v === "digest" ? "Compact" : "Full"}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+                          {urlVariant === "digest" ? "compact concept map, cheap to paste" : "every doc inline, heavier"}
+                        </span>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (typeof navigator === "undefined" || !navigator.clipboard) return;
+                          try {
+                            await navigator.clipboard.writeText(activeUrl);
+                            setCopiedTool(active.id);
+                            setTimeout(() => setCopiedTool(null), 1500);
+                          } catch { /* clipboard blocked */ }
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{
+                          fontSize: 13,
+                          background: "var(--surface)",
+                          color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
+                          border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                        }}
+                        title="Copy URL"
+                      >
+                        <span className="flex-1 text-left truncate">{activeUrl}</span>
+                        <span className="flex items-center gap-1 shrink-0" style={{ color: copiedTool === active.id ? "#22c55e" : "var(--text-faint)" }}>
+                          {copiedTool === active.id ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
+                          <span className="text-caption">{copiedTool === active.id ? "Copied" : "Copy"}</span>
+                        </span>
+                      </button>
+                    </div>
+                  ) : (
+                    <pre
+                      className="px-3 py-2 text-caption font-mono whitespace-pre-wrap"
+                      style={{ color: "var(--text-primary)", margin: 0, fontSize: 11, lineHeight: 1.6 }}
+                    >{active.snippet}</pre>
+                  )}
 
                   {/* Explanation — user-friendly multi-sentence */}
                   <div className="px-3 py-2.5 text-caption leading-relaxed"
@@ -851,29 +842,35 @@ mdfy hub`;
                     ))}
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions — URL tools embed Copy in the URL row,
+                      so the actions row only carries Full guide for
+                      them; snippet tools get a Copy + Full guide. */}
                   <div className="flex items-center justify-between gap-2 px-3 py-2"
                     style={{ borderTop: "1px solid var(--border-dim)" }}>
-                    <button
-                      onClick={async () => {
-                        if (typeof navigator === "undefined" || !navigator.clipboard) return;
-                        try {
-                          await navigator.clipboard.writeText(active.snippet);
-                          setCopiedTool(active.id);
-                          setTimeout(() => setCopiedTool(null), 1500);
-                        } catch { /* clipboard blocked */ }
-                      }}
-                      className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                      style={{
-                        background: "var(--surface)",
-                        color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
-                        border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-                      }}
-                      title="Copy snippet"
-                    >
-                      {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
-                      <span>{copiedTool === active.id ? "Copied" : "Copy"}</span>
-                    </button>
+                    {isUrlTool ? (
+                      <span />
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          if (typeof navigator === "undefined" || !navigator.clipboard) return;
+                          try {
+                            await navigator.clipboard.writeText(active.snippet);
+                            setCopiedTool(active.id);
+                            setTimeout(() => setCopiedTool(null), 1500);
+                          } catch { /* clipboard blocked */ }
+                        }}
+                        className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{
+                          background: "var(--surface)",
+                          color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
+                          border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                        }}
+                        title="Copy snippet"
+                      >
+                        {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
+                        <span>{copiedTool === active.id ? "Copied" : "Copy"}</span>
+                      </button>
+                    )}
                     <Link
                       href={active.docHref}
                       target="_blank"
