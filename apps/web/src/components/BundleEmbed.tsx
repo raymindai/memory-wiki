@@ -16,7 +16,7 @@ import { FEATURES } from "@/lib/feature-flags";
 import Tooltip from "@/components/Tooltip";
 import { Button, Chip, Badge, ModalShell, EmptyState } from "@/components/ui";
 import BundleOverview from "@/components/BundleOverview";
-import { Layers, AlertTriangle, HelpCircle, GitBranch, Sparkles, Lightbulb, Zap, CheckSquare, Tag, FileText, X as XIcon } from "lucide-react";
+import { Layers, AlertTriangle, HelpCircle, GitBranch, Sparkles, Lightbulb, Zap, CheckSquare, Tag, FileText, X as XIcon, PanelLeft } from "lucide-react";
 
 // Module-level cache so re-mounting a bundle tab paints instantly
 // (stale-while-revalidate). Same pattern as HubEmbed. Cleared on full
@@ -371,6 +371,21 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
 
   // Clear chunk selection on collapse / decomposition change
   useEffect(() => { setSelectedChunkIds(new Set()); setChunkTypeFilter(null); }, [expandedDocId]);
+
+  // Save bundle title. Optimistic — the PATCH default branch on the
+  // route accepts { title } directly (no action verb needed).
+  const saveBundleTitle = useCallback(async (next: string) => {
+    const trimmed = next.trim();
+    if (!trimmed) return;
+    setBundleTitle(trimmed);
+    try {
+      await fetch(`/api/bundles/${bundleId}`, {
+        method: "PATCH",
+        headers: buildPatchHeaders(),
+        body: JSON.stringify({ title: trimmed, editToken }),
+      });
+    } catch { /* best-effort — sidebar will resync on next fetch */ }
+  }, [bundleId, editToken, buildPatchHeaders]);
 
   // Save bundle intent. Optimistic — server-side persists via PATCH set-intent.
   const saveBundleIntent = useCallback(async (next: string) => {
@@ -1084,6 +1099,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         onOpenDoc={onOpenDoc}
         onSwitchToCanvas={() => onChangeView?.("canvas")}
         onSwitchToList={() => onChangeView?.("list")}
+        onRenameBundle={bundleIsOwner ? saveBundleTitle : undefined}
       />
     );
   }
@@ -3318,6 +3334,17 @@ function BundleListView({
   // Local TOC filter so the sidebar can be searched. Empty = show
   // all. Case-insensitive title match (also matches annotation).
   const [tocFilter, setTocFilter] = useState("");
+  // Collapsed Contents column — mirrors the Library rail's
+  // expand/collapse pattern. Persisted across reloads so the user's
+  // preference sticks for this surface.
+  const [contentsCollapsed, setContentsCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("mdfy-bundle-contents-collapsed") === "1";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("mdfy-bundle-contents-collapsed", contentsCollapsed ? "1" : "0");
+  }, [contentsCollapsed]);
   // Per-doc copy-state — used to flash the inline Copy URL button.
   const [copiedDocId, setCopiedDocId] = useState<string | null>(null);
   // Per-doc word counts memoised once per documents change so the
@@ -3452,15 +3479,42 @@ function BundleListView({
       <div className="flex-1 flex min-h-0">
       {/* ─── TOC sidebar — search, per-doc word counts, active-row
             highlight. Width matches the Hub overview sidebar so all
-            three bundle views share one rhythm. ─── */}
+            three bundle views share one rhythm. Collapsible the same
+            way the Library rail is, with a thin re-open strip when
+            shut. ─── */}
+      {contentsCollapsed ? (
+        <aside
+          className="shrink-0 flex flex-col items-center pt-3"
+          style={{ width: 28, borderRight: "1px solid var(--border-dim)" }}
+        >
+          <button
+            onClick={() => setContentsCollapsed(false)}
+            className="p-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+            style={{ color: "var(--accent)" }}
+            title="Open Contents"
+          >
+            <PanelLeft width={14} height={14} />
+          </button>
+        </aside>
+      ) : (
       <aside className="shrink-0 w-64 overflow-auto" style={{ borderRight: "1px solid var(--border-dim)" }}>
         <div className="px-3 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-caption font-semibold uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Contents</h3>
+          <div className="flex items-center justify-between mb-2 gap-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <button
+                onClick={() => setContentsCollapsed(true)}
+                className="p-1 rounded transition-colors shrink-0 hover:bg-[var(--toggle-bg)]"
+                style={{ color: "var(--accent)" }}
+                title="Close Contents"
+              >
+                <PanelLeft width={14} height={14} />
+              </button>
+              <h3 className="text-caption font-semibold uppercase tracking-wider truncate" style={{ color: "var(--text-faint)" }}>Contents</h3>
+            </div>
             {onSwitchToBundle && (
               <button
                 onClick={onSwitchToBundle}
-                className="text-caption transition-colors hover:underline"
+                className="text-caption transition-colors hover:underline shrink-0"
                 style={{ color: "var(--text-faint)" }}
                 title="Back to Bundle overview"
               >
@@ -3507,6 +3561,7 @@ function BundleListView({
           </div>
         </div>
       </aside>
+      )}
 
       {/* ─── Sequential rendering ─── */}
       <div className="flex-1 overflow-auto" ref={containerRef}>

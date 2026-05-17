@@ -59,6 +59,9 @@ interface BundleOverviewProps {
   onOpenDoc?: (docId: string) => void;
   onSwitchToCanvas?: () => void;
   onSwitchToList?: () => void;
+  /** Inline rename. When provided, the hero title becomes
+   *  contentEditable for the owner; absent for read-only viewers. */
+  onRenameBundle?: (next: string) => void;
 }
 
 // Compact relative time. Mirrors HubEmbed's helper so freshness reads
@@ -108,6 +111,7 @@ export default function BundleOverview({
   onOpenDoc,
   onSwitchToCanvas,
   onSwitchToList,
+  onRenameBundle,
 }: BundleOverviewProps) {
   const [copied, setCopied] = useState(false);
   // Which URL variant the unified Copy button is currently bound to —
@@ -144,26 +148,55 @@ export default function BundleOverview({
   return (
     <div className="h-full overflow-y-auto" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto px-6 py-10">
-        {/* Identity hero — big centered icon, title, bio, intent,
-            meta + Open-in-browser CTA. Same shape as Hub's hero so
-            both surfaces read as one family. Slug intentionally
-            omitted; the full URL lives in the Deploy card below. */}
-        <header
-          className="mb-6 rounded-xl text-center"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "32px 24px 24px" }}
-        >
+        {/* Identity hero — borderless, transparent. Big centered icon
+            + title (inline-editable for owners) + bio + intent + meta.
+            Same shape as Hub's hero so both surfaces read as one
+            family. */}
+        <header className="mb-6 text-center" style={{ padding: "32px 24px 24px" }}>
           <div
             className="mx-auto flex items-center justify-center rounded-2xl"
             style={{ width: 80, height: 80, background: "var(--accent-dim)", color: "var(--accent)" }}
           >
             <Layers width={40} height={40} />
           </div>
-          <h1
-            className="text-display font-bold tracking-tight mt-4"
-            style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
-          >
-            {bundleTitle || "Untitled bundle"}
-          </h1>
+          {onRenameBundle ? (
+            <h1
+              className="text-display font-bold tracking-tight mt-4 outline-none rounded transition-colors hover:bg-[var(--toggle-bg)] focus:bg-[var(--toggle-bg)]"
+              style={{ color: "var(--text-primary)", lineHeight: 1.2, padding: "2px 8px", display: "inline-block", minWidth: 120 }}
+              contentEditable
+              suppressContentEditableWarning
+              spellCheck={false}
+              title="Click to rename"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLElement).blur();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLElement).textContent = bundleTitle || "Untitled bundle";
+                  (e.currentTarget as HTMLElement).blur();
+                }
+              }}
+              onBlur={(e) => {
+                const next = (e.currentTarget.textContent || "").trim();
+                const prev = bundleTitle || "";
+                if (!next || next === prev) {
+                  e.currentTarget.textContent = prev || "Untitled bundle";
+                  return;
+                }
+                onRenameBundle(next);
+              }}
+            >
+              {bundleTitle || "Untitled bundle"}
+            </h1>
+          ) : (
+            <h1
+              className="text-display font-bold tracking-tight mt-4"
+              style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
+            >
+              {bundleTitle || "Untitled bundle"}
+            </h1>
+          )}
           {bundleDescription && (
             <p
               className="text-body mt-3 mx-auto leading-relaxed"
