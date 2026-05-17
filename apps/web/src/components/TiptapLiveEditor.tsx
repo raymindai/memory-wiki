@@ -44,6 +44,8 @@ import {
   Minus,
   CheckSquare,
   Trash2,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 
 const lowlight = createLowlight(common);
@@ -687,14 +689,38 @@ export interface TiptapLiveEditorHandle {
 }
 
 // ─── Selection Toolbar ───
+const AI_QUICK: { key: string; label: string; action: string }[] = [
+  { key: "polish", label: "Polish", action: "selection_polish" },
+  { key: "shorten", label: "Shorten", action: "selection_shorten" },
+  { key: "expand", label: "Expand", action: "selection_expand" },
+];
+const AI_LANGS: [string, string][] = [
+  ["English", "English"], ["한국어", "Korean"], ["日本語", "Japanese"], ["中文", "Chinese"],
+  ["Español", "Spanish"], ["Français", "French"], ["Deutsch", "German"], ["Português", "Portuguese"],
+];
+
 function SelectionToolbar({ editor }: { editor: Editor }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [aiMenu, setAiMenu] = useState<null | "root" | "translate">(null);
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState("");
+  // Stash the range — Tiptap selection collapses to the input when
+  // we focus the prompt field, but we still need the original
+  // (from, to) to replace.
+  const savedRangeRef = useRef<{ from: number; to: number } | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const aiMenuRef = useRef<typeof aiMenu>(null);
+  aiMenuRef.current = aiMenu;
 
   useEffect(() => {
     const update = () => {
+      // Don't tear down the toolbar while an AI popup is open — the
+      // prompt input takes focus and would otherwise collapse the
+      // selection.
+      if (aiMenuRef.current) return;
       const { from, to } = editor.state.selection;
       if (from === to || !editor.isFocused) {
         setPos(null);
@@ -712,11 +738,83 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
     };
 
     editor.on("selectionUpdate", update);
-    editor.on("blur", () => { setPos(null); setShowLinkInput(false); });
+    editor.on("blur", () => {
+      if (aiMenuRef.current) return;
+      setPos(null); setShowLinkInput(false);
+    });
     return () => {
       editor.off("selectionUpdate", update);
     };
   }, [editor]);
+
+  const openAiMenu = useCallback(() => {
+    const { from, to } = editor.state.selection;
+    if (from !== to) savedRangeRef.current = { from, to };
+    setAiError(null);
+    setAiMenu("root");
+  }, [editor]);
+
+  const closeAiMenu = useCallback(() => {
+    setAiMenu(null);
+    setAiError(null);
+    setAiPrompt("");
+    savedRangeRef.current = null;
+  }, []);
+
+  const replaceSelection = useCallback((mdResult: string) => {
+    const range = savedRangeRef.current;
+    if (!range) return false;
+    let html: string = mdResult;
+    try {
+      const mdParser = (editor.storage as { markdown?: { parser?: { md?: { render?: (s: string) => string } } } }).markdown?.parser;
+      if (mdParser?.md?.render) html = mdParser.md.render(mdResult);
+    } catch { /* fall back to raw */ }
+    // If the original selection was inline (single line, no leading
+    // hashes / list markers), strip the wrapping <p> tag so we don't
+    // accidentally split a paragraph mid-sentence.
+    const isLikelyInline = !/\n/.test(mdResult.trim()) && !/^(#|>|\*|-|\d+\.|\||\s*```)/.test(mdResult.trim());
+    if (isLikelyInline) {
+      html = html.replace(/^\s*<p>/, "").replace(/<\/p>\s*$/, "");
+    }
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from: range.from, to: range.to })
+      .insertContentAt(range.from, html)
+      .run();
+    return true;
+  }, [editor]);
+
+  const runAi = useCallback(async (action: string, opts: { language?: string; instruction?: string } = {}) => {
+    const range = savedRangeRef.current;
+    if (!range) { setAiError("Selection lost — try again."); return; }
+    const snippet = editor.state.doc.textBetween(range.from, range.to, "\n");
+    if (!snippet.trim()) { setAiError("Empty selection."); return; }
+    if (snippet.length > 8000) { setAiError("Selection too long (max 8k chars)."); return; }
+    setAiBusy(action);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, markdown: snippet, ...opts }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({ error: "AI failed" }));
+        throw new Error(j.error || `AI failed (${res.status})`);
+      }
+      const j = await res.json();
+      const out = (j.result || "").trim();
+      if (!out) throw new Error("Empty AI result");
+      const ok = replaceSelection(out);
+      if (!ok) throw new Error("Could not insert result");
+      closeAiMenu();
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI failed");
+    } finally {
+      setAiBusy(null);
+    }
+  }, [editor, replaceSelection, closeAiMenu]);
 
   const applyLink = useCallback(() => {
     if (linkUrl) editor.chain().focus().setLink({ href: linkUrl }).run();
@@ -795,7 +893,152 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
           <button onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} style={btn(false)} title="Clear formatting">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
           </button>
+          <div style={{ width: 1, height: 16, background: "var(--border-dim)", margin: "0 2px" }} />
+          <button
+            onClick={openAiMenu}
+            style={btn(!!aiMenu)}
+            title="AI on selection"
+          >
+            <Sparkles width={14} height={14} />
+          </button>
         </>
+      )}
+      {aiMenu && (
+        <div
+          className="absolute mt-1 min-w-[260px] rounded-lg p-1.5 flex flex-col gap-1"
+          style={{
+            top: "100%",
+            right: 4,
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            zIndex: 10000,
+          }}
+        >
+          {aiMenu === "root" && (
+            <>
+              <div
+                className="flex items-center gap-1.5 px-1.5 py-1 rounded-md"
+                style={{ background: "var(--background)", border: "1px solid var(--border-dim)" }}
+              >
+                <Sparkles size={12} style={{ color: "var(--accent)" }} />
+                <input
+                  autoFocus
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Tell AI what to do with this…"
+                  maxLength={500}
+                  disabled={!!aiBusy}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                      e.preventDefault();
+                      const v = aiPrompt.trim();
+                      if (v) runAi("selection_rewrite", { instruction: v });
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      closeAiMenu();
+                    }
+                  }}
+                  className="flex-1 text-caption bg-transparent outline-none"
+                  style={{ color: "var(--text-primary)", border: "none", fontSize: 13 }}
+                />
+                {aiBusy === "selection_rewrite" ? (
+                  <Loader2 size={12} className="animate-spin" style={{ color: "var(--text-faint)" }} />
+                ) : aiPrompt.trim() ? (
+                  <button
+                    onClick={() => {
+                      const v = aiPrompt.trim();
+                      if (v) runAi("selection_rewrite", { instruction: v });
+                    }}
+                    disabled={!!aiBusy}
+                    className="shrink-0 px-1.5 py-0.5 rounded font-medium"
+                    style={{ background: "var(--accent)", color: "#000", fontSize: 11, border: "none", cursor: "pointer" }}
+                    title="Send (Enter)"
+                  >
+                    ↵
+                  </button>
+                ) : null}
+              </div>
+              <div className="text-caption px-1.5 pt-1" style={{ color: "var(--text-faint)", fontSize: 11 }}>
+                Or pick a quick action
+              </div>
+              {AI_QUICK.map((q) => (
+                <button
+                  key={q.key}
+                  disabled={!!aiBusy}
+                  onClick={() => runAi(q.action)}
+                  className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-left"
+                  style={{ color: "var(--text-secondary)", background: "transparent", border: "none", fontSize: 12, cursor: aiBusy ? "default" : "pointer" }}
+                  onMouseEnter={(e) => { if (!aiBusy) (e.currentTarget as HTMLElement).style.background = "var(--menu-hover)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                >
+                  <span>{q.label}</span>
+                  {aiBusy === q.action && <Loader2 size={12} className="animate-spin" />}
+                </button>
+              ))}
+              <button
+                disabled={!!aiBusy}
+                onClick={() => setAiMenu("translate")}
+                className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded text-left"
+                style={{ color: "var(--text-secondary)", background: "transparent", border: "none", fontSize: 12, cursor: aiBusy ? "default" : "pointer" }}
+                onMouseEnter={(e) => { if (!aiBusy) (e.currentTarget as HTMLElement).style.background = "var(--menu-hover)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              >
+                <span>Translate</span>
+                <span style={{ color: "var(--text-faint)" }}>›</span>
+              </button>
+            </>
+          )}
+          {aiMenu === "translate" && (
+            <>
+              <button
+                onClick={() => setAiMenu("root")}
+                className="px-2.5 py-1 text-left rounded"
+                style={{ color: "var(--text-faint)", background: "transparent", border: "none", fontSize: 11, cursor: "pointer" }}
+              >
+                ‹ Back
+              </button>
+              <div className="grid grid-cols-2 gap-0.5 mt-1">
+                {AI_LANGS.map(([label, lang]) => (
+                  <button
+                    key={lang}
+                    disabled={!!aiBusy}
+                    onClick={() => runAi("selection_translate", { language: lang })}
+                    className="px-2 py-1 rounded flex items-center justify-between gap-1"
+                    style={{ color: "var(--text-secondary)", background: "transparent", border: "none", fontSize: 12, cursor: aiBusy ? "default" : "pointer" }}
+                    onMouseEnter={(e) => { if (!aiBusy) (e.currentTarget as HTMLElement).style.background = "var(--menu-hover)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  >
+                    <span>{label}</span>
+                    {aiBusy === "selection_translate" && <Loader2 size={10} className="animate-spin" />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          {aiError && (
+            <div className="px-2.5 py-1" style={{ color: "#f87171", fontSize: 11 }}>
+              {aiError}
+            </div>
+          )}
+          <div
+            className="border-t mt-1 pt-1 flex items-center justify-between"
+            style={{ borderColor: "var(--border-dim)" }}
+          >
+            <span className="px-1.5" style={{ color: "var(--text-faint)", fontSize: 11 }}>
+              Esc to close
+            </span>
+            <button
+              onClick={closeAiMenu}
+              className="px-2 py-0.5 rounded"
+              style={{ color: "var(--text-faint)", background: "transparent", border: "none", fontSize: 11, cursor: "pointer" }}
+              onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.background = "var(--menu-hover)"}
+              onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.background = "transparent"}
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

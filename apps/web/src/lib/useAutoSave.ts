@@ -96,7 +96,7 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
    * StrictMode, accidental double-clicks of "+ New") would each spawn a
    * fresh server doc — exactly how the duplicates pile up.
    */
-  const inflightCreatesRef = useRef<Map<string, Promise<{ id: string; editToken: string } | null>>>(new Map());
+  const inflightCreatesRef = useRef<Map<string, Promise<{ id: string; editToken: string; deduplicated?: boolean } | null>>>(new Map());
   const createDocument = useCallback(
     async (args: {
       markdown: string;
@@ -132,7 +132,11 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
           lastSavedMdRef.current = args.markdown;
           if (data.updated_at) lastServerUpdatedAtRef.current = data.updated_at;
           setState({ isSaving: false, lastSaved: new Date(), error: null, conflict: null });
-          return { id: data.id as string, editToken: data.editToken as string };
+          return {
+            id: data.id as string,
+            editToken: data.editToken as string,
+            deduplicated: !!data.deduplicated,
+          };
         } catch {
           setState((s) => ({ ...s, error: "Failed to create document" }));
           return null;

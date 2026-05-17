@@ -835,6 +835,21 @@ function resolveAvatar(profile: { avatar_url?: string | null } | null, user: { e
 // DocStatusIcon → @/components/DocStatusIcon
 // extractTitleFromMd → @/lib/extract-title
 
+/** Splice a new title into the first H1 line, or prepend one if no H1
+ *  exists. Used by the Duplicate flow so the resulting markdown's H1
+ *  matches the new tab title — the server enforces DB.title = H1, so
+ *  without this the server overwrites our chosen title back to the
+ *  source H1, which then collides with the source row in dedup. */
+function rewriteH1(md: string, newTitle: string): string {
+  const lines = md.split("\n");
+  const h1Idx = lines.findIndex(l => /^#\s+/.test(l));
+  if (h1Idx >= 0) {
+    lines[h1Idx] = `# ${newTitle}`;
+    return lines.join("\n");
+  }
+  return md.trim() ? `# ${newTitle}\n\n${md}` : `# ${newTitle}\n`;
+}
+
 // ─── Document Templates ───
 
 const DOCUMENT_TEMPLATES: { name: string; icon: string; markdown: string }[] = [
@@ -14837,9 +14852,25 @@ ${clone.innerHTML}
                 if (targetTab) {
                   const id = `tab-${tabIdCounter++}`;
                   const t = targetTab.title + " (copy)";
-                  setTabs(prev => [...prev, { id, title: t, markdown: targetTab.markdown, permission: "mine", shared: false, isDraft: true }]);
-                  autoSave.createDocument({ markdown: targetTab.markdown, title: t, userId: user?.id, anonymousId: !user?.id ? ensureAnonymousId() : undefined }).then(result => {
-                    if (result) setTabs(prev => prev.map(x => x.id === id ? { ...x, cloudId: result.id, editToken: result.editToken } : x));
+                  // Splice the "(copy)" suffix into the body's H1 too.
+                  // Server's title invariant rewrites DB title from the
+                  // H1, so without this the duplicate would land with
+                  // title === source title → dedup hit → original tab
+                  // removed by withoutDup filter below.
+                  const dupMd = rewriteH1(targetTab.markdown, t);
+                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true }]);
+                  autoSave.createDocument({ markdown: dupMd, title: t, userId: user?.id, anonymousId: !user?.id ? ensureAnonymousId() : undefined }).then(result => {
+                    if (!result) return;
+                    if (result.deduplicated) {
+                      // Server collapsed our copy into an existing doc.
+                      // Drop the phantom tab and switch to the survivor.
+                      setTabs(prev => prev.filter(x => x.id !== id));
+                      showToast("Duplicate already exists — opened existing copy", "info");
+                      const existing = tabs.find(x => x.cloudId === result.id);
+                      if (existing) switchTab(existing.id);
+                      return;
+                    }
+                    setTabs(prev => prev.map(x => x.id === id ? { ...x, cloudId: result.id, editToken: result.editToken } : x));
                   });
                 }
               }},
@@ -14914,19 +14945,38 @@ ${clone.innerHTML}
                 if (tab) {
                   const id = `tab-${tabIdCounter++}`;
                   const t = tab.title + " (copy)";
-                  setTabs(prev => [...prev, { id, title: t, markdown: tab.markdown, permission: "mine", shared: false, isDraft: true }]);
+                  // Splice "(copy)" into the body H1 so the server's
+                  // title invariant lands DB.title = "X (copy)". Without
+                  // this the server recomputes title from H1 ("X") and
+                  // the dedup helper matches the original — returning
+                  // the original's id, then withoutDup below would
+                  // delete the original tab.
+                  const dupMd = rewriteH1(tab.markdown, t);
+                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true }]);
                   autoSave.createDocument({
-                    markdown: tab.markdown,
+                    markdown: dupMd,
                     title: t,
                     userId: user?.id,
                     anonymousId: !user?.id ? ensureAnonymousId() : undefined,
                   }).then(result => {
-                    if (result) {
-                      setTabs(prev => {
-                        const withoutDup = prev.filter(x => !(x.cloudId === result.id && x.id !== id));
-                        return withoutDup.map(x => x.id === id ? { ...x, cloudId: result.id, editToken: result.editToken } : x);
-                      });
+                    if (!result) return;
+                    if (result.deduplicated) {
+                      // Server collapsed the copy into an existing doc
+                      // (likely a race or stale state). Drop the
+                      // phantom new tab and never strip the original.
+                      setTabs(prev => prev.filter(x => x.id !== id));
+                      showToast("Duplicate already exists — opened existing copy", "info");
+                      const existing = tabs.find(x => x.cloudId === result.id);
+                      if (existing) switchTab(existing.id);
+                      return;
                     }
+                    setTabs(prev => {
+                      // Only strip prior phantom drafts (no cloudId yet)
+                      // that happen to share the resolved cloudId.
+                      // Never strip a tab the user already had open.
+                      const withoutDup = prev.filter(x => !(x.cloudId === result.id && x.id !== id && x.isDraft && !x.cloudId));
+                      return withoutDup.map(x => x.id === id ? { ...x, cloudId: result.id, editToken: result.editToken } : x);
+                    });
                   });
                 }
               }},
