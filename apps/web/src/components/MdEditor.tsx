@@ -16690,11 +16690,20 @@ ${clone.innerHTML}
         onClose={() => setShowImportModal(false)}
         authHeaders={authHeaders}
         showToast={showToast}
-        onImported={() => {
+        onImported={(docId) => {
           fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
             .then((r) => (r.ok ? r.json() : null))
             .then((data) => { if (data?.documents) setServerDocs(data.documents); })
             .catch(() => {});
+          // Auto-open the freshly imported doc. The editor's
+          // URL-load effect picks up `/<id>` on mount and loads
+          // that doc into a tab. Page reload is acceptable here —
+          // tabs persist via localStorage so the user only loses
+          // unsaved scratch state (and import always lands a saved
+          // cloud doc anyway).
+          if (docId) {
+            try { window.location.href = `/${docId}`; } catch { /* ignore */ }
+          }
         }}
         onPickFiles={(files) => {
           // Reuse the parent's import pipeline by assigning the

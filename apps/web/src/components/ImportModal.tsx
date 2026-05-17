@@ -11,6 +11,7 @@
 // parent supplies authHeaders + showToast + a refresh callback.
 
 import { useRef, useState, useCallback } from "react";
+import { readSSE } from "@/lib/sse-stream";
 import {
   X,
   Globe,
@@ -39,8 +40,9 @@ interface ImportModalProps {
    *  global showToast(message, kind). */
   showToast: (message: string, kind?: "success" | "error" | "info") => void;
   /** Called after any successful import so the parent can refresh
-   *  its document list / lint / etc. */
-  onImported?: () => void;
+   *  its document list / lint / etc. When a docId is supplied, the
+   *  parent should also open that doc as the active tab. */
+  onImported?: (docId?: string) => void;
   /** Called when the user picks "Files" + a list of File objects.
    *  Files use the existing importFile() pipeline in the parent —
    *  we just hand the files back. */
@@ -98,6 +100,8 @@ export default function ImportModal({
   const [active, setActive] = useState<ImportSource | null>(initialSource);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Live progress for streaming imports (currently URL). { label, done, total }
+  const [progress, setProgress] = useState<{ label: string; done?: number; total?: number } | null>(null);
   const obsidianRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -105,6 +109,7 @@ export default function ImportModal({
     if (busy) return;
     setActive(null);
     setError(null);
+    setProgress(null);
     onClose();
   }, [busy, onClose]);
 
@@ -140,21 +145,73 @@ export default function ImportModal({
   const submitUrl = useCallback(async (url: string) => {
     if (!url.trim()) { setError("Paste a URL"); return; }
     setBusy(true); setError(null);
-    showToast("Fetching URL…", "info");
+    setProgress({ label: "Starting…" });
     try {
       const res = await fetch("/api/import/url", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({ url: url.trim() }),
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) { setError(json.error || `Import failed (${res.status})`); setBusy(false); return; }
-      announce(json.imported, json.deduplicated, json.failed);
-      onImported?.();
+      // Non-SSE errors (auth, rate-limit, bad body) come back as
+      // application/json with the right status; surface those before
+      // trying to read SSE.
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.startsWith("text/event-stream")) {
+        const json = await res.json().catch(() => ({}));
+        setError(json.error || `Import failed (${res.status})`);
+        setBusy(false);
+        setProgress(null);
+        return;
+      }
+
+      let importedId: string | undefined;
+      let importedTitle = "";
+      let deduplicated = false;
+      let imagesFound: number | undefined;
+      let imagesRehosted: number | undefined;
+      let gotError: string | null = null;
+      for await (const evt of readSSE(res)) {
+        if (evt.event === "stage") {
+          const d = evt.data as { label?: string; done?: number; total?: number };
+          setProgress({ label: d.label || "Working…", done: d.done, total: d.total });
+        } else if (evt.event === "done") {
+          const d = evt.data as { id?: string; title?: string; deduplicated?: boolean; imagesFound?: number; imagesRehosted?: number };
+          importedId = d.id;
+          importedTitle = d.title || "";
+          deduplicated = !!d.deduplicated;
+          imagesFound = d.imagesFound;
+          imagesRehosted = d.imagesRehosted;
+        } else if (evt.event === "error") {
+          const d = evt.data as { message?: string };
+          gotError = d.message || "Import failed";
+        }
+      }
+      if (gotError) {
+        setError(gotError);
+        setBusy(false);
+        setProgress(null);
+        return;
+      }
+      // Build a tidy toast — count + dedupe + image-rehost delta.
+      const toastBits: string[] = [];
+      if (deduplicated) {
+        toastBits.push(`"${importedTitle || "Page"}" already in your hub`);
+      } else if (importedId) {
+        toastBits.push(`Imported "${importedTitle || "page"}"`);
+      }
+      if (typeof imagesFound === "number" && typeof imagesRehosted === "number" && imagesFound > imagesRehosted) {
+        toastBits.push(`${imagesRehosted}/${imagesFound} images`);
+      }
+      showToast(toastBits.join(" / ") || "Imported", deduplicated ? "info" : "success");
+      onImported?.(importedId);
       close();
-    } catch { setError("Import failed"); }
-    finally { setBusy(false); }
-  }, [authHeaders, announce, onImported, close, showToast]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setBusy(false);
+      setProgress(null);
+    }
+  }, [authHeaders, onImported, close, showToast]);
 
   const submitNotion = useCallback(async (token: string, pageUrl: string) => {
     if (!token.trim()) { setError("Paste your integration token"); return; }
@@ -297,10 +354,11 @@ export default function ImportModal({
 
           {active === "url" && (
             <SimpleUrlForm
-              hint="Any public http(s) page. mdfy strips chrome (nav, footer, ads) and converts the main content."
-              placeholder="https://example.com/article"
+              hint="Any public http(s) page. YouTube URLs auto-extract the transcript. Everything else: mdfy strips chrome (nav, footer, ads) and converts the main content."
+              placeholder="https://example.com/article  or  https://youtube.com/watch?v=…"
               busy={busy}
               error={error}
+              progress={progress}
               onSubmit={submitUrl}
             />
           )}
@@ -350,15 +408,20 @@ function SimpleUrlForm({
   placeholder,
   busy,
   error,
+  progress,
   onSubmit,
 }: {
   hint: string;
   placeholder: string;
   busy: boolean;
   error: string | null;
+  progress?: { label: string; done?: number; total?: number } | null;
   onSubmit: (value: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const pct = (progress?.total && progress.total > 0 && typeof progress.done === "number")
+    ? Math.round((progress.done / progress.total) * 100)
+    : null;
   return (
     <form onSubmit={(e) => { e.preventDefault(); onSubmit(value); }} className="flex flex-col gap-3">
       <p className="text-caption" style={{ color: "var(--text-muted)" }}>{hint}</p>
@@ -377,6 +440,55 @@ function SimpleUrlForm({
       {error && (
         <div className="text-caption px-2 py-1.5 rounded" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}>
           {error}
+        </div>
+      )}
+      {busy && progress && (
+        <div
+          className="rounded-md px-3 py-2.5"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+        >
+          <div className="flex items-baseline justify-between gap-2 mb-1.5">
+            <span className="text-caption" style={{ color: "var(--text-primary)" }}>
+              {progress.label}
+            </span>
+            {typeof progress.done === "number" && typeof progress.total === "number" && progress.total > 0 && (
+              <span className="text-caption font-mono tabular-nums" style={{ color: "var(--text-faint)" }}>
+                {progress.done} / {progress.total}
+              </span>
+            )}
+          </div>
+          <div
+            style={{
+              height: 4,
+              borderRadius: 2,
+              background: "var(--border-dim)",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            {pct !== null ? (
+              <div
+                style={{
+                  height: "100%",
+                  width: `${pct}%`,
+                  background: "var(--accent)",
+                  transition: "width 0.2s ease",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  height: "100%",
+                  width: "30%",
+                  background: "var(--accent)",
+                  borderRadius: 2,
+                  animation: "mdfyBootBar 1.1s ease-in-out infinite",
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
       <button
