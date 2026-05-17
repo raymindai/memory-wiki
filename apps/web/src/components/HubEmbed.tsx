@@ -447,96 +447,39 @@ export default function HubEmbed({
               (/hub/<slug>) and the Deploy-to-AI block already say
               the same thing — removing it keeps the page top
               quieter. */}
-        {/* Identity strip — small, supporting. Title + slug as one
-            visual unit, bio as a single line beneath. Stays out of
-            the way so the Deploy URL card below can be the hero. */}
-        <header className="flex items-start gap-3 mb-5">
+        {/* Identity hero — big centered avatar, name, slug, bio,
+            meta + Galaxy CTA. "Who / what is this" is the first
+            impression; deploy URL becomes the second beat. */}
+        <header
+          className="mb-6 rounded-xl text-center"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "32px 24px 24px" }}
+        >
           <img
             src={data.hub.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(slug)}`}
             alt=""
-            className="shrink-0 rounded-xl"
-            style={{ width: 40, height: 40, border: "1px solid var(--border-dim)" }}
+            className="rounded-full mx-auto"
+            style={{ width: 80, height: 80, border: "1px solid var(--border-dim)" }}
           />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-baseline flex-wrap gap-x-3 gap-y-0.5">
-              <h1
-                className="text-display font-bold tracking-tight"
-                style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
-              >
-                {data.hub.display_name || slug}
-              </h1>
-              <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                /hub/{slug}
-              </span>
-            </div>
-            {data.hub.description && (
-              <p className="text-body mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                {data.hub.description}
-              </p>
-            )}
-          </div>
-        </header>
-
-        {/* Deploy URL card — THE focal point. One large URL field
-            with a tiny variant toggle above (Digest / Full); meta +
-            Galaxy entry tucked into the card's footer. Replaces the
-            old "intro para + Digest URL + Full URL" stack which
-            spread the same info across three rows. */}
-        <section
-          className="mb-6 rounded-xl overflow-hidden"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
-        >
-          <div className="px-5 pt-4 pb-4">
-            <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-              <div className="flex items-center gap-1">
-                {(["digest", "full"] as const).map((v) => {
-                  const active = urlVariant === v;
-                  return (
-                    <button
-                      key={v}
-                      type="button"
-                      onClick={() => setUrlVariant(v)}
-                      className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: 0.5,
-                        color: active ? "var(--accent)" : "var(--text-muted)",
-                        background: active ? "var(--accent-dim)" : "transparent",
-                        border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                      }}
-                    >
-                      {v === "digest" ? "Digest" : "Full"}
-                    </button>
-                  );
-                })}
-              </div>
-              <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-                {urlVariant === "digest" ? "compact concept map, cheap to paste" : "every doc inline, heavier"}
-              </span>
-            </div>
-            <button
-              onClick={copyUrl}
-              className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-              style={{
-                fontSize: 13,
-                background: "var(--background)",
-                color: copied ? "#22c55e" : "var(--text-primary)",
-                border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-              }}
-              title="Copy URL"
+          <h1
+            className="text-display font-bold tracking-tight mt-4"
+            style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
+          >
+            {data.hub.display_name || slug}
+          </h1>
+          {/* Slug intentionally NOT shown here — the full URL lives
+              in the Deploy card below; printing /hub/<slug> here too
+              just duplicates that identifier. */}
+          {data.hub.description && (
+            <p
+              className="text-body mt-3 mx-auto leading-relaxed"
+              style={{ color: "var(--text-secondary)", maxWidth: 480 }}
             >
-              <span className="flex-1 text-left truncate">
-                {urlVariant === "full" ? `${data.hub.url}?full=1` : data.hub.url}
-              </span>
-              <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
-                {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-                <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
-              </span>
-            </button>
-          </div>
-          {/* Footer — meta + Galaxy. Sits inside the same card as the
-              URL so "what this is / how big / open as constellation"
-              read as one cohesive deploy unit. */}
+              {data.hub.description}
+            </p>
+          )}
+          {/* Meta + Galaxy CTA — one centered row. Hub-only stats:
+              docs / bundles / updated. Galaxy entry as an accent
+              pill on the same baseline. */}
           {ov && (() => {
             const docCount = ov.documents.public.length + ov.documents.shared.length + ov.documents.private.length;
             const bundleCount = ov.bundles.public.length + ov.bundles.shared.length + ov.bundles.private.length;
@@ -552,28 +495,23 @@ export default function HubEmbed({
             for (const b of ov.bundles.shared) consider(b.updated_at);
             for (const b of ov.bundles.private) consider(b.updated_at);
             return (
-              <div
-                className="px-5 py-2.5 flex items-center justify-between gap-3 flex-wrap"
-                style={{ borderTop: "1px solid var(--border-dim)", background: "var(--background)" }}
-              >
-                <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+                <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                  <FolderClosed width={11} height={11} />
+                  {docCount} {docCount === 1 ? "doc" : "docs"}
+                </span>
+                {bundleCount > 0 && (
                   <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                    <FolderClosed width={11} height={11} />
-                    {docCount} {docCount === 1 ? "doc" : "docs"}
+                    <Layers width={11} height={11} />
+                    {bundleCount} {bundleCount === 1 ? "bundle" : "bundles"}
                   </span>
-                  {bundleCount > 0 && (
-                    <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                      <Layers width={11} height={11} />
-                      {bundleCount} {bundleCount === 1 ? "bundle" : "bundles"}
-                    </span>
-                  )}
-                  {latest && (
-                    <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                      <Clock width={11} height={11} />
-                      Updated {relativeTime(latest)}
-                    </span>
-                  )}
-                </div>
+                )}
+                {latest && (
+                  <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                    <Clock width={11} height={11} />
+                    Updated {relativeTime(latest)}
+                  </span>
+                )}
                 <Link
                   href="/galaxy"
                   target="_blank"
@@ -581,6 +519,8 @@ export default function HubEmbed({
                   className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
                   style={{
                     color: "var(--accent)",
+                    background: "var(--accent-dim)",
+                    border: "1px solid var(--accent-dim)",
                     textDecoration: "none",
                     letterSpacing: 0.3,
                   }}
@@ -593,6 +533,79 @@ export default function HubEmbed({
               </div>
             );
           })()}
+        </header>
+
+        {/* Deploy URL card — clearly labeled as DEPLOY so its
+            purpose is unambiguous. Header + variant chips + ONE
+            large URL row with embedded Copy. Footer info (meta /
+            Galaxy CTA) lives in the identity hero above to avoid
+            duplicating identifiers. */}
+        <section
+          className="mb-6 rounded-xl"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "16px 18px" }}
+        >
+          <div className="flex items-start gap-3 mb-3">
+            <span
+              className="flex items-center justify-center shrink-0 mt-0.5"
+              style={{ width: 24, height: 24, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
+            >
+              <Globe width={14} height={14} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
+                Deploy this hub to any AI
+              </p>
+              <p className="text-caption mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                Paste the URL into <strong>Claude</strong>, <strong>ChatGPT</strong>, or <strong>Cursor</strong> — the AI fetches a structured index and follows inline links.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+            <div className="flex items-center gap-1">
+              {(["digest", "full"] as const).map((v) => {
+                const active = urlVariant === v;
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setUrlVariant(v)}
+                    className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                    style={{
+                      fontSize: 10,
+                      letterSpacing: 0.5,
+                      color: active ? "var(--accent)" : "var(--text-muted)",
+                      background: active ? "var(--accent-dim)" : "transparent",
+                      border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                    }}
+                  >
+                    {v === "digest" ? "Digest" : "Full"}
+                  </button>
+                );
+              })}
+            </div>
+            <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+              {urlVariant === "digest" ? "compact concept map, cheap to paste" : "every doc inline, heavier"}
+            </span>
+          </div>
+          <button
+            onClick={copyUrl}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+            style={{
+              fontSize: 13,
+              background: "var(--background)",
+              color: copied ? "#22c55e" : "var(--text-primary)",
+              border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+            }}
+            title="Copy URL"
+          >
+            <span className="flex-1 text-left truncate">
+              {urlVariant === "full" ? `${data.hub.url}?full=1` : data.hub.url}
+            </span>
+            <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
+              {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
+              <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
+            </span>
+          </button>
         </section>
 
         {/* Setup card — per-tool snippets. Demoted to a secondary

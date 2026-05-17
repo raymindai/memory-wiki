@@ -16,7 +16,7 @@
 //   - Suggestions (TODO once we have a /api/bundles/[id]/suggestions surface)
 
 import { useEffect, useState, useMemo } from "react";
-import { Layers, Copy, Check, Eye, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock } from "lucide-react";
+import { Layers, Copy, Check, Eye, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, ArrowUpRight } from "lucide-react";
 
 interface BundleDoc {
   id: string;
@@ -140,44 +140,86 @@ export default function BundleOverview({
   return (
     <div className="h-full overflow-y-auto" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto px-6 py-10">
-        {/* Identity strip — small, supporting. Same shape as
-            HubEmbed's hero so Hub and Bundle read as one family. */}
-        <header className="flex items-start gap-3 mb-5">
+        {/* Identity hero — big centered icon, title, bio, intent,
+            meta + Open-in-browser CTA. Same shape as Hub's hero so
+            both surfaces read as one family. Slug intentionally
+            omitted; the full URL lives in the Deploy card below. */}
+        <header
+          className="mb-6 rounded-xl text-center"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "32px 24px 24px" }}
+        >
           <div
-            className="shrink-0 flex items-center justify-center rounded-xl"
-            style={{ width: 40, height: 40, background: "var(--accent-dim)", color: "var(--accent)" }}
+            className="mx-auto flex items-center justify-center rounded-2xl"
+            style={{ width: 80, height: 80, background: "var(--accent-dim)", color: "var(--accent)" }}
           >
-            <Layers width={20} height={20} />
+            <Layers width={40} height={40} />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-baseline flex-wrap gap-x-3 gap-y-0.5">
-              <h1
-                className="text-display font-bold tracking-tight"
-                style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
-              >
-                {bundleTitle || "Untitled bundle"}
-              </h1>
-              <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                /b/{bundleId}
+          <h1
+            className="text-display font-bold tracking-tight mt-4"
+            style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
+          >
+            {bundleTitle || "Untitled bundle"}
+          </h1>
+          {bundleDescription && (
+            <p
+              className="text-body mt-3 mx-auto leading-relaxed"
+              style={{ color: "var(--text-secondary)", maxWidth: 480 }}
+            >
+              {bundleDescription}
+            </p>
+          )}
+          {bundleIntent && (
+            <p
+              className="text-caption mt-2 mx-auto italic"
+              style={{ color: "var(--text-faint)", maxWidth: 480 }}
+            >
+              Intent: {bundleIntent}
+            </p>
+          )}
+          {/* Meta + Open-in-browser CTA — centered row. Matches
+              Hub's "meta + Galaxy" row. */}
+          <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+              <Layers width={11} height={11} />
+              {documents.length} {documents.length === 1 ? "doc" : "docs"}
+            </span>
+            {lastUpdatedAt && (
+              <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                <Clock width={11} height={11} />
+                Updated {relativeTime(lastUpdatedAt)}
               </span>
-            </div>
-            {bundleDescription && (
-              <p className="text-body mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                {bundleDescription}
-              </p>
             )}
-            {bundleIntent && (
-              <p className="text-caption mt-1.5 italic" style={{ color: "var(--text-faint)" }}>
-                Intent: {bundleIntent}
-              </p>
+            {accessKind === "shared" && bundleAllowedEmails && bundleAllowedEmails.length > 0 && (
+              <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "#60a5fa" }}>
+                <Users width={11} height={11} />
+                Shared with {bundleAllowedEmails.length}
+              </span>
             )}
+            <a
+              href={bundleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
+              style={{
+                color: "var(--accent)",
+                background: "var(--accent-dim)",
+                border: "1px solid var(--accent-dim)",
+                textDecoration: "none",
+                letterSpacing: 0.3,
+              }}
+              title="Open the rendered HTML view"
+            >
+              <Eye width={11} height={11} />
+              <span>Open in browser</span>
+              <ArrowUpRight width={11} height={11} />
+            </a>
           </div>
         </header>
 
-        {/* Deploy URL card — single focal URL with variant chips
-            above; meta + "Open in browser" tucked in the card
-            footer. Replaces the old "intro + two URL cards + Wire-it
-            + browser link" stack — same info, one focal point. */}
+        {/* Deploy URL card — clearly labeled. Header + variant
+            chips + ONE URL row + a small "Agent payload" link.
+            Meta + Open-in-browser already live in the identity
+            hero so they're not duplicated here. */}
         {(() => {
           const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
           const digestTokens = 50 + documents.length * 35;
@@ -194,107 +236,85 @@ export default function BundleOverview({
           };
           return (
             <section
-              className="mb-6 rounded-xl overflow-hidden"
-              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+              className="mb-6 rounded-xl"
+              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "16px 18px" }}
             >
-              <div className="px-5 pt-4 pb-4">
-                <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-                  <div className="flex items-center gap-1">
-                    {(["digest", "full"] as const).map((v) => {
-                      const active = urlVariant === v;
-                      return (
-                        <button
-                          key={v}
-                          type="button"
-                          onClick={() => setUrlVariant(v)}
-                          className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
-                          style={{
-                            fontSize: 10,
-                            letterSpacing: 0.5,
-                            color: active ? "var(--accent)" : "var(--text-muted)",
-                            background: active ? "var(--accent-dim)" : "transparent",
-                            border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                          }}
-                        >
-                          {v === "digest" ? "Digest" : "Full"}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                    {urlVariant === "digest"
-                      ? `≈ ${fmt(digestTokens)} tokens / cheap concept map`
-                      : `≈ ${fmt(fullTokens)} tokens / every doc inline`}
-                  </span>
-                </div>
-                <button
-                  onClick={onCopy}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{
-                    fontSize: 13,
-                    background: "var(--background)",
-                    color: copied ? "#22c55e" : "var(--text-primary)",
-                    border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-                  }}
-                  title="Copy URL"
+              <div className="flex items-start gap-3 mb-3">
+                <span
+                  className="flex items-center justify-center shrink-0 mt-0.5"
+                  style={{ width: 24, height: 24, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
                 >
-                  <span className="flex-1 text-left truncate">{activeUrl}</span>
-                  <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
-                    {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-                    <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
-                  </span>
-                </button>
+                  <Globe width={14} height={14} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
+                    Deploy this bundle to any AI
+                  </p>
+                  <p className="text-caption mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                    Paste the URL into <strong>Claude</strong>, <strong>ChatGPT</strong>, or <strong>Cursor</strong> — the AI fetches the markdown payload directly.
+                  </p>
+                </div>
               </div>
-              {/* Footer — meta + open-in-browser + see-agent-payload.
-                  All non-primary affordances live here so the URL row
-                  above stays the focal point. */}
-              <div
-                className="px-5 py-2.5 flex items-center justify-between gap-3 flex-wrap"
-                style={{ borderTop: "1px solid var(--border-dim)", background: "var(--background)" }}
+              <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+                <div className="flex items-center gap-1">
+                  {(["digest", "full"] as const).map((v) => {
+                    const active = urlVariant === v;
+                    return (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setUrlVariant(v)}
+                        className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                        style={{
+                          fontSize: 10,
+                          letterSpacing: 0.5,
+                          color: active ? "var(--accent)" : "var(--text-muted)",
+                          background: active ? "var(--accent-dim)" : "transparent",
+                          border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                        }}
+                      >
+                        {v === "digest" ? "Digest" : "Full"}
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                  {urlVariant === "digest"
+                    ? `≈ ${fmt(digestTokens)} tokens / cheap concept map`
+                    : `≈ ${fmt(fullTokens)} tokens / every doc inline`}
+                </span>
+              </div>
+              <button
+                onClick={onCopy}
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{
+                  fontSize: 13,
+                  background: "var(--background)",
+                  color: copied ? "#22c55e" : "var(--text-primary)",
+                  border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                }}
+                title="Copy URL"
               >
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                    <Layers width={11} height={11} />
-                    {documents.length} {documents.length === 1 ? "doc" : "docs"}
-                  </span>
-                  {lastUpdatedAt && (
-                    <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
-                      <Clock width={11} height={11} />
-                      Updated {relativeTime(lastUpdatedAt)}
-                    </span>
-                  )}
-                  {accessKind === "shared" && bundleAllowedEmails && bundleAllowedEmails.length > 0 && (
-                    <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "#60a5fa" }}>
-                      <Users width={11} height={11} />
-                      Shared with {bundleAllowedEmails.length}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <a
-                    href={rawHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                    style={{ color: "var(--text-muted)", textDecoration: "none" }}
-                    title="Raw .md payload — exactly what an AI sees"
-                  >
-                    <ExternalLink width={11} height={11} />
-                    Agent payload
-                  </a>
-                  <a
-                    href={bundleUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
-                    style={{ color: "var(--accent)", textDecoration: "none" }}
-                    title="Open the rendered HTML view"
-                  >
-                    <Eye width={11} height={11} />
-                    Open in browser
-                  </a>
-                </div>
-              </div>
+                <span className="flex-1 text-left truncate">{activeUrl}</span>
+                <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
+                  {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
+                  <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
+                </span>
+              </button>
+              {/* Small "agent payload" peek — what the AI receives.
+                  Single thin link, not a footer row, so the URL stays
+                  the only visual emphasis. */}
+              <a
+                href={rawHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-caption mt-2 transition-colors hover:underline"
+                style={{ color: "var(--text-muted)" }}
+                title="Raw .md payload — exactly what an AI sees"
+              >
+                <ExternalLink width={11} height={11} />
+                See what the AI sees (raw payload)
+              </a>
             </section>
           );
         })()}
