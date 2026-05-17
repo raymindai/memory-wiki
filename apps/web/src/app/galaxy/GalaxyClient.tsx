@@ -24,5 +24,5 @@ export default function GalaxyClient() {
     userId: user?.id,
     userEmail: user?.email,
   });
-  return <HubGalaxy authHeaders={headers} />;
+  return <HubGalaxy authHeaders={headers} userEmail={user?.email ?? null} />;
 }

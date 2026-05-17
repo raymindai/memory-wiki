@@ -11,7 +11,7 @@
 
 import { useEffect, useMemo, useRef, useState, useCallback, memo } from "react";
 import Link from "next/link";
-import { Play, Pause, Maximize2, ChevronLeft, FileText, ExternalLink, X } from "lucide-react";
+import { Play, Pause, Maximize2, ChevronLeft, FileText, ExternalLink, X, ZoomIn, ZoomOut, Expand, Minimize } from "lucide-react";
 import ELK from "elkjs/lib/elk.bundled.js";
 
 interface ApiNode {
@@ -51,6 +51,7 @@ interface GalaxyData {
 
 interface Props {
   authHeaders: Record<string, string>;
+  userEmail: string | null;
 }
 
 const SKY = {
@@ -235,6 +236,15 @@ function GalaxyKeyframes() {
         0%   { opacity: 0; }
         100% { opacity: 1; }
       }
+      /* Star scintillation — applied to a ~20% subset of stars, very
+         long period, randomised per-star phase so the sky reads as a
+         field of slowly twinkling lights rather than a synchronised
+         blink. Brief spike only, mostly idle. */
+      @keyframes galaxyScintillate {
+        0%, 92%, 100% { opacity: 1; }
+        95%           { opacity: 0.35; }
+        97%           { opacity: 1.2; }
+      }
       @keyframes galaxyMagneticPulse {
         0%   { transform: scale(0.8); opacity: 0.8; }
         100% { transform: scale(3.6); opacity: 0; }
@@ -347,6 +357,13 @@ const Star = memo(function Star({
   const h = hashStr(n.id) >>> 0;
   const floatIdx = h % 4;
   const period = 7 + (h % 7);
+  // Scintillation — ~20% of stars get an additional slow blink. Period
+  // 14-26s with a deterministic per-star phase so the sky never blinks
+  // in unison. Combined inline with the twinkle animation via the
+  // comma-separated shorthand.
+  const scintillates = h % 5 === 0;
+  const scintPeriod = 14 + (h % 13);
+  const scintDelay = -((h % 100) / 100) * scintPeriod;
   return (
     <g
       transform={`translate(${n.x}, ${n.y})`}
@@ -397,7 +414,9 @@ const Star = memo(function Star({
           r={haloR}
           fill={haloFill}
           style={twinkleEnabled ? {
-            animation: `galaxyTwinkle ${5 + (n.twinkleDelay % 4)}s ease-in-out -${n.twinkleDelay}s infinite`,
+            animation: scintillates
+              ? `galaxyTwinkle ${5 + (n.twinkleDelay % 4)}s ease-in-out -${n.twinkleDelay}s infinite, galaxyScintillate ${scintPeriod}s linear ${scintDelay}s infinite`
+              : `galaxyTwinkle ${5 + (n.twinkleDelay % 4)}s ease-in-out -${n.twinkleDelay}s infinite`,
           } : undefined}
         />
         <circle
@@ -514,7 +533,7 @@ function GalaxyButton({
   );
 }
 
-export default function HubGalaxy({ authHeaders }: Props) {
+export default function HubGalaxy({ authHeaders, userEmail }: Props) {
   const [data, setData] = useState<GalaxyData | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -585,7 +604,12 @@ export default function HubGalaxy({ authHeaders }: Props) {
         const json = (await res.json()) as GalaxyData;
         if (cancelled) return;
         setData(json);
-        setSliderDate(json.hubEnd);
+        // Start the cursor parked at hubStart (empty canvas) so the
+        // initial render doesn't flash the fully-formed galaxy before
+        // auto-play kicks in. Auto-play then keeps it at hubStart and
+        // CSS schedules the staggered fade-in; on play end the cursor
+        // snaps to endMs so everything stays visible thereafter.
+        setSliderDate(new Date(json.hubStart + "T00:00:00Z").toISOString());
         setLoaded(true);
       } catch {
         if (!cancelled) {
@@ -605,10 +629,19 @@ export default function HubGalaxy({ authHeaders }: Props) {
     if (autoPlayedRef.current) return;
     if (!data || !positions || data.nodes.length === 0) return;
     autoPlayedRef.current = true;
+    // Inline the startMs — `hubBounds` is declared later in this file,
+    // and pulling it into the dep array trips a TDZ ReferenceError at
+    // mount time. The auto-play effect only needs the start anchor.
+    const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
     // Small defer so the first paint completes before kicking off the
     // staggered fade-in — otherwise the play start coincides with the
     // initial mount + layout-fit and can feel laggy.
-    const t = setTimeout(() => setPlaying(true), 120);
+    const t = setTimeout(() => {
+      // Park cursor at hubStart in the same batched update so the
+      // timeline thumb starts at the left, not the right.
+      setSliderDate(new Date(startMs).toISOString());
+      setPlaying(true);
+    }, 120);
     return () => clearTimeout(t);
   }, [data, positions]);
 
@@ -658,26 +691,52 @@ export default function HubGalaxy({ authHeaders }: Props) {
     });
   }, [data, positions]);
 
+  // Compute a focal bounding box that ignores outlier stars (5/95
+  // percentile per axis). Centering on the raw bbox pulled the camera
+  // toward isolated faraway stars; the trimmed bbox lands naturally on
+  // the densest cluster of points while still fitting most of the
+  // graph in view. Falls back to raw bbox when there aren't enough
+  // nodes for percentile trimming to be meaningful.
+  const computeFocalBox = useCallback((points: { x: number; y: number }[]) => {
+    if (points.length === 0) return null;
+    if (points.length < 20) {
+      const xs = points.map((p) => p.x);
+      const ys = points.map((p) => p.y);
+      return {
+        minX: Math.min(...xs),
+        maxX: Math.max(...xs),
+        minY: Math.min(...ys),
+        maxY: Math.max(...ys),
+      };
+    }
+    const xs = points.map((p) => p.x).sort((a, b) => a - b);
+    const ys = points.map((p) => p.y).sort((a, b) => a - b);
+    const lo = Math.floor(xs.length * 0.05);
+    const hi = Math.min(xs.length - 1, Math.ceil(xs.length * 0.95) - 1);
+    return {
+      minX: xs[lo],
+      maxX: xs[hi],
+      minY: ys[lo],
+      maxY: ys[hi],
+    };
+  }, []);
+
   const didFitRef = useRef(false);
   useEffect(() => {
     if (didFitRef.current) return;
     if (all.length === 0 || size.w === 0 || size.h === 0) return;
-    const xs = all.map((n) => n.x);
-    const ys = all.map((n) => n.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    const bbW = Math.max(1, maxX - minX);
-    const bbH = Math.max(1, maxY - minY);
+    const box = computeFocalBox(all);
+    if (!box) return;
+    const bbW = Math.max(1, box.maxX - box.minX);
+    const bbH = Math.max(1, box.maxY - box.minY);
     const margin = 80;
     const k = Math.min((size.w - margin * 2) / bbW, (size.h - margin * 2) / bbH);
     const clampedK = Math.max(0.2, Math.min(3, k));
-    const x = size.w / 2 - (minX + bbW / 2) * clampedK;
-    const y = size.h / 2 - (minY + bbH / 2) * clampedK;
+    const x = size.w / 2 - (box.minX + bbW / 2) * clampedK;
+    const y = size.h / 2 - (box.minY + bbH / 2) * clampedK;
     setView({ x, y, k: clampedK });
     didFitRef.current = true;
-  }, [all, size]);
+  }, [all, size, computeFocalBox]);
 
   const apiMap = useMemo(() => {
     const m = new Map<string, ApiNode>();
@@ -748,12 +807,32 @@ export default function HubGalaxy({ authHeaders }: Props) {
     return { nodes, edges, neighbours, hoverNeighbours };
   }, [data, all, visibleKinds, searchTerm, selectedId, hoveredId]);
 
+  // Hub time bounds. Asymmetric on purpose:
+  //  - startMs is midnight UTC of hubStart so scrubbing to the very
+  //    left empties the canvas ("Day 0 of the hub").
+  //  - endMs is end-of-day of hubEnd so scrubbing / playing to the
+  //    very right includes everything created today after midnight.
+  //    Without this, the post-play frame snaps and re-hides any
+  //    element with createdAt > hubEnd midnight UTC.
+  const hubBounds = useMemo(() => {
+    if (!data) return null;
+    return {
+      startMs: new Date(data.hubStart + "T00:00:00Z").getTime(),
+      endMs: new Date(data.hubEnd + "T23:59:59.999Z").getTime(),
+    };
+  }, [data]);
+
   // Cutoff in ms — read per render to compute each element's isTimeVisible.
   const cutoffMs = useMemo(() => {
-    if (!data) return Number.POSITIVE_INFINITY;
-    const raw = sliderDate || data.hubEnd;
-    return new Date(raw.length >= 19 ? raw : raw + "T00:00:00Z").getTime();
-  }, [data, sliderDate]);
+    if (!hubBounds || !data) return Number.POSITIVE_INFINITY;
+    if (!sliderDate) return hubBounds.endMs;
+    if (sliderDate.length >= 19) return new Date(sliderDate).getTime();
+    // Day-form string — hubEnd resolves to end-of-day so "today is
+    // fully visible"; any other day resolves to start-of-day so
+    // scrubbing back to hubStart still empties the canvas.
+    if (sliderDate === data.hubEnd) return hubBounds.endMs;
+    return new Date(sliderDate + "T00:00:00Z").getTime();
+  }, [hubBounds, sliderDate, data]);
 
   // Stable lookup tables for createdAt (ms). One-time cost per data fetch.
   const nodeMs = useMemo(() => {
@@ -826,9 +905,8 @@ export default function HubGalaxy({ authHeaders }: Props) {
   // edges. The timeline cursor label is updated via refs so its rAF
   // doesn't trigger React renders either.
   useEffect(() => {
-    if (!playing || !data) return;
-    const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
-    const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
+    if (!playing || !data || !hubBounds) return;
+    const { startMs, endMs } = hubBounds;
     const totalMs = endMs - startMs;
     if (totalMs <= 0) { setPlaying(false); return; }
 
@@ -848,9 +926,12 @@ export default function HubGalaxy({ authHeaders }: Props) {
     for (const e of data.edges) addDelay(e.id, e.createdAt);
     for (const c of data.clusters) addDelay(c.id, c.createdAt);
 
-    // Expand visible to the whole range — everything in the schedule
-    // renders immediately as opacity:0, CSS reveals them over animMs.
-    setSliderDate(new Date(endMs).toISOString());
+    // Park the React cursor at hubStart so the slider thumb + floating
+    // cursor render at the LEFT edge immediately. (Previously parked at
+    // hubEnd so the thumb flashed at the right end for one frame before
+    // the rAF moved it.) The CSS schedule overrides element opacity
+    // during play, so React's isTimeVisible=false doesn't cause a flash.
+    setSliderDate(new Date(startMs).toISOString());
     setPlaySchedule(schedule);
 
     // Live timeline cursor — DOM-direct, no React re-render. Also drives
@@ -870,6 +951,11 @@ export default function HubGalaxy({ authHeaders }: Props) {
     playRef.current = requestAnimationFrame(tickLabel);
 
     const stopTimer = setTimeout(() => {
+      // Snap React's cursor to the inclusive end so isTimeVisible
+      // matches the schedule's final opacity-1 state for every element.
+      // Without this the post-play frame would re-hide anything created
+      // today after midnight UTC, producing a visible jump.
+      setSliderDate(new Date(endMs).toISOString());
       setPlaying(false);
       setPlaySchedule(null);
     }, PLAY_ANIM_MS + PLAY_FADE_MS + 100);
@@ -881,7 +967,7 @@ export default function HubGalaxy({ authHeaders }: Props) {
       setPlaySchedule(null);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing]);
+  }, [playing, hubBounds]);
 
   // Auto-clear stale focus state when scrubbing leaves the target
   // node behind. Without this, focusing mode stays on, the focusSet
@@ -1095,21 +1181,17 @@ export default function HubGalaxy({ authHeaders }: Props) {
 
   const handleRecentre = useCallback(() => {
     if (visible.nodes.length === 0 || size.w === 0) return;
-    const xs = visible.nodes.map((n) => n.x);
-    const ys = visible.nodes.map((n) => n.y);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    const bbW = Math.max(1, maxX - minX);
-    const bbH = Math.max(1, maxY - minY);
+    const box = computeFocalBox(visible.nodes);
+    if (!box) return;
+    const bbW = Math.max(1, box.maxX - box.minX);
+    const bbH = Math.max(1, box.maxY - box.minY);
     const margin = 80;
     const k = Math.min((size.w - margin * 2) / bbW, (size.h - margin * 2) / bbH);
     const clampedK = Math.max(0.2, Math.min(3, k));
-    const x = size.w / 2 - (minX + bbW / 2) * clampedK;
-    const y = size.h / 2 - (minY + bbH / 2) * clampedK;
+    const x = size.w / 2 - (box.minX + bbW / 2) * clampedK;
+    const y = size.h / 2 - (box.minY + bbH / 2) * clampedK;
     animateViewTo(x, y, clampedK);
-  }, [visible.nodes, size, animateViewTo]);
+  }, [visible.nodes, size, animateViewTo, computeFocalBox]);
 
   const handleStarDoubleClick = useCallback((n: Positioned) => {
     const targetK = Math.max(viewRef.current.k, 1.6);
@@ -1128,6 +1210,37 @@ export default function HubGalaxy({ authHeaders }: Props) {
     return !!dragRef.current?.moved;
   }, []);
 
+  // Zoom buttons — anchor on viewport centre so the focal point of the
+  // current layout stays put while scale changes.
+  const handleZoom = useCallback((factor: number) => {
+    const cur = viewRef.current;
+    const newK = Math.max(0.2, Math.min(3, cur.k * factor));
+    if (Math.abs(newK - cur.k) < 0.001) return;
+    const cx = size.w / 2;
+    const cy = size.h / 2;
+    const wx = (cx - cur.x) / cur.k;
+    const wy = (cy - cur.y) / cur.k;
+    animateViewTo(cx - wx * newK, cy - wy * newK, newK, 180);
+  }, [size, animateViewTo]);
+
+  // Fullscreen — request on the page container so the SVG plus header /
+  // sidebar / scrubber all stay in view.
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+  const handleFullscreen = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      el.requestFullscreen?.();
+    }
+  }, []);
+
   const selected = selectedId ? apiMap.get(selectedId) : null;
   const linkedDocs = useMemo(() => {
     if (!selected || !data) return [];
@@ -1139,14 +1252,11 @@ export default function HubGalaxy({ authHeaders }: Props) {
   }, [selected, data, apiMap]);
 
   const sliderPct = useMemo(() => {
-    if (!data) return 0;
-    const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
-    const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
-    const raw = sliderDate || data.hubEnd;
-    const curMs = new Date(raw.length >= 19 ? raw : raw + "T00:00:00Z").getTime();
+    if (!hubBounds) return 0;
+    const { startMs, endMs } = hubBounds;
     const total = Math.max(1, endMs - startMs);
-    return Math.max(0, Math.min(1, (curMs - startMs) / total));
-  }, [data, sliderDate]);
+    return Math.max(0, Math.min(1, (cutoffMs - startMs) / total));
+  }, [hubBounds, cutoffMs]);
 
   // Display date — sliderDate may carry sub-day precision during Growth
   // playback, so always slice to YYYY-MM-DD for the UI chrome.
@@ -1308,6 +1418,23 @@ export default function HubGalaxy({ authHeaders }: Props) {
           Galaxy
         </span>
 
+        {userEmail && (
+          <span
+            className="text-caption font-mono"
+            style={{
+              color: "var(--text-secondary)",
+              background: "var(--surface)",
+              border: "1px solid var(--border-dim)",
+              padding: "2px 8px",
+              borderRadius: 999,
+              letterSpacing: 0.3,
+            }}
+            title={`Signed in as ${userEmail}`}
+          >
+            {userEmail}
+          </span>
+        )}
+
         <span style={{ flex: 1 }} />
 
         {/* Stats — three discrete counts, mono, faint. */}
@@ -1337,10 +1464,25 @@ export default function HubGalaxy({ authHeaders }: Props) {
 
         <span style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
 
-        <GalaxyButton onClick={handleRecentre} title="Fit galaxy to view">
-          <Maximize2 width={11} height={11} />
-          <span>Fit</span>
-        </GalaxyButton>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <GalaxyButton onClick={() => handleZoom(1 / 1.25)} title="Zoom out">
+            <ZoomOut width={11} height={11} />
+          </GalaxyButton>
+          <GalaxyButton onClick={() => handleZoom(1.25)} title="Zoom in">
+            <ZoomIn width={11} height={11} />
+          </GalaxyButton>
+          <GalaxyButton onClick={handleRecentre} title="Fit galaxy to view">
+            <Maximize2 width={11} height={11} />
+            <span>Fit</span>
+          </GalaxyButton>
+          <GalaxyButton
+            onClick={handleFullscreen}
+            active={isFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? <Minimize width={11} height={11} /> : <Expand width={11} height={11} />}
+          </GalaxyButton>
+        </div>
       </header>
 
       <div style={{ flex: 1, display: "flex", minHeight: 0, position: "relative", zIndex: 1 }}>
@@ -2037,12 +2179,14 @@ export default function HubGalaxy({ authHeaders }: Props) {
               scrubRafIdRef.current = requestAnimationFrame(() => {
                 scrubRafIdRef.current = null;
                 const v = scrubPendingRef.current;
-                if (v == null || !data) return;
-                const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
-                const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
+                if (v == null || !hubBounds) return;
+                const { startMs, endMs } = hubBounds;
                 const target = startMs + (endMs - startMs) * v;
                 setPlaying(false);
-                setSliderDate(new Date(target).toISOString().slice(0, 10));
+                // Full ISO (not day-sliced) so cutoffMs matches target
+                // exactly — the day-form path only kicks in for the
+                // initial hubEnd fallback.
+                setSliderDate(new Date(target).toISOString());
               });
             }}
             className="galaxy-range"
@@ -2094,10 +2238,10 @@ export default function HubGalaxy({ authHeaders }: Props) {
           active={playing}
           onClick={() => {
             if (playing) { setPlaying(false); return; }
-            // No setSliderDate(hubStart) here — the play effect expands
-            // visible to the full range immediately and CSS handles the
-            // staggered reveal. Calling setSliderDate(hubStart) first
-            // caused a one-frame empty canvas before play kicked in.
+            // Park React's cursor at hubStart in the same batched update
+            // as setPlaying so the timeline thumb renders at the LEFT
+            // edge on the very first frame (no right-end flash).
+            if (hubBounds) setSliderDate(new Date(hubBounds.startMs).toISOString());
             setPlaying(true);
           }}
           title={playing ? "Pause replay" : "Replay growth from the beginning"}
