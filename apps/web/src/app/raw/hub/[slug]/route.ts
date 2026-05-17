@@ -330,7 +330,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
     relation_label: string | null;
     weight: number | null;
   };
-  let outgoingByConcept = new Map<number, RelationRow[]>();
+  const outgoingByConcept = new Map<number, RelationRow[]>();
   let topRelations: RelationRow[] = [];
   if (conceptIdList.length > 0) {
     const { data: relRows } = await supabase
@@ -357,7 +357,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
   // wants a richer payload (bundle digests include the AI graph
   // analysis, which single-doc fetches do not).
   type BundleDocRow = { bundle_id: string; document_id: string };
-  let bundleByDoc = new Map<string, string[]>();
+  const bundleByDoc = new Map<string, string[]>();
   let bundleTitleById = new Map<string, string>();
   if (docIdSet.size > 0) {
     const { data: bdRows } = await supabase
