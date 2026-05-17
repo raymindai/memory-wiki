@@ -191,15 +191,26 @@ export async function GET(req: NextRequest) {
     if (n.createdAt && n.createdAt < earliest) earliest = n.createdAt;
   }
 
+  // Dedupe edges by id — the relations table can hold multiple rows for
+  // the same (source, target) pair (different labels, historical entries),
+  // which produced duplicate React keys in the client and a warning that
+  // can also drop edges silently. First-seen wins.
+  const seenEdgeIds = new Set<string>();
+  const dedupedEdges = edges.filter((e) => {
+    if (seenEdgeIds.has(e.id)) return false;
+    seenEdgeIds.add(e.id);
+    return true;
+  });
+
   return NextResponse.json({
     nodes,
-    edges,
+    edges: dedupedEdges,
     clusters,
     hubStart: earliest.slice(0, 10),
     hubEnd: new Date().toISOString().slice(0, 10),
     counts: {
       nodes: nodes.length,
-      edges: edges.length,
+      edges: dedupedEdges.length,
       clusters: clusters.length,
       cappedConcepts: (concepts || []).length === MAX_CONCEPTS,
       cappedDocs: (docs || []).length === MAX_DOCS,

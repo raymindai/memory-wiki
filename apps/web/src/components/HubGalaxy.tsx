@@ -9,9 +9,9 @@
 //
 // API:  GET /api/user/hub/constellation  (owner-only)
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback, memo } from "react";
 import Link from "next/link";
-import { Play, Pause, Maximize2, ChevronLeft } from "lucide-react";
+import { Play, Pause, Maximize2, ChevronLeft, FileText, ExternalLink, X } from "lucide-react";
 import ELK from "elkjs/lib/elk.bundled.js";
 
 interface ApiNode {
@@ -69,6 +69,13 @@ const NEBULA_PALETTE = [
 ];
 
 const KIND_ORDER: Array<ApiNode["kind"]> = ["concept", "entity", "tag", "doc"];
+
+// Growth playback — CSS-driven. Total animation window + per-element
+// fade-in duration. Each element's animation-delay is interpolated from
+// its createdAt across PLAY_ANIM_MS so the staggered reveal feels like
+// a time-lapse of the hub forming itself.
+const PLAY_ANIM_MS = 6000;
+const PLAY_FADE_MS = 700;
 
 // Fake astronomical designation, deterministic per node id.
 // Only used in the detail panel now (hover tooltip dropped per feedback).
@@ -219,6 +226,15 @@ function GalaxyKeyframes() {
         0%   { opacity: 0; transform: scale(0.6); }
         100% { opacity: 1; transform: scale(1); }
       }
+      /* Opacity-only fade. Used by the Growth playback schedule on
+         elements that already carry their own transform (star wrappers
+         with translate, nebulae with drift) — galaxyFadeIn's CSS
+         transform would override those attribute / animation transforms
+         and yank the element to origin during the fade. */
+      @keyframes galaxyOpacityIn {
+        0%   { opacity: 0; }
+        100% { opacity: 1; }
+      }
       @keyframes galaxyMagneticPulse {
         0%   { transform: scale(0.8); opacity: 0.8; }
         100% { transform: scale(3.6); opacity: 0; }
@@ -274,6 +290,183 @@ function GalaxyKeyframes() {
   );
 }
 
+// Memoized star. Stable props → React.memo's default shallow compare
+// skips re-render. Stars that don't change between scrub ticks (the
+// vast majority) cost nothing to reconcile. Inline JSX inside HubGalaxy
+// was being re-created on every cutoff change, which is what made the
+// scrub feel jerky with hundreds of nodes on screen.
+type StarProps = {
+  node: Positioned;
+  viewK: number;
+  isSelected: boolean;
+  isHovered: boolean;
+  isIgniting: boolean;
+  // Time-cursor visibility. Toggled per scrub frame without mounting /
+  // unmounting the SVG node so the twinkle / float animations don't
+  // restart from t=0 every time the cursor crosses an element.
+  isTimeVisible: boolean;
+  dimmed: boolean;
+  showLabel: boolean;
+  floatEnabled: boolean;
+  twinkleEnabled: boolean;
+  playDelay: number | undefined;
+  onSelect: (id: string) => void;
+  onDoubleClick: (n: Positioned) => void;
+  onHover: (id: string | null) => void;
+  // Stable callback that returns true if the pointer was dragging at
+  // mouseup (we should swallow the synthetic click). Using a function
+  // instead of the underlying ref keeps StarProps' types narrow and
+  // avoids MutableRefObject variance complaints.
+  shouldSwallowClick: () => boolean;
+};
+const Star = memo(function Star({
+  node: n,
+  viewK,
+  isSelected,
+  isHovered,
+  isIgniting,
+  isTimeVisible,
+  dimmed,
+  showLabel,
+  floatEnabled,
+  twinkleEnabled,
+  playDelay,
+  onSelect,
+  onDoubleClick,
+  onHover,
+  shouldSwallowClick,
+}: StarProps) {
+  const haloR = n.size * (isSelected ? 7 : isHovered ? 6 : 4.5);
+  const coreR = n.size * (isSelected ? 1.5 : isHovered ? 1.25 : 1);
+  const haloFill = n.api.kind === "doc" && n.api.bundleId
+    ? `url(#halo-doc-${n.api.bundleId})`
+    : `url(#halo-${n.api.kind})`;
+  // Deterministic per-star animation phase, derived from the id so it's
+  // stable across renders (idx-based picks would shift when the visible
+  // set's ordering changes, which used to retrigger CSS animations).
+  const h = hashStr(n.id) >>> 0;
+  const floatIdx = h % 4;
+  const period = 7 + (h % 7);
+  return (
+    <g
+      transform={`translate(${n.x}, ${n.y})`}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (shouldSwallowClick()) return;
+        onSelect(n.id);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onDoubleClick(n);
+      }}
+      onMouseEnter={() => onHover(n.id)}
+      onMouseLeave={() => onHover(null)}
+      className={isIgniting ? "galaxy-fade-in" : undefined}
+      style={{
+        cursor: "pointer",
+        // Three layers of visibility: time cursor (scrub), focus dim,
+        // and explicit invisibility for not-yet-born elements.
+        opacity: !isTimeVisible ? 0 : dimmed ? 0.05 : 1,
+        pointerEvents: isTimeVisible ? undefined : "none",
+        transition: "opacity 0.18s ease-out",
+        ...(playDelay !== undefined ? {
+          animation: `galaxyOpacityIn ${PLAY_FADE_MS}ms ease-out ${playDelay}ms both`,
+        } : isIgniting ? {
+          animation: "galaxyFadeIn 700ms ease-out",
+        } : null),
+      }}
+    >
+      {isHovered && (
+        <circle
+          r={haloR}
+          fill="none"
+          stroke={n.colour}
+          strokeWidth={0.45 / Math.max(0.5, viewK)}
+          strokeOpacity={0.55}
+          className="galaxy-hover-ring"
+          style={{ animation: "galaxyHoverRipple 1.4s ease-out infinite", pointerEvents: "none" }}
+        />
+      )}
+      <g
+        className="galaxy-star"
+        style={floatEnabled ? {
+          animation: `galaxyFloat${floatIdx} ${period}s ease-in-out -${n.twinkleDelay * 1.2}s infinite`,
+        } : undefined}
+      >
+        <circle
+          r={haloR}
+          fill={haloFill}
+          style={twinkleEnabled ? {
+            animation: `galaxyTwinkle ${5 + (n.twinkleDelay % 4)}s ease-in-out -${n.twinkleDelay}s infinite`,
+          } : undefined}
+        />
+        <circle
+          r={coreR}
+          fill="#fafafa"
+          filter={isSelected || isHovered ? "url(#glow-core-strong)" : "url(#glow-core)"}
+          style={isSelected ? {
+            animation: `galaxyPulse 2.4s ease-in-out infinite`,
+            transformBox: "fill-box",
+            transformOrigin: "center",
+          } : undefined}
+        />
+      </g>
+      {showLabel && (
+        <text
+          y={haloR + 10}
+          textAnchor="middle"
+          style={{
+            fontSize: 10 / Math.max(0.6, viewK * 0.7),
+            fill: "#fafafa",
+            fontFamily: "ui-monospace, 'JetBrains Mono', 'Fira Code', monospace",
+            letterSpacing: 0.3,
+            pointerEvents: "none",
+            paintOrder: "stroke",
+            stroke: "rgba(9, 9, 11, 0.85)",
+            strokeWidth: 3 / Math.max(0.6, viewK * 0.7),
+            strokeLinejoin: "round",
+            opacity: dimmed ? 0 : 0.9,
+          }}
+        >
+          {n.api.label}
+        </text>
+      )}
+    </g>
+  );
+});
+
+// Memoized edge. Edges have no event handlers, so the default shallow
+// compare is sufficient. The parent passes the precomputed `d`
+// attribute and visual props — when none change, the path skips
+// reconciliation entirely.
+type EdgePathProps = {
+  d: string;
+  stroke: string;
+  strokeOpacity: number;
+  strokeWidth: number;
+  isTimeVisible: boolean;
+  playDelay: number | undefined;
+};
+const EdgePath = memo(function EdgePath({ d, stroke, strokeOpacity, strokeWidth, isTimeVisible, playDelay }: EdgePathProps) {
+  return (
+    <path
+      d={d}
+      fill="none"
+      stroke={stroke}
+      strokeOpacity={strokeOpacity}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      style={{
+        opacity: isTimeVisible ? 1 : 0,
+        transition: "opacity 0.18s ease-out",
+        ...(playDelay !== undefined ? {
+          animation: `galaxyOpacityIn ${PLAY_FADE_MS}ms ease-out ${playDelay}ms both`,
+        } : null),
+      }}
+    />
+  );
+});
+
 function GalaxyButton({
   active,
   onClick,
@@ -328,6 +521,10 @@ export default function HubGalaxy({ authHeaders }: Props) {
   const [positions, setPositions] = useState<Map<string, { x: number; y: number }> | null>(null);
   const [sliderDate, setSliderDate] = useState<string>("");
   const [playing, setPlaying] = useState(false);
+  // CSS-driven Growth playback: when non-null, every star/edge/nebula
+  // in this map renders with a baked-in `animation-delay` for fade-in.
+  // No per-frame React state updates required during play.
+  const [playSchedule, setPlaySchedule] = useState<Map<string, number> | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [hoveredBundleId, setHoveredBundleId] = useState<string | null>(null);
@@ -345,6 +542,19 @@ export default function HubGalaxy({ authHeaders }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const playRef = useRef<number | null>(null);
+  // Refs for direct-DOM updates of the timeline cursor + slider thumb
+  // during CSS-driven playback (avoids re-rendering React on the rAF
+  // tick — and keeps the native range input's thumb in lockstep with
+  // the floating cursor label so they don't drift apart visually).
+  const cursorLabelRef = useRef<HTMLSpanElement>(null);
+  const cursorThumbRef = useRef<HTMLSpanElement>(null);
+  const sliderInputRef = useRef<HTMLInputElement>(null);
+  // rAF-coalesce scrub events so a fast drag doesn't trigger one full
+  // SVG reconcile per native onChange (browsers can fire these faster
+  // than the display refresh on trackpads). We capture the latest
+  // fractional value in a ref and flush it once per frame.
+  const scrubPendingRef = useRef<number | null>(null);
+  const scrubRafIdRef = useRef<number | null>(null);
   const cameraAnimRef = useRef<number | null>(null);
   const dragRef = useRef<{ startX: number; startY: number; viewX: number; viewY: number; moved: boolean } | null>(null);
   const prevVisibleIdsRef = useRef<Set<string>>(new Set());
@@ -480,23 +690,24 @@ export default function HubGalaxy({ authHeaders }: Props) {
     return out;
   }, [hoveredBundleId, data]);
 
+  // `visible` no longer depends on the time cursor — that filter moved
+  // to a per-element `isTimeVisible` prop so scrubbing doesn't mount /
+  // unmount hundreds of SVG nodes per frame (the actual cause of the
+  // scrub jank — each remount also restarts the CSS twinkle / float
+  // animations). Kind / search / focus filters stay here because
+  // toggling them is a discrete user action; momentary mount cost is
+  // fine in that case.
   const visible = useMemo(() => {
     if (!data) return { nodes: [] as Positioned[], edges: [] as ApiEdge[], neighbours: new Set<string>(), hoverNeighbours: new Set<string>() };
-    // Strict start-of-day boundary so scrubbing back to hubStart
-    // actually empties the canvas (end-of-day kept too much around
-    // and made the scrub feel broken).
-    const cutoff = (sliderDate || data.hubEnd) + "T00:00:00Z";
     const term = searchTerm.trim().toLowerCase();
     const visibleIds = new Set<string>();
     for (const n of data.nodes) {
-      if (n.createdAt > cutoff) continue;
       if (!visibleKinds.has(n.kind)) continue;
       visibleIds.add(n.id);
     }
     const neighbours = new Set<string>();
     if (selectedId && visibleIds.has(selectedId)) {
       for (const e of data.edges) {
-        if (e.createdAt > cutoff) continue;
         if (e.source === selectedId && visibleIds.has(e.target)) neighbours.add(e.target);
         if (e.target === selectedId && visibleIds.has(e.source)) neighbours.add(e.source);
       }
@@ -504,7 +715,6 @@ export default function HubGalaxy({ authHeaders }: Props) {
     const hoverNeighbours = new Set<string>();
     if (hoveredId && hoveredId !== selectedId && visibleIds.has(hoveredId)) {
       for (const e of data.edges) {
-        if (e.createdAt > cutoff) continue;
         if (e.source === hoveredId && visibleIds.has(e.target)) hoverNeighbours.add(e.target);
         if (e.target === hoveredId && visibleIds.has(e.source)) hoverNeighbours.add(e.source);
       }
@@ -515,41 +725,54 @@ export default function HubGalaxy({ authHeaders }: Props) {
     );
     const renderedIds = new Set(nodes.map((n) => n.id));
     const edges = data.edges.filter(
-      (e) => e.createdAt <= cutoff && renderedIds.has(e.source) && renderedIds.has(e.target),
+      (e) => renderedIds.has(e.source) && renderedIds.has(e.target),
     );
     return { nodes, edges, neighbours, hoverNeighbours };
-  }, [data, all, sliderDate, visibleKinds, searchTerm, selectedId, hoveredId]);
+  }, [data, all, visibleKinds, searchTerm, selectedId, hoveredId]);
 
-  // Nebulae also gate on cutoff — during Growth replay they appear
-  // progressively as the bundles' docs come into existence. Centroid
-  // recomputes against currently-visible members so the cloud moves as
-  // the bundle fills out.
+  // Cutoff in ms — read per render to compute each element's isTimeVisible.
+  const cutoffMs = useMemo(() => {
+    if (!data) return Number.POSITIVE_INFINITY;
+    const raw = sliderDate || data.hubEnd;
+    return new Date(raw.length >= 19 ? raw : raw + "T00:00:00Z").getTime();
+  }, [data, sliderDate]);
+
+  // Stable lookup tables for createdAt (ms). One-time cost per data fetch.
+  const nodeMs = useMemo(() => {
+    const m = new Map<string, number>();
+    if (data) for (const n of data.nodes) m.set(n.id, new Date(n.createdAt).getTime());
+    return m;
+  }, [data]);
+  const edgeMs = useMemo(() => {
+    const m = new Map<string, number>();
+    if (data) for (const e of data.edges) m.set(e.id, new Date(e.createdAt).getTime());
+    return m;
+  }, [data]);
+  const clusterMs = useMemo(() => {
+    const m = new Map<string, number>();
+    if (data) for (const c of data.clusters) m.set(c.id, new Date(c.createdAt).getTime());
+    return m;
+  }, [data]);
+
+  // Nebulae — stable centroid based on the bundle's full member set.
+  // (Previously recomputed against time-visible members on every scrub
+  // tick, which caused the centroid to jump + the drift animation to
+  // restart each frame. Per-element opacity now toggles via clusterMs.)
   const nebulae = useMemo<NebulaBlob[]>(() => {
     if (!data || all.length === 0) return [];
-    // Strict start-of-day boundary so scrubbing back to hubStart
-    // actually empties the canvas (end-of-day kept too much around
-    // and made the scrub feel broken).
-    const cutoff = (sliderDate || data.hubEnd) + "T00:00:00Z";
     const byBundle = new Map<string, Positioned[]>();
     for (const n of all) {
       if (n.api.kind !== "doc" || !n.api.bundleId) continue;
-      if (n.api.createdAt > cutoff) continue;
       const arr = byBundle.get(n.api.bundleId) || [];
       arr.push(n);
       byBundle.set(n.api.bundleId, arr);
     }
     const out: NebulaBlob[] = [];
     data.clusters.forEach((c, idx) => {
-      if (c.createdAt > cutoff) return;
       const members = byBundle.get(c.id);
       if (!members || members.length === 0) return;
       const cx = members.reduce((s, m) => s + m.x, 0) / members.length;
       const cy = members.reduce((s, m) => s + m.y, 0) / members.length;
-      // Radius derived from the actual spread of the members — max
-      // distance from the centroid plus padding. Single-doc bundles
-      // get a small halo; spread-out bundles get a cloud that
-      // actually contains them. (Old fixed formula made nebulae
-      // float between docs instead of around them.)
       let maxDist = 0;
       for (const m of members) {
         const d = Math.hypot(m.x - cx, m.y - cy);
@@ -565,37 +788,69 @@ export default function HubGalaxy({ authHeaders }: Props) {
       });
     });
     return out;
-  }, [data, all, sliderDate]);
+  }, [data, all]);
 
-  // Replay tween
+  // Replay — CSS-driven. We compute a per-element animation-delay map
+  // once at play start, expand the visible set to cover the whole hub,
+  // and let the browser compositor handle the staggered fade-in at native
+  // 60fps. No per-frame React state updates touch the SVG tree, which is
+  // the only way to keep playback smooth with hundreds of stars and
+  // edges. The timeline cursor label is updated via refs so its rAF
+  // doesn't trigger React renders either.
   useEffect(() => {
     if (!playing || !data) return;
     const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
     const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
-    const cursorStart = sliderDate
-      ? new Date(sliderDate + "T00:00:00Z").getTime()
-      : startMs;
-    const fromMs = cursorStart >= endMs ? startMs : cursorStart;
-    const totalMs = endMs - fromMs;
-    const animMs = 6000;
+    const totalMs = endMs - startMs;
     if (totalMs <= 0) { setPlaying(false); return; }
-    const startT = performance.now();
-    const tick = () => {
-      const elapsed = performance.now() - startT;
-      const t = Math.min(1, elapsed / animMs);
-      const now = fromMs + totalMs * t;
-      setSliderDate(new Date(now).toISOString().slice(0, 10));
-      if (t >= 1) {
-        setPlaying(false);
-        playRef.current = null;
-        return;
-      }
-      playRef.current = requestAnimationFrame(tick);
+
+    const schedule = new Map<string, number>();
+    const addDelay = (id: string, createdAt: string | undefined) => {
+      if (!createdAt) return;
+      const t = new Date(createdAt).getTime();
+      // Elements that pre-date the play start window simply stay where
+      // they are; only future-of-cursor elements get fade-in delays.
+      if (t <= startMs) return;
+      schedule.set(
+        id,
+        Math.min(PLAY_ANIM_MS - 1, ((t - startMs) / totalMs) * PLAY_ANIM_MS),
+      );
     };
-    playRef.current = requestAnimationFrame(tick);
+    for (const n of data.nodes) addDelay(n.id, n.createdAt);
+    for (const e of data.edges) addDelay(e.id, e.createdAt);
+    for (const c of data.clusters) addDelay(c.id, c.createdAt);
+
+    // Expand visible to the whole range — everything in the schedule
+    // renders immediately as opacity:0, CSS reveals them over animMs.
+    setSliderDate(new Date(endMs).toISOString());
+    setPlaySchedule(schedule);
+
+    // Live timeline cursor — DOM-direct, no React re-render. Also drives
+    // the native range input's thumb so it tracks the floating cursor
+    // (without this, the thumb stays at the right end because sliderDate
+    // is pinned to hubEnd while CSS handles the staggered reveal).
+    const startT = performance.now();
+    const tickLabel = () => {
+      const elapsed = performance.now() - startT;
+      const t = Math.min(1, elapsed / PLAY_ANIM_MS);
+      const cur = new Date(startMs + totalMs * t).toISOString().slice(0, 10);
+      if (cursorLabelRef.current) cursorLabelRef.current.textContent = cur;
+      if (cursorThumbRef.current) cursorThumbRef.current.style.left = `${Math.max(8, Math.min(92, t * 100))}%`;
+      if (sliderInputRef.current) sliderInputRef.current.value = String(Math.round(t * 1000));
+      if (t < 1) playRef.current = requestAnimationFrame(tickLabel);
+    };
+    playRef.current = requestAnimationFrame(tickLabel);
+
+    const stopTimer = setTimeout(() => {
+      setPlaying(false);
+      setPlaySchedule(null);
+    }, PLAY_ANIM_MS + PLAY_FADE_MS + 100);
+
     return () => {
       if (playRef.current) cancelAnimationFrame(playRef.current);
       playRef.current = null;
+      clearTimeout(stopTimer);
+      setPlaySchedule(null);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing]);
@@ -619,10 +874,13 @@ export default function HubGalaxy({ authHeaders }: Props) {
     }
   }, [visible.nodes, selectedId, hoveredId, hoveredBundleId]);
 
-  // Ignite tracker — same as before, only during active play
+  // Ignite tracker — used to fade-in stars that newly enter the visible
+  // set. Skipped while a CSS-driven play schedule is active (the schedule
+  // handles fade-in via animation-delay, so duplicating here would cause
+  // double-anim and re-renders).
   useEffect(() => {
     const currentIds = new Set(visible.nodes.map((n) => n.id));
-    if (playing) {
+    if (playing && !playSchedule) {
       const prev = prevVisibleIdsRef.current;
       const newOnes: string[] = [];
       for (const id of currentIds) if (!prev.has(id)) newOnes.push(id);
@@ -833,6 +1091,15 @@ export default function HubGalaxy({ authHeaders }: Props) {
     setSelectedId(n.id);
   }, [size, animateViewTo]);
 
+  // Stable click handler — id arg form lets <Star memo> hold a reference
+  // identity across scrub frames so its prop check passes.
+  const handleStarSelect = useCallback((id: string) => {
+    setSelectedId((prev) => (prev === id ? null : id));
+  }, []);
+  const shouldSwallowStarClick = useCallback(() => {
+    return !!dragRef.current?.moved;
+  }, []);
+
   const selected = selectedId ? apiMap.get(selectedId) : null;
   const linkedDocs = useMemo(() => {
     if (!selected || !data) return [];
@@ -847,10 +1114,15 @@ export default function HubGalaxy({ authHeaders }: Props) {
     if (!data) return 0;
     const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
     const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
-    const curMs = new Date((sliderDate || data.hubEnd) + "T00:00:00Z").getTime();
+    const raw = sliderDate || data.hubEnd;
+    const curMs = new Date(raw.length >= 19 ? raw : raw + "T00:00:00Z").getTime();
     const total = Math.max(1, endMs - startMs);
     return Math.max(0, Math.min(1, (curMs - startMs) / total));
   }, [data, sliderDate]);
+
+  // Display date — sliderDate may carry sub-day precision during Growth
+  // playback, so always slice to YYYY-MM-DD for the UI chrome.
+  const displayDate = sliderDate ? sliderDate.slice(0, 10) : "";
 
   const cosmosWrap: React.CSSProperties = {
     height: "100vh",
@@ -1295,18 +1567,29 @@ export default function HubGalaxy({ authHeaders }: Props) {
               ))}
             </defs>
 
-            {/* WORLD. Keyed on sliderDate so the layer unmounts and
-                remounts on scrub — defensive against React reconciler
-                holding on to stale <path> elements when the visible
-                set goes through transitions (seen as "lines that
-                don't update"). */}
-            <g key={`world-${sliderDate}`} transform={`translate(${view.x}, ${view.y}) scale(${view.k})`}>
+            {/* WORLD. Children (nebulae / edges / stars) are keyed by
+                their stable ids, so React reconciles add/remove cleanly
+                as the visible set changes during scrub or playback. Do
+                NOT key this group on sliderDate — doing so unmounts and
+                remounts the entire layer on every tick, resetting every
+                CSS animation and producing visible jank. */}
+            <g transform={`translate(${view.x}, ${view.y}) scale(${view.k})`}>
               {/* Nebulae — also respect focus state. When something is
                   selected/hovered/searched, nebulae unrelated to the
                   focused node's bundle drop to a near-invisible 0.08. */}
               <g style={{ mixBlendMode: "screen" }}>
                 {nebulae.map((b, idx) => {
                   const dimmed = focusing && !focusedBundleIds.has(b.id);
+                  const playDelay = playSchedule?.get(b.id);
+                  const isTimeVisible = (clusterMs.get(b.id) ?? 0) <= cutoffMs;
+                  const driftDur = 28 + (idx % 5) * 6;
+                  const driftDelay = -(idx * 3.7);
+                  const animation = playDelay !== undefined
+                    ? `galaxyNebulaDrift ${driftDur}s ease-in-out ${driftDelay}s infinite, galaxyOpacityIn ${PLAY_FADE_MS}ms ease-out ${playDelay}ms both`
+                    : `galaxyNebulaDrift ${driftDur}s ease-in-out ${driftDelay}s infinite`;
+                  // Visibility via opacity (not mount/unmount) so the
+                  // drift animation never restarts mid-scrub.
+                  const opacity = !isTimeVisible ? 0 : dimmed ? 0.08 : 1;
                   return (
                     <circle
                       key={b.id}
@@ -1315,12 +1598,11 @@ export default function HubGalaxy({ authHeaders }: Props) {
                       r={b.radius}
                       fill={`url(#neb-${b.id})`}
                       filter="url(#nebula-blur)"
-                      opacity={dimmed ? 0.08 : 1}
+                      opacity={opacity}
                       style={{
-                        animation: `galaxyNebulaDrift ${28 + (idx % 5) * 6}s ease-in-out infinite`,
-                        animationDelay: `-${idx * 3.7}s`,
+                        animation,
                         transformOrigin: `${b.x}px ${b.y}px`,
-                        transition: "opacity 0.3s ease",
+                        transition: "opacity 0.25s ease-out",
                       }}
                     />
                   );
@@ -1355,15 +1637,16 @@ export default function HubGalaxy({ authHeaders }: Props) {
                     const cx = (a.x + b.x) / 2 + (-dy / len) * bend;
                     const cy = (a.y + b.y) / 2 + (dx / len) * bend;
                     const d = `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
+                    const isTimeVisible = (edgeMs.get(e.id) ?? 0) <= cutoffMs;
                     return (
-                      <path
+                      <EdgePath
                         key={e.id}
                         d={d}
-                        fill="none"
                         stroke="#fafafa"
                         strokeOpacity={e.kind === "concept_concept" ? 0.09 : 0.05}
                         strokeWidth={0.35 / Math.max(0.5, view.k * 0.7)}
-                        strokeLinecap="round"
+                        isTimeVisible={isTimeVisible}
+                        playDelay={playSchedule?.get(e.id)}
                       />
                     );
                   })}
@@ -1437,9 +1720,9 @@ export default function HubGalaxy({ authHeaders }: Props) {
                   compositor. Now only large + on-focus stars float;
                   tiny dimmed stars get nothing. */}
               <g>
-                {visible.nodes.map((n, idx) => {
+                {visible.nodes.map((n) => {
                   // Viewport culling — convert world coord to screen and
-                  // skip if outside the canvas (+ margin for halo bleed).
+                  // skip if offscreen (+ margin for halo bleed).
                   const sx = view.x + n.x * view.k;
                   const sy = view.y + n.y * view.k;
                   const cullMargin = 100;
@@ -1448,107 +1731,28 @@ export default function HubGalaxy({ authHeaders }: Props) {
 
                   const isSelected = n.id === selectedId;
                   const isHovered = n.id === hoveredId;
-                  const isIgniting = igniteEntries.has(n.id);
                   const dimmed = focusing && !focusSet.has(n.id);
-                  const haloR = n.size * (isSelected ? 7 : isHovered ? 6 : 4.5);
-                  const coreR = n.size * (isSelected ? 1.5 : isHovered ? 1.25 : 1);
-                  const haloFill =
-                    n.api.kind === "doc" && n.api.bundleId
-                      ? `url(#halo-doc-${n.api.bundleId})`
-                      : `url(#halo-${n.api.kind})`;
-                  const showLabel = isSelected || isHovered || (focusing && focusSet.has(n.id)) || view.k >= 1.4;
-                  // Animation gates — kill anims when:
-                  //   - dimmed (no point animating something invisible)
-                  //   - very small at low zoom (sub-pixel motion is noise)
-                  // Float only on giants OR focused stars.
                   const animEnabled = !dimmed && view.k >= 0.45;
-                  const floatEnabled = animEnabled && (n.size > 3 || isSelected || isHovered);
-                  const twinkleEnabled = animEnabled;
-                  const floatIdx = idx % 4;
-                  const period = 7 + (idx % 7);
+                  const isTimeVisible = (nodeMs.get(n.id) ?? 0) <= cutoffMs;
                   return (
-                    <g
+                    <Star
                       key={n.id}
-                      transform={`translate(${n.x}, ${n.y})`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (dragRef.current?.moved) return;
-                        setSelectedId(n.id === selectedId ? null : n.id);
-                      }}
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        handleStarDoubleClick(n);
-                      }}
-                      onMouseEnter={() => queueHover(n.id)}
-                      onMouseLeave={() => queueHover(null)}
-                      className={isIgniting ? "galaxy-fade-in" : undefined}
-                      style={{
-                        cursor: "pointer",
-                        opacity: dimmed ? 0.05 : 1,
-                        transition: "opacity 0.3s ease",
-                        ...(isIgniting ? {
-                          animation: "galaxyFadeIn 700ms ease-out",
-                        } : null),
-                      }}
-                    >
-                      {isHovered && (
-                        <circle
-                          r={haloR}
-                          fill="none"
-                          stroke={n.colour}
-                          strokeWidth={0.8 / Math.max(0.5, view.k)}
-                          strokeOpacity={0.6}
-                          className="galaxy-hover-ring"
-                          style={{ animation: "galaxyHoverRipple 1.4s ease-out infinite", pointerEvents: "none" }}
-                        />
-                      )}
-                      <g
-                        className="galaxy-star"
-                        style={floatEnabled ? {
-                          animation: `galaxyFloat${floatIdx} ${period}s ease-in-out infinite`,
-                          animationDelay: `-${n.twinkleDelay * 1.2}s`,
-                        } : undefined}
-                      >
-                        <circle
-                          r={haloR}
-                          fill={haloFill}
-                          style={twinkleEnabled ? {
-                            animation: `galaxyTwinkle ${5 + (n.twinkleDelay % 4)}s ease-in-out infinite`,
-                            animationDelay: `-${n.twinkleDelay}s`,
-                          } : undefined}
-                        />
-                        <circle
-                          r={coreR}
-                          fill="#fafafa"
-                          filter={isSelected || isHovered ? "url(#glow-core-strong)" : "url(#glow-core)"}
-                          style={isSelected ? {
-                            animation: `galaxyPulse 2.4s ease-in-out infinite`,
-                            transformBox: "fill-box",
-                            transformOrigin: "center",
-                          } : undefined}
-                        />
-                      </g>
-                      {showLabel && (
-                        <text
-                          y={haloR + 10}
-                          textAnchor="middle"
-                          style={{
-                            fontSize: 10 / Math.max(0.6, view.k * 0.7),
-                            fill: "#fafafa",
-                            fontFamily: "ui-monospace, 'JetBrains Mono', 'Fira Code', monospace",
-                            letterSpacing: 0.3,
-                            pointerEvents: "none",
-                            paintOrder: "stroke",
-                            stroke: "rgba(9, 9, 11, 0.85)",
-                            strokeWidth: 3 / Math.max(0.6, view.k * 0.7),
-                            strokeLinejoin: "round",
-                            opacity: dimmed ? 0 : 0.9,
-                          }}
-                        >
-                          {n.api.label}
-                        </text>
-                      )}
-                    </g>
+                      node={n}
+                      viewK={view.k}
+                      isSelected={isSelected}
+                      isHovered={isHovered}
+                      isIgniting={igniteEntries.has(n.id)}
+                      isTimeVisible={isTimeVisible}
+                      dimmed={dimmed}
+                      showLabel={isSelected || isHovered || (focusing && focusSet.has(n.id)) || view.k >= 1.4}
+                      floatEnabled={animEnabled && (n.size > 3 || isSelected || isHovered)}
+                      twinkleEnabled={animEnabled}
+                      playDelay={playSchedule?.get(n.id)}
+                      onSelect={handleStarSelect}
+                      onDoubleClick={handleStarDoubleClick}
+                      onHover={queueHover}
+                      shouldSwallowClick={shouldSwallowStarClick}
+                    />
                   );
                 })}
               </g>
@@ -1579,30 +1783,33 @@ export default function HubGalaxy({ authHeaders }: Props) {
           </svg>
         </div>
 
-        {/* Detail panel */}
+        {/* Detail panel — typography + spacing tracks mdfy.app's left
+            sidebar. Doc/concept references reuse the SidebarFolder
+            TabRow look: compact rounded rows, hover:bg-[var(--toggle-bg)],
+            tiny coloured dot prefix instead of bordered chips. */}
         {selected && (
           <aside
             style={{
               width: 320,
               borderLeft: "1px solid var(--border-dim)",
-              padding: "18px 18px 22px",
+              padding: "14px 12px 18px",
               display: "flex",
               flexDirection: "column",
-              gap: 14,
+              gap: 12,
               overflowY: "auto",
               flexShrink: 0,
               background: "color-mix(in srgb, var(--background) 80%, transparent 20%)",
               backdropFilter: "blur(10px)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            {/* Kind + date + close, single compact line */}
+            <div className="flex items-center gap-2" style={{ padding: "0 4px" }}>
               <span
                 className="text-caption font-mono uppercase"
                 style={{
                   color: colourForKind(selected.kind),
-                  letterSpacing: 1,
+                  letterSpacing: 0.8,
                   fontWeight: 600,
-                  textShadow: `0 0 6px ${colourForKind(selected.kind)}55`,
                 }}
               >
                 {selected.kind}
@@ -1613,45 +1820,64 @@ export default function HubGalaxy({ authHeaders }: Props) {
               <span style={{ flex: 1 }} />
               <button
                 onClick={() => setSelectedId(null)}
+                className="rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
                 style={{
+                  width: 22,
+                  height: 22,
                   background: "transparent",
                   border: "none",
                   color: "var(--text-faint)",
                   cursor: "pointer",
-                  fontSize: 18,
-                  lineHeight: 1,
-                  padding: 0,
                 }}
                 aria-label="Close"
               >
-                ×
+                <X width={13} height={13} />
               </button>
             </div>
 
-            <h3 className="text-heading" style={{ margin: 0, color: "var(--text-primary)", lineHeight: 1.3 }}>
-              {selected.label}
-            </h3>
-
-            <p className="text-caption font-mono" style={{ color: "var(--text-faint)", margin: 0, letterSpacing: 0.5, textTransform: "uppercase" }}>
-              {starDesignation(selected.id)}
-            </p>
+            <div style={{ padding: "0 4px", display: "flex", flexDirection: "column", gap: 6 }}>
+              <h3 className="text-heading" style={{ margin: 0, color: "var(--text-primary)", lineHeight: 1.3 }}>
+                {selected.label}
+              </h3>
+              <p className="text-caption font-mono" style={{ color: "var(--text-faint)", margin: 0, letterSpacing: 0.5, textTransform: "uppercase" }}>
+                {starDesignation(selected.id)}
+                {selected.kind !== "doc" && (selected.occurrence || 0) > 0 && (
+                  <span style={{ color: "var(--text-faint)" }}>
+                    {"  /  "}
+                    {selected.occurrence} mentions in {(selected.docIds || []).length}{" "}
+                    {(selected.docIds || []).length === 1 ? "doc" : "docs"}
+                  </span>
+                )}
+              </p>
+            </div>
 
             {selected.description && (
-              <p className="text-body" style={{ color: "var(--text-secondary)", lineHeight: 1.55, margin: 0 }}>
+              <p className="text-body" style={{ color: "var(--text-secondary)", lineHeight: 1.55, margin: 0, padding: "0 4px" }}>
                 {selected.description}
               </p>
             )}
 
-            {selected.kind !== "doc" && (selected.occurrence || 0) > 0 && (
-              <p className="text-caption" style={{ color: "var(--text-faint)", margin: 0 }}>
-                magnitude {selected.occurrence} (in {(selected.docIds || []).length}{" "}
-                {(selected.docIds || []).length === 1 ? "doc" : "docs"})
-              </p>
+            {selected.kind === "doc" && (
+              <a
+                href={`/${selected.id.startsWith("doc:") ? selected.id.slice(4) : selected.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{
+                  padding: "6px 8px",
+                  color: "var(--accent)",
+                  textDecoration: "none",
+                  background: "var(--accent-dim)",
+                }}
+              >
+                <ExternalLink width={12} height={12} className="shrink-0" />
+                <span>Open document</span>
+              </a>
             )}
 
             {linkedDocs.length > 0 && (
               <div>
-                <label className="text-caption font-mono uppercase" style={{ color: "var(--text-faint)", display: "block", marginBottom: 6, letterSpacing: 0.5 }}>
+                <label className="text-caption font-mono uppercase" style={{ color: "var(--text-faint)", display: "block", marginBottom: 4, marginLeft: 6, letterSpacing: 0.5 }}>
                   Anchored to
                 </label>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
@@ -1663,16 +1889,12 @@ export default function HubGalaxy({ authHeaders }: Props) {
                           href={`/${id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-body"
-                          style={{
-                            color: "var(--text-primary)",
-                            textDecoration: "none",
-                            display: "block",
-                            padding: "5px 0",
-                            borderBottom: "1px solid var(--border-dim)",
-                          }}
+                          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-primary)", textDecoration: "none" }}
+                          title={d.label}
                         >
-                          {d.label}
+                          <FileText width={12} height={12} className="shrink-0" style={{ color: "var(--text-faint)" }} />
+                          <span className="truncate flex-1">{d.label}</span>
                         </a>
                       </li>
                     );
@@ -1681,49 +1903,44 @@ export default function HubGalaxy({ authHeaders }: Props) {
               </div>
             )}
 
-            {selected.kind === "doc" && (
-              <a
-                href={`/${selected.id.startsWith("doc:") ? selected.id.slice(4) : selected.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body"
-                style={{ color: "var(--accent)", textDecoration: "none", marginTop: 2 }}
-              >
-                Open document →
-              </a>
-            )}
-
             {visible.neighbours.size > 0 && (
               <div>
-                <label className="text-caption font-mono uppercase" style={{ color: "var(--text-faint)", display: "block", marginBottom: 6, letterSpacing: 0.5 }}>
+                <label className="text-caption font-mono uppercase" style={{ color: "var(--text-faint)", display: "block", marginBottom: 4, marginLeft: 6, letterSpacing: 0.5 }}>
                   Connected
                 </label>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {Array.from(visible.neighbours)
                     .map((id) => apiMap.get(id))
                     .filter((n): n is ApiNode => !!n && n.kind !== "doc")
-                    .slice(0, 12)
+                    .slice(0, 16)
                     .map((n) => {
                       const c = colourForKind(n.kind);
                       return (
-                        <button
-                          key={n.id}
-                          onClick={() => setSelectedId(n.id)}
-                          className="text-caption font-mono"
-                          style={{
-                            background: "var(--surface)",
-                            color: "var(--text-primary)",
-                            border: `1px solid ${c}33`,
-                            borderRadius: 4,
-                            padding: "3px 8px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {n.label}
-                        </button>
+                        <li key={n.id}>
+                          <button
+                            onClick={() => setSelectedId(n.id)}
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)] w-full text-left"
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "var(--text-primary)",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <span
+                              aria-hidden
+                              className="shrink-0 rounded-full"
+                              style={{ width: 6, height: 6, background: c, opacity: 0.85 }}
+                            />
+                            <span className="truncate flex-1">{n.label}</span>
+                            <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)", letterSpacing: 0.3 }}>
+                              {n.kind}
+                            </span>
+                          </button>
+                        </li>
                       );
                     })}
-                </div>
+                </ul>
               </div>
             )}
           </aside>
@@ -1750,8 +1967,8 @@ export default function HubGalaxy({ authHeaders }: Props) {
         <span
           className="text-caption font-mono"
           style={{
-            color: sliderDate === data.hubStart ? "var(--accent)" : "var(--text-faint)",
-            fontWeight: sliderDate === data.hubStart ? 600 : 400,
+            color: displayDate === data.hubStart ? "var(--accent)" : "var(--text-faint)",
+            fontWeight: displayDate === data.hubStart ? 600 : 400,
             letterSpacing: 0.3,
             flexShrink: 0,
             minWidth: 78,
@@ -1767,23 +1984,44 @@ export default function HubGalaxy({ authHeaders }: Props) {
             sitting on hubStart or hubEnd (the bound label tells you). */}
         <div style={{ flex: 1, position: "relative", height: 32, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <input
+            ref={sliderInputRef}
             type="range"
             min={0}
             max={1000}
-            value={Math.round(sliderPct * 1000)}
+            // Uncontrolled-ish: defaultValue seeds the thumb, scrub
+            // onChange writes the React-state cutoff via rAF coalesce
+            // (the browser keeps the thumb itself smooth regardless).
+            defaultValue={Math.round(sliderPct * 1000)}
             onChange={(e) => {
-              const v = Number(e.target.value) / 1000;
-              const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
-              const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
-              const target = startMs + (endMs - startMs) * v;
-              setPlaying(false);
-              setSliderDate(new Date(target).toISOString().slice(0, 10));
+              // Coalesce many native onChange events to one React update
+              // per animation frame. The SVG world reconciles for ~100
+              // stars + edges every cutoff change, which is the
+              // bottleneck on fast drags; capping to 60fps keeps the
+              // input responsive (native thumb tracks the finger) while
+              // bounding the reconcile rate.
+              scrubPendingRef.current = Number(e.currentTarget.value) / 1000;
+              if (scrubRafIdRef.current != null) return;
+              scrubRafIdRef.current = requestAnimationFrame(() => {
+                scrubRafIdRef.current = null;
+                const v = scrubPendingRef.current;
+                if (v == null || !data) return;
+                const startMs = new Date(data.hubStart + "T00:00:00Z").getTime();
+                const endMs = new Date(data.hubEnd + "T00:00:00Z").getTime();
+                const target = startMs + (endMs - startMs) * v;
+                setPlaying(false);
+                setSliderDate(new Date(target).toISOString().slice(0, 10));
+              });
             }}
             className="galaxy-range"
             style={{ width: "100%", position: "absolute", top: 4, left: 0 }}
           />
-          {sliderDate && sliderDate !== data.hubStart && sliderDate !== data.hubEnd && (
+          {/* Cursor — during CSS-driven playback both `left` and the
+              text are mutated via refs each rAF, so React doesn't
+              re-render the SVG world. Outside of playback the slider's
+              sliderPct + displayDate drive these the normal way. */}
+          {(playing || (displayDate && displayDate !== data.hubStart && displayDate !== data.hubEnd)) && (
             <span
+              ref={cursorThumbRef}
               className="text-caption font-mono"
               style={{
                 position: "absolute",
@@ -1795,10 +2033,10 @@ export default function HubGalaxy({ authHeaders }: Props) {
                 fontWeight: 600,
                 whiteSpace: "nowrap",
                 pointerEvents: "none",
-                transition: "left 0.05s linear",
+                transition: playing ? "none" : "left 0.05s linear",
               }}
             >
-              {sliderDate}
+              <span ref={cursorLabelRef}>{displayDate}</span>
             </span>
           )}
         </div>
@@ -1806,8 +2044,8 @@ export default function HubGalaxy({ authHeaders }: Props) {
         <span
           className="text-caption font-mono"
           style={{
-            color: (!sliderDate || sliderDate === data.hubEnd) ? "var(--accent)" : "var(--text-faint)",
-            fontWeight: (!sliderDate || sliderDate === data.hubEnd) ? 600 : 400,
+            color: (!displayDate || displayDate === data.hubEnd) ? "var(--accent)" : "var(--text-faint)",
+            fontWeight: (!displayDate || displayDate === data.hubEnd) ? 600 : 400,
             letterSpacing: 0.3,
             flexShrink: 0,
             minWidth: 78,
@@ -1823,7 +2061,10 @@ export default function HubGalaxy({ authHeaders }: Props) {
           active={playing}
           onClick={() => {
             if (playing) { setPlaying(false); return; }
-            setSliderDate(data.hubStart);
+            // No setSliderDate(hubStart) here — the play effect expands
+            // visible to the full range immediately and CSS handles the
+            // staggered reveal. Calling setSliderDate(hubStart) first
+            // caused a one-frame empty canvas before play kicked in.
             setPlaying(true);
           }}
           title={playing ? "Pause replay" : "Replay growth from the beginning"}
