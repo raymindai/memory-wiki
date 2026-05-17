@@ -45,7 +45,7 @@ import {
   Columns2, Bell, Share2, Menu, PanelLeft, Download, Plus, ArrowUpDown,
   FolderPlus, Folder, FolderOpen, File as FileIcon, MoreHorizontal,
   User, Users, Search, X, Trash2, RefreshCw, Lock, ShieldAlert, FileX,
-  LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus,
+  LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus, Wand2,
   ChevronsDownUp, ChevronsUpDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
@@ -8184,6 +8184,57 @@ export default function MdEditor() {
     setAiProcessing(null);
   }, [doRender, setMarkdown, tabs]);
 
+  // ─── Format raw text from chat input ───
+  // Takes whatever the user pasted into the AI chat, runs the `format`
+  // action server-side (LLM structures it as clean Markdown), then
+  // APPENDS the result to the current doc. Different from chat: the
+  // input is the raw payload, not an instruction. The user's typical
+  // flow is "I just pasted a blob of text I want as a section."
+  const handleFormatChatText = useCallback(async (rawText: string) => {
+    if (aiProcessing) return;
+    const text = rawText.trim();
+    if (text.length < 20) { showToast("Paste more text to format", "info"); return; }
+    const ct = tabs.find(t => t.id === activeTabIdRef.current);
+    if (ct?.readonly || ct?.permission === "readonly") { showToast("Cannot edit a read-only document", "info"); return; }
+    setAiProcessing("format");
+    setAiChatHistory(prev => [...prev, { role: "user", text: `[Format raw text — ${text.length} chars]` }]);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "format", markdown: text }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Format failed" }));
+        throw new Error(err.error || "Format failed");
+      }
+      const { result } = await res.json();
+      if (!result) throw new Error("Empty format result");
+
+      const oldMd = markdownRef.current;
+      const sep = oldMd.trim() ? (oldMd.endsWith("\n\n") ? "" : oldMd.endsWith("\n") ? "\n" : "\n\n") : "";
+      const newMd = oldMd + sep + result.trim() + "\n";
+
+      undoStack.current.push(oldMd);
+      while (undoStack.current.length > 50) undoStack.current.shift();
+      redoStack.current = [];
+
+      setMarkdown(newMd);
+      doRender(newMd);
+      cmSetDocRef.current?.(newMd);
+      tiptapRef.current?.setMarkdown(newMd);
+      setTabs(prev => prev.map(t => t.id === activeTabIdRef.current ? { ...t, markdown: newMd } : t));
+      setAiChatInput("");
+      setAiChatHistory(prev => [...prev, { role: "ai", text: "Formatted and appended.", canUndo: true }]);
+      showToast("Formatted and appended", "success");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Format failed";
+      showToast(message, "error");
+      setAiChatHistory(prev => [...prev, { role: "ai", text: `Error: ${message}` }]);
+    }
+    setAiProcessing(null);
+  }, [aiProcessing, doRender, setMarkdown, tabs]);
+
   // ─── Diff Highlight ───
   const highlightDiff = useCallback((oldMd: string, newMd: string) => {
     if (oldMd === newMd) return;
@@ -13206,7 +13257,7 @@ ${clone.innerHTML}
                   >
                     {aiProcessing ? <Loader2 width={11} height={11} className="animate-spin" /> : <Sparkles width={11} height={11} />}
                     {aiProcessing ? <span className="text-caption hidden sm:inline">
-                      {(({ polish: "Polishing", summary: "Summarizing", tldr: "Generating", translate: "Translating", chat: "Editing", compact: "Compacting" } as Record<string, string>)[aiProcessing as string]) || "Processing"}...
+                      {(({ polish: "Polishing", summary: "Summarizing", tldr: "Generating", translate: "Translating", chat: "Editing", compact: "Compacting", format: "Formatting" } as Record<string, string>)[aiProcessing as string]) || "Processing"}...
                     </span> : <span className="hidden sm:inline text-caption">Chat</span>}
                   </button>
                   {!showAIPanel && !aiProcessing && (
@@ -14165,50 +14216,76 @@ ${clone.innerHTML}
                         <div className="px-3 py-2 rounded-lg text-caption flex items-center gap-2"
                           style={{ background: "var(--toggle-bg)", color: "var(--text-faint)" }}>
                           <Loader2 width={10} height={10} className="animate-spin" />
-                          {{ polish: "Polishing document...", summary: "Writing summary...", tldr: "Extracting key points...", translate: "Translating...", chat: "Thinking...", compact: "Compacting document..." }[aiProcessing] || "Processing..."}
+                          {{ polish: "Polishing document...", summary: "Writing summary...", tldr: "Extracting key points...", translate: "Translating...", chat: "Thinking...", compact: "Compacting document...", format: "Formatting raw text..." }[aiProcessing] || "Processing..."}
                         </div>
                       </div>
                     )}
                   </div>
-                  {/* Chat input */}
+                  {/* Chat input — textarea so users can paste raw text to
+                      format (Format button alongside Send). Auto-grows
+                      between 1–6 rows; Enter sends (Shift+Enter newline). */}
                   <div className="shrink-0 px-2 py-2" style={{ borderTop: "1px solid var(--border-dim)" }}>
-                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg" style={{ background: "var(--toggle-bg)", border: "1px solid var(--border-dim)" }}>
-                      <input
-                        type="text"
+                    <div className="flex items-end gap-1.5 px-3 py-2 rounded-lg" style={{ background: "var(--toggle-bg)", border: "1px solid var(--border-dim)" }}>
+                      <textarea
                         value={aiChatInput}
-                        onChange={(e) => setAiChatInput(e.target.value)}
+                        onChange={(e) => {
+                          setAiChatInput(e.target.value);
+                          // Auto-grow: reset then size to scrollHeight, capped at ~6 rows.
+                          const el = e.currentTarget;
+                          el.style.height = "auto";
+                          el.style.height = Math.min(el.scrollHeight, 140) + "px";
+                        }}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.nativeEvent.isComposing && aiChatInput.trim() && !aiProcessing) {
+                          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && aiChatInput.trim() && !aiProcessing) {
                             e.preventDefault();
                             const instruction = aiChatInput.trim();
                             setAiChatHistory(prev => [...prev, { role: "user", text: instruction }]);
                             setAiChatInput("");
+                            (e.currentTarget as HTMLTextAreaElement).style.height = "auto";
                             handleAIAction("chat", { instruction });
                           }
                         }}
-                        placeholder="Ask AI to edit..."
-                        maxLength={500}
+                        placeholder="Ask AI to edit, or paste raw text and Format it…"
+                        maxLength={20000}
+                        rows={1}
                         disabled={!!aiProcessing}
                         autoFocus
-                        className="flex-1 text-caption bg-transparent"
-                        style={{ color: "var(--text-secondary)", border: "none", outline: "none" }}
+                        className="flex-1 bg-transparent resize-none leading-relaxed"
+                        style={{ color: "var(--text-secondary)", border: "none", outline: "none", fontSize: "0.875rem", maxHeight: 140, minHeight: 22 }}
                       />
-                      <button
-                        onClick={() => {
-                          if (aiChatInput.trim() && !aiProcessing) {
-                            const instruction = aiChatInput.trim();
-                            setAiChatHistory(prev => [...prev, { role: "user", text: instruction }]);
-                            setAiChatInput("");
-                            handleAIAction("chat", { instruction });
-                          }
-                        }}
-                        disabled={!aiChatInput.trim() || !!aiProcessing}
-                        className="shrink-0 p-1.5 rounded-md transition-colors"
-                        style={{ background: aiChatInput.trim() ? "var(--accent)" : "transparent", color: aiChatInput.trim() ? "#000" : "var(--text-faint)" }}
-                        title="Send"
-                      >
-                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2L2 8.5l5 2L9.5 16z"/><path d="M14 2L7 10.5"/></svg>
-                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {/* Format raw text → append as formatted markdown.
+                            Only enabled for substantial pastes (>= 60 chars). */}
+                        <Tooltip text="Format raw text → append">
+                          <button
+                            onClick={() => handleFormatChatText(aiChatInput)}
+                            disabled={aiChatInput.trim().length < 60 || !!aiProcessing}
+                            className="p-1.5 rounded-md transition-colors hover:bg-[var(--menu-hover)]"
+                            style={{
+                              color: aiChatInput.trim().length >= 60 && !aiProcessing ? "var(--accent)" : "var(--text-faint)",
+                              opacity: aiChatInput.trim().length >= 60 && !aiProcessing ? 1 : 0.45,
+                            }}
+                          >
+                            <Wand2 width={14} height={14} />
+                          </button>
+                        </Tooltip>
+                        <button
+                          onClick={() => {
+                            if (aiChatInput.trim() && !aiProcessing) {
+                              const instruction = aiChatInput.trim();
+                              setAiChatHistory(prev => [...prev, { role: "user", text: instruction }]);
+                              setAiChatInput("");
+                              handleAIAction("chat", { instruction });
+                            }
+                          }}
+                          disabled={!aiChatInput.trim() || !!aiProcessing}
+                          className="p-1.5 rounded-md transition-colors"
+                          style={{ background: aiChatInput.trim() ? "var(--accent)" : "transparent", color: aiChatInput.trim() ? "#000" : "var(--text-faint)" }}
+                          title="Send (Enter)"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2L2 8.5l5 2L9.5 16z"/><path d="M14 2L7 10.5"/></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                   </>)}

@@ -12,6 +12,7 @@ type AIAction =
   | "chat"
   | "beautify"
   | "compact"
+  | "format"
   | "selection_polish"
   | "selection_shorten"
   | "selection_expand"
@@ -100,6 +101,18 @@ Output ONLY the final Markdown — no commentary, no explanations, no surroundin
 - Output ONLY the bullet list — no headings, no "TL;DR:" prefix, no wrapping, no explanations
 - Do NOT include any part of the original document in your output
 - Do NOT include code blocks, diagrams, or any content from the source — only the bullet points`,
+
+  format: `You are an expert markdown editor. Take the raw text below and structure it as clean, well-formatted Markdown:
+- Add appropriate headings (## / ###) where the text shifts topic or section
+- Break runs of prose into paragraphs
+- Detect lists hidden in prose (e.g., "First, ... Second, ... Third, ...") and render as Markdown lists (- or 1.)
+- Detect tables hidden in prose / pipe-or-tab-separated rows and render as Markdown tables
+- Detect quotes (lines beginning with someone's name + ":" or attribution) and render as > blockquotes
+- Detect code / commands / file paths and wrap with backticks or fenced \`\`\` blocks as appropriate
+- Preserve every distinct fact / sentence — do NOT summarize, abbreviate, or drop content
+- Preserve the original language
+- Do NOT add new information or commentary
+- Output ONLY the formatted Markdown — no preamble, no explanation, no surrounding fences`,
 
   compact: `You are an expert editor specializing in concise writing. Compact the following Markdown document:
 - Cut the length by roughly half while preserving every distinct idea
@@ -217,7 +230,7 @@ export async function POST(req: NextRequest) {
   }
 
   const validActions: AIAction[] = [
-    "polish", "summary", "tldr", "translate", "chat", "beautify", "compact",
+    "polish", "summary", "tldr", "translate", "chat", "beautify", "compact", "format",
     "selection_polish", "selection_shorten", "selection_expand",
     "selection_rewrite", "selection_translate",
   ];
@@ -273,6 +286,7 @@ ${action === "chat" ? "Modified document:" : action.startsWith("selection_") ? "
           generationConfig: {
             temperature:
               action === "polish" || action === "translate" || action === "compact"
+                || action === "format"
                 || action === "selection_polish" || action === "selection_translate"
                 ? 0.1
                 : 0.3,
