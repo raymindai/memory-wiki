@@ -239,9 +239,10 @@ export default function HubEmbed({
   // to render. With a snapshot we revalidate in the background.
   const [loading, setLoading] = useState(!cachedEntry);
   const [copied, setCopied] = useState(false);
-  // Separate state for the "?full=1" copy button so the two pills
-  // don't share a single "Copied" green flash.
-  const [copiedFull, setCopiedFull] = useState(false);
+  // Which URL variant is in the primary URL row — Digest (default,
+  // cheap concept map) or Full (?full=1, every doc inline). One Copy
+  // button serves whichever is active.
+  const [urlVariant, setUrlVariant] = useState<"digest" | "full">("digest");
   // Per-tool setup tab — drives which snippet shows in the "Setup
   // snippet for your tool" card. Claude as the default since chat
   // surfaces are the most common deploy target.
@@ -335,20 +336,16 @@ export default function HubEmbed({
     finally { setBusySuggestionId(null); }
   };
 
+  // Copies whichever URL variant the user currently has selected
+  // (digest by default, ?full=1 when toggled). Single state means a
+  // single "Copied" green flash — no juggling two flags.
   const copyUrl = async () => {
     if (!data) return;
+    const url = urlVariant === "full" ? `${data.hub.url}?full=1` : data.hub.url;
     try {
-      await navigator.clipboard.writeText(data.hub.url);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch { /* ignore */ }
-  };
-  const copyFullUrl = async () => {
-    if (!data) return;
-    try {
-      await navigator.clipboard.writeText(`${data.hub.url}?full=1`);
-      setCopiedFull(true);
-      setTimeout(() => setCopiedFull(false), 1500);
     } catch { /* ignore */ }
   };
 
@@ -450,48 +447,116 @@ export default function HubEmbed({
               (/hub/<slug>) and the Deploy-to-AI block already say
               the same thing — removing it keeps the page top
               quieter. */}
-        {/* Hero — mirrors BundleOverview's hero shape so Hub and
-            Bundle read as the same "identity strip" family. Avatar +
-            (title, slug, optional bio, meta row, actions row). */}
-        <header className="flex items-start gap-4 mb-7">
+        {/* Identity strip — small, supporting. Title + slug as one
+            visual unit, bio as a single line beneath. Stays out of
+            the way so the Deploy URL card below can be the hero. */}
+        <header className="flex items-start gap-3 mb-5">
           <img
             src={data.hub.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(slug)}`}
             alt=""
-            className="shrink-0 rounded-2xl"
-            style={{ width: 56, height: 56, border: "1px solid var(--border-dim)" }}
+            className="shrink-0 rounded-xl"
+            style={{ width: 40, height: 40, border: "1px solid var(--border-dim)" }}
           />
           <div className="min-w-0 flex-1">
-            <h1 className="text-display font-bold tracking-tight" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
-              {data.hub.display_name || slug}
-            </h1>
-            <p className="text-caption mt-1 font-mono" style={{ color: "var(--text-faint)" }}>
-              /hub/{slug}
-            </p>
+            <div className="flex items-baseline flex-wrap gap-x-3 gap-y-0.5">
+              <h1
+                className="text-display font-bold tracking-tight"
+                style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
+              >
+                {data.hub.display_name || slug}
+              </h1>
+              <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+                /hub/{slug}
+              </span>
+            </div>
             {data.hub.description && (
-              <p className="text-body mt-2.5 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-body mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 {data.hub.description}
               </p>
             )}
-            {/* Meta strip — totals + freshness in mono so the page
-                top tells you "what is this" without scrolling. */}
-            {(() => {
-              if (!ov) return null;
-              const docCount = ov.documents.public.length + ov.documents.shared.length + ov.documents.private.length;
-              const bundleCount = ov.bundles.public.length + ov.bundles.shared.length + ov.bundles.private.length;
-              // Latest of all docs + bundles, owner-view scope.
-              let latest: string | null = null;
-              const consider = (iso?: string | null) => {
-                if (!iso) return;
-                if (!latest || iso > latest) latest = iso;
-              };
-              for (const d of ov.documents.public) consider(d.updated_at);
-              for (const d of ov.documents.shared) consider(d.updated_at);
-              for (const d of ov.documents.private) consider(d.updated_at);
-              for (const b of ov.bundles.public) consider(b.updated_at);
-              for (const b of ov.bundles.shared) consider(b.updated_at);
-              for (const b of ov.bundles.private) consider(b.updated_at);
-              return (
-                <div className="flex items-center gap-3 mt-3 flex-wrap">
+          </div>
+        </header>
+
+        {/* Deploy URL card — THE focal point. One large URL field
+            with a tiny variant toggle above (Digest / Full); meta +
+            Galaxy entry tucked into the card's footer. Replaces the
+            old "intro para + Digest URL + Full URL" stack which
+            spread the same info across three rows. */}
+        <section
+          className="mb-6 rounded-xl overflow-hidden"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+        >
+          <div className="px-5 pt-4 pb-4">
+            <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+              <div className="flex items-center gap-1">
+                {(["digest", "full"] as const).map((v) => {
+                  const active = urlVariant === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setUrlVariant(v)}
+                      className="text-caption font-mono uppercase px-2 py-0.5 rounded transition-colors"
+                      style={{
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                        color: active ? "var(--accent)" : "var(--text-muted)",
+                        background: active ? "var(--accent-dim)" : "transparent",
+                        border: `1px solid ${active ? "var(--accent-dim)" : "var(--border-dim)"}`,
+                      }}
+                    >
+                      {v === "digest" ? "Digest" : "Full"}
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+                {urlVariant === "digest" ? "compact concept map, cheap to paste" : "every doc inline, heavier"}
+              </span>
+            </div>
+            <button
+              onClick={copyUrl}
+              className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+              style={{
+                fontSize: 13,
+                background: "var(--background)",
+                color: copied ? "#22c55e" : "var(--text-primary)",
+                border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+              }}
+              title="Copy URL"
+            >
+              <span className="flex-1 text-left truncate">
+                {urlVariant === "full" ? `${data.hub.url}?full=1` : data.hub.url}
+              </span>
+              <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
+                {copied ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
+                <span className="text-caption">{copied ? "Copied" : "Copy"}</span>
+              </span>
+            </button>
+          </div>
+          {/* Footer — meta + Galaxy. Sits inside the same card as the
+              URL so "what this is / how big / open as constellation"
+              read as one cohesive deploy unit. */}
+          {ov && (() => {
+            const docCount = ov.documents.public.length + ov.documents.shared.length + ov.documents.private.length;
+            const bundleCount = ov.bundles.public.length + ov.bundles.shared.length + ov.bundles.private.length;
+            let latest: string | null = null;
+            const consider = (iso?: string | null) => {
+              if (!iso) return;
+              if (!latest || iso > latest) latest = iso;
+            };
+            for (const d of ov.documents.public) consider(d.updated_at);
+            for (const d of ov.documents.shared) consider(d.updated_at);
+            for (const d of ov.documents.private) consider(d.updated_at);
+            for (const b of ov.bundles.public) consider(b.updated_at);
+            for (const b of ov.bundles.shared) consider(b.updated_at);
+            for (const b of ov.bundles.private) consider(b.updated_at);
+            return (
+              <div
+                className="px-5 py-2.5 flex items-center justify-between gap-3 flex-wrap"
+                style={{ borderTop: "1px solid var(--border-dim)", background: "var(--background)" }}
+              >
+                <div className="flex items-center gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
                     <FolderClosed width={11} height={11} />
                     {docCount} {docCount === 1 ? "doc" : "docs"}
@@ -509,122 +574,33 @@ export default function HubEmbed({
                     </span>
                   )}
                 </div>
-              );
-            })()}
-            {/* Actions row — Galaxy entry. Sits as a sibling row to
-                the meta so the hero ends with "here's how to open
-                this in a new view." */}
-            <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-              <Link
-                href="/galaxy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{
-                  color: "var(--accent)",
-                  background: "var(--accent-dim)",
-                  border: "1px solid var(--accent-dim)",
-                  textDecoration: "none",
-                  letterSpacing: 0.3,
-                }}
-                title="Open your hub as a constellation"
-              >
-                <Network width={11} height={11} />
-                <span>Dive into my Galaxy</span>
-                <ArrowUpRight width={11} height={11} />
-              </Link>
-            </div>
-          </div>
-        </header>
+                <Link
+                  href="/galaxy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
+                  style={{
+                    color: "var(--accent)",
+                    textDecoration: "none",
+                    letterSpacing: 0.3,
+                  }}
+                  title="Open your hub as a constellation"
+                >
+                  <Network width={11} height={11} />
+                  <span>Galaxy</span>
+                  <ArrowUpRight width={11} height={11} />
+                </Link>
+              </div>
+            );
+          })()}
+        </section>
 
-        {/* ── Deploy-to-AI — the WHY of Hub.
-              Design pass (founder feedback "배경색, 보더, 내부
-              버튼들 전부 이상함"): drop the accent-dim fill that
-              made the panel read as a warning callout — switch
-              to var(--surface) so it sits in the same tonal
-              family as the stat strip and the doc rows below.
-              The URL is displayed as a single full-width row
-              with a copy icon embedded at the right edge (no
-              separate code-box border + copy-pill seam). The
-              secondary actions (View as visitor / Raw .md) live
-              on their own row, sharing the bordered-neutral
-              style used everywhere else. ─────────────────────── */}
+        {/* Setup card — per-tool snippets. Demoted to a secondary
+            card so the Deploy URL above stays the focal point. */}
         <section
           className="mb-8 px-5 py-4 rounded-xl"
           style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
         >
-          <div className="flex items-start gap-3 mb-3">
-            <span
-              className="flex items-center justify-center shrink-0 mt-0.5"
-              style={{ width: 24, height: 24, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
-            >
-              <Globe width={14} height={14} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
-                Deploy this hub to any AI
-              </p>
-              <p className="text-caption leading-relaxed mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                Paste the URL into <strong>Claude</strong>, <strong>ChatGPT</strong>, or <strong>Cursor</strong>. The AI fetches a structured index and follows inline links to dive deeper as needed.
-              </p>
-            </div>
-          </div>
-          {/* Primary URL — digest by default. Compact concept-clustered
-              summary, ~30-40x cheaper than the per-doc index, and the
-              AI can still dive into individual docs via the inline
-              links. Use the second pill below for the full per-doc
-              index when you want the AI to see everything up-front. */}
-          <div className="flex items-baseline justify-between mb-1">
-            <span className="text-caption font-mono uppercase tracking-wider" style={{ color: "var(--accent)", fontSize: 10, letterSpacing: 0.5 }}>
-              Digest <span style={{ color: "var(--text-faint)" }}>(default)</span>
-            </span>
-            <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-              compact concept map, cheap to paste
-            </span>
-          </div>
-          <button
-            onClick={copyUrl}
-            className="w-full flex items-center gap-2 text-caption px-2.5 py-1.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)] mb-3"
-            style={{
-              background: "var(--background)",
-              color: copied ? "#22c55e" : "var(--text-primary)",
-              border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-            }}
-            title="Copy URL"
-          >
-            <span className="flex-1 text-left truncate">{data.hub.url}</span>
-            <span className="flex items-center gap-1 shrink-0" style={{ color: copied ? "#22c55e" : "var(--text-faint)" }}>
-              {copied ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
-              <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
-            </span>
-          </button>
-          {/* Secondary URL — full per-doc index. Same hub, but every
-              doc's metadata expanded inline. Heavier; only use when
-              the AI needs to see the whole library up front. */}
-          <div className="flex items-baseline justify-between mb-1">
-            <span className="text-caption font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: 0.5 }}>
-              Full index <span style={{ color: "var(--text-faint)" }}>(?full=1)</span>
-            </span>
-            <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-              every doc inline, heavier
-            </span>
-          </div>
-          <button
-            onClick={copyFullUrl}
-            className="w-full flex items-center gap-2 text-caption px-2.5 py-1.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)] mb-3"
-            style={{
-              background: "var(--background)",
-              color: copiedFull ? "#22c55e" : "var(--text-muted)",
-              border: `1px solid ${copiedFull ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-            }}
-            title="Copy URL (full index)"
-          >
-            <span className="flex-1 text-left truncate">{data.hub.url}?full=1</span>
-            <span className="flex items-center gap-1 shrink-0" style={{ color: copiedFull ? "#22c55e" : "var(--text-faint)" }}>
-              {copiedFull ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
-              <span className="hidden sm:inline">{copiedFull ? "Copied" : "Copy"}</span>
-            </span>
-          </button>
           {/* Per-tool setup. Two-row tab layout:
                 Row 1 — "where you do AI" (Claude / ChatGPT / Gemini /
                 Claude Code / Cursor / Generic), ordered by likely-
