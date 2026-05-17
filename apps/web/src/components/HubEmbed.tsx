@@ -569,7 +569,13 @@ export default function HubEmbed({
             const docCountTok = data.counts.documents ?? 0;
             const conceptCountTok = Math.min(data.counts.concepts ?? 0, 40);
             const fullTokens = totalWords > 0 ? Math.round(totalWords * 1.3 + docCountTok * 8) : 0;
-            const compactTokens = conceptCountTok > 0 ? Math.round(conceptCountTok * 25 + 200) : 0;
+            // Compact = concept-index summary. If concept index isn't
+            // populated yet, fall back to ~5% of full so the chip
+            // still shows a distinct number (was showing same as Full
+            // or "cheap" placeholder when concept count was 0).
+            const compactTokens = conceptCountTok > 0
+              ? Math.round(conceptCountTok * 25 + 200)
+              : (fullTokens > 0 ? Math.max(300, Math.round(fullTokens * 0.05)) : 0);
             const projCtx = `# Project context
 
 mdfy hub: ${url}
@@ -849,13 +855,7 @@ mdfy hub`;
                     >{active.snippet}</pre>
                   )}
 
-                  {/* Explanation — user-friendly multi-sentence */}
-                  <div className="px-3 py-2.5 text-caption leading-relaxed"
-                    style={{ color: "var(--text-secondary)", background: "var(--surface)", borderTop: "1px solid var(--border-dim)" }}>
-                    {active.explanation.split("\n").map((line, i) => (
-                      <div key={i} style={{ whiteSpace: "pre-wrap" }}>{line || " "}</div>
-                    ))}
-                  </div>
+
 
                   {/* Actions — URL tools embed Copy in the URL row,
                       so the actions row only carries Full guide for
@@ -896,6 +896,17 @@ mdfy hub`;
                     </Link>
                   </div>
                 </div>
+                {/* Explanation — plain text, no separate background,
+                    sits below the inner card so it reads as guidance
+                    about the chip/URL above, not as another panel. */}
+                {active.explanation && (
+                  <p
+                    className="text-caption leading-relaxed mt-3"
+                    style={{ color: "var(--text-secondary)", whiteSpace: "pre-wrap", margin: "12px 4px 0" }}
+                  >
+                    {active.explanation}
+                  </p>
+                )}
               </div>
             );
           })()}

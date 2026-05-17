@@ -402,11 +402,6 @@ mdfy search "topic"`;
                   >{active.snippet}</pre>
                 )}
 
-                <div className="px-3 py-2.5 text-caption leading-relaxed"
-                  style={{ color: "var(--text-secondary)", background: "var(--surface)", borderTop: "1px solid var(--border-dim)" }}>
-                  {active.explanation}
-                </div>
-
                 <div className="flex items-center justify-between gap-2 px-3 py-2"
                   style={{ borderTop: "1px solid var(--border-dim)" }}>
                   {isUrlTool ? (
@@ -448,6 +443,14 @@ mdfy search "topic"`;
                   </a>
                 </div>
               </div>
+              {active.explanation && (
+                <p
+                  className="text-caption leading-relaxed"
+                  style={{ color: "var(--text-secondary)", whiteSpace: "pre-wrap", margin: "12px 4px 0" }}
+                >
+                  {active.explanation}
+                </p>
+              )}
             </section>
           );
         })()}
