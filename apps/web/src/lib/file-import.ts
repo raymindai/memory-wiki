@@ -6,12 +6,15 @@
 import { htmlToMarkdown } from "./html-to-md";
 
 // ─── PDF ───
-// Uses server-side API (pdf-parse) to avoid webpack/pdfjs-dist issues
-async function pdfToMarkdown(file: File): Promise<string> {
+// Uses server-side API (pdfjs-dist via unpdf for text) — auth headers
+// are forwarded so the server can attribute extracted images to the
+// caller. Without them the server's anonymous branch skips image
+// extraction entirely.
+async function pdfToMarkdown(file: File, authHeaders: Record<string, string> = {}): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("/api/import/pdf", { method: "POST", body: formData });
+  const res = await fetch("/api/import/pdf", { method: "POST", body: formData, headers: authHeaders });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Failed to parse PDF" }));
     throw new Error(err.error);
@@ -29,11 +32,11 @@ async function pdfToMarkdown(file: File): Promise<string> {
 }
 
 // ─── Office files (PPTX, XLSX, ODP, etc.) ───
-async function officeToMarkdown(file: File): Promise<string> {
+async function officeToMarkdown(file: File, authHeaders: Record<string, string> = {}): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("/api/import/office", { method: "POST", body: formData });
+  const res = await fetch("/api/import/office", { method: "POST", body: formData, headers: authHeaders });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Failed to parse file" }));
     throw new Error(err.error);
@@ -321,7 +324,8 @@ export async function mdfyText(text: string, filename?: string): Promise<MdfyRes
 }
 
 export async function importFile(
-  file: File
+  file: File,
+  authHeaders: Record<string, string> = {},
 ): Promise<{ markdown: string; title: string }> {
   const format = getFormatFromFilename(file.name);
   const title = file.name.replace(/\.[^.]+$/, "");
@@ -340,7 +344,7 @@ export async function importFile(
 
   // PDF: server-side API
   if (format === "pdf") {
-    const markdown = await pdfToMarkdown(file);
+    const markdown = await pdfToMarkdown(file, authHeaders);
     return { markdown, title };
   }
 
@@ -353,7 +357,7 @@ export async function importFile(
 
   // Office (PPTX, XLSX, ODP, etc.): server-side API
   if (format === "office") {
-    const markdown = await officeToMarkdown(file);
+    const markdown = await officeToMarkdown(file, authHeaders);
     return { markdown, title };
   }
 

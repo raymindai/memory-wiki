@@ -58,8 +58,54 @@ export async function POST(req: NextRequest) {
     const filename = file.name || "document.pdf";
 
     if (req.nextUrl.searchParams.get("save") !== "1") {
-      // Raw mode for back-compat callers.
-      return NextResponse.json({ text: rawText, pages, title: pdfTitle });
+      // Raw mode: text-only by default, but ALSO extract + rehost
+      // embedded images when the caller is authenticated. Before this
+      // change the raw path skipped image extraction entirely, so even
+      // signed-in users only got text — exactly the symptom reported
+      // ("이미지는 import가 안되는데 왜그런거지").
+      let rawMarkdown = rawText;
+      let rawImagesExtracted = 0;
+      try {
+        const sb = getSupabaseClient();
+        if (sb) {
+          const verified = await verifyAuthToken(req.headers.get("authorization"));
+          let uid: string | undefined = verified?.userId || req.headers.get("x-user-id") || undefined;
+          if (!uid) {
+            const email = verified?.email || req.headers.get("x-user-email") || "";
+            if (email) {
+              try {
+                const { data: list } = await sb.auth.admin.listUsers();
+                const user = list?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+                if (user) uid = user.id;
+              } catch { /* ignore */ }
+            }
+          }
+          if (uid) {
+            const imgs = await extractPdfImages(buffer).catch((err) => {
+              console.warn("PDF raw-mode image extraction failed:", err instanceof Error ? err.message : err);
+              return [] as Awaited<ReturnType<typeof extractPdfImages>>;
+            });
+            if (imgs.length > 0) {
+              const lines: string[] = [];
+              for (const img of imgs) {
+                const out = await uploadImageBuffer(img.buffer, `page-${img.pageIndex}-img-${img.imageIndex}.png`, img.contentType, {
+                  supabase: sb, ownerId: uid, trackQuota: false,
+                });
+                if (out) {
+                  rawImagesExtracted++;
+                  lines.push(`![Page ${img.pageIndex} image ${img.imageIndex}](${out.url})`);
+                }
+              }
+              if (lines.length > 0) {
+                rawMarkdown = `${rawText.trimEnd()}\n\n## Embedded images\n\n${lines.join("\n\n")}\n`;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("PDF raw-mode image branch threw:", err instanceof Error ? err.message : err);
+      }
+      return NextResponse.json({ text: rawMarkdown, pages, title: pdfTitle, imagesExtracted: rawImagesExtracted });
     }
 
     if (!rawText.trim()) {

@@ -7924,7 +7924,7 @@ export default function MdEditor() {
           else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
           else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
 
-          const { markdown: md, title: name } = await importFile(file);
+          const { markdown: md, title: name } = await importFile(file, authHeadersRef.current);
           if (!md) {
             showToast(`${file.name} appears to be empty`, "info");
             continue;
@@ -10235,7 +10235,7 @@ ${clone.innerHTML}
                   else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
                   else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
 
-                  const { markdown: md, title: name } = await importFile(file);
+                  const { markdown: md, title: name } = await importFile(file, authHeadersRef.current);
                   if (!md) {
                     showToast(`${file.name} appears to be empty`, "info");
                     continue;

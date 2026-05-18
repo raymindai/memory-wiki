@@ -90,6 +90,19 @@ export async function extractPdfImages(
   const pdfjs: typeof import("pdfjs-dist/legacy/build/pdf.mjs") = await import(
     /* webpackIgnore: true */ "pdfjs-dist/legacy/build/pdf.mjs"
   );
+  // pdfjs-dist still tries to load pdf.worker.mjs through its
+  // fake-worker setup even on the server. Point GlobalWorkerOptions
+  // at the resolved path so Vercel's tracer follows it (paired with
+  // outputFileTracingIncludes in next.config.ts as belt-and-
+  // suspenders). Without this the call throws
+  // "Setting up fake worker failed".
+  try {
+    const { createRequire } = await import("module");
+    const require = createRequire(import.meta.url);
+    pdfjs.GlobalWorkerOptions.workerSrc = require.resolve(
+      "pdfjs-dist/legacy/build/pdf.worker.mjs",
+    );
+  } catch { /* leave default; getDocument will throw with a clearer error */ }
   // pdfjs-dist needs pdf.worker.mjs even when running server-side
   // (its "fake worker" path imports the worker module to grab the
   // parsing code). Vercel's trace pulls pdf.mjs but skips

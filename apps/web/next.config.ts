@@ -1,12 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Text extraction now goes through unpdf, which bundles its own
-  // serverless build and doesn't need pdf.worker.mjs at runtime.
-  // pdfjs-dist stays in the list because extractPdfImages still uses
-  // it (best-effort, image extraction is non-critical and silently
-  // skips if the worker setup fails on Vercel).
+  // Text extraction goes through unpdf (self-contained serverless
+  // build, no worker needed). Image extraction still uses
+  // pdfjs-dist directly via extractPdfImages, and pdfjs-dist loads
+  // pdf.worker.mjs lazily through its fake-worker path. Vercel's
+  // output file tracer doesn't see the worker file because the
+  // import is `webpackIgnore: true`, so we explicitly include the
+  // worker for the PDF route — without this, image extraction
+  // throws "Setting up fake worker failed" and the PDF saves as
+  // text-only even for signed-in users.
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "officeparser"],
+  outputFileTracingIncludes: {
+    "/api/import/pdf": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+  },
   // Long-slug explainer docs (mdfy.app/how-mdfy-works, etc.) live in the
   // documents table the same as any other doc, but their ids exceed the
   // 12-char nanoid pattern Vercel's top-level rewrite assumes. Map each
