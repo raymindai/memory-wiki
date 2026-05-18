@@ -3200,16 +3200,48 @@ export default function MdEditor() {
   // the user to confirm the merge direction. Stored as a ref so
   // the autoResolve effects can call into it without re-rendering.
   const lintRunningAutoRef = useRef(false);
-  const autoResolveSafeFindings = useCallback(async () => {
+  const autoResolveSafeFindings = useCallback(async (opts: { manual?: boolean } = {}) => {
     if (lintRunningAutoRef.current) return;
-    if (!user?.id || !lintReport) return;
-    if (curatorSettings.autoLevel === "off") return;
+    if (!user?.id) {
+      if (opts.manual) showToast("Sign in to run auto-management", "info");
+      return;
+    }
+    if (curatorSettings.autoLevel === "off") {
+      if (opts.manual) showToast("Auto-management is off — change level in Settings", "info");
+      return;
+    }
     lintRunningAutoRef.current = true;
+
+    // Manual Run-now: fetch a fresh lint report first so we resolve
+    // against current state. The background passes rely on the periodic
+    // fetch that populates lintReport; clicking Run-now needs to feel
+    // immediate even when no fetch has landed yet, otherwise the button
+    // silently no-ops with "lintReport is null".
+    let report = lintReport;
+    if (opts.manual) {
+      showToast("Running auto-management…", "info");
+      try {
+        const res = await fetch("/api/user/hub/lint", { headers: authHeaders });
+        if (res.ok) {
+          const data = await res.json();
+          if (data) {
+            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], totalDocs: data.totalDocs || 0 };
+            setLintReport(report);
+          }
+        }
+      } catch { /* fall through with existing report */ }
+    }
+    if (!report) {
+      lintRunningAutoRef.current = false;
+      if (opts.manual) showToast("Couldn't load lint report — try again", "error");
+      return;
+    }
+
     let orphansResolved = 0;
     let duplicatesResolved = 0;
     // Orphan refresh — handled at every level above Off.
     if (curatorSettings.orphan && autoHandles(curatorSettings.autoLevel, "orphan-refresh")) {
-      const orphans = lintReport.orphans.filter((o) => !lintResolved.orphans.has(o.id));
+      const orphans = report.orphans.filter((o) => !lintResolved.orphans.has(o.id));
       for (const o of orphans) {
         try {
           const res = await fetch(`/api/docs/${o.id}`, {
@@ -3230,7 +3262,7 @@ export default function MdEditor() {
     // of each pair; recoverable from Trash. We do NOT prompt here —
     // the user picked Aggressive knowing this acts without asking.
     if (curatorSettings.duplicate && autoHandles(curatorSettings.autoLevel, "duplicate-trash")) {
-      const dups = lintReport.duplicates.filter((p) => !lintResolved.duplicates.has(`${p.a.id}|${p.b.id}`));
+      const dups = report.duplicates.filter((p) => !lintResolved.duplicates.has(`${p.a.id}|${p.b.id}`));
       for (const p of dups) {
         try {
           const res = await fetch(`/api/docs/${p.a.id}`, {
@@ -3247,14 +3279,18 @@ export default function MdEditor() {
         } catch { /* ignore; next pass retries */ }
       }
     }
-    // Single toast summarising the run so the user always knows
-    // what auto-management did. Skipped when nothing happened.
+    // Single toast summarising the run so the user always knows what
+    // auto-management did. For background passes we stay silent when
+    // nothing happened; for manual Run-now we always confirm so the
+    // user knows the button worked.
     const total = orphansResolved + duplicatesResolved;
     if (total > 0) {
       const parts: string[] = [];
       if (orphansResolved > 0) parts.push(`${orphansResolved} orphan${orphansResolved === 1 ? "" : "s"} refreshed`);
       if (duplicatesResolved > 0) parts.push(`${duplicatesResolved} duplicate${duplicatesResolved === 1 ? "" : "s"} trashed`);
-      showToast(`Auto-managed: ${parts.join(", ")}.`, "info");
+      showToast(`Auto-managed: ${parts.join(", ")}.`, "success");
+    } else if (opts.manual) {
+      showToast("Nothing to auto-manage — your hub is clean.", "info");
     }
     lintRunningAutoRef.current = false;
   }, [user?.id, lintReport, curatorSettings.autoLevel, curatorSettings.orphan, curatorSettings.duplicate, lintResolved.orphans, lintResolved.duplicates, authHeaders]);
@@ -13594,7 +13630,7 @@ ${clone.innerHTML}
                     }}
                     autoLevel={curatorSettings.autoLevel}
                     autoTrigger={curatorSettings.autoTrigger}
-                    onAutoResolveRun={autoResolveSafeFindings}
+                    onAutoResolveRun={() => autoResolveSafeFindings({ manual: true })}
                     onOpenAutoSettings={() => {
                       setShowHub(false);
                       setSettingsInitialSection("auto-management");
