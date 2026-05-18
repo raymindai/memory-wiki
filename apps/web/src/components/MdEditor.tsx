@@ -14966,7 +14966,11 @@ ${clone.innerHTML}
                   // title === source title → dedup hit → original tab
                   // removed by withoutDup filter below.
                   const dupMd = rewriteH1(targetTab.markdown, t);
-                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true }]);
+                  // lastOpenedAt = now so the duplicate appears at the
+                  // TOP of the MDs sidebar (default sort: newest first).
+                  // Without this it lands at the bottom (lastOpenedAt
+                  // defaults to 0 in the sort comparator).
+                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true, lastOpenedAt: Date.now() }]);
                   autoSave.createDocument({ markdown: dupMd, title: t, userId: user?.id, anonymousId: !user?.id ? ensureAnonymousId() : undefined }).then(result => {
                     if (!result) return;
                     if (result.deduplicated) {
@@ -15060,7 +15064,11 @@ ${clone.innerHTML}
                   // the original's id, then withoutDup below would
                   // delete the original tab.
                   const dupMd = rewriteH1(tab.markdown, t);
-                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true }]);
+                  // lastOpenedAt = now so the duplicate appears at the
+                  // TOP of the MDs sidebar (default sort: newest first).
+                  // Without this it lands at the bottom (lastOpenedAt
+                  // defaults to 0 in the sort comparator).
+                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true, lastOpenedAt: Date.now() }]);
                   autoSave.createDocument({
                     markdown: dupMd,
                     title: t,
