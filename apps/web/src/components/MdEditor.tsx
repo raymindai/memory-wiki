@@ -14330,7 +14330,7 @@ ${clone.innerHTML}
               {showOutlinePanel && !showHub && activeTab?.kind !== "bundle" && (
                 <div
                   className="flex flex-col shrink-0"
-                  style={{ width: "min(260px, 40%)", background: "var(--surface)", borderLeft: "1px solid var(--border)" }}
+                  style={{ width: "min(260px, 40%)", background: "var(--surface)", borderLeft: "1px solid var(--border-dim)" }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
@@ -14396,7 +14396,7 @@ ${clone.innerHTML}
               )}
               {/* ─── Images Panel (side-by-side) ─── */}
               {showImagePanel && isAuthenticated && (
-                <div className="flex flex-col shrink-0" style={{ width: "min(300px, 50%)", background: "var(--surface)", borderLeft: "1px solid var(--border)" }}>
+                <div className="flex flex-col shrink-0" style={{ width: "min(300px, 50%)", background: "var(--surface)", borderLeft: "1px solid var(--border-dim)" }}>
                   {/* Header */}
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="flex items-center gap-1.5">
@@ -14494,7 +14494,7 @@ ${clone.innerHTML}
                   style={{
                     width: "min(320px, 50%)",
                     background: "var(--surface)",
-                    borderLeft: "1px solid var(--border)",
+                    borderLeft: "1px solid var(--border-dim)",
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -14592,7 +14592,9 @@ ${clone.innerHTML}
           );
         })()}
 
-        {/* Resize handle — hidden when split-view has no source pane
+        {/* Split-view resize seam — 1px line with an invisible 5px
+            hit-zone overlaying it. No grip-dot affordance; just the
+            crisp line. Hidden when split-view has no source pane
             visible (bundle / hub / onboarding / settings host the
             full pane). */}
         {viewMode === "split" && !(
@@ -14600,14 +14602,23 @@ ${clone.innerHTML}
         ) && (
           <div
             data-print-hide
-            className={`shrink-0 ${isMobile ? "cursor-row-resize h-[5px] w-full" : "cursor-col-resize w-[5px]"}`}
-            style={{ background: "var(--border-dim)", position: "relative", zIndex: 5 }}
+            className={`shrink-0 relative ${isMobile ? "cursor-row-resize" : "cursor-col-resize"}`}
+            style={{
+              ...(isMobile
+                ? { height: 1, width: "100%" }
+                : { width: 1, height: "100%" }),
+              background: "var(--border-dim)",
+              zIndex: 5,
+            }}
             onMouseDown={(e) => { e.preventDefault(); isDraggingSplit.current = true; }}
             onTouchStart={() => { isDraggingSplit.current = true; }}
           >
+            {/* Invisible drag hit-zone, centered on the 1px line */}
             <div
-              className={`absolute ${isMobile ? "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-[3px]" : "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[3px] h-8"}`}
-              style={{ background: "var(--text-faint)", borderRadius: 2, opacity: 0.3 }}
+              className="absolute"
+              style={isMobile
+                ? { left: 0, right: 0, top: -3, height: 7, background: "transparent" }
+                : { top: 0, bottom: 0, left: -3, width: 7, background: "transparent" }}
             />
           </div>
         )}
