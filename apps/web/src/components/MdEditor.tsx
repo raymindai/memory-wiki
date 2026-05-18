@@ -15385,12 +15385,17 @@ ${clone.innerHTML}
                   setMdfyLoading(true);
                   try {
                     const result = await mdfyText(mdfyPrompt.text, mdfyPrompt.filename);
-                    // Update the tab with structured markdown
+                    // Update the tab with structured markdown.
                     setTabs(prev => prev.map(t => t.id === mdfyPrompt.tabId ? { ...t, markdown: result.markdown } : t));
                     if (mdfyPrompt.tabId === activeTabId) {
                       setMarkdown(result.markdown);
                       doRender(result.markdown);
                       cmSetDocRef.current?.(result.markdown);
+                      // Tiptap owns its own DOM and only re-renders via
+                      // the imperative ref — without this the Live tab
+                      // keeps showing the raw pre-format markdown.
+                      // Same fix we applied to handleAIAction.
+                      tiptapRef.current?.setMarkdown(result.markdown);
                     }
                     if (result.truncated) {
                       showToast("Document was very large — only the first 3 MB was processed", "info");

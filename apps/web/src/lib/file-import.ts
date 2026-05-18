@@ -291,10 +291,22 @@ export interface MdfyResult {
  * Returns structured markdown (+ metadata) or throws on failure.
  */
 export async function mdfyText(text: string, filename?: string): Promise<MdfyResult> {
-  const res = await fetch("/api/import/mdfy", {
+  // Unified with the doc-level Auto-Format quick action — both routes
+  // used to live separately (/api/import/mdfy vs /api/ai action=format)
+  // with subtly different prompts, so importing + "mdfy it" produced a
+  // slightly different result than running Auto-Format on the same
+  // text. Calling the same endpoint guarantees identical behaviour.
+  // filename is no longer passed to the prompt; the format action
+  // operates on raw text regardless of source. 3MB input cap is
+  // enforced server-side.
+  void filename;
+  const MAX_INPUT_BYTES = 3 * 1024 * 1024;
+  const truncated = text.length > MAX_INPUT_BYTES;
+  const trimmed = truncated ? text.slice(0, MAX_INPUT_BYTES) : text;
+  const res = await fetch("/api/ai", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, filename }),
+    body: JSON.stringify({ action: "format", markdown: trimmed }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "AI processing failed" }));
@@ -302,8 +314,8 @@ export async function mdfyText(text: string, filename?: string): Promise<MdfyRes
   }
   const data = await res.json();
   return {
-    markdown: data.markdown || "",
-    truncated: !!data.truncated,
+    markdown: data.result || "",
+    truncated,
     finishReason: data.finishReason,
   };
 }
