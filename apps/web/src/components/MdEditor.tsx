@@ -4012,9 +4012,9 @@ export default function MdEditor() {
   const [editorPlaceholder, setEditorPlaceholder] = useState<"sign-in" | "restricted" | "not-found" | "deleted" | null>(null);
   const [deletedDocId, setDeletedDocId] = useState<string | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
-    if (typeof window === "undefined") return 220;
+    if (typeof window === "undefined") return 240;
     const saved = parseInt(localStorage.getItem("mdfy-sidebar-width") || "");
-    return Number.isFinite(saved) && saved >= 220 && saved <= 600 ? saved : 220;
+    return Number.isFinite(saved) && saved >= 240 && saved <= 600 ? saved : 240;
   });
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mdfy-sidebar-width", String(sidebarWidth));
@@ -4034,7 +4034,7 @@ export default function MdEditor() {
       if (!wrapper) return;
       const rect = wrapper.getBoundingClientRect();
       if (isDraggingSidebar.current) {
-        const w = Math.max(220, Math.min(600, e.clientX - rect.left));
+        const w = Math.max(240, Math.min(600, e.clientX - rect.left));
         const el = wrapper.querySelector('[data-pane="sidebar"]') as HTMLElement | null;
         if (el) el.style.width = `${w}px`;
         sidebarResizePendingWidthRef.current = w;
@@ -10051,7 +10051,7 @@ ${clone.innerHTML}
           data-pane="sidebar"
           style={{
             width: isMobile ? 260 : sidebarWidth,
-            minWidth: isMobile ? 260 : 220,
+            minWidth: isMobile ? 260 : 240,
             background: "var(--background)",
             borderRight: "1px solid var(--border-dim)",
             transition: isMobile ? "transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)" : "width 0.15s ease",
