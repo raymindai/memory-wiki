@@ -3528,6 +3528,12 @@ export default function MdEditor() {
   const undoStack = useRef<string[]>([initialMd]);
   const redoStack = useRef<string[]>([]);
   const undoTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Per-tab in-flight guard for the triggerAutoSave create-on-first-edit
+  // backstop. Without this a keystroke storm in a brand-new tab would
+  // fire N parallel POST /api/docs requests; the helper inside useAutoSave
+  // also dedupes by fingerprint, but per-tab tracking here keeps the
+  // setTabs callback from racing against itself.
+  const inflightCreateByTabIdRef = useRef<Set<string>>(new Set());
 
   // Global safety net: immediately remove cloudId duplicates from state
   useEffect(() => {
@@ -3625,6 +3631,49 @@ export default function MdEditor() {
     // tab-switch races feeding old content into the new doc's cloudId.
     if (val !== markdownRef.current) return;
     const currentTab = tabs.find(t => t.id === activeTabIdRef.current);
+
+    // ── Create-on-first-edit backstop ──
+    // Many tab-creation paths add the tab to local state without firing
+    // autoSave.createDocument. When the user then types, the original
+    // branch below skipped because cloudId was missing — so the tab
+    // never got a cloud id, no public URL, never appeared in the MDs
+    // sidebar serverDocs sync, and was effectively local-only forever.
+    // This block defensively creates a cloud row the first time the
+    // user's draft becomes substantial (≥ 10 trimmed chars), then
+    // attaches cloudId/editToken to the tab and refreshes serverDocs.
+    // De-duped per-tab so a flurry of keystrokes only fires one create.
+    if (!currentTab?.cloudId && currentTab && !currentTab.readonly && !currentTab.deleted && val.trim().length >= 10) {
+      const tabId = currentTab.id;
+      if (!inflightCreateByTabIdRef.current.has(tabId)) {
+        inflightCreateByTabIdRef.current.add(tabId);
+        const anonId = user?.id ? undefined : ensureAnonymousId();
+        autoSave.createDocument({
+          markdown: val,
+          title: extractTitleFromMd(val) || currentTab.title || "Untitled",
+          userId: user?.id,
+          anonymousId: anonId,
+        }).then(result => {
+          inflightCreateByTabIdRef.current.delete(tabId);
+          if (!result) return;
+          setTabs(prev => prev.map(t => t.id === tabId
+            ? { ...t, cloudId: result.id, editToken: result.editToken, isDraft: true, permission: "mine" as const }
+            : t,
+          ));
+          if (tabId === activeTabIdRef.current) {
+            try { window.history.replaceState(null, "", `/${result.id}`); } catch { /* SSR / iframe — ignore */ }
+            setDocId(result.id);
+          }
+          // Refresh sidebar serverDocs so MDs section reflects the
+          // newly-created doc without a page reload.
+          fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+            .catch(() => {});
+        });
+      }
+      return;
+    }
+
     if (currentTab?.cloudId && !currentTab.readonly && !currentTab.deleted) {
       // CRITICAL: refuse to save while the tab's body hasn't been
       // hydrated from the server yet. An empty tab.markdown means the
@@ -8123,12 +8172,13 @@ export default function MdEditor() {
         newMd = trimmed.replace(/^EDIT:\s*/, "");
         showToast("Document updated", "success");
       } else {
-        // Polish, translate, compact — replace entire document
+        // Polish, translate, compact, format — replace entire document.
         newMd = result;
         const labels: Record<string, string> = {
           polish: "Document polished",
           translate: "Document translated",
           compact: "Document compacted",
+          format: "Document auto-formatted",
         };
         showToast(labels[action] || "Done", "success");
       }
@@ -8136,7 +8186,7 @@ export default function MdEditor() {
       if (action === "chat") {
         setAiChatHistory(prev => [...prev, { role: "ai", text: "Done — document updated.", canUndo: true }]);
       } else {
-        const actionLabels: Record<string, string> = { polish: "Polished", summary: "Summary added", tldr: "TL;DR added", translate: "Translated", compact: "Compacted" };
+        const actionLabels: Record<string, string> = { polish: "Polished", summary: "Summary added", tldr: "TL;DR added", translate: "Translated", compact: "Compacted", format: "Auto-formatted" };
         setAiChatHistory(prev => [...prev, { role: "ai", text: actionLabels[action] || "Done", canUndo: true }]);
       }
       // Update title from new content
@@ -8185,55 +8235,10 @@ export default function MdEditor() {
   }, [doRender, setMarkdown, tabs]);
 
   // ─── Format raw text from chat input ───
-  // Takes whatever the user pasted into the AI chat, runs the `format`
-  // action server-side (LLM structures it as clean Markdown), then
-  // APPENDS the result to the current doc. Different from chat: the
-  // input is the raw payload, not an instruction. The user's typical
-  // flow is "I just pasted a blob of text I want as a section."
-  const handleFormatChatText = useCallback(async (rawText: string) => {
-    if (aiProcessing) return;
-    const text = rawText.trim();
-    if (text.length < 20) { showToast("Paste more text to format", "info"); return; }
-    const ct = tabs.find(t => t.id === activeTabIdRef.current);
-    if (ct?.readonly || ct?.permission === "readonly") { showToast("Cannot edit a read-only document", "info"); return; }
-    setAiProcessing("format");
-    setAiChatHistory(prev => [...prev, { role: "user", text: `[Format raw text — ${text.length} chars]` }]);
-    try {
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "format", markdown: text }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Format failed" }));
-        throw new Error(err.error || "Format failed");
-      }
-      const { result } = await res.json();
-      if (!result) throw new Error("Empty format result");
-
-      const oldMd = markdownRef.current;
-      const sep = oldMd.trim() ? (oldMd.endsWith("\n\n") ? "" : oldMd.endsWith("\n") ? "\n" : "\n\n") : "";
-      const newMd = oldMd + sep + result.trim() + "\n";
-
-      undoStack.current.push(oldMd);
-      while (undoStack.current.length > 50) undoStack.current.shift();
-      redoStack.current = [];
-
-      setMarkdown(newMd);
-      doRender(newMd);
-      cmSetDocRef.current?.(newMd);
-      tiptapRef.current?.setMarkdown(newMd);
-      setTabs(prev => prev.map(t => t.id === activeTabIdRef.current ? { ...t, markdown: newMd } : t));
-      setAiChatInput("");
-      setAiChatHistory(prev => [...prev, { role: "ai", text: "Formatted and appended.", canUndo: true }]);
-      showToast("Formatted and appended", "success");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Format failed";
-      showToast(message, "error");
-      setAiChatHistory(prev => [...prev, { role: "ai", text: `Error: ${message}` }]);
-    }
-    setAiProcessing(null);
-  }, [aiProcessing, doRender, setMarkdown, tabs]);
+  // (handleFormatChatText removed — Auto-Format now lives in the
+  //  quick-action grid via handleAIAction("format"), which replaces
+  //  the whole doc in place. The append-from-chat-input variant was
+  //  removed for UX consistency with Polish / Compact / Translate.)
 
   // ─── Diff Highlight ───
   const highlightDiff = useCallback((oldMd: string, newMd: string) => {
@@ -14119,6 +14124,7 @@ ${clone.innerHTML}
                         { action: "summary", icon: <AlignLeft width={11} height={11} style={{ color: "#60a5fa" }} />, label: "Summary", desc: "Generate a 2-4 sentence summary and add it to the top of the document." },
                         { action: "tldr", icon: <List width={11} height={11} style={{ color: "#fbbf24" }} />, label: "TL;DR", desc: "Create 2-5 bullet points of key takeaways and add to the top." },
                         { action: "translate", icon: <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"><path d="M2 3h7M5.5 3v9M3 6c1 3 3.5 5 5.5 6M8 6c-1 3-3.5 5-5.5 6"/><path d="M10 8l2 5 2-5M10.5 11.5h3"/></svg>, label: "Translate", desc: "Translate the entire document to another language. Code blocks stay unchanged." },
+                        { action: "format", icon: <Wand2 width={11} height={11} style={{ color: "#34d399" }} />, label: "Auto-Format", desc: "Restructure the document into clean Markdown — auto-detect headings, lists, tables, code, quotes from prose." },
                       ] as const).map((item) => (
                         <div key={item.action} className="relative group/ai">
                           <button
@@ -14254,24 +14260,12 @@ ${clone.innerHTML}
                         style={{ color: "var(--text-secondary)", border: "none", outline: "none", fontSize: "0.875rem", maxHeight: 140, minHeight: 22 }}
                       />
                       <div className="flex items-center gap-1 shrink-0">
-                        {/* Format raw text → append as formatted markdown.
-                            Always visible so users discover the feature;
-                            enabled at the same 20-char floor the handler
-                            enforces (was 60 — caused a visibility gap
-                            where the icon looked broken). */}
-                        <Tooltip text="Format raw text → append to doc">
-                          <button
-                            onClick={() => handleFormatChatText(aiChatInput)}
-                            disabled={aiChatInput.trim().length < 20 || !!aiProcessing}
-                            className="p-1.5 rounded-md transition-colors hover:bg-[var(--menu-hover)]"
-                            style={{
-                              color: aiChatInput.trim().length >= 20 && !aiProcessing ? "var(--accent)" : "var(--text-muted)",
-                              opacity: aiChatInput.trim().length >= 20 && !aiProcessing ? 1 : 0.75,
-                            }}
-                          >
-                            <Wand2 width={14} height={14} />
-                          </button>
-                        </Tooltip>
+                        {/* Auto-Format now lives in the quick-action grid
+                            above (alongside Polish / Compact / Summary /
+                            TL;DR / Translate) — keeping the formatting
+                            entry point in one consistent place. The
+                            chat-input Wand2 button was confusing as a
+                            second affordance. */}
                         <button
                           onClick={() => {
                             if (aiChatInput.trim() && !aiProcessing) {
