@@ -9715,8 +9715,8 @@ ${clone.innerHTML}
                 className="px-2 h-6 rounded-md transition-colors text-caption font-medium flex items-center gap-1.5"
                 title={`Share (${mod}+S)`}
                 style={{
-                  background: shareState === "copied" ? "rgba(34, 197, 94, 0.2)" : "var(--accent-dim)",
-                  color: shareState === "copied" ? "#4ade80" : "var(--accent)",
+                  background: shareState === "copied" ? "rgba(34, 197, 94, 0.2)" : "var(--toggle-bg)",
+                  color: shareState === "copied" ? "#4ade80" : "var(--text-muted)",
                 }}
               >
                 {shareState === "sharing" ? (
