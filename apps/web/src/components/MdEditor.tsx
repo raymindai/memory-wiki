@@ -14035,9 +14035,9 @@ ${clone.innerHTML}
                       tab) plus Hub. We don't render Document AND Bundle
                       simultaneously since only one is meaningful at a
                       time; the visible per-scope tab swaps based on
-                      activeTab.kind. Active state uses accent-dim
-                      background + orange text (high contrast in dark
-                      mode); orange-on-white was hard to read. */}
+                      activeTab.kind. Active state = accent-dim fill +
+                      orange text. No crisp orange border — the fill is
+                      enough signal and the border read as loud. */}
                   <div className="px-2 pt-2 shrink-0">
                     <div
                       className="flex items-center gap-0.5 p-0.5 rounded-lg"
@@ -14078,7 +14078,6 @@ ${clone.innerHTML}
                             style={{
                               background: t.active ? "var(--accent-dim)" : "transparent",
                               color: t.active ? "var(--accent)" : "var(--text-faint)",
-                              border: t.active ? "1px solid var(--accent)" : "1px solid transparent",
                             }}
                             title={t.title}
                           >
