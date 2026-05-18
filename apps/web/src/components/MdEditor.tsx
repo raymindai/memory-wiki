@@ -14908,6 +14908,16 @@ ${clone.innerHTML}
       {/* Document context menu */}
       {docContextMenu && (
         <div
+          // Force a remount on every folders mutation. The IIFE below
+          // re-reads `folders` from state on every render, but user
+          // reports new/renamed folders weren't appearing in the
+          // Move-to submenu — likely a React reconciliation quirk
+          // around the nested submenu div whose visibility is driven
+          // by CSS :hover (`opacity-0 ... group-hover/sub:opacity-100`)
+          // rather than React state. Keying the whole menu on a
+          // fingerprint of folders' ids + names guarantees a fresh
+          // subtree any time folders change.
+          key={`docmenu-${folders.map(f => `${f.id}:${f.name}`).join("|")}`}
           className="fixed rounded-lg shadow-xl py-1"
           style={{
             left: Math.min(docContextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 9999) - 180),
