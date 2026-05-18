@@ -12400,21 +12400,21 @@ ${clone.innerHTML}
             )}
           </div>
         </div>
-        {/* Sidebar resize handle — hidden on mobile (sidebar is overlay) */}
+        {/* Sidebar resize hit-zone — invisible. The 1px borderRight on
+            the sidebar itself is the only visible seam; this strip just
+            exposes a 5px drag target sitting on top of that seam. */}
         {!isMobile && (
           <div
             data-print-hide
-            className="shrink-0 cursor-col-resize w-[5px]"
-            style={{ background: "var(--border-dim)", position: "relative" }}
+            className="shrink-0 cursor-col-resize"
+            style={{ width: 5, marginLeft: -3, background: "transparent", position: "relative", zIndex: 11 }}
             onMouseDown={(e) => {
               e.preventDefault();
               isDraggingSidebar.current = true;
               document.body.style.cursor = "col-resize";
               document.body.style.userSelect = "none";
             }}
-          >
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[3px] h-8" style={{ background: "var(--text-faint)", borderRadius: 2, opacity: 0.3 }} />
-          </div>
+          />
         )}
         </>
       ) : (
@@ -13935,7 +13935,7 @@ ${clone.innerHTML}
                     minWidth: 280,
                     maxWidth: 720,
                     background: "var(--surface)",
-                    borderLeft: "1px solid var(--border)",
+                    borderLeft: "1px solid var(--border-dim)",
                     // Layering: AI panel floats above sidebar (z:10) and canvas
                     // (default). Originally had a left-edge box-shadow but
                     // the 8px blur leaked above/below the panel — read as
@@ -13945,19 +13945,19 @@ ${clone.innerHTML}
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Resize handle — drag the left edge to widen/narrow */}
+                  {/* Resize hit-zone — invisible. The 1px borderLeft on
+                      the panel itself is the only visible seam; this
+                      strip just exposes a 5px drag target on top of it. */}
                   <div
                     className="absolute top-0 bottom-0 cursor-col-resize z-[100]"
-                    style={{ width: 5, left: -2, background: "var(--border-dim)" }}
+                    style={{ width: 5, left: -3, background: "transparent" }}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       isDraggingAiPanel.current = true;
                       document.body.style.cursor = "col-resize";
                       document.body.style.userSelect = "none";
                     }}
-                  >
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[3px] h-8" style={{ background: "var(--text-faint)", borderRadius: 2, opacity: 0.3 }} />
-                  </div>
+                  />
                   <div className="flex flex-col flex-1 min-w-0 min-h-0 h-full">
                   {/* Mode indicator + actions header. Single brand colour
                       (orange) so the panel feels like one product. The
