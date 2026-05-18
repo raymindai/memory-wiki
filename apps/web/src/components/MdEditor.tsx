@@ -10055,10 +10055,10 @@ ${clone.innerHTML}
             background: "var(--background)",
             borderRight: "1px solid var(--border-dim)",
             transition: isMobile ? "transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)" : "width 0.15s ease",
-            // Layering: sidebar floats above the canvas with a soft right-edge
-            // shadow so the canvas reads as "underneath" the sidebar.
+            // Flat chrome — desktop sidebar has no boxShadow; the
+            // mobile overlay keeps shadow-2xl because it actually
+            // floats above content.
             zIndex: isMobile ? 201 : 10,
-            boxShadow: isMobile ? undefined : "2px 0 8px rgba(0,0,0,0.18)",
             ...(isMobile ? { transform: sidebarClosing ? "translateX(-100%)" : "translateX(0)" } : {}),
           }}
         >
