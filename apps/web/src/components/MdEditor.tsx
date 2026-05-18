@@ -10560,7 +10560,7 @@ ${clone.innerHTML}
                   return (
                     <div
                       data-section-id="bundles"
-                      className="flex items-center gap-1.5 pl-3 pr-5 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
+                      className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
                       style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showMyBundles ? "1px solid var(--border)" : "none", position: "sticky", top: 0, zIndex: 10 }}
                       onClick={() => setShowMyBundles(!showMyBundles)}
                     >
@@ -10890,7 +10890,7 @@ ${clone.innerHTML}
                     return (
                       <div
                         data-section-id="mds"
-                        className="flex items-center gap-1.5 pl-3 pr-5 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
+                        className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
                         style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showMyDocs ? "1px solid var(--border)" : "none", position: "sticky", top: 0, zIndex: 10 }}
                         onClick={() => { setShowMyDocs(!showMyDocs); }}
                       >
