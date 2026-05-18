@@ -110,37 +110,42 @@
    Theme: Light
    ======================================== */
 [data-theme="light"] {
-  --background: #faf9f7;
-  --foreground: #18181b;
+  /* "Paper" — Notion / Apple Notes feel. Pure-white page on a
+     warm-gray stone palette (stone-50…stone-900). The earlier
+     light mode mixed warm bg with cool zinc surface; this
+     unifies temperature, restores hierarchy, and lets the orange
+     accent breathe. */
+  --background: #ffffff;
+  --foreground: #1c1917; /* stone-900 */
   --accent: #ea580c;
   --accent-dim: rgba(234, 88, 12, 0.1);
-  --surface: #f4f4f5;
+  --surface: #fafaf9; /* stone-50 — subtle off-white card */
   --surface-hover: rgba(234, 88, 12, 0.04);
-  --border: #e4e4e7;
-  --border-dim: rgba(228, 228, 231, 0.6);
-  --text-primary: #09090b;
-  --text-secondary: #3f3f46;
-  --text-tertiary: #52525b;
-  --text-muted: #52525b;
-  --text-faint: #71717a;
+  --border: #ececec;
+  --border-dim: rgba(231, 229, 228, 0.55); /* stone-200 @ 55% */
+  --text-primary: #1c1917; /* stone-900 */
+  --text-secondary: #44403c; /* stone-700 */
+  --text-tertiary: #57534e; /* stone-600 */
+  --text-muted: #57534e; /* stone-600 */
+  --text-faint: #78716c; /* stone-500 */
   --header-bg: rgba(255, 255, 255, 0.95);
-  --editor-text: #3f3f46;
-  --editor-placeholder: #a1a1aa;
-  --scrollbar-thumb: #a1a1aa;
-  --scrollbar-hover: #a1a1aa;
+  --editor-text: #44403c; /* stone-700 — softer than primary for long reads */
+  --editor-placeholder: #a8a29e; /* stone-400 */
+  --scrollbar-thumb: #d6d3d1; /* stone-300 */
+  --scrollbar-hover: #a8a29e; /* stone-400 */
   --math-color: #7c3aed;
   --math-display-color: #6d28d9;
-  --code-copy-bg: #f4f4f5;
-  --code-copy-color: #71717a;
-  --code-copy-border: #e4e4e7;
-  --h2-color: #27272a;
+  --code-copy-bg: #fafaf9;
+  --code-copy-color: #78716c;
+  --code-copy-border: #ececec;
+  --h2-color: #292524; /* stone-800 */
   --badge-bg: rgba(234, 88, 12, 0.1);
-  --badge-muted-bg: rgba(244, 244, 245, 0.8);
-  --badge-muted-color: #71717a;
+  --badge-muted-bg: rgba(245, 245, 244, 0.8); /* stone-100 @ 80% */
+  --badge-muted-color: #78716c;
   --menu-bg: #ffffff;
-  --menu-hover: rgba(244, 244, 245, 0.8);
-  --toggle-bg: #e4e4e7;
-  --toggle-active: #d4d4d8;
+  --menu-hover: rgba(245, 245, 244, 0.9); /* stone-100 @ 90% */
+  --toggle-bg: #f5f5f4; /* stone-100 — distinct from border */
+  --toggle-active: #e7e5e4; /* stone-200 */
   --drag-bg: rgba(255, 255, 255, 0.9);
 
   /* Semantic palette — light variants (slightly darker for AA contrast) */
