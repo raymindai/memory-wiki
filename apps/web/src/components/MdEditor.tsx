@@ -14255,15 +14255,18 @@ ${clone.innerHTML}
                       />
                       <div className="flex items-center gap-1 shrink-0">
                         {/* Format raw text → append as formatted markdown.
-                            Only enabled for substantial pastes (>= 60 chars). */}
-                        <Tooltip text="Format raw text → append">
+                            Always visible so users discover the feature;
+                            enabled at the same 20-char floor the handler
+                            enforces (was 60 — caused a visibility gap
+                            where the icon looked broken). */}
+                        <Tooltip text="Format raw text → append to doc">
                           <button
                             onClick={() => handleFormatChatText(aiChatInput)}
-                            disabled={aiChatInput.trim().length < 60 || !!aiProcessing}
+                            disabled={aiChatInput.trim().length < 20 || !!aiProcessing}
                             className="p-1.5 rounded-md transition-colors hover:bg-[var(--menu-hover)]"
                             style={{
-                              color: aiChatInput.trim().length >= 60 && !aiProcessing ? "var(--accent)" : "var(--text-faint)",
-                              opacity: aiChatInput.trim().length >= 60 && !aiProcessing ? 1 : 0.45,
+                              color: aiChatInput.trim().length >= 20 && !aiProcessing ? "var(--accent)" : "var(--text-muted)",
+                              opacity: aiChatInput.trim().length >= 20 && !aiProcessing ? 1 : 0.75,
                             }}
                           >
                             <Wand2 width={14} height={14} />

@@ -262,8 +262,8 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
             maxLength={500}
             disabled={isStreaming}
             autoFocus
-            className="flex-1 text-caption bg-transparent min-w-0"
-            style={{ color: "var(--text-secondary)", border: "none", outline: "none" }}
+            className="flex-1 bg-transparent min-w-0"
+            style={{ color: "var(--text-secondary)", border: "none", outline: "none", fontSize: "0.875rem" }}
           />
           {/* Inline reset removed — panel header now owns the "New chat" affordance. */}
           <button type="submit" disabled={!input.trim() || isStreaming}
