@@ -2389,6 +2389,15 @@ textarea::selection {
   -ms-overflow-style: none;
 }
 .sidebar-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* Doc body / preview scroll — same hide treatment as the sidebar. Scrolling
+   stays functional (wheel + trackpad + keyboard) but the bar itself doesn't
+   render. Keeps the middle column visually clean across all panel states. */
+.body-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.body-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .hero-c-track { cursor: grab; }
 .hero-c-track:active { cursor: grabbing; }
 .hero-c-item {

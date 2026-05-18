@@ -12032,7 +12032,7 @@ ${clone.innerHTML}
               { id: "trash", label: "Trash", count: memoTrashTabs.length },
             ];
             return (
-              <div className="shrink-0 flex items-center gap-1 px-2 py-1.5 overflow-x-auto" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
+              <div className="shrink-0 flex flex-wrap items-center gap-1 px-2 py-1.5" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                 <span className="shrink-0 text-caption font-mono uppercase tracking-wider" style={{ color: "var(--text-faint)", letterSpacing: "0.05em" }}>↓</span>
                 {navItems.filter(s => belowViewportSections.has(s.id)).map(s => (
                   <Tooltip key={s.id} text={`Jump to ${s.label}`}>
@@ -13741,7 +13741,7 @@ ${clone.innerHTML}
                 })}
               </div>
             )}
-            <div className="flex-1 overflow-auto relative" ref={previewRef}>
+            <div className="flex-1 overflow-auto body-scroll relative" ref={previewRef}>
               {showInnerLoader && activeTab?.kind !== "bundle" && !showHub && (
                 // Visually identical to page.tsx's boot loader — same
                 // logo size, same bar dimensions, same caption — so
@@ -13937,9 +13937,11 @@ ${clone.innerHTML}
                     background: "var(--surface)",
                     borderLeft: "1px solid var(--border)",
                     // Layering: AI panel floats above sidebar (z:10) and canvas
-                    // (default). Soft left-edge shadow gives it a "lifted" feel.
+                    // (default). Originally had a left-edge box-shadow but
+                    // the 8px blur leaked above/below the panel — read as
+                    // an unwanted shadow under the chat. Border alone keeps
+                    // the seam crisp without the bleed.
                     zIndex: 20,
-                    boxShadow: "-2px 0 8px rgba(0,0,0,0.18)",
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
