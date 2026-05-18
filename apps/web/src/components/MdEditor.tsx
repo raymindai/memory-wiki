@@ -15012,13 +15012,17 @@ ${clone.innerHTML}
                   // title === source title → dedup hit → original tab
                   // removed by withoutDup filter below.
                   const dupMd = rewriteH1(targetTab.markdown, t);
-                  // lastOpenedAt = now so the duplicate appears at the
-                  // TOP of the MDs sidebar (default sort: newest first).
-                  // Without this it lands at the bottom (lastOpenedAt
-                  // defaults to 0 in the sort comparator).
-                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true, lastOpenedAt: Date.now() }]);
+                  // Bulletproof newest-first sort: take max(all existing) + 1.
+                  const maxLastOpenedAt = Math.max(Date.now(), ...tabs.map(x => x.lastOpenedAt ?? 0));
+                  const newLastOpenedAt = maxLastOpenedAt + 1;
+                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true, lastOpenedAt: newLastOpenedAt }]);
+                  showToast(`Duplicating "${targetTab.title}"…`, "info");
+                  setTimeout(() => switchTab(id), 50);
                   autoSave.createDocument({ markdown: dupMd, title: t, userId: user?.id, anonymousId: !user?.id ? ensureAnonymousId() : undefined }).then(result => {
-                    if (!result) return;
+                    if (!result) {
+                      showToast("Duplicate failed — try again", "error");
+                      return;
+                    }
                     if (result.deduplicated) {
                       // Server collapsed our copy into an existing doc.
                       // Drop the phantom tab and switch to the survivor.
@@ -15029,6 +15033,7 @@ ${clone.innerHTML}
                       return;
                     }
                     setTabs(prev => prev.map(x => x.id === id ? { ...x, cloudId: result.id, editToken: result.editToken } : x));
+                    showToast(`Duplicated "${targetTab.title}"`, "success");
                   });
                 }
               }},
@@ -15110,18 +15115,33 @@ ${clone.innerHTML}
                   // the original's id, then withoutDup below would
                   // delete the original tab.
                   const dupMd = rewriteH1(tab.markdown, t);
-                  // lastOpenedAt = now so the duplicate appears at the
-                  // TOP of the MDs sidebar (default sort: newest first).
-                  // Without this it lands at the bottom (lastOpenedAt
-                  // defaults to 0 in the sort comparator).
-                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true, lastOpenedAt: Date.now() }]);
+                  // GUARANTEE the duplicate beats every existing tab's
+                  // lastOpenedAt in the "newest first" sort. Plain
+                  // Date.now() was sometimes equal to a tab opened in
+                  // the same ms (or got beaten by an incoming server
+                  // sync's updated_at). Take max(all existing) + 1
+                  // explicitly.
+                  const maxLastOpenedAt = Math.max(Date.now(), ...tabs.map(x => x.lastOpenedAt ?? 0));
+                  const newLastOpenedAt = maxLastOpenedAt + 1;
+                  setTabs(prev => [...prev, { id, title: t, markdown: dupMd, permission: "mine", shared: false, isDraft: true, lastOpenedAt: newLastOpenedAt }]);
+                  // Immediate visible feedback — the server round-trip
+                  // can take 1-3s and users were left wondering if the
+                  // click did anything.
+                  showToast(`Duplicating "${tab.title}"…`, "info");
+                  // Switch to the new tab right away so the user lands
+                  // in the duplicate as it saves (matches the "+New
+                  // Document" UX). Tiny setTimeout to let setTabs flush.
+                  setTimeout(() => switchTab(id), 50);
                   autoSave.createDocument({
                     markdown: dupMd,
                     title: t,
                     userId: user?.id,
                     anonymousId: !user?.id ? ensureAnonymousId() : undefined,
                   }).then(result => {
-                    if (!result) return;
+                    if (!result) {
+                      showToast("Duplicate failed — try again", "error");
+                      return;
+                    }
                     if (result.deduplicated) {
                       // Server collapsed the copy into an existing doc
                       // (likely a race or stale state). Drop the
@@ -15139,6 +15159,7 @@ ${clone.innerHTML}
                       const withoutDup = prev.filter(x => !(x.cloudId === result.id && x.id !== id && x.isDraft && !x.cloudId));
                       return withoutDup.map(x => x.id === id ? { ...x, cloudId: result.id, editToken: result.editToken } : x);
                     });
+                    showToast(`Duplicated "${tab.title}"`, "success");
                   });
                 }
               }},
