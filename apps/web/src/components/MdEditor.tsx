@@ -12032,8 +12032,7 @@ ${clone.innerHTML}
               { id: "trash", label: "Trash", count: memoTrashTabs.length },
             ];
             return (
-              <div className="shrink-0 flex flex-wrap items-center gap-1 px-2 py-1.5" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
-                <span className="shrink-0 text-caption font-mono uppercase tracking-wider" style={{ color: "var(--text-faint)", letterSpacing: "0.05em" }}>↓</span>
+              <div className="shrink-0 flex items-center gap-1 px-2 py-1.5 overflow-x-auto whitespace-nowrap sidebar-scroll" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
                 {navItems.filter(s => belowViewportSections.has(s.id)).map(s => (
                   <Tooltip key={s.id} text={`Jump to ${s.label}`}>
                     <button
