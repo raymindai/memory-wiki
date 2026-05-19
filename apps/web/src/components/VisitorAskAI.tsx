@@ -76,7 +76,10 @@ export default function VisitorAskAI({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "chat",
+          // visitor_chat is a read-only path with its own prompt
+          // (lib/ai-providers via /api/ai). It never returns the
+          // document body and never uses ANSWER:/EDIT: prefixes.
+          action: "visitor_chat",
           markdown,
           instruction: trimmed,
         }),
@@ -88,13 +91,7 @@ export default function VisitorAskAI({
         return;
       }
       const data = await res.json();
-      let answer: string = data.result || "";
-      // The editor's chat prompt prefixes ANSWER:/EDIT: tags. Strip
-      // them for the visitor surface — we treat the response as
-      // pure text. If the model returned an EDIT (because the user
-      // asked something like "rewrite this"), still show the body
-      // but it'll read as a rewrite suggestion not a side effect.
-      answer = answer.replace(/^(ANSWER:|EDIT:)\s*/i, "").trim();
+      const answer: string = (data.result || "").trim();
       if (!answer) {
         setError("AI returned an empty answer.");
         setBusy(false);

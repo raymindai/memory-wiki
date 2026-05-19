@@ -11,6 +11,7 @@ type AIAction =
   | "tldr"
   | "translate"
   | "chat"
+  | "visitor_chat"
   | "beautify"
   | "compact"
   | "format"
@@ -56,7 +57,7 @@ async function getAIModels(): Promise<{ primary: string; lite: string }> {
   return cachedModels;
 }
 
-const PROMPTS: Record<Exclude<AIAction, "chat" | "translate" | "selection_rewrite" | "selection_translate">, string> = {
+const PROMPTS: Record<Exclude<AIAction, "chat" | "visitor_chat" | "translate" | "selection_rewrite" | "selection_translate">, string> = {
   polish: `You are an expert editor. Polish the following Markdown document:
 - Fix grammar, spelling, and punctuation errors
 - Improve clarity and readability
@@ -181,6 +182,39 @@ Rules:
 - Output ONLY the rewritten snippet`;
 }
 
+/**
+ * Visitor-facing chat prompt. Distinct from buildChatPrompt because
+ * the visitor surface (/d/<id>'s Ask AI panel) is read-only — there
+ * is no editing affordance for a visitor, so any "modify the doc"
+ * branch is nonsense. The editor's chat path has three intents
+ * (QUESTION / EDIT / CASUAL) and EDIT returns the entire document
+ * body; that fell through to the visitor panel, so asking "TLDR"
+ * returned "TLDR + whole doc". This prompt forces the model into
+ * answer-only mode: never return the doc, never use ANSWER:/EDIT:
+ * prefixes, just say the thing.
+ */
+function buildVisitorChatPrompt(instruction: string): string {
+  const sanitized = instruction
+    .replace(/["""]/g, "'")
+    .replace(/\n/g, " ")
+    .slice(0, 500);
+  return `You are answering a reader's question about a document they're viewing.
+
+The reader's question is between the <question> tags below.
+
+<question>${sanitized}</question>
+
+Rules:
+- Answer using ONLY information from the document.
+- Be concise and direct. Bullet points or short paragraphs are fine.
+- If the reader asks for a TL;DR, summary, or list, output ONLY that — do NOT include the source document body in your reply.
+- If the question can't be answered from the document, say so briefly.
+- Do NOT prefix your reply with "ANSWER:", "EDIT:", or any tag.
+- Do NOT echo the document. Do NOT quote large chunks. Cite sparingly when needed for clarity.
+- Do NOT suggest edits. You are a reader, not an editor.
+- Preserve the document's original language in your answer when natural.`;
+}
+
 function buildChatPrompt(instruction: string): string {
   // Sanitize instruction to prevent prompt injection
   const sanitized = instruction
@@ -233,7 +267,7 @@ export async function POST(req: NextRequest) {
   }
 
   const validActions: AIAction[] = [
-    "polish", "summary", "tldr", "translate", "chat", "beautify", "compact", "format",
+    "polish", "summary", "tldr", "translate", "chat", "visitor_chat", "beautify", "compact", "format",
     "selection_polish", "selection_shorten", "selection_expand",
     "selection_rewrite", "selection_translate",
   ];
@@ -245,7 +279,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "language is required for translate" }, { status: 400 });
   }
 
-  if ((action === "chat" || action === "selection_rewrite") && !instruction) {
+  if ((action === "chat" || action === "visitor_chat" || action === "selection_rewrite") && !instruction) {
     return NextResponse.json({ error: "instruction is required" }, { status: 400 });
   }
 
@@ -257,12 +291,20 @@ export async function POST(req: NextRequest) {
     systemPrompt = buildSelectionTranslatePrompt(language!);
   } else if (action === "chat") {
     systemPrompt = buildChatPrompt(instruction!);
+  } else if (action === "visitor_chat") {
+    systemPrompt = buildVisitorChatPrompt(instruction!);
   } else if (action === "selection_rewrite") {
     systemPrompt = buildSelectionRewritePrompt(instruction!);
   } else {
     systemPrompt = PROMPTS[action];
   }
 
+  const trailingLabel =
+    action === "chat" ? "Modified document:"
+    : action === "visitor_chat" ? "Answer:"
+    : action.startsWith("selection_") ? "Snippet:"
+    : action === "polish" || action === "translate" || action === "compact" ? "Result:"
+    : "Output:";
   const fullPrompt = `${systemPrompt}
 
 Document:
@@ -270,12 +312,15 @@ Document:
 ${markdown.slice(0, 3 * 1024 * 1024)}
 ---
 
-${action === "chat" ? "Modified document:" : action.startsWith("selection_") ? "Snippet:" : action === "polish" || action === "translate" || action === "compact" ? "Result:" : "Output:"}`;
+${trailingLabel}`;
 
-  // Per-action knobs: summary/tldr/selection-ops can use the lite
-  // model (cheaper, faster); the rest get the primary tier. Same
-  // policy as before, now provider-agnostic.
-  const useLite = action === "summary" || action === "tldr" || action.startsWith("selection_");
+  // Per-action knobs: summary/tldr/selection-ops + visitor_chat can
+  // use the lite model (cheaper, faster, answers are short); the
+  // rest get the primary tier. visitor_chat also caps output at
+  // 2048 tokens because there's no path where a visitor needs a
+  // multi-thousand-token reply — anything longer is usually the
+  // model misclassifying and trying to echo the doc body.
+  const useLite = action === "summary" || action === "tldr" || action === "visitor_chat" || action.startsWith("selection_");
   const temperature =
     action === "polish" || action === "translate" || action === "compact"
       || action === "format"
@@ -283,7 +328,7 @@ ${action === "chat" ? "Modified document:" : action.startsWith("selection_") ? "
       ? 0.1
       : 0.3;
   const maxOutputTokens =
-    action === "summary" || action === "tldr"
+    action === "summary" || action === "tldr" || action === "visitor_chat"
       ? 2048
       : action.startsWith("selection_")
         ? 8192
