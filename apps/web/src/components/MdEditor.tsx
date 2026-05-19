@@ -2,6 +2,9 @@
 
 import { useState, useCallback, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import { flushSync, createPortal } from "react-dom";
+// Aliased because lucide-react also exports a `Link` icon used
+// elsewhere in this file. NextLink is the routing component.
+import NextLink from "next/link";
 import { render } from "@/lib/render";
 import katex from "katex";
 import { htmlToMarkdown, isHtmlContent } from "@/lib/html-to-md";
@@ -6166,6 +6169,39 @@ export default function MdEditor() {
     };
     window.addEventListener("mdfy-hub-auto-created", handler as EventListener);
     return () => window.removeEventListener("mdfy-hub-auto-created", handler as EventListener);
+  }, []);
+
+  // Anonymous-to-account claim notice. Fired by useAuth's
+  // tryClaimAnonymousContent after a fresh sign-in absorbs the
+  // anonymous browser's docs / bundles. Without this listener the
+  // user just sees their newly-claimed content "appear" in the
+  // sidebar with no explanation. We:
+  //   1. Toast a clear summary so they know what just moved.
+  //   2. Refresh the sidebar's serverDocs so claimed items show
+  //      up immediately (don't wait for the next manual reload).
+  //   3. Expand MDs + Recent sections so the new entries are
+  //      visible without the user hunting for them.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ documents: number; bundles: number }>).detail;
+      if (!detail) return;
+      const docs = detail.documents || 0;
+      const bundles = detail.bundles || 0;
+      if (docs === 0 && bundles === 0) return;
+      const parts: string[] = [];
+      if (docs > 0) parts.push(`${docs} ${docs === 1 ? "doc" : "docs"}`);
+      if (bundles > 0) parts.push(`${bundles} ${bundles === 1 ? "bundle" : "bundles"}`);
+      showToast(`Claimed ${parts.join(" + ")} from your anonymous session.`, "success");
+      setShowMyDocs(true);
+      setShowRecent(true);
+      // Pull the fresh list so claimed items render right away.
+      fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+        .catch(() => {});
+    };
+    window.addEventListener("mdfy-anon-claimed", handler as EventListener);
+    return () => window.removeEventListener("mdfy-anon-claimed", handler as EventListener);
   }, []);
 
   // Load shared content from URL — wait for auth to resolve first
@@ -13275,9 +13311,13 @@ ${clone.innerHTML}
                             {body}
                           </button>
                         ) : (
-                          <a key={item.label} href={item.url} target="_blank" rel="noopener noreferrer" {...sharedProps}>
+                          // Internal Next.js pages — same-window navigation so
+                          // users don't pile up "stale editor" tabs in their
+                          // browser. Editor state persists in localStorage so
+                          // back-button restores everything.
+                          <NextLink key={item.label} href={item.url} {...sharedProps}>
                             {body}
-                          </a>
+                          </NextLink>
                         );
                       });
                     })()}
@@ -13389,7 +13429,10 @@ ${clone.innerHTML}
                       { label: "How it works", desc: "Architecture, end to end", url: "/about#how-it-works", color: "#c4b5fd", icon: <HelpCircle width={14} height={14} /> },
                       { label: "mdfy Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
                     ]).map((item) => (
-                      <a key={item.label} href={item.url} target="_blank" rel="noopener noreferrer"
+                      // Same-window navigation (Link, no target=_blank)
+                      // for internal mdfy pages — keeps the user in one
+                      // browser tab; editor state restores on back.
+                      <NextLink key={item.label} href={item.url}
                         className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-left cursor-pointer"
                         style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", textDecoration: "none", transition: "all 0.12s" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = item.color; e.currentTarget.style.boxShadow = `0 0 0 1px ${item.color}20`; }}
@@ -13399,7 +13442,7 @@ ${clone.innerHTML}
                           <div className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>{item.label}</div>
                           <div className="text-caption mt-0.5" style={{ color: "var(--text-faint)" }}>{item.desc}</div>
                         </div>
-                      </a>
+                      </NextLink>
                     ))}
                   </div>
                   )}
@@ -13976,6 +14019,59 @@ ${clone.innerHTML}
                   // outline panel here — don't reserve space for it either.
                   right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
                   background: "var(--background)",
+                  outline: dragTabId ? "2px dashed var(--accent)" : undefined,
+                  outlineOffset: dragTabId ? "-8px" : undefined,
+                  transition: "outline-color 0.12s",
+                }}
+                // Sidebar MD/doc tabs are draggable. When the user drags
+                // one onto an open bundle viewer, add the cloud doc to
+                // the bundle in place — no roundtrip to a picker. The
+                // outline above flashes accent during a valid drag so
+                // the drop target is obvious.
+                onDragOver={(e) => {
+                  if (!dragTabId) return;
+                  const draggedTab = tabs.find(t => t.id === dragTabId);
+                  if (!draggedTab?.cloudId || draggedTab.kind === "bundle") return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "copy";
+                }}
+                onDrop={async (e) => {
+                  if (!dragTabId || !activeTab.bundleId) return;
+                  e.preventDefault();
+                  const draggedTab = tabs.find(t => t.id === dragTabId);
+                  setDragTabId(null);
+                  if (!draggedTab?.cloudId) {
+                    showToast("Save the doc first before adding to a bundle.", "info");
+                    return;
+                  }
+                  if (draggedTab.kind === "bundle") return;
+                  const bundleId = activeTab.bundleId;
+                  try {
+                    const res = await fetch(`/api/bundles/${bundleId}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json", ...authHeaders },
+                      body: JSON.stringify({
+                        action: "add-documents",
+                        documentIds: [draggedTab.cloudId],
+                      }),
+                    });
+                    if (!res.ok) {
+                      const j = await res.json().catch(() => ({}));
+                      showToast(j.error || "Couldn't add to bundle.", "error");
+                      return;
+                    }
+                    showToast(`Added "${draggedTab.title || "Untitled"}" to bundle.`, "success");
+                    // BundleEmbed subscribes to this event and re-pulls
+                    // its document list so the new member appears
+                    // without a manual reload.
+                    try {
+                      window.dispatchEvent(new CustomEvent("mdfy-bundle-doc-added", {
+                        detail: { bundleId, docIds: [draggedTab.cloudId] },
+                      }));
+                    } catch { /* ignore */ }
+                  } catch {
+                    showToast("Couldn't add to bundle.", "error");
+                  }
                 }}
               >
                 <div className="flex-1 min-w-0">
@@ -15227,7 +15323,12 @@ ${clone.innerHTML}
           <a href="/privacy" className="transition-colors hidden lg:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Privacy policy">Privacy</a>
           <a href="/terms" className="transition-colors hidden lg:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Terms of service">Terms</a>
         </div>
-        {/* Right: stats + engine badges — tap to expand on mobile */}
+        {/* Right: stats + engine badges — tap to expand on mobile.
+            Stats only render when the editor is showing an actual
+            doc. Start / Hub / Settings / Bundle surfaces have no
+            markdown to count, so "0 words 0 chars 1 lines" was just
+            visual noise. */}
+        {!showOnboarding && !showHub && !showSettings && activeTab?.kind !== "bundle" && (
         <div className="flex items-center gap-3 shrink-0">
           {/* Desktop: always visible */}
           <span className="hidden sm:inline">{wordCount.toLocaleString()} words</span>
@@ -15278,6 +15379,7 @@ ${clone.innerHTML}
             </div>
           </div>
         </div>
+        )}
       </footer>
 
       {/* Document context menu */}

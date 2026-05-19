@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
+import { callAI } from "@/lib/ai-providers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -212,8 +213,10 @@ ALWAYS start with exactly "ANSWER:" or "EDIT:" — no exceptions.`;
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  // Provider resilience: tries Anthropic → OpenAI → Gemini with
+  // runtime failover (see lib/ai-providers). At least one of the
+  // three keys must be present.
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: "AI API key not configured" }, { status: 503 });
   }
 
@@ -269,68 +272,51 @@ ${markdown.slice(0, 3 * 1024 * 1024)}
 
 ${action === "chat" ? "Modified document:" : action.startsWith("selection_") ? "Snippet:" : action === "polish" || action === "translate" || action === "compact" ? "Result:" : "Output:"}`;
 
-  // Resolve model from site_config (cached 5 min). Snippet ops are
-  // small so they stay on the lite model for cost.
-  const models = await getAIModels();
+  // Per-action knobs: summary/tldr/selection-ops can use the lite
+  // model (cheaper, faster); the rest get the primary tier. Same
+  // policy as before, now provider-agnostic.
   const useLite = action === "summary" || action === "tldr" || action.startsWith("selection_");
-  const modelName = useLite ? models.lite : models.primary;
+  const temperature =
+    action === "polish" || action === "translate" || action === "compact"
+      || action === "format"
+      || action === "selection_polish" || action === "selection_translate"
+      ? 0.1
+      : 0.3;
+  const maxOutputTokens =
+    action === "summary" || action === "tldr"
+      ? 2048
+      : action.startsWith("selection_")
+        ? 8192
+        : 65536;
 
-  const callGemini = async (attempt: number): Promise<Response> => {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: fullPrompt }] }],
-          generationConfig: {
-            temperature:
-              action === "polish" || action === "translate" || action === "compact"
-                || action === "format"
-                || action === "selection_polish" || action === "selection_translate"
-                ? 0.1
-                : 0.3,
-            maxOutputTokens:
-              action === "summary" || action === "tldr"
-                ? 2048
-                : action.startsWith("selection_")
-                  ? 8192
-                  : 65536,
-          },
-        }),
-      }
-    );
-    if (res.ok || res.status < 500 || attempt >= 2) return res;
-    await new Promise((r) => setTimeout(r, 500 + attempt * 1000));
-    return callGemini(attempt + 1);
-  };
+  // Gemini fallback respects site_config overrides; Anthropic /
+  // OpenAI use hardcoded sane defaults inside the helper.
+  const models = await getAIModels();
 
   try {
-    const res = await callGemini(0);
+    const result = await callAI({
+      prompt: fullPrompt,
+      temperature,
+      maxOutputTokens,
+      useLiteModel: useLite,
+      geminiModel: models.primary,
+      geminiLiteModel: models.lite,
+    });
 
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.error(`AI ${action} error:`, res.status, errBody);
-      let userMessage = "AI processing failed";
-      if (res.status === 429) userMessage = "AI is rate-limited. Try again in a minute.";
-      else if (res.status >= 500) userMessage = "AI service is temporarily unavailable.";
-      return NextResponse.json({ error: userMessage }, { status: res.status === 429 ? 429 : 502 });
-    }
-
-    const data = await res.json();
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const finishReason = data.candidates?.[0]?.finishReason;
-
-    if (!result.trim()) {
+    if (!result.ok) {
+      console.error(`AI ${action} failover exhausted:`, result.status, result.error);
       return NextResponse.json(
-        { error: finishReason === "SAFETY" ? "AI refused this content (safety filter)." : "AI returned empty result" },
-        { status: 500 }
+        { error: result.error },
+        { status: result.rateLimited ? 429 : result.status >= 500 ? 502 : result.status },
       );
     }
 
     return NextResponse.json({
-      result,
-      ...(finishReason && finishReason !== "STOP" ? { finishReason } : {}),
+      result: result.text,
+      provider: result.provider,
+      ...(result.finishReason && result.finishReason !== "STOP" && result.finishReason !== "end_turn" && result.finishReason !== "stop"
+        ? { finishReason: result.finishReason }
+        : {}),
     });
   } catch (err) {
     console.error(`AI ${action} error:`, err);

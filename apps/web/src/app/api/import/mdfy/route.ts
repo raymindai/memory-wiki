@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { callAI } from "@/lib/ai-providers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: "AI API key not configured" }, { status: 503 });
   }
 
@@ -21,13 +21,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "text is required" }, { status: 400 });
   }
 
-  // Hard cap: 3 MB of text. Gemini 3.1 has a 1M-token context window which
-  // comfortably handles this (3MB ≈ 750k tokens at 4 chars/token).
+  // Hard cap: 3 MB of text. Provider context windows comfortably
+  // handle this (Anthropic Sonnet = 200k tokens, OpenAI gpt-4o =
+  // 128k, Gemini 3.1 = 1M). 3MB ≈ 750k tokens at 4 chars/token, so
+  // Gemini is the only one that fits the full budget — the
+  // failover helper picks whoever is up; if Anthropic/OpenAI get
+  // the call they'll error on length and the helper falls through.
   const MAX_INPUT_BYTES = 3 * 1024 * 1024;
   const truncated = text.length > MAX_INPUT_BYTES;
   const trimmed = truncated ? text.slice(0, MAX_INPUT_BYTES) : text;
 
-  const buildPrompt = (input: string) => `You are an expert at converting raw text into well-structured Markdown.
+  const prompt = `You are an expert at converting raw text into well-structured Markdown.
 
 The following text was extracted from a file${filename ? ` named "${filename}"` : ""}. The extraction process lost all formatting — headings, bold, lists, tables, code blocks, etc. are all flattened into plain text.
 
@@ -47,67 +51,34 @@ Rules:
 
 Raw text:
 ---
-${input}
+${trimmed}
 ---
 
 Structured Markdown:`;
 
-  // Call Gemini with retry on transient errors (5xx, network).
-  const callGemini = async (attempt: number): Promise<Response> => {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: buildPrompt(trimmed) }] }],
-          generationConfig: {
-            temperature: 0.1,
-            // Bumped from 8192 to support large inputs. Gemini 3.1 supports
-            // up to 65536 output tokens.
-            maxOutputTokens: 65536,
-          },
-        }),
-      }
-    );
-    if (res.ok || res.status < 500 || attempt >= 2) return res;
-    // Backoff: 500ms, 1500ms
-    await new Promise((r) => setTimeout(r, 500 + attempt * 1000));
-    return callGemini(attempt + 1);
-  };
-
   try {
-    const res = await callGemini(0);
+    const result = await callAI({
+      prompt,
+      temperature: 0.1,
+      maxOutputTokens: 65536,
+      useLiteModel: true,
+    });
 
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.error("Gemini API error:", res.status, errBody);
-      // Surface a specific error so the client can show useful UX.
-      let userMessage = "AI processing failed";
-      if (res.status === 429) userMessage = "AI is rate-limited right now. Try again in a minute.";
-      else if (res.status === 413 || /too large|exceeds/i.test(errBody))
-        userMessage = "Document is too large for AI processing.";
-      else if (res.status === 400 && /API key/i.test(errBody))
-        userMessage = "AI service misconfigured.";
-      else if (res.status >= 500) userMessage = "AI service is temporarily unavailable.";
-      return NextResponse.json({ error: userMessage }, { status: res.status === 429 ? 429 : 502 });
-    }
-
-    const data = await res.json();
-    const markdown = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const finishReason = data.candidates?.[0]?.finishReason;
-
-    if (!markdown.trim()) {
+    if (!result.ok) {
+      console.error("mdfy formatter failover exhausted:", result.status, result.error);
       return NextResponse.json(
-        { error: finishReason === "SAFETY" ? "AI refused this content (safety filter)." : "AI returned empty result" },
-        { status: 500 }
+        { error: result.error },
+        { status: result.rateLimited ? 429 : result.status >= 500 ? 502 : result.status },
       );
     }
 
     return NextResponse.json({
-      markdown,
+      markdown: result.text,
       truncated,
-      ...(finishReason && finishReason !== "STOP" ? { finishReason } : {}),
+      provider: result.provider,
+      ...(result.finishReason && result.finishReason !== "STOP" && result.finishReason !== "end_turn" && result.finishReason !== "stop"
+        ? { finishReason: result.finishReason }
+        : {}),
     });
   } catch (err) {
     console.error("mdfy API error:", err);

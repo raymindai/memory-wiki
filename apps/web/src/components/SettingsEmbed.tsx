@@ -16,7 +16,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/useAuth";
 import { buildAuthHeaders } from "@/lib/auth-fetch";
-import { ArrowLeft, Trash2, Loader2, Check } from "lucide-react";
+import { ArrowLeft, Trash2, Loader2, Check, Download } from "lucide-react";
 import Link from "next/link";
 import {
   CURATOR_OPTIONS,
@@ -312,6 +312,40 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
       setDeleting(false);
     }
   }, [accessToken, user, signOut]);
+
+  // Export all user data as a JSON file. Single round-trip; the
+  // server assembles the payload and returns it with a
+  // Content-Disposition header so the browser downloads as
+  // mdfy-export-YYYY-MM-DD.json.
+  const [exporting, setExporting] = useState(false);
+  const handleExportData = useCallback(async () => {
+    if (!accessToken || exporting) return;
+    setExporting(true);
+    try {
+      const res = await fetch("/api/user/export", {
+        headers: buildAuthHeaders({ accessToken, userId: user?.id, userEmail: user?.email }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        alert(j.error || `Export failed (${res.status})`);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `mdfy-export-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  }, [accessToken, user, exporting]);
 
   const handleThemeChange = (newTheme: "dark" | "light") => {
     setTheme(newTheme);
@@ -1068,6 +1102,33 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
 
         {/* ── Danger section ── */}
         {activeSection === "danger" && (<>
+
+        {/* Export — sits in the same section as Delete because both
+            are "I want to leave / move my data" actions. Export is
+            non-destructive so it lives above Danger Zone. */}
+        <div className="mb-8">
+          <label className="block text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-faint)" }}>
+            Your data
+          </label>
+          <p className="text-sm mb-3" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
+            Download every document, bundle, folder, and concept you own as a single JSON file. Your data is yours — this works any time, no questions asked. GDPR right-to-portability and your daily backup, the same endpoint.
+          </p>
+          <button
+            onClick={handleExportData}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              color: "var(--text-secondary)",
+              opacity: exporting ? 0.6 : 1,
+              cursor: exporting ? "not-allowed" : "pointer",
+            }}
+          >
+            <Download width={14} height={14} />
+            {exporting ? "Preparing export…" : "Export all my data"}
+          </button>
+        </div>
 
         {/* Danger Zone */}
         <div>

@@ -25,6 +25,15 @@ export default function Tooltip({
   const [edgeAlign, setEdgeAlign] = useState<"left" | "right" | null>(null);
   const handleMouseEnter = () => {
     if (!triggerRef.current || typeof window === "undefined") return;
+    // Touch devices fire synthetic mouseEnter on tap but never the
+    // matching mouseLeave (the finger lifts off, there's no cursor
+    // to track) — the tooltip would then stick visible until the
+    // user tapped elsewhere. Mobile-Safari was showing "Close my
+    // hub" indefinitely on the header Hub button for exactly this
+    // reason. Suppress the tooltip entirely on no-hover devices;
+    // the underlying button's title attribute (where present) is
+    // the right accessible fallback there.
+    if (window.matchMedia && window.matchMedia("(hover: none)").matches) return;
     const rect = triggerRef.current.getBoundingClientRect();
     const vw = window.innerWidth;
     // Decide edge alignment up-front based on trigger position so very-left or

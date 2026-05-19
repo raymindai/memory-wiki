@@ -281,6 +281,31 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     try { await navigator.clipboard.writeText(context); } catch { /* clipboard error */ }
   }, [documents]);
 
+  // Listen for "doc dragged onto this bundle" events from the
+  // parent editor's drop handler. When a matching event fires we
+  // re-fetch the bundle so the freshly-added doc shows in the
+  // canvas/list views without a manual reload.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ bundleId: string }>).detail;
+      if (!detail?.bundleId || detail.bundleId !== bundleId) return;
+      const headers: Record<string, string> = { ...(parentAuthHeaders || {}) };
+      fetch(`/api/bundles/${bundleId}`, { headers })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data) return;
+          bundleDataCache.set(bundleId, { data, ts: Date.now() });
+          setDocuments(data.documents || []);
+          setGraphGeneratedAt(data.graph_generated_at || null);
+          setEmbeddingUpdatedAt(data.embedding_updated_at || null);
+          setIsAnalysisStale(!!data.isAnalysisStale);
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("mdfy-bundle-doc-added", handler as EventListener);
+    return () => window.removeEventListener("mdfy-bundle-doc-added", handler as EventListener);
+  }, [bundleId, parentAuthHeaders]);
+
   const handleRegenerate = useCallback(async () => {
     setAiGraph(null);
     setIsAnalyzing(true);
