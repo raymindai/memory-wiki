@@ -4060,11 +4060,17 @@ export default function MdEditor() {
   const { otherEditors } = usePresence(docId, presenceUser);
 
   // ─── Yjs CRDT Collaboration ───
-  // Remote change handler: update markdown, render, and sync CM6
+  // Remote change handler: update markdown, render, and sync CM6 +
+  // the Live tab's Tiptap editor. Tiptap was previously left out
+  // here, so a viewer on the Live tab never saw the remote peer's
+  // edits stream in — they only got the final markdown after
+  // auto-save. Tiptap's setMarkdown flips isSettingContent so the
+  // resulting onUpdate doesn't echo back into Yjs.
   const collabRemoteHandler = useCallback((newMarkdown: string) => {
     setMarkdownRaw(newMarkdown);
     doRenderRef.current(newMarkdown);
     cmSetDocRef.current?.(newMarkdown);
+    tiptapRef.current?.setMarkdown(newMarkdown);
     triggerAutoSave(newMarkdown);
   }, [triggerAutoSave]);
   const { applyLocalChange: collabApplyLocal, forceReset: collabForceReset, peerCount: _collabPeerCount, isCollaborating } = useCollaboration(
@@ -4568,7 +4574,7 @@ export default function MdEditor() {
         cloudId: slug,
         isDraft: d.is_draft,
         shared: !d.isOwner,
-        readonly: !d.isOwner && d.editMode !== "public",
+        readonly: !d.isOwner && !d.isEditor && d.editMode !== "public",
         ownerEmail: d.ownerEmail,
       };
       setTabs(prev => [...prev, newTab]);
@@ -7760,6 +7766,13 @@ export default function MdEditor() {
     markdownRef.current = md;
     setMarkdownRaw(md);
     triggerAutoSave(md);
+    // Broadcast to Yjs peers. Live-tab edits used to skip this
+    // (setMarkdownRaw vs setMarkdown), so Tiptap edits never reached
+    // remote collaborators — they only saw whatever finally landed on
+    // the server via auto-save, with no streaming sync. Fixed by
+    // calling collabApplyLocal directly here so Yjs propagates the
+    // diff to the doc-channel.
+    collabApplyLocalRef.current?.(md);
     // Sync derived title (H1) into header + sidebar tab list
     const derived = extractTitleFromMd(md);
     if (derived) {
@@ -13938,7 +13951,7 @@ ${clone.innerHTML}
                           cloudId: docId,
                           isDraft: d.is_draft,
                           shared: !d.isOwner,
-                          readonly: !d.isOwner && d.editMode !== "public",
+                          readonly: !d.isOwner && !d.isEditor && d.editMode !== "public",
                         };
                         setTabs(prev => [...prev, newTab]);
                         switchTab(newId);
@@ -13996,7 +14009,7 @@ ${clone.innerHTML}
                           cloudId: docId,
                           isDraft: d.is_draft,
                           shared: !d.isOwner,
-                          readonly: !d.isOwner && d.editMode !== "public",
+                          readonly: !d.isOwner && !d.isEditor && d.editMode !== "public",
                         };
                         setTabs(prev => [...prev, newTab]);
                         switchTab(newId);
@@ -14184,7 +14197,7 @@ ${clone.innerHTML}
                           cloudId: docId,
                           isDraft: d.is_draft,
                           shared: !d.isOwner,
-                          readonly: !d.isOwner && d.editMode !== "public",
+                          readonly: !d.isOwner && !d.isEditor && d.editMode !== "public",
                         };
                         setTabs(prev => [...prev, newTab]);
                         switchTab(newId);
