@@ -19,7 +19,7 @@
    ======================================== */
 :root,
 [data-theme="dark"] {
-  --background: #09090b;
+  --background: #0d0d10;
   --foreground: #fafafa;
   --accent: #fb923c;
   --accent-dim: rgba(251, 146, 60, 0.15);
@@ -32,7 +32,7 @@
   --text-tertiary: #a1a1aa;
   --text-muted: #a1a1aa;
   --text-faint: #8a8a91;
-  --header-bg: rgba(9, 9, 11, 0.95);
+  --header-bg: rgba(13, 13, 16, 0.95);
   --editor-text: #d4d4d8;
   --editor-placeholder: #3f3f46;
   --scrollbar-thumb: #27272a;
@@ -50,7 +50,7 @@
   --menu-hover: rgba(39, 39, 42, 0.5);
   --toggle-bg: rgba(39, 39, 42, 0.5);
   --toggle-active: #3f3f46;
-  --drag-bg: rgba(9, 9, 11, 0.9);
+  --drag-bg: rgba(13, 13, 16, 0.9);
 
   /* ── Design tokens (sprint 2026-05) — see docs/DESIGN-TOKENS.md ──
      These are the new vocabulary; existing vars above are kept as
@@ -71,7 +71,7 @@
   /* Bg + text shorthand (parallel to existing names, will replace) */
   --bg-base: var(--background);
   --bg-elevated: var(--surface);
-  --bg-overlay: rgba(9, 9, 11, 0.95);
+  --bg-overlay: rgba(13, 13, 16, 0.95);
 
   /* Spacing — 4px grid */
   --space-1: 4px;
