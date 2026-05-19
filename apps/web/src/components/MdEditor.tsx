@@ -4464,9 +4464,9 @@ export default function MdEditor() {
   // sections (Cases, Guides, Explore) collapse so the surface stops
   // feeling like a card farm. localStorage-backed so user toggles
   // survive reloads.
-  type StartSectionKey = "recent" | "create" | "drop" | "deploy" | "cases" | "guides" | "explore";
+  type StartSectionKey = "recent" | "create" | "deploy" | "cases" | "guides" | "explore";
   const START_SECTION_DEFAULTS: Record<StartSectionKey, boolean> = {
-    recent: true, create: true, drop: true, deploy: true,
+    recent: true, create: true, deploy: true,
     cases: false, guides: false, explore: false,
   };
   const [startSections, setStartSections] = useState<Record<StartSectionKey, boolean>>(() => {
@@ -13136,7 +13136,7 @@ ${clone.innerHTML}
                     <ChevronDown width={11} height={11} style={{ transform: startSections.create ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                     Create
                   </button>
-                  {startSections.create && (
+                  {startSections.create && (<>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { label: "New Document", desc: "Blank page", kbd: "", color: "#fb923c", icon: <Plus width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} addTab(); } },
@@ -13155,23 +13155,12 @@ ${clone.innerHTML}
                       </button>
                     ))}
                   </div>
-                  )}
-                </div>
-
-                {/* Drop zone — desktop only. Mobile devices don't support
-                    desktop-style file drag-and-drop, so the affordance just
-                    eats vertical space without paying off there. */}
-                <div className="hidden sm:block mb-6">
-                  <button
-                    onClick={() => toggleStartSection("drop")}
-                    className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
-                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
-                  >
-                    <ChevronDown width={11} height={11} style={{ transform: startSections.drop ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
-                    Drop or upload
-                  </button>
-                  {startSections.drop && (
-                  <div className="py-6 rounded-xl cursor-pointer text-center"
+                  {/* Drop zone — desktop only. Lives under the 3-card
+                      grid because dropping a file IS another way to
+                      create a new doc, not a separate concern. Mobile
+                      hides it because mobile browsers don't support
+                      desktop-style file drag-and-drop. */}
+                  <div className="hidden sm:block mt-2 py-5 rounded-xl cursor-pointer text-center"
                     style={{ border: "2px dashed var(--border)", color: "var(--text-faint)", background: "var(--surface)", transition: "all 0.15s" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
@@ -13182,7 +13171,7 @@ ${clone.innerHTML}
                     <p className="text-body font-medium">Drop files here to open</p>
                     <p className="text-caption mt-1" style={{ opacity: 0.5 }}>MD, PDF, DOCX, PPTX, XLSX, HTML, CSV</p>
                   </div>
-                  )}
+                  </>)}
                 </div>
 
                 {/* Deploy to AI — v6 hero. Goes above Guides because the hub story
