@@ -4459,6 +4459,32 @@ export default function MdEditor() {
   // meant clicking Hub deselected whatever was in the sidebar — that's
   // the founder complaint this state replaces.
   const [showHub, setShowHub] = useState(false);
+  // Per-section fold state for the Start screen. Hot sections
+  // (Recent, Create, Drop, Deploy) stay open by default; learning
+  // sections (Cases, Guides, Explore) collapse so the surface stops
+  // feeling like a card farm. localStorage-backed so user toggles
+  // survive reloads.
+  type StartSectionKey = "recent" | "create" | "drop" | "deploy" | "cases" | "guides" | "explore";
+  const START_SECTION_DEFAULTS: Record<StartSectionKey, boolean> = {
+    recent: true, create: true, drop: true, deploy: true,
+    cases: false, guides: false, explore: false,
+  };
+  const [startSections, setStartSections] = useState<Record<StartSectionKey, boolean>>(() => {
+    if (typeof window === "undefined") return START_SECTION_DEFAULTS;
+    try {
+      const raw = localStorage.getItem("mdfy-start-sections");
+      if (!raw) return START_SECTION_DEFAULTS;
+      const parsed = JSON.parse(raw);
+      return { ...START_SECTION_DEFAULTS, ...parsed };
+    } catch { return START_SECTION_DEFAULTS; }
+  });
+  const toggleStartSection = useCallback((k: StartSectionKey) => {
+    setStartSections(prev => {
+      const next = { ...prev, [k]: !prev[k] };
+      try { localStorage.setItem("mdfy-start-sections", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
   // Auto-resolve trigger A — fires when the Hub overlay opens and
   // the user picked "on-open" as their auto-management trigger. The
   // overlay opening is the user's intent-signal that they care
@@ -4511,6 +4537,43 @@ export default function MdEditor() {
       setHubReanalyzing(false);
     }
   }, [hubReanalyzing, authHeaders, showToast]);
+  // Open an explainer / case-study doc as an in-app tab instead of
+  // a new browser window. The slug IS the document id (see the
+  // next.config rewrites — each /case-* or /how-mdfy-* path maps to
+  // /d/<same-slug>). Falls back to opening the public URL in a new
+  // tab if the API call fails, so the link is never a dead-end.
+  // switchTab is declared later in this component, so we route the
+  // call through a ref populated below.
+  const switchTabRef = useRef<((id: string) => void) | null>(null);
+  const openDocBySlug = useCallback(async (slug: string, fallbackUrl?: string) => {
+    setShowOnboarding(false);
+    try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+    const existing = tabs.find(t => t.cloudId === slug);
+    if (existing) { switchTabRef.current?.(existing.id); return; }
+    try {
+      const res = await fetch(`/api/docs/${slug}`, { headers: authHeaders });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      const d = await res.json();
+      const newId = `doc-${slug}-${Date.now()}`;
+      const newTab: Tab = {
+        id: newId,
+        kind: "doc",
+        title: d.title || "Untitled",
+        markdown: d.markdown || "",
+        cloudId: slug,
+        isDraft: d.is_draft,
+        shared: !d.isOwner,
+        readonly: !d.isOwner && d.editMode !== "public",
+        ownerEmail: d.ownerEmail,
+      };
+      setTabs(prev => [...prev, newTab]);
+      switchTabRef.current?.(newId);
+    } catch {
+      if (fallbackUrl && typeof window !== "undefined") {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      }
+    }
+  }, [tabs, authHeaders]);
   // Auto-resolve trigger B — background interval. Cheap because
   // autoResolveSafeFindings short-circuits when there's nothing to do.
   useEffect(() => {
@@ -5213,6 +5276,12 @@ export default function MdEditor() {
       return saved;
     });
   }, [loadTab]);
+
+  // Bind the switchTab ref so the earlier-declared openDocBySlug
+  // helper (used by Start screen cards) can invoke it.
+  useEffect(() => {
+    switchTabRef.current = switchTab;
+  }, [switchTab]);
 
   // ─── Tab nav: back/forward chevrons ───
   // Home (dashboard) is represented in nav history with the sentinel
@@ -12987,15 +13056,25 @@ ${clone.innerHTML}
                   return (
                     <div className="mb-6">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="text-caption font-mono uppercase tracking-wider" style={{ color: "var(--accent)" }}>Recent</div>
                         <button
-                          onClick={() => { setRecentTabIds([]); }}
-                          className="text-caption cursor-pointer"
-                          style={{ color: "var(--text-faint)", background: "none", border: "none", padding: "2px 6px", opacity: 0.6 }}
+                          onClick={() => toggleStartSection("recent")}
+                          className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider cursor-pointer"
+                          style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
                         >
-                          Clear
+                          <ChevronDown width={11} height={11} style={{ transform: startSections.recent ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                          Recent
                         </button>
+                        {startSections.recent && (
+                          <button
+                            onClick={() => { setRecentTabIds([]); }}
+                            className="text-caption cursor-pointer"
+                            style={{ color: "var(--text-faint)", background: "none", border: "none", padding: "2px 6px", opacity: 0.6 }}
+                          >
+                            Clear
+                          </button>
+                        )}
                       </div>
+                      {startSections.recent && (
                       <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
                         {entries.map((entry, i) => {
                           if (entry.kind === "ghost-bundle") {
@@ -13027,13 +13106,22 @@ ${clone.innerHTML}
                           );
                         })}
                       </div>
+                      )}
                     </div>
                   );
                 })()}
 
                 {/* Create — 3 column grid like About page */}
                 <div className="mb-6">
-                  <div className="text-caption font-mono uppercase tracking-wider mb-3" style={{ color: "var(--accent)" }}>Create</div>
+                  <button
+                    onClick={() => toggleStartSection("create")}
+                    className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
+                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                  >
+                    <ChevronDown width={11} height={11} style={{ transform: startSections.create ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                    Create
+                  </button>
+                  {startSections.create && (
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { label: "New Document", desc: "Blank page", kbd: "", color: "#fb923c", icon: <Plus width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} addTab(); } },
@@ -13052,21 +13140,34 @@ ${clone.innerHTML}
                       </button>
                     ))}
                   </div>
+                  )}
                 </div>
 
                 {/* Drop zone — desktop only. Mobile devices don't support
                     desktop-style file drag-and-drop, so the affordance just
                     eats vertical space without paying off there. */}
-                <div className="hidden sm:block mb-6 py-6 rounded-xl cursor-pointer text-center"
-                  style={{ border: "2px dashed var(--border)", color: "var(--text-faint)", background: "var(--surface)", transition: "all 0.15s" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
-                  onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = "var(--accent-dim)"; }}
-                  onDragLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.background = "var(--surface)"; }}
-                  onDrop={(e) => { e.preventDefault(); setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} }}
-                  onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} imageFileRef.current?.click(); }}>
-                  <p className="text-body font-medium">Drop files here to open</p>
-                  <p className="text-caption mt-1" style={{ opacity: 0.5 }}>MD, PDF, DOCX, PPTX, XLSX, HTML, CSV</p>
+                <div className="hidden sm:block mb-6">
+                  <button
+                    onClick={() => toggleStartSection("drop")}
+                    className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
+                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                  >
+                    <ChevronDown width={11} height={11} style={{ transform: startSections.drop ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                    Drop or upload
+                  </button>
+                  {startSections.drop && (
+                  <div className="py-6 rounded-xl cursor-pointer text-center"
+                    style={{ border: "2px dashed var(--border)", color: "var(--text-faint)", background: "var(--surface)", transition: "all 0.15s" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = "var(--accent-dim)"; }}
+                    onDragLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.background = "var(--surface)"; }}
+                    onDrop={(e) => { e.preventDefault(); setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} }}
+                    onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} imageFileRef.current?.click(); }}>
+                    <p className="text-body font-medium">Drop files here to open</p>
+                    <p className="text-caption mt-1" style={{ opacity: 0.5 }}>MD, PDF, DOCX, PPTX, XLSX, HTML, CSV</p>
+                  </div>
+                  )}
                 </div>
 
                 {/* Deploy to AI — v6 hero. Goes above Guides because the hub story
@@ -13075,7 +13176,15 @@ ${clone.innerHTML}
                     full-card border (the border made the card visually heavier
                     than its neighbors and read as "warning" yellow). */}
                 <div className="mb-6">
-                  <div className="text-caption font-mono uppercase tracking-wider mb-2" style={{ color: "var(--accent)" }}>Deploy to AI</div>
+                  <button
+                    onClick={() => toggleStartSection("deploy")}
+                    className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-2 cursor-pointer"
+                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                  >
+                    <ChevronDown width={11} height={11} style={{ transform: startSections.deploy ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                    Deploy to AI
+                  </button>
+                  {startSections.deploy && (<>
                   <p className="text-caption mb-3" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
                     Your hub is the context any AI can read. Paste the URL into Claude, ChatGPT, Cursor, or Codex — they load your knowledge as context.
                   </p>
@@ -13084,94 +13193,126 @@ ${clone.innerHTML}
                       const myHubSlug = (profile as { hub_slug?: string | null; hub_public?: boolean } | null)?.hub_public
                         ? (profile as { hub_slug?: string | null }).hub_slug || null
                         : null;
-                      const cards = [
+                      type DeployCard = {
+                        label: string; desc: string; url: string; color: string;
+                        icon: React.ReactElement; tag: string | null;
+                        /** When set, clicking opens the doc as an in-app
+                         *  tab via openDocBySlug instead of a new browser
+                         *  window. */
+                        docSlug?: string;
+                      };
+                      const cards: DeployCard[] = [
                         myHubSlug
                           ? { label: "Your hub", desc: `mdfy.app/hub/${myHubSlug}`, url: `/hub/${myHubSlug}`, color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null }
                           : { label: "Browse hubs", desc: "See what a hub looks like", url: "/hubs", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
                         { label: "Install /mdfy", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
-                        { label: "mdfy Foundations", desc: "Curated bundle: what mdfy is", url: "/b/mdfy-foundations", color: "#60a5fa", icon: <Layers width={14} height={14} />, tag: null },
+                        { label: "How mdfy stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
                       ];
-                      return cards.map((item) => (
-                        <a key={item.label} href={item.url} target="_blank" rel="noopener noreferrer"
-                          className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-left cursor-pointer"
-                          style={{
+                      return cards.map((item) => {
+                        const sharedProps = {
+                          className: "flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-left cursor-pointer",
+                          style: {
                             background: "var(--surface)",
                             border: "1px solid var(--border-dim)",
                             textDecoration: "none",
                             transition: "all 0.12s",
-                          }}
-                          onMouseEnter={(e) => { e.currentTarget.style.borderColor = item.color; e.currentTarget.style.boxShadow = `0 0 0 1px ${item.color}20`; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-dim)"; e.currentTarget.style.boxShadow = "none"; }}>
-                          <div className="mt-0.5 shrink-0" style={{ color: item.color }}>{item.icon}</div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>{item.label}</span>
-                              {item.tag && (
-                                <span
-                                  className="text-caption font-mono px-1.5 py-px rounded"
-                                  style={{
-                                    background: "var(--accent-dim)",
-                                    color: "var(--accent)",
-                                    fontSize: 9,
-                                    letterSpacing: 0.5,
-                                    textTransform: "uppercase",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {item.tag}
-                                </span>
-                              )}
+                          } as React.CSSProperties,
+                          onMouseEnter: (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.borderColor = item.color; e.currentTarget.style.boxShadow = `0 0 0 1px ${item.color}20`; },
+                          onMouseLeave: (e: React.MouseEvent<HTMLElement>) => { e.currentTarget.style.borderColor = "var(--border-dim)"; e.currentTarget.style.boxShadow = "none"; },
+                        };
+                        const body = (
+                          <>
+                            <div className="mt-0.5 shrink-0" style={{ color: item.color }}>{item.icon}</div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>{item.label}</span>
+                                {item.tag && (
+                                  <span
+                                    className="text-caption font-mono px-1.5 py-px rounded"
+                                    style={{
+                                      background: "var(--accent-dim)",
+                                      color: "var(--accent)",
+                                      fontSize: 9,
+                                      letterSpacing: 0.5,
+                                      textTransform: "uppercase",
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    {item.tag}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-caption mt-0.5" style={{ color: "var(--text-faint)" }}>{item.desc}</div>
                             </div>
-                            <div className="text-caption mt-0.5" style={{ color: "var(--text-faint)" }}>{item.desc}</div>
-                          </div>
-                        </a>
-                      ));
+                          </>
+                        );
+                        return item.docSlug ? (
+                          <button key={item.label} onClick={() => openDocBySlug(item.docSlug!, item.url)} {...sharedProps}>
+                            {body}
+                          </button>
+                        ) : (
+                          <a key={item.label} href={item.url} target="_blank" rel="noopener noreferrer" {...sharedProps}>
+                            {body}
+                          </a>
+                        );
+                      });
                     })()}
                   </div>
+                  </>)}
                 </div>
 
                 {/* How people use mdfy — short Pain → Action → Result case
                     studies. Each card opens a published doc in the founder
                     hub. Sits between the v6 hero (Deploy to AI) and the
                     tutorial-shaped Guides & Examples — answers "why would
-                    I bother" before "here's how it works." */}
+                    I bother" before "here's how it works."
+                    Card list trimmed to only slugs that actually exist
+                    in next.config rewrites — 7 → 4. The previous "Agent
+                    memory / Docs as KB / Project decisions / Research
+                    notes / Meeting log / Book notes" entries all 404'd. */}
                 <div className="mb-6">
                   <div className="flex items-baseline justify-between mb-2">
-                    <div className="text-caption font-mono uppercase tracking-wider" style={{ color: "var(--accent)" }}>What people put in mdfy</div>
-                    <a href="/about#use-cases" target="_blank" rel="noopener noreferrer" className="text-caption" style={{ color: "var(--text-faint)" }}>All cases &rarr;</a>
+                    <button
+                      onClick={() => toggleStartSection("cases")}
+                      className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider cursor-pointer"
+                      style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                    >
+                      <ChevronDown width={11} height={11} style={{ transform: startSections.cases ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                      What people put in mdfy
+                    </button>
+                    {startSections.cases && (
+                      <button
+                        onClick={() => openDocBySlug("about", "/about#use-cases")}
+                        className="text-caption cursor-pointer"
+                        style={{ color: "var(--text-faint)", background: "none", border: "none", padding: 0 }}
+                      >
+                        All cases &rarr;
+                      </button>
+                    )}
                   </div>
+                  {startSections.cases && (<>
                   <p className="text-caption mb-3" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
                     Concrete shapes the URL takes. Pick what fits your week.
                   </p>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {/* Each card opens its own /case-<slug> page with
-                        the Pain → Action → Result narrative. */}
                     {([
-                      // Wedge cases first — Cross-tool handoff and Agent
-                      // memory are the two narratives that exercise mdfy's
-                      // structural moat (one URL, every AI) most clearly.
-                      // Putting them in the top row primes the reader for
-                      // the v6 thesis before the broader knowledge-worker
-                      // cases below.
-                      { label: "Cross-tool handoff", desc: "Cursor ↔ Claude on shared context", url: "/case-cross-tool-handoff", color: "#f472b6" },
-                      { label: "Agent memory", desc: "Long-running agents remember runs", url: "/case-agent-memory", color: "#a78bfa" },
-                      { label: "Docs as a KB", desc: "Your team's docs, AI-readable", url: "/case-docs-as-kb", color: "#c4b5fd" },
-                      { label: "Project decisions", desc: "Why you chose X, in one place", url: "/case-project-decisions", color: "#60a5fa" },
-                      { label: "Research notes", desc: "Papers + PDFs into one cited URL", url: "/case-research-notes", color: "#fb923c" },
-                      { label: "Meeting + interview log", desc: "Transcripts your AI can quote back", url: "/case-meetings-and-interviews", color: "#fbbf24" },
-                      { label: "Book + course notes", desc: "Chapter takeaways that compound", url: "/case-book-course-notes", color: "#4ade80" },
+                      { label: "Cross-tool handoff", desc: "Cursor ↔ Claude on shared context", slug: "case-cross-tool-handoff", url: "/case-cross-tool-handoff", color: "#f472b6" },
+                      { label: "Personal LLM wiki", desc: "Your own knowledge base for AIs", slug: "case-personal-llm-wiki", url: "/case-personal-llm-wiki", color: "#a78bfa" },
+                      { label: "CLAUDE.md personal context", desc: "Carry context across coding sessions", slug: "case-claude-md-personal-context", url: "/case-claude-md-personal-context", color: "#60a5fa" },
+                      { label: "Share with a team", desc: "Living docs your team + AI both read", slug: "case-share-with-team", url: "/case-share-with-team", color: "#4ade80" },
                     ]).map((item) => (
-                      <a key={item.label} href={item.url} target="_blank" rel="noopener noreferrer"
+                      <button key={item.label} onClick={() => openDocBySlug(item.slug, item.url)}
                         className="flex flex-col gap-0.5 px-3 py-2.5 rounded-lg text-left cursor-pointer"
-                        style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", textDecoration: "none", transition: "all 0.12s" }}
+                        style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", transition: "all 0.12s" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = item.color; e.currentTarget.style.boxShadow = `0 0 0 1px ${item.color}20`; }}
                         onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-dim)"; e.currentTarget.style.boxShadow = "none"; }}>
                         <div className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>{item.label}</div>
                         <div className="text-caption" style={{ color: "var(--text-faint)" }}>{item.desc}</div>
-                      </a>
+                      </button>
                     ))}
                   </div>
+                  </>)}
                 </div>
 
                 {/* Examples — 2 column grid. Surface guides (Chrome/VSCode/Mac/CLI/MCP/QuickLook)
@@ -13181,7 +13322,15 @@ ${clone.innerHTML}
                     and titles longer than the card width truncate with ellipsis
                     so the grid stays single-line everywhere. */}
                 <div className="mb-6">
-                  <div className="text-caption font-mono uppercase tracking-wider mb-3" style={{ color: "var(--accent)" }}>Guides & Examples</div>
+                  <button
+                    onClick={() => toggleStartSection("guides")}
+                    className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
+                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                  >
+                    <ChevronDown width={11} height={11} style={{ transform: startSections.guides ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                    Guides & Examples
+                  </button>
+                  {startSections.guides && (
                   <div className="grid grid-cols-2 gap-1.5">
                     {EXAMPLE_TABS.filter(ex => !["tab-chrome-ext", "tab-vscode-ext", "tab-desktop", "tab-cli", "tab-mcp", "tab-quicklook"].includes(ex.id)).map((ex) => (
                       <button key={ex.id} onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} switchTab(ex.id); }}
@@ -13195,11 +13344,20 @@ ${clone.innerHTML}
                       </button>
                     ))}
                   </div>
+                  )}
                 </div>
 
                 {/* Explore + Plugins — 2 column grid */}
                 <div className="mb-6">
-                  <div className="text-caption font-mono uppercase tracking-wider mb-3" style={{ color: "var(--accent)" }}>Explore</div>
+                  <button
+                    onClick={() => toggleStartSection("explore")}
+                    className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
+                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                  >
+                    <ChevronDown width={11} height={11} style={{ transform: startSections.explore ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                    Explore
+                  </button>
+                  {startSections.explore && (
                   <div className="grid grid-cols-2 gap-1.5">
                     {([
                       { label: "Trending", desc: "Popular GitHub projects", url: "/discover", color: "#fb923c", icon: <Zap width={14} height={14} /> },
@@ -13221,6 +13379,7 @@ ${clone.innerHTML}
                       </a>
                     ))}
                   </div>
+                  )}
                 </div>
 
                 {/* Replay welcome */}
