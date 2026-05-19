@@ -98,9 +98,13 @@ export default function DocumentViewer({
 
         const doc = await res.json();
 
-        // Owner → open in editor instead of viewer (don't flip authChecked,
-        // we're navigating away)
-        if (doc.isOwner) {
+        // Owner OR explicit editor → open in editor instead of viewer
+        // (don't flip authChecked, we're navigating away). The editor
+        // checks doc.isEditor on the same fetch and unlocks editing for
+        // allowed_editors; landing here on the read-only viewer for a
+        // user who was explicitly invited as an Editor would be a dead
+        // end.
+        if (doc.isOwner || doc.isEditor) {
           window.location.replace(`/?from=${id}`);
           return;
         }

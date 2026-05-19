@@ -4085,10 +4085,16 @@ export default function MdEditor() {
 
   const [isOwner, setIsOwner] = useState(false);
   const [docEditMode, setDocEditMode] = useState<"owner" | "account" | "token" | "view" | "public">("token");
-  // Can edit: not shared, or owner (owner-only permission model)
-  const [_isEditor, setIsEditor] = useState(false);
-  // Only the document owner can edit. Non-owners must duplicate to edit.
-  const canEdit = !isSharedDoc || isOwner;
+  // Editor role: non-owner who's been explicitly added to a doc's
+  // allowed_editors. Comes from /api/docs/[id]'s isEditor flag and
+  // unlocks the Tiptap + CM6 editing surface (the PATCH endpoint
+  // already accepts edits from editors — only the client gate was
+  // missing).
+  const [isEditor, setIsEditor] = useState(false);
+  // Edit access: I'm not on a shared doc OR I'm its owner OR the
+  // owner explicitly invited me as an editor. Owner-only was the
+  // legacy model; allowed_editors lifted that.
+  const canEdit = !isSharedDoc || isOwner || isEditor;
   const [showQr, setShowQr] = useState(false);
   const [showAiBanner, setShowAiBanner] = useState(false);
   const [canvasMermaid, setCanvasMermaid] = useState<string | undefined>();
@@ -5054,7 +5060,11 @@ export default function MdEditor() {
     setDocId(tab.cloudId || null);
     setIsSharedDoc(tab.permission === "readonly" || tab.permission === "editable");
     setIsOwner(tab.permission === "mine" || !tab.permission);
-    setIsEditor(false);
+    // Editor role is preserved on the tab itself via permission ===
+    // "editable". The canEdit gate looks at this; without it, switching
+    // away and back to a doc you have edit access to would land in
+    // read-only state again.
+    setIsEditor(tab.permission === "editable");
     // Reset share modal state + view count for the new tab. Hydrate
     // the allowed-email/editor lists from the tab's cached values so
     // a tab we've already opened once renders the right ShareModal
@@ -6466,18 +6476,30 @@ export default function MdEditor() {
             const ownerByToken = !!token;
             const ownerByAccount = !!doc.isOwner;
 
-            // Determine permission — owner-only edit model
+            // Determine permission — three roles now:
+            //   mine     — I created (token OR account ownership)
+            //   editable — owner added me to allowed_editors
+            //   readonly — I have view access but can't edit
             let perm: "mine" | "editable" | "readonly" = "readonly";
             if (ownerByToken || ownerByAccount) {
               perm = "mine";
               setIsOwner(true);
               setIsSharedDoc(false);
+              setIsEditor(false);
               // Keep the user's persisted viewMode (Live / Split / Source).
               // Previously this forced "preview" — so a refresh on a doc URL
               // dropped users out of Split/Source back into Live view, which
               // read as "the editor turned into a viewer."
+            } else if (doc.isEditor) {
+              perm = "editable";
+              setIsOwner(false);
+              setIsSharedDoc(true);
+              setIsEditor(true);
+              // Don't force viewMode — editor-role users typically want
+              // the same Live/Split/Source they used on their own docs.
             } else {
               perm = "readonly";
+              setIsOwner(false);
               setIsSharedDoc(true);
               setIsEditor(false);
               setViewMode("preview"); // readonly users get the rendered view
