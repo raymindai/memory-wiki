@@ -13087,6 +13087,9 @@ ${clone.innerHTML}
                                 onMouseLeave={(e) => { e.currentTarget.style.background = "var(--surface)"; e.currentTarget.style.color = "var(--text-secondary)"; }}>
                                 {renderBundleStatusIcon(entry.bundleId, 14)}
                                 <span className="flex-1 truncate">{bundle.title || "Untitled Bundle"}</span>
+                                {bundle.updated_at && (
+                                  <span className="shrink-0 text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>{relativeTime(bundle.updated_at)}</span>
+                                )}
                               </button>
                             );
                           }
@@ -13094,6 +13097,15 @@ ${clone.innerHTML}
                           const displayTitle = t.kind === "bundle" && t.bundleId
                             ? (bundles.find(b => b.id === t.bundleId)?.title || t.title || "Untitled")
                             : (t.title || "Untitled");
+                          // Prefer the bundle's server updated_at for bundle
+                          // tabs (always present); fall back to the local
+                          // lastOpenedAt for plain docs which don't carry
+                          // a server timestamp on the tab itself.
+                          const bundleUpdated = t.kind === "bundle" && t.bundleId
+                            ? bundles.find(b => b.id === t.bundleId)?.updated_at || null
+                            : null;
+                          const tsIso = bundleUpdated
+                            || (t.lastOpenedAt ? new Date(t.lastOpenedAt).toISOString() : null);
                           return (
                             <button key={t.id} onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} switchTab(t.id); }}
                               className="w-full flex items-center gap-3 px-4 py-3 text-body text-left cursor-pointer"
@@ -13102,6 +13114,9 @@ ${clone.innerHTML}
                               onMouseLeave={(e) => { e.currentTarget.style.background = "var(--surface)"; e.currentTarget.style.color = "var(--text-secondary)"; }}>
                               {t.kind === "bundle" ? renderBundleStatusIcon(t.bundleId, 14) : <DocStatusIcon tab={t} isActive={false} />}
                               <span className="flex-1 truncate">{displayTitle}</span>
+                              {tsIso && (
+                                <span className="shrink-0 text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>{relativeTime(tsIso)}</span>
+                              )}
                             </button>
                           );
                         })}
