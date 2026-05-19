@@ -15713,16 +15713,6 @@ ${clone.innerHTML}
                   setShowBundleCreator(true);
                   setSidebarContextMenu(null);
                 }} className="w-full text-left px-3 py-1.5 text-xs transition-colors hover:bg-[var(--menu-hover)]" style={{ color: "var(--text-secondary)" }}>New Bundle</button>
-                <div className="my-1" style={{ borderTop: "1px solid var(--border-dim)" }} />
-                <button onClick={() => {
-                  const existingExampleIds = new Set(tabs.filter(tab => tab.ownerEmail === EXAMPLE_OWNER).map(tab => tab.id));
-                  const missingExamples = EXAMPLE_TABS.filter(ex => !existingExampleIds.has(ex.id));
-                  if (missingExamples.length > 0) setTabs(prev => [...prev, ...missingExamples]);
-                  setTabs(prev => prev.map(t => t.ownerEmail === EXAMPLE_OWNER ? { ...t, deleted: false, folderId: undefined } : t));
-                  setHiddenExampleIds(new Set());
-                  setShowExamples(true);
-                  setSidebarContextMenu(null);
-                }} className="w-full text-left px-3 py-1.5 text-xs transition-colors hover:bg-[var(--menu-hover)]" style={{ color: "var(--text-secondary)" }}>Restore Examples</button>
               </>
             )}
           </div>
