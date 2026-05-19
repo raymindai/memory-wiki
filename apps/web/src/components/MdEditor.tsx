@@ -1330,6 +1330,83 @@ Claude: → mdfy_update → Document updated, same URL
 The hosted HTTP MCP exposes 25 tools including append, sections, versions, folders, and more.
 `;
 
+const SAMPLE_FRESHNESS = `# How mdfy keeps your docs, bundles, and hub fresh
+
+> Every mdfy URL is what the AI reads when you paste it. Freshness is part of the deal.
+
+## TL;DR
+
+| Layer | What | How fresh | Click anything? |
+| --- | --- | --- | --- |
+| **Document body** | The markdown you wrote | Always — within ~60 seconds of save | Nothing. Just save. |
+| **Bundle graph** | AI-generated themes / insights | Stays until a member doc's content changes | "Re-analyze with AI" in the bundle header |
+| **Hub concept index** | Cross-doc "related" map | Auto-extracts in seconds; 30-min cooldown per doc | "Re-analyze (N)" banner when stale |
+
+Body markdown is always fresh. The AI-derived layers occasionally need a nudge.
+
+## Document body — always fresh
+
+Save a doc → \`/raw/{id}\` and \`/d/{id}\` see it within ~60 seconds via the edge cache's stale-while-revalidate. **No action needed.**
+
+## Bundle graph — Re-analyze on demand
+
+The graph is computed once with an LLM pass over member docs and stamped with \`graph_generated_at\`. When a member doc's content (not its permissions) has changed since then, the bundle is stale — click **Re-analyze with AI** in the header.
+
+We don't auto-rebuild because graphs cost real LLM calls and you're usually mid-edit. **You decide when it's worth re-running.**
+
+## Hub concept index — automatic, with two guardrails
+
+Every save fires:
+
+1. **Enqueue** an ontology job (deduped at the DB level)
+2. **Fast-path** run inside Vercel's \`after()\` — usually done in seconds
+3. **Cron backstop** picks up pending rows if the instance dies
+
+Normal flow: concept changes show up in the hub URL within seconds. Two guardrails can make things look stale temporarily:
+
+- **30-min per-doc cooldown** — back-to-back edits don't re-run the LLM
+- **200-char minimum delta** — typo-level edits skip extraction
+
+## The "Re-analyze (N)" banner
+
+When the Hub opens, mdfy compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
+
+> 🟡 Concepts out of date · N docs have changed
+> [Re-analyze (N)]
+
+Clicking it:
+
+- **Only re-extracts the N docs that actually changed.** Unchanged docs skip the LLM entirely.
+- **Caps at 50 per click.** The rest stay queued; the cron worker drains them.
+- **Bypasses the 30-min cooldown** — that's why you clicked.
+
+A Re-analyze click is cheap: at most 50 short LLM calls for the docs that genuinely changed.
+
+## Doc-level Re-analyze
+
+Right-click any doc in the sidebar → **Re-analyze concepts**. Same machinery, scoped to one doc, bypasses cooldown. Use when you've been polishing in tight cycles and want the hub to keep up.
+
+## When clicking is worth it
+
+- You bulk-imported or edited many docs and want the hub's concept map to reflect the new shape *right now*
+- The yellow banner appears and you're about to share your hub URL with an AI
+- You added a doc on a new topic and want it surfaced as "related" immediately
+
+## When you don't need to click anything
+
+- You edited a doc and shared its URL — the receiving AI sees your edits within ~60s, concept attribution catches up automatically
+- You haven't touched anything (just reading) — nothing to refresh
+- You're not signed in — no concept index applies
+
+## Why mdfy doesn't auto-rebuild more aggressively
+
+**Cost discipline.** Concept extraction is a Haiku call per doc. Auto-rebuilding on every save would burn tokens during noisy editing.
+
+**Predictability.** When something changes in your hub, you chose for it to change. Implicit background rebuilds make "why does my AI see X?" hard to debug.
+
+The trade: body markdown is aggressive-fresh (always, no click). AI-derived metadata is fast-but-not-instant with explicit override available.
+`;
+
 const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 > Press Space on any .md file in Finder to see a rendered preview.
@@ -1531,6 +1608,7 @@ const EXAMPLE_TABS: Tab[] = [
   { id: "tab-cli", title: extractTitleFromMd(SAMPLE_CLI), markdown: SAMPLE_CLI, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-mcp", title: extractTitleFromMd(SAMPLE_MCP), markdown: SAMPLE_MCP, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-quicklook", title: extractTitleFromMd(SAMPLE_QUICKLOOK), markdown: SAMPLE_QUICKLOOK, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
+  { id: "tab-freshness", title: extractTitleFromMd(SAMPLE_FRESHNESS), markdown: SAMPLE_FRESHNESS, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
 ];
 
 const INITIAL_TABS: Tab[] = [
