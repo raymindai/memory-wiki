@@ -786,6 +786,13 @@ function FlyoutMenu({
       {open && pos && typeof document !== "undefined" && createPortal(
         <div
           ref={panelRef}
+          // data-flyout-portal lets the parent menu's outside-click
+          // handler (showAuthMenu's useEffect) recognize clicks inside
+          // this portaled panel as "still inside the menu surface" and
+          // skip closing. Without it the mousedown closed the auth
+          // menu, unmounting the FlyoutMenu wrapper before the
+          // click event could land on the option button.
+          data-flyout-portal
           className="rounded-lg shadow-xl py-1 max-h-[calc(100vh-40px)] overflow-y-auto"
           style={{
             position: "fixed",
@@ -3185,6 +3192,12 @@ export default function MdEditor() {
       if (!t) return;
       if (authMenuTriggerRef.current?.contains(t)) return;
       if (authMenuPanelRef.current?.contains(t)) return;
+      // FlyoutMenu (Skin Theme / Key Color submenus) portals its
+      // panel into document.body to escape the auth menu's
+      // overflow-hidden. Without this check the outside-click
+      // handler would treat clicks inside the portaled flyout as
+      // "outside" and close the auth menu before the click landed.
+      if (t instanceof Element && t.closest('[data-flyout-portal]')) return;
       setShowAuthMenu(false);
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowAuthMenu(false); };
