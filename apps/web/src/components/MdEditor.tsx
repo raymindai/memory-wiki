@@ -4089,10 +4089,13 @@ export default function MdEditor() {
   // already accepts edits from editors — only the client gate was
   // missing).
   const [isEditor, setIsEditor] = useState(false);
-  // Edit access: I'm not on a shared doc OR I'm its owner OR the
-  // owner explicitly invited me as an editor. Owner-only was the
-  // legacy model; allowed_editors lifted that.
-  const canEdit = !isSharedDoc || isOwner || isEditor;
+  // Edit access. Four positive cases:
+  //   1. local-only / I created the tab → !isSharedDoc
+  //   2. cloud owner (token OR account)
+  //   3. owner explicitly invited me as an editor (allowed_editors)
+  //   4. edit_mode === "public" → "anyone with link can edit",
+  //      a legacy mode some old docs still use
+  const canEdit = !isSharedDoc || isOwner || isEditor || docEditMode === "public";
   const [showQr, setShowQr] = useState(false);
   const [showAiBanner, setShowAiBanner] = useState(false);
   const [canvasMermaid, setCanvasMermaid] = useState<string | undefined>();
