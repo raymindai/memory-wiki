@@ -29,6 +29,9 @@ const nextConfig: NextConfig = {
       // Architecture explainers
       { source: "/how-mdfy-works", destination: "/d/how-mdfy-works" },
       { source: "/mdfy-memory", destination: "/d/mdfy-memory" },
+      // Freshness explainer — destination is a regular nanoid since the
+      // doc was created via MCP (no custom-slug path on that surface).
+      { source: "/how-mdfy-stays-fresh", destination: "/d/RUMdz2fQ" },
       // Legacy alias (now a redirect stub doc)
       { source: "/how-mdfy-rag-works", destination: "/d/how-mdfy-rag-works" },
       // mdfy-about-mdfy content set

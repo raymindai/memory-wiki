@@ -3176,6 +3176,15 @@ export default function MdEditor() {
     totalDocs: number;
   } | null>(null);
   const [lintLoading, setLintLoading] = useState(false);
+  // Hub concept-index freshness — populated from
+  // /api/user/hub/freshness when the Hub view opens. Drives the
+  // "Concepts out of date · Re-analyze (N)" banner inside HubEmbed.
+  const [hubFreshness, setHubFreshness] = useState<{
+    isStale: boolean;
+    staleDocCount: number;
+    conceptsBuiltAt: string | null;
+  } | null>(null);
+  const [hubReanalyzing, setHubReanalyzing] = useState(false);
   // Track resolved findings within this session so they stay hidden
   // even if a re-scan returns them (backend concept-extraction is
   // async and can lag). Cleared on hard refresh.
@@ -4368,6 +4377,49 @@ export default function MdEditor() {
     if (curatorSettings.autoTrigger !== "on-open") return;
     autoResolveSafeFindings();
   }, [showHub, curatorSettings.autoTrigger, autoResolveSafeFindings]);
+  // Fetch concept-index freshness whenever the Hub opens. Owner-only.
+  // Cheap (two indexed SELECTs server-side) so we don't bother caching.
+  useEffect(() => {
+    if (!showHub || !user?.id) { setHubFreshness(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/user/hub/freshness", { headers: authHeaders });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!cancelled) setHubFreshness(json);
+      } catch { /* silent — banner just doesn't show */ }
+    })();
+    return () => { cancelled = true; };
+  }, [showHub, user?.id, authHeaders]);
+  const handleHubReanalyze = useCallback(async () => {
+    if (hubReanalyzing) return;
+    setHubReanalyzing(true);
+    try {
+      const res = await fetch("/api/user/hub/reanalyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        showToast(j.error || "Re-analyze failed", "error");
+        return;
+      }
+      const json = await res.json();
+      const msg = json.capped
+        ? `Re-analyzing ${json.enqueued} docs now; ${json.totalStale - json.enqueued} more queued in background.`
+        : `Re-analyzing ${json.enqueued} ${json.enqueued === 1 ? "doc" : "docs"}.`;
+      showToast(msg, "success");
+      // Optimistic: hide the banner immediately. The next Hub open
+      // re-fetches freshness and will resurrect it if jobs are still
+      // pending (most fast-path runs finish within seconds).
+      setHubFreshness((prev) => prev ? { ...prev, isStale: false, staleDocCount: 0 } : prev);
+    } catch {
+      showToast("Re-analyze failed", "error");
+    } finally {
+      setHubReanalyzing(false);
+    }
+  }, [hubReanalyzing, authHeaders, showToast]);
   // Auto-resolve trigger B — background interval. Cheap because
   // autoResolveSafeFindings short-circuits when there's nothing to do.
   useEffect(() => {
@@ -13635,6 +13687,9 @@ ${clone.innerHTML}
                       setSettingsInitialSection("auto-management");
                       setShowSettings(true);
                     }}
+                    freshness={hubFreshness}
+                    onReanalyze={handleHubReanalyze}
+                    reanalyzing={hubReanalyzing}
                   />
                 </div>
               </div>
@@ -15215,6 +15270,27 @@ ${clone.innerHTML}
                   URL.revokeObjectURL(url);
                 }
               }},
+              ...(() => {
+                const tab = tabs.find(t => t.id === docContextMenu.tabId);
+                if (!tab?.cloudId || !user?.id) return [];
+                return [{ label: "Re-analyze concepts", action: async () => {
+                  try {
+                    const res = await fetch(`/api/docs/${tab.cloudId}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json", ...authHeaders },
+                      body: JSON.stringify({ action: "refresh-concepts", userId: user.id }),
+                    });
+                    if (!res.ok) {
+                      const j = await res.json().catch(() => ({}));
+                      showToast(j.error || "Couldn't re-analyze", "error");
+                      return;
+                    }
+                    showToast(`Re-analyzing "${tab.title || "Untitled"}".`, "success");
+                  } catch {
+                    showToast("Couldn't re-analyze", "error");
+                  }
+                }}];
+              })(),
               ...(() => {
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
                 if (!tab?.cloudId || !tab.source) return [];

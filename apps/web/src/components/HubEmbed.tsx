@@ -132,6 +132,20 @@ interface HubEmbedProps {
   onAutoResolveRun?: () => void;
   /** Deep-link to the auto-management section of Settings. */
   onOpenAutoSettings?: () => void;
+  /** Concept-index freshness snapshot. When `isStale` is true the
+   *  Re-analyze banner renders above auto-management with a one-click
+   *  refresh. Parent owns the fetch + the cooldown bypass. */
+  freshness?: {
+    isStale: boolean;
+    staleDocCount: number;
+    conceptsBuiltAt: string | null;
+  } | null;
+  /** Force-refresh concept extraction for stale docs only. Wired to
+   *  the "Re-analyze" button on the freshness banner. */
+  onReanalyze?: () => void;
+  /** True while a reanalyze pass is in flight; disables the button +
+   *  flips the label to "Re-analyzing…". */
+  reanalyzing?: boolean;
 }
 
 // Module-level cache. The hub tab unmounts whenever the user switches
@@ -211,6 +225,9 @@ export default function HubEmbed({
   autoTrigger,
   onAutoResolveRun,
   onOpenAutoSettings,
+  freshness,
+  onReanalyze,
+  reanalyzing,
 }: HubEmbedProps) {
   // Needs Review + Suggestions default to COLLAPSED when auto-
   // management is on — the assumption is mdfy is handling them
@@ -1145,6 +1162,70 @@ mdfy hub`;
                 {ontologyBuilding ? "Building…" : "Build ontology"}
               </button>
             </div>
+          </section>
+        )}
+
+        {/* ── Concept-index freshness banner — surfaces when docs
+              have been touched since the last ontology build, so
+              the user knows the AI URL's concept layer is out of
+              sync until they click Re-analyze. Body markdown is
+              always fresh (per-doc 60s edge cache) — what's stale
+              is the hub-wide concept attribution.
+              Owner-only; parent gates by isOwner before passing
+              the prop. Amber tone so it reads as a soft notice,
+              not an error. */}
+        {freshness?.isStale && onReanalyze && (
+          <section
+            className="mb-4 flex items-center gap-3 px-4 py-3 rounded-xl"
+            style={{
+              background: "rgba(245, 158, 11, 0.08)",
+              border: "1px solid rgba(245, 158, 11, 0.3)",
+            }}
+          >
+            <span
+              className="shrink-0 rounded-full"
+              style={{ width: 8, height: 8, background: "#f59e0b" }}
+              aria-hidden
+            />
+            <div className="min-w-0 flex-1">
+              <div className="text-caption">
+                <span className="font-semibold" style={{ color: "#f59e0b" }}>
+                  Concepts out of date
+                </span>
+                <span style={{ color: "var(--text-faint)" }}>
+                  {" · "}
+                  {freshness.staleDocCount} {freshness.staleDocCount === 1 ? "doc has" : "docs have"} changed since the last build
+                </span>
+              </div>
+              <div className="text-caption" style={{ color: "var(--text-muted)" }}>
+                Body markdown in your AI URLs is always fresh (~60s).
+                The concept index — what each AI sees as &ldquo;related&rdquo; —
+                needs a refresh. Only the changed docs are re-extracted.
+                {" "}
+                <Link
+                  href="/how-mdfy-stays-fresh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#f59e0b", textDecoration: "underline" }}
+                >
+                  Learn more
+                </Link>
+              </div>
+            </div>
+            <button
+              onClick={onReanalyze}
+              disabled={reanalyzing}
+              className="text-caption px-3 py-1.5 rounded shrink-0 transition-colors"
+              style={{
+                background: "#f59e0b",
+                color: "#000",
+                fontWeight: 600,
+                opacity: reanalyzing ? 0.5 : 1,
+                cursor: reanalyzing ? "not-allowed" : "pointer",
+              }}
+            >
+              {reanalyzing ? "Re-analyzing…" : `Re-analyze (${freshness.staleDocCount})`}
+            </button>
           </section>
         )}
 
