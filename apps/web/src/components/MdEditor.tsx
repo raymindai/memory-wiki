@@ -6151,6 +6151,23 @@ export default function MdEditor() {
     return () => window.removeEventListener("mdfy-session-expired", handler);
   }, []);
 
+  // Hub auto-creation notice — fires the first time useAuth gets
+  // back a fresh slug from /api/user/hub/ensure. Tell the user
+  // where their hub lives + where to rename it. Persistent toast
+  // so they have time to read; click dismisses.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ slug: string }>).detail;
+      if (!detail?.slug) return;
+      showToast(
+        `Your hub is live at mdfy.app/hub/${detail.slug}. Rename it any time in Settings → Hub.`,
+        "success",
+      );
+    };
+    window.addEventListener("mdfy-hub-auto-created", handler as EventListener);
+    return () => window.removeEventListener("mdfy-hub-auto-created", handler as EventListener);
+  }, []);
+
   // Load shared content from URL — wait for auth to resolve first
   useEffect(() => {
     if (authLoading) return; // Wait until auth state is known
@@ -13194,9 +13211,11 @@ ${clone.innerHTML}
                   </p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {(() => {
-                      const myHubSlug = (profile as { hub_slug?: string | null; hub_public?: boolean } | null)?.hub_public
-                        ? (profile as { hub_slug?: string | null }).hub_slug || null
-                        : null;
+                      // Every signed-in user has a slug (auto-assigned
+                      // by /api/user/hub/ensure on first login). The
+                      // null branch is reserved for signed-out users
+                      // who land on Home before authenticating.
+                      const myHubSlug = (profile as { hub_slug?: string | null } | null)?.hub_slug || null;
                       type DeployCard = {
                         label: string; desc: string; url: string; color: string;
                         icon: React.ReactElement; tag: string | null;
@@ -13207,8 +13226,8 @@ ${clone.innerHTML}
                       };
                       const cards: DeployCard[] = [
                         myHubSlug
-                          ? { label: "Your hub", desc: `mdfy.app/hub/${myHubSlug}`, url: `/hub/${myHubSlug}`, color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null }
-                          : { label: "Browse hubs", desc: "See what a hub looks like", url: "/hubs", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
+                          ? { label: "Your hub", desc: `mdfy.app/hub/${myHubSlug} · Rename in Settings`, url: `/hub/${myHubSlug}`, color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null }
+                          : { label: "Sign in to get your hub", desc: "Every signed-in user gets a personal hub URL", url: "/", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
                         { label: "Install /mdfy", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
                         { label: "How mdfy stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },

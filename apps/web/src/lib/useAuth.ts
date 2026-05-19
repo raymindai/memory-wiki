@@ -25,7 +25,8 @@ interface AuthState {
 function fetchProfile(
   supabase: ReturnType<typeof getSupabaseBrowserClient>,
   userId: string,
-  setState: React.Dispatch<React.SetStateAction<AuthState>>
+  setState: React.Dispatch<React.SetStateAction<AuthState>>,
+  accessToken: string | null,
 ) {
   if (!supabase) return;
   supabase
@@ -35,7 +36,57 @@ function fetchProfile(
     .single()
     .then((res: { data: Profile | null }) => {
       if (res.data) setState((prev) => ({ ...prev, profile: res.data }));
+      // Every signed-in user gets a hub by default. If the profile
+      // doesn't already have a slug, ask the server to assign a
+      // nanoid one and re-hydrate. Fires once per session — the
+      // endpoint is idempotent so retries are safe but wasteful.
+      if (res.data && !res.data.hub_slug) {
+        ensureHubSlug(supabase, userId, accessToken, setState);
+      }
     });
+}
+
+function ensureHubSlug(
+  supabase: ReturnType<typeof getSupabaseBrowserClient>,
+  userId: string,
+  accessToken: string | null,
+  setState: React.Dispatch<React.SetStateAction<AuthState>>,
+) {
+  if (typeof window === "undefined") return;
+  try {
+    if (sessionStorage.getItem("mdfy-hub-ensure-attempted") === "1") return;
+    sessionStorage.setItem("mdfy-hub-ensure-attempted", "1");
+  } catch { /* ignore */ }
+  fetch("/api/user/hub/ensure", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "x-user-id": userId,
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      if (!data?.slug || !supabase) return;
+      // Re-hydrate the profile with the new slug + the auto-publish flag.
+      supabase
+        .from("profiles")
+        .select("display_name, avatar_url, plan, hub_slug, hub_public, hub_description")
+        .eq("id", userId)
+        .single()
+        .then((res: { data: Profile | null }) => {
+          if (res.data) setState((prev) => ({ ...prev, profile: res.data }));
+        });
+      if (data.created) {
+        // Surface a one-shot notice so the user knows where to
+        // customize. Components subscribe via the event listener.
+        try {
+          window.dispatchEvent(new CustomEvent("mdfy-hub-auto-created", { detail: { slug: data.slug } }));
+        } catch { /* ignore */ }
+      }
+    })
+    .catch(() => { /* best-effort — Settings can still fix manually */ });
 }
 
 /**
@@ -112,7 +163,7 @@ export function useAuth() {
       const session = res.data.session;
       if (session?.user) {
         setState((prev) => ({ ...prev, user: session.user, accessToken: session.access_token || null, loading: false }));
-        fetchProfile(supabase, session.user.id, setState);
+        fetchProfile(supabase, session.user.id, setState, session.access_token || null);
         // Already-signed-in path: SIGNED_IN event won't fire, so trigger
         // the anonymous-content claim here too. Per-tab guarded so the
         // API isn't hit on every page navigation.
@@ -128,7 +179,7 @@ export function useAuth() {
       (event: string, session: { user: User; access_token?: string } | null) => {
         if (session?.user) {
           setState((prev) => ({ ...prev, user: session.user, accessToken: session.access_token || null, loading: false }));
-          fetchProfile(supabase, session.user.id, setState);
+          fetchProfile(supabase, session.user.id, setState, session.access_token || null);
           // SIGNED_IN (fresh login) AND repeat events both go through the
           // same idempotent helper. The sessionStorage guard inside
           // tryClaimAnonymousContent prevents repeated API hits per tab.
