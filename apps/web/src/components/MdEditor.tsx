@@ -6293,6 +6293,34 @@ export default function MdEditor() {
           return;
         }
       }
+      // ?fork=<id> — visitor clicked "Save in mdfy" on the public
+      // viewer's Ask AI panel. Fetch the source doc, drop it into a
+      // fresh local tab as a draft (no cloudId — autoSave creates a
+      // new row under the signed-in user's account, or anon cookie
+      // if not signed in). Title gets a "(forked)" suffix so the
+      // user knows it's their own copy.
+      const forkParam = params.get("fork");
+      if (forkParam && /^[\w-]+$/.test(forkParam)) {
+        try {
+          const res = await fetch(`/api/docs/${forkParam}`);
+          if (res.ok) {
+            const d = await res.json();
+            const id = `tab-${tabIdCounter++}`;
+            const baseTitle = (d.title || "Untitled").trim();
+            const forkedTitle = baseTitle.endsWith("(forked)") ? baseTitle : `${baseTitle} (forked)`;
+            const forkedMd = (d.markdown || "").replace(/^#\s+.+$/m, `# ${forkedTitle}`);
+            setTabs((prev) => [
+              ...prev,
+              { id, title: forkedTitle, markdown: forkedMd, permission: "mine", isDraft: true, lastOpenedAt: Date.now() },
+            ]);
+            setShowOnboarding(false);
+            setActiveTabId(id);
+            activeTabIdRef.current = id;
+            window.history.replaceState(null, "", "/");
+            return;
+          }
+        } catch { /* fall through to default landing */ }
+      }
       // Also accept the bare short-URL form `mdfy.app/<id>` — the
       // /[id]/page.tsx route re-exports this editor, so when a user
       // refreshes (or clicks the URL chip) on a doc URL, the editor

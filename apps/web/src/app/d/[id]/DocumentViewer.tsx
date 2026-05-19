@@ -6,6 +6,7 @@ import Link from "next/link";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import RelatedInHubPanel from "@/components/RelatedInHubPanel";
+import VisitorAskAI from "@/components/VisitorAskAI";
 import ViewerHeader from "@/components/ViewerHeader";
 import type { TiptapLiveEditorHandle } from "@/components/TiptapLiveEditor";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -461,6 +462,15 @@ export default function DocumentViewer({
           </div>
         )}
       </div>
+
+      {/* Visitor "Ask AI about this doc" — inline, between the doc
+          body and the Related-in-hub panel. Hidden on restricted /
+          expired / revoked states (no doc body to ask about) and
+          when the markdown is empty. Same /api/ai endpoint as the
+          editor, restricted to read-only chat. */}
+      {unlocked && !isExpired && !accessRevoked && markdown.trim().length > 0 && (
+        <VisitorAskAI markdown={markdown} docTitle={title} docId={id} />
+      )}
 
       {/* Related-in-hub panel (F2′ in MEMORI-WIKI-GAP rev 2).
           AI-era replacement for hand-typed backlinks — surfaces other
