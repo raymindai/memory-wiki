@@ -2848,6 +2848,11 @@ function BundleShareModal({
   // modal opened with a stale "Anyone with the link" default for up
   // to ~2 seconds until that follow-up resolved.
   useEffect(() => {
+    // Skip the fetch while authHeaders is empty — the owner-only
+    // draft bundle would 404 on the first paint (no x-user-id),
+    // then refetch and 200 once the parent hydrated identity. The
+    // intermediate 404 was just noise in the console.
+    if (!authHeaders["x-user-id"] && !authHeaders.Authorization) return;
     let cancelled = false;
     fetch(`/api/bundles/${bundleId}`, { headers: authHeaders })
       .then(r => r.ok ? r.json() : null)
