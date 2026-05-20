@@ -29,8 +29,9 @@ import { userColor } from "@/lib/user-color";
 
 export interface RemoteCursor {
   userId: string;
-  line: number;     // 0-indexed
+  line: number;     // 0-indexed (CM6 origin); 0 when sender is Tiptap-only
   col: number;      // 0-indexed
+  pmPos?: number;   // ProseMirror position — set when sender is in the Live (Tiptap) tab
   name: string;
   color: string;
   updatedAt: number;
@@ -38,7 +39,7 @@ export interface RemoteCursor {
 
 export interface UseCursorPresenceResult {
   remoteCursors: RemoteCursor[];
-  broadcastCursor: (line: number, col: number) => void;
+  broadcastCursor: (line: number, col: number, pmPos?: number) => void;
 }
 
 const BROADCAST_THROTTLE_MS = 80;
@@ -55,7 +56,7 @@ export function useCursorPresence(
   const channelRef = useRef<any>(null);
   const lastBroadcastAt = useRef(0);
   const pendingBroadcast = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSentPos = useRef<{ line: number; col: number } | null>(null);
+  const lastSentPos = useRef<{ line: number; col: number; pmPos?: number } | null>(null);
   const cursorsRef = useRef<RemoteCursor[]>([]);
 
   useEffect(() => {
@@ -87,13 +88,14 @@ export function useCursorPresence(
       .on(
         "broadcast",
         { event: "cursor" },
-        ({ payload }: { payload: { userId?: string; line?: number; col?: number; name?: string } }) => {
+        ({ payload }: { payload: { userId?: string; line?: number; col?: number; pmPos?: number; name?: string } }) => {
           if (!payload?.userId || payload.userId === user.id) return;
           if (typeof payload.line !== "number" || typeof payload.col !== "number") return;
           upsertCursor({
             userId: payload.userId,
             line: payload.line,
             col: payload.col,
+            pmPos: typeof payload.pmPos === "number" ? payload.pmPos : undefined,
             name: payload.name || "",
             color: userColor(payload.userId),
             updatedAt: Date.now(),
@@ -137,16 +139,16 @@ export function useCursorPresence(
     };
   }, [cloudId, user?.id]);
 
-  const broadcastCursor = useCallback((line: number, col: number) => {
+  const broadcastCursor = useCallback((line: number, col: number, pmPos?: number) => {
     if (!user?.id) return;
     const channel = channelRef.current;
     if (!channel) return;
     // Suppress no-op broadcasts (same position re-fires from a
     // re-render or selectionchange noise).
     const last = lastSentPos.current;
-    if (last && last.line === line && last.col === col) return;
+    if (last && last.line === line && last.col === col && last.pmPos === pmPos) return;
     const send = () => {
-      lastSentPos.current = { line, col };
+      lastSentPos.current = { line, col, pmPos };
       lastBroadcastAt.current = Date.now();
       try {
         channel.send({
@@ -156,6 +158,7 @@ export function useCursorPresence(
             userId: user.id,
             line,
             col,
+            pmPos,
             name: user.displayName || user.email || "",
           },
         });

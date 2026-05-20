@@ -4827,13 +4827,22 @@ export default function MdEditor() {
   // the visible bars track other collaborators in real time.
   const { remoteCursors, broadcastCursor } = useCursorPresence(docId, presenceUser);
   useEffect(() => {
-    cmSetRemoteCursors(remoteCursors.map((c) => ({
-      userId: c.userId,
-      line: c.line,
-      col: c.col,
-      name: c.name,
-      color: c.color,
-    })));
+    // CM6 only renders cursors that originated from a CM6 sender —
+    // a Tiptap-origin cursor carries pmPos and would otherwise show
+    // up at (0, 0) in the Source pane (which is meaningless and
+    // confusing). Tiptap-origin cursors are picked up by the
+    // remoteCursors prop passed to <TiptapLiveEditor> below.
+    cmSetRemoteCursors(
+      remoteCursors
+        .filter((c) => typeof c.pmPos !== "number")
+        .map((c) => ({
+          userId: c.userId,
+          line: c.line,
+          col: c.col,
+          name: c.name,
+          color: c.color,
+        })),
+    );
   }, [remoteCursors, cmSetRemoteCursors]);
   const broadcastCursorRef = useRef(broadcastCursor);
   broadcastCursorRef.current = broadcastCursor;
@@ -14449,6 +14458,21 @@ ${clone.innerHTML}
                     mathOriginalRef.current = mode === "display" ? `$$${tex}$$` : `$${tex}$`;
                     setShowMathModal(true);
                   }}
+                  onSelectionUpdate={(pmPos) => {
+                    // CM6 line/col stays at 0/0 when origin is Tiptap — the
+                    // pmPos field is the meaningful payload here. Source
+                    // pane receivers will skip cursors whose pmPos is set
+                    // without line/col context, and vice versa.
+                    broadcastCursorRef.current?.(0, 0, pmPos);
+                  }}
+                  remoteCursors={remoteCursors
+                    .filter((c) => typeof c.pmPos === "number")
+                    .map((c) => ({
+                      userId: c.userId,
+                      pmPos: c.pmPos as number,
+                      name: c.name,
+                      color: c.color,
+                    }))}
                 />
                 {/* Related docs — under the body so the user
                     discovers it after they finish reading. Owner-

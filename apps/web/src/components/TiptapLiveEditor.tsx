@@ -18,6 +18,7 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { Markdown as TiptapMarkdown } from "tiptap-markdown";
 import markdownItFootnote from "markdown-it-footnote";
+import { remoteCursorsPlugin, remoteCursorsPluginKey, type TiptapRemoteCursor } from "@/components/tiptap-remote-cursors";
 import {
   useCallback,
   useEffect,
@@ -679,6 +680,14 @@ export interface TiptapLiveEditorProps {
   onDoubleClickCode?: (lang: string, code: string) => void;
   onDoubleClickMath?: (tex: string, mode: "inline" | "display") => void;
   onDoubleClickMermaid?: (code: string) => void;
+  /** Fires when the local caret moves. `pmPos` is the ProseMirror
+   *  position of the selection head — both peers' PM docs are
+   *  parsed from the same markdown so the value travels untouched. */
+  onSelectionUpdate?: (pmPos: number) => void;
+  /** Remote collaborators' carets to render as decorations. Updated
+   *  by the parent whenever useCursorPresence's remoteCursors list
+   *  changes. */
+  remoteCursors?: TiptapRemoteCursor[];
 }
 
 export interface TiptapLiveEditorHandle {
@@ -1195,7 +1204,7 @@ const TiptapLiveEditor = forwardRef<TiptapLiveEditorHandle, TiptapLiveEditorProp
 
 // ─── Inner Component (client-only, safe to use useEditor) ───
 const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEditorProps>(
-  function TiptapLiveEditorInner({ markdown, onChange, canEdit, narrowView, onPasteImage, onDoubleClickCode, onDoubleClickMath, onDoubleClickMermaid }, ref) {
+  function TiptapLiveEditorInner({ markdown, onChange, canEdit, narrowView, onPasteImage, onDoubleClickCode, onDoubleClickMath, onDoubleClickMermaid, onSelectionUpdate, remoteCursors }, ref) {
     const frontmatterRef = useRef("");
     const isSettingContent = useRef(false);
     const onChangeRef = useRef(onChange);
@@ -1208,6 +1217,8 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
     onDblClickMathRef.current = onDoubleClickMath;
     const onDblClickMermaidRef = useRef(onDoubleClickMermaid);
     onDblClickMermaidRef.current = onDoubleClickMermaid;
+    const onSelectionUpdateRef = useRef(onSelectionUpdate);
+    onSelectionUpdateRef.current = onSelectionUpdate;
 
     const { frontmatter: initialFm, body: initialBody } = extractFrontmatter(markdown);
     const initialBodyRef = useRef(initialBody);
@@ -1249,6 +1260,13 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
             html: true,
             transformPastedText: false,
             transformCopiedText: true,
+          }),
+          // Remote-cursor decorations live in their own ProseMirror
+          // plugin so they share the editor's transaction lifecycle
+          // (decorations re-map automatically across local edits).
+          Extension.create({
+            name: "mdfyRemoteCursors",
+            addProseMirrorPlugins() { return [remoteCursorsPlugin()]; },
           }),
         ],
         content: "<p></p>",
@@ -1354,6 +1372,40 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
     }, []);
 
     useEffect(() => { if (editor) editor.setEditable(canEdit); }, [editor, canEdit]);
+
+    // Local-caret broadcast — fires on every selection move (focus,
+    // arrow keys, click, typing). The throttle lives in
+    // useCursorPresence so we don't double-up here.
+    useEffect(() => {
+      if (!editor) return;
+      const handler = () => {
+        try {
+          const cb = onSelectionUpdateRef.current;
+          if (!cb) return;
+          cb(editor.state.selection.head);
+        } catch { /* ignore — editor may have been torn down */ }
+      };
+      editor.on("selectionUpdate", handler);
+      editor.on("focus", handler);
+      return () => {
+        editor.off("selectionUpdate", handler);
+        editor.off("focus", handler);
+      };
+    }, [editor]);
+
+    // Push the remote-cursors list into the ProseMirror plugin state
+    // via a setMeta transaction. Decorations rebuild whenever the
+    // prop reference changes; ProseMirror handles position remapping
+    // across intervening local edits.
+    useEffect(() => {
+      if (!editor) return;
+      try {
+        const tr = editor.view.state.tr.setMeta(remoteCursorsPluginKey, {
+          cursors: (remoteCursors || []).filter((c) => Number.isFinite(c?.pmPos)),
+        });
+        editor.view.dispatch(tr);
+      } catch { /* ignore — torn down */ }
+    }, [editor, remoteCursors]);
 
     useEffect(() => {
       if (!editor) return;

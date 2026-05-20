@@ -2684,3 +2684,12 @@ textarea::selection {
 @container (max-width: 240px) {
   .mdfy-collapse-label { display: none; }
 }
+
+/* Remote-cursor caret blink for Live (Tiptap) collab — see
+   components/tiptap-remote-cursors.ts. Steps blinker keeps the
+   eye honest about presence without the distraction of a smooth
+   fade. */
+@keyframes mdfyRemoteCaretBlink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0.35; }
+}
