@@ -52,6 +52,14 @@ interface GalaxyData {
 interface Props {
   authHeaders: Record<string, string>;
   userEmail: string | null;
+  /** Embedded mode — drop the standalone /galaxy chrome (top header,
+   *  left sidebar) so this can sit inside an editor surface that
+   *  already owns the page header / footer / sidebars. Controls are
+   *  floated over the canvas instead. Doc/bundle links call the
+   *  parent's handlers instead of opening a new tab. */
+  embedded?: boolean;
+  onOpenDoc?: (docId: string) => void;
+  onOpenBundle?: (bundleId: string) => void;
 }
 
 const SKY = {
@@ -533,7 +541,7 @@ function GalaxyButton({
   );
 }
 
-export default function HubGalaxy({ authHeaders, userEmail }: Props) {
+export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc, onOpenBundle }: Props) {
   const [data, setData] = useState<GalaxyData | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1367,7 +1375,7 @@ export default function HubGalaxy({ authHeaders, userEmail }: Props) {
     <div
       data-theme="dark"
       style={{
-        height: "100vh",
+        height: embedded ? "100%" : "100vh",
         display: "flex",
         flexDirection: "column",
         background: SKY.bg,
@@ -1379,7 +1387,7 @@ export default function HubGalaxy({ authHeaders, userEmail }: Props) {
     >
       <GalaxyKeyframes />
 
-      <header
+      {!embedded && <header
         style={{
           height: 44,
           display: "flex",
@@ -1483,11 +1491,13 @@ export default function HubGalaxy({ authHeaders, userEmail }: Props) {
             {isFullscreen ? <Minimize width={11} height={11} /> : <Expand width={11} height={11} />}
           </GalaxyButton>
         </div>
-      </header>
+      </header>}
 
       <div style={{ flex: 1, display: "flex", minHeight: 0, position: "relative", zIndex: 1 }}>
-        {/* Sidebar */}
-        <aside
+        {/* Sidebar — standalone /galaxy only. Embedded mode floats the
+            essential controls over the canvas instead (see overlay
+            below the SVG). */}
+        {!embedded && <aside
           style={{
             width: 220,
             borderRight: "1px solid var(--border-dim)",
@@ -1657,13 +1667,159 @@ export default function HubGalaxy({ authHeaders, userEmail }: Props) {
               hover to focus / dbl-click to fly
             </p>
           </div>
-        </aside>
+        </aside>}
 
         {/* SVG cosmos canvas */}
         <div
           ref={containerRef}
           style={{ flex: 1, minWidth: 0, position: "relative", cursor: dragRef.current ? "grabbing" : "grab" }}
         >
+          {/* Embedded-mode floating chrome — drops the standalone
+              header / aside in favour of two small backdrop-blurred
+              widgets that sit ON the canvas so they read as part of
+              the cosmos instead of a separate page chrome. */}
+          {embedded && (
+            <>
+              {/* Top-left: search + kind filter chips. */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  left: 12,
+                  zIndex: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 8px",
+                  borderRadius: 8,
+                  background: "color-mix(in srgb, var(--background) 70%, transparent 30%)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid var(--border-dim)",
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="search stars"
+                  className="text-caption font-mono"
+                  style={{
+                    width: 140,
+                    background: "transparent",
+                    border: "none",
+                    color: "var(--text-primary)",
+                    outline: "none",
+                    padding: "2px 4px",
+                  }}
+                />
+                <span style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
+                <div style={{ display: "flex", gap: 4 }}>
+                  {KIND_ORDER.map((k) => {
+                    const active = visibleKinds.has(k);
+                    const c = colourForKind(k);
+                    return (
+                      <button
+                        key={k}
+                        onClick={() => {
+                          const next = new Set(visibleKinds);
+                          if (next.has(k)) next.delete(k);
+                          else next.add(k);
+                          setVisibleKinds(next);
+                        }}
+                        title={k}
+                        className="text-caption"
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: 4,
+                          background: active ? "var(--toggle-bg)" : "transparent",
+                          border: "1px solid var(--border-dim)",
+                          padding: 0,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background: `radial-gradient(circle, #fff 0%, ${c} 50%, transparent 100%)`,
+                            opacity: active ? 1 : 0.35,
+                          }}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Top-right: stats + zoom/fit/fullscreen. */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  right: 12,
+                  zIndex: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "6px 8px",
+                  borderRadius: 8,
+                  background: "color-mix(in srgb, var(--background) 70%, transparent 30%)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid var(--border-dim)",
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div
+                  className="text-caption font-mono"
+                  style={{
+                    color: "var(--text-faint)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  <span>
+                    <span style={{ color: "var(--text-secondary)" }}>{data.counts.nodes}</span>
+                    {" stars"}
+                  </span>
+                  <span>
+                    <span style={{ color: "var(--text-secondary)" }}>{data.clusters.length}</span>
+                    {" nebulae"}
+                  </span>
+                  <span>
+                    <span style={{ color: "var(--text-secondary)" }}>{data.counts.edges}</span>
+                    {" threads"}
+                  </span>
+                </div>
+                <span style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <GalaxyButton onClick={() => handleZoom(1 / 1.25)} title="Zoom out">
+                    <ZoomOut width={11} height={11} />
+                  </GalaxyButton>
+                  <GalaxyButton onClick={() => handleZoom(1.25)} title="Zoom in">
+                    <ZoomIn width={11} height={11} />
+                  </GalaxyButton>
+                  <GalaxyButton onClick={handleRecentre} title="Fit galaxy to view">
+                    <Maximize2 width={11} height={11} />
+                  </GalaxyButton>
+                  <GalaxyButton
+                    onClick={handleFullscreen}
+                    active={isFullscreen}
+                    title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  >
+                    {isFullscreen ? <Minimize width={11} height={11} /> : <Expand width={11} height={11} />}
+                  </GalaxyButton>
+                </div>
+              </div>
+            </>
+          )}
           <svg
             ref={svgRef}
             width="100%"
@@ -2032,23 +2188,36 @@ export default function HubGalaxy({ authHeaders, userEmail }: Props) {
               </p>
             )}
 
-            {selected.kind === "doc" && (
-              <a
-                href={`/${selected.id.startsWith("doc:") ? selected.id.slice(4) : selected.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{
-                  padding: "6px 8px",
-                  color: "var(--accent)",
-                  textDecoration: "none",
-                  background: "var(--accent-dim)",
-                }}
-              >
-                <ExternalLink width={12} height={12} className="shrink-0" />
-                <span>Open document</span>
-              </a>
-            )}
+            {selected.kind === "doc" && (() => {
+              const rawDocId = selected.id.startsWith("doc:") ? selected.id.slice(4) : selected.id;
+              const className = "flex items-center gap-1.5 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)]";
+              const style = {
+                padding: "6px 8px",
+                color: "var(--accent)",
+                textDecoration: "none",
+                background: "var(--accent-dim)",
+              } as const;
+              if (embedded && onOpenDoc) {
+                return (
+                  <button onClick={() => onOpenDoc(rawDocId)} className={className} style={style}>
+                    <ExternalLink width={12} height={12} className="shrink-0" />
+                    <span>Open document</span>
+                  </button>
+                );
+              }
+              return (
+                <a
+                  href={`/${rawDocId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={className}
+                  style={style}
+                >
+                  <ExternalLink width={12} height={12} className="shrink-0" />
+                  <span>Open document</span>
+                </a>
+              );
+            })()}
 
             {linkedDocs.length > 0 && (
               <div>
@@ -2058,19 +2227,33 @@ export default function HubGalaxy({ authHeaders, userEmail }: Props) {
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {linkedDocs.map((d) => {
                     const id = d.id.startsWith("doc:") ? d.id.slice(4) : d.id;
+                    const className = "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)] w-full text-left";
+                    const style = { color: "var(--text-primary)", textDecoration: "none" } as const;
                     return (
                       <li key={d.id}>
-                        <a
-                          href={`/${id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)]"
-                          style={{ color: "var(--text-primary)", textDecoration: "none" }}
-                          title={d.label}
-                        >
-                          <FileText width={12} height={12} className="shrink-0" style={{ color: "var(--text-faint)" }} />
-                          <span className="truncate flex-1">{d.label}</span>
-                        </a>
+                        {embedded && onOpenDoc ? (
+                          <button
+                            onClick={() => onOpenDoc(id)}
+                            className={className}
+                            style={style}
+                            title={d.label}
+                          >
+                            <FileText width={12} height={12} className="shrink-0" style={{ color: "var(--text-faint)" }} />
+                            <span className="truncate flex-1">{d.label}</span>
+                          </button>
+                        ) : (
+                          <a
+                            href={`/${id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={className}
+                            style={style}
+                            title={d.label}
+                          >
+                            <FileText width={12} height={12} className="shrink-0" style={{ color: "var(--text-faint)" }} />
+                            <span className="truncate flex-1">{d.label}</span>
+                          </a>
+                        )}
                       </li>
                     );
                   })}

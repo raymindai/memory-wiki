@@ -9901,6 +9901,12 @@ ${clone.innerHTML}
                       setShowOnboarding(false);
                       setShowSettings(false);
                       setShowHub(false);
+                      // Galaxy wants the full canvas — collapse every
+                      // side panel so the cosmos breathes.
+                      setShowSidebar(false);
+                      setShowAIPanel(false);
+                      setShowImagePanel(false);
+                      setShowOutlinePanel(false);
                       setShowGalaxy(true);
                     }}
                     className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
@@ -14352,7 +14358,45 @@ ${clone.innerHTML}
                 }}
               >
                 <div className="flex-1 min-w-0">
-                  <HubGalaxy authHeaders={authHeaders} userEmail={user?.email ?? null} />
+                  <HubGalaxy
+                    authHeaders={authHeaders}
+                    userEmail={user?.email ?? null}
+                    embedded
+                    onOpenDoc={(docId) => {
+                      setShowGalaxy(false);
+                      const existing = tabs.find(t => t.cloudId === docId);
+                      if (existing) { switchTab(existing.id); return; }
+                      fetch(`/api/docs/${docId}`, { headers: authHeaders }).then(r => r.ok ? r.json() : null).then(d => {
+                        if (!d) return;
+                        const newId = `doc-${docId}-${Date.now()}`;
+                        const newTab: Tab = {
+                          id: newId, kind: "doc",
+                          title: d.title || "Untitled",
+                          markdown: d.markdown || "",
+                          cloudId: docId,
+                          isDraft: d.is_draft,
+                          shared: !d.isOwner,
+                          readonly: !d.isOwner && !d.isEditor && d.editMode !== "public",
+                        };
+                        setTabs(prev => [...prev, newTab]);
+                        switchTab(newId);
+                      }).catch(() => {});
+                    }}
+                    onOpenBundle={(bundleId) => {
+                      setShowGalaxy(false);
+                      const existing = tabs.find(t => t.kind === "bundle" && t.bundleId === bundleId);
+                      if (existing) { switchTab(existing.id); return; }
+                      const b = bundles.find(x => x.id === bundleId);
+                      const newId = `bundle-${bundleId}-${Date.now()}`;
+                      const newTab: Tab = {
+                        id: newId, kind: "bundle", bundleId,
+                        title: b?.title || "Untitled Bundle",
+                        markdown: "",
+                      };
+                      setTabs(prev => [...prev, newTab]);
+                      switchTab(newId);
+                    }}
+                  />
                 </div>
               </div>
             )}
@@ -17543,7 +17587,7 @@ ${clone.innerHTML}
         const surfaces: PaletteItem[] = [
           { id: "surface-start", label: "Start", hint: "Personal workspace", icon: <Smile width={13} height={13} />, action: () => { setShowOnboarding(true); setShowHub(false); setShowGalaxy(false); setShowSettings(false); } },
           ...(hubSlug ? [{ id: "surface-hub", label: "Hub", hint: `/hub/${hubSlug}`, icon: <LayoutDashboard width={13} height={13} />, action: () => { setShowOnboarding(false); setShowSettings(false); setShowGalaxy(false); setShowHub(true); } }] : []),
-          ...(hubSlug ? [{ id: "surface-galaxy", label: "Galaxy", hint: "Your hub as a constellation", icon: <Atom width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowSettings(false); setShowGalaxy(true); } }] : []),
+          ...(hubSlug ? [{ id: "surface-galaxy", label: "Galaxy", hint: "Your hub as a constellation", icon: <Atom width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowSettings(false); setShowSidebar(false); setShowAIPanel(false); setShowImagePanel(false); setShowOutlinePanel(false); setShowGalaxy(true); } }] : []),
           { id: "surface-settings", label: "Settings", hint: "Profile, appearance, auto-management", icon: <Settings width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(true); } },
         ];
 
