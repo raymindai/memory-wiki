@@ -51,3 +51,6 @@ npm-debug.log*
 test-results/
 apps/web/test-results/
 
+
+# VS Code extension build artifacts
+apps/vscode-extension/*.vsix
