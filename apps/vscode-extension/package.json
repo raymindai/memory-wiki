@@ -2,7 +2,7 @@
   "name": "mdfy-vscode",
   "displayName": "memory.wiki — Markdown Publisher",
   "description": "WYSIWYG preview and publish Markdown documents to memory.wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "publisher": "raymindai",
   "license": "MIT",
   "repository": {
