@@ -4654,12 +4654,14 @@ export default function MdEditor() {
     if (typeof window === "undefined") return;
     if (showSettings) {
       window.history.replaceState(null, "", "/settings");
+    } else if (showGalaxy) {
+      window.history.replaceState(null, "", "/galaxy");
     } else if (showHub && hubSlug) {
       window.history.replaceState(null, "", `/hub/${hubSlug}`);
     } else if (showOnboarding) {
       window.history.replaceState(null, "", "/");
     }
-  }, [showSettings, showHub, showOnboarding, hubSlug]);
+  }, [showSettings, showGalaxy, showHub, showOnboarding, hubSlug]);
   // Optional deep-link target when opening Settings. Hub's
   // "Auto-management" link sets this to "auto-management" so the
   // overlay opens on that tab instead of the user's last-active
@@ -9929,7 +9931,11 @@ ${clone.innerHTML}
               [Bundle | Canvas | List]; everything else gets
               [Live | Split | Source] so the toolbar slot count stays
               consistent across kinds. */}
-          <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+          {/* View-mode pill group. Galaxy owns the full content slot
+              and has no meaningful Live/Split/Source axis, so the
+              whole pill group is hidden while Galaxy is active —
+              keeps the toolbar to just identity + surface picks. */}
+          {!showGalaxy && <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
           {/* View buttons — different per tab kind. Bundle tabs get
               [Canvas | List]; everything else (doc + hub + onboarding)
               keeps [Live | Split | Source] so the toolbar layout stays
@@ -10018,7 +10024,7 @@ ${clone.innerHTML}
             );
           })
           )}
-          </div>{/* end view-modes group */}
+          </div>}{/* end view-modes group */}
         </div>{/* end center cluster */}
 
         <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0 justify-end" style={{ position: "relative", zIndex: 2 }}>
