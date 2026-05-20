@@ -13786,10 +13786,18 @@ ${clone.innerHTML}
                   )}
                 </div>
 
-                {/* Replay welcome */}
+                {/* Replay welcome — clear both the current versioned
+                    key AND the legacy unversioned key so users whose
+                    storage was sealed before the v7 bump can also
+                    replay. Keep this list in sync with WelcomeOverlay's
+                    STORAGE_KEY whenever it bumps. */}
                 <div className="text-center mt-2 mb-4">
                   <button
-                    onClick={() => { localStorage.removeItem("mw-welcome-seen"); window.location.reload(); }}
+                    onClick={() => {
+                      localStorage.removeItem("mw-welcome-seen-v7");
+                      localStorage.removeItem("mw-welcome-seen");
+                      window.location.reload();
+                    }}
                     className="text-caption cursor-pointer"
                     style={{ color: "var(--text-faint)", background: "none", border: "none", padding: "4px 8px", opacity: 0.6 }}
                   >
