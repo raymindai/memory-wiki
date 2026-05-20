@@ -952,22 +952,15 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       }
     })();
 
-    // Try opening in the Memory.Wiki desktop app via custom URL scheme.
-    // Falls back to https://memory.wiki if the desktop app is not installed.
+    // "Open on Memory.Wiki" goes to the web editor — drops the user
+    // straight onto memory.wiki in their default browser. We
+    // intentionally do NOT try the memorywiki:// custom URL scheme
+    // here: local-file previews don't have a canonical web URL yet,
+    // and silently launching the desktop app surprised the user.
+    // Browser → memory.wiki is the predictable behaviour.
     function openInMemoryWiki(event) {
       event.preventDefault();
-      var fileName = encodeURIComponent('{{FILE_NAME}}');
-      var desktopUrl = 'memory.wiki://open?file=' + fileName;
-      // Try custom scheme — if it fails (no handler), fall back to web
-      var iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = desktopUrl;
-      document.body.appendChild(iframe);
-      // After a short delay, if we're still here, open in browser
-      setTimeout(function() {
-        document.body.removeChild(iframe);
-        window.open('https://memory.wiki', '_blank');
-      }, 500);
+      window.open('https://memory.wiki', '_blank');
       return false;
     }
 

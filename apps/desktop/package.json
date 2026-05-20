@@ -1,6 +1,6 @@
 {
   "name": "memory-wiki-desktop",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Memory.Wiki for Mac — Markdown publishing with sidebar, sync, and local rendering",
   "main": "main.js",
   "scripts": {
@@ -102,12 +102,14 @@
       {
         "ext": "md",
         "name": "Markdown Document",
-        "role": "Editor"
+        "role": "Editor",
+        "icon": "assets/icon.icns"
       },
       {
         "ext": "markdown",
         "name": "Markdown Document",
-        "role": "Editor"
+        "role": "Editor",
+        "icon": "assets/icon.icns"
       },
       {
         "ext": "txt",
