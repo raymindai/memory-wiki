@@ -366,18 +366,23 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const { data: doc } = await supabase
       .from("documents")
-      .select("edit_token, markdown, title, user_id, anonymous_id")
+      .select("edit_token, markdown, title, user_id, anonymous_id, allowed_editors")
       .eq("id", id)
       .single();
 
     if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    // Permission: owner or token holder
+    // Permission: owner, token holder, or editor-role (allowed_editors).
+    // Collaborators with edit access trigger snapshots from the same client
+    // path owners use; refusing them produced a 403 on every keystroke.
     const isOwner =
       !!(userId && doc.user_id && userId === doc.user_id) ||
       !!(anonymousId && doc.anonymous_id && anonymousId === doc.anonymous_id);
     const hasToken = !!(editToken && doc.edit_token === editToken);
-    if (!isOwner && !hasToken) {
+    const resolvedEmail = body.userEmail || verified?.email || req.headers.get("x-user-email") || "";
+    const allowedEditors = (doc.allowed_editors || []) as string[];
+    const isAllowedEditor = !!resolvedEmail && allowedEditors.some((e) => e.toLowerCase() === resolvedEmail.toLowerCase());
+    if (!isOwner && !hasToken && !isAllowedEditor) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

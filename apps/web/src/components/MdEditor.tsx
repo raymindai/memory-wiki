@@ -6758,6 +6758,7 @@ export default function MdEditor() {
       const snapshotPayload = JSON.stringify({
         action: "snapshot",
         userId: user?.id,
+        userEmail: user?.email,
         anonymousId: (!user?.id) ? getAnonymousId() : undefined,
         editToken: currentTab.editToken,
         changeSummary: "Session end",
@@ -6791,16 +6792,17 @@ export default function MdEditor() {
     const currentTab = tabs.find(t => t.cloudId === cloudId);
     fetch(`/api/docs/${cloudId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeadersRef.current },
       body: JSON.stringify({
         action: "snapshot",
         userId: user?.id,
+        userEmail: user?.email,
         anonymousId: (!user?.id) ? getAnonymousId() : undefined,
         editToken: currentTab?.editToken,
         changeSummary: "Session start",
       }),
     }).catch(() => {});
-  }, [tabs, user?.id]);
+  }, [tabs, user?.id, user?.email]);
 
   // Fetch recently visited (shared with me) + server docs for logged-in OR anonymous users
   useEffect(() => {
@@ -8517,8 +8519,8 @@ export default function MdEditor() {
       if (docId && user?.id) {
         await fetch(`/api/docs/${docId}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "snapshot", userId: user.id, changeSummary: "Before restore" }),
+          headers: { "Content-Type": "application/json", ...authHeaders },
+          body: JSON.stringify({ action: "snapshot", userId: user.id, userEmail: user.email, changeSummary: "Before restore" }),
         }).catch(() => {});
       }
       const data = await fetchVersion(docId, versionId, authHeaders);
