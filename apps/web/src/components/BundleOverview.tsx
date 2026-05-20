@@ -16,7 +16,7 @@
 //   - Suggestions (TODO once we have a /api/bundles/[id]/suggestions surface)
 
 import { useEffect, useState, useMemo } from "react";
-import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock } from "lucide-react";
+import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, Network, ArrowUpRight } from "lucide-react";
 
 interface BundleDoc {
   id: string;
@@ -158,11 +158,14 @@ export default function BundleOverview({
   return (
     <div className="h-full overflow-y-auto" style={{ background: "var(--background)" }}>
       <div className="max-w-3xl mx-auto px-6 py-10">
-        {/* Identity hero — borderless, transparent. Big centered icon
-            + title (inline-editable for owners) + bio + intent + meta.
-            Same shape as Hub's hero so both surfaces read as one
-            family. */}
-        <header className="mb-6 text-center" style={{ padding: "32px 24px 24px" }}>
+        {/* Identity hero — same card shape as Hub's hero so both
+            surfaces read as one family. Big centered icon + title
+            (inline-editable for owners) + AI digest + description
+            + intent + meta with Canvas CTA. */}
+        <header
+          className="mb-6 rounded-xl text-center"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "32px 24px 24px" }}
+        >
           <div
             className="mx-auto flex items-center justify-center rounded-2xl"
             style={{ width: 80, height: 80, background: "var(--accent-dim)", color: "var(--accent)" }}
@@ -275,6 +278,23 @@ export default function BundleOverview({
                 <Users width={11} height={11} />
                 Shared with {bundleAllowedEmails.length}
               </span>
+            )}
+            {onSwitchToCanvas && (
+              <button
+                onClick={() => onSwitchToCanvas()}
+                className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
+                style={{
+                  color: "var(--accent)",
+                  background: "var(--accent-dim)",
+                  border: "1px solid var(--accent-dim)",
+                  letterSpacing: 0.3,
+                }}
+                title="Open this bundle as a canvas"
+              >
+                <Network width={11} height={11} />
+                <span>Canvas</span>
+                <ArrowUpRight width={11} height={11} />
+              </button>
             )}
           </div>
         </header>
