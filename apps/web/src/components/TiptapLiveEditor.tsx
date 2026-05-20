@@ -1375,17 +1375,23 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
         isSettingContent.current = true;
         // markdown-it renderer is patched (no <thead>/<tbody>)
         editor.commands.setContent(body || "<p></p>");
-        isSettingContent.current = false;
         // Force a math rebuild on the frame after setContent — same
-        // safety net as the initial mount path. The decoration
-        // build that runs synchronously inside setContent uses the
-        // post-transaction doc, but a follow-up paint with the
-        // explicit meta is cheap insurance against any paint where
-        // KaTeX widgets weren't yet wired in.
+        // safety net as the initial mount path. CRITICAL: keep
+        // isSettingContent latched through the rAF dispatch so the
+        // follow-up transaction doesn't fire onUpdate. Previously
+        // the flag was released right after setContent; the rAF
+        // dispatch then ran with isSettingContent=false → onUpdate
+        // → onChange → triggerAutoSave + collabApplyLocal. For a
+        // collaborator receiving a remote Yjs update this turned
+        // every incoming peer edit into (a) a 403-prone PATCH back
+        // to the server and (b) a Yjs re-broadcast loop.
         requestAnimationFrame(() => {
           try {
             editor.view.dispatch(editor.view.state.tr.setMeta(MDFY_MATH_FORCE_META, true));
           } catch { /* editor may have been destroyed */ }
+          // Release the suppression only after the math-rebuild
+          // transaction has settled.
+          isSettingContent.current = false;
         });
       },
       getMarkdown: () => {
