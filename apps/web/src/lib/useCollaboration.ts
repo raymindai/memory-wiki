@@ -142,24 +142,34 @@ export function useCollaboration(
         if (!payload?.state) return;
         const state = base64ToUint8(payload.state);
 
-        // Decode peer content to check if it's empty
-        const freshDoc = new Y.Doc();
-        Y.applyUpdate(freshDoc, state);
-        const peerContent = freshDoc.getText("content").toString();
-        freshDoc.destroy();
-
-        // NEVER replace with empty content — protect against blank document
+        // Probe peer payload first — refuse to swap our content for an
+        // empty doc (defensive against a peer that mounted with empty
+        // markdown and broadcast its blank state).
+        const probeDoc = new Y.Doc();
+        Y.applyUpdate(probeDoc, state);
+        const peerContent = probeDoc.getText("content").toString();
+        probeDoc.destroy();
         if (!peerContent.trim()) return;
 
         isApplyingRemoteRef.current = true;
         if (!initialized) {
           initialized = true;
           clearTimeout(initTimer);
-          // Replace local with peer content (avoid CRDT merge duplication)
+          // If we have local items already (init timer fired before
+          // the peer responded), mark them deleted so peerContent is
+          // the only visible text. We then applyUpdate the peer state
+          // so peer's character ids are imported into OUR Y.Doc —
+          // critical for subsequent delta sync, because the deltas
+          // are anchored relative to those ids. The previous
+          // toString → insert(0, peerContent) variant materialised
+          // peer content under OUR clientId, so peer deltas arrived
+          // anchored to ids that didn't exist in our structure and
+          // were silently buffered (CRDT duplication symptom: peers
+          // saw each other's initial state but no live updates).
           if (ytext.length > 0) {
             ydoc.transact(() => { ytext.delete(0, ytext.length); }, "remote");
           }
-          ydoc.transact(() => { ytext.insert(0, peerContent); }, "remote");
+          Y.applyUpdate(ydoc, state, "remote");
           onRemoteChangeRef.current(ytext.toString());
           isApplyingRemoteRef.current = false;
           return;
