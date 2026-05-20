@@ -13802,7 +13802,7 @@ ${clone.innerHTML}
             <div
               data-print-hide
               className="flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 text-caption font-mono uppercase tracking-normal select-none"
-              style={{ color: "var(--text-muted)", borderBottom: "1px solid var(--border-dim)", cursor: "default", display: (activeTab?.kind === "bundle" || showHub || showSettings || showOnboarding) ? "none" : undefined }}
+              style={{ color: "var(--text-muted)", borderBottom: "1px solid var(--border-dim)", cursor: "default", display: (activeTab?.kind === "bundle" || showHub || showGalaxy || showSettings || showOnboarding) ? "none" : undefined }}
             >
               <div className="flex items-center gap-2 shrink-0 min-w-0">
                 <span className="shrink-0" style={{ color: "var(--accent)" }}>LIVE</span>
@@ -15479,7 +15479,7 @@ ${clone.innerHTML}
           className="flex-1 flex flex-col min-h-0"
           style={{ display:
             (viewMode === "preview")
-              || (activeTab?.kind === "bundle") || showHub || showOnboarding || showSettings
+              || (activeTab?.kind === "bundle") || showHub || showGalaxy || showOnboarding || showSettings
               ? "none" : undefined,
             minWidth: viewMode === "split" && !isMobile ? 280 : undefined,
             overflow: viewMode === "split" && isMobile ? "hidden" : undefined,
