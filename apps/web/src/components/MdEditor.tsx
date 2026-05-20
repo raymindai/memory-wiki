@@ -4450,15 +4450,23 @@ export default function MdEditor() {
   // Onboarding banner — first visit only
   const [showOnboarding, setShowOnboarding] = useState(() => {
     if (typeof window === "undefined") return false;
+    const path = window.location.pathname;
+    const search = window.location.search;
+    const hash = window.location.hash;
+    // Doc / bundle / hub deep-link refresh — the user is pointing at a
+    // specific surface, not the Start landing. Show the doc, not Home.
+    // Without this, a refresh on /<id> with no cached own-docs would
+    // flip showOnboarding=true, and the URL-mirroring effect would
+    // immediately rewrite the address bar back to "/" while the
+    // doc-load was still in flight.
+    const isDeepLink = path !== "/" || !!search || !!hash;
+    if (isDeepLink) return false;
     // First visit — always show
     if (!localStorage.getItem("mdfy-onboarded")) return true;
     // Bare root URL (mdfy.app/ with no query / hash / doc path)
     // means the user wants the Home landing, not a restored doc.
     // Pair with the activeTabId useState which already clears in
     // this case — together they make the root URL contract honest.
-    const path = window.location.pathname;
-    const search = window.location.search;
-    const hash = window.location.hash;
     if (path === "/" && !search && !hash) return true;
     // Return visit — show if user has no own documents (only examples)
     try {
@@ -5014,6 +5022,12 @@ export default function MdEditor() {
   const loadTab = useCallback((tab: Tab) => {
     // Clear any placeholder overlay when loading a real document
     setEditorPlaceholder(null);
+    // Close the Start overlay. Without this, the URL-mirroring effect
+    // (showOnboarding → "/") would immediately reset the address bar
+    // back to "/" right after loadTab's own replaceState set it to
+    // `/${cloudId}` — the user sees "click did nothing, URL didn't
+    // change" on the first click after refresh / Home.
+    setShowOnboarding(false);
     // Mark this tab as read — kills the orange pulse dot in the sidebar.
     if (tab.unread) {
       setTabs(prev => prev.map(t => t.id === tab.id ? { ...t, unread: false } : t));
