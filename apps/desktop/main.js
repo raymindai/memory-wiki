@@ -3,7 +3,7 @@
    Architecture: mirrors VS Code extension model
    - Sidebar with file list (ALL/SYNCED/LOCAL/CLOUD)
    - SyncEngine (push/pull/conflict/offline queue/polling)
-   - AuthManager (memory.wiki:// OAuth callback, JWT tokens)
+   - AuthManager (memorywiki:// OAuth callback, JWT tokens)
    - Workspace folder scanning
    ========================================================= */
 
@@ -1175,14 +1175,14 @@ function sendToRenderer(channel, data) {
   }
 }
 
-// ─── URL Scheme: memory.wiki:// ───
+// ─── URL Scheme: memorywiki:// ───
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("Memory.Wiki", process.execPath, [path.resolve(process.argv[1])]);
+    app.setAsDefaultProtocolClient("memorywiki", process.execPath, [path.resolve(process.argv[1])]);
   }
 } else {
-  app.setAsDefaultProtocolClient("Memory.Wiki");
+  app.setAsDefaultProtocolClient("memorywiki");
 }
 
 // ─── Single Instance ───
@@ -1196,7 +1196,7 @@ if (!gotTheLock) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
 
-      const mwUrl = argv.find((a) => a.startsWith("memory.wiki://"));
+      const mwUrl = argv.find((a) => a.startsWith("memorywiki://"));
       if (mwUrl) {
         handleMdfyUrl(mwUrl);
         return;
@@ -1220,13 +1220,13 @@ function handleMdfyUrl(url) {
   try {
     const parsed = new URL(url);
 
-    // Auth callback: memory.wiki://auth?token=...&refresh_token=...
+    // Auth callback: memorywiki://auth?token=...&refresh_token=...
     if (parsed.hostname === "auth" || parsed.pathname.startsWith("/auth")) {
       AuthManager.handleAuthCallback(url);
       return;
     }
 
-    // Open file: memory.wiki://open?file=/path/to/file.md
+    // Open file: memorywiki://open?file=/path/to/file.md
     if (parsed.hostname === "open" || parsed.pathname.startsWith("/open")) {
       const filePath = parsed.searchParams.get("file");
       if (filePath && fs.existsSync(filePath)) {
@@ -1242,7 +1242,7 @@ function handleMdfyUrl(url) {
       return;
     }
 
-    // Open cloud doc: memory.wiki://doc/{docId}
+    // Open cloud doc: memorywiki://doc/{docId}
     if (parsed.hostname === "doc" || parsed.pathname.startsWith("/doc")) {
       const docId = parsed.pathname.split("/").pop();
       if (docId) openCloudDocumentInApp(docId);
@@ -1552,7 +1552,7 @@ ipcMain.handle("get-recent-files", () => {
 // --- Auth ---
 
 ipcMain.handle("login", () => {
-  const callbackUrl = encodeURIComponent("memory.wiki://auth");
+  const callbackUrl = encodeURIComponent("memorywiki://auth");
   const url = `${MDFY_URL}/auth/desktop?redirect=${callbackUrl}`;
   console.log("[login] Opening:", url);
   shell.openExternal(url).catch((err) => {

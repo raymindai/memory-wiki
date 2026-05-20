@@ -3,8 +3,8 @@
 // /auth/desktop — auth flow for the Memory.Wiki Electron desktop app.
 //
 // Lifecycle: main.js's "login" IPC handler opens this URL in the system
-// browser with redirect=memory.wiki://auth. If the visitor already has an
-// Memory.Wiki Supabase session, we immediately bounce to the memory.wiki:// URI
+// browser with redirect=memorywiki://auth. If the visitor already has an
+// Memory.Wiki Supabase session, we immediately bounce to the memorywiki:// URI
 // scheme with token + refresh_token attached as query params — the
 // Electron AuthManager.handleProtocolUrl() picks them up and signs the
 // app in.
@@ -53,7 +53,7 @@ export default function DesktopAuthPage() {
 
       const token = session.access_token;
       const refreshToken = (session as { refresh_token?: string }).refresh_token;
-      let desktopUri = `memory.wiki://auth?token=${encodeURIComponent(token)}`;
+      let desktopUri = `memorywiki://auth?token=${encodeURIComponent(token)}`;
       if (refreshToken) {
         desktopUri += `&refresh_token=${encodeURIComponent(refreshToken)}`;
       }

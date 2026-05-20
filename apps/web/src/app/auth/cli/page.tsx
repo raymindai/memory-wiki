@@ -36,7 +36,7 @@ export default function CliAuthPage() {
 
       // We surface the raw access_token on this page so CLI users +
       // MCP users can paste it into `Memory.Wiki login`. The legacy Electron
-      // desktop app's `memory.wiki://` URL scheme handler used to grab the
+      // desktop app's `memorywiki://` URL scheme handler used to grab the
       // token automatically via a forced redirect — but a) most users
       // don't run that app, b) the redirect would launch the
       // (deprecated, mdfy.cc-baked) desktop app on macOS for users
