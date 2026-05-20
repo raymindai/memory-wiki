@@ -135,7 +135,7 @@ export default function EmbedPage() {
           rel="noopener noreferrer"
           style={{ color: "var(--accent)", textDecoration: "none" }}
         >
-          memory.wiki
+          Memory.Wiki
         </a>
       </div>
     </div>

@@ -1,9 +1,9 @@
-// W12b — cross-reference extraction across public memory.wiki URLs.
+// W12b — cross-reference extraction across public Memory.Wiki URLs.
 //
 // Given a corpus of public document markdown, find every internal
-// memory.wiki reference and roll them up by target. A "reference" here is any
+// Memory.Wiki reference and roll them up by target. A "reference" here is any
 // link whose href resolves to /<docId>, /d/<docId>, /b/<bundleId>, or
-// /hub/<slug> on memory.wiki (or staging.memory.wiki). Plain URLs without
+// /hub/<slug> on Memory.Wiki (or staging.memory.wiki). Plain URLs without
 // markdown link syntax also count, so links pasted into a captured
 // chat transcript are caught too.
 //
@@ -12,7 +12,7 @@
 // that exist in the corpus — random external strings can't game the
 // citation count.
 
-const HOST_PATTERN = "(?:https?://(?:www\\.)?(?:staging\\.)?memory.wiki\\.app)?";
+const HOST_PATTERN = "(?:https?://(?:www\\.)?(?:staging\\.)?Memory.Wiki\\.app)?";
 const DOC_RE = new RegExp(`${HOST_PATTERN}/(?:d/)?([A-Za-z0-9]{6,16})\\b`, "g");
 const BUNDLE_RE = new RegExp(`${HOST_PATTERN}/b/([A-Za-z0-9]{6,16})\\b`, "g");
 const HUB_RE = new RegExp(`${HOST_PATTERN}/hub/([a-z0-9_-]{3,32})\\b`, "g");

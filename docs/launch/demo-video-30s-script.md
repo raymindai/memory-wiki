@@ -21,10 +21,10 @@
 
 ### Shot 2 (6–12s) — Capture
 
-**On screen**: Chrome ext on a Claude chat → click memory.wiki button → URL pops in a toast → cuts to memory.wiki showing the doc rendered cleanly.
+**On screen**: Chrome ext on a Claude chat → click Memory.Wiki button → URL pops in a toast → cuts to Memory.Wiki showing the doc rendered cleanly.
 
 **VO**:
-> memory.wiki captures it. One click, permanent URL.
+> Memory.Wiki captures it. One click, permanent URL.
 
 ---
 
@@ -48,10 +48,10 @@
 
 ### Shot 5 (25–30s) — Close
 
-**On screen**: just the logo and the tagline center-screen. `memory.wiki` underneath.
+**On screen**: just the logo and the tagline center-screen. `Memory.Wiki` underneath.
 
 **VO**:
-> Your AI memory, deployable to any AI. Try it — no signup. memory.wiki.
+> Your AI memory, deployable to any AI. Try it — no signup. Memory.Wiki.
 
 ---
 
@@ -66,7 +66,7 @@
 
 ## Distribution channels
 
-- memory.wiki home page: embed at the top as a muted-by-default autoplay
+- Memory.Wiki home page: embed at the top as a muted-by-default autoplay
 - About page: embed in the hero
 - Twitter: 16:9 with subtitles burned in (autoplay is muted on TL)
 - LinkedIn: 16:9 with subtitles

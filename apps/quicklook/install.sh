@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ================================================================
-# memory.wiki QuickLook — Build & Install Script
+# Memory.Wiki QuickLook — Build & Install Script
 # ================================================================
 #
 # Builds the mdfy-quicklook CLI tool and installs it to /usr/local/bin.
@@ -19,7 +19,7 @@ INSTALL_DIR="/usr/local/bin"
 TOOL_NAME="mdfy-quicklook"
 
 echo ""
-echo "  memory.wiki QuickLook — Build & Install"
+echo "  Memory.Wiki QuickLook — Build & Install"
 echo "  ================================="
 echo ""
 

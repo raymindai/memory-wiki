@@ -18,7 +18,7 @@ interface PullResult {
 }
 
 /**
- * Publish a new document to memory.wiki.
+ * Publish a new document to Memory.Wiki.
  * POST /api/docs → { id, editToken }
  */
 export async function publishDocument(
@@ -68,7 +68,7 @@ export async function publishDocument(
 }
 
 /**
- * Update an existing document on memory.wiki.
+ * Update an existing document on Memory.Wiki.
  * PATCH /api/docs/{id} → { ok: true, updated_at }
  */
 export async function updateDocument(
@@ -151,7 +151,7 @@ export interface ConflictError extends Error {
 }
 
 /**
- * Pull the latest document content from memory.wiki.
+ * Pull the latest document content from Memory.Wiki.
  * GET /api/docs/{id} → { markdown, title, updated_at, ... }
  */
 export async function pullDocument(

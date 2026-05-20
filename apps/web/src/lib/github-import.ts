@@ -86,7 +86,7 @@ interface GithubTreeResponse { tree: GithubTreeEntry[]; truncated?: boolean }
 const COMMON_HEADERS: Record<string, string> = {
   Accept: "application/vnd.github+json",
   "X-GitHub-Api-Version": "2022-11-28",
-  "User-Agent": "memory.wiki",
+  "User-Agent": "Memory.Wiki",
 };
 
 async function ghJson<T>(url: string): Promise<T> {
@@ -105,7 +105,7 @@ async function ghJson<T>(url: string): Promise<T> {
 }
 
 async function ghText(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { "User-Agent": "memory.wiki" } });
+  const res = await fetch(url, { headers: { "User-Agent": "Memory.Wiki" } });
   if (!res.ok) throw new GithubImportError(`Failed to fetch raw file (${res.status})`, res.status);
   return await res.text();
 }

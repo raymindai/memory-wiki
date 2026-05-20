@@ -11,7 +11,7 @@ const texts = {
     hero: {
       h1_1: "Your AI memory,",
       h1_2: "deployable to any AI.",
-      sub: "One URL, every AI. Capture from ChatGPT, Claude, GitHub, Obsidian, or Notion — every doc becomes part of a hub that Claude, Cursor, ChatGPT, and Codex all fetch the same way. You set the direction; memory.wiki structures the URL.",
+      sub: "One URL, every AI. Capture from ChatGPT, Claude, GitHub, Obsidian, or Notion — every doc becomes part of a hub that Claude, Cursor, ChatGPT, and Codex all fetch the same way. You set the direction; Memory.Wiki structures the URL.",
       cta_primary: "Start your hub →",
       cta_secondary: "Install Chrome extension",
     },
@@ -27,13 +27,13 @@ const texts = {
     ],
 
     carousel: [
-      { src: "/images/hero-editor.webp", alt: "memory.wiki WYSIWYG editor", title: "WYSIWYG Editor", desc: "Click and type directly in the rendered preview", href: "/", linkText: "Open editor" },
-      { src: "/images/hero-chromeext.webp", alt: "memory.wiki Chrome extension capturing from Claude", title: "Chrome Extension", desc: "One-click capture from ChatGPT, Claude, Gemini", href: "/plugins#chrome", linkText: "Get extension" },
-      { src: "/images/hero-mcp.webp", alt: "memory.wiki MCP server in Claude Code", title: "MCP Server", desc: "AI agents create, read, and manage documents via MCP", href: "/plugins#mcp", linkText: "Setup guide" },
-      { src: "/images/plugin-vscode.webp", alt: "memory.wiki VS Code extension with WYSIWYG preview and sidebar", title: "VS Code Extension", desc: "WYSIWYG preview, cloud sync, AI tools — right in your editor", href: "/plugins#vscode", linkText: "Install extension" },
-      { src: "/images/plugin-desktop.webp", alt: "memory.wiki for Mac with sidebar and document outline", title: "memory.wiki for Mac", desc: "Native desktop app with sidebar, folders, and offline support", href: "/plugins#desktop", linkText: "Download app" },
-      { src: "/images/feature-showcase-1.webp", alt: "memory.wiki rendered document", title: "Beautiful Rendering", desc: "Tables, lists, headings — rendered with precision", href: "/", linkText: "Try it now" },
-      { src: "/images/feature-showcase-2.webp", alt: "memory.wiki math and diagrams", title: "Math, Diagrams, Code", desc: "KaTeX equations, Mermaid charts, 190+ language highlighting", href: "/docs", linkText: "See docs" },
+      { src: "/images/hero-editor.webp", alt: "Memory.Wiki WYSIWYG editor", title: "WYSIWYG Editor", desc: "Click and type directly in the rendered preview", href: "/", linkText: "Open editor" },
+      { src: "/images/hero-chromeext.webp", alt: "Memory.Wiki Chrome extension capturing from Claude", title: "Chrome Extension", desc: "One-click capture from ChatGPT, Claude, Gemini", href: "/plugins#chrome", linkText: "Get extension" },
+      { src: "/images/hero-mcp.webp", alt: "Memory.Wiki MCP server in Claude Code", title: "MCP Server", desc: "AI agents create, read, and manage documents via MCP", href: "/plugins#mcp", linkText: "Setup guide" },
+      { src: "/images/plugin-vscode.webp", alt: "Memory.Wiki VS Code extension with WYSIWYG preview and sidebar", title: "VS Code Extension", desc: "WYSIWYG preview, cloud sync, AI tools — right in your editor", href: "/plugins#vscode", linkText: "Install extension" },
+      { src: "/images/plugin-desktop.webp", alt: "Memory.Wiki for Mac with sidebar and document outline", title: "Memory.Wiki for Mac", desc: "Native desktop app with sidebar, folders, and offline support", href: "/plugins#desktop", linkText: "Download app" },
+      { src: "/images/feature-showcase-1.webp", alt: "Memory.Wiki rendered document", title: "Beautiful Rendering", desc: "Tables, lists, headings — rendered with precision", href: "/", linkText: "Try it now" },
+      { src: "/images/feature-showcase-2.webp", alt: "Memory.Wiki math and diagrams", title: "Math, Diagrams, Code", desc: "KaTeX equations, Mermaid charts, 190+ language highlighting", href: "/docs", linkText: "See docs" },
     ],
 
     pillars: [
@@ -111,7 +111,7 @@ const texts = {
       { label: "Mermaid Diagrams", desc: "Flowcharts, sequence diagrams, Gantt charts — write them in Markdown, see them as interactive visuals.", color: "#60a5fa" },
       { label: "Code Highlighting", desc: "190+ languages with syntax highlighting via highlight.js. Every programming language you write in.", color: "#38bdf8" },
       { label: "Dark / Light Mode", desc: "Two carefully crafted themes. Your preference is saved locally. Shared docs respect the viewer's choice.", color: "#fb923c" },
-      { label: "Import Anything", desc: "PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, RST, RTF — drop any file and get Markdown. AI-powered memory.wiki restructures raw text.", color: "#4ade80" },
+      { label: "Import Anything", desc: "PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, RST, RTF — drop any file and get Markdown. AI-powered Memory.Wiki restructures raw text.", color: "#4ade80" },
       { label: "Version History", desc: "Every change is tracked. Revert to any previous version. The URL stays the same — recipients always see the latest.", color: "#fbbf24" },
     ],
 
@@ -138,7 +138,7 @@ const texts = {
       image_alt: "Rendered preview on the left, raw Markdown on the right",
       image_title: "Before and After",
       image_sub: "Rendered preview on the left, raw Markdown on the right",
-      before_title: "Before memory.wiki",
+      before_title: "Before Memory.Wiki",
       before_items: [
         "- .md files are raw text nobody wants to read",
         "- Copy to Google Docs — formatting breaks",
@@ -147,7 +147,7 @@ const texts = {
         "- Edit requires VS Code or terminal",
         "- Version control? Manual backups",
       ],
-      after_title: "With memory.wiki",
+      after_title: "With Memory.Wiki",
       after_items: [
         "Every .md gets a beautiful, shareable URL",
         "Edit in browser — no install, no login to view",
@@ -159,7 +159,7 @@ const texts = {
     },
 
     vision: {
-      heading: "Where memory.wiki is going",
+      heading: "Where Memory.Wiki is going",
       sub: "Everything above works today. Here is what we are building next.",
       today_title: "Today",
       today_badge: "Live",
@@ -194,9 +194,9 @@ const texts = {
     },
 
     comparison_md: {
-      heading: "memory.wiki vs Markdown publishing tools",
-      sub: "Publish Markdown to the web. How does memory.wiki stack up?",
-      columns: ["", "memory.wiki", "HackMD", "StackEdit", "Obsidian Publish", "GitHub Gist"] as string[],
+      heading: "Memory.Wiki vs Markdown publishing tools",
+      sub: "Publish Markdown to the web. How does Memory.Wiki stack up?",
+      columns: ["", "Memory.Wiki", "HackMD", "StackEdit", "Obsidian Publish", "GitHub Gist"] as string[],
       rows: [
         { feature: "No signup to publish", vals: ["yes", "no", "no", "no", "no"] },
         { feature: "Instant shareable URL", vals: ["yes", "yes", "no", "yes", "yes"] },
@@ -214,9 +214,9 @@ const texts = {
     },
 
     comparison_ai: {
-      heading: "memory.wiki vs AI Memory Solutions",
-      sub: "Other tools extract memory from your conversations automatically. memory.wiki takes a different approach: you decide what to remember.",
-      columns: ["", "memory.wiki", "Mem0", "Letta", "Notion AI"] as string[],
+      heading: "Memory.Wiki vs AI Memory Solutions",
+      sub: "Other tools extract memory from your conversations automatically. Memory.Wiki takes a different approach: you decide what to remember.",
+      columns: ["", "Memory.Wiki", "Mem0", "Letta", "Notion AI"] as string[],
       rows: [
         { feature: "Author your own memory", vals: ["yes", "no", "no", "partial"] },
         { feature: "Markdown native", vals: ["yes", "no", "no", "partial"] },
@@ -229,7 +229,7 @@ const texts = {
         { feature: "WYSIWYG editing", vals: ["yes", "no", "no", "yes"] },
         { feature: "No vendor lock-in", vals: ["yes", "yes", "yes", "no"] },
       ],
-      footer: "Mem0 and Letta are excellent at what they do — they extract memory from your AI conversations automatically. memory.wiki answers a different question: what do you want to remember? You author. You bundle. You deploy.",
+      footer: "Mem0 and Letta are excellent at what they do — they extract memory from your AI conversations automatically. Memory.Wiki answers a different question: what do you want to remember? You author. You bundle. You deploy.",
     },
 
     pricing_heading: "Pricing",
@@ -262,9 +262,9 @@ const texts = {
           { text: "Documents never expire", accent: true, dim: false },
           { text: "Cloud sync across devices", accent: true, dim: false },
           { text: "Short URL sharing", accent: true, dim: false },
-          { text: "AI memory.wiki structuring", accent: true, dim: false },
+          { text: "AI Memory.Wiki structuring", accent: true, dim: false },
           { text: "All formats supported", accent: true, dim: false },
-          { text: "- memory.wiki badge on shared docs", accent: false, dim: false, faint: true },
+          { text: "- Memory.Wiki badge on shared docs", accent: false, dim: false, faint: true },
         ],
       },
       {
@@ -280,7 +280,7 @@ const texts = {
           { text: "Custom domain", accent: true, dim: false },
           { text: "View analytics", accent: true, dim: false },
           { text: "Password protection", accent: true, dim: false },
-          { text: "Priority AI memory.wiki", accent: true, dim: false },
+          { text: "Priority AI Memory.Wiki", accent: true, dim: false },
           { text: "Memory Bundles", accent: true, dim: false, coming: "Coming Q2 2026" },
           { text: "Semantic search", accent: true, dim: false, coming: "Coming Q2 2026" },
           { text: "Bundle versioning", accent: true, dim: false, coming: "Coming Q2 2026" },
@@ -308,7 +308,7 @@ const texts = {
 
     bigger_picture: {
       heading: "The bigger picture",
-      sub: "This is more than a markdown tool. Read why I'm building memory.wiki.",
+      sub: "This is more than a markdown tool. Read why I'm building Memory.Wiki.",
       manifesto_link: "Read the manifesto",
     },
 
@@ -323,7 +323,7 @@ const texts = {
     hero: {
       h1_1: "당신의 AI 메모리,",
       h1_2: "어떤 AI에도 deploy.",
-      sub: "URL 하나, 모든 AI. ChatGPT·Claude·GitHub·Obsidian·Notion에서 캡처한 모든 문서가 하나의 허브가 되고, Claude·Cursor·ChatGPT·Codex가 같은 방식으로 가져갑니다. 방향은 당신이, 구조는 memory.wiki가.",
+      sub: "URL 하나, 모든 AI. ChatGPT·Claude·GitHub·Obsidian·Notion에서 캡처한 모든 문서가 하나의 허브가 되고, Claude·Cursor·ChatGPT·Codex가 같은 방식으로 가져갑니다. 방향은 당신이, 구조는 Memory.Wiki가.",
       cta_primary: "허브 시작하기 →",
       cta_secondary: "Chrome 확장 설치",
     },
@@ -339,13 +339,13 @@ const texts = {
     ],
 
     carousel: [
-      { src: "/images/hero-editor.webp", alt: "memory.wiki WYSIWYG 에디터", title: "WYSIWYG 에디터", desc: "렌더링된 미리보기에서 직접 클릭하고 타이핑", href: "/", linkText: "에디터 열기" },
-      { src: "/images/hero-chromeext.webp", alt: "memory.wiki Chrome 확장 — Claude에서 캡처", title: "Chrome 확장", desc: "ChatGPT, Claude, Gemini에서 원클릭 캡처", href: "/plugins#chrome", linkText: "확장 설치" },
-      { src: "/images/hero-mcp.webp", alt: "memory.wiki MCP 서버 — Claude Code에서 사용", title: "MCP 서버", desc: "AI 에이전트가 MCP로 문서를 생성, 읽기, 관리", href: "/plugins#mcp", linkText: "설정 가이드" },
-      { src: "/images/plugin-vscode.webp", alt: "memory.wiki VS Code 확장 — WYSIWYG 미리보기와 사이드바", title: "VS Code 확장", desc: "WYSIWYG 미리보기, 클라우드 싱크, AI 도구 — 에디터에서 바로", href: "/plugins#vscode", linkText: "확장 설치" },
-      { src: "/images/plugin-desktop.webp", alt: "memory.wiki for Mac — 사이드바와 문서 아웃라인", title: "memory.wiki for Mac", desc: "사이드바, 폴더, 오프라인 지원이 있는 네이티브 데스크톱 앱", href: "/plugins#desktop", linkText: "앱 다운로드" },
-      { src: "/images/feature-showcase-1.webp", alt: "memory.wiki 렌더링된 문서", title: "아름다운 렌더링", desc: "테이블, 리스트, 헤딩 — 정밀하게 렌더링", href: "/", linkText: "지금 사용하기" },
-      { src: "/images/feature-showcase-2.webp", alt: "memory.wiki 수학과 다이어그램", title: "수학, 다이어그램, 코드", desc: "KaTeX 방정식, Mermaid 차트, 190+ 언어 하이라이팅", href: "/docs", linkText: "문서 보기" },
+      { src: "/images/hero-editor.webp", alt: "Memory.Wiki WYSIWYG 에디터", title: "WYSIWYG 에디터", desc: "렌더링된 미리보기에서 직접 클릭하고 타이핑", href: "/", linkText: "에디터 열기" },
+      { src: "/images/hero-chromeext.webp", alt: "Memory.Wiki Chrome 확장 — Claude에서 캡처", title: "Chrome 확장", desc: "ChatGPT, Claude, Gemini에서 원클릭 캡처", href: "/plugins#chrome", linkText: "확장 설치" },
+      { src: "/images/hero-mcp.webp", alt: "Memory.Wiki MCP 서버 — Claude Code에서 사용", title: "MCP 서버", desc: "AI 에이전트가 MCP로 문서를 생성, 읽기, 관리", href: "/plugins#mcp", linkText: "설정 가이드" },
+      { src: "/images/plugin-vscode.webp", alt: "Memory.Wiki VS Code 확장 — WYSIWYG 미리보기와 사이드바", title: "VS Code 확장", desc: "WYSIWYG 미리보기, 클라우드 싱크, AI 도구 — 에디터에서 바로", href: "/plugins#vscode", linkText: "확장 설치" },
+      { src: "/images/plugin-desktop.webp", alt: "Memory.Wiki for Mac — 사이드바와 문서 아웃라인", title: "Memory.Wiki for Mac", desc: "사이드바, 폴더, 오프라인 지원이 있는 네이티브 데스크톱 앱", href: "/plugins#desktop", linkText: "앱 다운로드" },
+      { src: "/images/feature-showcase-1.webp", alt: "Memory.Wiki 렌더링된 문서", title: "아름다운 렌더링", desc: "테이블, 리스트, 헤딩 — 정밀하게 렌더링", href: "/", linkText: "지금 사용하기" },
+      { src: "/images/feature-showcase-2.webp", alt: "Memory.Wiki 수학과 다이어그램", title: "수학, 다이어그램, 코드", desc: "KaTeX 방정식, Mermaid 차트, 190+ 언어 하이라이팅", href: "/docs", linkText: "문서 보기" },
     ],
 
     pillars: [
@@ -423,7 +423,7 @@ const texts = {
       { label: "Mermaid 다이어그램", desc: "플로우차트, 시퀀스 다이어그램, 간트 차트 — 마크다운으로 작성하고, 인터랙티브 비주얼로 보세요.", color: "#60a5fa" },
       { label: "코드 하이라이팅", desc: "highlight.js를 통한 190+ 언어 구문 강조. 당신이 사용하는 모든 프로그래밍 언어를 지원합니다.", color: "#38bdf8" },
       { label: "다크 / 라이트 모드", desc: "정성스럽게 만든 두 가지 테마. 선호 설정은 로컬에 저장됩니다. 공유 문서는 보는 사람의 선택을 따릅니다.", color: "#fb923c" },
-      { label: "무엇이든 가져오기", desc: "PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, RST, RTF — 아무 파일이나 드롭하면 마크다운으로 변환됩니다. AI 기반 memory.wiki가 원시 텍스트를 구조화합니다.", color: "#4ade80" },
+      { label: "무엇이든 가져오기", desc: "PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, RST, RTF — 아무 파일이나 드롭하면 마크다운으로 변환됩니다. AI 기반 Memory.Wiki가 원시 텍스트를 구조화합니다.", color: "#4ade80" },
       { label: "버전 히스토리", desc: "모든 변경이 추적됩니다. 이전 버전으로 되돌릴 수 있습니다. URL은 그대로 — 수신자는 항상 최신 버전을 봅니다.", color: "#fbbf24" },
     ],
 
@@ -446,11 +446,11 @@ const texts = {
 
     before_after: {
       heading: "왜 이것이 중요한가",
-      sub: "좋은 AI 답변이 채팅 기록 속으로 사라집니다. .md 파일은 아무도 안 읽습니다. memory.wiki가 그걸 바꿉니다.",
+      sub: "좋은 AI 답변이 채팅 기록 속으로 사라집니다. .md 파일은 아무도 안 읽습니다. Memory.Wiki가 그걸 바꿉니다.",
       image_alt: "왼쪽은 렌더링된 미리보기, 오른쪽은 원시 마크다운",
       image_title: "Before and After",
       image_sub: "왼쪽은 렌더링된 미리보기, 오른쪽은 원시 마크다운",
-      before_title: "memory.wiki 이전",
+      before_title: "Memory.Wiki 이전",
       before_items: [
         "- .md 파일은 아무도 읽고 싶지 않은 원시 텍스트",
         "- Google Docs에 복사 — 포맷 깨짐",
@@ -459,7 +459,7 @@ const texts = {
         "- 편집하려면 VS Code나 터미널 필요",
         "- 버전 관리? 수동 백업",
       ],
-      after_title: "memory.wiki와 함께",
+      after_title: "Memory.Wiki와 함께",
       after_items: [
         "모든 .md가 아름답고 공유 가능한 URL을 가짐",
         "브라우저에서 편집 — 설치 불필요, 보는 데 로그인 불필요",
@@ -471,7 +471,7 @@ const texts = {
     },
 
     vision: {
-      heading: "Where memory.wiki is going",
+      heading: "Where Memory.Wiki is going",
       sub: "위의 모든 것은 오늘 이미 작동합니다. 하지만 더 큰 베팅은 마크다운 URL이 AI 시대 지식의 substrate가 된다는 것입니다 — 퍼블리싱뿐 아니라, 메모리.",
       today_title: "오늘",
       today_badge: "Live",
@@ -506,9 +506,9 @@ const texts = {
     },
 
     comparison_md: {
-      heading: "memory.wiki vs Markdown publishing tools",
-      sub: "마크다운을 웹에 퍼블리시. memory.wiki는 어떻게 다를까?",
-      columns: ["", "memory.wiki", "HackMD", "StackEdit", "Obsidian Publish", "GitHub Gist"] as string[],
+      heading: "Memory.Wiki vs Markdown publishing tools",
+      sub: "마크다운을 웹에 퍼블리시. Memory.Wiki는 어떻게 다를까?",
+      columns: ["", "Memory.Wiki", "HackMD", "StackEdit", "Obsidian Publish", "GitHub Gist"] as string[],
       rows: [
         { feature: "No signup to publish", vals: ["yes", "no", "no", "no", "no"] },
         { feature: "Instant shareable URL", vals: ["yes", "yes", "no", "yes", "yes"] },
@@ -526,9 +526,9 @@ const texts = {
     },
 
     comparison_ai: {
-      heading: "memory.wiki vs AI Memory Solutions",
-      sub: "다른 도구는 대화에서 memory를 자동 추출합니다. memory.wiki는 다른 접근입니다: 당신이 무엇을 기억할지 결정합니다.",
-      columns: ["", "memory.wiki", "Mem0", "Letta", "Notion AI"] as string[],
+      heading: "Memory.Wiki vs AI Memory Solutions",
+      sub: "다른 도구는 대화에서 memory를 자동 추출합니다. Memory.Wiki는 다른 접근입니다: 당신이 무엇을 기억할지 결정합니다.",
+      columns: ["", "Memory.Wiki", "Mem0", "Letta", "Notion AI"] as string[],
       rows: [
         { feature: "Author your own memory", vals: ["yes", "no", "no", "partial"] },
         { feature: "Markdown native", vals: ["yes", "no", "no", "partial"] },
@@ -541,7 +541,7 @@ const texts = {
         { feature: "WYSIWYG editing", vals: ["yes", "no", "no", "yes"] },
         { feature: "No vendor lock-in", vals: ["yes", "yes", "yes", "no"] },
       ],
-      footer: "Mem0과 Letta는 각자의 영역에서 뛰어납니다 — AI 대화에서 메모리를 자동으로 추출합니다. memory.wiki는 다른 질문에 답합니다: 당신은 무엇을 기억하고 싶은가? 당신이 작성합니다. 당신이 번들합니다. 당신이 배포합니다.",
+      footer: "Mem0과 Letta는 각자의 영역에서 뛰어납니다 — AI 대화에서 메모리를 자동으로 추출합니다. Memory.Wiki는 다른 질문에 답합니다: 당신은 무엇을 기억하고 싶은가? 당신이 작성합니다. 당신이 번들합니다. 당신이 배포합니다.",
     },
 
     pricing_heading: "요금제",
@@ -574,9 +574,9 @@ const texts = {
           { text: "문서 영구 보존", accent: true, dim: false },
           { text: "클라우드 동기화", accent: true, dim: false },
           { text: "짧은 URL 공유", accent: true, dim: false },
-          { text: "AI memory.wiki 구조화", accent: true, dim: false },
+          { text: "AI Memory.Wiki 구조화", accent: true, dim: false },
           { text: "모든 포맷 지원", accent: true, dim: false },
-          { text: "- 공유 문서에 memory.wiki 뱃지", accent: false, dim: false, faint: true },
+          { text: "- 공유 문서에 Memory.Wiki 뱃지", accent: false, dim: false, faint: true },
         ],
       },
       {
@@ -592,7 +592,7 @@ const texts = {
           { text: "커스텀 도메인", accent: true, dim: false },
           { text: "조회 분석", accent: true, dim: false },
           { text: "비밀번호 보호", accent: true, dim: false },
-          { text: "우선 AI memory.wiki", accent: true, dim: false },
+          { text: "우선 AI Memory.Wiki", accent: true, dim: false },
           { text: "Memory Bundles", accent: true, dim: false, coming: "Coming Q2 2026" },
           { text: "시맨틱 검색", accent: true, dim: false, coming: "Coming Q2 2026" },
           { text: "Bundle 버전 관리", accent: true, dim: false, coming: "Coming Q2 2026" },
@@ -620,7 +620,7 @@ const texts = {
 
     bigger_picture: {
       heading: "더 큰 그림",
-      sub: "이건 단순한 마크다운 도구가 아닙니다. 왜 memory.wiki를 만드는지 읽어보세요.",
+      sub: "이건 단순한 마크다운 도구가 아닙니다. 왜 Memory.Wiki를 만드는지 읽어보세요.",
       manifesto_link: "manifesto 읽기",
     },
 

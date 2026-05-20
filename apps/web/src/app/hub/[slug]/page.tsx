@@ -114,7 +114,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!hub) return { robots: { index: false, follow: false } };
 
   const author = hub.profile.display_name || slug;
-  const title = `${author}'s knowledge hub — memory.wiki`;
+  const title = `${author}'s knowledge hub — Memory.Wiki`;
   const description = hub.profile.hub_description ||
     `${hub.docs.length} documents, ${hub.bundles.length} bundles. Karpathy's wiki, deployable to any AI.`;
 
@@ -145,7 +145,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       title,
       description,
       url: `https://memory.wiki/hub/${slug}`,
-      siteName: "memory.wiki",
+      siteName: "Memory.Wiki",
       type: "profile",
       images: [{ url: ogImage, width: 1200, height: 630 }],
     },

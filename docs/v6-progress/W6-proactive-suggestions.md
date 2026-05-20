@@ -5,10 +5,10 @@
 ## Why this is the third exceed
 
 Karpathy's pattern is reactive: the user asks, the LLM responds.
-Graphify is the same: the user runs `/graphify`. memory.wiki now watches
+Graphify is the same: the user runs `/graphify`. Memory.Wiki now watches
 hub activity and proposes actions on its own ("you've added 4 docs
 about pricing this week, want a bundle?"). This is the third
-structural capability memory.wiki ships at launch that's outside what the
+structural capability Memory.Wiki ships at launch that's outside what the
 source patterns cover.
 
 Combined with W4 (diff/accept synthesis) and W5a (PDF ingest), the
@@ -104,7 +104,7 @@ cluster (4 pricing docs):
 | Vlkn4CaB <> jqYSWWVo | 0.40 |
 | Vlkn4CaB <> ybAfPRUe | 0.43 |
 | any of these <> "Project Acme Milestones" | 0.62+ |
-| any of these <> "Welcome to memory.wiki" | 0.66+ |
+| any of these <> "Welcome to Memory.Wiki" | 0.66+ |
 
 So 0.45 cleanly separates "same-topic" from "different-topic." Bumping
 to 0.50 would still work but starts admitting tangentially-related

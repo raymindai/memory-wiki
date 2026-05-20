@@ -14,7 +14,7 @@
 //
 // Why integration tokens (not OAuth) for v1: OAuth needs a public
 // client_id + per-user encrypted token storage. Internal integration
-// tokens cover the "I want my Notion notes in memory.wiki" path with zero
+// tokens cover the "I want my Notion notes in Memory.Wiki" path with zero
 // infra; the user pastes the token once per import.
 
 import { NextRequest, NextResponse, after } from "next/server";

@@ -1,4 +1,4 @@
-# memory.wiki
+# Memory.Wiki
 
 ## The fastest way from thought to shared document.
 
@@ -13,7 +13,7 @@
 
 ## What is this?
 
-**memory.wiki** is a document platform with one promise: every document gets a permanent short URL (`memory.wiki/abc123`) that works everywhere — browsers, AI chats, Slack, email, embeds. No login to view. No paywall.
+**Memory.Wiki** is a document platform with one promise: every document gets a permanent short URL (`memory.wiki/abc123`) that works everywhere — browsers, AI chats, Slack, email, embeds. No login to view. No paywall.
 
 It ships across 7 channels, all driven by the same shared rendering pipeline (markdown-it + highlight.js + KaTeX + Mermaid) so a doc looks identical wherever you open it.
 
@@ -21,7 +21,7 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 
 | Channel | Status | Install |
 |---------|--------|---------|
-| [**Web**](https://memory.wiki) | Live | Just open memory.wiki |
+| [**Web**](https://memory.wiki) | Live | Just open Memory.Wiki |
 | [**VS Code**](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode) | v1.4.0 | Marketplace |
 | **Desktop (Mac)** | v2.2.0 | DMG from releases |
 | [**CLI**](https://www.npmjs.com/package/mdfy-cli) | v1.3.x | `npm install -g mdfy-cli` |
@@ -74,19 +74,19 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 
 ```bash
 # Publish a file
-memory.wiki publish README.md
+Memory.Wiki publish README.md
 
 # Pipe from any command
-echo "# Hello" | memory.wiki publish
-tmux capture-pane -p | memory.wiki publish
-pbpaste | memory.wiki publish
+echo "# Hello" | Memory.Wiki publish
+tmux capture-pane -p | Memory.Wiki publish
+pbpaste | Memory.Wiki publish
 
 # Manage documents
-memory.wiki list
-memory.wiki read abc123
-memory.wiki update abc123 updated.md
-memory.wiki search "meeting notes"
-memory.wiki pull abc123 -o doc.md
+Memory.Wiki list
+Memory.Wiki read abc123
+Memory.Wiki update abc123 updated.md
+Memory.Wiki search "meeting notes"
+Memory.Wiki pull abc123 -o doc.md
 ```
 
 ## MCP Server
@@ -96,7 +96,7 @@ Connect any AI tool to memory.wiki:
 ```json
 {
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -148,7 +148,7 @@ npx @vscode/vsce publish
 ```text
 mdcore/
 ├── apps/
-│   ├── web/                  # Next.js 15 (memory.wiki)
+│   ├── web/                  # Next.js 15 (Memory.Wiki)
 │   ├── desktop/              # Electron Mac app
 │   ├── vscode-extension/     # VS Code extension
 │   ├── chrome-extension/     # Chrome extension
@@ -181,6 +181,6 @@ MIT
 
 ---
 
-**memory.wiki** — *The fastest way from thought to shared document.*
+**Memory.Wiki** — *The fastest way from thought to shared document.*
 
-[memory.wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/mdcore)
+[Memory.Wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/mdcore)

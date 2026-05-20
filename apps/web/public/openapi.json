@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "memory.wiki API",
+    "title": "Memory.Wiki API",
     "description": "Publish, read, and manage Markdown documents. Create shareable URLs from any content.",
     "version": "1.0.0"
   },

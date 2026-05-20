@@ -9,7 +9,7 @@
 // Why no OAuth yet: building a Notion OAuth provider needs a public
 // client_id, redirect URL, and per-user encrypted token storage.
 // We can layer that on later. Internal integration tokens cover the
-// "I want my Notion notes in memory.wiki" path with zero infra.
+// "I want my Notion notes in Memory.Wiki" path with zero infra.
 //
 // Block coverage: paragraph, heading_1/2/3, bulleted/numbered list,
 // to_do, toggle, code, quote, divider, callout, image, table,

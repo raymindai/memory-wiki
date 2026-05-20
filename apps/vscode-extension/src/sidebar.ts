@@ -136,7 +136,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
         case "logout":
           await this._authManager.logout();
           this.refresh();
-          vscode.window.showInformationMessage("Signed out from memory.wiki.");
+          vscode.window.showInformationMessage("Signed out from Memory.Wiki.");
           break;
       }
     });
@@ -182,7 +182,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     suppressAutoPreviewFor(500);
     const uri = vscode.Uri.file(filePath);
     const doc = await vscode.workspace.openTextDocument(uri);
-    // Show memory.wiki preview only — don't open native editor separately
+    // Show Memory.Wiki preview only — don't open native editor separately
     PreviewPanel.createOrShow(this._extensionUri, doc);
   }
 
@@ -196,7 +196,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
   private async unsyncDocument(filePath: string): Promise<void> {
     const fileName = path.basename(filePath);
     const confirm = await vscode.window.showWarningMessage(
-      `Unsync "${fileName}" from memory.wiki? The local file stays, only the sync connection is removed.`,
+      `Unsync "${fileName}" from Memory.Wiki? The local file stays, only the sync connection is removed.`,
       "Unsync",
       "Cancel"
     );
@@ -207,7 +207,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     const base = path.basename(filePath, ext);
     const configPath = path.join(path.dirname(filePath), `.${base}.mdfy.json`);
     try {
-      // Clear source on server so memory.wiki no longer shows it as synced
+      // Clear source on server so Memory.Wiki no longer shows it as synced
       const configBytes = await vscode.workspace.fs.readFile(vscode.Uri.file(configPath));
       const config = JSON.parse(Buffer.from(configBytes).toString("utf-8"));
       if (config.docId && this._authManager) {
@@ -222,7 +222,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
       await vscode.workspace.fs.delete(vscode.Uri.file(configPath));
       this.refresh();
       vscode.window.showInformationMessage(
-        `"${fileName}" unsynced. The document remains on memory.wiki but is no longer linked to this file.`
+        `"${fileName}" unsynced. The document remains on Memory.Wiki but is no longer linked to this file.`
       );
     } catch {
       vscode.window.showErrorMessage("Failed to remove sync file.");
@@ -232,7 +232,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
   private async deleteSyncedDocument(filePath: string): Promise<void> {
     const fileName = path.basename(filePath);
     const confirm = await vscode.window.showWarningMessage(
-      `Delete "${fileName}" from memory.wiki? The local file stays, but the cloud copy will be removed.`,
+      `Delete "${fileName}" from Memory.Wiki? The local file stays, but the cloud copy will be removed.`,
       "Delete from Cloud",
       "Cancel"
     );
@@ -260,12 +260,12 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
       try { await vscode.workspace.fs.delete(vscode.Uri.file(configPath)); } catch {}
     }
     this.refresh();
-    vscode.window.showInformationMessage(`"${fileName}" removed from memory.wiki.`);
+    vscode.window.showInformationMessage(`"${fileName}" removed from Memory.Wiki.`);
   }
 
   private async deleteCloudDocument(docId: string): Promise<void> {
     const confirm = await vscode.window.showWarningMessage(
-      `Move this document to trash on memory.wiki? You can restore it later.`,
+      `Move this document to trash on Memory.Wiki? You can restore it later.`,
       "Delete",
       "Cancel"
     );
@@ -283,7 +283,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
         body: JSON.stringify({ action: "soft-delete", userId }),
       });
       this.refresh();
-      vscode.window.showInformationMessage("Document removed from memory.wiki.");
+      vscode.window.showInformationMessage("Document removed from Memory.Wiki.");
     } catch {
       vscode.window.showErrorMessage("Failed to delete document.");
     }
@@ -349,7 +349,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
         lastServerUpdatedAt: remote.updated_at,
       });
 
-      // Open in memory.wiki preview only (no native editor)
+      // Open in Memory.Wiki preview only (no native editor)
       suppressAutoPreviewFor(500);
       const doc = await vscode.workspace.openTextDocument(saveUri);
       PreviewPanel.createOrShow(this._extensionUri, doc);
@@ -930,7 +930,7 @@ body {
   <div class="filters">
     <div class="filter-group">
       <button class="filter-btn active" data-filter="all" title="Show all documents">ALL</button>
-      <button class="filter-btn" data-filter="synced" title="Local files linked to memory.wiki">SYNCED</button>
+      <button class="filter-btn" data-filter="synced" title="Local files linked to Memory.Wiki">SYNCED</button>
       <button class="filter-btn" data-filter="local" title="Local files not yet published">LOCAL</button>
       <button class="filter-btn" data-filter="cloud" title="Cloud documents not synced locally">CLOUD</button>
     </div>
@@ -943,17 +943,17 @@ body {
   </div>
 
   <div class="help-panel hidden" id="help-panel">
-    <div class="help-row"><span class="help-icon" style="color:#22c55e"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
-    <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Sync to upload to memory.wiki.</span></div></div>
-    <div class="help-row"><span class="help-icon" style="color:#60a5fa"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
+    <div class="help-row"><span class="help-icon" style="color:#22c55e"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to Memory.Wiki. Edits can be pushed/pulled.</span></div></div>
+    <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Sync to upload to Memory.Wiki.</span></div></div>
+    <div class="help-row"><span class="help-icon" style="color:#60a5fa"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on Memory.Wiki. Sync to download a local copy.</span></div></div>
     <div class="help-divider"></div>
-    <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg></span><div><strong>Copy URL</strong><span class="help-desc">Copy the memory.wiki link to clipboard.</span></div></div>
-    <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 10V2"/><path d="M5 4.5L8 1.5l3 3"/></svg></span><div><strong>Sync Up</strong><span class="help-desc">Upload local file to memory.wiki and get a shareable URL.</span></div></div>
+    <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg></span><div><strong>Copy URL</strong><span class="help-desc">Copy the Memory.Wiki link to clipboard.</span></div></div>
+    <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 10V2"/><path d="M5 4.5L8 1.5l3 3"/></svg></span><div><strong>Sync Up</strong><span class="help-desc">Upload local file to Memory.Wiki and get a shareable URL.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 2v8"/><path d="M5 7.5L8 10.5l3-3"/></svg></span><div><strong>Sync Down</strong><span class="help-desc">Download cloud document to your local workspace.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8A6 6 0 004.8 3.3L2 6"/><path d="M2 8a6 6 0 009.2 4.7L14 10"/><path d="M4 4l8 8"/></svg></span><div><strong>Unsync</strong><span class="help-desc">Remove sync connection. File stays local, moves back to Local.</span></div></div>
     <div class="help-divider"></div>
     <div style="font-size:10px;color:var(--fg-muted);line-height:1.6">
-      <a href="https://memory.wiki" style="color:var(--accent);text-decoration:none">memory.wiki</a> — Web editor &amp; sharing<br>
+      <a href="https://memory.wiki" style="color:var(--accent);text-decoration:none">Memory.Wiki</a> — Web editor &amp; sharing<br>
       <a href="https://chrome.google.com/webstore" style="color:var(--fg-muted);text-decoration:none">Chrome Extension</a> — Capture from ChatGPT/Claude
     </div>
   </div>
@@ -964,7 +964,7 @@ body {
     <div class="user-bar-loggedout" id="user-loggedout">
       <button class="signin-btn" id="signin-btn" title="Sign in to sync and access cloud documents">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>
-        Sign in to memory.wiki
+        Sign in to Memory.Wiki
       </button>
       <div class="signin-hint">Sync, publish, and access cloud documents</div>
     </div>
@@ -1168,7 +1168,7 @@ body {
       if (showSynced) {
         if (!isLoggedIn && (currentFilter === 'all' || currentFilter === 'synced')) {
           html += secHeader('sync', 'Synced', '');
-          html += '<div class="login-prompt"><p>Sign in to sync your documents between VS Code and memory.wiki.</p><button class="login-btn" id="login-btn">Sign in to memory.wiki</button></div>';
+          html += '<div class="login-prompt"><p>Sign in to sync your documents between VS Code and Memory.Wiki.</p><button class="login-btn" id="login-btn">Sign in to Memory.Wiki</button></div>';
         } else if (synced.length > 0) {
           html += secHeader('sync', 'Synced', synced.length);
           html += '<ul class="doc-list">';
@@ -1189,7 +1189,7 @@ body {
       if (showCloud) {
         if (!isLoggedIn) {
           html += secHeader('globe', 'Cloud', '');
-          html += '<div class="login-prompt"><p>Sign in to access your cloud documents and pull them to your workspace.</p><button class="login-btn" id="login-btn">Sign in to memory.wiki</button></div>';
+          html += '<div class="login-prompt"><p>Sign in to access your cloud documents and pull them to your workspace.</p><button class="login-btn" id="login-btn">Sign in to Memory.Wiki</button></div>';
         } else if (cloudFiltered.length > 0) {
           html += secHeader('globe', 'Cloud', cloudFiltered.length);
           // Docs without folder
@@ -1285,7 +1285,7 @@ body {
     function renderLocalDoc(doc) {
       var ic = '<div class="doc-icon local">' + icon('file', 14) + '</div>';
       var meta = doc.relativePath || doc.fileName;
-      var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to memory.wiki">' + icon('upload', 14) + '</button>';
+      var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to Memory.Wiki">' + icon('upload', 14) + '</button>';
       return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(doc.relativePath || doc.fileName) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
@@ -1415,7 +1415,7 @@ body {
         var email = currentUserId || '';
         var initial = email.charAt(0).toUpperCase() || 'U';
         if (avatar) avatar.textContent = initial;
-        if (nameEl) nameEl.textContent = email || 'memory.wiki user';
+        if (nameEl) nameEl.textContent = email || 'Memory.Wiki user';
       } else {
         loggedOut.classList.remove('hidden');
         loggedIn.classList.add('hidden');

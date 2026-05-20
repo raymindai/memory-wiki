@@ -19,7 +19,7 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
  *   document_count: N
  *   bundle_count: M
  *   updated: <ISO>
- *   source: "memory.wiki"
+ *   source: "Memory.Wiki"
  *   ---
  *
  *   # <author>'s knowledge hub
@@ -168,7 +168,7 @@ export async function GET(
     `document_count: ${docsList.length}`,
     `bundle_count: ${bundlesList.length}`,
     hubUpdated ? `updated: ${new Date(hubUpdated).toISOString()}` : null,
-    'source: "memory.wiki"',
+    'source: "Memory.Wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");
@@ -397,7 +397,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
     `concept_count: ${concepts.length}`,
     ...(since ? [`since: ${since}`] : []),
     `updated: ${updatedAt}`,
-    'source: "memory.wiki"',
+    'source: "Memory.Wiki"',
     "---",
     "",
   ].join("\n");

@@ -7,7 +7,7 @@ import MdfyLogo from "@/components/MdfyLogo";
 // Shared header for the public viewers (/d/<id>, /b/<id>, /hub/<slug>).
 // Single source of truth for the chrome each viewer wears at the top:
 // - sticky + backdrop blur (so the page scrolls under it)
-// - memory.wiki logo on the left (always links to /)
+// - Memory.Wiki logo on the left (always links to /)
 // - title + optional subtitle, both truncated so long titles don't shove
 //   the action buttons off the viewport
 // - actions slot on the right — each viewer passes its viewer-specific
@@ -44,7 +44,7 @@ export default function ViewerHeader({ title, subtitle, breadcrumb, actions }: V
         WebkitBackdropFilter: "blur(10px)",
       }}
     >
-      <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="memory.wiki home">
+      <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="Memory.Wiki home">
         <MdfyLogo size={18} />
       </Link>
 

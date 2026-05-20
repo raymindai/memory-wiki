@@ -12,16 +12,16 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "MCP Server — memory.wiki",
+  title: "MCP Server — Memory.Wiki",
   description:
-    "MCP (Model Context Protocol) server for memory.wiki. Let Claude, Cursor, Windsurf, and other AI tools create and manage documents directly with 25 tools.",
+    "MCP (Model Context Protocol) server for Memory.Wiki. Let Claude, Cursor, Windsurf, and other AI tools create and manage documents directly with 25 tools.",
   alternates: {
     canonical: "https://memory.wiki/docs/mcp",
     languages: { ko: "https://memory.wiki/ko/docs/mcp" },
   },
   openGraph: {
-    title: "MCP Server — memory.wiki",
-    description: "Let AI tools publish and manage documents on memory.wiki. 25 tools for Claude, Cursor, and Windsurf.",
+    title: "MCP Server — Memory.Wiki",
+    description: "Let AI tools publish and manage documents on Memory.Wiki. 25 tools for Claude, Cursor, and Windsurf.",
     url: "https://memory.wiki/docs/mcp",
     images: [{ url: "/api/og?title=MCP%20Server", width: 1200, height: 630 }],
   },
@@ -78,7 +78,7 @@ const tools = [
       { name: "isDraft", type: "boolean", required: false, desc: "Create as draft. Default: false." },
     ],
     example: `// In Claude Code:
-"Publish this analysis as a document on memory.wiki"
+"Publish this analysis as a document on Memory.Wiki"
 
 // Claude calls mdfy_create:
 {
@@ -182,7 +182,7 @@ export default function McpDocsPage() {
             MCP Server
           </h1>
           <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 32, maxWidth: 640 }}>
-            Let Claude, Cursor, Windsurf, and other AI tools create and manage documents on memory.wiki directly.
+            Let Claude, Cursor, Windsurf, and other AI tools create and manage documents on Memory.Wiki directly.
           </p>
 
           {/* Memory Layer intro */}
@@ -191,7 +191,7 @@ export default function McpDocsPage() {
               The MCP-native memory layer for AI agents.
             </p>
             <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 20px", lineHeight: 1.7 }}>
-              Read memory.wiki URLs as context today. Write memory back via MCP in Phase 2.
+              Read Memory.Wiki URLs as context today. Write memory back via MCP in Phase 2.
             </p>
             <div className="about-grid-2" style={{ gap: 16 }}>
               <div>
@@ -199,7 +199,7 @@ export default function McpDocsPage() {
                   Today <span className="live-badge">Live</span>
                 </p>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-muted)" }}>
-                  <li style={{ padding: "3px 0" }}>Read memory.wiki URLs as AI context</li>
+                  <li style={{ padding: "3px 0" }}>Read Memory.Wiki URLs as AI context</li>
                   <li style={{ padding: "3px 0" }}>Document CRUD via 25 MCP tools</li>
                   <li style={{ padding: "3px 0" }}>Auto-source detection</li>
                 </ul>
@@ -223,7 +223,7 @@ export default function McpDocsPage() {
           <Card>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
               The <strong style={{ color: "var(--text-primary)" }}>Model Context Protocol (MCP)</strong> is an open standard
-              that lets AI assistants interact with external tools and services. The memory.wiki MCP server exposes
+              that lets AI assistants interact with external tools and services. The Memory.Wiki MCP server exposes
               25 tools across 7 categories — core CRUD, append/prepend, section editing, sharing controls,
               version history, folders, and stats. The hosted endpoint at <InlineCode>{"https://memory.wiki/api/mcp"}</InlineCode> works
               with any MCP-compatible client (Claude Web, Cursor, etc.).
@@ -233,7 +233,7 @@ export default function McpDocsPage() {
           {/* Claude Web — Hosted */}
           <SectionHeading id="claude-web">Claude Web (Hosted MCP)</SectionHeading>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
-            Use memory.wiki directly in <strong style={{ color: "var(--text-primary)" }}>claude.ai</strong> via our hosted MCP endpoint — no local install required.
+            Use Memory.Wiki directly in <strong style={{ color: "var(--text-primary)" }}>claude.ai</strong> via our hosted MCP endpoint — no local install required.
           </p>
           <Card>
             <SubLabel>Endpoint URL</SubLabel>
@@ -252,9 +252,9 @@ export default function McpDocsPage() {
             For local stdio-based clients (Claude Desktop, Claude Code, Cursor stdio mode), install the npm package:
           </p>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli && memory.wiki login`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g mdfy-cli && Memory.Wiki login`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0, lineHeight: 1.7 }}>
-              The MCP server uses JWT authentication from <InlineCode>{"memory.wiki login"}</InlineCode>. No environment variables needed.
+              The MCP server uses JWT authentication from <InlineCode>{"Memory.Wiki login"}</InlineCode>. No environment variables needed.
             </p>
           </Card>
 
@@ -266,7 +266,7 @@ export default function McpDocsPage() {
           <Card>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -290,7 +290,7 @@ export default function McpDocsPage() {
             </p>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -307,7 +307,7 @@ export default function McpDocsPage() {
             <SubLabel>Cursor — Settings → MCP → Add new global MCP server</SubLabel>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "url": "https://memory.wiki/api/mcp"
     }
   }
@@ -318,7 +318,7 @@ export default function McpDocsPage() {
           <SectionHeading id="tools">All 25 Tools</SectionHeading>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
             The hosted MCP exposes 25 tools across 8 categories.
-            Auth happens via the user&apos;s memory.wiki session (no API keys).
+            Auth happens via the user&apos;s Memory.Wiki session (no API keys).
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: 8, marginBottom: 24 }}>
             {[
@@ -403,7 +403,7 @@ export default function McpDocsPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <Card>
               <SubLabel>Publish a document</SubLabel>
-              <CodeBlock>{`You: "Write a blog post about WebAssembly and publish it on memory.wiki"
+              <CodeBlock>{`You: "Write a blog post about WebAssembly and publish it on Memory.Wiki"
 
 Claude: I'll write the blog post and publish it for you.
 

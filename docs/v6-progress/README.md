@@ -23,7 +23,7 @@ commits, verified scenarios, and any deferred work.
 
 ## Conventions
 
-- All work happens on `v6` branch and stays on `staging.memory.wiki`. Production `memory.wiki` stays on v1 until W12 single-ship.
+- All work happens on `v6` branch and stays on `staging.memory.wiki`. Production `Memory.Wiki` stays on v1 until W12 single-ship.
 - Supabase is shared between staging and production, so schema migrations apply to both at write time.
 - Per-week files name the verified scenarios, not what's *intended* to work. If a path isn't verified, it's not in the file.
 - Tests live under `apps/web/scripts/`; run any with `pnpm --filter web test:<name>`.

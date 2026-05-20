@@ -16,7 +16,7 @@ config to follow.
 
 **Problem.** The bookmarklet runs on `chatgpt.com` / `claude.ai` /
 `gemini.google.com` and POSTs to `memory.wiki/api/docs`. localStorage on
-memory.wiki is unreachable from those origins, so anonymous captures had
+Memory.Wiki is unreachable from those origins, so anonymous captures had
 no way to be grouped together for later claiming.
 
 **Fix.** Server issues an `mdfy_anon` cookie:
@@ -31,7 +31,7 @@ cookie is intentionally not `HttpOnly` so the in-app sign-in flow can
 read it.
 
 CORS preflight handler added to `/api/docs` with a trusted-origin
-allowlist (the four AI hosts plus memory.wiki and local dev). Bookmarklet
+allowlist (the four AI hosts plus Memory.Wiki and local dev). Bookmarklet
 flips to `credentials: "include"` so the cookie round-trips.
 
 **Files.**

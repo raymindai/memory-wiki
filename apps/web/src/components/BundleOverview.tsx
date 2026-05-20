@@ -318,36 +318,36 @@ export default function BundleOverview({
 
           const projCtx = `# Project context
 
-memory.wiki bundle: ${bundleUrl}
+Memory.Wiki bundle: ${bundleUrl}
 
 Fetch this URL on every session. The response carries the bundle's
 markdown payload — title, annotations, links + concept analysis —
 ready to paste as project context.`;
           const cursorRule = `---
-description: memory.wiki bundle context
+description: Memory.Wiki bundle context
 alwaysApply: true
 ---
-memory.wiki bundle: ${bundleUrl}
+Memory.Wiki bundle: ${bundleUrl}
 
 Fetch this URL on every session for project-scoped context.`;
           const mcpConfig = `{
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["-y", "mdfy-mcp"]
     }
   }
 }`;
           const skillUse = `# Install once
-claude skill install memory.wiki
+claude skill install Memory.Wiki
 
 # Inside any Claude Code session
 /memory.wiki bundle ${bundleId}
 /memory.wiki search "topic"`;
           const cliUse = `npm install -g mdfy-cli
 
-memory.wiki bundle ${bundleId}
-memory.wiki search "topic"`;
+Memory.Wiki bundle ${bundleId}
+Memory.Wiki search "topic"`;
 
           type Tool = {
             id: string;
@@ -366,8 +366,8 @@ memory.wiki search "topic"`;
             { id: "cursor", label: "Cursor", hint: "Save as .cursor/rules/mdfy.mdc", savePath: ".cursor/rules/mdfy.mdc", snippet: cursorRule, explanation: "Cursor's Rules feature reads .mdc files from .cursor/rules/. alwaysApply: true keeps the bundle URL in context on every chat, including ad-hoc questions.", docHref: "/docs/integrate#cursor" },
             { id: "generic", label: "Generic", hint: "Paste the URL into any AI that can fetch a webpage", snippet: bundleUrl, explanation: "Any LLM with web-fetch (or a configured browser tool) works. Append ?full=1 for every doc inline, or use /b/<id>.md for the raw markdown payload.", docHref: "/docs/integrate" },
             { id: "mcp", label: "MCP", hint: "Add mdfy-mcp to your MCP host config", snippet: mcpConfig, explanation: "Compatible with Claude Desktop, Cursor, Cline, Windsurf, and any MCP-capable host. Exposes 26 tools across capture / bundle / search / share / version history.", docHref: "/docs/mcp" },
-            { id: "skill", label: "Skill", hint: "Use /memory.wiki slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install memory.wiki`. Then inside any Claude Code session, run /memory.wiki bundle <id> or /memory.wiki search to pull this bundle in.", docHref: "/docs/integrate" },
-            { id: "cli", label: "CLI", hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run memory.wiki bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
+            { id: "skill", label: "Skill", hint: "Use /memory.wiki slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install Memory.Wiki`. Then inside any Claude Code session, run /memory.wiki bundle <id> or /memory.wiki search to pull this bundle in.", docHref: "/docs/integrate" },
+            { id: "cli", label: "CLI", hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run Memory.Wiki bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
           ];
           const active = TOOLS.find((t) => t.id === activeTool) || TOOLS[0];
           const URL_TOOL_IDS = new Set(["claude", "chatgpt", "gemini", "generic"]);

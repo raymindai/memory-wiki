@@ -94,7 +94,7 @@ bundle owner controls whether their bundle appears here.
   - `GET /api/bundles/discover` returns 200 and the bundle is in
     the list with owner `hub_slug=yc-demo`.
   - `GET /shared` returns 200 and the HTML references `/b/<id>`.
-  - Page heading "Shared by people on memory.wiki" renders.
+  - Page heading "Shared by people on Memory.Wiki" renders.
 - After locking the bundle behind `allowed_emails`, the discover
   endpoint no longer surfaces it — both the safety filter in the
   API and the auto-flip rule in `set-allowed-emails` collaborate to

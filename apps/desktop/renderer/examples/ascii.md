@@ -6,7 +6,7 @@
 
 ```
 ┌──────────────────────────────────────────┐
-│              memory.wiki                      │
+│              Memory.Wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -24,7 +24,7 @@
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
 │  │ memory.wiki/{id} — shareable URL        │ │
-│  │ + "Published with memory.wiki" badge    │ │
+│  │ + "Published with Memory.Wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 ```
@@ -40,7 +40,7 @@
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  memory.wiki                     │
+│  Memory.Wiki                     │
 └─────────────────────────────┘
 ```
 
@@ -76,7 +76,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI memory.wiki structuring    │
+│ AI Memory.Wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 ```

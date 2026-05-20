@@ -2,7 +2,7 @@
 // Loaded by index.html before editor.js
 
 window.MDFY_EXAMPLES = {
-  welcome: `# Welcome to memory.wiki
+  welcome: `# Welcome to Memory.Wiki
 
 > **Your Markdown, Beautifully Published.**
 > Import anything. Render beautifully. Share instantly.
@@ -40,7 +40,7 @@ window.MDFY_EXAMPLES = {
 
 ## Try It Now
 
-- **Drop a PDF here** — see AI memory.wiki turn it into clean Markdown
+- **Drop a PDF here** — see AI Memory.Wiki turn it into clean Markdown
 - **Click +** in the sidebar to start a new doc from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during the beta, no credit card
 
@@ -240,7 +240,7 @@ erDiagram
 mindmap
   root((mdcore))
     Product
-      memory.wiki
+      Memory.Wiki
       Chrome Extension
     Engine
       Rust
@@ -257,7 +257,7 @@ mindmap
 timeline
     title mdcore Milestones
     2026 Q1 : Engine v0.1
-             : memory.wiki launch
+             : Memory.Wiki launch
     2026 Q2 : npm package
              : CLI tool
     2026 Q3 : API platform
@@ -327,7 +327,7 @@ xychart-beta
 
 \`\`\`
 ┌──────────────────────────────────────────┐
-│              memory.wiki                      │
+│              Memory.Wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -345,7 +345,7 @@ xychart-beta
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
 │  │ memory.wiki/{id} — shareable URL        │ │
-│  │ + "Published with memory.wiki" badge    │ │
+│  │ + "Published with Memory.Wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 \`\`\`
@@ -361,7 +361,7 @@ xychart-beta
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  memory.wiki                     │
+│  Memory.Wiki                     │
 └─────────────────────────────┘
 \`\`\`
 
@@ -397,7 +397,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI memory.wiki structuring    │
+│ AI Memory.Wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 \`\`\``,
@@ -406,7 +406,7 @@ Everything is unlocked while we're testing — no credit card required.
 
 ## Import — 13+ Formats
 
-Drop any file onto memory.wiki or click **IMPORT** in the sidebar.
+Drop any file onto Memory.Wiki or click **IMPORT** in the sidebar.
 
 | Format | How it works |
 |--------|-------------|
@@ -419,9 +419,9 @@ Drop any file onto memory.wiki or click **IMPORT** in the sidebar.
 | **RST** | reStructuredText headings, links → Markdown |
 | **RTF / JSON / XML / TXT** | Text extraction with format hints |
 
-### AI memory.wiki Structuring
+### AI Memory.Wiki Structuring
 
-After importing, you'll see **"memory.wiki this document?"** — click **memory.wiki it** to let AI:
+After importing, you'll see **"Memory.Wiki this document?"** — click **Memory.Wiki it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks
@@ -458,7 +458,7 @@ Click anywhere in the **Live** view to start editing. Format with the toolbar or
 
 ## Flavor Detection & Conversion
 
-memory.wiki auto-detects your Markdown flavor:
+Memory.Wiki auto-detects your Markdown flavor:
 
 - **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
 - **CommonMark** — Standard, maximum compatibility
@@ -527,9 +527,9 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 ## Cross-Platform
 
-Your documents sync across all memory.wiki channels:
+Your documents sync across all Memory.Wiki channels:
 
-- **Web** — memory.wiki
+- **Web** — Memory.Wiki
 - **VS Code** — Extension with WYSIWYG preview
 - **Mac Desktop** — Native app with sidebar
 - **CLI** — \`npm install -g mdfy-cli\`

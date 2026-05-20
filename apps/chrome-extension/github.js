@@ -1,8 +1,8 @@
 /**
- * memory.wiki Chrome Extension — GitHub Integration
+ * Memory.Wiki Chrome Extension — GitHub Integration
  *
- * Detects .md files on GitHub and adds an "Open in memory.wiki" button.
- * Fetches raw markdown and opens it in memory.wiki for beautiful rendering + editing.
+ * Detects .md files on GitHub and adds an "Open in Memory.Wiki" button.
+ * Fetches raw markdown and opens it in Memory.Wiki for beautiful rendering + editing.
  */
 
 (function () {
@@ -34,15 +34,15 @@
   }
 
   function createButton() {
-    // Prevent duplicates — remove ALL existing memory.wiki buttons first
+    // Prevent duplicates — remove ALL existing Memory.Wiki buttons first
     document.querySelectorAll("#mdfy-github-btn, .mdfy-github-btn").forEach(el => el.remove());
     if (!isMarkdownPage()) return;
 
     const btn = document.createElement("button");
     btn.id = "mdfy-github-btn";
     btn.className = "mdfy-github-btn";
-    btn.innerHTML = '<span class="mdfy-gh-label">Open in memory.wiki</span>';
-    btn.title = "Open this Markdown file in memory.wiki for beautiful rendering and editing";
+    btn.innerHTML = '<span class="mdfy-gh-label">Open in Memory.Wiki</span>';
+    btn.title = "Open this Markdown file in Memory.Wiki for beautiful rendering and editing";
 
     btn.addEventListener("click", async (e) => {
       e.preventDefault();
@@ -63,7 +63,7 @@
           return;
         }
 
-        // Try authenticated upload if user is logged in to memory.wiki
+        // Try authenticated upload if user is logged in to Memory.Wiki
         try {
           const userId = await new Promise((resolve) => {
             chrome.runtime.sendMessage({ action: "get-user-id" }, (r) => resolve(r?.userId));
@@ -123,7 +123,7 @@
         btn.querySelector(".mdfy-gh-label").textContent = "Opened!";
         setTimeout(() => resetButton(btn), 3000);
       } catch (err) {
-        console.error("[memory.wiki] GitHub integration error:", err);
+        console.error("[Memory.Wiki] GitHub integration error:", err);
         btn.classList.remove("mdfy-gh-loading");
         btn.classList.add("mdfy-gh-error");
         btn.querySelector(".mdfy-gh-label").textContent = "Failed";
@@ -214,7 +214,7 @@
 
   function resetButton(btn) {
     btn.classList.remove("mdfy-gh-loading", "mdfy-gh-done", "mdfy-gh-error");
-    btn.innerHTML = '<span class="mdfy-gh-label">Open in memory.wiki</span>';
+    btn.innerHTML = '<span class="mdfy-gh-label">Open in Memory.Wiki</span>';
   }
 
   // Compression (same as content.js)

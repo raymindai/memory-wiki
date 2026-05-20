@@ -8,14 +8,14 @@ import MdfyLogo from "@/components/MdfyLogo";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Public hubs — memory.wiki",
-  description: "Personal knowledge hubs published with memory.wiki. Each one is a single URL deployable to any AI.",
+  title: "Public hubs — Memory.Wiki",
+  description: "Personal knowledge hubs published with Memory.Wiki. Each one is a single URL deployable to any AI.",
   alternates: { canonical: "https://memory.wiki/hubs" },
   openGraph: {
-    title: "Public hubs — memory.wiki",
-    description: "Personal knowledge hubs published with memory.wiki. One URL, deployable anywhere.",
+    title: "Public hubs — Memory.Wiki",
+    description: "Personal knowledge hubs published with Memory.Wiki. One URL, deployable anywhere.",
     url: "https://memory.wiki/hubs",
-    siteName: "memory.wiki",
+    siteName: "Memory.Wiki",
     type: "website",
   },
 };
@@ -161,7 +161,7 @@ async function getActivityFeed(hubs: HubRow[]): Promise<ActivityRow[]> {
 // hub (raymindai) and the demo fixture (yc-demo). Both stay
 // hub_public=true so their docs are still fetchable as raw markdown by
 // AI agents — they just don't appear in the gallery / Recently Active /
-// Most Cited as if they were community examples. memory.wiki's official
+// Most Cited as if they were community examples. Memory.Wiki's official
 // content surfaces (dashboard EXPLORE, /shared bundles) point at this
 // content directly via specific URLs, not via the gallery.
 const RESERVED_HUB_SLUGS = new Set(["yc-demo", "raymindai"]);
@@ -259,7 +259,7 @@ export default async function HubsPage() {
             Public hubs
           </h1>
           <p className="text-body mt-3 leading-relaxed max-w-2xl" style={{ color: "var(--text-secondary)" }}>
-            Personal knowledge hubs published with memory.wiki. Each one is a single URL — paste it into Claude, ChatGPT, or Cursor, and the AI deploys the entire hub as context.
+            Personal knowledge hubs published with Memory.Wiki. Each one is a single URL — paste it into Claude, ChatGPT, or Cursor, and the AI deploys the entire hub as context.
           </p>
         </div>
 
@@ -311,7 +311,7 @@ export default async function HubsPage() {
             <header className="flex items-baseline justify-between mb-3">
               <h2 className="text-heading" style={{ color: "var(--accent)" }}>Most cited</h2>
               <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-                docs and bundles linked to from elsewhere on memory.wiki
+                docs and bundles linked to from elsewhere on Memory.Wiki
               </span>
             </header>
             <ul className="space-y-1">
@@ -415,7 +415,7 @@ export default async function HubsPage() {
           <span>
             Want yours listed? <Link href="/settings" style={{ color: "var(--accent)" }}>Enable from Settings →</Link>
           </span>
-          <span>memory.wiki</span>
+          <span>Memory.Wiki</span>
         </footer>
       </main>
     </div>

@@ -1,7 +1,7 @@
 {
   "name": "mdfy-mcp",
   "version": "1.5.0",
-  "description": "MCP server for memory.wiki — 28 tools for AI agents to create, edit, organize, share, and version Markdown documents",
+  "description": "MCP server for Memory.Wiki — 28 tools for AI agents to create, edit, organize, share, and version Markdown documents",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -32,6 +32,6 @@
   "bugs": {
     "url": "https://github.com/raymindai/mdcore/issues"
   },
-  "keywords": ["memory.wiki", "mcp", "markdown", "ai", "publish", "model-context-protocol"],
+  "keywords": ["Memory.Wiki", "mcp", "markdown", "ai", "publish", "model-context-protocol"],
   "license": "MIT"
 }

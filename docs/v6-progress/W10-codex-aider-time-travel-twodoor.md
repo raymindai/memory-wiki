@@ -10,15 +10,15 @@
 documents the same three actions as W8/W9 — capture, bundle, hub —
 in a tool-agnostic shape. Wrapped in `<!-- memory.wiki:start -->` /
 `<!-- memory.wiki:end -->` markers so installers can replace just the
-memory.wiki block when rerun.
+Memory.Wiki block when rerun.
 
 `install.sh` gained two new `--target` branches:
 
 - `--target=codex` appends the agent prompt to
-  `~/.codex/AGENTS.md`. If a previous memory.wiki block is already there,
+  `~/.codex/AGENTS.md`. If a previous Memory.Wiki block is already there,
   a Python regex replaces just that block in place — the rest of
   the user's AGENTS.md is preserved. If AGENTS.md exists with no
-  memory.wiki block, the prompt is appended; if it doesn't exist, the
+  Memory.Wiki block, the prompt is appended; if it doesn't exist, the
   prompt is the new file.
 - `--target=aider` drops the agent prompt at
   `~/.aider/conventions.md`. The post-install hint tells the user
@@ -32,11 +32,11 @@ Cursor, Codex CLI, Aider) — each with its own one-liner.
 ### Verified
 
 - `/skills/memory.wiki/agent-prompt.md` served. 1981 bytes, HTTP 200.
-- `--target=codex` first run: appends memory.wiki block, AGENTS.md = 51
+- `--target=codex` first run: appends Memory.Wiki block, AGENTS.md = 51
   lines.
 - `--target=codex` rerun against an AGENTS.md that already has user
-  content + memory.wiki block: user's first 5 lines preserved verbatim,
-  memory.wiki block replaced in place, exactly one `memory.wiki:start` and one
+  content + Memory.Wiki block: user's first 5 lines preserved verbatim,
+  Memory.Wiki block replaced in place, exactly one `memory.wiki:start` and one
   `memory.wiki:end` marker remain.
 - `--target=aider` writes `~/.aider/conventions.md` (51 lines).
 - Unknown target rejected with "Supported targets: claude, cursor,
@@ -123,7 +123,7 @@ v6 launch landing. The structure:
   `/memory.wiki capture`, `/memory.wiki bundle`, `/memory.wiki hub` so each door knows
   the underlying surface is the same.
 - **Why this matters**: one-paragraph framing — vendor memory
-  layers are racing to own context inside walls; memory.wiki is the bet
+  layers are racing to own context inside walls; Memory.Wiki is the bet
   that the public URL is the universal context format.
 
 It lives at `/v6-landing` because the live `/` is still the

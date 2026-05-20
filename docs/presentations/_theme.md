@@ -5,7 +5,7 @@ paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
 style: |
-  /* memory.wiki brand — warm zinc + orange, no purple. */
+  /* Memory.Wiki brand — warm zinc + orange, no purple. */
   section {
     font-family: 'Inter', 'Pretendard', system-ui, -apple-system, sans-serif;
     padding: 64px 72px;
@@ -135,7 +135,7 @@ style: |
 ---
 
 <!--
-Shared theme for all four memory.wiki decks. Each deck imports this header
+Shared theme for all four Memory.Wiki decks. Each deck imports this header
 by copying these front-matter directives at the top of its file.
 Marp doesn't have a real include, so the style block is duplicated.
 Update once here, then propagate to the four decks.

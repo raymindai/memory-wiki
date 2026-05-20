@@ -210,7 +210,7 @@ export default function ManifestoContent({ locale }: ManifestoContentProps) {
           </p>
         ))}
 
-        {/* Why memory.wiki (Korean only) */}
+        {/* Why Memory.Wiki (Korean only) */}
         {t.whyMdfyHeading && t.whyMdfy && (
           <>
             <h2 style={h2Style}>{t.whyMdfyHeading}</h2>
@@ -392,7 +392,7 @@ export default function ManifestoContent({ locale }: ManifestoContentProps) {
               textDecoration: "none",
             }}
           >
-            How memory.wiki works (deep dive) &rarr;
+            How Memory.Wiki works (deep dive) &rarr;
           </Link>
         </div>
 

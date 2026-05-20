@@ -37,10 +37,10 @@ docs, and email-restricted bundles never appear.
 
 ### What ships
 
-`lib/cross-refs.ts` extracts internal memory.wiki URL references from a
+`lib/cross-refs.ts` extracts internal Memory.Wiki URL references from a
 markdown corpus and rolls them up by target. A reference is any
 `/{docId}`, `/d/{docId}`, `/b/{bundleId}`, or `/hub/{slug}` URL,
-with or without the `https://(staging.)?memory.wiki` host prefix.
+with or without the `https://(staging.)?Memory.Wiki` host prefix.
 Self-citations are dropped. Targets that aren't themselves in the
 public corpus are dropped (no way to game the count by linking to
 random ids).

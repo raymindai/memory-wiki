@@ -285,7 +285,7 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
 // ─── Message Bubble with citation rendering ───
 
 function MessageBubble({ message, onCitationClick, onApplyFilter, isStreaming }: { message: Message; onCitationClick?: (docId: string) => void; onApplyFilter?: (docIds: string[]) => void; isStreaming?: boolean; accent: string; accentDim: string }) {
-  // Chat bubbles use the global memory.wiki orange uniformly — per-mode colour
+  // Chat bubbles use the global Memory.Wiki orange uniformly — per-mode colour
   // already lives in the panel header so you know which assistant is
   // active; the bubble itself doesn't need to repeat that signal.
   const chatAccent = "var(--accent)";

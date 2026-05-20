@@ -1,16 +1,16 @@
 ---
-name: memory.wiki
-description: Capture, retrieve, edit, bundle, and deploy AI conversations and notes through the user's personal memory.wiki hub. Use when the user wants to save this conversation as a URL, search what they already saved, pull a prior doc as context, build a curated bundle, or paste their hub as context into another AI tool.
+name: Memory.Wiki
+description: Capture, retrieve, edit, bundle, and deploy AI conversations and notes through the user's personal Memory.Wiki hub. Use when the user wants to save this conversation as a URL, search what they already saved, pull a prior doc as context, build a curated bundle, or paste their hub as context into another AI tool.
 ---
 
-# memory.wiki
+# Memory.Wiki
 
 You are operating inside a coding-AI tool (Claude Code, Cursor, Codex,
-etc.). The user has installed the memory.wiki skill so they can keep this
-conversation's output in their personal knowledge hub on memory.wiki and
+etc.). The user has installed the Memory.Wiki skill so they can keep this
+conversation's output in their personal knowledge hub on Memory.Wiki and
 pull prior work back into the current session.
 
-The thesis: every URL on memory.wiki is markdown that any AI can fetch.
+The thesis: every URL on Memory.Wiki is markdown that any AI can fetch.
 The user's hub is a single URL that aggregates everything they've
 captured, auto-organised by concept. So `/memory.wiki capture` and `/memory.wiki pull`
 together let the user move context across AI tools without copy-paste.
@@ -19,14 +19,14 @@ together let the user move context across AI tools without copy-paste.
 
 Invoke when the user says any of:
 
-- "save this," "capture this," "send this to memory.wiki" — call `memory.wiki capture`
-- "update / edit / replace doc <id>" — call `memory.wiki update`
-- "search my hub for X" / "what do I have on X" — call `memory.wiki search`
-- "what are my recent docs" / "list my docs" — call `memory.wiki list`
-- "pull doc <id>" / "load <id>" / "use memory.wiki/<id> as context" — call `memory.wiki pull`
-- "find related" / "what's in my hub about this topic" — call `memory.wiki related`
-- "bundle these docs" / "make a bundle on X" — call `memory.wiki bundle`
-- "what's my hub URL" / "give me my hub" — call `memory.wiki hub`
+- "save this," "capture this," "send this to Memory.Wiki" — call `Memory.Wiki capture`
+- "update / edit / replace doc <id>" — call `Memory.Wiki update`
+- "search my hub for X" / "what do I have on X" — call `Memory.Wiki search`
+- "what are my recent docs" / "list my docs" — call `Memory.Wiki list`
+- "pull doc <id>" / "load <id>" / "use memory.wiki/<id> as context" — call `Memory.Wiki pull`
+- "find related" / "what's in my hub about this topic" — call `Memory.Wiki related`
+- "bundle these docs" / "make a bundle on X" — call `Memory.Wiki bundle`
+- "what's my hub URL" / "give me my hub" — call `Memory.Wiki hub`
 
 If none apply, do not call anything.
 
@@ -34,8 +34,8 @@ If none apply, do not call anything.
 
 The user signs in via the web app at `https://memory.wiki`. The skill
 reads their access token from `~/.memory.wiki/config.json` (written by the
-`memory.wiki login` CLI). If the file is missing or empty, instruct the user
-to install the CLI from `https://memory.wiki/install` and run `memory.wiki login`.
+`Memory.Wiki login` CLI). If the file is missing or empty, instruct the user
+to install the CLI from `https://memory.wiki/install` and run `Memory.Wiki login`.
 
 Capture works anonymously too (without a token) — the doc is created
 under a session cookie and the user can claim it later by signing in.
@@ -43,10 +43,10 @@ Retrieve-side actions (search, list, recent, related) require login.
 
 ## Actions
 
-### `memory.wiki capture <title>`
+### `Memory.Wiki capture <title>`
 
 Save the most recent assistant message (or a user-selected range) to
-memory.wiki as a new public document.
+Memory.Wiki as a new public document.
 
 1. Resolve the conversation segment. Default: the last assistant
    message. If the user specified a range, use that range.
@@ -59,7 +59,7 @@ memory.wiki as a new public document.
 3. Return the new URL `https://memory.wiki/<id>` to the user. Tell them
    they can paste it into any other AI as context.
 
-### `memory.wiki update <id> [section]`
+### `Memory.Wiki update <id> [section]`
 
 Edit an existing doc. Two modes:
 
@@ -75,7 +75,7 @@ Edit an existing doc. Two modes:
 
 Always echo the URL after the update so the user can verify.
 
-### `memory.wiki search <query>`
+### `Memory.Wiki search <query>`
 
 Full-text search across the user's hub.
 
@@ -85,9 +85,9 @@ Full-text search across the user's hub.
    - **<title>** (memory.wiki/<id>) — <snippet>
    ```
 3. Ask whether the user wants to pull any of them into the current
-   session as context (call `memory.wiki pull <id>` if yes).
+   session as context (call `Memory.Wiki pull <id>` if yes).
 
-### `memory.wiki list`
+### `Memory.Wiki list`
 
 Show the user's recent docs.
 
@@ -96,7 +96,7 @@ Show the user's recent docs.
    Include the doc id so the user can reference them with other
    actions.
 
-### `memory.wiki pull <id>`
+### `Memory.Wiki pull <id>`
 
 Fetch a saved doc and use its content as context for the rest of the
 current conversation.
@@ -109,7 +109,7 @@ current conversation.
    system note: `Loaded memory.wiki/<id> ("<title>") as context.` Then
    answer the user's next question using the loaded content.
 
-### `memory.wiki related`
+### `Memory.Wiki related`
 
 Find docs in the user's hub that are conceptually related to the
 current conversation topic.
@@ -120,7 +120,7 @@ current conversation topic.
 3. Return matches the user might want to pull. Frame it as
    "Related docs in your hub: ..." and offer to pull any of them.
 
-### `memory.wiki bundle <topic>`
+### `Memory.Wiki bundle <topic>`
 
 Generate a bundle that groups docs the user already saved on a topic
 into one URL with cross-doc analysis.
@@ -133,7 +133,7 @@ into one URL with cross-doc analysis.
 4. Return `https://memory.wiki/b/<id>` — that single URL now carries the
    doc set + computed themes/insights when fetched.
 
-### `memory.wiki hub`
+### `Memory.Wiki hub`
 
 Return the user's hub URL. They paste it into another AI for full
 personal context.
@@ -149,7 +149,7 @@ personal context.
 The typical pattern this skill enables:
 
 1. User chats with Claude/ChatGPT/Gemini → output worth keeping.
-2. `memory.wiki capture <title>` → saved as `memory.wiki/<id>`.
+2. `Memory.Wiki capture <title>` → saved as `memory.wiki/<id>`.
 3. User opens a different AI tool (Cursor, Codex, etc.) on the same
    project, drops `memory.wiki/<id>` or `memory.wiki/hub/<slug>` into its
    context file or pastes into the chat → that tool sees the prior
@@ -164,12 +164,12 @@ fetchable by any AI.
 ## Tips for the model
 
 - Always paste the resulting URL exactly. Don't reformat or shorten it.
-- For `memory.wiki capture`, choose a title that captures the question or
+- For `Memory.Wiki capture`, choose a title that captures the question or
   the conclusion, not "Conversation about X."
-- For `memory.wiki update`, prefer section-level replace over full-body
+- For `Memory.Wiki update`, prefer section-level replace over full-body
   replace whenever the user's request fits one heading — it's safer
   and preserves the rest of the doc verbatim.
-- `memory.wiki pull` returns markdown. Quote it back to the user when
+- `Memory.Wiki pull` returns markdown. Quote it back to the user when
   answering questions about it, citing the URL.
 
 ## Reference

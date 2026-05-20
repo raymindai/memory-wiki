@@ -8,7 +8,7 @@ Click anywhere in the **Live** view to start editing. Format with the toolbar or
 
 ## Flavor Detection & Conversion
 
-memory.wiki auto-detects your Markdown flavor:
+Memory.Wiki auto-detects your Markdown flavor:
 
 - **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
 - **CommonMark** — Standard, maximum compatibility
@@ -77,9 +77,9 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 ## Cross-Platform
 
-Your documents sync across all memory.wiki channels:
+Your documents sync across all Memory.Wiki channels:
 
-- **Web** — memory.wiki
+- **Web** — Memory.Wiki
 - **VS Code** — Extension with WYSIWYG preview
 - **Mac Desktop** — Native app with sidebar
 - **CLI** — `npm install -g mdfy-cli`

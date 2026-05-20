@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
-  <title>memory.wiki</title>
+  <title>Memory.Wiki</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -294,8 +294,8 @@
     <div class="panel">
       <div>
         <div class="hero-logo">
-          <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark">
-          <img src="logo-light.svg" alt="memory.wiki" class="logo-light">
+          <img src="logo-dark.svg" alt="Memory.Wiki" class="logo-dark">
+          <img src="logo-light.svg" alt="Memory.Wiki" class="logo-light">
         </div>
         <p class="hero-tagline">Your Markdown, Beautifully Published.</p>
 
@@ -389,7 +389,7 @@
       <span><kbd>&#8984;O</kbd> Open</span>
       <span><kbd>&#8984;&#8679;H</kbd> Home</span>
       <span style="margin-left:auto;opacity:0.5">
-        <a href="https://memory.wiki" style="color:inherit;text-decoration:none" target="_blank">memory.wiki</a>
+        <a href="https://memory.wiki" style="color:inherit;text-decoration:none" target="_blank">Memory.Wiki</a>
       </span>
     </div>
     <span id="version-text">v1.0.0</span>
@@ -414,13 +414,13 @@
     var EXAMPLES = {
 "ai-cleanup": "# How to Build a REST API\n\n> **User:** How do I build a REST API in Node.js?\n\n## Overview\n\nBuilding a REST API in Node.js typically involves:\n\n1. **Express.js** as the web framework\n2. A database (PostgreSQL, MongoDB, etc.)\n3. Proper error handling and validation\n\n## Quick Setup\n\n```bash\nmkdir my-api && cd my-api\nnpm init -y\nnpm install express cors dotenv\n```\n\n## Basic Server\n\n```javascript\nconst express = require('express');\nconst app = express();\n\napp.use(express.json());\n\napp.get('/api/users', (req, res) => {\n  res.json({ users: [] });\n});\n\napp.listen(3000, () => {\n  console.log('Server running on port 3000');\n});\n```\n\n> **Key takeaway:** Start simple, add complexity as needed.",
 
-"code-docs": "# memory.wiki render pipeline\n\nThe markdown-it pipeline shared across the editor's Live tab and every public viewer.\n\n## Usage\n\n```typescript\nimport { render } from '@/lib/render';\n\nconst { html, title, flavor } = render('# Hello World');\nconsole.log(html);\n```\n\n## What it does\n\n| Step | What |\n|------|------|\n| Parse | `markdown-it` + `markdown-it-footnote`, thead/tbody nooped to match TipTap's table model |\n| Highlight | `highlight.js` on fenced code blocks |\n| Math | KaTeX widgets for `$..$` (inline) and `$$..$$` (display) |\n| Mermaid | left as `<pre lang=\"mermaid\">`, consumer renders via `mermaid.js` |\n| Tables | wrapped in `.table-wrapper` for horizontal scroll |\n| Images | alt-text alignment markers, `<figure>` wrap for captions |\n\n## Why one pipeline\n\nThe editor's Live tab is TipTap, which drives its own markdown-it under the hood. Every non-editing viewer (`/d`, `/b`, `/hub`, `/embed`, VS Code preview, desktop preview) calls the same `render()` function. Same DOM. No \"looks different here\" bugs.",
+"code-docs": "# Memory.Wiki render pipeline\n\nThe markdown-it pipeline shared across the editor's Live tab and every public viewer.\n\n## Usage\n\n```typescript\nimport { render } from '@/lib/render';\n\nconst { html, title, flavor } = render('# Hello World');\nconsole.log(html);\n```\n\n## What it does\n\n| Step | What |\n|------|------|\n| Parse | `markdown-it` + `markdown-it-footnote`, thead/tbody nooped to match TipTap's table model |\n| Highlight | `highlight.js` on fenced code blocks |\n| Math | KaTeX widgets for `$..$` (inline) and `$$..$$` (display) |\n| Mermaid | left as `<pre lang=\"mermaid\">`, consumer renders via `mermaid.js` |\n| Tables | wrapped in `.table-wrapper` for horizontal scroll |\n| Images | alt-text alignment markers, `<figure>` wrap for captions |\n\n## Why one pipeline\n\nThe editor's Live tab is TipTap, which drives its own markdown-it under the hood. Every non-editing viewer (`/d`, `/b`, `/hub`, `/embed`, VS Code preview, desktop preview) calls the same `render()` function. Same DOM. No \"looks different here\" bugs.",
 
 "math": "# Calculus Notes\n\n## The Fundamental Theorem\n\nIf $f$ is continuous on $[a, b]$ and $F$ is an antiderivative of $f$:\n\n$$\\int_a^b f(x)\\,dx = F(b) - F(a)$$\n\n## Integration by Parts\n\n$$\\int u\\,dv = uv - \\int v\\,du$$\n\n**Example:** $\\int x e^x\\,dx = e^x(x - 1) + C$\n\n## Taylor Series\n\n$$f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!}(x-a)^n$$\n\n- $e^x = \\sum \\frac{x^n}{n!}$\n- $\\sin x = \\sum \\frac{(-1)^n x^{2n+1}}{(2n+1)!}$",
 
 "diagram": "# System Architecture\n\n```mermaid\ngraph LR\n  Client[Browser] --> CDN[Vercel CDN]\n  CDN --> Next[Next.js]\n  Next --> Render[markdown-it]\n  Next --> API[REST API]\n  API --> DB[(PostgreSQL)]\n```\n\n```mermaid\nflowchart TD\n  A[Markdown] --> B[markdown-it]\n  B --> C[Raw HTML]\n  C --> D{Post-Process}\n  D --> E[highlight.js]\n  D --> F[KaTeX]\n  D --> G[Mermaid]\n  E & F & G --> H[Output]\n```\n\n| Layer | Tech | Purpose |\n|-------|------|----------|\n| Render | markdown-it | Parsing + HTML |\n| Editor | TipTap (ProseMirror) | WYSIWYG live editing |\n| App | Next.js 15 | Web |\n| DB | Supabase | Storage |",
 
-"import-guide": "# Import & Export Guide\n\n## Import\n\nDrop any file onto memory.wiki or click **Import File** on the dashboard.\n\n### Supported Formats\n\n| Format | Extension | How |\n|--------|----------|------|\n| Markdown | .md, .markdown, .txt | Direct open |\n| PDF | .pdf | Extracted text |\n| Word | .docx | Converted to MD |\n| PowerPoint | .pptx | Slide text extraction |\n| Excel | .xlsx | Converted to MD tables |\n| HTML | .html | Turndown conversion |\n| CSV | .csv | Auto table formatting |\n| JSON | .json | Pretty-printed code block |\n\n## Export\n\n- **Share URL** — One-click publish to memory.wiki\n- **PDF** — Print-optimized export\n- **Copy** — Rich text for Docs/Email, mrkdwn for Slack\n- **Download** — Save as .md file",
+"import-guide": "# Import & Export Guide\n\n## Import\n\nDrop any file onto Memory.Wiki or click **Import File** on the dashboard.\n\n### Supported Formats\n\n| Format | Extension | How |\n|--------|----------|------|\n| Markdown | .md, .markdown, .txt | Direct open |\n| PDF | .pdf | Extracted text |\n| Word | .docx | Converted to MD |\n| PowerPoint | .pptx | Slide text extraction |\n| Excel | .xlsx | Converted to MD tables |\n| HTML | .html | Turndown conversion |\n| CSV | .csv | Auto table formatting |\n| JSON | .json | Pretty-printed code block |\n\n## Export\n\n- **Share URL** — One-click publish to Memory.Wiki\n- **PDF** — Print-optimized export\n- **Copy** — Rich text for Docs/Email, mrkdwn for Slack\n- **Download** — Save as .md file",
 
 "table": "# Q1 2026 Metrics\n\n| Month | Users | Growth | Revenue |\n|-------|------:|-------:|--------:|\n| Jan | 12,450 | - | $2,490 |\n| Feb | 18,200 | +46% | $4,550 |\n| Mar | 31,800 | +75% | $9,540 |\n\n## Feature Usage\n\n| Feature | Daily | % Total |\n|---------|------:|--------:|\n| Render | 28,400 | 89% |\n| Code | 19,200 | 60% |\n| Math | 8,100 | 26% |\n| Diagrams | 6,300 | 20% |\n| PDF Export | 11,500 | 36% |\n| Share URL | 15,600 | 49% |\n\n- [x] Growth exceeding projections\n- [x] Share driving viral adoption\n- [ ] Pro conversion needs work\n- [ ] Mobile optimization needed"
     };

@@ -1,10 +1,10 @@
 "use client";
 
-// /auth/desktop — auth flow for the memory.wiki Electron desktop app.
+// /auth/desktop — auth flow for the Memory.Wiki Electron desktop app.
 //
 // Lifecycle: main.js's "login" IPC handler opens this URL in the system
 // browser with redirect=memory.wiki://auth. If the visitor already has an
-// memory.wiki Supabase session, we immediately bounce to the memory.wiki:// URI
+// Memory.Wiki Supabase session, we immediately bounce to the memory.wiki:// URI
 // scheme with token + refresh_token attached as query params — the
 // Electron AuthManager.handleProtocolUrl() picks them up and signs the
 // app in.
@@ -83,7 +83,7 @@ export default function DesktopAuthPage() {
           <div style={{ width: 128, height: 2, borderRadius: 2, overflow: "hidden", background: "var(--border-dim)" }}>
             <div style={{ height: "100%", borderRadius: 2, background: "var(--accent)", animation: "loadbar 1.2s ease-in-out infinite" }} />
           </div>
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Connecting to memory.wiki for Mac...</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Connecting to Memory.Wiki for Mac...</p>
         </>
       )}
 
@@ -93,18 +93,18 @@ export default function DesktopAuthPage() {
             <circle cx="12" cy="12" r="10" />
             <path d="M8 12l3 3 5-5" />
           </svg>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Connected to memory.wiki for Mac</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Connected to Memory.Wiki for Mac</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
-            Your memory.wiki account is now linked. You can close this tab and return to the app.
+            Your Memory.Wiki account is now linked. You can close this tab and return to the app.
           </p>
         </>
       )}
 
       {status === "choose-provider" && (
         <>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect memory.wiki for Mac</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect Memory.Wiki for Mac</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
-            Use the same account you use on memory.wiki
+            Use the same account you use on Memory.Wiki
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
@@ -134,7 +134,7 @@ export default function DesktopAuthPage() {
           <p style={{ fontSize: 16, fontWeight: 600, color: "var(--error, #ef4444)" }}>Connection Failed</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Please try again.</p>
           <Link href="/" style={{ padding: "10px 24px", borderRadius: 8, background: "var(--accent-dim)", color: "var(--accent)", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
-            Go to memory.wiki
+            Go to Memory.Wiki
           </Link>
         </>
       )}

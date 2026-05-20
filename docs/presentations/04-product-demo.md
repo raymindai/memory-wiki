@@ -4,7 +4,7 @@ theme: default
 paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
-title: 'memory.wiki — 사용자 / 제품 데모 덱'
+title: 'Memory.Wiki — 사용자 / 제품 데모 덱'
 style: |
   section { font-family: 'Pretendard', 'Inter', system-ui, sans-serif; padding: 64px 72px; letter-spacing: -0.01em; }
   section.lead { justify-content: center; text-align: left; }
@@ -31,12 +31,12 @@ style: |
 
 <!-- _class: lead -->
 
-# **memory.wiki**
+# **Memory.Wiki**
 ## 모든 AI에 배포 가능한 당신의 기억층.
 
 <br>
 
-<span class="muted">ChatGPT, Claude, Cursor, Codex — 다 잊는다. memory.wiki는 안 잊는다.</span>
+<span class="muted">ChatGPT, Claude, Cursor, Codex — 다 잊는다. Memory.Wiki는 안 잊는다.</span>
 
 ---
 
@@ -102,7 +102,7 @@ memory.wiki/d/&lt;id&gt;
 
 <div>
 
-<h3>memory.wiki 가 하는 것</h3>
+<h3>Memory.Wiki 가 하는 것</h3>
 
 - 핵심 개념 자동 추출
 - 문서 간 의미 연결 발견
@@ -191,9 +191,9 @@ memory.wiki/b/<id>?full=1
 
 <h3>지금 바로 (가입 없이)</h3>
 
-1. **memory.wiki** 접속
+1. **Memory.Wiki** 접속
 2. AI 대화 URL 붙여넣거나 글 작성
-3. 나오는 memory.wiki URL을 Claude / Cursor / ChatGPT 에 보내기
+3. 나오는 Memory.Wiki URL을 Claude / Cursor / ChatGPT 에 보내기
 4. 끝.
 
 </div>
@@ -214,5 +214,5 @@ memory.wiki/b/<id>?full=1
 
 <br>
 
-<span class="accent" style="font-size:28px;font-weight:700;">memory.wiki</span>
+<span class="accent" style="font-size:28px;font-weight:700;">Memory.Wiki</span>
 <span class="faint" style="font-size:16px;font-family:monospace;margin-left:16px;">hi@raymind.ai</span>

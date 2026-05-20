@@ -23,7 +23,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
             var markdown: String
             if fileSize > maxSize {
                 let truncatedData = try Data(contentsOf: url).prefix(Int(maxSize))
-                markdown = (String(data: truncatedData, encoding: .utf8) ?? "") + "\n\n---\n\n> **Note:** This file was truncated for preview (original size: \(fileSize / 1_000_000)MB). Open in memory.wiki for the full document."
+                markdown = (String(data: truncatedData, encoding: .utf8) ?? "") + "\n\n---\n\n> **Note:** This file was truncated for preview (original size: \(fileSize / 1_000_000)MB). Open in Memory.Wiki for the full document."
             } else {
                 markdown = try String(contentsOf: url, encoding: .utf8)
             }
@@ -304,7 +304,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{FILE_NAME}} - memory.wiki Preview</title>
+    <title>{{FILE_NAME}} - Memory.Wiki Preview</title>
     <style>
     /* System font stack */
     :root {
@@ -549,7 +549,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
             <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M9 1h6m0 0v6m0-6L8 8"
                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Open on memory.wiki
+          Open on Memory.Wiki
         </a>
         <button class="mdfy-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
           <svg id="theme-icon-sun" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none">
@@ -952,7 +952,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       }
     })();
 
-    // Try opening in the memory.wiki desktop app via custom URL scheme.
+    // Try opening in the Memory.Wiki desktop app via custom URL scheme.
     // Falls back to https://memory.wiki if the desktop app is not installed.
     function openInMdfy(event) {
       event.preventDefault();

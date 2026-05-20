@@ -35,7 +35,7 @@ export default function CliAuthPage() {
       }
 
       // We surface the raw access_token on this page so CLI users +
-      // MCP users can paste it into `memory.wiki login`. The legacy Electron
+      // MCP users can paste it into `Memory.Wiki login`. The legacy Electron
       // desktop app's `memory.wiki://` URL scheme handler used to grab the
       // token automatically via a forced redirect — but a) most users
       // don't run that app, b) the redirect would launch the
@@ -76,7 +76,7 @@ export default function CliAuthPage() {
           <div style={{ width: 128, height: 2, borderRadius: 2, overflow: "hidden", background: "var(--border-dim)" }}>
             <div style={{ height: "100%", borderRadius: 2, background: "var(--accent)", animation: "loadbar 1.2s ease-in-out infinite" }} />
           </div>
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Connecting to memory.wiki for Mac...</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Connecting to Memory.Wiki for Mac...</p>
         </>
       )}
 
@@ -88,7 +88,7 @@ export default function CliAuthPage() {
           </svg>
           <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>You&apos;re signed in</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 440, lineHeight: 1.55 }}>
-            Copy the token below and paste it into your terminal where <code style={{ background: "var(--surface)", padding: "1px 6px", borderRadius: 3 }}>memory.wiki login</code> is waiting. This same token authenticates the <code style={{ background: "var(--surface)", padding: "1px 6px", borderRadius: 3 }}>memory.wiki</code> CLI and any MCP server (Claude Code, Cursor, Claude Desktop) you wire up.
+            Copy the token below and paste it into your terminal where <code style={{ background: "var(--surface)", padding: "1px 6px", borderRadius: 3 }}>Memory.Wiki login</code> is waiting. This same token authenticates the <code style={{ background: "var(--surface)", padding: "1px 6px", borderRadius: 3 }}>Memory.Wiki</code> CLI and any MCP server (Claude Code, Cursor, Claude Desktop) you wire up.
           </p>
           <div style={{ width: "min(560px, 90vw)", display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
             <div style={{ position: "relative" }}>
@@ -130,7 +130,7 @@ export default function CliAuthPage() {
               {copied ? "✓ Copied — paste in your terminal" : "Copy token"}
             </button>
             <p style={{ fontSize: 11, color: "var(--text-faint)", textAlign: "center", lineHeight: 1.5, margin: 0 }}>
-              This is your Supabase session token. It&apos;s saved to <code>~/.memory.wiki/config.json</code> and used by the <code>memory.wiki</code> CLI + MCP server to act on your behalf. Treat it like a password.
+              This is your Supabase session token. It&apos;s saved to <code>~/.memory.wiki/config.json</code> and used by the <code>Memory.Wiki</code> CLI + MCP server to act on your behalf. Treat it like a password.
             </p>
           </div>
         </>
@@ -138,9 +138,9 @@ export default function CliAuthPage() {
 
       {status === "choose-provider" && (
         <>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect memory.wiki for Mac</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect Memory.Wiki for Mac</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
-            Use the same account you use on memory.wiki
+            Use the same account you use on Memory.Wiki
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
@@ -170,7 +170,7 @@ export default function CliAuthPage() {
           <p style={{ fontSize: 16, fontWeight: 600, color: "var(--error, #ef4444)" }}>Connection Failed</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Please try again.</p>
           <Link href="/" style={{ padding: "10px 24px", borderRadius: 8, background: "var(--accent-dim)", color: "var(--accent)", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
-            Go to memory.wiki
+            Go to Memory.Wiki
           </Link>
         </>
       )}

@@ -1,5 +1,5 @@
 /* =========================================================
-   memory.wiki for Mac — Electron + Local WASM + Sidebar + Sync
+   Memory.Wiki for Mac — Electron + Local WASM + Sidebar + Sync
    Architecture: mirrors VS Code extension model
    - Sidebar with file list (ALL/SYNCED/LOCAL/CLOUD)
    - SyncEngine (push/pull/conflict/offline queue/polling)
@@ -1121,7 +1121,7 @@ function openFileInApp(filePath) {
   const ext = path.extname(absolutePath).toLowerCase();
 
   if (!ALL_SUPPORTED_EXTENSIONS.has(ext)) {
-    dialog.showErrorBox("Unsupported Format", `memory.wiki does not support ${ext} files.`);
+    dialog.showErrorBox("Unsupported Format", `Memory.Wiki does not support ${ext} files.`);
     return;
   }
 
@@ -1141,7 +1141,7 @@ function openFileInApp(filePath) {
       const result = renderMarkdown(content);
       const config = loadMdfyConfig(absolutePath);
 
-      mainWindow.setTitle(`${path.basename(absolutePath)} — memory.wiki`);
+      mainWindow.setTitle(`${path.basename(absolutePath)} — Memory.Wiki`);
       mainWindow.webContents.send("load-document", {
         html: result.html,
         markdown: content,
@@ -1151,7 +1151,7 @@ function openFileInApp(filePath) {
       });
     } else {
       // Non-text: show import message
-      const msg = `Import ${ext} files by opening them on memory.wiki.`;
+      const msg = `Import ${ext} files by opening them on Memory.Wiki.`;
       const md = `# ${path.basename(absolutePath)}\n\n${msg}`;
       const result = renderMarkdown(md);
       mainWindow.webContents.send("load-document", {
@@ -1179,10 +1179,10 @@ function sendToRenderer(channel, data) {
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("memory.wiki", process.execPath, [path.resolve(process.argv[1])]);
+    app.setAsDefaultProtocolClient("Memory.Wiki", process.execPath, [path.resolve(process.argv[1])]);
   }
 } else {
-  app.setAsDefaultProtocolClient("memory.wiki");
+  app.setAsDefaultProtocolClient("Memory.Wiki");
 }
 
 // ─── Single Instance ───
@@ -1258,7 +1258,7 @@ async function openCloudDocumentInApp(docId) {
     const markdown = data.markdown || data.content || "";
     const result = renderMarkdown(markdown);
     currentFilePath = null;
-    mainWindow.setTitle((data.title || docId) + " — memory.wiki");
+    mainWindow.setTitle((data.title || docId) + " — Memory.Wiki");
     mainWindow.webContents.send("load-document", {
       html: result.html,
       markdown,
@@ -1371,7 +1371,7 @@ ipcMain.handle("new-document", async () => {
     // User cancelled — open empty editor without file
     currentFilePath = null;
     stopFileWatcher();
-    mainWindow.setTitle("Untitled — memory.wiki");
+    mainWindow.setTitle("Untitled — Memory.Wiki");
     mainWindow.webContents.send("load-document", {
       html: "<p><br></p>", markdown: "", filePath: null, flavor: "gfm", config: null,
     });
@@ -1382,7 +1382,7 @@ ipcMain.handle("new-document", async () => {
   currentFilePath = filePath;
   startFileWatcher(filePath);
   addToRecentFiles(filePath);
-  mainWindow.setTitle(`${path.basename(filePath)} — memory.wiki`);
+  mainWindow.setTitle(`${path.basename(filePath)} — Memory.Wiki`);
   mainWindow.webContents.send("load-document", {
     html: "<p><br></p>", markdown: "", filePath, flavor: "gfm", config: null,
   });
@@ -1421,7 +1421,7 @@ ipcMain.handle("save-file", async (event, markdown) => {
         mainWindow?.webContents.send("save-error", { path: result.filePath, message: err.message });
         return null;
       }
-      mainWindow.setTitle(`${path.basename(result.filePath)} — memory.wiki`);
+      mainWindow.setTitle(`${path.basename(result.filePath)} — Memory.Wiki`);
       addToRecentFiles(result.filePath);
       startFileWatcher(result.filePath);
       return result.filePath;
@@ -1718,7 +1718,7 @@ ipcMain.handle("duplicate-cloud", async (event, docId, title) => {
     const rendered = renderMarkdown(markdown);
     currentFilePath = null;
     stopFileWatcher();
-    mainWindow.setTitle(newTitle + " — memory.wiki");
+    mainWindow.setTitle(newTitle + " — Memory.Wiki");
     mainWindow.webContents.send("load-document", {
       html: rendered.html,
       markdown,
@@ -1798,7 +1798,7 @@ ipcMain.handle("preview-cloud-doc", async (event, docId, title) => {
     const isOwner = !!(userId && data.user_id && data.user_id === userId);
     const editToken = data.editToken || null;
 
-    mainWindow.setTitle((title || docId) + (isOwner ? "" : " (Cloud)") + " — memory.wiki");
+    mainWindow.setTitle((title || docId) + (isOwner ? "" : " (Cloud)") + " — Memory.Wiki");
     mainWindow.webContents.send("load-document", {
       html: result.html,
       markdown,
@@ -1996,7 +1996,7 @@ function buildMenu() {
   const isMac = process.platform === "darwin";
   const template = [
     ...(isMac ? [{
-      label: "memory.wiki",
+      label: "Memory.Wiki",
       submenu: [
         { role: "about" },
         { type: "separator" },
@@ -2017,7 +2017,7 @@ function buildMenu() {
             if (!mainWindow) return;
             currentFilePath = null;
             stopFileWatcher();
-            mainWindow.setTitle("Untitled — memory.wiki");
+            mainWindow.setTitle("Untitled — Memory.Wiki");
             mainWindow.webContents.send("load-document", {
               html: "<p><br></p>", markdown: "", filePath: null, flavor: "gfm", config: null,
             });
@@ -2061,7 +2061,7 @@ function buildMenu() {
         },
         { type: "separator" },
         {
-          label: "Publish to memory.wiki",
+          label: "Publish to Memory.Wiki",
           accelerator: "CmdOrCtrl+Shift+P",
           click: () => {
             if (mainWindow) mainWindow.webContents.send("trigger-publish");
@@ -2100,8 +2100,8 @@ function buildMenu() {
     {
       label: "Help",
       submenu: [
-        { label: "memory.wiki", click: () => shell.openExternal("https://memory.wiki") },
-        { label: "About memory.wiki", click: () => shell.openExternal("https://memory.wiki/about") },
+        { label: "Memory.Wiki", click: () => shell.openExternal("https://memory.wiki") },
+        { label: "About Memory.Wiki", click: () => shell.openExternal("https://memory.wiki/about") },
       ],
     },
   ];
@@ -2151,10 +2151,10 @@ app.on("open-file", (event, filePath) => {
 
 app.whenReady().then(() => {
   app.setAboutPanelOptions({
-    applicationName: "memory.wiki",
+    applicationName: "Memory.Wiki",
     applicationVersion: app.getVersion(),
     version: `Electron ${process.versions.electron}`,
-    copyright: "Copyright 2024-2026 memory.wiki",
+    copyright: "Copyright 2024-2026 Memory.Wiki",
     website: "https://memory.wiki",
     iconPath: path.join(__dirname, "assets", "icon.png"),
   });

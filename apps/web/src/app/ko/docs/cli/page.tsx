@@ -12,15 +12,15 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "CLI 레퍼런스 — memory.wiki",
+  title: "CLI 레퍼런스 — Memory.Wiki",
   description:
-    "memory.wiki CLI 레퍼런스. 커맨드 라인에서 Markdown을 게시합니다. stdin 파이프, tmux 캡처, 문서 관리를 간단한 터미널 명령어로 수행하세요.",
+    "Memory.Wiki CLI 레퍼런스. 커맨드 라인에서 Markdown을 게시합니다. stdin 파이프, tmux 캡처, 문서 관리를 간단한 터미널 명령어로 수행하세요.",
   alternates: {
     canonical: "https://memory.wiki/ko/docs/cli",
     languages: { en: "https://memory.wiki/docs/cli" },
   },
   openGraph: {
-    title: "CLI 레퍼런스 — memory.wiki",
+    title: "CLI 레퍼런스 — Memory.Wiki",
     description: "커맨드 라인에서 Markdown을 게시합니다. stdin 파이프, tmux 캡처, 문서 관리.",
     url: "https://memory.wiki/ko/docs/cli",
     images: [{ url: "/api/og?title=CLI", width: 1200, height: 630 }],
@@ -89,23 +89,23 @@ export default function CliDocsPageKo() {
           <Card>
             <CodeBlock lang="bash">{`npm install -g mdfy-cli`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
-              Node.js 18 이상이 필요합니다. 설치 후 <InlineCode>{"memory.wiki"}</InlineCode> 명령어를 사용할 수 있습니다.
+              Node.js 18 이상이 필요합니다. 설치 후 <InlineCode>{"Memory.Wiki"}</InlineCode> 명령어를 사용할 수 있습니다.
             </p>
           </Card>
 
           {/* 명령어 개요 */}
           <SectionHeading id="commands">명령어</SectionHeading>
           <Card>
-            <CommandRow cmd="memory.wiki publish <file>" desc="Markdown 파일 또는 stdin을 memory.wiki에 게시합니다." />
-            <CommandRow cmd="memory.wiki update <id> <file>" desc="기존 문서를 새 내용으로 업데이트합니다." />
-            <CommandRow cmd="memory.wiki pull <id>" desc="문서의 Markdown 내용을 다운로드합니다." />
-            <CommandRow cmd="memory.wiki delete <id>" desc="문서를 소프트 삭제합니다." />
-            <CommandRow cmd="memory.wiki list" desc="내 모든 문서를 조회합니다." />
-            <CommandRow cmd="memory.wiki open <id>" desc="브라우저에서 문서를 엽니다." />
-            <CommandRow cmd="memory.wiki capture" desc="현재 tmux 패널을 캡처하여 게시합니다." />
-            <CommandRow cmd="memory.wiki login" desc="memory.wiki에 인증합니다." />
-            <CommandRow cmd="memory.wiki logout" desc="저장된 인증 정보를 삭제합니다." />
-            <CommandRow cmd="memory.wiki whoami" desc="현재 인증된 사용자를 표시합니다." />
+            <CommandRow cmd="Memory.Wiki publish <file>" desc="Markdown 파일 또는 stdin을 Memory.Wiki에 게시합니다." />
+            <CommandRow cmd="Memory.Wiki update <id> <file>" desc="기존 문서를 새 내용으로 업데이트합니다." />
+            <CommandRow cmd="Memory.Wiki pull <id>" desc="문서의 Markdown 내용을 다운로드합니다." />
+            <CommandRow cmd="Memory.Wiki delete <id>" desc="문서를 소프트 삭제합니다." />
+            <CommandRow cmd="Memory.Wiki list" desc="내 모든 문서를 조회합니다." />
+            <CommandRow cmd="Memory.Wiki open <id>" desc="브라우저에서 문서를 엽니다." />
+            <CommandRow cmd="Memory.Wiki capture" desc="현재 tmux 패널을 캡처하여 게시합니다." />
+            <CommandRow cmd="Memory.Wiki login" desc="Memory.Wiki에 인증합니다." />
+            <CommandRow cmd="Memory.Wiki logout" desc="저장된 인증 정보를 삭제합니다." />
+            <CommandRow cmd="Memory.Wiki whoami" desc="현재 인증된 사용자를 표시합니다." />
           </Card>
 
           {/* publish */}
@@ -115,22 +115,22 @@ export default function CliDocsPageKo() {
           </p>
           <Card>
             <CodeBlock lang="bash">{`# 파일 게시
-memory.wiki publish README.md
+Memory.Wiki publish README.md
 
 # stdin에서 게시
-echo "# Hello World" | memory.wiki publish
+echo "# Hello World" | Memory.Wiki publish
 
 # 임시 저장으로 게시
-memory.wiki publish README.md --draft
+Memory.Wiki publish README.md --draft
 
 # 제목 지정
-memory.wiki publish README.md --title "My Document"
+Memory.Wiki publish README.md --title "My Document"
 
 # 비밀번호 설정
-memory.wiki publish README.md --password "secret"
+Memory.Wiki publish README.md --password "secret"
 
 # 만료 시간 설정
-memory.wiki publish README.md --expires 7d`}</CodeBlock>
+Memory.Wiki publish README.md --expires 7d`}</CodeBlock>
             <SubLabel>옵션</SubLabel>
             <CommandRow cmd="--draft, -d" desc="임시 저장으로 게시합니다 (본인만 볼 수 있음)." />
             <CommandRow cmd="--title, -t" desc="문서 제목을 설정합니다." />
@@ -146,13 +146,13 @@ memory.wiki publish README.md --expires 7d`}</CodeBlock>
           </p>
           <Card>
             <CodeBlock lang="bash">{`# 파일로 업데이트
-memory.wiki update abc123 README.md
+Memory.Wiki update abc123 README.md
 
 # stdin으로 업데이트
-echo "# Updated" | memory.wiki update abc123
+echo "# Updated" | Memory.Wiki update abc123
 
 # 버전 노트와 함께 업데이트
-memory.wiki update abc123 README.md --message "Fixed typos"`}</CodeBlock>
+Memory.Wiki update abc123 README.md --message "Fixed typos"`}</CodeBlock>
           </Card>
 
           {/* pull */}
@@ -162,28 +162,28 @@ memory.wiki update abc123 README.md --message "Fixed typos"`}</CodeBlock>
           </p>
           <Card>
             <CodeBlock lang="bash">{`# stdout으로 출력
-memory.wiki pull abc123
+Memory.Wiki pull abc123
 
 # 파일로 저장
-memory.wiki pull abc123 -o output.md
+Memory.Wiki pull abc123 -o output.md
 
 # 비밀번호 보호 문서 다운로드
-memory.wiki pull abc123 --password "secret"`}</CodeBlock>
+Memory.Wiki pull abc123 --password "secret"`}</CodeBlock>
           </Card>
 
           {/* delete */}
           <SectionHeading id="delete">delete</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`memory.wiki delete abc123
+            <CodeBlock lang="bash">{`Memory.Wiki delete abc123
 
 # 확인 건너뛰기
-memory.wiki delete abc123 --yes`}</CodeBlock>
+Memory.Wiki delete abc123 --yes`}</CodeBlock>
           </Card>
 
           {/* list */}
           <SectionHeading id="list">list</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`memory.wiki list
+            <CodeBlock lang="bash">{`Memory.Wiki list
 
 # Output:
 #  ID       TITLE              UPDATED         STATUS
@@ -194,7 +194,7 @@ memory.wiki delete abc123 --yes`}</CodeBlock>
           {/* open */}
           <SectionHeading id="open">open</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`memory.wiki open abc123
+            <CodeBlock lang="bash">{`Memory.Wiki open abc123
 # Opens https://memory.wiki/abc123 in your default browser`}</CodeBlock>
           </Card>
 
@@ -205,73 +205,73 @@ memory.wiki delete abc123 --yes`}</CodeBlock>
           </p>
           <Card>
             <CodeBlock lang="bash">{`# 현재 패널 캡처
-memory.wiki capture
+Memory.Wiki capture
 
 # 특정 패널 캡처
-memory.wiki capture -t %3
+Memory.Wiki capture -t %3
 
 # 마지막 N줄 캡처
-memory.wiki capture --lines 50`}</CodeBlock>
+Memory.Wiki capture --lines 50`}</CodeBlock>
           </Card>
 
           {/* 인증 */}
           <SectionHeading id="auth-commands">인증</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# 인증 (브라우저에서 OAuth 진행)
-memory.wiki login
+Memory.Wiki login
 
 # 저장된 인증 정보 삭제
-memory.wiki logout
+Memory.Wiki logout
 
 # 현재 사용자 확인
-memory.wiki whoami
+Memory.Wiki whoami
 # user@example.com (authenticated via OAuth)`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
               인증은 선택 사항입니다. 로그인 없이도 문서는 edit token 기반의 익명 문서로 생성됩니다.
-              로그인하면 <InlineCode>{"memory.wiki list"}</InlineCode>와 계정 기반 소유권을 사용할 수 있습니다.
+              로그인하면 <InlineCode>{"Memory.Wiki list"}</InlineCode>와 계정 기반 소유권을 사용할 수 있습니다.
             </p>
           </Card>
 
           {/* 파이프 예시 */}
           <SectionHeading id="pipes">파이프 예시</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`# 클립보드를 memory.wiki로
-pbpaste | memory.wiki publish
+            <CodeBlock lang="bash">{`# 클립보드를 Memory.Wiki로
+pbpaste | Memory.Wiki publish
 
 # 명령어 출력
-ls -la | memory.wiki publish
+ls -la | Memory.Wiki publish
 
 # 파일 내용
-cat report.md | memory.wiki publish
+cat report.md | Memory.Wiki publish
 
 # AI로 생성 후 바로 게시
-claude "Write a guide to Rust" | memory.wiki publish
+claude "Write a guide to Rust" | Memory.Wiki publish
 
 # Git diff
-git diff | memory.wiki publish --title "Changes"
+git diff | Memory.Wiki publish --title "Changes"
 
 # Docker 로그
-docker logs my-app 2>&1 | memory.wiki publish
+docker logs my-app 2>&1 | Memory.Wiki publish
 
 # 여러 명령어 파이프
-curl -s https://api.example.com/data | jq . | memory.wiki publish`}</CodeBlock>
+curl -s https://api.example.com/data | jq . | Memory.Wiki publish`}</CodeBlock>
           </Card>
 
           {/* tmux */}
           <SectionHeading id="tmux">tmux 연동</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# 현재 패널 캡처
-tmux capture-pane -p | memory.wiki publish
+tmux capture-pane -p | Memory.Wiki publish
 
 # 단축키로 캡처 및 공유
 # ~/.tmux.conf에 추가:
-bind-key M run-shell "tmux capture-pane -p | memory.wiki publish"
+bind-key M run-shell "tmux capture-pane -p | Memory.Wiki publish"
 
 # 특정 패널 캡처
-tmux capture-pane -t %3 -p | memory.wiki publish
+tmux capture-pane -t %3 -p | Memory.Wiki publish
 
 # 전체 스크롤백 캡처
-tmux capture-pane -p -S - | memory.wiki publish`}</CodeBlock>
+tmux capture-pane -p -S - | Memory.Wiki publish`}</CodeBlock>
           </Card>
 
           {/* Aliases */}
@@ -280,16 +280,16 @@ tmux capture-pane -p -S - | memory.wiki publish`}</CodeBlock>
             <CodeBlock lang="bash">{`# ~/.zshrc 또는 ~/.bashrc에 추가
 
 # 빠른 게시
-alias mp="memory.wiki publish"
+alias mp="Memory.Wiki publish"
 
 # 클립보드 게시
-alias mpc="pbpaste | memory.wiki publish"
+alias mpc="pbpaste | Memory.Wiki publish"
 
 # 게시 후 브라우저 열기
-alias mpo="memory.wiki publish --open"
+alias mpo="Memory.Wiki publish --open"
 
 # tmux 캡처
-alias mtx="tmux capture-pane -p | memory.wiki publish"`}</CodeBlock>
+alias mtx="tmux capture-pane -p | Memory.Wiki publish"`}</CodeBlock>
           </Card>
 
           {/* 설정 */}
@@ -300,7 +300,7 @@ alias mtx="tmux capture-pane -p | memory.wiki publish"`}</CodeBlock>
 
             <SubLabel>설정 파일</SubLabel>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, marginBottom: 12, lineHeight: 1.7 }}>
-              인증 정보는 <InlineCode>{"memory.wiki login"}</InlineCode> 후 <InlineCode>{"~/.memory.wiki/config.json"}</InlineCode>에 저장됩니다.
+              인증 정보는 <InlineCode>{"Memory.Wiki login"}</InlineCode> 후 <InlineCode>{"~/.memory.wiki/config.json"}</InlineCode>에 저장됩니다.
               게시된 문서의 edit token은 <InlineCode>{"~/.memory.wiki/tokens.json"}</InlineCode>에 저장됩니다.
             </p>
             <CodeBlock lang="json">{`// ~/.memory.wiki/config.json

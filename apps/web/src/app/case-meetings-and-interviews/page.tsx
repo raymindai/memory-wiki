@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "Capture the transcript",
-      detail: "Paste it from Otter / Fireflies / Granola, or import from a Notion page that holds it. memory.wiki normalizes the speakers and saves a permanent URL.",
+      detail: "Paste it from Otter / Fireflies / Granola, or import from a Notion page that holds it. Memory.Wiki normalizes the speakers and saves a permanent URL.",
     },
     {
       step: "Tag with intent",

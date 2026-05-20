@@ -5,7 +5,7 @@ import { nanoid } from "nanoid";
  * Proactive bundle suggestion generator (W6 exceed move 3).
  *
  * Karpathy's pattern is reactive: the user prompts, the LLM responds.
- * Graphify is the same: run `/graphify` and get a snapshot. memory.wiki
+ * Graphify is the same: run `/graphify` and get a snapshot. Memory.Wiki
  * watches activity and proposes actions on its own.
  *
  * v1 surfaces one signal: clusters of recent unbundled docs that

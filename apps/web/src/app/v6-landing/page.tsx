@@ -3,7 +3,7 @@ import Link from "next/link";
 import MdfyLogo from "@/components/MdfyLogo";
 
 export const metadata: Metadata = {
-  title: "memory.wiki — Your AI memory, owned by you",
+  title: "Memory.Wiki — Your AI memory, owned by you",
   description:
     "Two doors into memory.wiki: a personal AI memory every LLM user can own, and an LLM-maintained personal wiki for power users. Same hub, two ways in.",
   robots: { index: false, follow: false },
@@ -22,7 +22,7 @@ const wikiDoorPoints = [
 ];
 
 const sharedActions = [
-  { label: "/memory.wiki capture", body: "Save the conversation segment as a public memory.wiki URL." },
+  { label: "/memory.wiki capture", body: "Save the conversation segment as a public Memory.Wiki URL." },
   { label: "/memory.wiki bundle", body: "Group related docs into a curated bundle." },
   { label: "/memory.wiki hub", body: "Print your hub URL. Paste anywhere, any AI reads it." },
 ];
@@ -87,7 +87,7 @@ export default function V6LandingDraft() {
             className="mb-5"
             style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}
           >
-            ChatGPT, Claude, and Gemini all forget you between sessions. memory.wiki is a one-click capture for the answers worth keeping — yours, on a URL you control.
+            ChatGPT, Claude, and Gemini all forget you between sessions. Memory.Wiki is a one-click capture for the answers worth keeping — yours, on a URL you control.
           </p>
           <ul className="space-y-2 mb-6 flex-1" style={{ color: "var(--text-secondary)" }}>
             {memoryDoorPoints.map(point => (
@@ -126,7 +126,7 @@ export default function V6LandingDraft() {
             className="mb-5"
             style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}
           >
-            Karpathy hand-curates a personal LLM wiki because nothing does it for him. memory.wiki does it for you — auto-synthesis, semantic bundles, and a hub-wide lint pass that flags what to reconcile.
+            Karpathy hand-curates a personal LLM wiki because nothing does it for him. Memory.Wiki does it for you — auto-synthesis, semantic bundles, and a hub-wide lint pass that flags what to reconcile.
           </p>
           <ul className="space-y-2 mb-6 flex-1" style={{ color: "var(--text-secondary)" }}>
             {wikiDoorPoints.map(point => (
@@ -190,7 +190,7 @@ export default function V6LandingDraft() {
         <p
           style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}
         >
-          AI vendors are racing to be your memory layer — and your memory will live inside their walls. memory.wiki is the opposite bet: a public URL is the universal context format, and the hub that owns it should be yours, not a vendor&apos;s.
+          AI vendors are racing to be your memory layer — and your memory will live inside their walls. Memory.Wiki is the opposite bet: a public URL is the universal context format, and the hub that owns it should be yours, not a vendor&apos;s.
         </p>
       </section>
 
@@ -199,7 +199,7 @@ export default function V6LandingDraft() {
         style={{ borderTop: "1px solid var(--border-dim)", color: "var(--text-faint)" }}
       >
         <span>
-          Hosted on <Link href="/" style={{ color: "var(--accent)" }}>memory.wiki</Link>
+          Hosted on <Link href="/" style={{ color: "var(--accent)" }}>Memory.Wiki</Link>
         </span>
         <span>v6-landing draft — not the live page yet</span>
       </footer>

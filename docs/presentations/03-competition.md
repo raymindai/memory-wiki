@@ -4,7 +4,7 @@ theme: default
 paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
-title: 'memory.wiki — 공모전 / 심사용 덱'
+title: 'Memory.Wiki — 공모전 / 심사용 덱'
 style: |
   section { font-family: 'Pretendard', 'Inter', system-ui, sans-serif; padding: 64px 72px; letter-spacing: -0.01em; }
   section.lead { justify-content: center; text-align: left; }
@@ -34,9 +34,9 @@ style: |
 
 <!-- _class: lead -->
 
-<span style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">memory.wiki · 2026</span>
+<span style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">Memory.Wiki · 2026</span>
 
-# **memory.wiki**
+# **Memory.Wiki**
 ## 모든 AI에 배포 가능한 당신의 기억층.
 
 <br>
@@ -123,7 +123,7 @@ ChatGPT, Claude, Cursor, Codex, Gemini — 각자 자기만의 메모리 레이�
 
 <h3>오늘 살아있는 것</h3>
 
-- memory.wiki 운영중 (Vercel)
+- Memory.Wiki 운영중 (Vercel)
 - 데모 허브: 50 문서 / 7 번들
 - Chrome 확장 (스토어)
 - MCP 서버 (npm)

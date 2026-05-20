@@ -95,7 +95,7 @@ export async function importFromUrl(rawUrl: string): Promise<UrlImportResult> {
   const url = new URL(rawUrl);
   // Block well-known internal addresses to avoid SSRF surface. Anyone
   // wanting to import private intranet pages can paste their content
-  // directly into memory.wiki instead — that's not what this endpoint is for.
+  // directly into Memory.Wiki instead — that's not what this endpoint is for.
   if (/^(127\.|10\.|192\.168\.|0\.|localhost$)/i.test(url.hostname) || url.hostname.endsWith(".local")) {
     throw new UrlImportError("Localhost / private addresses are not allowed", 400);
   }
@@ -169,7 +169,7 @@ export async function importFromUrl(rawUrl: string): Promise<UrlImportResult> {
   // Resolve any relative image refs against the source URL so the
   // markdown we hand back has only absolute URLs. Relative refs
   // would otherwise be unfetchable (we no longer have the page
-  // base) and would render as broken in memory.wiki.
+  // base) and would render as broken in Memory.Wiki.
   markdown = markdown.replace(/!\[([^\]]*)\]\(([^)\s]+)(\s+"[^"]*")?\)/g, (full, alt, target, titleAttr) => {
     if (/^(https?:|data:)/i.test(target)) return full;
     try {

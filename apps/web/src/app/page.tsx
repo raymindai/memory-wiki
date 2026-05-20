@@ -74,7 +74,7 @@ export default function Home() {
     <>
       <noscript>
         <div style={{ padding: "60px 24px", maxWidth: 800, margin: "0 auto", fontFamily: "system-ui, sans-serif", color: "#fafafa", background: "#09090b" }}>
-          <h1>memory.wiki — Your Markdown, Beautifully Published</h1>
+          <h1>Memory.Wiki — Your Markdown, Beautifully Published</h1>
           <p>Create, edit, and share beautiful documents instantly. WYSIWYG Markdown editor with AI conversation capture, cross-platform sync, and a developer-friendly API. No login required — paste or type, get a permanent URL in seconds.</p>
           <h2>Features</h2>
           <ul>
@@ -88,7 +88,7 @@ export default function Home() {
             <li>Export to PDF, copy as rich text for Google Docs and email</li>
           </ul>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- noscript context, Link component won't work */}
-          <p><a href="/about">About memory.wiki</a> | <a href="/plugins">Plugins and Extensions</a> | <a href="/docs">Developer Documentation</a> | <a href="/manifesto">Manifesto</a></p>
+          <p><a href="/about">About Memory.Wiki</a> | <a href="/plugins">Plugins and Extensions</a> | <a href="/docs">Developer Documentation</a> | <a href="/manifesto">Manifesto</a></p>
         </div>
       </noscript>
       <WelcomeOverlay />

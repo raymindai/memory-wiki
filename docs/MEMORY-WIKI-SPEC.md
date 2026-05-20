@@ -1,6 +1,6 @@
-# memory.wiki — Product Specification
+# Memory.Wiki — Product Specification
 
-> **Internal spec.** Hand-off document for implementation planning. Defines what "true memory.wiki" means, what's required to honor that promise, and what is explicitly out of scope.
+> **Internal spec.** Hand-off document for implementation planning. Defines what "true Memory.Wiki" means, what's required to honor that promise, and what is explicitly out of scope.
 >
 > **Author**: strategic conversation between founder + Claude (this session, mdcore1)
 > **Audience**: implementation session (phase2) + future contributors
@@ -11,11 +11,11 @@
 
 ## 0. TL;DR
 
-`memory.wiki`는 **개인 지식 위키**이면서 동시에 **모든 AI에 deploy 가능한 메모리 레이어**다. 두 문이 하나의 hub에서 만난다.
+`Memory.Wiki`는 **개인 지식 위키**이면서 동시에 **모든 AI에 deploy 가능한 메모리 레이어**다. 두 문이 하나의 hub에서 만난다.
 
 핵심 약속 한 줄: **"You author. AI uses. The wiki maintains itself."**
 
-이 약속을 정직하게 만들기 위해 현재 memory.wiki 대비 부족한 것은 — 한 문장으로 — **링크 그래프, 의미 기반 검색, LLM 자가 정리** 셋. 이 spec은 그 셋을 핵심으로 두고, 그 위에 신뢰/네트워크 효과 layer를 얹는다.
+이 약속을 정직하게 만들기 위해 현재 Memory.Wiki 대비 부족한 것은 — 한 문장으로 — **링크 그래프, 의미 기반 검색, LLM 자가 정리** 셋. 이 spec은 그 셋을 핵심으로 두고, 그 위에 신뢰/네트워크 효과 layer를 얹는다.
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### 1.1 한 문장 정의
 
-> **memory.wiki는 당신이 author하고, AI가 사용하고, LLM이 스스로 유지하는 개인 위키다.**
+> **Memory.Wiki는 당신이 author하고, AI가 사용하고, LLM이 스스로 유지하는 개인 위키다.**
 
 ### 1.2 Two Doors
 
@@ -168,7 +168,7 @@ interface Link {
 #### Journey A: First Capture (Memory door)
 1. 사용자가 ChatGPT/Claude/Cursor에서 답변 받음
 2. Chrome extension 클릭 → conversation을 markdown으로 변환
-3. memory.wiki에 자동 저장, doc URL 생성
+3. Memory.Wiki에 자동 저장, doc URL 생성
 4. URL을 다른 AI에 paste → context 즉시 사용
 
 **Critical UX**: 가입 없이 가능. 30초 안에 완료. 첫 doc 생성 후 *"create your hub"* 부드럽게 prompt.
@@ -297,7 +297,7 @@ interface Link {
 ### 3.3 Tier 3 — Trust + Network effects (6개월 내)
 
 **[F14] Native LLM 인식** ⭐
-- 적어도 3개 LLM 도구가 memory.wiki URL을 native context로 인지
+- 적어도 3개 LLM 도구가 Memory.Wiki URL을 native context로 인지
 - Target: Cursor, Anthropic Claude (Skills), Codex CLI, Aider
 - 통합 방식: spec 따른 fetch + llms.txt parse
 - *"Recognized by"* 페이지에 logo 노출
@@ -342,10 +342,10 @@ interface Link {
 ### 4.2 Hub URL Resolution
 
 ```
-1. memory.wiki → main marketing site
+1. Memory.Wiki → main marketing site
 2. memory.wiki/{slug} where slug exists in hubs table → hub home
 3. memory.wiki/{slug}/{path} → resolved per spec table
-4. mori.wiki → 301 redirect to memory.wiki (short URL alias)
+4. mori.wiki → 301 redirect to Memory.Wiki (short URL alias)
 5. memory.wiki/d/{id} → backwards compat doc URL (current memory.wiki/{id})
 ```
 
@@ -427,7 +427,7 @@ def lint_hub(hub_id):
 LLM tool fetches `memory.wiki/{user}/llms.txt` → parses → uses as index → fetches relevant docs on demand.
 
 #### Pattern C: MCP server
-memory.wiki MCP server (already shipped) exposes hub as tool → AI agent calls `memory.search(q=...)` directly.
+Memory.Wiki MCP server (already shipped) exposes hub as tool → AI agent calls `memory.search(q=...)` directly.
 
 #### Pattern D: Native partner integration (target)
 Cursor / Claude Skills 가 `memory.wiki/{user}` 를 인지 → 자동 fetch + cache + use.
@@ -474,14 +474,14 @@ Cursor / Claude Skills 가 `memory.wiki/{user}` 를 인지 → 자동 fetch + ca
 
 ---
 
-## 6. Migration from memory.wiki
+## 6. Migration from Memory.Wiki
 
 ### 6.1 도메인
 
 ```
-Primary brand:  memory.wiki
+Primary brand:  Memory.Wiki
 Short URL:      mori.wiki  (이미 확보)
-Legacy:         memory.wiki   (1년 이상 redirect 유지)
+Legacy:         Memory.Wiki   (1년 이상 redirect 유지)
 
 mori.wiki/{anything}    → memory.wiki/{anything} (301)
 memory.wiki/{anything}     → memory.wiki/{anything} (301)
@@ -503,7 +503,7 @@ memory.wiki/hub/{slug}      → memory.wiki/{slug}      (hub home as primary pat
 
 | 영역 | 추정 변경량 |
 |---|---|
-| 텍스트 references ("memory.wiki", "memory.wiki") | 200+ 곳 |
+| 텍스트 references ("Memory.Wiki", "Memory.Wiki") | 200+ 곳 |
 | Branding assets (로고, OG 이미지, favicon) | 50+ 파일 |
 | Welcome/onboarding 카피 | 5+ 컴포넌트 |
 | Email templates | 3-5개 |
@@ -543,7 +543,7 @@ memory.wiki/hub/{slug}      → memory.wiki/{slug}      (hub home as primary pat
 - [F6] llms.txt for hub
 - [F7] Compact form
 
-**Rebrand timing**: 위 4개 (F1, F2, F4, F8) ship 직후 → memory.wiki 리브랜드 → HN/PH 런칭
+**Rebrand timing**: 위 4개 (F1, F2, F4, F8) ship 직후 → Memory.Wiki 리브랜드 → HN/PH 런칭
 
 ### 8.2 Post-Launch (6월 ~ 8월, K-Tech 시작 전)
 

@@ -12,7 +12,7 @@ const STORAGE_KEY = "mdfy-welcome-seen";
 //
 // One CTA per slide (the Next button). No inline links — those competed
 // with Next and broke the "one screen, one action" rule. The dashboard
-// surfaces (Install /memory.wiki, memory.wiki Foundations bundle, etc.) are the
+// surfaces (Install /memory.wiki, Memory.Wiki Foundations bundle, etc.) are the
 // click targets once the user dismisses the overlay.
 
 type Surface = { name: string; desc: string; color: string };
@@ -34,7 +34,7 @@ const slides: Slide[] = [
     // when the badge wraps on narrow viewports.
     badge: "Personal knowledge hub\nfor the AI era",
     title: "Your AI memory,\ndeployable to any AI.",
-    desc: "ChatGPT, Claude, and Cursor forget you between sessions. memory.wiki turns what you write into a URL any AI can read — you decide the shape, memory.wiki keeps the index.",
+    desc: "ChatGPT, Claude, and Cursor forget you between sessions. Memory.Wiki turns what you write into a URL any AI can read — you decide the shape, Memory.Wiki keeps the index.",
     icon: null,
   },
   {

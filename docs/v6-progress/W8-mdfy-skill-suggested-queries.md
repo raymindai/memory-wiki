@@ -64,7 +64,7 @@ question-as-section-heading layout.
 defines three actions:
 
 - `/memory.wiki capture <title>`. Saves the most recent assistant message
-(or a user-selected range) to the user's memory.wiki hub as a public
+(or a user-selected range) to the user's Memory.Wiki hub as a public
 doc. Returns the URL the user can paste into any other AI.
 - `/memory.wiki bundle <topic>`. Calls the AI Bundle Generation
 endpoint with the topic, returns suggested doc ids and lets
@@ -111,7 +111,7 @@ All previous regression suites still pass: `test:share` 56/56,
 - **Cursor / Codex / Aider versions** of the skill. The [SKILL.md](http://SKILL.md)
 shape ports across with minor adjustments. W9 and W10 work.
 - **Programmatic auth flow**. Right now the user grabs a token
-from the web app and exports it. A `memory.wiki login` flow that opens
+from the web app and exports it. A `Memory.Wiki login` flow that opens
 a browser tab and stores the token in `~/.config/memory.wiki/token`
 is post-launch.
 - **In-app suggested queries panel**. Backend is wired; the React

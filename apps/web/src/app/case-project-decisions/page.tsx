@@ -15,11 +15,11 @@ const data: CaseData = {
   action: [
     {
       step: "Write the decision as a short doc",
-      detail: "Context (what we knew), Options (what we considered), Decision (what we picked), Consequences (what we expect). 200-400 words. memory.wiki auto-tags the intent as \"decision\" after the next concept refresh.",
+      detail: "Context (what we knew), Options (what we considered), Decision (what we picked), Consequences (what we expect). 200-400 words. Memory.Wiki auto-tags the intent as \"decision\" after the next concept refresh.",
     },
     {
       step: "Cite the inputs",
-      detail: "Link the customer interview, the spike branch, the cost-model spreadsheet, the AI conversation that helped you think. Each link survives because memory.wiki URLs are permanent.",
+      detail: "Link the customer interview, the spike branch, the cost-model spreadsheet, the AI conversation that helped you think. Each link survives because Memory.Wiki URLs are permanent.",
     },
     {
       step: "Bundle by area",

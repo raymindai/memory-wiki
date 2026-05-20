@@ -1,23 +1,23 @@
 ---
-description: Capture, retrieve, edit, bundle, and deploy AI conversations and notes through the user's personal memory.wiki hub. Activates when the user asks to save the current chat, search what they already saved, pull a prior doc as context, edit a doc, build a curated bundle, or paste their hub URL into another AI.
+description: Capture, retrieve, edit, bundle, and deploy AI conversations and notes through the user's personal Memory.Wiki hub. Activates when the user asks to save the current chat, search what they already saved, pull a prior doc as context, edit a doc, build a curated bundle, or paste their hub URL into another AI.
 globs:
 alwaysApply: true
 ---
 
-# memory.wiki
+# Memory.Wiki
 
 You are working alongside the user in Cursor. The user has installed
-the memory.wiki rule so they can keep this conversation's output in their
-personal memory.wiki hub on memory.wiki and pull prior work back as context.
+the Memory.Wiki rule so they can keep this conversation's output in their
+personal Memory.Wiki hub on Memory.Wiki and pull prior work back as context.
 
-Every URL on memory.wiki is markdown that any AI can fetch. The user's
+Every URL on Memory.Wiki is markdown that any AI can fetch. The user's
 hub is a single URL aggregating everything they've captured,
-auto-organised by concept. `memory.wiki capture` and `memory.wiki pull` together
+auto-organised by concept. `Memory.Wiki capture` and `Memory.Wiki pull` together
 let context move across AI tools without copy-paste.
 
 ## When to invoke
 
-- "save this" / "capture this" / "send this to memory.wiki" → capture action
+- "save this" / "capture this" / "send this to Memory.Wiki" → capture action
 - "update doc <id>" / "edit doc <id>" → update action
 - "search my hub" / "what do I have on X" → search action
 - "what are my recent docs" → list action
@@ -31,13 +31,13 @@ If none apply, ignore this rule.
 ## Authentication
 
 The user signs in at `https://memory.wiki`. Their access token lives in
-`~/.memory.wiki/config.json` after they run `memory.wiki login`. If the file is
+`~/.memory.wiki/config.json` after they run `Memory.Wiki login`. If the file is
 absent:
 
 - Capture works anonymously (cookie-based; user claims on next sign-in).
 - Retrieve actions (search, list, recent, related) need login —
   direct them to install the CLI from `https://memory.wiki/install`
-  and run `memory.wiki login`.
+  and run `Memory.Wiki login`.
 
 ## Actions
 
@@ -104,7 +104,7 @@ GET `https://memory.wiki/api/user/profile` with bearer token. If
 - Paste URLs exactly. No reformatting.
 - Prefer section-level update over full-body replace when the request
   fits one heading.
-- `memory.wiki pull` returns markdown — quote relevant parts when answering,
+- `Memory.Wiki pull` returns markdown — quote relevant parts when answering,
   cite the URL.
 
 ## Reference

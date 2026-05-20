@@ -11,15 +11,15 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "REST API 레퍼런스 — memory.wiki",
+  title: "REST API 레퍼런스 — Memory.Wiki",
   description:
-    "memory.wiki REST API 레퍼런스. HTTP를 통해 Markdown 문서를 생성, 조회, 수정, 삭제할 수 있습니다. curl, JavaScript, Python 예시 포함.",
+    "Memory.Wiki REST API 레퍼런스. HTTP를 통해 Markdown 문서를 생성, 조회, 수정, 삭제할 수 있습니다. curl, JavaScript, Python 예시 포함.",
   alternates: {
     canonical: "https://memory.wiki/ko/docs/api",
     languages: { en: "https://memory.wiki/docs/api" },
   },
   openGraph: {
-    title: "REST API 레퍼런스 — memory.wiki",
+    title: "REST API 레퍼런스 — Memory.Wiki",
     description: "REST API 레퍼런스. 엔드포인트, 매개변수, 예시.",
     url: "https://memory.wiki/ko/docs/api",
     images: [{ url: "/api/og?title=REST%20API", width: 1200, height: 630 }],
@@ -597,7 +597,7 @@ url = res.json()["url"]`}</CodeBlock>
               maxWidth: 640,
             }}
           >
-            모든 공개 memory.wiki URL 은 AI 에이전트용 클린 마크다운 변형을 함께 제공합니다.
+            모든 공개 Memory.Wiki URL 은 AI 에이전트용 클린 마크다운 변형을 함께 제공합니다.
             <InlineCode>{"?compact"}</InlineCode> 또는 <InlineCode>{"?digest"}</InlineCode> 을 붙이면 토큰을 줄일 수 있습니다 — 답변은 동일하고, 비용만 줄어듭니다.
           </p>
           <div
@@ -679,7 +679,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>   # 캔버스가 실행된 적이 있을 때만
 analysis_stale: true           # 분석 이후 멤버 문서가 수정된 경우에만
-source: "memory.wiki"
+source: "Memory.Wiki"
 ---
 
 # <Bundle title>
@@ -771,7 +771,7 @@ source: "memory.wiki"
               maxWidth: 640,
             }}
           >
-            memory.wiki 는 두 개의 서로 다른 온톨로지 레이어를 제공하며, 각각 별도의 URL 에 실립니다:
+            Memory.Wiki 는 두 개의 서로 다른 온톨로지 레이어를 제공하며, 각각 별도의 URL 에 실립니다:
           </p>
           <ul
             style={{
@@ -829,7 +829,7 @@ source: "memory.wiki"
               maxWidth: 640,
             }}
           >
-            memory.wiki는 점진적 인증 방식을 사용합니다. 기본 작업은 인증이 필요 없습니다.
+            Memory.Wiki는 점진적 인증 방식을 사용합니다. 기본 작업은 인증이 필요 없습니다.
             고급 기능은 edit token 또는 사용자 식별 정보를 사용합니다.
           </p>
 
@@ -856,7 +856,7 @@ source: "memory.wiki"
               },
               {
                 title: "MCP / CLI 인증",
-                desc: "MCP 서버와 CLI 모두 memory.wiki login의 JWT를 사용합니다. 실행: npm install -g mdfy-cli && memory.wiki login",
+                desc: "MCP 서버와 CLI 모두 Memory.Wiki login의 JWT를 사용합니다. 실행: npm install -g mdfy-cli && Memory.Wiki login",
               },
             ].map((item) => (
               <div

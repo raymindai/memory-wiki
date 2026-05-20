@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - memory.wiki QuickLook Preview Generator
+// MARK: - Memory.Wiki QuickLook Preview Generator
 
 /// Escapes special characters for safe embedding in JavaScript template literals.
 func escapeForJS(_ string: String) -> String {

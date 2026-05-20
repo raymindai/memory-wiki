@@ -1,8 +1,8 @@
 <!-- memory.wiki:start -->
-## memory.wiki actions
+## Memory.Wiki actions
 
-The user has installed memory.wiki actions so any AI coding session can
-capture conversations into their personal memory.wiki hub, pull prior work
+The user has installed Memory.Wiki actions so any AI coding session can
+capture conversations into their personal Memory.Wiki hub, pull prior work
 back as context, edit existing docs, build curated bundles, and
 surface their hub URL as context for any other AI.
 
@@ -20,7 +20,7 @@ When to invoke:
 If none apply, ignore this section.
 
 Authentication: the user signs in at https://memory.wiki. After running
-`memory.wiki login`, the token lives in `~/.memory.wiki/config.json`. If absent,
+`Memory.Wiki login`, the token lives in `~/.memory.wiki/config.json`. If absent,
 capture works anonymously; retrieve actions (search/list/recent/
 related) need login — direct the user to https://memory.wiki/install.
 

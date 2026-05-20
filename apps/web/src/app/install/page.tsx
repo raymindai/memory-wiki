@@ -3,9 +3,9 @@ import Link from "next/link";
 import ClaudeMdSnippet from "./ClaudeMdSnippet";
 
 export const metadata: Metadata = {
-  title: "Install /memory.wiki in Claude Code | memory.wiki",
+  title: "Install /memory.wiki in Claude Code | Memory.Wiki",
   description:
-    "One-line install for the /memory.wiki slash command in Claude Code. Capture, bundle, and deploy your conversations through your personal memory.wiki hub.",
+    "One-line install for the /memory.wiki slash command in Claude Code. Capture, bundle, and deploy your conversations through your personal Memory.Wiki hub.",
 };
 
 const INSTALL_CMD_CLAUDE =
@@ -25,7 +25,7 @@ export default function InstallPage() {
     >
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
-          Install memory.wiki in your AI coding tool
+          Install Memory.Wiki in your AI coding tool
         </h1>
         <p
           className="text-base mb-10"
@@ -80,7 +80,7 @@ export default function InstallPage() {
             className="text-xs mt-2"
             style={{ color: "var(--text-faint)" }}
           >
-            Drops <code>mdfy.mdc</code> into <code>~/.cursor/rules/</code>. Cursor picks it up on next launch (or after toggling rules in Settings). Then say things like &quot;save this to memory.wiki as &lt;title&gt;&quot; in any chat.
+            Drops <code>mdfy.mdc</code> into <code>~/.cursor/rules/</code>. Cursor picks it up on next launch (or after toggling rules in Settings). Then say things like &quot;save this to Memory.Wiki as &lt;title&gt;&quot; in any chat.
           </p>
         </section>
 
@@ -105,7 +105,7 @@ export default function InstallPage() {
             className="text-xs mt-2"
             style={{ color: "var(--text-faint)" }}
           >
-            Appends an <code>memory.wiki actions</code> block to <code>~/.codex/AGENTS.md</code>. Idempotent: rerunning replaces just the memory.wiki block, leaves the rest of your AGENTS.md alone. Restart Codex CLI to pick it up.
+            Appends an <code>Memory.Wiki actions</code> block to <code>~/.codex/AGENTS.md</code>. Idempotent: rerunning replaces just the Memory.Wiki block, leaves the rest of your AGENTS.md alone. Restart Codex CLI to pick it up.
           </p>
         </section>
 
@@ -161,7 +161,7 @@ export default function InstallPage() {
             <li>
               <strong>/memory.wiki capture &lt;title&gt;</strong>
               <br />
-              Save the conversation segment as a public memory.wiki URL. Pasted into any AI, it loads as context.
+              Save the conversation segment as a public Memory.Wiki URL. Pasted into any AI, it loads as context.
             </li>
             <li>
               <strong>/memory.wiki bundle &lt;topic&gt;</strong>
@@ -194,7 +194,7 @@ export default function InstallPage() {
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              Read the deep dive: How memory.wiki works &rarr;
+              Read the deep dive: How Memory.Wiki works &rarr;
             </Link>
           </p>
           <p className="mt-2 text-sm">
@@ -203,7 +203,7 @@ export default function InstallPage() {
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              How memory.wiki Memory works (chunked, hybrid, public) &rarr;
+              How Memory.Wiki Memory works (chunked, hybrid, public) &rarr;
             </Link>
           </p>
         </section>

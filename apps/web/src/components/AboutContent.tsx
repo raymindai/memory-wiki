@@ -144,7 +144,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
               letterSpacing: "-0.01em",
             }}
           >
-            How memory.wiki works &rarr;
+            How Memory.Wiki works &rarr;
           </Link>
         </div>
       </section>
@@ -205,7 +205,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
           {t.ecosystem.sub}
         </p>
 
-        {/* Flow: Sources -> memory.wiki -> Outputs */}
+        {/* Flow: Sources -> Memory.Wiki -> Outputs */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", borderRadius: 20, padding: "40px 32px", overflow: "hidden" }}>
           {/* Row 1: Input sources */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
@@ -219,7 +219,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
             <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round"><line x1="8" y1="0" x2="8" y2="20" /><polyline points="4 16 8 20 12 16" /></svg>
           </div>
 
-          {/* Row 2: Surfaces -> memory.wiki hub -> Outputs */}
+          {/* Row 2: Surfaces -> Memory.Wiki hub -> Outputs */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap", margin: "16px 0" }}>
             {/* Input surfaces */}
             <div style={{ display: "flex", gap: 6 }}>
@@ -255,7 +255,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
       </section>
 
       {/* ───────── 2.5. INTEGRATE WITH AI DEV TOOLS ─────────
-            The ecosystem section above shows where memory.wiki *captures*
+            The ecosystem section above shows where Memory.Wiki *captures*
             from. This section closes the loop: where the URL goes
             back into. Single block linking to /docs/integrate which
             carries the per-tool snippets (AGENTS.md / CLAUDE.md /
@@ -292,9 +292,9 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
         </p>
         <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24, maxWidth: 640 }}>
           {locale === "ko" ? (
-            <>Claude Code, Cursor, Codex, 그리고 모든 에이전트가 이미 <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>AGENTS.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>CLAUDE.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>.cursor/rules</code> 의 내용으로 부팅합니다. memory.wiki 번들을 가리키는 한 줄을 추가하면, 다음 세션은 이전 결정, 노트, 그래프 분석이 *이미 로드된 상태로* 시작됩니다. API 키 없음, vendor lock-in 없음.</>
+            <>Claude Code, Cursor, Codex, 그리고 모든 에이전트가 이미 <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>AGENTS.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>CLAUDE.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>.cursor/rules</code> 의 내용으로 부팅합니다. Memory.Wiki 번들을 가리키는 한 줄을 추가하면, 다음 세션은 이전 결정, 노트, 그래프 분석이 *이미 로드된 상태로* 시작됩니다. API 키 없음, vendor lock-in 없음.</>
           ) : (
-            <>Claude Code, Cursor, Codex, and every other agent already boot with whatever sits in <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>AGENTS.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>CLAUDE.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>.cursor/rules</code>. Add a line that points at your memory.wiki bundle and the next session opens with your prior decisions, notes, and graph analysis already loaded. No API key, no vendor lock-in.</>
+            <>Claude Code, Cursor, Codex, and every other agent already boot with whatever sits in <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>AGENTS.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>CLAUDE.md</code> / <code style={{ fontFamily: "var(--font-geist-mono), monospace" }}>.cursor/rules</code>. Add a line that points at your Memory.Wiki bundle and the next session opens with your prior decisions, notes, and graph analysis already loaded. No API key, no vendor lock-in.</>
           )}
         </p>
         <div
@@ -694,7 +694,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)" }}>
                 {t.comparison_md.columns.map((h) => (
-                  <th key={h} style={{ padding: "12px 16px", textAlign: h === "" ? "left" : "center", fontSize: 12, fontWeight: h === "memory.wiki" ? 800 : 600, color: h === "memory.wiki" ? "var(--accent)" : "var(--text-muted)", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ padding: "12px 16px", textAlign: h === "" ? "left" : "center", fontSize: 12, fontWeight: h === "Memory.Wiki" ? 800 : 600, color: h === "Memory.Wiki" ? "var(--accent)" : "var(--text-muted)", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -730,7 +730,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)" }}>
                 {t.comparison_ai.columns.map((h) => (
-                  <th key={h} style={{ padding: "12px 16px", textAlign: h === "" ? "left" : "center", fontSize: 12, fontWeight: h === "memory.wiki" ? 800 : 600, color: h === "memory.wiki" ? "var(--accent)" : "var(--text-muted)", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ padding: "12px 16px", textAlign: h === "" ? "left" : "center", fontSize: 12, fontWeight: h === "Memory.Wiki" ? 800 : 600, color: h === "Memory.Wiki" ? "var(--accent)" : "var(--text-muted)", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "memory.wiki — Capture. Edit. Share. One URL for your Markdown",
+  "name": "Memory.Wiki — Capture. Edit. Share. One URL for your Markdown",
   "version": "2.2.1",
   "description": "Capture AI conversations from ChatGPT, Claude, and Gemini. Edit in WYSIWYG, share with a permanent link.",
   "permissions": [

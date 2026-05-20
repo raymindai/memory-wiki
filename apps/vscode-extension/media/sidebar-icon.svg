@@ -1,6 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <rect width="24" height="24" rx="5" fill="none"/>
-  <text x="12" y="17" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-weight="800" font-size="14" letter-spacing="-0.5">
-    <tspan fill="#fb923c">m</tspan><tspan fill="#C5C5C5">d</tspan>
-  </text>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 26.74 10.32">
+  <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #fafafa;
+      }
+
+      .st1 {
+        fill: #fb923c;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st1" d="M3.32,0l2.44,5.91h.11L8.29,0h3.33v10.17h-2.61v-5.99h-.08l-2.31,5.91h-1.6l-2.31-5.94h-.08v6.01H0V0h3.32Z"/>
+    <path class="st0" d="M12.03,0h2.97l1.43,6.37h.08l1.67-6.37h2.38l1.68,6.39h.08l1.43-6.39h2.98l-2.98,10.17h-2.59l-1.75-5.83h-.08l-1.76,5.83h-2.56L12.03,0Z"/>
+  </g>
+  <circle class="st0" cx="13.21" cy="9.43" r=".89"/>
 </svg>

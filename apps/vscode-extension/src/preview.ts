@@ -45,7 +45,7 @@ export class PreviewPanel {
 
     const panel = vscode.window.createWebviewPanel(
       PreviewPanel.viewType,
-      `memory.wiki Preview: ${path.basename(document.fileName)}`,
+      `Memory.Wiki Preview: ${path.basename(document.fileName)}`,
       column,
       {
         enableScripts: true,
@@ -129,7 +129,7 @@ export class PreviewPanel {
 
     const panel = vscode.window.createWebviewPanel(
       PreviewPanel.viewType,
-      `memory.wiki Preview: ${path.basename(document.fileName)}`,
+      `Memory.Wiki Preview: ${path.basename(document.fileName)}`,
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       {
         enableScripts: true,
@@ -392,7 +392,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
               const match = [...PreviewPanel.panels.entries()].find(([, p]) => p === this);
               const docId = match?.[0]?.replace("cloud:", "") || "";
               if (docId) {
-                const baseUrl = vscode.workspace.getConfiguration("memory.wiki").get<string>("apiBaseUrl", "https://memory.wiki");
+                const baseUrl = vscode.workspace.getConfiguration("Memory.Wiki").get<string>("apiBaseUrl", "https://memory.wiki");
                 vscode.env.openExternal(vscode.Uri.parse(`${baseUrl}/${docId}`));
               }
             }
@@ -443,11 +443,11 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       ? `<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#94a3b8;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:8px">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg>
-            <span>This is a cloud document. View only — to edit, sync to local or open in memory.wiki.</span>
+            <span>This is a cloud document. View only — to edit, sync to local or open in Memory.Wiki.</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:#fb923c;color:#0a0a0c;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
-            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in memory.wiki</button>
+            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in Memory.Wiki</button>
           </div>
         </div>`
       : "";
@@ -539,7 +539,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const userId = await auth?.getUserId();
     if (!auth || !userId) {
       const action = await vscode.window.showInformationMessage(
-        "Sign in to memory.wiki to use ASCII to Mermaid conversion.",
+        "Sign in to Memory.Wiki to use ASCII to Mermaid conversion.",
         "Sign in"
       );
       if (action === "Sign in") {
@@ -549,7 +549,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     }
 
     const apiBaseUrl = vscode.workspace
-      .getConfiguration("memory.wiki")
+      .getConfiguration("Memory.Wiki")
       .get<string>("apiBaseUrl", "https://memory.wiki");
 
     const token = await auth.getToken();
@@ -790,7 +790,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     if (!auth || !loggedIn) {
       this.panel.webview.postMessage({ type: "aiResult", error: "Sign in to use AI features." });
       const choice = await vscode.window.showWarningMessage(
-        "Sign in to memory.wiki to use AI features.",
+        "Sign in to Memory.Wiki to use AI features.",
         "Sign in"
       );
       if (choice === "Sign in") {
@@ -887,7 +887,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const userId = await auth?.getUserId();
     if (!auth || !userId) {
       vscode.window.showWarningMessage(
-        "Sign in to memory.wiki to upload images (memory.wiki: Login)."
+        "Sign in to Memory.Wiki to upload images (memory.wiki: Login)."
       );
       this.panel.webview.postMessage({ type: "imageUploadFailed" });
       return;
@@ -908,7 +908,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       const fileName = name || `image.${ext}`;
 
       const apiBaseUrl = vscode.workspace
-        .getConfiguration("memory.wiki")
+        .getConfiguration("Memory.Wiki")
         .get<string>("apiBaseUrl", "https://memory.wiki");
 
       // Build multipart/form-data manually
@@ -1007,18 +1007,18 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       ? `<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#94a3b8;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:8px">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg>
-            <span>This is a cloud document. View only — to edit, sync to local or open in memory.wiki.</span>
+            <span>This is a cloud document. View only — to edit, sync to local or open in Memory.Wiki.</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:#fb923c;color:#0a0a0c;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
-            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in memory.wiki</button>
+            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in Memory.Wiki</button>
           </div>
         </div>`
       : "";
     const renderedHtml = cloudBanner + result.html;
 
     const themeSetting = vscode.workspace
-      .getConfiguration("memory.wiki")
+      .getConfiguration("Memory.Wiki")
       .get<string>("theme", "auto");
 
     let themeClass: string;
@@ -1054,7 +1054,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     body { cursor: default; }
     article[contenteditable="false"] { user-select: text; cursor: default; }
   </style>` : ""}
-  <title>memory.wiki Preview</title>
+  <title>Memory.Wiki Preview</title>
 </head>
 <body${this.isCloudPreview ? ' class="live-mode"' : ""}>
   <!-- Loading state -->
@@ -1078,7 +1078,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   <div id="editor-wrapper">
     <!-- Live pane: own header + content -->
     <div id="live-pane">
-      <!-- Live pane header: label + toggle icons (like memory.wiki) -->
+      <!-- Live pane header: label + toggle icons (like Memory.Wiki) -->
       <div id="live-header" class="pane-header">
         <span class="pane-label" style="color:var(--accent)">LIVE</span>
         <span style="flex:1"></span>
@@ -1343,7 +1343,7 @@ interface RenderResult {
 
 function renderMarkdownWithFlavor(markdown: string): RenderResult {
   try {
-    // Same render pipeline as memory.wiki's web viewers (Phase 2 of the
+    // Same render pipeline as Memory.Wiki's web viewers (Phase 2 of the
     // WASM-to-markdown-it migration) — keeps preview output in sync
     // with what the user will see at memory.wiki/<id> after they publish.
     const result = renderMarkdown(markdown);

@@ -24,7 +24,7 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
  *   url: https://memory.wiki/b/<id>
  *   document_count: N
  *   updated: <ISO>
- *   source: "memory.wiki"
+ *   source: "Memory.Wiki"
  *   ---
  *
  *   # <bundle title>
@@ -167,7 +167,7 @@ export async function GET(
     updated ? `updated: ${updated}` : null,
     graphGeneratedAt && graphRequested ? `analysis_generated_at: ${new Date(graphGeneratedAt).toISOString()}` : null,
     graphRequested && isAnalysisStale ? "analysis_stale: true" : null,
-    'source: "memory.wiki"',
+    'source: "Memory.Wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");

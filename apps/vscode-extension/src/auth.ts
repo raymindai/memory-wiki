@@ -37,7 +37,7 @@ export class AuthManager {
     vscode.env.openExternal(vscode.Uri.parse(authUrl));
 
     vscode.window.showInformationMessage(
-      "Opening memory.wiki login in your browser. Complete login there to continue."
+      "Opening Memory.Wiki login in your browser. Complete login there to continue."
     );
 
     // Wait for the callback
@@ -54,7 +54,7 @@ export class AuthManager {
 
       await this.storeToken(token);
       this._onDidLogin.fire();
-      vscode.window.showInformationMessage("Successfully logged in to memory.wiki.");
+      vscode.window.showInformationMessage("Successfully logged in to Memory.Wiki.");
     } catch (err) {
       vscode.window.showErrorMessage(
         `Login failed: ${err instanceof Error ? err.message : String(err)}`
@@ -85,7 +85,7 @@ export class AuthManager {
       this.storeToken(token).then(() => {
         this._onDidLogin.fire();
         vscode.window.showInformationMessage(
-          "Successfully logged in to memory.wiki."
+          "Successfully logged in to Memory.Wiki."
         );
       });
     } else {

@@ -78,7 +78,7 @@ function instructionsFor(reason: PermissionReason, canonicalUrl: string): string
         "or unpublished it.",
       ].join("\n");
     case "service_unavailable":
-      return "The memory.wiki backend is temporarily unavailable. Try again shortly.";
+      return "The Memory.Wiki backend is temporarily unavailable. Try again shortly.";
   }
 }
 
@@ -101,7 +101,7 @@ export function permissionResponse(opts: PermissionResponseOptions): NextRespons
     `kind: ${resourceKind}`,
     resourceId ? `id: ${resourceId}` : null,
     `url: ${canonicalUrl}`,
-    'source: "memory.wiki"',
+    'source: "Memory.Wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");

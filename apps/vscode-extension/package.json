@@ -1,7 +1,7 @@
 {
   "name": "mdfy-vscode",
-  "displayName": "memory.wiki — Markdown Publisher",
-  "description": "WYSIWYG preview and publish Markdown documents to memory.wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
+  "displayName": "Memory.Wiki — Markdown Publisher",
+  "description": "WYSIWYG preview and publish Markdown documents to Memory.Wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
   "version": "1.4.1",
   "publisher": "raymindai",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "markdown",
     "preview",
     "publish",
-    "memory.wiki",
+    "Memory.Wiki",
     "mermaid",
     "katex",
     "gfm",
@@ -42,14 +42,14 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "memory.wiki",
-          "title": "memory.wiki",
+          "id": "Memory.Wiki",
+          "title": "Memory.Wiki",
           "icon": "media/sidebar-icon.svg"
         }
       ]
     },
     "views": {
-      "memory.wiki": [
+      "Memory.Wiki": [
         {
           "id": "mdfyDocuments",
           "name": "Documents",
@@ -68,22 +68,22 @@
       },
       {
         "command": "mdfy.publish",
-        "title": "memory.wiki: Publish to memory.wiki",
+        "title": "memory.wiki: Publish to Memory.Wiki",
         "icon": "$(cloud-upload)"
       },
       {
         "command": "mdfy.update",
-        "title": "memory.wiki: Push to memory.wiki",
+        "title": "memory.wiki: Push to Memory.Wiki",
         "icon": "$(arrow-up)"
       },
       {
         "command": "mdfy.pull",
-        "title": "memory.wiki: Pull from memory.wiki",
+        "title": "memory.wiki: Pull from Memory.Wiki",
         "icon": "$(arrow-down)"
       },
       {
         "command": "mdfy.login",
-        "title": "memory.wiki: Login to memory.wiki",
+        "title": "memory.wiki: Login to Memory.Wiki",
         "icon": "$(sign-in)"
       },
       {
@@ -139,47 +139,47 @@
         {
           "command": "mdfy.publish",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@1"
+          "group": "Memory.Wiki@1"
         },
         {
           "command": "mdfy.update",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@2"
+          "group": "Memory.Wiki@2"
         },
         {
           "command": "mdfy.pull",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@3"
+          "group": "Memory.Wiki@3"
         },
         {
           "command": "mdfy.export",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@4"
+          "group": "Memory.Wiki@4"
         },
         {
           "command": "mdfy.aiPolish",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@5"
+          "group": "Memory.Wiki@5"
         },
         {
           "command": "mdfy.aiSummary",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@6"
+          "group": "Memory.Wiki@6"
         },
         {
           "command": "mdfy.aiTldr",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@7"
+          "group": "Memory.Wiki@7"
         },
         {
           "command": "mdfy.aiTranslate",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@8"
+          "group": "Memory.Wiki@8"
         },
         {
           "command": "mdfy.aiChat",
           "when": "editorLangId == markdown",
-          "group": "memory.wiki@9"
+          "group": "Memory.Wiki@9"
         }
       ]
     },
@@ -204,12 +204,12 @@
       }
     ],
     "configuration": {
-      "title": "memory.wiki",
+      "title": "Memory.Wiki",
       "properties": {
         "mdfy.apiBaseUrl": {
           "type": "string",
           "default": "https://memory.wiki",
-          "description": "Base URL for the memory.wiki API"
+          "description": "Base URL for the Memory.Wiki API"
         },
         "mdfy.theme": {
           "type": "string",
@@ -229,7 +229,7 @@
         "mdfy.autoPreview": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically open memory.wiki preview when opening a Markdown file"
+          "description": "Automatically open Memory.Wiki preview when opening a Markdown file"
         },
         "mdfy.syncInterval": {
           "type": "number",

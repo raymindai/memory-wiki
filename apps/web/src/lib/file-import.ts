@@ -296,7 +296,7 @@ export interface MdfyResult {
 export async function mdfyText(text: string, filename?: string): Promise<MdfyResult> {
   // Unified with the doc-level Auto-Format quick action — both routes
   // used to live separately (/api/import/memory.wiki vs /api/ai action=format)
-  // with subtly different prompts, so importing + "memory.wiki it" produced a
+  // with subtly different prompts, so importing + "Memory.Wiki it" produced a
   // slightly different result than running Auto-Format on the same
   // text. Calling the same endpoint guarantees identical behaviour.
   // filename is no longer passed to the prompt; the format action

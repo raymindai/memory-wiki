@@ -17,7 +17,7 @@ export default function BundleNotFound() {
             This bundle doesn&apos;t exist, was deleted, or its owner restricted access.
           </p>
           <p className="text-caption leading-relaxed mb-8" style={{ color: "var(--text-faint)" }}>
-            Bundles are collections of documents — they share one URL but contain many docs. Make your own from any pair of docs in memory.wiki.
+            Bundles are collections of documents — they share one URL but contain many docs. Make your own from any pair of docs in Memory.Wiki.
           </p>
           <div className="flex gap-3 justify-center">
             <Link

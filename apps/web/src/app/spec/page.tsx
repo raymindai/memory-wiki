@@ -63,12 +63,12 @@ export default function SpecPage() {
         </h1>
         <p style={{ fontSize: 17, lineHeight: 1.7, color: "var(--text-muted)", marginBottom: 24, maxWidth: 720 }}>
           memori.wiki is a personal knowledge wiki that any AI can read. This page documents the URL contract, the
-          retrieval API, the llms.txt manifest, and the bundle digest — the same primitives the memory.wiki reference
+          retrieval API, the llms.txt manifest, and the bundle digest — the same primitives the Memory.Wiki reference
           implementation ships today. Other tools can implement this spec and interop with no platform lock-in.
         </p>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-faint)", marginBottom: 48, maxWidth: 720 }}>
           Engine licence: MIT. Reference implementation:{" "}
-          <Link href="https://memory.wiki" style={{ color: "var(--accent)" }}>memory.wiki</Link>. Spec version: 0.1 (draft, 2026-05-15).
+          <Link href="https://memory.wiki" style={{ color: "var(--accent)" }}>Memory.Wiki</Link>. Spec version: 0.1 (draft, 2026-05-15).
         </p>
 
         {/* TOC */}
@@ -185,7 +185,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>
 analysis_stale: true        # only when a member doc was edited after the analysis
-source: "memory.wiki"
+source: "Memory.Wiki"
 ---
 
 # <Bundle title>

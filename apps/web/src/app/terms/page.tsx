@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — memory.wiki",
-  description: "Terms of Service for memory.wiki, the memory.wiki Chrome Extension, VS Code Extension, and memory.wiki for Mac.",
+  title: "Terms of Service — Memory.Wiki",
+  description: "Terms of Service for Memory.Wiki, the Memory.Wiki Chrome Extension, VS Code Extension, and Memory.Wiki for Mac.",
   openGraph: {
-    title: "Terms of Service — memory.wiki",
+    title: "Terms of Service — Memory.Wiki",
     url: "https://memory.wiki/terms",
   },
 };
@@ -19,7 +19,7 @@ export default function TermsPage() {
       <article className="w-full max-w-2xl space-y-8 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
         <div>
           <Link href="/" className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-            &larr; memory.wiki
+            &larr; Memory.Wiki
           </Link>
           <h1 className="text-2xl font-bold mt-4" style={{ color: "var(--text-primary)" }}>
             Terms of Service
@@ -32,7 +32,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>1. Acceptance</h2>
           <p>
-            By using memory.wiki, the memory.wiki Chrome Extension, VS Code Extension, memory.wiki for Mac, or the memory.wiki MCP server
+            By using Memory.Wiki, the Memory.Wiki Chrome Extension, VS Code Extension, Memory.Wiki for Mac, or the Memory.Wiki MCP server
             (collectively, &ldquo;the Service&rdquo;), you agree to these terms. The Service is operated by Raymind AI.
           </p>
         </section>
@@ -40,7 +40,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>2. The Service</h2>
           <p>
-            memory.wiki is a Markdown document publishing platform. You can create, edit, and share documents
+            Memory.Wiki is a Markdown document publishing platform. You can create, edit, and share documents
             via shareable URLs. The Service includes a web editor, browser extension, VS Code extension,
             desktop app, and MCP server for AI tool integration.
           </p>
@@ -123,7 +123,7 @@ export default function TermsPage() {
         </section>
 
         <div className="pt-8 text-xs" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-dim)" }}>
-          <Link href="/" style={{ color: "var(--accent)" }}>memory.wiki</Link>
+          <Link href="/" style={{ color: "var(--accent)" }}>Memory.Wiki</Link>
           {" "}&middot;{" "}
           <Link href="/about" style={{ color: "var(--text-muted)" }}>About</Link>
           {" "}&middot;{" "}

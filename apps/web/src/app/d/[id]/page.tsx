@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isRestricted = (doc.allowed_emails || []).length > 0;
 
   if (isExpired) {
-    return { title: "Expired — memory.wiki", robots: { index: false, follow: false } };
+    return { title: "Expired — Memory.Wiki", robots: { index: false, follow: false } };
   }
 
   // Don't index restricted content. The password gate was removed,
@@ -73,20 +73,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `https://memory.wiki/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(features.slice(0, 5).join(","))}${authorParam}`;
 
   return {
-    title: `${title} — memory.wiki`,
+    title: `${title} — Memory.Wiki`,
     description,
     robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${title} — memory.wiki`,
+      title: `${title} — Memory.Wiki`,
       description,
       url: `https://memory.wiki/${id}`,
-      siteName: "memory.wiki",
+      siteName: "Memory.Wiki",
       type: "article",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} — memory.wiki`,
+      title: `${title} — Memory.Wiki`,
       description,
       images: [ogImageUrl],
     },

@@ -1,6 +1,6 @@
-# How memory.wiki works
+# How Memory.Wiki works
 
-> Read this once and you can explain memory.wiki to anyone — a teammate,
+> Read this once and you can explain Memory.Wiki to anyone — a teammate,
 > a journalist, an investor, the AI you're about to paste a URL into.
 > Assumes nothing. Pairs with `OVERVIEW.md` (what we have shipped).
 
@@ -8,7 +8,7 @@
 
 ## The one idea
 
-**A memory.wiki URL is an API for any AI.**
+**A Memory.Wiki URL is an API for any AI.**
 
 Paste `memory.wiki/<id>`, `memory.wiki/b/<id>`, or `memory.wiki/hub/<slug>`
 into ChatGPT, Claude, Gemini, or Cursor — the LLM fetches it and gets
@@ -34,7 +34,7 @@ go to the LLM directly — they back `mdfy_search` via MCP.
 
 ---
 
-## What an LLM gets when it fetches a memory.wiki URL
+## What an LLM gets when it fetches a Memory.Wiki URL
 
 Three URL shapes, each tuned for its purpose.
 
@@ -119,7 +119,7 @@ Useful extras: `?full=1` for a flat per-doc / per-bundle listing;
 
 ---
 
-## Two ways an LLM talks to memory.wiki
+## Two ways an LLM talks to Memory.Wiki
 
 **Pull (URL fetch).** The LLM has a URL, it `GET`s, it reads. Works
 in every AI tool that can hit a webpage — ChatGPT, Claude.ai web,
@@ -206,14 +206,14 @@ galaxy is what the LLM gets in the hub digest, just rendered for
 eyes instead of for a context window. Extend one, you extend the
 other.
 
-The mental model: **every memory.wiki surface is a different reader of
+The mental model: **every Memory.Wiki surface is a different reader of
 the same underlying graph**. The graph is the product.
 
 ---
 
 ## Why this is different from a PDF, Notion, or Google Doc
 
-| Property                                | PDF upload    | Notion / GDoc share | memory.wiki URL              |
+| Property                                | PDF upload    | Notion / GDoc share | Memory.Wiki URL              |
 | --------------------------------------- | ------------- | ------------------- | --------------------- |
 | Any AI reads it with no setup           | ✓             | ✗ (auth / JS)       | ✓                     |
 | Updates automatically as you edit       | ✗             | ✓                   | ✓                     |

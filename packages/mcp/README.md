@@ -1,6 +1,6 @@
 # mdfy-mcp
 
-MCP server for [memory.wiki](https://memory.wiki) — let any AI tool create, read, update, and manage Markdown documents with permanent shareable URLs.
+MCP server for [Memory.Wiki](https://memory.wiki) — let any AI tool create, read, update, and manage Markdown documents with permanent shareable URLs.
 
 Works with **Claude Code**, **Claude Desktop**, **Cursor**, and any [Model Context Protocol](https://modelcontextprotocol.io/) compatible client.
 
@@ -26,7 +26,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
 ```json
 {
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -39,7 +39,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
 ```json
 {
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -47,7 +47,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
 }
 ```
 
-No API keys or environment variables needed. Authentication is handled via `memory.wiki login`.
+No API keys or environment variables needed. Authentication is handled via `Memory.Wiki login`.
 
 ## Tools
 
@@ -84,7 +84,7 @@ AI:  mdfy_delete → Moved to trash
 
 ### Cross-AI Workflow
 
-memory.wiki URLs work as context across AI conversations:
+Memory.Wiki URLs work as context across AI conversations:
 
 ```
 You (in Claude): "Summarize the research at memory.wiki/abc123"
@@ -99,9 +99,9 @@ AI:  mdfy_update → document updated, same URL
 
 ## How Authentication Works
 
-The MCP server shares credentials with the `memory.wiki` CLI:
+The MCP server shares credentials with the `Memory.Wiki` CLI:
 
-1. `memory.wiki login` opens your browser for Google/GitHub OAuth
+1. `Memory.Wiki login` opens your browser for Google/GitHub OAuth
 2. JWT token is stored locally in `~/.memory.wiki/config.json`
 3. Edit tokens for each document are stored in `~/.memory.wiki/tokens.json`
 4. All API requests use `Authorization: Bearer` headers
@@ -120,7 +120,7 @@ No email spoofing possible — all requests are authenticated via JWT.
 
 ## Other Channels
 
-memory.wiki is available everywhere:
+Memory.Wiki is available everywhere:
 
 | Channel | Install |
 |---------|---------|
@@ -132,7 +132,7 @@ memory.wiki is available everywhere:
 
 ## Links
 
-- Website: [memory.wiki](https://memory.wiki)
+- Website: [Memory.Wiki](https://memory.wiki)
 - Plugins: [memory.wiki/plugins](https://memory.wiki/plugins)
 - API Docs: [memory.wiki/docs](https://memory.wiki/docs)
 - GitHub: [github.com/raymindai/mdcore](https://github.com/raymindai/mdcore)

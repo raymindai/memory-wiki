@@ -48,7 +48,7 @@ export default function ClaudeMdSnippet() {
 
   const snippet = hubSlug
     ? `<!-- memory.wiki:start -->
-## Personal context (memory.wiki hub)
+## Personal context (Memory.Wiki hub)
 
 Hub URL: https://memory.wiki/hub/${hubSlug}
 
@@ -80,7 +80,7 @@ docs as needed.
   if (state === "signed-out") {
     return (
       <p className="text-caption" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
-        <Link href="/" style={{ color: "var(--accent)" }}>Sign in to memory.wiki</Link>{" "}
+        <Link href="/" style={{ color: "var(--accent)" }}>Sign in to Memory.Wiki</Link>{" "}
         first — once your hub is public, this section will show a snippet you can paste into your CLAUDE.md.
       </p>
     );

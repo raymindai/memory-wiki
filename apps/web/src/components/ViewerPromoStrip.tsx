@@ -35,7 +35,7 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
             className="font-medium"
             style={{ color: "var(--accent)" }}
           >
-            Go to memory.wiki →
+            Go to Memory.Wiki →
           </Link>
         </p>
       </section>
@@ -122,14 +122,14 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
             className="text-caption"
             style={{ color: "var(--text-faint)" }}
           >
-            How memory.wiki works &rarr;
+            How Memory.Wiki works &rarr;
           </Link>
           <Link
             href="/mdfy-memory"
             className="text-caption"
             style={{ color: "var(--text-faint)" }}
           >
-            How memory.wiki Memory works &rarr;
+            How Memory.Wiki Memory works &rarr;
           </Link>
         </div>
       </div>

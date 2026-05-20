@@ -1,4 +1,4 @@
-# CLAUDE.md — memory.wiki Project Context
+# CLAUDE.md — Memory.Wiki Project Context
 
 > 이 파일은 Claude Code CLI가 자동으로 읽는 프로젝트 컨텍스트 파일이다.
 > 프로젝트에 대한 모든 핵심 정보를 담고 있다.
@@ -11,7 +11,7 @@
 
 AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이지 인터페이스가 아니다.
 사용자는 MD를 몰라도 된다. AI 회사가 구조적으로 복제 불가능한 포지션(크로스 AI 레이어).
-핵심 해자: 바이럴 뱃지("Published with memory.wiki") + 크로스 AI + 렌더링 품질.
+핵심 해자: 바이럴 뱃지("Published with Memory.Wiki") + 크로스 AI + 렌더링 품질.
 상세 전략 (v6): `docs/direction_v6_2026_05.md` 또는 memory의 `direction_v6_2026_05`.
 
 ## 팀
@@ -21,16 +21,16 @@ AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이
 
 ## 도메인
 
-- **memory.wiki** — 핵심 제품, 라이브, Vercel 자동 배포
-- **mdfy.online** — memory.wiki로 리다이렉트 (보조)
+- **Memory.Wiki** — 핵심 제품, 라이브, Vercel 자동 배포
+- **mdfy.online** — Memory.Wiki로 리다이렉트 (보조)
 - **mdcore.ai / mdcore.org / mdcore.md** — 과거 "Rust 엔진을 제품화" 전략의 잔재. 현재는
-  파킹/리다이렉트 상태. 차후 일몰 예정 (memory.wiki으로 통합).
+  파킹/리다이렉트 상태. 차후 일몰 예정 (Memory.Wiki으로 통합).
 
 ## GitHub
 
 - **Repo**: `raymindai/mdcore` (이름은 역사적 — 향후 `raymindai/memory.wiki`로 rename 검토 중)
 - **CI**: GitHub Actions (`.github/workflows/ci.yml` — build-web + e2e-test)
-- **Deploy**: Vercel 자동 배포, push하면 memory.wiki에 반영
+- **Deploy**: Vercel 자동 배포, push하면 Memory.Wiki에 반영
 
 ---
 
@@ -41,7 +41,7 @@ mdcore/
 ├── packages/
 │   └── mcp/                 # mdfy-mcp — MCP server (npm 출시됨, v1.3.x)
 ├── apps/
-│   ├── web/                 # Next.js 15 웹앱 (memory.wiki) — 메인 제품
+│   ├── web/                 # Next.js 15 웹앱 (Memory.Wiki) — 메인 제품
 │   │   ├── src/
 │   │   │   ├── app/
 │   │   │   │   ├── layout.tsx
@@ -68,8 +68,8 @@ mdcore/
 │   │   │       └── ...
 │   │   └── package.json
 │   ├── vscode-extension/    # mdfy-vscode — Marketplace 출시 (v1.4.0+)
-│   ├── desktop/             # memory.wiki Desktop — DMG (v2.2.0+, Developer ID 사인+notarize)
-│   ├── chrome-extension/    # memory.wiki Chrome — Web Store 출시 (v2.x)
+│   ├── desktop/             # Memory.Wiki Desktop — DMG (v2.2.0+, Developer ID 사인+notarize)
+│   ├── chrome-extension/    # Memory.Wiki Chrome — Web Store 출시 (v2.x)
 │   ├── cli/                 # mdfy-cli — npm 출시 (v1.3.x)
 │   └── quicklook/           # macOS QuickLook 플러그인
 ├── docs/
@@ -133,7 +133,7 @@ Live 탭(편집)은 TipTap이 같은 markdown-it 인스턴스로 ProseMirror 트
 
 | 디렉토리 | 출시 채널 | 상태 |
 | --- | --- | --- |
-| `apps/web` | memory.wiki (Vercel) | 라이브 |
+| `apps/web` | Memory.Wiki (Vercel) | 라이브 |
 | `apps/vscode-extension` | VS Code Marketplace (mdfy-vscode) | v1.4.0 |
 | `apps/desktop` | DMG 다운로드 | v2.2.0 (Developer ID 사인+notarize) |
 | `apps/chrome-extension` | Chrome Web Store | v2.x |
@@ -149,7 +149,7 @@ Live 탭(편집)은 TipTap이 같은 markdown-it 인스턴스로 ProseMirror 트
 
 ### 라이브 + 검증된 것
 
-- memory.wiki 메인 (Next.js 15, Vercel)
+- Memory.Wiki 메인 (Next.js 15, Vercel)
 - GFM 전체, KaTeX, Mermaid, 코드 하이라이팅
 - 짧은 URL 공유 (`memory.wiki/{nanoid}`) + 권한 모델
 - 다크/라이트 토글, 모바일 반응형, 드래그 앤 드롭
@@ -182,7 +182,7 @@ npm run dev    # → http://localhost:3000
 
 ### 빌드 & 배포
 
-- `git push origin main` → GitHub Actions CI → Vercel 자동 배포 (memory.wiki)
+- `git push origin main` → GitHub Actions CI → Vercel 자동 배포 (Memory.Wiki)
 - VS Code ext: `cd apps/vscode-extension && npx @vscode/vsce publish`
 - Desktop DMG: `cd apps/desktop && npm run build:dmg`
   (사전 설치: Developer ID Application 인증서 + 환경변수 `APPLE_ID`,

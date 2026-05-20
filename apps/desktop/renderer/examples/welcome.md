@@ -1,4 +1,4 @@
-# Welcome to memory.wiki
+# Welcome to Memory.Wiki
 
 > **Your Markdown, Beautifully Published.**
 > Import anything. Render beautifully. Share instantly.
@@ -36,7 +36,7 @@
 
 ## Try It Now
 
-- **Drop a PDF here** — see AI memory.wiki turn it into clean Markdown
+- **Drop a PDF here** — see AI Memory.Wiki turn it into clean Markdown
 - **Click +** in the sidebar to start a new doc from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during the beta, no credit card
 

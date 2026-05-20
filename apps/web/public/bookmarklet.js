@@ -346,7 +346,7 @@
         console.error("[mdfy] save failed:", err);
         setStatus(overlay,
           "<strong>mdfy</strong><br>Couldn't save. " + (err && err.message ? err.message : "Try again.") +
-          "<br><span style=\"color:#a1a1aa;font-size:12px\">If this keeps happening, check your network or try memory.wiki directly.</span>"
+          "<br><span style=\"color:#a1a1aa;font-size:12px\">If this keeps happening, check your network or try Memory.Wiki directly.</span>"
         );
         teardown(overlay, 6000);
       });

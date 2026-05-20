@@ -17,7 +17,7 @@ export default function DocNotFound() {
             This document doesn&apos;t exist, was moved, or its owner made it private.
           </p>
           <p className="text-caption leading-relaxed mb-8" style={{ color: "var(--text-faint)" }}>
-            memory.wiki documents are permanent — if you saved one earlier and it&apos;s gone, the owner likely deleted or restricted it.
+            Memory.Wiki documents are permanent — if you saved one earlier and it&apos;s gone, the owner likely deleted or restricted it.
           </p>
           <div className="flex gap-3 justify-center">
             <Link
@@ -32,7 +32,7 @@ export default function DocNotFound() {
               className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-body font-semibold transition-colors"
               style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
             >
-              What is memory.wiki?
+              What is Memory.Wiki?
             </Link>
           </div>
         </div>

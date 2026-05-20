@@ -231,7 +231,7 @@ function isAccent(fill: string): boolean {
   );
 }
 
-/** Mermaid initialization config matching memory.wiki rendering */
+/** Mermaid initialization config matching Memory.Wiki rendering */
 export function getMermaidConfig(isDark: boolean) {
   return {
     startOnLoad: false,

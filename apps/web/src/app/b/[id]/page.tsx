@@ -60,20 +60,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `https://memory.wiki/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(`Bundle,${bundle.documentCount} docs,Knowledge Graph`)}${authorParam}`;
 
   return {
-    title: `${title} — memory.wiki`,
+    title: `${title} — Memory.Wiki`,
     description,
     robots: isProtected ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${title} — memory.wiki`,
+      title: `${title} — Memory.Wiki`,
       description,
       url: `https://memory.wiki/b/${id}`,
-      siteName: "memory.wiki",
+      siteName: "Memory.Wiki",
       type: "article",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} — memory.wiki`,
+      title: `${title} — Memory.Wiki`,
       description,
       images: [ogImageUrl],
     },

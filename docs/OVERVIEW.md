@@ -1,4 +1,4 @@
-# memory.wiki — Product, Features, Technology (2026-05)
+# Memory.Wiki — Product, Features, Technology (2026-05)
 
 > One-page reference. Skim it before any meeting, pitch, or
 > onboarding. Pairs with `HOW-IT-WORKS.md` (mental model) and
@@ -10,7 +10,7 @@
 
 **Tagline.** The fastest way from thought to shared document.
 
-**One sentence.** memory.wiki turns any markdown — typed, pasted from an AI,
+**One sentence.** Memory.Wiki turns any markdown — typed, pasted from an AI,
 imported from a file — into a clean public URL that any human reads
 in a browser and any LLM (Claude, ChatGPT, Gemini, Cursor) ingests
 as native context.
@@ -19,12 +19,12 @@ as native context.
 
 | Moat                 | What it means                                                                                  |
 | -------------------- | ---------------------------------------------------------------------------------------------- |
-| **Viral badge loop** | Every shared doc carries a "Published with memory.wiki" badge → free distribution.                |
-| **Cross-AI layer**   | memory.wiki sits between *every* LLM and the human. No single AI company can replicate that position. |
+| **Viral badge loop** | Every shared doc carries a "Published with Memory.Wiki" badge → free distribution.                |
+| **Cross-AI layer**   | Memory.Wiki sits between *every* LLM and the human. No single AI company can replicate that position. |
 | **URL-native**       | The doc isn't a file behind an app — it's an address. AI agents pull it directly.              |
 | **Rendering quality**| GFM + KaTeX + Mermaid + ASCII diagrams + footnotes share one renderer across every surface.    |
 
-**Strategic anchor.** A memory.wiki URL is an API for any AI. See
+**Strategic anchor.** A Memory.Wiki URL is an API for any AI. See
 `HOW-IT-WORKS.md` for the full mental model.
 
 ---
@@ -83,12 +83,12 @@ Auxiliary surfaces:
 - Per-user nanoid Hub slug (auto-created on sign-in).
 - Restricted docs gate non-allowed visitors with a password / sign-in flow.
 - Permanent URLs — docs **never expire** (pricing policy: free during beta, future Pro for auto-analysis; expiry never).
-- Public viewer carries a "Published with memory.wiki" badge.
+- Public viewer carries a "Published with Memory.Wiki" badge.
 
 ### Multi-channel app surfaces
 | Channel                     | Status                                  |
 | --------------------------- | --------------------------------------- |
-| `memory.wiki` web              | Live on Vercel                          |
+| `Memory.Wiki` web              | Live on Vercel                          |
 | VS Code (mdfy-vscode)       | Marketplace v1.4.0                      |
 | Desktop (DMG)               | v2.2.0, Developer ID signed + notarized |
 | Chrome Web Store            | v2.x                                    |
@@ -150,9 +150,9 @@ Auxiliary surfaces:
 - pgvector for similarity search.
 
 ### Hosting & CI
-- **Vercel** — `git push origin main` → Actions CI → auto-deploy memory.wiki.
+- **Vercel** — `git push origin main` → Actions CI → auto-deploy Memory.Wiki.
 - **GitHub Actions** (`.github/workflows/ci.yml`) — build-web + e2e-test.
-- Domains: **memory.wiki** primary; mdfy.online redirects in; mdcore.ai / .org / .md parked (historical, sunset planned).
+- Domains: **Memory.Wiki** primary; mdfy.online redirects in; mdcore.ai / .org / .md parked (historical, sunset planned).
 
 ### One renderer everywhere
 Every non-edit surface — web viewer, embed, bundle, hub, VS Code preview, Desktop preview, Chrome extension popup, raw payload — runs the **same `lib/render.ts`** (vendored to each channel). That's why "looks different in viewer than in editor" can't structurally happen.
@@ -162,12 +162,12 @@ Every non-edit surface — web viewer, embed, bundle, hub, VS Code preview, Desk
 ## 5. Repository layout
 
 ```text
-mdcore/                          # repo name is historical — product is "memory.wiki"
+mdcore/                          # repo name is historical — product is "Memory.Wiki"
 ├── apps/
-│   ├── web/                     # Next.js 15 web app → memory.wiki (the main product)
+│   ├── web/                     # Next.js 15 web app → Memory.Wiki (the main product)
 │   ├── vscode-extension/        # mdfy-vscode (Marketplace)
-│   ├── desktop/                 # memory.wiki Desktop (Electron DMG)
-│   ├── chrome-extension/        # memory.wiki Chrome (Web Store)
+│   ├── desktop/                 # Memory.Wiki Desktop (Electron DMG)
+│   ├── chrome-extension/        # Memory.Wiki Chrome (Web Store)
 │   ├── cli/                     # mdfy-cli (npm)
 │   └── quicklook/               # macOS QuickLook
 ├── packages/
@@ -188,5 +188,5 @@ markdown-it pipeline.
 - Public launch held for end of August 2026; beta is free.
 - Two-door product framing: **personal knowledge hub for the AI era**, accessed via memory (capture / publish) AND wiki (curate / share).
 - Brand rename is deferred until ~2 weeks before public launch (shortlist: brains.wiki, mind.wiki, itsmy.wiki).
-- memory.wiki IS Graph RAG, but the differentiation is **delivery model, not retrieval** — the graph ships in the URL payload so any external AI inherits it.
-- vs Karpathy's LLM Wiki: memory.wiki is hub + N bundles + M docs (scope composition); Karpathy is one unified wiki. Per-project AGENTS.md / .cursor/rules want context shaped like bundles, not like one wiki.
+- Memory.Wiki IS Graph RAG, but the differentiation is **delivery model, not retrieval** — the graph ships in the URL payload so any external AI inherits it.
+- vs Karpathy's LLM Wiki: Memory.Wiki is hub + N bundles + M docs (scope composition); Karpathy is one unified wiki. Per-project AGENTS.md / .cursor/rules want context shaped like bundles, not like one wiki.

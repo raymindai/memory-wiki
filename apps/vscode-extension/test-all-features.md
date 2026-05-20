@@ -1,4 +1,4 @@
-# memory.wiki VS Code Extension Test Document
+# Memory.Wiki VS Code Extension Test Document
 
 This file contains every Markdown element to test the WYSIWYG preview.
 
@@ -20,7 +20,7 @@ You can also combine them: ***bold italic***, **~~bold strikethrough~~**, *~~ita
 
 ## Links and Images
 
-Here is a [link to memory.wiki](https://memory.wiki) and another [link to GitHub](https://github.com).
+Here is a [link to Memory.Wiki](https://memory.wiki) and another [link to GitHub](https://github.com).
 
 ![Sample Image](https://picsum.photos/600/300)
 
@@ -69,7 +69,7 @@ function greet(name) {
   return { greeting: `Hello, ${name}!` };
 }
 
-greet("memory.wiki");
+greet("Memory.Wiki");
 ```
 
 ```python
@@ -109,7 +109,7 @@ LIMIT 10;
 | Feature | Status | Notes |
 | --- | --- | --- |
 | WYSIWYG Preview | Done | contentEditable |
-| Publish to memory.wiki | Done | One-click |
+| Publish to Memory.Wiki | Done | One-click |
 | Bidirectional Sync | Done | Push/Pull |
 | Code Highlighting | Done | highlight.js |
 | Math Rendering | Done | KaTeX |
@@ -166,7 +166,7 @@ graph TD
 sequenceDiagram
     participant U as User
     participant V as VS Code
-    participant S as memory.wiki
+    participant S as Memory.Wiki
     U->>V: Edit markdown
     V->>V: WYSIWYG Preview
     V->>S: Publish
@@ -230,4 +230,4 @@ pie title Document Types
 
 ---
 
-*Published with [memory.wiki](https://memory.wiki) -- Your Markdown, Beautifully Published.*
+*Published with [Memory.Wiki](https://memory.wiki) -- Your Markdown, Beautifully Published.*

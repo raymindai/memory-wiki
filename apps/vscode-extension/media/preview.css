@@ -1,6 +1,6 @@
 /* =========================================================
-   memory.wiki VS Code Preview — Dark/Light theme
-   Ported from memory.wiki globals.css + mdcore-rendered styles
+   Memory.Wiki VS Code Preview — Dark/Light theme
+   Ported from Memory.Wiki globals.css + mdcore-rendered styles
    ========================================================= */
 
 :root {
@@ -438,7 +438,7 @@ html, body {
   line-height: 1.65;
 }
 
-/* Override highlight.js background to match memory.wiki */
+/* Override highlight.js background to match Memory.Wiki */
 .mdcore-rendered .hljs {
   background: transparent !important;
 }
@@ -646,9 +646,9 @@ pre.ascii-original.hidden {
   outline-color: var(--accent);
 }
 
-/* === Pane-based layout (like memory.wiki) === */
+/* === Pane-based layout (like Memory.Wiki) === */
 
-/* Pane header — label + toggle icons (compact, like memory.wiki header row) */
+/* Pane header — label + toggle icons (compact, like Memory.Wiki header row) */
 .pane-header {
   display: flex;
   align-items: center;

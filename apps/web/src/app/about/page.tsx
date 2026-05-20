@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import AboutContent from "@/components/AboutContent";
 
 export const metadata: Metadata = {
-  title: "About — memory.wiki",
+  title: "About — Memory.Wiki",
   description:
-    "memory.wiki is your personal knowledge hub for the AI era. Capture from any AI chat, bundle by topic, deploy to any AI as a URL. Document, Bundle, and Hub URLs — same primitive, three scopes.",
+    "Memory.Wiki is your personal knowledge hub for the AI era. Capture from any AI chat, bundle by topic, deploy to any AI as a URL. Document, Bundle, and Hub URLs — same primitive, three scopes.",
   alternates: {
     canonical: "https://memory.wiki/about",
     languages: { ko: "https://memory.wiki/ko/about" },
   },
   openGraph: {
-    title: "About — memory.wiki",
+    title: "About — Memory.Wiki",
     description:
       "Your personal knowledge hub for the AI era. Capture, Bundle, Deploy — every URL is a living document, deployable to any AI.",
     url: "https://memory.wiki/about",

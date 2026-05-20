@@ -84,7 +84,7 @@ import {
 
 // ─── Sample documents for default tabs ───
 
-const SAMPLE_WELCOME = `# Welcome to memory.wiki
+const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
 
 > **The Markdown Hub.** Collect from anywhere. Edit with AI. Publish with a permanent URL.
 
@@ -123,7 +123,7 @@ const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
 | Channel | How |
 |---------|-----|
-| Web | You are here — [memory.wiki](https://memory.wiki) |
+| Web | You are here — [Memory.Wiki](https://memory.wiki) |
 | VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode) — Cmd+Shift+M to preview |
 | Mac App | Native desktop with sidebar and sync |
 | CLI | \`npm install -g mdfy-cli\` — pipe anything to a URL |
@@ -133,7 +133,7 @@ const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
 ## Try It Now
 
-- **Drop a PDF here** — AI memory.wiki turns it into clean Markdown
+- **Drop a PDF here** — AI Memory.Wiki turns it into clean Markdown
 - **Click +** in the sidebar to start from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during beta
 
@@ -335,7 +335,7 @@ erDiagram
 mindmap
   root((mdcore))
     Product
-      memory.wiki
+      Memory.Wiki
       Chrome Extension
     Engine
       Rust
@@ -352,7 +352,7 @@ mindmap
 timeline
     title mdcore Milestones
     2026 Q1 : Engine v0.1
-             : memory.wiki launch
+             : Memory.Wiki launch
     2026 Q2 : npm package
              : CLI tool
     2026 Q3 : API platform
@@ -424,7 +424,7 @@ const SAMPLE_ASCII = `# ASCII Art Examples
 
 \`\`\`
 ┌──────────────────────────────────────────┐
-│              memory.wiki                      │
+│              Memory.Wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -442,7 +442,7 @@ const SAMPLE_ASCII = `# ASCII Art Examples
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
 │  │ memory.wiki/{id} — shareable URL        │ │
-│  │ + "Published with memory.wiki" badge    │ │
+│  │ + "Published with Memory.Wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 \`\`\`
@@ -458,7 +458,7 @@ const SAMPLE_ASCII = `# ASCII Art Examples
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  memory.wiki                     │
+│  Memory.Wiki                     │
 └─────────────────────────────┘
 \`\`\`
 
@@ -494,7 +494,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI memory.wiki structuring    │
+│ AI Memory.Wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 \`\`\`
@@ -504,7 +504,7 @@ const SAMPLE_IMPORT_EXPORT = `# Import & Export Guide
 
 ## Import — 13+ Formats
 
-Drop any file onto memory.wiki, use the **IMPORT** button in the sidebar, or paste content directly.
+Drop any file onto Memory.Wiki, use the **IMPORT** button in the sidebar, or paste content directly.
 
 | Format | How it works |
 |--------|-------------|
@@ -517,9 +517,9 @@ Drop any file onto memory.wiki, use the **IMPORT** button in the sidebar, or pas
 | **RST** | reStructuredText headings, links → Markdown |
 | **RTF / JSON / XML / TXT** | Text extraction with format hints |
 
-### AI memory.wiki Structuring
+### AI Memory.Wiki Structuring
 
-After importing, you'll see **"memory.wiki this document?"** — click **memory.wiki it** to let AI:
+After importing, you'll see **"Memory.Wiki this document?"** — click **Memory.Wiki it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks
@@ -532,13 +532,13 @@ After importing, you'll see **"memory.wiki this document?"** — click **memory.
 
 \`\`\`bash
 # Pipe any file content
-cat report.md | memory.wiki publish
-pbpaste | memory.wiki publish
+cat report.md | Memory.Wiki publish
+pbpaste | Memory.Wiki publish
 \`\`\`
 
 ### Import from GitHub
 
-Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. memory.wiki fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
+Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. Memory.Wiki fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
 
 Works on:
 - \`github.com/owner/repo\` — repo root, recursive
@@ -548,13 +548,13 @@ Works on:
 
 ### Import an Obsidian vault
 
-Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. memory.wiki walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
+Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. Memory.Wiki walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
 
 > v1 doesn't follow \`[[wikilinks]]\` or rewrite attachments — they come through as plain text. The concept index will still connect notes that share concepts once the ontology refresh catches up.
 
 ### Import via Chrome Extension
 
-Click the memory.wiki button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
+Click the Memory.Wiki button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
 
 ## Export — Every Destination
 
@@ -590,7 +590,7 @@ Click anywhere in the **Live** view to start editing. Format with the toolbar or
 
 ## Flavor Detection & Conversion
 
-memory.wiki auto-detects your Markdown flavor:
+Memory.Wiki auto-detects your Markdown flavor:
 
 - **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
 - **CommonMark** — Standard, maximum compatibility
@@ -640,7 +640,7 @@ Click the **Outline** button to see your document structure. All headings (H1-H6
 
 ## Related in your hub
 
-Under every doc you own, memory.wiki lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
+Under every doc you own, Memory.Wiki lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
 
 ## Hub recall + reranker
 
@@ -671,11 +671,11 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 ## Cross-Platform Sync
 
-Your documents sync across all 7 memory.wiki channels:
+Your documents sync across all 7 Memory.Wiki channels:
 
 | Channel | Install | What it does |
 |---------|---------|-------------|
-| Web | [memory.wiki](https://memory.wiki) | Full editor with AI tools |
+| Web | [Memory.Wiki](https://memory.wiki) | Full editor with AI tools |
 | VS Code | \`ext install raymindai.mdfy-vscode\` | WYSIWYG preview + sync |
 | Mac App | [Download DMG](https://memory.wiki/plugins) | Native sidebar + offline |
 | CLI | \`npm install -g mdfy-cli\` | Pipe anything to a URL |
@@ -1094,13 +1094,13 @@ const SAMPLE_CHROME_EXT = `# Chrome Extension
 ### Capture from ChatGPT / Claude / Gemini
 
 1. Open any AI conversation
-2. Click the **memory.wiki** floating button (bottom-right corner)
+2. Click the **Memory.Wiki** floating button (bottom-right corner)
 3. Conversation is auto-formatted with User/Assistant roles
 4. URL is copied to clipboard
 
 ### Capture from Any Page
 
-1. Click the memory.wiki icon in the toolbar
+1. Click the Memory.Wiki icon in the toolbar
 2. Select "Capture Page"
 3. Page content is converted to Markdown and published
 
@@ -1131,7 +1131,7 @@ const SAMPLE_VSCODE_EXT = `# VS Code Extension
 ext install raymindai.mdfy-vscode
 \`\`\`
 
-Or search "memory.wiki" in VS Code Extensions.
+Or search "Memory.Wiki" in VS Code Extensions.
 
 ## Quick Start
 
@@ -1155,7 +1155,7 @@ Or search "memory.wiki" in VS Code Extensions.
 | Shortcut | Command |
 |----------|---------|
 | \`Cmd+Shift+M\` | Open WYSIWYG preview |
-| \`Cmd+Alt+P\` | Publish to memory.wiki |
+| \`Cmd+Alt+P\` | Publish to Memory.Wiki |
 | \`Cmd+Alt+E\` | Export document |
 
 ## Settings
@@ -1168,24 +1168,24 @@ Or search "memory.wiki" in VS Code Extensions.
 | \`mdfy.syncInterval\` | \`30\` | Polling interval (seconds) |
 `;
 
-const SAMPLE_DESKTOP = `# memory.wiki for Mac
+const SAMPLE_DESKTOP = `# Memory.Wiki for Mac
 
 > Native desktop app with sidebar, sync, and local WASM rendering.
 
 ## Install
 
 1. Download the DMG from [memory.wiki/plugins](https://memory.wiki/plugins)
-2. Drag **memory.wiki** to Applications
-3. Launch memory.wiki
+2. Drag **Memory.Wiki** to Applications
+3. Launch Memory.Wiki
 
 ## Sidebar
 
 | Tab | Contents |
 |-----|----------|
 | ALL | Everything — local + synced + cloud |
-| SYNCED | Local files linked to memory.wiki |
+| SYNCED | Local files linked to Memory.Wiki |
 | LOCAL | Unpublished local files |
-| CLOUD | Documents on memory.wiki with folders |
+| CLOUD | Documents on Memory.Wiki with folders |
 
 ## Editing Modes
 
@@ -1199,7 +1199,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 
 ## Features
 
-- Full WASM rendering engine (same as memory.wiki)
+- Full WASM rendering engine (same as Memory.Wiki)
 - KaTeX math, Mermaid diagrams, 190+ language highlighting
 - Document outline panel
 - Import: PDF, DOCX, PPTX, XLSX, HTML, CSV
@@ -1209,7 +1209,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 - Offline support
 `;
 
-const SAMPLE_CLI = `# memory.wiki CLI
+const SAMPLE_CLI = `# Memory.Wiki CLI
 
 > Publish Markdown from the terminal. Pipe anything to a URL.
 
@@ -1223,40 +1223,40 @@ npm install -g mdfy-cli
 
 \`\`\`bash
 # Publish a file
-memory.wiki publish README.md
+Memory.Wiki publish README.md
 # → https://memory.wiki/abc123  (copied to clipboard)
 
 # Publish from pipe
-echo "# Hello World" | memory.wiki publish
+echo "# Hello World" | Memory.Wiki publish
 
 # Publish clipboard
-pbpaste | memory.wiki publish
+pbpaste | Memory.Wiki publish
 \`\`\`
 
 ## Pipe Anything
 
 \`\`\`bash
-claude "explain React hooks" | memory.wiki publish
-git log --oneline -20 | memory.wiki publish
-man grep | memory.wiki publish
-curl -s https://api.example.com/status | memory.wiki publish
+claude "explain React hooks" | Memory.Wiki publish
+git log --oneline -20 | Memory.Wiki publish
+man grep | Memory.Wiki publish
+curl -s https://api.example.com/status | Memory.Wiki publish
 \`\`\`
 
 ## Read in Terminal
 
 \`\`\`bash
-memory.wiki read abc123
+Memory.Wiki read abc123
 # → Color-coded headings, bold, code blocks, lists
 \`\`\`
 
 ## Manage Documents
 
 \`\`\`bash
-memory.wiki list                       # List your documents
-memory.wiki update abc123 updated.md   # Update
-memory.wiki pull abc123 -o doc.md      # Download
-memory.wiki delete abc123              # Delete
-memory.wiki open abc123                # Open in browser
+Memory.Wiki list                       # List your documents
+Memory.Wiki update abc123 updated.md   # Update
+Memory.Wiki pull abc123 -o doc.md      # Download
+Memory.Wiki delete abc123              # Delete
+Memory.Wiki open abc123                # Open in browser
 \`\`\`
 
 ## tmux Integration
@@ -1264,26 +1264,26 @@ memory.wiki open abc123                # Open in browser
 Add to \`~/.tmux.conf\`:
 
 \`\`\`bash
-bind-key M run-shell "tmux capture-pane -p -S -1000 | memory.wiki publish"
+bind-key M run-shell "tmux capture-pane -p -S -1000 | Memory.Wiki publish"
 \`\`\`
 
 ## Short Aliases
 
 | Short | Full |
 |-------|------|
-| \`memory.wiki p\` | \`memory.wiki publish\` |
-| \`memory.wiki ls\` | \`memory.wiki list\` |
-| \`memory.wiki rm\` | \`memory.wiki delete\` |
-| \`memory.wiki cat\` | \`memory.wiki read\` |
+| \`Memory.Wiki p\` | \`Memory.Wiki publish\` |
+| \`Memory.Wiki ls\` | \`Memory.Wiki list\` |
+| \`Memory.Wiki rm\` | \`Memory.Wiki delete\` |
+| \`Memory.Wiki cat\` | \`Memory.Wiki read\` |
 `;
 
 const SAMPLE_MCP = `# MCP Server
 
-> Let AI tools create, read, and manage documents on memory.wiki.
+> Let AI tools create, read, and manage documents on Memory.Wiki.
 
 ## What is MCP?
 
-MCP (Model Context Protocol) lets AI tools call external APIs. The memory.wiki MCP server gives Claude the ability to publish and manage documents.
+MCP (Model Context Protocol) lets AI tools call external APIs. The Memory.Wiki MCP server gives Claude the ability to publish and manage documents.
 
 ## Setup
 
@@ -1308,7 +1308,7 @@ Add to \`.mcp.json\`:
 \`\`\`json
 {
   "mcpServers": {
-    "memory.wiki": {
+    "Memory.Wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -1319,7 +1319,7 @@ Add to \`.mcp.json\`:
 ## Usage Examples
 
 \`\`\`
-You: "Publish my meeting notes to memory.wiki"
+You: "Publish my meeting notes to Memory.Wiki"
 Claude: → mdfy_create → https://memory.wiki/abc123
 
 You: "Show me my documents"
@@ -1346,9 +1346,9 @@ Claude: → mdfy_update → Document updated, same URL
 The hosted HTTP MCP exposes 25 tools including append, sections, versions, folders, and more.
 `;
 
-const SAMPLE_FRESHNESS = `# How memory.wiki keeps your docs, bundles, and hub fresh
+const SAMPLE_FRESHNESS = `# How Memory.Wiki keeps your docs, bundles, and hub fresh
 
-> Every memory.wiki URL is what the AI reads when you paste it. Freshness is part of the deal.
+> Every Memory.Wiki URL is what the AI reads when you paste it. Freshness is part of the deal.
 
 ## TL;DR
 
@@ -1385,7 +1385,7 @@ Normal flow: concept changes show up in the hub URL within seconds. Two guardrai
 
 ## The "Re-analyze (N)" banner
 
-When the Hub opens, memory.wiki compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
+When the Hub opens, Memory.Wiki compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
 
 > 🟡 Concepts out of date · N docs have changed
 > [Re-analyze (N)]
@@ -1414,7 +1414,7 @@ Right-click any doc in the sidebar → **Re-analyze concepts**. Same machinery, 
 - You haven't touched anything (just reading) — nothing to refresh
 - You're not signed in — no concept index applies
 
-## Why memory.wiki doesn't auto-rebuild more aggressively
+## Why Memory.Wiki doesn't auto-rebuild more aggressively
 
 **Cost discipline.** Concept extraction is a Haiku call per doc. Auto-rebuilding on every save would burn tokens during noisy editing.
 
@@ -1429,7 +1429,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 ## Install
 
-1. Install memory.wiki for Mac — QuickLook is bundled automatically
+1. Install Memory.Wiki for Mac — QuickLook is bundled automatically
 2. Or download MdfyQuickLook separately from [memory.wiki/plugins](https://memory.wiki/plugins)
 3. Enable in **System Settings → Extensions → Quick Look**
 
@@ -1447,7 +1447,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 - Tables with alignment
 - KaTeX math equations
 - Dark / light theme (follows system preference)
-- "Open on memory.wiki" button
+- "Open on Memory.Wiki" button
 
 ## Supported Files
 
@@ -1462,13 +1462,13 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 - Works in Finder, Desktop, and Open/Save dialogs
 - Preview updates when you press Space again after editing
-- Click "Open on memory.wiki" to publish directly from the preview
+- Click "Open on Memory.Wiki" to publish directly from the preview
 - No background processes — lightweight QuickLook extension
 `;
 
 const SAMPLE_BUNDLES = `# Bundles, Discoveries, Compile & Concepts
 
-Beyond single docs, memory.wiki lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
+Beyond single docs, Memory.Wiki lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
 
 ## Bundles: from folder to thinking surface
 
@@ -1558,7 +1558,7 @@ The home screen shows compounding stats:
 The bundle is no longer a folder. It's a thinking partner that reads what you've gathered and tells you what it sees.
 `;
 
-// Server-seeded "Sample Bundle: Tour of memory.wiki". The bundle row and its
+// Server-seeded "Sample Bundle: Tour of Memory.Wiki". The bundle row and its
 // 3 member docs are inserted by supabase/migrations/033_example_bundle.sql
 // with fixed ids (mdfy-ex-bundle / mdfy-ex-fmt / mdfy-ex-diag / mdfy-ex-feat),
 // so this id can be hardcoded on the client. Listed in EXAMPLE_TABS as a
@@ -1569,13 +1569,13 @@ const EXAMPLE_BUNDLE_ID = "mdfy-ex-bundle";
 
 const SAMPLE_AI_CAPTURE = `# Capture AI conversations
 
-memory.wiki is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
+Memory.Wiki is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
 
 ## Three ways in
 
 ### 1. Paste a share URL
 
-Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. memory.wiki fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
+Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. Memory.Wiki fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
 
 \`\`\`
 https://chat.openai.com/share/abc-...
@@ -1584,7 +1584,7 @@ https://claude.ai/share/xyz-...
 
 ### 2. Drop a transcript
 
-Copied a chat thread to clipboard? Paste it. memory.wiki auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
+Copied a chat thread to clipboard? Paste it. Memory.Wiki auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
 
 ### 3. Capture from where you work
 
@@ -1612,7 +1612,7 @@ const EXAMPLE_TABS: Tab[] = [
   // Markdown is "" because BundleEmbed fetches member docs by bundleId,
   // not from this tab's local body. readonly:true so the tab persists
   // across sessions like other Guides & Examples entries.
-  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of memory.wiki", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
+  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of Memory.Wiki", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-import", title: extractTitleFromMd(SAMPLE_IMPORT_EXPORT), markdown: SAMPLE_IMPORT_EXPORT, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-features", title: extractTitleFromMd(SAMPLE_FEATURES), markdown: SAMPLE_FEATURES, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-syntax", title: extractTitleFromMd(SAMPLE_FORMATTING), markdown: SAMPLE_FORMATTING, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
@@ -3486,7 +3486,7 @@ export default function MdEditor() {
   const [mdfyElapsed, setMdfyElapsed] = useState(0);
   const [showFlavorMenu, setShowFlavorMenu] = useState(false);
 
-  // Tick elapsed time while AI memory.wiki is processing
+  // Tick elapsed time while AI Memory.Wiki is processing
   useEffect(() => {
     if (!mdfyLoading) {
       setMdfyElapsed(0);
@@ -3598,7 +3598,7 @@ export default function MdEditor() {
     // Root URL contract: visiting memory.wiki/ (no doc path, no
     // ?from=/?doc=/?bundle=, no hash share) means "I'm starting
     // fresh — show me Home." Restoring a stale activeTab from
-    // localStorage here was confusing: the user types memory.wiki,
+    // localStorage here was confusing: the user types Memory.Wiki,
     // expects a landing page, instead lands inside the editor on
     // whatever doc they last looked at (often with an empty body
     // because the doc's cloud markdown wasn't fetched yet).
@@ -3639,7 +3639,7 @@ export default function MdEditor() {
   // the user is *intentionally* viewing it (they just clicked it in
   // the Guides sidebar / Start grid). Honour that click — previously
   // we filtered it out and silently fell back to an owned doc, which
-  // is why clicking "Sample Bundle: Tour of memory.wiki" in the sidebar
+  // is why clicking "Sample Bundle: Tour of Memory.Wiki" in the sidebar
   // showed someone else's doc (or blank) instead of the bundle.
   const activeTab = (() => {
     const isOwn = (t: typeof tabs[number]) => !t.deleted && t.ownerEmail !== EXAMPLE_OWNER;
@@ -3687,7 +3687,7 @@ export default function MdEditor() {
   // when localStorage has examples only), don't fall back to
   // SAMPLE_WELCOME either. The Start screen handles the empty-
   // state case; the editor staying blank prevents the
-  // "# Welcome to memory.wiki" blurb from auto-rendering on refresh.
+  // "# Welcome to Memory.Wiki" blurb from auto-rendering on refresh.
   const initialMd = activeTab?.markdown
     || (activeTab ? "" : "");
   const [markdown, setMarkdownRaw] = useState(initialMd);
@@ -3847,7 +3847,7 @@ export default function MdEditor() {
       // is either the editor's seed (used to be SAMPLE_WELCOME!) or
       // a Tiptap-normalized version of it. Saving would clobber the
       // real doc body with the seed — which is the failure mode that
-      // produced the "Welcome to [memory.wiki]..." corruption.
+      // produced the "Welcome to [Memory.Wiki]..." corruption.
       if (!currentTab.markdown) return;
       // Hold off saving while a tab switch is mid-flight. handleTiptapChange
       // already gates on this flag for direct edits, but other call sites
@@ -5852,7 +5852,7 @@ export default function MdEditor() {
       });
     };
 
-    waitForMermaid().catch(() => { console.warn("[memory.wiki] Mermaid failed to load"); return null; }).then(async (mermaid) => {
+    waitForMermaid().catch(() => { console.warn("[Memory.Wiki] Mermaid failed to load"); return null; }).then(async (mermaid) => {
       if (!mermaid) return;
       mermaid.initialize({
         startOnLoad: false,
@@ -6414,7 +6414,7 @@ export default function MdEditor() {
           return;
         }
       }
-      // ?fork=<id> — visitor clicked "Save in memory.wiki" on the public
+      // ?fork=<id> — visitor clicked "Save in Memory.Wiki" on the public
       // viewer's Ask AI panel. Fetch the source doc, drop it into a
       // fresh local tab as a draft (no cloudId — autoSave creates a
       // new row under the signed-in user's account, or anon cookie
@@ -9658,7 +9658,7 @@ ${clone.innerHTML}
           <h1
             className="font-bold tracking-tight cursor-pointer shrink-0 flex items-baseline"
             onClick={() => window.open("/about", "_blank")}
-            title="memory.wiki — About"
+            title="Memory.Wiki — About"
           >
             <MdfyLogo size={isMobile ? 14 : 18} />
           </h1>
@@ -13324,7 +13324,7 @@ ${clone.innerHTML}
                     toolbar was redundant. The greeting falls through
                     profile.display_name → email prefix → bare time
                     string so it never renders an empty name slot.
-                    Signed-out users see "Welcome to memory.wiki" + the
+                    Signed-out users see "Welcome to Memory.Wiki" + the
                     deploy-to-any-AI subtitle. */}
                 {(() => {
                   const hour = new Date().getHours();
@@ -13342,7 +13342,7 @@ ${clone.innerHTML}
                       <h1 className="text-display font-bold tracking-tight" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
                         {isSignedIn
                           ? (displayName ? `${timeGreeting}, ${displayName}` : timeGreeting)
-                          : "Welcome to memory.wiki"}
+                          : "Welcome to Memory.Wiki"}
                       </h1>
                       <p className="text-body mt-1.5" style={{ color: "var(--text-secondary)" }}>
                         {isSignedIn
@@ -13608,7 +13608,7 @@ ${clone.innerHTML}
                           : { label: "Sign in to get your hub", desc: "Every signed-in user gets a personal hub URL", url: "/", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
                         { label: "Install /memory.wiki", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
-                        { label: "How memory.wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
+                        { label: "How Memory.Wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
                       ];
                       return cards.map((item) => {
                         const sharedProps = {
@@ -13667,7 +13667,7 @@ ${clone.innerHTML}
                   </>)}
                 </div>
 
-                {/* How people use memory.wiki — short Pain → Action → Result case
+                {/* How people use Memory.Wiki — short Pain → Action → Result case
                     studies. Each card opens a published doc in the founder
                     hub. Sits between the v6 hero (Deploy to AI) and the
                     tutorial-shaped Guides & Examples — answers "why would
@@ -13684,7 +13684,7 @@ ${clone.innerHTML}
                       style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
                     >
                       <ChevronDown width={11} height={11} style={{ transform: startSections.cases ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
-                      What people put in memory.wiki
+                      What people put in Memory.Wiki
                     </button>
                     {startSections.cases && (
                       <button
@@ -13769,10 +13769,10 @@ ${clone.innerHTML}
                       { label: "Documentation", desc: "API and SDK reference", url: "/docs", color: "#60a5fa", icon: <FileText width={14} height={14} /> },
                       { label: "Plugins", desc: "Chrome, VS Code, Mac, CLI", url: "/plugins", color: "#4ade80", icon: <Download width={14} height={14} /> },
                       { label: "How it works", desc: "Architecture, end to end", url: "/about#how-it-works", color: "#c4b5fd", icon: <HelpCircle width={14} height={14} /> },
-                      { label: "memory.wiki Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
+                      { label: "Memory.Wiki Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
                     ]).map((item) => (
                       // Same-window navigation (Link, no target=_blank)
-                      // for internal memory.wiki pages — keeps the user in one
+                      // for internal Memory.Wiki pages — keeps the user in one
                       // browser tab; editor state restores on back.
                       <NextLink key={item.label} href={item.url}
                         className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-left cursor-pointer"
@@ -14707,7 +14707,7 @@ ${clone.innerHTML}
               {/* ─── AI Panel (side-by-side) ─── */}
               {showAIPanel && (canEdit || activeTab?.kind === "bundle" || showHub || (aiPanelMode === "hub" && hubSlug)) && (() => {
                 // Three assistants — Document, Bundle, Hub. All share the
-                // memory.wiki orange palette; the radio tabs above the panel are
+                // Memory.Wiki orange palette; the radio tabs above the panel are
                 // the single source of mode identity. The header below
                 // just shows "what the active assistant is working with"
                 // (title + word count, doc count + bundle name, concept
@@ -15656,7 +15656,7 @@ ${clone.innerHTML}
       >
         {/* Left: Alpha badge + Help + navigation */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <Tooltip text="memory.wiki is in alpha — features can change and bugs are expected. Send feedback to hi@raymind.ai." position="top">
+          <Tooltip text="Memory.Wiki is in alpha — features can change and bugs are expected. Send feedback to hi@raymind.ai." position="top">
             <span
               className="inline-flex items-center font-semibold uppercase shrink-0"
               style={{
@@ -15740,7 +15740,7 @@ ${clone.innerHTML}
           <button onClick={() => { setShowCommandPalette(true); setCmdSearch(""); }} className="transition-colors hidden sm:inline-flex items-center gap-1" style={{ color: "var(--text-faint)", background: "none", border: "1px solid var(--border-dim)", borderRadius: 4, padding: "1px 6px", fontSize: 10, cursor: "pointer" }} title="Command palette">
             <span style={{ fontSize: 10 }}>{navigator.platform?.includes("Mac") ? "\u2318" : "Ctrl+"}K</span>
           </button>
-          <a href="/about" className="transition-colors inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="About memory.wiki">About</a>
+          <a href="/about" className="transition-colors inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="About Memory.Wiki">About</a>
           <a href="/plugins" className="transition-colors hidden sm:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Browser and editor plugins">Plugins</a>
           <a href="/discover" className="transition-colors hidden md:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Trending public documents">Trending</a>
           <a href="/docs" className="transition-colors hidden md:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="API documentation">API</a>
@@ -16188,7 +16188,7 @@ ${clone.innerHTML}
         </div>
       )}
 
-      {/* memory.wiki AI structuring prompt */}
+      {/* Memory.Wiki AI structuring prompt */}
       {/* Sign In / Sign Up modal */}
       {showAuthMenu && !isAuthenticated && (
         // Slim sign-in modal. Previous version was a 560px-wide
@@ -16203,7 +16203,7 @@ ${clone.innerHTML}
           <div className="rounded-xl w-[400px] max-w-[92vw]" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 16px 64px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="px-6 pt-6 pb-4">
               <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-                Sign in to <span style={{ color: "var(--accent)" }}>memory.wiki</span>.app
+                Sign in to <span style={{ color: "var(--accent)" }}>Memory.Wiki</span>.app
               </h2>
               <p className="text-caption mt-1" style={{ color: "var(--text-muted)" }}>
                 Save, sync, and publish your knowledge hub.
@@ -16299,7 +16299,7 @@ ${clone.innerHTML}
         <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => !mdfyLoading && setMdfyPrompt(null)}>
           <div className="rounded-xl p-5 w-80" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--accent)" }}>memory.wiki</span> this document?</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--accent)" }}>Memory.Wiki</span> this document?</span>
               <span className="text-caption font-mono" style={{ color: "var(--text-muted)" }}>
                 {(mdfyPrompt.text.length / 1024).toFixed(0)} KB
               </span>
@@ -16308,7 +16308,7 @@ ${clone.innerHTML}
               This file was imported as raw text — all formatting (headings, lists, tables, emphasis) was lost during extraction.
             </p>
             <p className="text-caption mb-4" style={{ color: "var(--text-muted)" }}>
-              <strong style={{ color: "var(--accent)" }}>memory.wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
+              <strong style={{ color: "var(--accent)" }}>Memory.Wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
               {mdfyPrompt.text.length > 200_000 && (
                 <span style={{ color: "var(--text-faint)" }}> Large documents may take 30–60 seconds.</span>
               )}
@@ -16348,7 +16348,7 @@ ${clone.innerHTML}
                       showToast("Document structured successfully", "success");
                     }
                   } catch (err) {
-                    console.error("memory.wiki failed:", err);
+                    console.error("Memory.Wiki failed:", err);
                     const message = err instanceof Error ? err.message : "AI processing failed";
                     showToast(message, "error");
                   }
@@ -16364,7 +16364,7 @@ ${clone.innerHTML}
                     Processing{mdfyElapsed > 0 ? ` ${mdfyElapsed}s` : "..."}
                   </>
                 ) : (
-                  <>memory.wiki it</>
+                  <>Memory.Wiki it</>
                 )}
               </button>
             </div>

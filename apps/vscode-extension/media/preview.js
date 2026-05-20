@@ -1,5 +1,5 @@
 /* =========================================================
-   memory.wiki VS Code Preview — Webview Client Script
+   Memory.Wiki VS Code Preview — Webview Client Script
    WYSIWYG editing via contentEditable + message passing
    ========================================================= */
 
@@ -2164,7 +2164,7 @@
   // Initialize flavor badge with detected flavor
   updateFlavorBadge(currentFlavor);
 
-  // ─── Custom Tooltips (instant, like memory.wiki) ───
+  // ─── Custom Tooltips (instant, like Memory.Wiki) ───
 
   var tooltipEl = null;
   var tooltipTimer = null;

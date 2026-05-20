@@ -128,7 +128,7 @@ export default function DiscoverPage() {
           <span style={{ color: "var(--accent)" }}>beautifully rendered.</span>
         </h1>
         <p style={{ fontSize: 15, color: "var(--text-tertiary)", maxWidth: 500, lineHeight: 1.7 }}>
-          Explore documentation from the hottest GitHub projects. Every .md file rendered with memory.wiki.
+          Explore documentation from the hottest GitHub projects. Every .md file rendered with Memory.Wiki.
         </p>
       </div>
 
@@ -222,7 +222,7 @@ export default function DiscoverPage() {
                                 background: isOpening ? "rgba(74,222,128,0.15)" : "var(--accent-dim)",
                                 color: isOpening ? "#4ade80" : "var(--accent)",
                               }}>
-                                {isOpening ? "Opening..." : "memory.wiki"}
+                                {isOpening ? "Opening..." : "Memory.Wiki"}
                               </span>
                             </div>
                           );
@@ -247,7 +247,7 @@ export default function DiscoverPage() {
 
         {/* Footer note */}
         <p style={{ fontSize: 11, color: "var(--text-faint)", textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          Data from GitHub API. Click any repo to browse its .md files and open them in memory.wiki.
+          Data from GitHub API. Click any repo to browse its .md files and open them in Memory.Wiki.
           <br />
           <a href="https://github.com/trending" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>See full GitHub Trending →</a>
         </p>

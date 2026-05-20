@@ -11,15 +11,15 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "REST API Reference — memory.wiki",
+  title: "REST API Reference — Memory.Wiki",
   description:
-    "Complete REST API reference for memory.wiki. Create, read, update, and delete Markdown documents via HTTP. Includes code examples in curl, JavaScript, and Python.",
+    "Complete REST API reference for Memory.Wiki. Create, read, update, and delete Markdown documents via HTTP. Includes code examples in curl, JavaScript, and Python.",
   alternates: {
     canonical: "https://memory.wiki/docs/api",
     languages: { ko: "https://memory.wiki/ko/docs/api" },
   },
   openGraph: {
-    title: "REST API Reference — memory.wiki",
+    title: "REST API Reference — Memory.Wiki",
     description: "Full REST API reference. Endpoints, parameters, examples.",
     url: "https://memory.wiki/docs/api",
     images: [{ url: "/api/og?title=REST%20API", width: 1200, height: 630 }],
@@ -780,7 +780,7 @@ url = res.json()["url"]`}</CodeBlock>
               maxWidth: 640,
             }}
           >
-            Every public memory.wiki URL also exposes a clean-markdown variant for AI agents.
+            Every public Memory.Wiki URL also exposes a clean-markdown variant for AI agents.
             Append <InlineCode>{"?compact"}</InlineCode> or <InlineCode>{"?digest"}</InlineCode> to cut tokens — the answer is the same; the bill is smaller.
           </p>
           <div
@@ -864,7 +864,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>   # present when the canvas has run
 analysis_stale: true           # only when a member doc was edited after that run
-source: "memory.wiki"
+source: "Memory.Wiki"
 ---
 
 # <Bundle title>
@@ -955,7 +955,7 @@ source: "memory.wiki"
               maxWidth: 640,
             }}
           >
-            memory.wiki ships two distinct ontology layers, and each lives on its own URL:
+            Memory.Wiki ships two distinct ontology layers, and each lives on its own URL:
           </p>
           <ul
             style={{
@@ -1014,7 +1014,7 @@ source: "memory.wiki"
               maxWidth: 640,
             }}
           >
-            memory.wiki uses progressive authentication. Basic operations require no auth.
+            Memory.Wiki uses progressive authentication. Basic operations require no auth.
             Advanced features use edit tokens or user identity.
           </p>
 
@@ -1041,7 +1041,7 @@ source: "memory.wiki"
               },
               {
                 title: "MCP / CLI auth",
-                desc: "Both MCP server and CLI use JWT from memory.wiki login. Run: npm install -g mdfy-cli && memory.wiki login",
+                desc: "Both MCP server and CLI use JWT from Memory.Wiki login. Run: npm install -g mdfy-cli && Memory.Wiki login",
               },
             ].map((item) => (
               <div

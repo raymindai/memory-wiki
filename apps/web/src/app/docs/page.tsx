@@ -3,15 +3,15 @@ import Link from "next/link";
 import { CodeBlock, InlineCode, DocsNav, DocsSidebar, SiteFooter, mono } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "Documentation — memory.wiki",
+  title: "Documentation — Memory.Wiki",
   description:
-    "Complete developer documentation for memory.wiki. REST API, CLI, JavaScript SDK, MCP server, and npm packages for Markdown publishing.",
+    "Complete developer documentation for Memory.Wiki. REST API, CLI, JavaScript SDK, MCP server, and npm packages for Markdown publishing.",
   alternates: {
     canonical: "https://memory.wiki/docs",
     languages: { ko: "https://memory.wiki/ko/docs" },
   },
   openGraph: {
-    title: "Documentation — memory.wiki",
+    title: "Documentation — Memory.Wiki",
     description:
       "Complete developer documentation. REST API, CLI, SDK, MCP server.",
     url: "https://memory.wiki/docs",
