@@ -35,6 +35,11 @@ interface BundleOverviewProps {
   bundleId: string;
   bundleTitle: string;
   bundleDescription?: string | null;
+  /** AI-generated 2-3 sentence digest from graph_data.summary. Rendered
+   *  under the hero title so the user sees the gist before scrolling
+   *  into "How to use" / docs. Absent on bundles that haven't been
+   *  analyzed yet. */
+  bundleSummary?: string | null;
   bundleIntent?: string | null;
   bundleIsDraft?: boolean;
   bundleAllowedEmails?: string[];
@@ -98,6 +103,7 @@ export default function BundleOverview({
   bundleId,
   bundleTitle,
   bundleDescription,
+  bundleSummary,
   bundleIntent,
   bundleIsDraft,
   bundleAllowedEmails,
@@ -232,6 +238,21 @@ export default function BundleOverview({
               </span>
             )}
           </div>
+
+          {/* AI digest — 2-3 sentence summary from graph_data.summary.
+              Sits below the meta strip so the hero reads as
+              identity (icon/title/description/intent) → vitals
+              (docs/updated/access) → gist. No accent rail; the
+              extra vertical breathing room and softer secondary
+              text colour separate it from the meta strip. */}
+          {bundleSummary && (
+            <p
+              className="text-body mt-6 mx-auto leading-relaxed text-left"
+              style={{ color: "var(--text-secondary)", maxWidth: 560 }}
+            >
+              {bundleSummary}
+            </p>
+          )}
         </header>
 
         {/* Unified "How to use this bundle" — pick the tool, see

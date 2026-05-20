@@ -1132,45 +1132,14 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     setSelectedNodeInfo(null);
   }, [onOpenDoc, aiGraph, documents, openNodeInfo, graphGeneratedAt]);
 
-  // 2-3 sentence digest of the bundle, surfaced inline above the canvas
-  // so even the owner (who hits /?bundle=<id> in the editor instead of
-  // the public /b/<id> viewer) sees the AI-written gist without having
-  // to click the Bundle Analysis node. Hidden on tiny bundles with no
-  // graph yet.
-  const summaryText: string | null = (aiGraph?.summary && typeof aiGraph.summary === "string")
+  // 2-3 sentence AI digest of the bundle, surfaced on the Overview
+  // ("Bundle" tab) below the hero title. The owner-side editor opens
+  // here by default, so this is where the gist needs to appear — not
+  // on the public /b/<id> viewer (already shipped) and not on the
+  // canvas (intentionally clean for graph work).
+  const bundleSummary: string | null = (aiGraph?.summary && typeof aiGraph.summary === "string")
     ? aiGraph.summary.trim() || null
     : null;
-  const showSummaryBand = documents.length >= 2 && (summaryText || isAnalyzing);
-  const summaryBand = showSummaryBand ? (
-    <div
-      className="shrink-0 flex items-center px-6"
-      style={{
-        height: "4.5rem",
-        borderBottom: "1px solid var(--border-dim)",
-        background: "var(--surface)",
-      }}
-    >
-      {summaryText ? (
-        <p
-          className="text-sm leading-relaxed mx-auto w-full"
-          style={{
-            color: "var(--text-secondary)",
-            maxWidth: "72rem",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
-        >
-          {summaryText}
-        </p>
-      ) : (
-        <p className="text-sm mx-auto w-full" style={{ color: "var(--text-faint)", maxWidth: "72rem" }}>
-          Analyzing this bundle…
-        </p>
-      )}
-    </div>
-  ) : null;
 
   if (isLoading) {
     // Layout-aware skeleton — mirrors the eventual frame (List has a
@@ -1245,6 +1214,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         bundleId={bundleId}
         bundleTitle={bundleTitle}
         bundleDescription={bundleDescription}
+        bundleSummary={bundleSummary}
         bundleIntent={bundleIntent}
         bundleIsDraft={bundleIsDraft}
         bundleAllowedEmails={bundleAllowedEmails}
@@ -1294,9 +1264,6 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
-      {summaryBand}
-      <div className="flex-1 min-h-0">
     <BundleCanvasLayout
       selectedNodeInfo={selectedNodeInfo}
       onCloseNodeInfo={() => setSelectedNodeInfo(null)}
@@ -1539,8 +1506,6 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         />
       )}
     />
-      </div>
-    </div>
   );
 }
 
