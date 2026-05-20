@@ -6443,6 +6443,16 @@ export default function MdEditor() {
 
             const doc = await res.json();
             setEditorPlaceholder(null);
+            // Deep-link entry (mdfy.app/<id>) — the user came in
+            // pointing at this specific doc, not the dashboard. The
+            // Start screen would otherwise stay visible on top of
+            // the loaded tab (showOnboarding is initialized true
+            // when no own-docs are cached locally yet, which is the
+            // common case for a non-owner editor opening a shared
+            // link). Force-flip it off so the doc body actually
+            // shows once the load resolves.
+            setShowOnboarding(false);
+            try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
             setMarkdownRaw(doc.markdown);
             if (doc.title) setTitle(doc.title);
             setDocId(fromId);
