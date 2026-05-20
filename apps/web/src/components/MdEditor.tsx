@@ -12528,7 +12528,7 @@ ${clone.innerHTML}
               </div>
               {/* Actions */}
               <div className="flex gap-1.5">
-                {folders.filter(f => !f.section || f.section === "my").length > 0 && (
+                {(folders.filter(f => !f.section || f.section === "my").length > 0 || !!user?.id) && (
                   <div className="relative group/move flex-1">
                     <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]" style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }} title="Move to folder">
                       <Folder width={11} height={11} /><span className="mdfy-collapse-label">Move</span><ChevronDown width={8} height={8} />
@@ -12564,6 +12564,49 @@ ${clone.innerHTML}
                         style={{ color: "var(--text-secondary)", borderTop: "1px solid var(--border-dim)" }}>
                         <FileIcon width={11} height={11} style={{ color: "var(--text-faint)", flexShrink: 0 }} />Root
                       </button>
+                      {user?.id && (
+                        <button
+                          onClick={() => {
+                            // Snapshot the selection BEFORE we clear it
+                            // — setInlineInput's onSubmit fires later
+                            // and selectedTabIds will be empty by then.
+                            const targetIds = new Set(selectedTabIds);
+                            const id = `folder-${Date.now()}`;
+                            const defaultName = "New Folder";
+                            setFolders(prev => [...prev, { id, name: defaultName, collapsed: false, section: "my" }]);
+                            setTabs(prev => prev.map(t => targetIds.has(t.id) ? { ...t, folderId: id } : t));
+                            setSelectedTabIds(new Set());
+                            // Persist optimistically; failure is recoverable on next reload
+                            fetch("/api/user/folders", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json", ...authHeaders },
+                              body: JSON.stringify({ id, name: defaultName, section: "my" }),
+                            }).catch(() => {});
+                            // Immediately open rename so the user names
+                            // it in-flow instead of finding "New Folder"
+                            // in the sidebar after the fact.
+                            setInlineInput({
+                              label: "Folder name",
+                              defaultValue: defaultName,
+                              onSubmit: (name) => {
+                                setFolders(prev => prev.map(f => f.id === id ? { ...f, name } : f));
+                                fetch("/api/user/folders", {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json", ...authHeaders },
+                                  body: JSON.stringify({ id, name }),
+                                }).catch(() => {});
+                                setInlineInput(null);
+                              },
+                            });
+                          }}
+                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2 whitespace-nowrap"
+                          style={{ color: "var(--accent)", borderTop: "1px solid var(--border-dim)" }}
+                          title="Create a new folder and move the selected docs into it"
+                        >
+                          <FolderPlus width={11} height={11} style={{ flexShrink: 0 }} />
+                          New folder…
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
