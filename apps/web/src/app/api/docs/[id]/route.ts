@@ -267,13 +267,30 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (verified) {
     body.userId = verified.userId;
     body.userEmail = verified.email;
-  } else if (!body.userId && body.userEmail) {
-    // Fallback: resolve email → userId (for non-JWT clients with editToken)
-    try {
-      const { data } = await supabase.auth.admin.listUsers();
-      const user = data?.users?.find(u => u.email?.toLowerCase() === body.userEmail!.toLowerCase());
-      if (user) body.userId = user.id;
-    } catch { /* ignore */ }
+  } else {
+    // No verified bearer. Fall back to identity headers the client
+    // also sends — useAutoSave + other PATCH paths mirror
+    // /api/docs's GET shape with x-user-id / x-user-email so server
+    // can still resolve the caller when the bearer is missing or
+    // mid-refresh. Without these header reads the auto-save was
+    // failing 403 on every Editor-role save when getSession()
+    // briefly returned null on the client.
+    if (!body.userId) {
+      const headerUserId = req.headers.get("x-user-id") || "";
+      if (headerUserId) body.userId = headerUserId;
+    }
+    if (!body.userEmail) {
+      const headerEmail = req.headers.get("x-user-email") || "";
+      if (headerEmail) body.userEmail = headerEmail;
+    }
+    if (!body.userId && body.userEmail) {
+      // Fallback: resolve email → userId (for non-JWT clients with editToken)
+      try {
+        const { data } = await supabase.auth.admin.listUsers();
+        const user = data?.users?.find(u => u.email?.toLowerCase() === body.userEmail!.toLowerCase());
+        if (user) body.userId = user.id;
+      } catch { /* ignore */ }
+    }
   }
 
   // Size limit (same as POST)
@@ -507,13 +524,20 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     // allowed_editors. The Editor role from ShareModal writes into
     // allowed_editors; without this check those promotions had no
     // server-side effect.
+    // Identity resolution order: body > verified > headers. Headers
+    // are the last-resort source because the body-level identity is
+    // hydrated from headers (and lookup-by-email) above, but we still
+    // re-check here to cover the edge case where verifyAuthToken
+    // succeeded WITHOUT email (e.g. an OAuth-only JWT with email
+    // claim missing) and the client also sent x-user-email.
+    const resolvedUserId = userId || req.headers.get("x-user-id") || "";
+    const resolvedEmail = body.userEmail || verified?.email || req.headers.get("x-user-email") || "";
     const isOwner =
-      !!(userId && doc.user_id && userId === doc.user_id) ||
+      !!(resolvedUserId && doc.user_id && resolvedUserId === doc.user_id) ||
       !!(anonymousId && doc.anonymous_id && anonymousId === doc.anonymous_id);
     const hasToken = !!(editToken && doc.edit_token === editToken);
-    const userEmail = body.userEmail || verified?.email || "";
     const allowedEditors = (doc.allowed_editors || []) as string[];
-    const isAllowedEditor = !!userEmail && allowedEditors.some((e) => e.toLowerCase() === userEmail.toLowerCase());
+    const isAllowedEditor = !!resolvedEmail && allowedEditors.some((e) => e.toLowerCase() === resolvedEmail.toLowerCase());
 
     if (!isOwner && !hasToken && !isAllowedEditor) {
       return NextResponse.json({ error: "Only the owner can edit this document" }, { status: 403 });
@@ -577,8 +601,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       else if (typeof body.intent === "string" && allowed.has(body.intent)) updates.intent = body.intent;
     }
     // Track last editor
-    if (userId) updates.last_editor_id = userId;
-    if (userEmail) updates.last_editor_email = userEmail;
+    if (resolvedUserId) updates.last_editor_id = resolvedUserId;
+    if (resolvedEmail) updates.last_editor_email = resolvedEmail;
 
     const { error } = await supabase.from("documents").update(updates).eq("id", id);
     if (error) return NextResponse.json({ error: "Failed to save" }, { status: 500 });
@@ -618,7 +642,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       try {
         const { data: ownerUser } = await supabase.auth.admin.getUserById(doc.user_id);
         if (ownerUser?.user?.email) {
-          const editorName = userEmail || "Someone";
+          const editorName = resolvedEmail || "Someone";
           await supabase.from("notifications").insert({
             recipient_email: ownerUser.user.email,
             type: "document_updated",
