@@ -1,8 +1,8 @@
 # How mdfy works
 
-> Read this once and you'll be able to explain mdfy.app to anyone — a
-> teammate, a journalist, an investor, the AI you're about to paste a
-> URL into. It assumes nothing.
+> Read this once and you can explain mdfy.app to anyone — a teammate,
+> a journalist, an investor, the AI you're about to paste a URL into.
+> Assumes nothing. Pairs with `OVERVIEW.md` (what we have shipped).
 
 ---
 
@@ -10,104 +10,98 @@
 
 **A mdfy URL is an API for any AI.**
 
-When you paste `mdfy.app/d/abc123` or `mdfy.app/b/xyz` or
-`mdfy.app/hub/yourname` into ChatGPT, Claude, Gemini, or Cursor, the
-LLM fetches that URL and gets back clean markdown — _your_ thinking,
-already shaped for an AI to read. No app to install. No format to
-learn. No JS to render. Just markdown over HTTPS.
+Paste `mdfy.app/<id>`, `mdfy.app/b/<id>`, or `mdfy.app/hub/<slug>`
+into ChatGPT, Claude, Gemini, or Cursor — the LLM fetches it and gets
+back clean markdown shaped for an AI to read. No app to install. No
+format to learn. No JavaScript to render. Just markdown over HTTPS.
 
-That is the entire product. Every other feature exists to make the
-markdown that comes back from those URLs more useful.
+That's the entire product. Every other feature exists to make the
+markdown those URLs return more useful.
 
 ---
 
 ## The four moving parts
 
-Inside mdfy there are exactly four things to know about:
+| Part                 | What it is                                                          | Where it lives                       |
+| -------------------- | ------------------------------------------------------------------- | ------------------------------------ |
+| **The markdown**     | Source of truth. What the human types.                              | `documents.markdown`                 |
+| **The AI graph**     | What an LLM extracted from a *bundle*: themes, insights, edges.     | `bundles.graph_data` (JSON)          |
+| **The concept index**| User's lifelong ontology — concepts pooled across every bundle.     | `concept_index` + `concept_relations`|
+| **The embeddings**   | Vectors. Power semantic recall ("which docs cover X?").             | `documents.embedding`, `bundles.embedding`, `document_chunks.embedding` |
 
-| Part                 | What it is                                                           | Where it lives                       |
-| -------------------- | -------------------------------------------------------------------- | ------------------------------------ |
-| **The markdown**     | Source of truth. What the human types.                               | `documents.markdown`                 |
-| **The AI graph**     | What Claude/GPT extracted from a *bundle*: themes, insights, edges.  | `bundles.graph_data` (JSON)          |
-| **The concept index**| The user's lifelong ontology — concepts pooled across every bundle.  | `concept_index` + `concept_relations`|
-| **The embeddings**   | Vectors. Power semantic recall (“which docs cover X?”). Internal.    | `documents.embedding`, `bundles.embedding`, `document_chunks.embedding` |
-
-The first three end up in the markdown an LLM fetches. Embeddings
-never go to the LLM — they power the *second* way an LLM talks to
-mdfy (via MCP search). See "Two ways an LLM talks to mdfy" below.
+First three end up in the markdown an LLM fetches. Embeddings never
+go to the LLM directly — they back `mdfy_search` via MCP.
 
 ---
 
 ## What an LLM gets when it fetches a mdfy URL
 
-There are three URL shapes. Each one returns markdown shaped for the
-shape's purpose.
+Three URL shapes, each tuned for its purpose.
 
-### 1. `mdfy.app/d/<docId>` — a single document
+### `mdfy.app/<id>` — one document
 
 ```
 ---
 title: "..."
-url: https://mdfy.app/d/abc123
-updated: 2026-05-18T...
+url: https://mdfy.app/<id>
+updated: 2026-05-20T...
 ---
 # Doc title
-
-…the full markdown body…
+…full markdown body…
 ```
 
-No AI processing. Just the source markdown wrapped in frontmatter.
-This is the cheapest payload — and the link target the bundle and
-hub digests point _into_ when an LLM needs deeper context.
+No AI processing. Source markdown with a frontmatter wrapper. The
+cheapest payload, and the target every bundle / hub digest links
+into when an LLM wants the full body.
 
-### 2. `mdfy.app/b/<bundleId>` — a bundle (default: **Compact**)
+### `mdfy.app/b/<id>` — a bundle (default: **Compact**)
 
 ```
 ---
 type: bundle
-url: https://mdfy.app/b/xyz
+url: https://mdfy.app/b/<id>
 analysis_stale: false
 ---
 # Bundle title
-> intent: "why I made this bundle"
+> intent: "why I built this bundle"
 
-## Summary           ← AI graph
-## Themes            ← AI graph
+## Summary                ← AI graph
+## Themes                 ← AI graph
 ## Cross-document insights
-## Concepts          ← AI graph (this bundle's concept subgraph)
+## Concepts               ← this bundle's concept subgraph
 ## Concept relations
 ## Documents
-- [Doc A](https://mdfy.app/d/...) — annotation
-- [Doc B](https://mdfy.app/d/...) — annotation
+- [Doc A](https://mdfy.app/<id>) — annotation
+- [Doc B](https://mdfy.app/<id>) — annotation
 ```
 
-The bundle digest gives the LLM the **map** — what's in the bundle,
-how the pieces relate, what the prior AI thought after reading the
-whole set — plus a clickable index. The LLM follows the inline doc
-links only when it needs full bodies. Same context, ~95% fewer
-tokens than concatenating every doc.
+The bundle digest is the **map** — what's in it, how the pieces
+relate, what the prior LLM thought after reading the whole set, plus
+a clickable index. The LLM follows inline doc links only when it
+needs full bodies. Same context as concatenating every doc, ~95%
+fewer tokens.
 
 Append `?full=1` to inline every doc body. Expensive, occasionally
 the right call.
 
-### 3. `mdfy.app/hub/<slug>` — a person's whole hub (default: **Compact**)
+### `mdfy.app/hub/<slug>` — a person's whole hub (default: **Compact**)
 
 ```
 ---
 type: hub_digest
-url: https://mdfy.app/hub/yourname
+url: https://mdfy.app/hub/<slug>
 concept_count: 40
 ---
-# Yourname's knowledge — concept digest
+# <name>'s knowledge — concept digest
 
 ## Concepts
-### Concept Label                   ← from concept_index
+### Concept Label
 *tag • weight 14 • 4 docs*
 > short description
-- [Linked doc](https://mdfy.app/d/...)
+- [Linked doc](https://mdfy.app/<id>)
 …
 _Related:_ depends on → **Other concept** · contradicts → **Another**
-_In bundles:_ [Bundle A](https://mdfy.app/b/...) (3 docs) · [Bundle B](https://mdfy.app/b/...) (2)
+_In bundles:_ [Bundle A](https://mdfy.app/b/<id>) (3 docs) · …
 
 ## Concept relations
 - **Concept X** part_of **Concept Y**
@@ -115,125 +109,118 @@ _In bundles:_ [Bundle A](https://mdfy.app/b/...) (3 docs) · [Bundle B](https://
 …
 ```
 
-A hub digest is the **shape of someone's thinking** — top 40
-concepts by weight, the typed edges between them, which bundle each
-concept lives in. Each entry is clickable, so the LLM navigates from
-"I see this person cares about X" → "X is most discussed in bundle
-Y" → fetch bundle Y for the rich AI graph.
+A hub digest is the **shape of someone's thinking**: top-weighted
+concepts, the typed edges between them, which bundle each concept
+lives in. The LLM navigates "this person cares about X" → "X is most
+discussed in bundle Y" → fetch bundle Y for the AI graph.
 
-Useful extras:
-- `?full=1` — flat per-doc and per-bundle listing instead of the
-  concept map.
-- `?since=2026-04-01` — only concepts that emerged after that date.
-  Lets an LLM ask "what's new in this hub since last month?".
+Useful extras: `?full=1` for a flat per-doc / per-bundle listing;
+`?since=2026-04-01` for "what's new since".
 
 ---
 
 ## Two ways an LLM talks to mdfy
 
-1. **URL fetch (pull)** — covered above. The LLM has the URL, it
-   wants the content, it `GET`s and reads. Works in every AI tool
-   that can fetch a webpage (ChatGPT, Claude.ai web, Gemini,
-   Perplexity, Cursor, your terminal).
+**Pull (URL fetch).** The LLM has a URL, it `GET`s, it reads. Works
+in every AI tool that can hit a webpage — ChatGPT, Claude.ai web,
+Gemini, Perplexity, Cursor, your terminal.
 
-2. **MCP server (push + pull)** — `mdfy-mcp` is a published npm
-   package. Hosts that speak MCP (Claude Desktop, Cursor, Cline,
-   Windsurf) load it once and gain 26 tools the LLM can call by
-   itself: `mdfy_create`, `mdfy_append`, `mdfy_search`,
-   `mdfy_outline`, `mdfy_versions`, `mdfy_publish`, etc. This is
-   where embeddings earn their keep — `mdfy_search` uses vector
-   similarity, not keyword match.
+**Push + pull (MCP).** `mdfy-mcp` is a published npm package. Hosts
+that speak MCP — Claude Desktop, Cursor, Cline, Windsurf — load it
+once and get **26 tools** the LLM can call by itself: `mdfy_create`,
+`mdfy_append`, `mdfy_search`, `mdfy_outline`, `mdfy_versions`,
+`mdfy_publish`, `mdfy_diff`, `mdfy_render_preview`, … This is where
+embeddings earn their keep — `mdfy_search` is vector similarity,
+not keyword match.
 
-So when someone asks "what does embeddings even do for me?" — the
-answer is: they let the LLM _search_ your library by meaning. The
-URL payload is for pasting; MCP is for living inside.
+So: URL payload is for pasting; MCP is for living inside.
 
 ---
 
 ## What happens when you create things
 
-### You write a new document
-1. `POST /api/docs` writes the markdown.
-2. An `extraction_jobs` row is enqueued (`kind=doc_ontology`,
-   30-minute throttle per doc so autosaves don't burn LLM budget).
-3. Fast path: same request runs the extractor inline — Claude
-   Haiku reads the markdown and pulls out concepts/entities/tags.
-   Each one upserts into your `concept_index`.
+### Write a new doc
+1. `PATCH /api/docs/<id>` with `action="auto-save"` writes the body
+   (or `POST /api/docs` for a brand-new doc).
+2. An `extraction_jobs` row is enqueued (`kind=doc_ontology`, 30 min
+   throttle per doc so autosaves don't burn LLM budget).
+3. Fast path: the same request runs the extractor inline — an LLM
+   pulls out concepts / entities / tags and upserts them into your
+   `concept_index`.
 4. If the serverless instance dies mid-extraction, a cron worker
-   picks the pending row up within a minute. Nothing silently
-   fails.
-5. Separately the doc gets embedded (`/api/embed/[id]`) — title +
-   markdown for global search, plus each section as its own chunk
-   for finer recall.
-6. The moment you publish (un-draft), `mdfy.app/d/<id>` becomes
-   fetchable by any AI in the world. Your hub digest already
-   reflects the new concepts.
+   picks the pending row up within a minute. Nothing silently fails.
+5. Embedding pipeline (`/api/embed/<id>`) embeds title + body for
+   global search and chunks each section for finer recall. Skips
+   re-embedding via `embedding_source_hash` when nothing changed.
+6. The moment you publish (un-draft), `mdfy.app/<id>` is fetchable
+   by any AI in the world. Your hub digest already reflects the new
+   concepts.
 
-### You create a new bundle
+### Create a new bundle
 1. `POST /api/bundles` creates the row.
-2. You add N docs — `bundle_documents` join rows record order and
-   per-doc annotations ("why this belongs").
-3. First time you open the bundle (or click Analyze), the canvas
-   triggers `POST /api/bundles/[id]/graph`. The first ~10 doc
-   bodies (truncated to 2000 chars each) are sent to Claude/GPT
-   with your bundle's _intent_ string prepended. The LLM returns
-   a structured JSON: themes, insights, concept nodes, typed
-   edges, takeaways, document summaries, open questions.
-4. That JSON lands in `bundles.graph_data`. From this moment, the
-   bundle URL serves the rich Compact payload above.
-5. Same call also merges every concept into your `concept_index`
-   (weights and `doc_ids` accumulate across bundles — this is
-   how your hub digest grows).
-6. A separate request embeds the bundle (`title + description +
-   member titles`) for MCP search.
+2. You add N docs — `bundle_documents` join rows record order + per-
+   doc annotations ("why this belongs").
+3. On open (or on Analyze click), `POST /api/bundles/<id>/graph`
+   sends the first ~10 doc bodies (truncated to 2000 chars each)
+   plus the bundle's *intent* string to an LLM. The LLM returns a
+   structured JSON: themes, insights, concept nodes, typed edges,
+   takeaways, doc summaries, open questions.
+4. JSON lands in `bundles.graph_data`. From now on the bundle URL
+   serves the rich Compact payload above.
+5. Same call merges every concept into your `concept_index` —
+   weights and `doc_ids` accumulate across bundles. That's how your
+   hub digest grows.
+6. A separate request embeds the bundle (title + description +
+   member titles) for MCP search.
 
-### You edit a doc that's in a bundle
-The bundle's `graph_data` is now older than the source. The next
-fetch of `mdfy.app/b/<id>` includes `analysis_stale: true` in the
+### Edit a doc that's in a bundle
+The bundle's `graph_data` is now older than its source. The next
+fetch of `mdfy.app/b/<id>` carries `analysis_stale: true` in the
 frontmatter so the LLM knows the AI summary may not match the
 current text. The owner sees a "stale" pill in the canvas and can
 re-analyze.
 
+### Collaborate live
+1. Owner shares with `someone@example.com` as Editor — server adds
+   to `allowed_editors`.
+2. Editor opens `mdfy.app/<id>` — `/d/<id>` viewer detects
+   `isEditor=true` and redirects them to the live editor.
+3. Both browsers subscribe to `yjs-doc-<id>` (Yjs CRDT) and
+   `doc-cursor:<id>` (presence). Edits flow as Y.Doc updates;
+   carets flow as broadcast events.
+4. `Y.applyUpdate` keeps the peer's clientId ids in your Y.Doc, so
+   subsequent deltas anchor correctly — sync converges on every
+   keystroke.
+
 ---
 
-## The galaxy: same graph, two readers
+## Same graph, many readers
 
-The **Galaxy** view at `mdfy.app/galaxy` is a constellation
-visualization of your hub: concept nodes (sized by weight), typed
-edges between them, doc nodes, bundle clusters, time-slider. It
-reads from a single endpoint: `/api/user/hub/constellation`.
+The hub digest, the bundle canvas, the constellation view at
+`/galaxy`, MCP search results — they all read from the **same four
+tables**: `concept_index`, `concept_relations`, `documents`,
+`bundles` + `bundle_documents`.
 
-That endpoint pulls from the same four tables that feed every other
-mdfy surface:
+The visualization is not a separate dataset. What you see in the
+galaxy is what the LLM gets in the hub digest, just rendered for
+eyes instead of for a context window. Extend one, you extend the
+other.
 
-- `concept_index` — the nodes
-- `concept_relations` — the typed edges
-- `documents` — leaf nodes
-- `bundles` + `bundle_documents` — clusters
-
-This is important: **the visualization is not a separate dataset.**
-What you see in the galaxy is what an LLM gets in the hub digest —
-just rendered for eyes instead of for a context window. When you
-extend one, you extend the other. (The 2026-05-18 change that added
-`Related:` lines and `In bundles:` lines to the hub digest brought
-the LLM payload up to parity with the galaxy's edges and clusters.)
-
-The mental model: every mdfy surface — bundle canvas, hub galaxy,
-raw markdown digest, MCP search results — is **a different reader
-of the same underlying graph**. The graph is the product.
+The mental model: **every mdfy surface is a different reader of
+the same underlying graph**. The graph is the product.
 
 ---
 
 ## Why this is different from a PDF, Notion, or Google Doc
 
-| Property                                | PDF / Doc upload | Notion / Google Doc share | mdfy URL                |
-| --------------------------------------- | ---------------- | ------------------------- | ----------------------- |
-| Any AI can read it with no setup        | ✓                | ✗ (auth, JS, scraping)    | ✓                       |
-| Updates automatically as you edit       | ✗                | ✓                         | ✓                       |
-| AI gets pre-built navigation + summary  | ✗                | ✗                         | ✓ (bundle/hub digests)  |
-| Single URL composes many docs           | ✗                | ✗                         | ✓ (bundle, hub)         |
-| Cross-AI portable                       | per-AI re-upload | per-AI re-share           | one URL, every AI       |
-| LLM can write back via standard tools   | ✗                | ✗                         | ✓ (MCP, 26 tools)       |
+| Property                                | PDF upload    | Notion / GDoc share | mdfy URL              |
+| --------------------------------------- | ------------- | ------------------- | --------------------- |
+| Any AI reads it with no setup           | ✓             | ✗ (auth / JS)       | ✓                     |
+| Updates automatically as you edit       | ✗             | ✓                   | ✓                     |
+| AI gets pre-built navigation + summary  | ✗             | ✗                   | ✓ (bundle / hub)      |
+| Single URL composes many docs           | ✗             | ✗                   | ✓ (bundle, hub)       |
+| Cross-AI portable                       | re-upload     | re-share            | one URL, every AI     |
+| LLM can write back via standard tools   | ✗             | ✗                   | ✓ (MCP, 26 tools)     |
 
 The thing AI companies cannot copy is the **delivery model**: a
 universal URL that any LLM fetches into its context, carrying both
@@ -241,47 +228,51 @@ the source and the pre-built graph over it. That's the moat.
 
 ---
 
-## Trust: permissions and staleness
+## Trust: permissions, gates, freshness
 
-- `is_draft=true` — never served to a public fetch. Owner-only.
-- `allowed_emails: [...]` — served only if the request carries a
-  verified token for one of those emails.
+- `is_draft=true` — never served to public fetch. Owner-only.
+- `allowed_emails: [...]` — viewers must be signed in as one of
+  these.
+- `allowed_editors: [...]` — editors can save + collaborate live
+  (separate from view access).
+- `edit_mode`: `owner` / `account` / `token` / `view` / `public`.
 - `password_hash` — gates the raw endpoint with HTTP basic.
-- `expires_at` — past expiry returns 410 Gone.
 - `analysis_stale: true` in bundle frontmatter — LLM knows the
   graph reflects an older version of the docs.
 - `embedding_source_hash` — embedding pipeline skips re-embedding
   unchanged content; you don't pay for no-op updates.
+- **No expiry, ever.** Pricing policy: docs are permanent. Free
+  during beta, future Pro is for auto-analysis features, never for
+  keeping a URL alive.
 
-Every protection is enforced at the raw endpoint layer, so the
-exact same rules apply whether the consumer is the browser, an MCP
-host, a curl from a script, or an LLM following an inline link.
+Every protection enforces at the raw endpoint, so the same rules
+apply whether the consumer is a browser, an MCP host, a curl from
+a script, or an LLM following an inline link.
 
 ---
 
 ## Glossary
 
-- **Document (MD)** — a markdown file. Lives at `mdfy.app/d/<id>`.
+- **Document** — a markdown file. URL: `mdfy.app/<id>`.
 - **Bundle** — a curated set of docs analyzed as a group. URL:
   `mdfy.app/b/<id>`. Has its own AI graph.
 - **Hub** — your personal home: every doc, every bundle, your
   concept index, your galaxy. URL: `mdfy.app/hub/<slug>`.
-- **Compact** — the default URL response shape. AI graph or
-  concept map + links instead of full bodies. ~30x cheaper to
-  paste than Full.
-- **Full** — `?full=1`. Concatenates everything.
-- **Concept index** — the user-scoped ontology. Updated whenever
-  a doc is saved (`doc_ontology` jobs) or a bundle is analyzed.
-- **Galaxy** — the visual reader of your concept index and its
-  relations.
+- **Compact** — the default URL response shape. AI graph or concept
+  map + links instead of full bodies. ~30× cheaper to paste than
+  Full.
+- **Full** — `?full=1`. Inlines every body. Expensive but complete.
+- **Concept index** — the user-scoped ontology. Updated on doc save
+  (`doc_ontology` jobs) and bundle analyze.
+- **Galaxy** — the visual reader of your concept index + relations.
 - **Canvas** — the visual reader of a single bundle's AI graph.
-- **Intent / annotation** — short text the user attaches to a
-  bundle ("why I made this") or per-doc ("why this belongs"). Both
-  get woven into the AI's analysis prompt and the rendered digest.
-- **MCP** — Model Context Protocol. The standard hosts use to
-  give LLMs structured tool access. mdfy-mcp ships 26 tools.
+- **Intent / annotation** — short text attached to a bundle ("why
+  I made this") or to a doc-in-bundle ("why this belongs"). Both
+  feed the LLM analysis prompt and the rendered digest.
+- **MCP** — Model Context Protocol. The standard hosts use to give
+  LLMs structured tool access. mdfy-mcp ships 26 tools.
 
 ---
 
-*Last updated 2026-05-18. If anything here drifts from the code,
+*Last updated 2026-05-20. If anything here drifts from the code,
 the code wins — file an issue.*
