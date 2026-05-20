@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
   const { data: doc, error: fetchErr } = await supabase
     .from("documents")
-    .select("id, markdown, title, user_id, anonymous_id, deleted_at, embedding_source_hash")
+    .select("id, markdown, title, user_id, anonymous_id, deleted_at, embedding_source_hash, allowed_editors")
     .eq("id", id)
     .single();
 
@@ -47,7 +47,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   const isOwner =
     !!(requesterId && doc.user_id && requesterId === doc.user_id) ||
     !!(requesterAnonId && doc.anonymous_id && requesterAnonId === doc.anonymous_id);
-  if (!isOwner) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  // Editor-role users (allowed_editors) also schedule embeds when
+  // they save. Refusing those calls produced a 403 in the browser
+  // console every time a collaborator typed — harmless to the
+  // editor flow but noisy, and it left the doc's embedding stale
+  // until the owner opened the doc.
+  const requesterEmail = verified?.email || req.headers.get("x-user-email") || "";
+  const allowedEditors = (doc.allowed_editors || []) as string[];
+  const isAllowedEditor = !!requesterEmail && allowedEditors.some((e) => e.toLowerCase() === requesterEmail.toLowerCase());
+  if (!isOwner && !isAllowedEditor) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   const input = prepareEmbeddingInput(doc.title, doc.markdown);
   if (input.length < 20) {
