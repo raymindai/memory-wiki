@@ -1198,6 +1198,15 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
   function TiptapLiveEditorInner({ markdown, onChange, canEdit, narrowView, onPasteImage, onDoubleClickCode, onDoubleClickMath, onDoubleClickMermaid }, ref) {
     const frontmatterRef = useRef("");
     const isSettingContent = useRef(false);
+    // Last body markdown we either programmatically set OR
+    // emitted via onChange. Used to drop spurious onUpdate fires
+    // where the document didn't actually change (e.g. the
+    // math-rebuild meta dispatch on the frame after setContent,
+    // or theme/decoration-only transactions). Without this guard
+    // those transactions echo back into onChange → triggerAutoSave
+    // → PATCH, which is the noise a collab-mode editor sees on
+    // every incoming peer broadcast.
+    const lastEmittedBodyRef = useRef<string>("");
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
     const onPasteImageRef = useRef(onPasteImage);
@@ -1310,6 +1319,14 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
           if (isSettingContent.current) return;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const bodyMd = (updatedEd.storage as any).markdown?.getMarkdown?.() || "";
+          // Drop transactions where the body didn't actually
+          // change (decoration-only / math-rebuild meta dispatch
+          // from the rAF inside setMarkdown). Those used to echo
+          // through onChange → triggerAutoSave → PATCH, which is
+          // the 403 noise collab-mode editors saw on every
+          // incoming peer broadcast.
+          if (bodyMd === lastEmittedBodyRef.current) return;
+          lastEmittedBodyRef.current = bodyMd;
           const fullMd = reattachFrontmatter(frontmatterRef.current, bodyMd);
           onChangeRef.current(fullMd);
         },
@@ -1337,6 +1354,14 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
       if (initialBodyRef.current) {
         isSettingContent.current = true;
         ed.commands.setContent(initialBodyRef.current);
+        // Capture the serializer's output of the initial doc so the
+        // onUpdate dedup baseline matches what Tiptap actually
+        // produces (whitespace / markdown-it round-trip can differ
+        // from the raw input).
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          lastEmittedBodyRef.current = (ed.storage as any).markdown?.getMarkdown?.() || initialBodyRef.current;
+        } catch { lastEmittedBodyRef.current = initialBodyRef.current; }
         isSettingContent.current = false;
       }
       // Force a math-decoration rebuild on the next frame. Covers the
@@ -1375,23 +1400,22 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
         isSettingContent.current = true;
         // markdown-it renderer is patched (no <thead>/<tbody>)
         editor.commands.setContent(body || "<p></p>");
-        // Force a math rebuild on the frame after setContent — same
-        // safety net as the initial mount path. CRITICAL: keep
-        // isSettingContent latched through the rAF dispatch so the
-        // follow-up transaction doesn't fire onUpdate. Previously
-        // the flag was released right after setContent; the rAF
-        // dispatch then ran with isSettingContent=false → onUpdate
-        // → onChange → triggerAutoSave + collabApplyLocal. For a
-        // collaborator receiving a remote Yjs update this turned
-        // every incoming peer edit into (a) a 403-prone PATCH back
-        // to the server and (b) a Yjs re-broadcast loop.
+        // Snapshot the markdown we just set so onUpdate can detect
+        // "transaction fired but content didn't change" (e.g. the
+        // rAF math-rebuild dispatch below) and silently skip the
+        // outgoing onChange. This is safer than latching
+        // isSettingContent through the rAF — a backgrounded tab
+        // would never fire rAF, leaving the flag stuck true and
+        // silently dropping every subsequent user keystroke.
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          lastEmittedBodyRef.current = (editor.storage as any).markdown?.getMarkdown?.() || "";
+        } catch { /* serializer not ready — onUpdate will catch up */ }
+        isSettingContent.current = false;
         requestAnimationFrame(() => {
           try {
             editor.view.dispatch(editor.view.state.tr.setMeta(MDFY_MATH_FORCE_META, true));
           } catch { /* editor may have been destroyed */ }
-          // Release the suppression only after the math-rebuild
-          // transaction has settled.
-          isSettingContent.current = false;
         });
       },
       getMarkdown: () => {
