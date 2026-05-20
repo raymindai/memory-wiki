@@ -2828,6 +2828,13 @@ function BundleShareModal({
   const [revertDocIds, setRevertDocIds] = useState<Set<string>>(new Set());
   const [reverting, setReverting] = useState(false);
   const [bundleEditToken, setBundleEditToken] = useState<string | undefined>(undefined);
+  // Whether the bundle row itself is a draft. The Share modal's
+  // "Anyone with link" badge was hardcoded-cheerful for newly
+  // created bundles because we never propagated bundles.is_draft
+  // into ShareModal's isPrivate prop — the modal then defaulted
+  // to "anyone" (no emails set, no isPrivate signal) even though
+  // /b/<id> still 404'd for everyone but the owner.
+  const [bundleIsDraft, setBundleIsDraft] = useState<boolean>(true);
   // Readiness for cross-AI fetch: graph_data + embedding pipeline.
   // Surfaces in the Share modal so the user sees "Ready / Pending"
   // before they hand the URL to Claude / Cursor / ChatGPT.
@@ -2866,6 +2873,12 @@ function BundleShareModal({
         // footer can surface it for programmatic API access.
         if (typeof data.editToken === "string") {
           setBundleEditToken(data.editToken);
+        }
+        // Capture the bundle's own draft state so ShareModal's
+        // People-tab badge tells the truth ("Only you" for a
+        // freshly-created bundle, not "Anyone with link").
+        if (typeof data.is_draft === "boolean") {
+          setBundleIsDraft(data.is_draft);
         }
         setBundleAiReady({
           hasGraph: !!data.hasGraph,
@@ -2926,6 +2939,7 @@ function BundleShareModal({
       headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({ userId: uid, action: "change-edit-mode", editMode: mode }),
     }).catch(() => {});
+    setBundleIsDraft(false);
     onBundleUpdated({ is_draft: false });
     // Cascade publish + edit-mode onto every doc
     await Promise.all(docs.map(async d => {
@@ -2966,6 +2980,7 @@ function BundleShareModal({
           body: JSON.stringify({ userId, action: "unpublish" }),
         }).catch(() => {})
       ));
+      setBundleIsDraft(true);
       onBundleUpdated({ is_draft: true });
       showToast(
         toRevert.length === 0
@@ -3097,6 +3112,7 @@ function BundleShareModal({
       currentEditMode={editMode}
       initialAllowedEmails={allowedEmails}
       initialAllowedEditors={[]}
+      isPrivate={bundleIsDraft}
       onClose={onClose}
       onEditModeChange={(mode) => {
         setEditMode(mode);
