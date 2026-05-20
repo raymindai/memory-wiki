@@ -55,3 +55,6 @@ apps/web/test-results/
 # VS Code extension build artifacts
 apps/vscode-extension/*.vsix
 apps/desktop/build.log
+apps/quicklook/MdfyQuickLook/build.log
+apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/project.xcworkspace/xcuserdata/
+apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/xcuserdata/
