@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 
-const STORAGE_KEY = "mw-welcome-seen";
+// Bumped to v7 so anyone who saw the old "mdfy.app" welcome card
+// gets the new "Memory.Wiki" version of the tour after rebrand.
+const STORAGE_KEY = "mw-welcome-seen-v7";
 
 // v6 welcome flow. Five slides, each with one role and one CTA:
 //   intro — hook on the v6 thesis (knowledge hub for the AI era)
@@ -29,10 +31,9 @@ type Slide = {
 const slides: Slide[] = [
   {
     step: null,
-    // Explicit line break: "Personal knowledge hub" / "for the AI era"
-    // sits clean on two lines instead of orphaning "ERA" on its own
-    // when the badge wraps on narrow viewports.
-    badge: "Personal knowledge hub\nfor the AI era",
+    // Explicit line break: keeps the badge on two clean lines instead
+    // of orphaning the last word when it wraps on narrow viewports.
+    badge: "Your knowledge graph\nas a URL for any AI",
     title: "Your AI memory,\ndeployable to any AI.",
     desc: "ChatGPT, Claude, and Cursor forget you between sessions. Memory.Wiki turns what you write into a URL any AI can read — you decide the shape, Memory.Wiki keeps the index.",
     icon: null,
@@ -203,9 +204,8 @@ export default function WelcomeOverlay() {
           {isFirst && (
             <div style={{ marginBottom: 16 }}>
               <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>
-                <span style={{ color: "var(--accent)" }}>md</span>
-                <span style={{ color: "var(--text-primary)" }}>fy</span>
-                <span style={{ color: "var(--text-faint)" }}>.app</span>
+                <span style={{ color: "var(--accent)" }}>Memory</span>
+                <span style={{ color: "var(--text-primary)" }}>.Wiki</span>
               </span>
             </div>
           )}
