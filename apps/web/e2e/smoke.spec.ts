@@ -32,6 +32,7 @@ test.describe("Bare root URL → Home", () => {
     await page.addInitScript(() => {
       localStorage.setItem("mw-onboarded", "1");
       localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-welcome-seen-v7", "1");
       localStorage.setItem("mw-tabs-version", "10");
       localStorage.setItem("mw-active-tab", "stale-deleted-doc-id");
       localStorage.setItem("mw-tabs", JSON.stringify([
@@ -61,6 +62,7 @@ test.describe.skip("Sign-In modal", () => {
     await page.addInitScript(() => {
       localStorage.setItem("mw-onboarded", "1");
       localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-welcome-seen-v7", "1");
       localStorage.setItem("mw-tabs-version", "10");
     });
     // Bypass bare-root → Home logic (which would overlay Start above
@@ -131,6 +133,7 @@ test.describe.skip("Modal stopPropagation invariant", () => {
     await page.addInitScript(() => {
       localStorage.setItem("mw-onboarded", "1");
       localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-welcome-seen-v7", "1");
       localStorage.setItem("mw-tabs-version", "10");
     });
     await page.goto("/?e2e=1");

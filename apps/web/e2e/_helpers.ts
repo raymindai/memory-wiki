@@ -9,6 +9,10 @@ export async function setupEditableTab(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem("mw-onboarded", "1");
     localStorage.setItem("mw-welcome-seen", "1");
+    // WelcomeOverlay STORAGE_KEY is bumped per major release so users
+    // see the rebranded tour. E2E must skip the current key too —
+    // otherwise the overlay mounts and intercepts every pointer event.
+    localStorage.setItem("mw-welcome-seen-v7", "1");
     // Match the live TABS_VERSION constant in MdEditor.tsx so the
     // editor doesn't run the version-mismatch path on every test
     // boot (which merges every EXAMPLE_TABS row into mw-tabs and
