@@ -155,6 +155,7 @@
 }
 
 .mw-logo-md { color: #fb923c; }
+.mw-logo-dot { color: #fafafa; }
 .mw-logo-fy { color: #fafafa; }
 
 .mw-btn-label {
@@ -230,6 +231,7 @@
 
 .mw-mini-logo { display: inline-flex; letter-spacing: -0.5px; }
 .mw-mini-md { color: #fb923c; }
+.mw-mini-dot { color: #fafafa; }
 .mw-mini-fy { color: #fafafa; }
 .mw-mini-label { color: #737373; margin-left: 4px; font-weight: 500; }
 .mw-mini-status { color: #a1a1aa; margin-left: 2px; font-weight: 400; font-size: 9px; }

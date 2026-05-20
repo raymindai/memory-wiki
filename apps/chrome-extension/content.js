@@ -1068,7 +1068,7 @@
 
     const btn = document.createElement("button");
     btn.id = "mw-float-btn";
-    btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">md</span><span class="mw-logo-fy">fy</span></span><span class="mw-btn-label">All</span>';
+    btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">M</span><span class="mw-logo-dot">.</span><span class="mw-logo-fy">W</span></span><span class="mw-btn-label">All</span>';
     btn.title = "Capture entire conversation and publish on Memory.Wiki";
 
     const toggle = document.createElement("button");
@@ -1091,12 +1091,12 @@
     document.body.appendChild(container);
 
     const setFloatStatus = (status, state) => {
-      const logo = '<span class="mw-btn-logo"><span class="mw-logo-md">md</span><span class="mw-logo-fy">fy</span></span>';
+      const logo = '<span class="mw-btn-logo"><span class="mw-logo-md">M</span><span class="mw-logo-dot">.</span><span class="mw-logo-fy">W</span></span>';
       const stateClass = state === "done" ? " mw-btn-status-done" : state === "error" ? " mw-btn-status-error" : "";
       btn.innerHTML = logo + '<span class="mw-btn-label' + stateClass + '">' + status + '</span>';
     };
     const resetFloat = () => {
-      btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">md</span><span class="mw-logo-fy">fy</span></span><span class="mw-btn-label">All</span>';
+      btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">M</span><span class="mw-logo-dot">.</span><span class="mw-logo-fy">W</span></span><span class="mw-btn-label">All</span>';
     };
 
     async function captureAndSend(lastN) {
@@ -1232,14 +1232,14 @@
 
       const miniBtn = document.createElement("button");
       miniBtn.className = "mw-mini-btn";
-      miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">md</span><span class="mw-mini-fy">fy</span></span><span class="mw-mini-label">this</span>';
+      miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
       miniBtn.title = "Send this Q&A to Memory.Wiki";
 
       const resetMini = () => {
-        miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">md</span><span class="mw-mini-fy">fy</span></span><span class="mw-mini-label">this</span>';
+        miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
       };
       const setMiniStatus = (status, state) => {
-        const logo = '<span class="mw-mini-logo"><span class="mw-mini-md">md</span><span class="mw-mini-fy">fy</span></span>';
+        const logo = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span>';
         const stateClass = state === "done" ? " mw-mini-status-done" : state === "error" ? " mw-mini-status-error" : "";
         miniBtn.innerHTML = logo + '<span class="mw-mini-status' + stateClass + '">' + status + '</span>';
       };
