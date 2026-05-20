@@ -88,6 +88,8 @@ export function useCollaboration(
     ydoc.on("update", (update: Uint8Array, origin: unknown) => {
       if (origin === "remote") return; // Don't re-broadcast remote changes
       const channel = channelRef.current;
+      // [collab-debug] temporary instrumentation
+      console.log("[collab] local Y.Doc update", { cloudId, hasChannel: !!channel, updateLen: update.length, ytextLen: ytext.length });
       if (channel) {
         channel.send({
           type: "broadcast",
@@ -104,11 +106,13 @@ export function useCollaboration(
 
     channel
       .on("broadcast", { event: "yjs-update" }, ({ payload }: { payload: { update?: string } }) => {
+        console.log("[collab] received yjs-update", { cloudId, hasPayload: !!payload?.update });
         if (!payload?.update) return;
         const update = base64ToUint8(payload.update);
         isApplyingRemoteRef.current = true;
         Y.applyUpdate(ydoc, update, "remote");
         const merged = ytext.toString();
+        console.log("[collab] applied remote update", { mergedLen: merged.length, mergedHead: merged.slice(0, 40) });
         // Protect against blank: only apply if result has content
         if (merged.trim() || markdownRef.current.trim().length === 0) {
           onRemoteChangeRef.current(merged);
@@ -173,6 +177,7 @@ export function useCollaboration(
         setPeerCount(Math.max(0, Object.keys(presenceState).length - 1));
       })
       .subscribe(async (status: string) => {
+        console.log("[collab] subscribe status", { cloudId, status });
         if (status === "SUBSCRIBED") {
           setIsCollaborating(true);
           // Request full state from any existing peers
@@ -205,13 +210,17 @@ export function useCollaboration(
    * Computes a Y.Doc transaction and broadcasts the update to peers.
    */
   const applyLocalChange = useCallback((newMarkdown: string) => {
+    console.log("[collab] applyLocalChange called", { mdLen: newMarkdown.length, isApplyingRemote: isApplyingRemoteRef.current, hasYDoc: !!ydocRef.current });
     if (isApplyingRemoteRef.current) return;
     const ytext = ytextRef.current;
     const ydoc = ydocRef.current;
     if (!ytext || !ydoc) return;
 
     const currentYText = ytext.toString();
-    if (currentYText === newMarkdown) return;
+    if (currentYText === newMarkdown) {
+      console.log("[collab] applyLocalChange: no diff vs Y.Text, skipping broadcast");
+      return;
+    }
 
     // Apply minimal diff to Y.Text (avoid delete-all + insert-all which causes CRDT duplication)
     ydoc.transact(() => {
