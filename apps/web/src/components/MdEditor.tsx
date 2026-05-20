@@ -9847,22 +9847,21 @@ ${clone.innerHTML}
           </button>
           {hubSlug && (() => {
             // Hub is an overlay (like Start / showOnboarding), not a
-            // tab. The button toggles showHub and leaves activeTabId
-            // untouched, so the bundle/doc the user was on stays
-            // highlighted in the sidebar and clicking the row brings
-            // it back instantly. Mutually exclusive with the Start
-            // and Settings overlays — opening one closes the others.
+            // tab. The button opens Hub and leaves activeTabId untouched
+            // so the bundle/doc the user was on stays highlighted in
+            // the sidebar — clicking that row brings the doc back.
+            // Mutually exclusive with the Start and Settings overlays:
+            // opening one closes the others. No toggle-close on
+            // re-click (matches the Start button), since Hub is the
+            // surface the user came to view — re-clicking should be a
+            // no-op, not a hide.
             const isHubActive = showHub && !showOnboarding;
             return (
               <>
                 <div style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
-                <Tooltip text={isHubActive ? "Close My Hub" : "Open My Hub — public knowledge base"} position="bottom">
+                <Tooltip text="Open My Hub — public knowledge base" position="bottom">
                   <button
                     onClick={() => {
-                      if (isHubActive) {
-                        setShowHub(false);
-                        return;
-                      }
                       setShowOnboarding(false);
                       setShowSettings(false);
                       setShowHub(true);
