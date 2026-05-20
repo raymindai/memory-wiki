@@ -105,12 +105,12 @@ export default function EmbedPage() {
               This document is password-protected.
             </div>
             <a
-              href={`https://mdfy.app/${id}`}
+              href={`https://memory.wiki/${id}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: "var(--accent)", textDecoration: "underline", fontSize: "0.95rem" }}
             >
-              View it at mdfy.app/{id}
+              View it at memory.wiki/{id}
             </a>
           </div>
         ) : (
@@ -130,12 +130,12 @@ export default function EmbedPage() {
         }}
       >
         <a
-          href={`https://mdfy.app/${id}`}
+          href={`https://memory.wiki/${id}`}
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: "var(--accent)", textDecoration: "none" }}
         >
-          mdfy.app
+          memory.wiki
         </a>
       </div>
     </div>

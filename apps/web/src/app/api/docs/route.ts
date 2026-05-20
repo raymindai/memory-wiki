@@ -12,7 +12,7 @@ import { extractTitleFromMd } from "@/lib/extract-title";
 
 /**
  * CORS preflight for cross-origin capture (bookmarklet on chatgpt.com,
- * claude.ai, gemini.google.com → mdfy.app/api/docs). Trusted origins
+ * claude.ai, gemini.google.com → memory.wiki/api/docs). Trusted origins
  * defined in lib/anonymous-cookie.ts; everything else gets a no-op.
  */
 export async function OPTIONS(req: NextRequest) {

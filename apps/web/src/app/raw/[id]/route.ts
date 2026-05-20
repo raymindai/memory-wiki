@@ -17,7 +17,7 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
 //   - title  — human title
 //   - url    — canonical mdfy URL (so the LLM can cite it back)
 //   - updated — ISO timestamp
-//   - source  — always "mdfy.app" so the LLM knows the origin
+//   - source  — always "memory.wiki" so the LLM knows the origin
 //
 // Restricted documents (draft / soft-deleted / password-protected /
 // expired / email-restricted) intentionally 404 here so the AI never
@@ -27,7 +27,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const canonicalUrl = `https://mdfy.app/${id}`;
+  const canonicalUrl = `https://memory.wiki/${id}`;
   const supabase = getSupabaseClient();
   if (!supabase) {
     return permissionResponse({ reason: "service_unavailable", canonicalUrl, resourceKind: "doc", resourceId: id });
@@ -66,14 +66,14 @@ export async function GET(
 
   const title = (data.title || "Untitled").replace(/"/g, '\\"');
   const updated = data.updated_at ? new Date(data.updated_at).toISOString() : "";
-  const source = data.source ? String(data.source).replace(/"/g, '\\"') : "mdfy.app";
+  const source = data.source ? String(data.source).replace(/"/g, '\\"') : "memory.wiki";
 
   // Frontmatter first, then the raw markdown body. The body usually starts
   // with its own H1; we don't repeat the title to avoid duplicate headings.
   const frontmatter = [
     "---",
     `title: "${title}"`,
-    `url: https://mdfy.app/${id}`,
+    `url: https://memory.wiki/${id}`,
     updated ? `updated: ${updated}` : null,
     `source: "${source}"`,
     "---",
@@ -107,7 +107,7 @@ export async function GET(
       "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300",
       // Tell crawlers the canonical browser URL so search ranks the human
       // page, not the raw markdown.
-      "Link": `<https://mdfy.app/${id}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/${id}>; rel="canonical"`,
       "X-Document-ID": id,
       ...tokenEconomyHeaders(body, { compact }),
     },

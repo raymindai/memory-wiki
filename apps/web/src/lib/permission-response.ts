@@ -54,7 +54,7 @@ function instructionsFor(reason: PermissionReason, canonicalUrl: string): string
         "AI agent, retry with one of:",
         "",
         "  - `Authorization: Bearer <user_token>` if the user is signed in",
-        "    at https://staging.mdfy.app and you have their token from",
+        "    at https://staging.memory.wiki and you have their token from",
         "    `~/.config/mdfy/token`.",
         "  - `X-User-Email: <user_email>` if you only have the user's email",
         "    on hand and they're already on the bundle's allow-list.",
@@ -101,7 +101,7 @@ export function permissionResponse(opts: PermissionResponseOptions): NextRespons
     `kind: ${resourceKind}`,
     resourceId ? `id: ${resourceId}` : null,
     `url: ${canonicalUrl}`,
-    'source: "mdfy.app"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");

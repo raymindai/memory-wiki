@@ -254,7 +254,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       avatar_url: resolvedAvatar,
       description: profile.hub_description,
       plan: profile.plan,
-      url: `https://mdfy.app/hub/${profile.hub_slug}`,
+      url: `https://memory.wiki/hub/${profile.hub_slug}`,
     },
     documents: filteredDocs.map(d => ({
       id: d.id,

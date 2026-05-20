@@ -104,7 +104,7 @@ cluster (4 pricing docs):
 | Vlkn4CaB <> jqYSWWVo | 0.40 |
 | Vlkn4CaB <> ybAfPRUe | 0.43 |
 | any of these <> "Project Acme Milestones" | 0.62+ |
-| any of these <> "Welcome to mdfy.app" | 0.66+ |
+| any of these <> "Welcome to memory.wiki" | 0.66+ |
 
 So 0.45 cleanly separates "same-topic" from "different-topic." Bumping
 to 0.50 would still work but starts admitting tangentially-related

@@ -1299,7 +1299,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
           className="text-caption font-mono"
           style={{ background: "var(--accent)", color: "var(--background)", padding: "8px 16px", borderRadius: 6, textDecoration: "none", fontWeight: 600, letterSpacing: 0.3 }}
         >
-          Go to mdfy.app
+          Go to memory.wiki
         </Link>
       </div>
     );
@@ -2118,7 +2118,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
           </svg>
         </div>
 
-        {/* Detail panel — typography + spacing tracks mdfy.app's left
+        {/* Detail panel — typography + spacing tracks memory.wiki's left
             sidebar. Doc/concept references reuse the SidebarFolder
             TabRow look: compact rounded rows, hover:bg-[var(--toggle-bg)],
             tiny coloured dot prefix instead of bordered chips. */}

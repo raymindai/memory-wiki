@@ -121,7 +121,7 @@ export async function GET(
       for (const id of c.docIds.slice(0, MAX_DOCS_PER_CONCEPT)) {
         const d = docById.get(id);
         if (!d) continue;
-        lines.push(`- [${d.title || "Untitled"}](https://mdfy.app/${d.id})`);
+        lines.push(`- [${d.title || "Untitled"}](https://memory.wiki/${d.id})`);
       }
       if (c.docIds.length > MAX_DOCS_PER_CONCEPT) {
         lines.push(`- …and ${c.docIds.length - MAX_DOCS_PER_CONCEPT} more.`);
@@ -135,7 +135,7 @@ export async function GET(
   lines.push("");
   for (const d of visibleDocs.slice(0, 30)) {
     const date = (d.updated_at || "").slice(0, 10);
-    lines.push(`- ${date} — [${d.title || "Untitled"}](https://mdfy.app/${d.id})`);
+    lines.push(`- ${date} — [${d.title || "Untitled"}](https://memory.wiki/${d.id})`);
   }
   if (visibleDocs.length > 30) {
     lines.push(`- …and ${visibleDocs.length - 30} more in [llms.txt](/hub/${slug}/llms.txt).`);
@@ -148,7 +148,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=900",
-      "Link": `<https://mdfy.app/hub/${slug}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/hub/${slug}>; rel="canonical"`,
       "X-Hub-Slug": slug,
       "X-Token-Estimate": String(estimateTokens(body)),
     },

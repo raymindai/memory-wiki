@@ -133,7 +133,7 @@ async function runWebImport(args: {
       const t = setTimeout(() => ctrl.abort(), PER_IMAGE_TIMEOUT_MS);
       try {
         const r = await fetch(u, {
-          headers: { "User-Agent": "mdfy.app/1.0 (Image rehost)" },
+          headers: { "User-Agent": "memory.wiki/1.0 (Image rehost)" },
           redirect: "follow",
           signal: ctrl.signal,
         });

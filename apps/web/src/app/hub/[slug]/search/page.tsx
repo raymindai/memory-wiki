@@ -45,7 +45,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     // is unique per visit and the canonical content lives at each
     // result doc's own URL.
     robots: { index: false, follow: true },
-    alternates: { canonical: `https://mdfy.app/hub/${slug}/search` },
+    alternates: { canonical: `https://memory.wiki/hub/${slug}/search` },
   };
 }
 

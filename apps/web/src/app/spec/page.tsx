@@ -8,11 +8,11 @@ export const metadata: Metadata = {
   title: "memori.wiki — Open Spec",
   description:
     "The URL contract, retrieval API, llms.txt, bundle digest, and concept index — the open spec that any AI tool can implement against. memori.wiki is an AI-era wiki: the AI does the linking, you write.",
-  alternates: { canonical: "https://mdfy.app/spec" },
+  alternates: { canonical: "https://memory.wiki/spec" },
   openGraph: {
     title: "memori.wiki — Open Spec",
     description: "URL contract + retrieval API + llms.txt for the AI-era wiki. Open, MIT-licensed engine.",
-    url: "https://mdfy.app/spec",
+    url: "https://memory.wiki/spec",
     images: [{ url: "/api/og?title=memori.wiki%20Spec", width: 1200, height: 630 }],
   },
 };
@@ -68,7 +68,7 @@ export default function SpecPage() {
         </p>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-faint)", marginBottom: 48, maxWidth: 720 }}>
           Engine licence: MIT. Reference implementation:{" "}
-          <Link href="https://mdfy.app" style={{ color: "var(--accent)" }}>mdfy.app</Link>. Spec version: 0.1 (draft, 2026-05-15).
+          <Link href="https://memory.wiki" style={{ color: "var(--accent)" }}>memory.wiki</Link>. Spec version: 0.1 (draft, 2026-05-15).
         </p>
 
         {/* TOC */}
@@ -118,8 +118,8 @@ export default function SpecPage() {
             <p style={{ marginBottom: 0 }}><Code>memori.wiki/&#123;user&#125;</Code> &nbsp; — &nbsp; the whole hub. Broad context, hub-wide concept index attached. Use sparingly.</p>
           </div>
           <p style={{ marginTop: 20 }}>
-            During the rebrand transition, <Code>mdfy.app/&#123;id&#125;</Code>, <Code>mdfy.app/b/&#123;id&#125;</Code>, and
-            <Code>mdfy.app/hub/&#123;slug&#125;</Code> resolve to the same payloads. <Code>mori.wiki/...</Code> 301s to <Code>memori.wiki/...</Code>.
+            During the rebrand transition, <Code>memory.wiki/&#123;id&#125;</Code>, <Code>memory.wiki/b/&#123;id&#125;</Code>, and
+            <Code>memory.wiki/hub/&#123;slug&#125;</Code> resolve to the same payloads. <Code>mori.wiki/...</Code> 301s to <Code>memori.wiki/...</Code>.
           </p>
         </Section>
 
@@ -180,12 +180,12 @@ GET /raw/hub/{slug}/c/{concept}`}</Block>
 mdfy_bundle: 1
 id: <bundleId>
 title: "..."
-url: https://mdfy.app/b/<id>
+url: https://memory.wiki/b/<id>
 document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>
 analysis_stale: true        # only when a member doc was edited after the analysis
-source: "mdfy.app"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -216,8 +216,8 @@ source: "mdfy.app"
 ## Concept relations
 - **conceptA** ↔ **conceptB** — <edge label>
 
-1. [Doc 1](https://mdfy.app/<docId>) — annotation
-2. [Doc 2](https://mdfy.app/<docId>) — annotation
+1. [Doc 1](https://memory.wiki/<docId>) — annotation
+2. [Doc 2](https://memory.wiki/<docId>) — annotation
 ...`}</Block>
         </Section>
 
@@ -241,7 +241,7 @@ Content-Type: application/json
     {
       "id": "abc123",
       "title": "React hooks crash course",
-      "url": "https://mdfy.app/abc123",
+      "url": "https://memory.wiki/abc123",
       "snippet": "...react hooks let you...",
       "distance": 0.13,
       "updated_at": "2026-04-10T..."

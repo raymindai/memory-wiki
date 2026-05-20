@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import PluginsContent from "@/components/PluginsContent";
 
 export const metadata: Metadata = {
-  title: "플러그인 및 확장 프로그램 — mdfy.app",
+  title: "플러그인 및 확장 프로그램 — memory.wiki",
   description:
-    "CLI, Mac 데스크톱 앱, Chrome 확장 프로그램, VS Code 확장 프로그램, macOS QuickLook으로 mdfy.app를 어디서든 사용하세요. AI 채팅 캡처와 터미널 게시 지원.",
+    "CLI, Mac 데스크톱 앱, Chrome 확장 프로그램, VS Code 확장 프로그램, macOS QuickLook으로 memory.wiki를 어디서든 사용하세요. AI 채팅 캡처와 터미널 게시 지원.",
   alternates: {
-    canonical: "https://mdfy.app/ko/plugins",
-    languages: { en: "https://mdfy.app/plugins" },
+    canonical: "https://memory.wiki/ko/plugins",
+    languages: { en: "https://memory.wiki/plugins" },
   },
   openGraph: {
-    title: "플러그인 및 확장 프로그램 — mdfy.app",
+    title: "플러그인 및 확장 프로그램 — memory.wiki",
     description:
       "AI 채팅 캡처 Chrome 확장. VS Code, CLI, Mac 앱, macOS QuickLook으로 Markdown 관리.",
-    url: "https://mdfy.app/ko/plugins",
+    url: "https://memory.wiki/ko/plugins",
     images: [{ url: "/api/og?title=Plugins", width: 1200, height: 630 }],
   },
 };

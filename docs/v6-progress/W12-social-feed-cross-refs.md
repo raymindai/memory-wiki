@@ -40,7 +40,7 @@ docs, and email-restricted bundles never appear.
 `lib/cross-refs.ts` extracts internal mdfy URL references from a
 markdown corpus and rolls them up by target. A reference is any
 `/{docId}`, `/d/{docId}`, `/b/{bundleId}`, or `/hub/{slug}` URL,
-with or without the `https://(staging.)?mdfy.app` host prefix.
+with or without the `https://(staging.)?memory.wiki` host prefix.
 Self-citations are dropped. Targets that aren't themselves in the
 public corpus are dropped (no way to game the count by linking to
 random ids).
@@ -68,7 +68,7 @@ under a second and the cited-set fresh.
 
 - doc / bundle / hub citation extraction
 - self-reference exclusion
-- both `https://staging.mdfy.app/<id>` and bare `/<id>` syntax
+- both `https://staging.memory.wiki/<id>` and bare `/<id>` syntax
 - `/b/<id>` not double-counted as `/<id>`
 - unknown targets dropped
 - multiple sources rolled up into a per-target unique-source set

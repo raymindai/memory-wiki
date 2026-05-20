@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Canonical mdfy.app logo component.
+ * Canonical memory.wiki logo component.
  * Renders inline SVG so CSS variables are respected for theming.
  * Source of truth: assets/brand/
  *
@@ -10,11 +10,11 @@
  */
 export default function MdfyLogo({
   size = 22,
-  variant = "mdfy.app",
+  variant = "memory.wiki",
   compact = false,
 }: {
   size?: number;
-  variant?: "mdfy.app" | "mdcore.ai";
+  variant?: "memory.wiki" | "mdcore.ai";
   /** When true, render only the orange "md" mark — useful in tight spots
    *  (app toolbar) where the full wordmark crowds the row. */
   compact?: boolean;

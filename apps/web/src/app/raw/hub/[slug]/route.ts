@@ -8,33 +8,33 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
  *
  * GET /raw/hub/[slug] — Bundle Spec v1.0 hub-subtype markdown payload.
  *
- * What an AI gets when the user pastes mdfy.app/hub/<slug>:
+ * What an AI gets when the user pastes memory.wiki/hub/<slug>:
  *
  *   ---
  *   mdfy_bundle: 1
  *   type: hub
  *   slug: <slug>
  *   author: "..."
- *   url: https://mdfy.app/hub/<slug>
+ *   url: https://memory.wiki/hub/<slug>
  *   document_count: N
  *   bundle_count: M
  *   updated: <ISO>
- *   source: "mdfy.app"
+ *   source: "memory.wiki"
  *   ---
  *
  *   # <author>'s knowledge hub
  *   > <hub_description>
  *
  *   ## Recent (last 7 days)
- *   - [Title](https://mdfy.app/<docId>) — yesterday
+ *   - [Title](https://memory.wiki/<docId>) — yesterday
  *   ...
  *
  *   ## Documents
- *   - [Title](https://mdfy.app/<docId>) — 2026-04-15
+ *   - [Title](https://memory.wiki/<docId>) — 2026-04-15
  *   ...
  *
  *   ## Bundles
- *   - [Bundle Title](https://mdfy.app/b/<bundleId>) — N docs
+ *   - [Bundle Title](https://memory.wiki/b/<bundleId>) — N docs
  *   ...
  *
  * Index-style payload, NOT a full doc concatenation. A user's hub
@@ -116,7 +116,7 @@ export async function GET(
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
         "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=900",
-        "Link": `<https://mdfy.app/hub/${slug}>; rel="canonical"`,
+        "Link": `<https://memory.wiki/hub/${slug}>; rel="canonical"`,
         "X-Hub-Slug": slug,
         ...tokenEconomyHeaders(body, { compact, digest: true }),
       },
@@ -164,11 +164,11 @@ export async function GET(
     "type: hub",
     `slug: ${slug}`,
     `author: "${author}"`,
-    `url: https://mdfy.app/hub/${slug}`,
+    `url: https://memory.wiki/hub/${slug}`,
     `document_count: ${docsList.length}`,
     `bundle_count: ${bundlesList.length}`,
     hubUpdated ? `updated: ${new Date(hubUpdated).toISOString()}` : null,
-    'source: "mdfy.app"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");
@@ -183,21 +183,21 @@ export async function GET(
   if (recent.length > 0) {
     sections.push("## Recent (last 7 days)");
     sections.push(recent.slice(0, 20).map(d =>
-      `- [${d.title || "Untitled"}](https://mdfy.app/${d.id}) — ${formatRelativeDate(d.updated_at)}`
+      `- [${d.title || "Untitled"}](https://memory.wiki/${d.id}) — ${formatRelativeDate(d.updated_at)}`
     ).join("\n"));
   }
 
   if (bundlesList.length > 0) {
     sections.push("## Bundles");
     sections.push(bundlesList.slice(0, 50).map(b =>
-      `- [${b.title || "Untitled Bundle"}](https://mdfy.app/b/${b.id})`
+      `- [${b.title || "Untitled Bundle"}](https://memory.wiki/b/${b.id})`
     ).join("\n"));
   }
 
   if (docsList.length > 0) {
     sections.push("## All documents");
     sections.push(docsList.slice(0, 200).map(d =>
-      `- [${d.title || "Untitled"}](https://mdfy.app/${d.id}) — ${formatDate(d.updated_at)}`
+      `- [${d.title || "Untitled"}](https://memory.wiki/${d.id}) — ${formatDate(d.updated_at)}`
     ).join("\n"));
     if (docsList.length > 200) {
       sections.push(`_…and ${docsList.length - 200} more docs._`);
@@ -227,7 +227,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": "public, max-age=120, s-maxage=120, stale-while-revalidate=600",
-      "Link": `<https://mdfy.app/hub/${slug}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/hub/${slug}>; rel="canonical"`,
       "X-Hub-Slug": slug,
       ...tokenEconomyHeaders(body, { compact }),
     },
@@ -393,11 +393,11 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
     "type: hub_digest",
     `slug: ${slug}`,
     `author: "${author}"`,
-    `url: https://mdfy.app/hub/${slug}`,
+    `url: https://memory.wiki/hub/${slug}`,
     `concept_count: ${concepts.length}`,
     ...(since ? [`since: ${since}`] : []),
     `updated: ${updatedAt}`,
-    'source: "mdfy.app"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].join("\n");
@@ -409,11 +409,11 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
   if (concepts.length === 0) {
     sections.push(
       "_The ontology for this hub hasn't been built yet. Ask the owner to run **Build ontology** in their hub view, " +
-      `or fetch [the full index](https://mdfy.app/raw/hub/${slug}?compact=1) instead._`,
+      `or fetch [the full index](https://memory.wiki/raw/hub/${slug}?compact=1) instead._`,
     );
   } else {
     sections.push(
-      `_${concepts.length} concept${concepts.length === 1 ? "" : "s"} extracted across this hub. Each entry links to the supporting documents — fetch any of them as \`https://mdfy.app/raw/<id>?compact=1\` for the dense full text._`,
+      `_${concepts.length} concept${concepts.length === 1 ? "" : "s"} extracted across this hub. Each entry links to the supporting documents — fetch any of them as \`https://memory.wiki/raw/<id>?compact=1\` for the dense full text._`,
     );
 
     sections.push("## Concepts");
@@ -427,7 +427,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
       ].join(" • ");
       sections.push(`### ${c.label}\n*${meta}*`);
       if (c.description) sections.push(`> ${c.description.split("\n")[0]}`);
-      sections.push(visibleDocs.map((id) => `- [${docTitleById.get(id)}](https://mdfy.app/${id})`).join("\n"));
+      sections.push(visibleDocs.map((id) => `- [${docTitleById.get(id)}](https://memory.wiki/${id})`).join("\n"));
 
       // Related concepts inside the top-40 set — gives the AI
       // first-class navigation between ideas without needing to read
@@ -461,7 +461,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
         const bundleLine = Array.from(bundleCounts.entries())
           .sort((a, b) => b[1] - a[1])
           .slice(0, 3)
-          .map(([bid, count]) => `[${bundleTitleById.get(bid)}](https://mdfy.app/b/${bid}) (${count} doc${count === 1 ? "" : "s"})`)
+          .map(([bid, count]) => `[${bundleTitleById.get(bid)}](https://memory.wiki/b/${bid}) (${count} doc${count === 1 ? "" : "s"})`)
           .join(" · ");
         sections.push(`_In bundles:_ ${bundleLine}`);
       }
@@ -489,7 +489,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
   }
 
   sections.push(
-    `---\n\n_Need everything? [Full hub index](https://mdfy.app/raw/hub/${slug}?compact=1) lists every public document. [llms.txt manifest](https://mdfy.app/hub/${slug}/llms.txt) explains how to crawl this hub._`,
+    `---\n\n_Need everything? [Full hub index](https://memory.wiki/raw/hub/${slug}?compact=1) lists every public document. [llms.txt manifest](https://memory.wiki/hub/${slug}/llms.txt) explains how to crawl this hub._`,
   );
 
   const body = `${frontmatter}\n${sections.join("\n\n")}\n`;

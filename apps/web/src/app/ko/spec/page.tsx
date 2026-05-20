@@ -9,13 +9,13 @@ export const metadata: Metadata = {
   description:
     "URL 계약, retrieval API, llms.txt, bundle digest, concept index 의 공개 스펙. 어떤 AI 도구든 구현 가능. memori.wiki 는 AI 시대 wiki — 링킹은 AI 가 하고 사용자는 글을 씁니다.",
   alternates: {
-    canonical: "https://mdfy.app/ko/spec",
-    languages: { en: "https://mdfy.app/spec" },
+    canonical: "https://memory.wiki/ko/spec",
+    languages: { en: "https://memory.wiki/spec" },
   },
   openGraph: {
     title: "memori.wiki — Open Spec",
     description: "AI 시대 wiki 를 위한 URL 계약 + retrieval API + llms.txt. 오픈, MIT 라이선스 엔진.",
-    url: "https://mdfy.app/ko/spec",
+    url: "https://memory.wiki/ko/spec",
     images: [{ url: "/api/og?title=memori.wiki%20Spec", width: 1200, height: 630 }],
   },
 };
@@ -63,7 +63,7 @@ export default function SpecPageKo() {
         </p>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-faint)", marginBottom: 48, maxWidth: 720 }}>
           엔진 라이선스: MIT. 레퍼런스 구현:{" "}
-          <Link href="https://mdfy.app" style={{ color: "var(--accent)" }}>mdfy.app</Link>. 스펙 버전: 0.1 (draft, 2026-05-15).
+          <Link href="https://memory.wiki" style={{ color: "var(--accent)" }}>memory.wiki</Link>. 스펙 버전: 0.1 (draft, 2026-05-15).
         </p>
 
         <nav style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", borderRadius: 12, padding: "16px 20px", marginBottom: 56 }}>
@@ -106,7 +106,7 @@ export default function SpecPageKo() {
             <p style={{ marginBottom: 0 }}><Code>memori.wiki/&#123;user&#125;</Code> &nbsp; — &nbsp; 전체 hub. 넓은 컨텍스트, hub-wide concept index 포함. 사용 자제.</p>
           </div>
           <p style={{ marginTop: 20 }}>
-            리브랜드 전환 기간 동안 <Code>mdfy.app/&#123;id&#125;</Code>, <Code>mdfy.app/b/&#123;id&#125;</Code>, <Code>mdfy.app/hub/&#123;slug&#125;</Code> 가 같은 payload 로 resolve. <Code>mori.wiki/...</Code> 는 <Code>memori.wiki/...</Code> 로 301.
+            리브랜드 전환 기간 동안 <Code>memory.wiki/&#123;id&#125;</Code>, <Code>memory.wiki/b/&#123;id&#125;</Code>, <Code>memory.wiki/hub/&#123;slug&#125;</Code> 가 같은 payload 로 resolve. <Code>mori.wiki/...</Code> 는 <Code>memori.wiki/...</Code> 로 301.
           </p>
         </Section>
 
@@ -147,12 +147,12 @@ GET /raw/hub/{slug}/c/{concept}`}</Block>
 mdfy_bundle: 1
 id: <bundleId>
 title: "..."
-url: https://mdfy.app/b/<id>
+url: https://memory.wiki/b/<id>
 document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>
 analysis_stale: true        # 분석 이후 멤버 doc 이 수정됐을 때만
-source: "mdfy.app"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -183,8 +183,8 @@ source: "mdfy.app"
 ## Concept relations
 - **conceptA** ↔ **conceptB** — <edge label>
 
-1. [Doc 1](https://mdfy.app/<docId>) — annotation
-2. [Doc 2](https://mdfy.app/<docId>) — annotation
+1. [Doc 1](https://memory.wiki/<docId>) — annotation
+2. [Doc 2](https://memory.wiki/<docId>) — annotation
 ...`}</Block>
         </Section>
 
@@ -206,7 +206,7 @@ Content-Type: application/json
     {
       "id": "abc123",
       "title": "React hooks crash course",
-      "url": "https://mdfy.app/abc123",
+      "url": "https://memory.wiki/abc123",
       "snippet": "...react hooks let you...",
       "distance": 0.13,
       "updated_at": "2026-04-10T..."

@@ -87,7 +87,7 @@ When producing Mermaid:
 - Use subgraphs to group related nodes
 - Add classDef styles for visual variety (use orange #fb923c for the key/important nodes, and zinc shades #27272a/#3f3f46 for supporting ones, with white #fafafa text)
 - Use shape syntax: \`A["Process"]\`, \`B(("Start/End"))\`, \`C{"Decision"}\`, \`D[/"Input"/]\`, \`E[("Database")]\`
-- **CRITICAL: ALWAYS wrap every node label in double quotes** — \`A["any text"]\` not \`A[any text]\`. This prevents parse errors when labels contain \`{ } ( ) / \\ | : . , < > # @ %\` or whitespace. NEVER write \`G[mdfy.app/{id}]\` — write \`G["mdfy.app/{id}"]\`.
+- **CRITICAL: ALWAYS wrap every node label in double quotes** — \`A["any text"]\` not \`A[any text]\`. This prevents parse errors when labels contain \`{ } ( ) / \\ | : . , < > # @ %\` or whitespace. NEVER write \`G[memory.wiki/{id}]\` — write \`G["memory.wiki/{id}"]\`.
 - Add edge labels where they clarify relationships: \`A -->|"label"| B\` (also quoted)
 - Use only ASCII characters in node IDs (left of the bracket): A, B1, node_x — never spaces or punctuation
 - Choose direction (LR or TD) that fits the content best

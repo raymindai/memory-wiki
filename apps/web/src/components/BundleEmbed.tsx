@@ -3596,7 +3596,7 @@ function BundleListView({
   const copyDocUrl = async (docId: string) => {
     if (typeof navigator === "undefined") return;
     try {
-      await navigator.clipboard.writeText(`https://mdfy.app/${docId}`);
+      await navigator.clipboard.writeText(`https://memory.wiki/${docId}`);
       setCopiedDocId(docId);
       setTimeout(() => setCopiedDocId((v) => v === docId ? null : v), 1200);
     } catch { /* ignore */ }

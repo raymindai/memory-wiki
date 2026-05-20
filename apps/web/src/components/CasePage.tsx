@@ -41,13 +41,13 @@ export interface CaseData {
 }
 
 const caseMetaBase = (slug: string, title: string, sub: string): Metadata => ({
-  title: `${title} — mdfy.app`,
+  title: `${title} — memory.wiki`,
   description: sub,
-  alternates: { canonical: `https://mdfy.app/case-${slug}` },
+  alternates: { canonical: `https://memory.wiki/case-${slug}` },
   openGraph: {
-    title: `${title} — mdfy.app`,
+    title: `${title} — memory.wiki`,
     description: sub,
-    url: `https://mdfy.app/case-${slug}`,
+    url: `https://memory.wiki/case-${slug}`,
     images: [{ url: `/api/og?title=${encodeURIComponent(title)}`, width: 1200, height: 630 }],
   },
 });

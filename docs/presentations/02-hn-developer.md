@@ -42,7 +42,7 @@ style: |
 <br>
 
 ```
-$ curl https://mdfy.app/hub/you?compact
+$ curl https://memory.wiki/hub/you?compact
 # Your AI memory, deployable to any AI.
 ```
 
@@ -125,7 +125,7 @@ mdfy ships the graph **in the URL response** — themes, insights, concept relat
 <br>
 
 ```bash
-$ curl https://mdfy.app/b/<bundle-id>
+$ curl https://memory.wiki/b/<bundle-id>
 # ... markdown body ...
 ```mdfy:graph
 { "themes": [...], "insights": [...], "connections": [...] }
@@ -144,9 +144,9 @@ The receiving AI gets the prior AI's analysis for free, single round trip.
 
 Right thesis, local file shape. We rebuilt it as a URL shape — and added **composable scopes**:
 
-- `mdfy.app/d/<id>` — single doc
-- `mdfy.app/b/<bundle-id>` — topical bundle with synthesised analysis
-- `mdfy.app/hub/<you>` — full personal hub
+- `memory.wiki/d/<id>` — single doc
+- `memory.wiki/b/<bundle-id>` — topical bundle with synthesised analysis
+- `memory.wiki/hub/<you>` — full personal hub
 
 Per-project context (bundles) maps cleanly onto AGENTS.md / .cursor/rules. The Obsidian shape can't reach there.
 
@@ -208,7 +208,7 @@ Everything that matters is documented or open source.
 | Chrome extension | source on GitHub |
 | `/docs/integrate` worked examples (incl. GitHub Action) | public |
 
-**Try it before reading anything else:** `mdfy.app/hub/demo`
+**Try it before reading anything else:** `memory.wiki/hub/demo`
 
 ---
 
@@ -236,13 +236,13 @@ It's not. The hub layer (concept index, recall API, auto-graph), the capture sur
 
 ```bash
 # Browse the demo hub
-open https://mdfy.app/hub/demo
+open https://memory.wiki/hub/demo
 
 # Paste into Claude / Cursor / Codex
-echo 'https://mdfy.app/hub/demo' >> AGENTS.md
+echo 'https://memory.wiki/hub/demo' >> AGENTS.md
 
 # Or call the recall API directly
-curl -X POST https://mdfy.app/api/hub/demo/recall \
+curl -X POST https://memory.wiki/api/hub/demo/recall \
      -H 'Content-Type: application/json' \
      -d '{"question":"cross-AI memory","k":5}'
 ```

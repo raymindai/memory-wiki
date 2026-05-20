@@ -1,6 +1,6 @@
 # How mdfy works
 
-> Read this once and you can explain mdfy.app to anyone — a teammate,
+> Read this once and you can explain memory.wiki to anyone — a teammate,
 > a journalist, an investor, the AI you're about to paste a URL into.
 > Assumes nothing. Pairs with `OVERVIEW.md` (what we have shipped).
 
@@ -10,7 +10,7 @@
 
 **A mdfy URL is an API for any AI.**
 
-Paste `mdfy.app/<id>`, `mdfy.app/b/<id>`, or `mdfy.app/hub/<slug>`
+Paste `memory.wiki/<id>`, `memory.wiki/b/<id>`, or `memory.wiki/hub/<slug>`
 into ChatGPT, Claude, Gemini, or Cursor — the LLM fetches it and gets
 back clean markdown shaped for an AI to read. No app to install. No
 format to learn. No JavaScript to render. Just markdown over HTTPS.
@@ -38,12 +38,12 @@ go to the LLM directly — they back `mdfy_search` via MCP.
 
 Three URL shapes, each tuned for its purpose.
 
-### `mdfy.app/<id>` — one document
+### `memory.wiki/<id>` — one document
 
 ```
 ---
 title: "..."
-url: https://mdfy.app/<id>
+url: https://memory.wiki/<id>
 updated: 2026-05-20T...
 ---
 # Doc title
@@ -54,12 +54,12 @@ No AI processing. Source markdown with a frontmatter wrapper. The
 cheapest payload, and the target every bundle / hub digest links
 into when an LLM wants the full body.
 
-### `mdfy.app/b/<id>` — a bundle (default: **Compact**)
+### `memory.wiki/b/<id>` — a bundle (default: **Compact**)
 
 ```
 ---
 type: bundle
-url: https://mdfy.app/b/<id>
+url: https://memory.wiki/b/<id>
 analysis_stale: false
 ---
 # Bundle title
@@ -71,8 +71,8 @@ analysis_stale: false
 ## Concepts               ← this bundle's concept subgraph
 ## Concept relations
 ## Documents
-- [Doc A](https://mdfy.app/<id>) — annotation
-- [Doc B](https://mdfy.app/<id>) — annotation
+- [Doc A](https://memory.wiki/<id>) — annotation
+- [Doc B](https://memory.wiki/<id>) — annotation
 ```
 
 The bundle digest is the **map** — what's in it, how the pieces
@@ -84,12 +84,12 @@ fewer tokens.
 Append `?full=1` to inline every doc body. Expensive, occasionally
 the right call.
 
-### `mdfy.app/hub/<slug>` — a person's whole hub (default: **Compact**)
+### `memory.wiki/hub/<slug>` — a person's whole hub (default: **Compact**)
 
 ```
 ---
 type: hub_digest
-url: https://mdfy.app/hub/<slug>
+url: https://memory.wiki/hub/<slug>
 concept_count: 40
 ---
 # <name>'s knowledge — concept digest
@@ -98,10 +98,10 @@ concept_count: 40
 ### Concept Label
 *tag • weight 14 • 4 docs*
 > short description
-- [Linked doc](https://mdfy.app/<id>)
+- [Linked doc](https://memory.wiki/<id>)
 …
 _Related:_ depends on → **Other concept** · contradicts → **Another**
-_In bundles:_ [Bundle A](https://mdfy.app/b/<id>) (3 docs) · …
+_In bundles:_ [Bundle A](https://memory.wiki/b/<id>) (3 docs) · …
 
 ## Concept relations
 - **Concept X** part_of **Concept Y**
@@ -152,7 +152,7 @@ So: URL payload is for pasting; MCP is for living inside.
 5. Embedding pipeline (`/api/embed/<id>`) embeds title + body for
    global search and chunks each section for finer recall. Skips
    re-embedding via `embedding_source_hash` when nothing changed.
-6. The moment you publish (un-draft), `mdfy.app/<id>` is fetchable
+6. The moment you publish (un-draft), `memory.wiki/<id>` is fetchable
    by any AI in the world. Your hub digest already reflects the new
    concepts.
 
@@ -175,7 +175,7 @@ So: URL payload is for pasting; MCP is for living inside.
 
 ### Edit a doc that's in a bundle
 The bundle's `graph_data` is now older than its source. The next
-fetch of `mdfy.app/b/<id>` carries `analysis_stale: true` in the
+fetch of `memory.wiki/b/<id>` carries `analysis_stale: true` in the
 frontmatter so the LLM knows the AI summary may not match the
 current text. The owner sees a "stale" pill in the canvas and can
 re-analyze.
@@ -183,7 +183,7 @@ re-analyze.
 ### Collaborate live
 1. Owner shares with `someone@example.com` as Editor — server adds
    to `allowed_editors`.
-2. Editor opens `mdfy.app/<id>` — `/d/<id>` viewer detects
+2. Editor opens `memory.wiki/<id>` — `/d/<id>` viewer detects
    `isEditor=true` and redirects them to the live editor.
 3. Both browsers subscribe to `yjs-doc-<id>` (Yjs CRDT) and
    `doc-cursor:<id>` (presence). Edits flow as Y.Doc updates;
@@ -253,11 +253,11 @@ a script, or an LLM following an inline link.
 
 ## Glossary
 
-- **Document** — a markdown file. URL: `mdfy.app/<id>`.
+- **Document** — a markdown file. URL: `memory.wiki/<id>`.
 - **Bundle** — a curated set of docs analyzed as a group. URL:
-  `mdfy.app/b/<id>`. Has its own AI graph.
+  `memory.wiki/b/<id>`. Has its own AI graph.
 - **Hub** — your personal home: every doc, every bundle, your
-  concept index, your galaxy. URL: `mdfy.app/hub/<slug>`.
+  concept index, your galaxy. URL: `memory.wiki/hub/<slug>`.
 - **Compact** — the default URL response shape. AI graph or concept
   map + links instead of full bodies. ~30× cheaper to paste than
   Full.

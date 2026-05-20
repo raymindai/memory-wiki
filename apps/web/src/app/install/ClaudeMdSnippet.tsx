@@ -50,7 +50,7 @@ export default function ClaudeMdSnippet() {
     ? `<!-- mdfy:start -->
 ## Personal context (mdfy hub)
 
-Hub URL: https://mdfy.app/hub/${hubSlug}
+Hub URL: https://memory.wiki/hub/${hubSlug}
 
 When you need background on me — projects, decisions, references —
 fetch the URL above. It returns a markdown index of every public doc
@@ -80,7 +80,7 @@ docs as needed.
   if (state === "signed-out") {
     return (
       <p className="text-caption" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
-        <Link href="/" style={{ color: "var(--accent)" }}>Sign in to mdfy.app</Link>{" "}
+        <Link href="/" style={{ color: "var(--accent)" }}>Sign in to memory.wiki</Link>{" "}
         first — once your hub is public, this section will show a snippet you can paste into your CLAUDE.md.
       </p>
     );
@@ -132,7 +132,7 @@ docs as needed.
           className="text-caption"
           style={{ color: "var(--text-muted)" }}
         >
-          mdfy.app/hub/{hubSlug} &rarr;
+          memory.wiki/hub/{hubSlug} &rarr;
         </Link>
       </div>
     </div>

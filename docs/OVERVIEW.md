@@ -19,7 +19,7 @@ as native context.
 
 | Moat                 | What it means                                                                                  |
 | -------------------- | ---------------------------------------------------------------------------------------------- |
-| **Viral badge loop** | Every shared doc carries a "Published with mdfy.app" badge → free distribution.                |
+| **Viral badge loop** | Every shared doc carries a "Published with memory.wiki" badge → free distribution.                |
 | **Cross-AI layer**   | mdfy sits between *every* LLM and the human. No single AI company can replicate that position. |
 | **URL-native**       | The doc isn't a file behind an app — it's an address. AI agents pull it directly.              |
 | **Rendering quality**| GFM + KaTeX + Mermaid + ASCII diagrams + footnotes share one renderer across every surface.    |
@@ -36,15 +36,15 @@ Three tiers, each with its own page route and its own LLM-ready
 
 | Tier       | URL                  | Holds                                                                 |
 | ---------- | -------------------- | --------------------------------------------------------------------- |
-| **Doc**    | `mdfy.app/<id>`      | A single markdown document. The atom.                                 |
-| **Bundle** | `mdfy.app/b/<id>`    | An ordered set of docs + an AI-extracted graph (themes, edges).       |
-| **Hub**    | `mdfy.app/hub/<slug>`| A user's whole bundle library + cross-bundle concept ontology.        |
+| **Doc**    | `memory.wiki/<id>`      | A single markdown document. The atom.                                 |
+| **Bundle** | `memory.wiki/b/<id>`    | An ordered set of docs + an AI-extracted graph (themes, edges).       |
+| **Hub**    | `memory.wiki/hub/<slug>`| A user's whole bundle library + cross-bundle concept ontology.        |
 
 Auxiliary surfaces:
 
-- `mdfy.app/d/<id>` — reader-only viewer for non-owners.
-- `mdfy.app/embed/<id>` — iframe-friendly stripped render.
-- `mdfy.app/raw/...` — plain-markdown payload for AIs / scrapers / RSS-like consumers.
+- `memory.wiki/d/<id>` — reader-only viewer for non-owners.
+- `memory.wiki/embed/<id>` — iframe-friendly stripped render.
+- `memory.wiki/raw/...` — plain-markdown payload for AIs / scrapers / RSS-like consumers.
 
 ---
 
@@ -83,12 +83,12 @@ Auxiliary surfaces:
 - Per-user nanoid Hub slug (auto-created on sign-in).
 - Restricted docs gate non-allowed visitors with a password / sign-in flow.
 - Permanent URLs — docs **never expire** (pricing policy: free during beta, future Pro for auto-analysis; expiry never).
-- Public viewer carries a "Published with mdfy.app" badge.
+- Public viewer carries a "Published with memory.wiki" badge.
 
 ### Multi-channel app surfaces
 | Channel                     | Status                                  |
 | --------------------------- | --------------------------------------- |
-| `mdfy.app` web              | Live on Vercel                          |
+| `memory.wiki` web              | Live on Vercel                          |
 | VS Code (mdfy-vscode)       | Marketplace v1.4.0                      |
 | Desktop (DMG)               | v2.2.0, Developer ID signed + notarized |
 | Chrome Web Store            | v2.x                                    |
@@ -150,9 +150,9 @@ Auxiliary surfaces:
 - pgvector for similarity search.
 
 ### Hosting & CI
-- **Vercel** — `git push origin main` → Actions CI → auto-deploy mdfy.app.
+- **Vercel** — `git push origin main` → Actions CI → auto-deploy memory.wiki.
 - **GitHub Actions** (`.github/workflows/ci.yml`) — build-web + e2e-test.
-- Domains: **mdfy.app** primary; mdfy.online redirects in; mdcore.ai / .org / .md parked (historical, sunset planned).
+- Domains: **memory.wiki** primary; mdfy.online redirects in; mdcore.ai / .org / .md parked (historical, sunset planned).
 
 ### One renderer everywhere
 Every non-edit surface — web viewer, embed, bundle, hub, VS Code preview, Desktop preview, Chrome extension popup, raw payload — runs the **same `lib/render.ts`** (vendored to each channel). That's why "looks different in viewer than in editor" can't structurally happen.
@@ -164,7 +164,7 @@ Every non-edit surface — web viewer, embed, bundle, hub, VS Code preview, Desk
 ```text
 mdcore/                          # repo name is historical — product is "mdfy"
 ├── apps/
-│   ├── web/                     # Next.js 15 web app → mdfy.app (the main product)
+│   ├── web/                     # Next.js 15 web app → memory.wiki (the main product)
 │   ├── vscode-extension/        # mdfy-vscode (Marketplace)
 │   ├── desktop/                 # mdfy Desktop (Electron DMG)
 │   ├── chrome-extension/        # mdfy Chrome (Web Store)

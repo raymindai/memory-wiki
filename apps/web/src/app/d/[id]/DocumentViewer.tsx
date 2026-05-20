@@ -278,7 +278,7 @@ export default function DocumentViewer({
     >
       <ViewerHeader
         title={title || "Untitled"}
-        breadcrumb={<>mdfy.app/<span style={{ color: "var(--accent)" }}>{id}</span></>}
+        breadcrumb={<>memory.wiki/<span style={{ color: "var(--accent)" }}>{id}</span></>}
         actions={
           <>
             <button

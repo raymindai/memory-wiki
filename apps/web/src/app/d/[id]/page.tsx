@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isRestricted = (doc.allowed_emails || []).length > 0;
 
   if (isExpired) {
-    return { title: "Expired — mdfy.app", robots: { index: false, follow: false } };
+    return { title: "Expired — memory.wiki", robots: { index: false, follow: false } };
   }
 
   // Don't index restricted content. The password gate was removed,
@@ -70,23 +70,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Author attribution
   const authorParam = doc.ownerName ? `&author=${encodeURIComponent(doc.ownerName)}` : "";
-  const ogImageUrl = `https://mdfy.app/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(features.slice(0, 5).join(","))}${authorParam}`;
+  const ogImageUrl = `https://memory.wiki/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(features.slice(0, 5).join(","))}${authorParam}`;
 
   return {
-    title: `${title} — mdfy.app`,
+    title: `${title} — memory.wiki`,
     description,
     robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${title} — mdfy.app`,
+      title: `${title} — memory.wiki`,
       description,
-      url: `https://mdfy.app/${id}`,
-      siteName: "mdfy.app",
+      url: `https://memory.wiki/${id}`,
+      siteName: "memory.wiki",
       type: "article",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} — mdfy.app`,
+      title: `${title} — memory.wiki`,
       description,
       images: [ogImageUrl],
     },
@@ -95,9 +95,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // browser still loads the rich page; AI tools that follow alternate
     // links pick up text/markdown without any extra config.
     alternates: noIndex ? undefined : {
-      canonical: `https://mdfy.app/${id}`,
+      canonical: `https://memory.wiki/${id}`,
       types: {
-        "text/markdown": `https://mdfy.app/${id}.md`,
+        "text/markdown": `https://memory.wiki/${id}.md`,
       },
     },
   };

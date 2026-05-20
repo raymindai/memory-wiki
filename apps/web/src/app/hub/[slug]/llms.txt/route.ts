@@ -72,33 +72,33 @@ export async function GET(
   if (description) lines.push(`> ${description}`);
   lines.push("");
   lines.push(
-    `Canonical hub URL: https://mdfy.app/hub/${slug}`
+    `Canonical hub URL: https://memory.wiki/hub/${slug}`
   );
   lines.push(
-    `Wiki manifest (concept-grouped TOC): https://mdfy.app/hub/${slug}/index.md`
+    `Wiki manifest (concept-grouped TOC): https://memory.wiki/hub/${slug}/index.md`
   );
   lines.push(
-    `Wiki schema (what URLs are available + how to use them): https://mdfy.app/hub/${slug}/SCHEMA.md`
+    `Wiki schema (what URLs are available + how to use them): https://memory.wiki/hub/${slug}/SCHEMA.md`
   );
   lines.push(
-    `Activity log (public events only): https://mdfy.app/hub/${slug}/log.md`
+    `Activity log (public events only): https://memory.wiki/hub/${slug}/log.md`
   );
   lines.push(
-    `Lint report (orphan + duplicate findings): https://mdfy.app/raw/hub/${slug}/lint.md`
+    `Lint report (orphan + duplicate findings): https://memory.wiki/raw/hub/${slug}/lint.md`
   );
   lines.push(
-    `Index (full markdown listing): https://mdfy.app/raw/hub/${slug}?compact=1`
+    `Index (full markdown listing): https://memory.wiki/raw/hub/${slug}?compact=1`
   );
   lines.push(
-    `Concept digest (densest summary): https://mdfy.app/raw/hub/${slug}?digest=1&compact=1`
+    `Concept digest (densest summary): https://memory.wiki/raw/hub/${slug}?digest=1&compact=1`
   );
   lines.push(
-    `Full text (every doc concatenated, capped to fit a context window): https://mdfy.app/hub/${slug}/llms-full.txt`
+    `Full text (every doc concatenated, capped to fit a context window): https://memory.wiki/hub/${slug}/llms-full.txt`
   );
   lines.push("");
   lines.push(`Hub size: ~${totalTokens.toLocaleString()} tokens across ${visibleDocs.length} public documents.`);
   lines.push(
-    "Every document below is also available as `https://mdfy.app/raw/<id>?compact=1` for token-economical fetches."
+    "Every document below is also available as `https://memory.wiki/raw/<id>?compact=1` for token-economical fetches."
   );
 
   if (visibleDocs.length > 0) {
@@ -106,7 +106,7 @@ export async function GET(
     lines.push("## Documents");
     for (const d of visibleDocs.slice(0, 200)) {
       const tokens = estimateTokens(d.markdown || "");
-      lines.push(`- [${d.title || "Untitled"}](https://mdfy.app/${d.id}) — ~${tokens} tokens`);
+      lines.push(`- [${d.title || "Untitled"}](https://memory.wiki/${d.id}) — ~${tokens} tokens`);
     }
     if (visibleDocs.length > 200) {
       lines.push(`- …and ${visibleDocs.length - 200} more documents.`);
@@ -119,13 +119,13 @@ export async function GET(
     for (const b of visibleBundles.slice(0, 50)) {
       const desc = (b.description || "").trim().split("\n")[0];
       const suffix = desc ? `: ${desc.slice(0, 120)}` : "";
-      lines.push(`- [${b.title || "Untitled Bundle"}](https://mdfy.app/b/${b.id})${suffix}`);
+      lines.push(`- [${b.title || "Untitled Bundle"}](https://memory.wiki/b/${b.id})${suffix}`);
     }
   }
 
   lines.push("");
   lines.push("## Optional");
-  lines.push(`- [Owner page](https://mdfy.app/hub/${slug}): rendered HTML view`);
+  lines.push(`- [Owner page](https://memory.wiki/hub/${slug}): rendered HTML view`);
 
   const body = lines.join("\n") + "\n";
 
@@ -134,7 +134,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=900",
-      "Link": `<https://mdfy.app/hub/${slug}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/hub/${slug}>; rel="canonical"`,
       "X-Hub-Slug": slug,
       "X-Token-Estimate": String(estimateTokens(body)),
     },

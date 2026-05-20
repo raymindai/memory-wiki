@@ -21,17 +21,17 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
  *   mdfy_bundle: 1
  *   id: <bundleId>
  *   title: "..."
- *   url: https://mdfy.app/b/<id>
+ *   url: https://memory.wiki/b/<id>
  *   document_count: N
  *   updated: <ISO>
- *   source: "mdfy.app"
+ *   source: "memory.wiki"
  *   ---
  *
  *   # <bundle title>
  *
  *   > <bundle description, if any>
  *
- *   ## 1. <doc title>  (https://mdfy.app/<docId>)
+ *   ## 1. <doc title>  (https://memory.wiki/<docId>)
  *
  *   <doc markdown body>
  *
@@ -46,7 +46,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const canonicalUrl = `https://mdfy.app/b/${id}`;
+  const canonicalUrl = `https://memory.wiki/b/${id}`;
   const supabase = getSupabaseClient();
   if (!supabase) {
     return permissionResponse({ reason: "service_unavailable", canonicalUrl, resourceKind: "bundle", resourceId: id });
@@ -162,12 +162,12 @@ export async function GET(
     "mdfy_bundle: 1",
     `id: ${bundle.id}`,
     `title: "${title}"`,
-    `url: https://mdfy.app/b/${bundle.id}`,
+    `url: https://memory.wiki/b/${bundle.id}`,
     `document_count: ${includedCount}`,
     updated ? `updated: ${updated}` : null,
     graphGeneratedAt && graphRequested ? `analysis_generated_at: ${new Date(graphGeneratedAt).toISOString()}` : null,
     graphRequested && isAnalysisStale ? "analysis_stale: true" : null,
-    'source: "mdfy.app"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");
@@ -274,7 +274,7 @@ export async function GET(
     if (!isFetchable(d)) continue;
     visibleIdx++;
     const docTitle = d!.title || "Untitled";
-    const docUrl = `https://mdfy.app/${d!.id}`;
+    const docUrl = `https://memory.wiki/${d!.id}`;
     const annotation = (bd.annotation || "").trim();
     if (fullMode) {
       sections.push(`## ${visibleIdx}. ${docTitle}`);
@@ -320,7 +320,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300",
-      "Link": `<https://mdfy.app/b/${bundle.id}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/b/${bundle.id}>; rel="canonical"`,
       "X-Bundle-ID": bundle.id,
       "X-Document-Count": String(includedCount),
       "X-Mdfy-Mode": fullMode ? "full" : "digest",

@@ -12,17 +12,17 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "MCP Server 레퍼런스 — mdfy.app",
+  title: "MCP Server 레퍼런스 — memory.wiki",
   description:
-    "mdfy.app MCP (Model Context Protocol) 서버. Claude, Cursor, Windsurf 등 AI 도구에서 25개 도구로 문서를 직접 생성하고 관리할 수 있습니다.",
+    "memory.wiki MCP (Model Context Protocol) 서버. Claude, Cursor, Windsurf 등 AI 도구에서 25개 도구로 문서를 직접 생성하고 관리할 수 있습니다.",
   alternates: {
-    canonical: "https://mdfy.app/ko/docs/mcp",
-    languages: { en: "https://mdfy.app/docs/mcp" },
+    canonical: "https://memory.wiki/ko/docs/mcp",
+    languages: { en: "https://memory.wiki/docs/mcp" },
   },
   openGraph: {
-    title: "MCP Server 레퍼런스 — mdfy.app",
-    description: "AI 도구에서 mdfy.app 문서를 게시하고 관리합니다. 25개 도구 지원.",
-    url: "https://mdfy.app/ko/docs/mcp",
+    title: "MCP Server 레퍼런스 — memory.wiki",
+    description: "AI 도구에서 memory.wiki 문서를 게시하고 관리합니다. 25개 도구 지원.",
+    url: "https://memory.wiki/ko/docs/mcp",
     images: [{ url: "/api/og?title=MCP%20Server", width: 1200, height: 630 }],
   },
 };
@@ -78,7 +78,7 @@ const tools = [
       { name: "isDraft", type: "boolean", required: false, desc: "임시 저장으로 생성. 기본값: false." },
     ],
     example: `// Claude Code에서:
-"이 분석 내용을 mdfy.app에 문서로 게시해줘"
+"이 분석 내용을 memory.wiki에 문서로 게시해줘"
 
 // Claude가 mdfy_create를 호출:
 {
@@ -89,7 +89,7 @@ const tools = [
 
 // 반환값:
 {
-  "url": "https://mdfy.app/abc123",
+  "url": "https://memory.wiki/abc123",
   "id": "abc123",
   "editToken": "tok_..."
 }`,
@@ -101,7 +101,7 @@ const tools = [
     params: [
       { name: "id", type: "string", required: true, desc: "문서 ID." },
     ],
-    example: `// "mdfy.app/abc123 문서를 읽어줘"
+    example: `// "memory.wiki/abc123 문서를 읽어줘"
 
 // Claude가 mdfy_read를 호출:
 { "id": "abc123" }
@@ -182,7 +182,7 @@ export default function McpDocsPageKo() {
             MCP Server
           </h1>
           <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 32, maxWidth: 640 }}>
-            Claude, Cursor, Windsurf 및 기타 AI 도구에서 mdfy.app 문서를 직접 생성하고 관리할 수 있습니다.
+            Claude, Cursor, Windsurf 및 기타 AI 도구에서 memory.wiki 문서를 직접 생성하고 관리할 수 있습니다.
           </p>
 
           {/* Memory Layer 소개 */}
@@ -225,7 +225,7 @@ export default function McpDocsPageKo() {
               <strong style={{ color: "var(--text-primary)" }}>Model Context Protocol (MCP)</strong>은 AI 어시스턴트가
               외부 도구 및 서비스와 상호작용할 수 있게 하는 개방형 표준입니다. mdfy MCP 서버는
               7개 카테고리에 걸쳐 25개 도구를 제공합니다 -- 핵심 CRUD, append/prepend, 섹션 편집, 공유 설정,
-              버전 이력, 폴더, 통계. <InlineCode>{"https://mdfy.app/api/mcp"}</InlineCode>의 호스팅 엔드포인트는
+              버전 이력, 폴더, 통계. <InlineCode>{"https://memory.wiki/api/mcp"}</InlineCode>의 호스팅 엔드포인트는
               모든 MCP 호환 클라이언트(Claude Web, Cursor 등)에서 사용할 수 있습니다.
             </p>
           </Card>
@@ -233,11 +233,11 @@ export default function McpDocsPageKo() {
           {/* Claude Web -- 호스팅 */}
           <SectionHeading id="claude-web">Claude Web (호스팅 MCP)</SectionHeading>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
-            호스팅 MCP 엔드포인트를 통해 <strong style={{ color: "var(--text-primary)" }}>claude.ai</strong>에서 바로 mdfy.app를 사용할 수 있습니다 -- 로컬 설치가 필요 없습니다.
+            호스팅 MCP 엔드포인트를 통해 <strong style={{ color: "var(--text-primary)" }}>claude.ai</strong>에서 바로 memory.wiki를 사용할 수 있습니다 -- 로컬 설치가 필요 없습니다.
           </p>
           <Card>
             <SubLabel>엔드포인트 URL</SubLabel>
-            <CodeBlock>{`https://mdfy.app/api/mcp`}</CodeBlock>
+            <CodeBlock>{`https://memory.wiki/api/mcp`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 16, marginBottom: 8, lineHeight: 1.7 }}>
               Claude.ai에서 <strong style={{ color: "var(--text-muted)" }}>Settings &rarr; Integrations / Connectors</strong> &rarr; Add custom MCP server &rarr; 위 URL을 붙여넣기 합니다.
             </p>
@@ -308,7 +308,7 @@ export default function McpDocsPageKo() {
             <CodeBlock lang="json">{`{
   "mcpServers": {
     "mdfy": {
-      "url": "https://mdfy.app/api/mcp"
+      "url": "https://memory.wiki/api/mcp"
     }
   }
 }`}</CodeBlock>
@@ -318,7 +318,7 @@ export default function McpDocsPageKo() {
           <SectionHeading id="tools">전체 25개 도구</SectionHeading>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
             호스팅 MCP는 7개 카테고리에 걸쳐 25개 도구를 제공합니다.
-            인증은 사용자의 mdfy.app 세션을 통해 이루어집니다 (API 키 불필요).
+            인증은 사용자의 memory.wiki 세션을 통해 이루어집니다 (API 키 불필요).
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: 8, marginBottom: 24 }}>
             {[
@@ -402,18 +402,18 @@ export default function McpDocsPageKo() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <Card>
               <SubLabel>문서 게시</SubLabel>
-              <CodeBlock>{`You: "WebAssembly에 대한 블로그 글을 써서 mdfy.app에 게시해줘"
+              <CodeBlock>{`You: "WebAssembly에 대한 블로그 글을 써서 memory.wiki에 게시해줘"
 
 Claude: 블로그 글을 작성하고 게시하겠습니다.
 
 [Claude가 내용을 작성한 후 mdfy_create를 호출]
 
-완료! 블로그 글이 https://mdfy.app/abc123 에 게시되었습니다.`}</CodeBlock>
+완료! 블로그 글이 https://memory.wiki/abc123 에 게시되었습니다.`}</CodeBlock>
             </Card>
 
             <Card>
               <SubLabel>수정 반영</SubLabel>
-              <CodeBlock>{`You: "mdfy.app/abc123 문서에 벤치마크 섹션을 추가해줘"
+              <CodeBlock>{`You: "memory.wiki/abc123 문서에 벤치마크 섹션을 추가해줘"
 
 Claude: 현재 문서를 읽고 벤치마크 섹션을 추가하겠습니다.
 

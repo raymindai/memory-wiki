@@ -100,8 +100,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${data.concept.label} — ${author}'s knowledge hub`,
     description: data.concept.description || `${data.concept.label} across ${data.docs.length} documents in ${author}'s hub.`,
     alternates: {
-      canonical: `https://mdfy.app/hub/${slug}/c/${concept}`,
-      types: { "text/markdown": `https://mdfy.app/raw/hub/${slug}/c/${concept}?compact=1` },
+      canonical: `https://memory.wiki/hub/${slug}/c/${concept}`,
+      types: { "text/markdown": `https://memory.wiki/raw/hub/${slug}/c/${concept}?compact=1` },
     },
   };
 }
@@ -190,7 +190,7 @@ export default async function ConceptPage({ params }: Props) {
         <p className="text-xs font-mono mt-12" style={{ color: "var(--text-faint)" }}>
           For LLM consumption:{" "}
           <code style={{ color: "var(--text-muted)" }}>
-            https://mdfy.app/raw/hub/{slug}/c/{concept}?compact=1
+            https://memory.wiki/raw/hub/{slug}/c/{concept}?compact=1
           </code>
         </p>
       </div>

@@ -26,7 +26,7 @@ interface ViewerHeaderProps {
    *  the description; hub leaves it empty. Truncated. */
   subtitle?: ReactNode;
   /** Optional mono breadcrumb on the right side of the title slot
-   *  (e.g. "mdfy.app/hub/yc-demo"). */
+   *  (e.g. "memory.wiki/hub/yc-demo"). */
   breadcrumb?: ReactNode;
   /** Action buttons (Copy / Theme / Edit / etc.). Each viewer keeps its
    *  buttons compact (h-7, gap-1.5) so the right side stays one row. */
@@ -44,7 +44,7 @@ export default function ViewerHeader({ title, subtitle, breadcrumb, actions }: V
         WebkitBackdropFilter: "blur(10px)",
       }}
     >
-      <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="mdfy.app home">
+      <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="memory.wiki home">
         <MdfyLogo size={18} />
       </Link>
 

@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "You set the direction. mdfy structures the URL. Any AI reads it. The 7 beliefs behind mdfy — markdown as the AI-era memory format, hub as the deployable shape, URL as the primitive.",
   alternates: {
-    canonical: "https://mdfy.app/manifesto",
-    languages: { ko: "https://mdfy.app/ko/manifesto" },
+    canonical: "https://memory.wiki/manifesto",
+    languages: { ko: "https://memory.wiki/ko/manifesto" },
   },
   openGraph: {
-    title: "Manifesto — mdfy.app",
+    title: "Manifesto — memory.wiki",
     description: "You set the direction. mdfy structures the URL. Any AI reads it. The 7 beliefs behind mdfy.",
-    url: "https://mdfy.app/manifesto",
+    url: "https://memory.wiki/manifesto",
     images: [{ url: "/api/og?title=Manifesto", width: 1200, height: 630 }],
   },
 };

@@ -396,7 +396,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
           </button>
         ) : (
           <Link href="/" className="text-sm font-medium px-4 py-2 rounded-lg" style={{ background: "var(--accent)", color: "#000", textDecoration: "none" }}>
-            Go to mdfy.app
+            Go to memory.wiki
           </Link>
         )}
       </div>
@@ -610,7 +610,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                     className="text-xs flex items-center px-3 shrink-0 font-mono"
                     style={{ color: "var(--text-faint)", borderRight: "1px solid var(--border)" }}
                   >
-                    mdfy.app/hub/
+                    memory.wiki/hub/
                   </span>
                   <input
                     type="text"
@@ -658,7 +658,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                 style={{ color: "var(--accent)" }}
                 target="_blank"
               >
-                View at mdfy.app/hub/{hubSlug} →
+                View at memory.wiki/hub/{hubSlug} →
               </Link>
             )}
           </div>
@@ -1039,7 +1039,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             ];
             const PRO_FEATURES = [
               "Everything in Free",
-              "Custom domain (yourname.mdfy.app)",
+              "Custom domain (yourname.memory.wiki)",
               "Remove mdfy badge from public hub",
               "Viewer analytics (who opened, how long)",
               "Priority concept extraction + larger limits",

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "mdfy.app — Your AI memory, deployable to any AI.",
+  title: "memory.wiki — Your AI memory, deployable to any AI.",
   description:
     "One URL, every AI. Capture from ChatGPT, Claude, Notion, GitHub, Obsidian — your knowledge becomes a citable URL that Claude, ChatGPT, Cursor, and Codex all fetch the same way. You set the direction; mdfy structures the URL.",
   keywords: [
@@ -33,20 +33,20 @@ export const metadata: Metadata = {
     "Codex",
     "knowledge management",
   ],
-  authors: [{ name: "mdfy", url: "https://mdfy.app" }],
-  metadataBase: new URL("https://mdfy.app"),
+  authors: [{ name: "mdfy", url: "https://memory.wiki" }],
+  metadataBase: new URL("https://memory.wiki"),
   openGraph: {
-    title: "mdfy.app — Your AI memory, deployable to any AI.",
+    title: "memory.wiki — Your AI memory, deployable to any AI.",
     description:
       "One URL, every AI. Capture, bundle, deploy. The personal knowledge hub for the AI era.",
-    url: "https://mdfy.app",
-    siteName: "mdfy.app",
+    url: "https://memory.wiki",
+    siteName: "memory.wiki",
     type: "website",
     images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "mdfy.app — Your AI memory, deployable to any AI.",
+    title: "memory.wiki — Your AI memory, deployable to any AI.",
     description:
       "One URL, every AI. Your memory, deployable to Claude, ChatGPT, Cursor, Codex — same way.",
     images: ["/api/og"],
@@ -56,10 +56,10 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://mdfy.app",
+    canonical: "https://memory.wiki",
     languages: {
-      en: "https://mdfy.app",
-      ko: "https://mdfy.app/ko",
+      en: "https://memory.wiki",
+      ko: "https://memory.wiki/ko",
     },
   },
   other: {
@@ -90,8 +90,8 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          "name": "mdfy.app",
-          "url": "https://mdfy.app",
+          "name": "memory.wiki",
+          "url": "https://memory.wiki",
           "description": "Create, edit, and share beautiful documents instantly. WYSIWYG Markdown editor with AI tools, cross-platform sync, and developer API. No login required.",
           "publisher": {
             "@type": "Organization",
@@ -100,17 +100,17 @@ export default function RootLayout({
           },
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://mdfy.app/?q={search_term_string}",
+            "target": "https://memory.wiki/?q={search_term_string}",
             "query-input": "required name=search_term_string"
           }
         })}} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "mdfy.app",
+          "name": "memory.wiki",
           "applicationCategory": "Productivity",
           "operatingSystem": "Web, macOS, VS Code, Chrome",
-          "url": "https://mdfy.app",
+          "url": "https://memory.wiki",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
           "description": "Markdown publishing tool with WYSIWYG editing, AI conversation capture, and permanent shareable URLs."
         })}} />

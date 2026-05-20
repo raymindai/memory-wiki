@@ -69,7 +69,7 @@ style: |
 </p>
 
 <p style="font-size:16px;color:#a1a1aa;margin-top:8px;font-family:monospace;">
-mdfy.app/d/&lt;id&gt;
+memory.wiki/d/&lt;id&gt;
 </p>
 
 <p style="font-size:18px;color:#d4d4d8;margin-top:18px;">
@@ -146,9 +146,9 @@ mdfy.app/d/&lt;id&gt;
 마크다운 + `graph_data` JSON을 함께 응답한다. 받는 AI가 이전 AI의 분석을 *공짜로* 상속받는다.
 
 ```
-mdfy.app/b/<bundle-id>
-mdfy.app/b/<id>?compact
-mdfy.app/b/<id>?full=1
+memory.wiki/b/<bundle-id>
+memory.wiki/b/<id>?compact
+memory.wiki/b/<id>?full=1
 ```
 
 </div>
@@ -165,7 +165,7 @@ mdfy.app/b/<id>?full=1
 
 ```markdown
 ## Context
-프로젝트 맥락은 여기: https://mdfy.app/hub/you
+프로젝트 맥락은 여기: https://memory.wiki/hub/you
 
 배경, 결정 기록, 진행 중인 작업이 다 들어 있음.
 질문에 답할 때 이 URL을 컨텍스트로 사용해 줘.
@@ -191,9 +191,9 @@ mdfy.app/b/<id>?full=1
 
 <h3>지금 바로 (가입 없이)</h3>
 
-1. **mdfy.app** 접속
+1. **memory.wiki** 접속
 2. AI 대화 URL 붙여넣거나 글 작성
-3. 나오는 mdfy.app URL을 Claude / Cursor / ChatGPT 에 보내기
+3. 나오는 memory.wiki URL을 Claude / Cursor / ChatGPT 에 보내기
 4. 끝.
 
 </div>
@@ -202,10 +202,10 @@ mdfy.app/b/<id>?full=1
 
 <h3>둘러보기</h3>
 
-- **데모 허브:** `mdfy.app/hub/demo`
-- **샘플 번들:** `mdfy.app/b/<id>`
-- **스펙:** `mdfy.app/spec`
-- **통합 가이드:** `mdfy.app/docs/integrate`
+- **데모 허브:** `memory.wiki/hub/demo`
+- **샘플 번들:** `memory.wiki/b/<id>`
+- **스펙:** `memory.wiki/spec`
+- **통합 가이드:** `memory.wiki/docs/integrate`
 - Chrome 확장 / MCP 서버 모두 무료
 
 </div>
@@ -214,5 +214,5 @@ mdfy.app/b/<id>?full=1
 
 <br>
 
-<span class="accent" style="font-size:28px;font-weight:700;">mdfy.app</span>
+<span class="accent" style="font-size:28px;font-weight:700;">memory.wiki</span>
 <span class="faint" style="font-size:16px;font-family:monospace;margin-left:16px;">hi@raymind.ai</span>

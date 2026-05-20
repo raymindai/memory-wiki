@@ -1,13 +1,13 @@
 export const dynamic = "force-static";
 
-const CONTENT = `# mdfy.app API Reference
-Base URL: https://mdfy.app
+const CONTENT = `# memory.wiki API Reference
+Base URL: https://memory.wiki
 Rate Limit: 10 requests/min per IP
 Max Document Size: 500KB
 
 ## Authentication
 
-mdfy.app uses progressive authentication:
+memory.wiki uses progressive authentication:
 - No auth required for basic publish and read
 - Edit tokens for updates/deletes (returned at creation)
 - User identity via x-user-id or Authorization: Bearer JWT headers
@@ -29,7 +29,7 @@ Parameters:
 
 Request:
 \`\`\`
-curl -X POST https://mdfy.app/api/docs \\
+curl -X POST https://memory.wiki/api/docs \\
   -H "Content-Type: application/json" \\
   -d '{"markdown": "# Hello World", "isDraft": false}'
 \`\`\`
@@ -54,7 +54,7 @@ Headers (optional):
 
 Request:
 \`\`\`
-curl https://mdfy.app/api/docs/abc123
+curl https://memory.wiki/api/docs/abc123
 \`\`\`
 
 Response 200:
@@ -87,14 +87,14 @@ Parameters:
 
 Request (update content):
 \`\`\`
-curl -X PATCH https://mdfy.app/api/docs/abc123 \\
+curl -X PATCH https://memory.wiki/api/docs/abc123 \\
   -H "Content-Type: application/json" \\
   -d '{"editToken": "tok_...", "markdown": "# Updated", "changeSummary": "Fixed typos"}'
 \`\`\`
 
 Request (soft delete):
 \`\`\`
-curl -X PATCH https://mdfy.app/api/docs/abc123 \\
+curl -X PATCH https://memory.wiki/api/docs/abc123 \\
   -H "Content-Type: application/json" \\
   -d '{"editToken": "tok_...", "action": "soft-delete"}'
 \`\`\`
@@ -113,7 +113,7 @@ Check when a document was last updated. Returns x-updated-at header.
 
 Request:
 \`\`\`
-curl -I https://mdfy.app/api/docs/abc123
+curl -I https://memory.wiki/api/docs/abc123
 \`\`\`
 
 Response Headers:
@@ -130,7 +130,7 @@ Headers (one required):
 
 Request:
 \`\`\`
-curl https://mdfy.app/api/user/documents \\
+curl https://memory.wiki/api/user/documents \\
   -H "x-user-id: user-uuid"
 \`\`\`
 
@@ -155,14 +155,14 @@ Upload an image. Returns a public URL.
 
 Request:
 \`\`\`
-curl -X POST https://mdfy.app/api/upload \\
+curl -X POST https://memory.wiki/api/upload \\
   -F "file=@screenshot.png"
 \`\`\`
 
 Response 200:
 \`\`\`json
 {
-  "url": "https://storage.mdfy.app/uploads/screenshot.png"
+  "url": "https://storage.memory.wiki/uploads/screenshot.png"
 }
 \`\`\`
 
@@ -331,13 +331,13 @@ Pipe examples:
 
 ## HTTP API
 
-There is no SDK package — mdfy.app exposes plain HTTP. Use any client.
+There is no SDK package — memory.wiki exposes plain HTTP. Use any client.
 See "REST API" above for the full endpoint surface, request shapes, and
 authentication. \`fetch()\` from anywhere works.
 
 \`\`\`typescript
 // Publish
-const res = await fetch("https://mdfy.app/api/docs", {
+const res = await fetch("https://memory.wiki/api/docs", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ markdown: "# Hello", title: "Doc" }),
@@ -345,14 +345,14 @@ const res = await fetch("https://mdfy.app/api/docs", {
 const { id, editToken, url } = await res.json();
 
 // Update (edit-token auth)
-await fetch(\`https://mdfy.app/api/docs/\${id}\`, {
+await fetch(\`https://memory.wiki/api/docs/\${id}\`, {
   method: "PATCH",
   headers: { "Content-Type": "application/json", "x-edit-token": editToken },
   body: JSON.stringify({ markdown: "# Updated" }),
 });
 
 // Read
-const doc = await fetch(\`https://mdfy.app/api/docs/\${id}\`).then((r) => r.json());
+const doc = await fetch(\`https://memory.wiki/api/docs/\${id}\`).then((r) => r.json());
 \`\`\`
 
 ## MCP Server
@@ -361,10 +361,10 @@ Two ways to connect:
 
 ### Option A: Hosted HTTP MCP (Claude Web, Cursor, etc.)
 
-URL: https://mdfy.app/api/mcp
+URL: https://memory.wiki/api/mcp
 
 In Claude.ai: Settings → Integrations → Add custom MCP server → paste the URL.
-In Cursor: Settings → MCP → Add server with { "url": "https://mdfy.app/api/mcp" }.
+In Cursor: Settings → MCP → Add server with { "url": "https://memory.wiki/api/mcp" }.
 
 ### Option B: Local stdio MCP (Claude Desktop, Claude Code)
 

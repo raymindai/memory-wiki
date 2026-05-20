@@ -38,7 +38,7 @@ const data: CaseData = {
   ],
   example: {
     title: "Example: shipping a feature with Cursor + Claude in tandem",
-    body: "Bundle mdfy.app/b/feat-handoff — spec, ADRs, 3 customer quotes, recent test failures. Pasted into both Cursor (.cursorrules) and Claude (system prompt). Switch tools 4× over an afternoon. Zero re-priming.",
+    body: "Bundle memory.wiki/b/feat-handoff — spec, ADRs, 3 customer quotes, recent test failures. Pasted into both Cursor (.cursorrules) and Claude (system prompt). Switch tools 4× over an afternoon. Zero re-priming.",
   },
   related: [
     { slug: "docs-as-kb", label: "Docs as a KB" },

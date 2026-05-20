@@ -99,7 +99,7 @@ those docs gets logged normally.
 
 **Verified.** Doc creation produces a `doc.created` entry with title
 and id; schema PATCH produces `schema.updated`; markdown surface
-renders timestamps and inline `mdfy.app/<id>` links.
+renders timestamps and inline `memory.wiki/<id>` links.
 
 ## W5c. Hub lint v1
 

@@ -34,7 +34,7 @@ style: |
 
 <!-- _class: lead -->
 
-<span style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">mdfy.app · 2026</span>
+<span style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">memory.wiki · 2026</span>
 
 # **mdfy**
 ## 모든 AI에 배포 가능한 당신의 기억층.
@@ -85,7 +85,7 @@ ChatGPT, Claude, Cursor, Codex, Gemini — 각자 자기만의 메모리 레이�
 
 허브 URL 응답은 **마크다운 + 인라인 graph_data JSON** — 테마, 인사이트, 컨셉 관계가 한 번의 fetch에 다 담긴다.
 
-<span class="faint">데모: mdfy.app/hub/demo</span>
+<span class="faint">데모: memory.wiki/hub/demo</span>
 
 ---
 
@@ -123,12 +123,12 @@ ChatGPT, Claude, Cursor, Codex, Gemini — 각자 자기만의 메모리 레이�
 
 <h3>오늘 살아있는 것</h3>
 
-- mdfy.app 운영중 (Vercel)
+- memory.wiki 운영중 (Vercel)
 - 데모 허브: 50 문서 / 7 번들
 - Chrome 확장 (스토어)
 - MCP 서버 (npm)
-- 공개 스펙 (mdfy.app/spec)
-- 통합 가이드 (mdfy.app/docs/integrate)
+- 공개 스펙 (memory.wiki/spec)
+- 통합 가이드 (memory.wiki/docs/integrate)
 - 엔진 MIT 오픈소스
 
 </div>
@@ -184,9 +184,9 @@ ChatGPT, Claude, Cursor, Codex, Gemini — 각자 자기만의 메모리 레이�
 
 <br>
 
-<span class="muted">**지금 바로 체험:** mdfy.app/hub/demo</span>
+<span class="muted">**지금 바로 체험:** memory.wiki/hub/demo</span>
 
-<span class="muted">**스펙:** mdfy.app/spec · **통합:** mdfy.app/docs/integrate</span>
+<span class="muted">**스펙:** memory.wiki/spec · **통합:** memory.wiki/docs/integrate</span>
 
 <br>
 

@@ -12,17 +12,17 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "MCP Server — mdfy.app",
+  title: "MCP Server — memory.wiki",
   description:
-    "MCP (Model Context Protocol) server for mdfy.app. Let Claude, Cursor, Windsurf, and other AI tools create and manage documents directly with 25 tools.",
+    "MCP (Model Context Protocol) server for memory.wiki. Let Claude, Cursor, Windsurf, and other AI tools create and manage documents directly with 25 tools.",
   alternates: {
-    canonical: "https://mdfy.app/docs/mcp",
-    languages: { ko: "https://mdfy.app/ko/docs/mcp" },
+    canonical: "https://memory.wiki/docs/mcp",
+    languages: { ko: "https://memory.wiki/ko/docs/mcp" },
   },
   openGraph: {
-    title: "MCP Server — mdfy.app",
-    description: "Let AI tools publish and manage documents on mdfy.app. 25 tools for Claude, Cursor, and Windsurf.",
-    url: "https://mdfy.app/docs/mcp",
+    title: "MCP Server — memory.wiki",
+    description: "Let AI tools publish and manage documents on memory.wiki. 25 tools for Claude, Cursor, and Windsurf.",
+    url: "https://memory.wiki/docs/mcp",
     images: [{ url: "/api/og?title=MCP%20Server", width: 1200, height: 630 }],
   },
 };
@@ -78,7 +78,7 @@ const tools = [
       { name: "isDraft", type: "boolean", required: false, desc: "Create as draft. Default: false." },
     ],
     example: `// In Claude Code:
-"Publish this analysis as a document on mdfy.app"
+"Publish this analysis as a document on memory.wiki"
 
 // Claude calls mdfy_create:
 {
@@ -89,7 +89,7 @@ const tools = [
 
 // Returns:
 {
-  "url": "https://mdfy.app/abc123",
+  "url": "https://memory.wiki/abc123",
   "id": "abc123",
   "editToken": "tok_..."
 }`,
@@ -101,7 +101,7 @@ const tools = [
     params: [
       { name: "id", type: "string", required: true, desc: "Document ID." },
     ],
-    example: `// "Read the document at mdfy.app/abc123"
+    example: `// "Read the document at memory.wiki/abc123"
 
 // Claude calls mdfy_read:
 { "id": "abc123" }
@@ -182,7 +182,7 @@ export default function McpDocsPage() {
             MCP Server
           </h1>
           <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 32, maxWidth: 640 }}>
-            Let Claude, Cursor, Windsurf, and other AI tools create and manage documents on mdfy.app directly.
+            Let Claude, Cursor, Windsurf, and other AI tools create and manage documents on memory.wiki directly.
           </p>
 
           {/* Memory Layer intro */}
@@ -225,7 +225,7 @@ export default function McpDocsPage() {
               The <strong style={{ color: "var(--text-primary)" }}>Model Context Protocol (MCP)</strong> is an open standard
               that lets AI assistants interact with external tools and services. The mdfy MCP server exposes
               25 tools across 7 categories — core CRUD, append/prepend, section editing, sharing controls,
-              version history, folders, and stats. The hosted endpoint at <InlineCode>{"https://mdfy.app/api/mcp"}</InlineCode> works
+              version history, folders, and stats. The hosted endpoint at <InlineCode>{"https://memory.wiki/api/mcp"}</InlineCode> works
               with any MCP-compatible client (Claude Web, Cursor, etc.).
             </p>
           </Card>
@@ -233,11 +233,11 @@ export default function McpDocsPage() {
           {/* Claude Web — Hosted */}
           <SectionHeading id="claude-web">Claude Web (Hosted MCP)</SectionHeading>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
-            Use mdfy.app directly in <strong style={{ color: "var(--text-primary)" }}>claude.ai</strong> via our hosted MCP endpoint — no local install required.
+            Use memory.wiki directly in <strong style={{ color: "var(--text-primary)" }}>claude.ai</strong> via our hosted MCP endpoint — no local install required.
           </p>
           <Card>
             <SubLabel>Endpoint URL</SubLabel>
-            <CodeBlock>{`https://mdfy.app/api/mcp`}</CodeBlock>
+            <CodeBlock>{`https://memory.wiki/api/mcp`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 16, marginBottom: 8, lineHeight: 1.7 }}>
               In Claude.ai → <strong style={{ color: "var(--text-muted)" }}>Settings → Integrations / Connectors</strong> → Add custom MCP server → paste the URL above.
             </p>
@@ -308,7 +308,7 @@ export default function McpDocsPage() {
             <CodeBlock lang="json">{`{
   "mcpServers": {
     "mdfy": {
-      "url": "https://mdfy.app/api/mcp"
+      "url": "https://memory.wiki/api/mcp"
     }
   }
 }`}</CodeBlock>
@@ -318,7 +318,7 @@ export default function McpDocsPage() {
           <SectionHeading id="tools">All 25 Tools</SectionHeading>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16 }}>
             The hosted MCP exposes 25 tools across 8 categories.
-            Auth happens via the user&apos;s mdfy.app session (no API keys).
+            Auth happens via the user&apos;s memory.wiki session (no API keys).
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: 8, marginBottom: 24 }}>
             {[
@@ -403,18 +403,18 @@ export default function McpDocsPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <Card>
               <SubLabel>Publish a document</SubLabel>
-              <CodeBlock>{`You: "Write a blog post about WebAssembly and publish it on mdfy.app"
+              <CodeBlock>{`You: "Write a blog post about WebAssembly and publish it on memory.wiki"
 
 Claude: I'll write the blog post and publish it for you.
 
 [Claude writes the content, then calls mdfy_create]
 
-Done! Your blog post is live at https://mdfy.app/abc123`}</CodeBlock>
+Done! Your blog post is live at https://memory.wiki/abc123`}</CodeBlock>
             </Card>
 
             <Card>
               <SubLabel>Update with revisions</SubLabel>
-              <CodeBlock>{`You: "Update the document at mdfy.app/abc123 - add a section about benchmarks"
+              <CodeBlock>{`You: "Update the document at memory.wiki/abc123 - add a section about benchmarks"
 
 Claude: I'll read the current document and add the benchmarks section.
 

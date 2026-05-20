@@ -4,16 +4,16 @@
 # Defaults to Claude Code. Pass --target=cursor for the Cursor rule.
 #
 # Claude Code:
-#   curl -fsSL https://staging.mdfy.app/skills/mdfy/install.sh | sh
+#   curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh
 #
 # Cursor:
-#   curl -fsSL https://staging.mdfy.app/skills/mdfy/install.sh | sh -s -- --target=cursor
+#   curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=cursor
 #
 # Idempotent and safe to rerun.
 
 set -euo pipefail
 
-BASE_URL="${MDFY_BASE_URL:-https://staging.mdfy.app}"
+BASE_URL="${MDFY_BASE_URL:-https://staging.memory.wiki}"
 TARGET="claude"
 for arg in "$@"; do
   case "$arg" in

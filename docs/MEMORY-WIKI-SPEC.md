@@ -346,7 +346,7 @@ interface Link {
 2. memory.wiki/{slug} where slug exists in hubs table → hub home
 3. memory.wiki/{slug}/{path} → resolved per spec table
 4. mori.wiki → 301 redirect to memory.wiki (short URL alias)
-5. memory.wiki/d/{id} → backwards compat doc URL (current mdfy.app/{id})
+5. memory.wiki/d/{id} → backwards compat doc URL (current memory.wiki/{id})
 ```
 
 ### 4.3 Concept Extraction (LLM job)
@@ -474,25 +474,25 @@ Cursor / Claude Skills 가 `memory.wiki/{user}` 를 인지 → 자동 fetch + ca
 
 ---
 
-## 6. Migration from mdfy.app
+## 6. Migration from memory.wiki
 
 ### 6.1 도메인
 
 ```
 Primary brand:  memory.wiki
 Short URL:      mori.wiki  (이미 확보)
-Legacy:         mdfy.app   (1년 이상 redirect 유지)
+Legacy:         memory.wiki   (1년 이상 redirect 유지)
 
 mori.wiki/{anything}    → memory.wiki/{anything} (301)
-mdfy.app/{anything}     → memory.wiki/{anything} (301)
+memory.wiki/{anything}     → memory.wiki/{anything} (301)
 ```
 
 ### 6.2 Existing URL 호환
 
 ```
-mdfy.app/{id}            → memory.wiki/d/{id}      (legacy doc URL)
-mdfy.app/b/{id}          → memory.wiki/d/b/{id}
-mdfy.app/hub/{slug}      → memory.wiki/{slug}      (hub home as primary path)
+memory.wiki/{id}            → memory.wiki/d/{id}      (legacy doc URL)
+memory.wiki/b/{id}          → memory.wiki/d/b/{id}
+memory.wiki/hub/{slug}      → memory.wiki/{slug}      (hub home as primary path)
 ```
 
 `/d/{id}` namespace로 anonymous doc은 유지 (login 없이 publish 가능 = brand promise).
@@ -503,7 +503,7 @@ mdfy.app/hub/{slug}      → memory.wiki/{slug}      (hub home as primary path)
 
 | 영역 | 추정 변경량 |
 |---|---|
-| 텍스트 references ("mdfy.app", "mdfy") | 200+ 곳 |
+| 텍스트 references ("memory.wiki", "mdfy") | 200+ 곳 |
 | Branding assets (로고, OG 이미지, favicon) | 50+ 파일 |
 | Welcome/onboarding 카피 | 5+ 컴포넌트 |
 | Email templates | 3-5개 |

@@ -203,7 +203,7 @@ export default function HubSearchClient({ slug, author, hubDescription, initialQ
         <p className="text-xs font-mono mt-12" style={{ color: "var(--text-faint)" }}>
           API:{" "}
           <code style={{ color: "var(--text-muted)" }}>
-            POST https://mdfy.app/api/hub/{slug}/recall
+            POST https://memory.wiki/api/hub/{slug}/recall
           </code>
         </p>
       </div>

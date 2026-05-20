@@ -199,7 +199,7 @@ export default function V6LandingDraft() {
         style={{ borderTop: "1px solid var(--border-dim)", color: "var(--text-faint)" }}
       >
         <span>
-          Hosted on <Link href="/" style={{ color: "var(--accent)" }}>mdfy.app</Link>
+          Hosted on <Link href="/" style={{ color: "var(--accent)" }}>memory.wiki</Link>
         </span>
         <span>v6-landing draft — not the live page yet</span>
       </footer>

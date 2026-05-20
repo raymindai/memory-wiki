@@ -12,17 +12,17 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "CLI 레퍼런스 — mdfy.app",
+  title: "CLI 레퍼런스 — memory.wiki",
   description:
     "mdfy CLI 레퍼런스. 커맨드 라인에서 Markdown을 게시합니다. stdin 파이프, tmux 캡처, 문서 관리를 간단한 터미널 명령어로 수행하세요.",
   alternates: {
-    canonical: "https://mdfy.app/ko/docs/cli",
-    languages: { en: "https://mdfy.app/docs/cli" },
+    canonical: "https://memory.wiki/ko/docs/cli",
+    languages: { en: "https://memory.wiki/docs/cli" },
   },
   openGraph: {
-    title: "CLI 레퍼런스 — mdfy.app",
+    title: "CLI 레퍼런스 — memory.wiki",
     description: "커맨드 라인에서 Markdown을 게시합니다. stdin 파이프, tmux 캡처, 문서 관리.",
-    url: "https://mdfy.app/ko/docs/cli",
+    url: "https://memory.wiki/ko/docs/cli",
     images: [{ url: "/api/og?title=CLI", width: 1200, height: 630 }],
   },
 };
@@ -96,14 +96,14 @@ export default function CliDocsPageKo() {
           {/* 명령어 개요 */}
           <SectionHeading id="commands">명령어</SectionHeading>
           <Card>
-            <CommandRow cmd="mdfy publish <file>" desc="Markdown 파일 또는 stdin을 mdfy.app에 게시합니다." />
+            <CommandRow cmd="mdfy publish <file>" desc="Markdown 파일 또는 stdin을 memory.wiki에 게시합니다." />
             <CommandRow cmd="mdfy update <id> <file>" desc="기존 문서를 새 내용으로 업데이트합니다." />
             <CommandRow cmd="mdfy pull <id>" desc="문서의 Markdown 내용을 다운로드합니다." />
             <CommandRow cmd="mdfy delete <id>" desc="문서를 소프트 삭제합니다." />
             <CommandRow cmd="mdfy list" desc="내 모든 문서를 조회합니다." />
             <CommandRow cmd="mdfy open <id>" desc="브라우저에서 문서를 엽니다." />
             <CommandRow cmd="mdfy capture" desc="현재 tmux 패널을 캡처하여 게시합니다." />
-            <CommandRow cmd="mdfy login" desc="mdfy.app에 인증합니다." />
+            <CommandRow cmd="mdfy login" desc="memory.wiki에 인증합니다." />
             <CommandRow cmd="mdfy logout" desc="저장된 인증 정보를 삭제합니다." />
             <CommandRow cmd="mdfy whoami" desc="현재 인증된 사용자를 표시합니다." />
           </Card>
@@ -195,7 +195,7 @@ mdfy delete abc123 --yes`}</CodeBlock>
           <SectionHeading id="open">open</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`mdfy open abc123
-# Opens https://mdfy.app/abc123 in your default browser`}</CodeBlock>
+# Opens https://memory.wiki/abc123 in your default browser`}</CodeBlock>
           </Card>
 
           {/* capture */}
@@ -296,7 +296,7 @@ alias mtx="tmux capture-pane -p | mdfy publish"`}</CodeBlock>
           <SectionHeading id="config">설정</SectionHeading>
           <Card>
             <SubLabel>환경 변수</SubLabel>
-            <CommandRow cmd="MDFY_URL" desc="API Base URL. 기본값: https://mdfy.app" />
+            <CommandRow cmd="MDFY_URL" desc="API Base URL. 기본값: https://memory.wiki" />
 
             <SubLabel>설정 파일</SubLabel>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, marginBottom: 12, lineHeight: 1.7 }}>
@@ -305,7 +305,7 @@ alias mtx="tmux capture-pane -p | mdfy publish"`}</CodeBlock>
             </p>
             <CodeBlock lang="json">{`// ~/.mdfy/config.json
 {
-  "apiUrl": "https://mdfy.app",
+  "apiUrl": "https://memory.wiki",
   "email": "user@example.com",
   "token": "..."
 }`}</CodeBlock>

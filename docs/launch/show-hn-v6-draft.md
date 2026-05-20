@@ -25,7 +25,7 @@ mdfy is what I built to stop doing that.
 
 Each saved doc is a markdown URL. Group them into a Bundle URL. Group bundles into your Hub URL. Drop the same URL into Cursor's `.cursor/rules`, Claude Code's `CLAUDE.md`, ChatGPT's "knowledge" — every AI now reads the same project memory. When a new decision lands, you save it once. Next session in any tool, the AI sees it.
 
-**The 30-second demo**: paste `https://mdfy.app/b/p_mdtSk0` into Claude Code or Cursor's rules. It's a sample project's living context — 7 docs (README, auth pattern, DB schema, API conventions, UI patterns, decision log, open questions). The bundle URL fetches as markdown, with `?full=1` inlining every member doc (≈3.3k tokens) for the AI to ingest. Same URL works in any AI tool.
+**The 30-second demo**: paste `https://memory.wiki/b/p_mdtSk0` into Claude Code or Cursor's rules. It's a sample project's living context — 7 docs (README, auth pattern, DB schema, API conventions, UI patterns, decision log, open questions). The bundle URL fetches as markdown, with `?full=1` inlining every member doc (≈3.3k tokens) for the AI to ingest. Same URL works in any AI tool.
 
 **What v6 ships beyond the wedge** (everything's free, no signup to try):
 
@@ -39,9 +39,9 @@ Each saved doc is a markdown URL. Group them into a Bundle URL. Group bundles in
 2. **Authored ≠ extracted memory.** Mem0 and Letta extract facts from conversations. mdfy answers a different question: *what do you want to remember?* You write it. You edit it. You decide.
 3. **The Karpathy wiki, deployed as a URL.** "Obsidian is the IDE; the LLM is the programmer; the wiki is the codebase" — that's a local-file shape. mdfy rebuilt it as URL + composable scopes (doc / bundle / hub) so per-project context maps cleanly to `AGENTS.md` / `CLAUDE.md` / `.cursor/rules`.
 
-Stack: Next.js 15, Supabase Postgres + pgvector + HNSW, OpenAI text-embedding-3-small, Anthropic Haiku for concept extraction + reranking, markdown-it as the shared render pipeline across editor + every viewer (TipTap on top for WYSIWYG). Open source. Bundle spec at [/spec](https://mdfy.app/spec).
+Stack: Next.js 15, Supabase Postgres + pgvector + HNSW, OpenAI text-embedding-3-small, Anthropic Haiku for concept extraction + reranking, markdown-it as the shared render pipeline across editor + every viewer (TipTap on top for WYSIWYG). Open source. Bundle spec at [/spec](https://memory.wiki/spec).
 
-Try it: paste `mdfy.app/b/p_mdtSk0` into any AI tool. Or open the example hub: [`mdfy.app/hub/demo`](https://mdfy.app/hub/demo). Or paste a ChatGPT share link at mdfy.app — your URL is yours forever, no signup.
+Try it: paste `memory.wiki/b/p_mdtSk0` into any AI tool. Or open the example hub: [`memory.wiki/hub/demo`](https://memory.wiki/hub/demo). Or paste a ChatGPT share link at memory.wiki — your URL is yours forever, no signup.
 
 Happy to dig into the cross-AI thesis, the wedge use case, why authored beats extracted, the bundle digest format, or where this goes if it works.
 
@@ -81,10 +81,10 @@ Happy to dig into the cross-AI thesis, the wedge use case, why authored beats ex
 
 ## Demo URLs to have ready
 
-- Wedge demo: `mdfy.app/b/p_mdtSk0` (Cross-tool dev workflow bundle, 7 docs, ~3.3k tokens at `?full=1`)
-- Full hub demo: `mdfy.app/hub/demo` (mdfy Demo's hub — 50 docs, 7 bundles, 40 concepts)
-- Spec: `mdfy.app/spec`
-- Integrate doc with per-tool snippets: `mdfy.app/docs/integrate`
+- Wedge demo: `memory.wiki/b/p_mdtSk0` (Cross-tool dev workflow bundle, 7 docs, ~3.3k tokens at `?full=1`)
+- Full hub demo: `memory.wiki/hub/demo` (mdfy Demo's hub — 50 docs, 7 bundles, 40 concepts)
+- Spec: `memory.wiki/spec`
+- Integrate doc with per-tool snippets: `memory.wiki/docs/integrate`
 
 ---
 

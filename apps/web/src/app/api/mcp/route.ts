@@ -8,7 +8,7 @@ import { findRecentDuplicateDoc, isStrictDupLockError } from "@/lib/doc-dedup";
 
 // ─── Helpers ───
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mdfy.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://memory.wiki";
 
 function errorResult(msg: string) {
   return { content: [{ type: "text" as const, text: `Error: ${msg}` }], isError: true as const };
@@ -94,7 +94,7 @@ function createMcpServer(userId?: string) {
 
   server.tool(
     "mdfy_create",
-    "Create a new Markdown document on mdfy.app and get a shareable URL",
+    "Create a new Markdown document on memory.wiki and get a shareable URL",
     {
       markdown: z.string().describe("Markdown content"),
       title: z.string().optional().describe("Document title"),
@@ -445,7 +445,7 @@ function createMcpServer(userId?: string) {
 
   server.tool(
     "mdfy_import_url",
-    "Fetch a webpage and import it as a new mdfy.app document",
+    "Fetch a webpage and import it as a new memory.wiki document",
     {
       url: z.string().describe("URL to fetch"),
       title: z.string().optional(),
@@ -752,7 +752,7 @@ function createMcpServer(userId?: string) {
     "Get the public render URL for previewing markdown without saving",
     { markdown: z.string().describe("Markdown to preview") },
     async ({ markdown }) => {
-      // For now just return the hash-share URL (mdfy.app supports it via /#md=...)
+      // For now just return the hash-share URL (memory.wiki supports it via /#md=...)
       // True render would need WASM access; this gives users a quick preview link.
       void markdown;
       return textResult(`To preview: paste markdown into ${BASE_URL} (it renders live in browser).\nFor a permanent preview, use mdfy_create with draft=true.`);

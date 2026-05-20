@@ -8,7 +8,7 @@ import GalaxyClient from "./GalaxyClient";
 // `start_growing_hub_concept_2026_05` for design + iteration history.
 
 export const metadata: Metadata = {
-  title: "Galaxy — mdfy.app",
+  title: "Galaxy — memory.wiki",
   description: "Your hub as a constellation. Concepts and docs, connected.",
   robots: { index: false, follow: false }, // owner-only surface
 };

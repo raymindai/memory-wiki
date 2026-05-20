@@ -3,18 +3,18 @@ import Link from "next/link";
 import { CodeBlock, InlineCode, DocsNav, DocsSidebar, SiteFooter, mono } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "Documentation — mdfy.app",
+  title: "Documentation — memory.wiki",
   description:
-    "Complete developer documentation for mdfy.app. REST API, CLI, JavaScript SDK, MCP server, and npm packages for Markdown publishing.",
+    "Complete developer documentation for memory.wiki. REST API, CLI, JavaScript SDK, MCP server, and npm packages for Markdown publishing.",
   alternates: {
-    canonical: "https://mdfy.app/docs",
-    languages: { ko: "https://mdfy.app/ko/docs" },
+    canonical: "https://memory.wiki/docs",
+    languages: { ko: "https://memory.wiki/ko/docs" },
   },
   openGraph: {
-    title: "Documentation — mdfy.app",
+    title: "Documentation — memory.wiki",
     description:
       "Complete developer documentation. REST API, CLI, SDK, MCP server.",
-    url: "https://mdfy.app/docs",
+    url: "https://memory.wiki/docs",
     images: [{ url: "/api/og?title=Documentation", width: 1200, height: 630 }],
   },
 };
@@ -208,7 +208,7 @@ export default function DocsPage() {
             fontFamily: mono,
           }}
         >
-          Base URL: <InlineCode>{"https://mdfy.app"}</InlineCode>
+          Base URL: <InlineCode>{"https://memory.wiki"}</InlineCode>
         </p>
       </section>
 
@@ -223,13 +223,13 @@ export default function DocsPage() {
           </div>
           <div className="terminal-mock-body">
             <span className="line comment">{"# Create a document"}</span>
-            <span className="line"><span className="prompt">$ </span><span className="cmd">{"curl -X POST https://mdfy.app/api/docs \\"}</span></span>
+            <span className="line"><span className="prompt">$ </span><span className="cmd">{"curl -X POST https://memory.wiki/api/docs \\"}</span></span>
             <span className="line"><span className="cmd">{"  -H 'Content-Type: application/json' \\"}</span></span>
             <span className="line"><span className="cmd">{"  -d '{\"markdown\": \"# Hello World\"}'"}</span></span>
             <span className="line-gap" />
             <span className="line"><span className="output">{`{`}</span></span>
             <span className="line"><span className="output">{"  \"id\": "}</span><span className="url">{`"abc123"`}</span><span className="output">,</span></span>
-            <span className="line"><span className="output">{"  \"url\": "}</span><span className="url">{`"https://mdfy.app/abc123"`}</span><span className="output">,</span></span>
+            <span className="line"><span className="output">{"  \"url\": "}</span><span className="url">{`"https://memory.wiki/abc123"`}</span><span className="output">,</span></span>
             <span className="line"><span className="output">{"  \"editToken\": \"eyJ...\""}</span></span>
             <span className="line"><span className="output">{`}`}</span></span>
           </div>
@@ -390,13 +390,13 @@ export default function DocsPage() {
             Publish your first document in under 30 seconds. No authentication
             required.
           </p>
-          <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/docs \\
+          <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/docs \\
   -H "Content-Type: application/json" \\
   -d '{"markdown": "# Hello World\\nPublished via API.", "isDraft": false}'
 
 # Response:
 # { "id": "abc123", "editToken": "tok_...", "created_at": "..." }
-# View at: https://mdfy.app/abc123`}</CodeBlock>
+# View at: https://memory.wiki/abc123`}</CodeBlock>
         </div>
       </section>
 

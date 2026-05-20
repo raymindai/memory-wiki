@@ -50,7 +50,7 @@ export async function GET(
   const conceptRow = (rows && rows[0]) || null;
   if (!conceptRow) {
     return new NextResponse(
-      `Concept "${concept}" not found in this hub. See https://mdfy.app/raw/hub/${slug}?digest=1 for the available concepts.\n`,
+      `Concept "${concept}" not found in this hub. See https://memory.wiki/raw/hub/${slug}?digest=1 for the available concepts.\n`,
       { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   }
@@ -104,10 +104,10 @@ export async function GET(
     `concept: "${conceptRow.label.replace(/"/g, '\\"')}"`,
     `concept_type: ${conceptRow.concept_type || "concept"}`,
     `author: "${author}"`,
-    `url: https://mdfy.app/hub/${slug}/c/${concept}`,
+    `url: https://memory.wiki/hub/${slug}/c/${concept}`,
     `document_count: ${docs.length}`,
     `weight: ${Math.round(conceptRow.weight || 0)}`,
-    'source: "mdfy.app"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].join("\n");
@@ -129,7 +129,7 @@ export async function GET(
     const PAGE_CHAR_BUDGET = 24_000; // ~6k tokens — fits in any model
     for (const d of docs) {
       const passages = extractPassagesFor(d.markdown || "", conceptRow.label, 3, 320);
-      sections.push(`### [${d.title || "Untitled"}](https://mdfy.app/${d.id})`);
+      sections.push(`### [${d.title || "Untitled"}](https://memory.wiki/${d.id})`);
       if (passages.length === 0) {
         sections.push(`*No paragraph-level passage extracted — the concept may appear only in a heading or list.*`);
       } else {
@@ -139,26 +139,26 @@ export async function GET(
           // passages but keep the doc heading (so the AI knows the
           // doc exists and can fetch it directly).
           if (runningChars + block.length > PAGE_CHAR_BUDGET) {
-            sections.push(`*…more passages available — fetch \`https://mdfy.app/raw/${d.id}?compact=1\` for the full doc.*`);
+            sections.push(`*…more passages available — fetch \`https://memory.wiki/raw/${d.id}?compact=1\` for the full doc.*`);
             break;
           }
           sections.push(block);
           runningChars += block.length;
         }
       }
-      sections.push(`*Full doc: \`https://mdfy.app/raw/${d.id}?compact=1\`*`);
+      sections.push(`*Full doc: \`https://memory.wiki/raw/${d.id}?compact=1\`*`);
     }
   }
 
   if (neighbors.length > 0) {
     sections.push("## Related concepts");
     sections.push(neighbors
-      .map((n) => `- [${n.label}](https://mdfy.app/raw/hub/${slug}/c/${labelToSlug(n.label)})`)
+      .map((n) => `- [${n.label}](https://memory.wiki/raw/hub/${slug}/c/${labelToSlug(n.label)})`)
       .join("\n"));
   }
 
   sections.push(
-    `---\n\n_Need the broader context? [Hub digest](https://mdfy.app/raw/hub/${slug}?digest=1&compact=1) — every concept in this hub at one glance._`,
+    `---\n\n_Need the broader context? [Hub digest](https://memory.wiki/raw/hub/${slug}?digest=1&compact=1) — every concept in this hub at one glance._`,
   );
 
   const body = (compact ? compactMarkdown : (s: string) => s)(`${frontmatter}\n${sections.join("\n\n")}\n`);
@@ -180,7 +180,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": "public, max-age=120, s-maxage=120, stale-while-revalidate=600",
-      "Link": `<https://mdfy.app/hub/${slug}/c/${concept}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/hub/${slug}/c/${concept}>; rel="canonical"`,
       "X-Hub-Slug": slug,
       "X-Concept": conceptRow.label,
       ...tokenEconomyHeaders(body, { compact }),

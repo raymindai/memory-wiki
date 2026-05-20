@@ -40,11 +40,11 @@ export async function GET(
 
   const author = profile.display_name || slug;
   const description = (profile.hub_description || "").trim();
-  const base = `https://mdfy.app`;
+  const base = `https://memory.wiki`;
 
   const body = `# SCHEMA — ${author}'s hub
 ${description ? `\n> ${description}\n` : ""}
-This file describes the public surface of \`mdfy.app/hub/${slug}\`. Every URL
+This file describes the public surface of \`memory.wiki/hub/${slug}\`. Every URL
 below returns plain markdown unless noted; cacheable; no auth required.
 
 ## Manifest files

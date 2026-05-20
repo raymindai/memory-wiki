@@ -103,9 +103,9 @@ export function formatHubLogMarkdown(rows: HubLogRow[]): string {
     const tag = row.event_type;
     const summary = row.summary || row.target_id || "";
     const ref = row.target_id && row.target_type === "document"
-      ? ` (mdfy.app/${row.target_id})`
+      ? ` (memory.wiki/${row.target_id})`
       : row.target_id && row.target_type === "bundle"
-        ? ` (mdfy.app/b/${row.target_id})`
+        ? ` (memory.wiki/b/${row.target_id})`
         : "";
     lines.push(`- \`${ts}\` **${tag}** ${summary}${ref}`.trim());
   }

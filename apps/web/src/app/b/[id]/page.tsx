@@ -57,23 +57,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `${bundle.documentCount} documents${bundle.description ? ` — ${bundle.description.slice(0, 150)}` : ""}`;
 
   const authorParam = !isProtected && bundle.ownerName ? `&author=${encodeURIComponent(bundle.ownerName)}` : "";
-  const ogImageUrl = `https://mdfy.app/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(`Bundle,${bundle.documentCount} docs,Knowledge Graph`)}${authorParam}`;
+  const ogImageUrl = `https://memory.wiki/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(`Bundle,${bundle.documentCount} docs,Knowledge Graph`)}${authorParam}`;
 
   return {
-    title: `${title} — mdfy.app`,
+    title: `${title} — memory.wiki`,
     description,
     robots: isProtected ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${title} — mdfy.app`,
+      title: `${title} — memory.wiki`,
       description,
-      url: `https://mdfy.app/b/${id}`,
-      siteName: "mdfy.app",
+      url: `https://memory.wiki/b/${id}`,
+      siteName: "memory.wiki",
       type: "article",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} — mdfy.app`,
+      title: `${title} — memory.wiki`,
       description,
       images: [ogImageUrl],
     },
@@ -82,9 +82,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // structured payload directly. Skipped for protected bundles so
     // the alternate URL doesn't leak.
     alternates: isProtected ? undefined : {
-      canonical: `https://mdfy.app/b/${id}`,
+      canonical: `https://memory.wiki/b/${id}`,
       types: {
-        "text/markdown": `https://mdfy.app/b/${id}.md`,
+        "text/markdown": `https://memory.wiki/b/${id}.md`,
       },
     },
   };

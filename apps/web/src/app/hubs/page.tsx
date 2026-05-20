@@ -8,14 +8,14 @@ import MdfyLogo from "@/components/MdfyLogo";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Public hubs — mdfy.app",
+  title: "Public hubs — memory.wiki",
   description: "Personal knowledge hubs published with mdfy. Each one is a single URL deployable to any AI.",
-  alternates: { canonical: "https://mdfy.app/hubs" },
+  alternates: { canonical: "https://memory.wiki/hubs" },
   openGraph: {
-    title: "Public hubs — mdfy.app",
+    title: "Public hubs — memory.wiki",
     description: "Personal knowledge hubs published with mdfy. One URL, deployable anywhere.",
-    url: "https://mdfy.app/hubs",
-    siteName: "mdfy.app",
+    url: "https://memory.wiki/hubs",
+    siteName: "memory.wiki",
     type: "website",
   },
 };
@@ -415,7 +415,7 @@ export default async function HubsPage() {
           <span>
             Want yours listed? <Link href="/settings" style={{ color: "var(--accent)" }}>Enable from Settings →</Link>
           </span>
-          <span>mdfy.app</span>
+          <span>memory.wiki</span>
         </footer>
       </main>
     </div>

@@ -15,7 +15,7 @@
 // Configure in Supabase Dashboard → Database → Webhooks:
 //   - Table: documents
 //   - Events: Insert
-//   - URL: https://mdfy.app/api/hooks/doc-created
+//   - URL: https://memory.wiki/api/hooks/doc-created
 //   - HTTP headers: Authorization: Bearer ${WEBHOOK_SECRET}
 //   - Method: POST
 

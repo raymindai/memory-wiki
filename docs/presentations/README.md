@@ -61,5 +61,5 @@ with the demo brevity for live-judge contexts.
 
 ## Editing flow
 
-The decks reference live URLs (`mdfy.app/hub/demo`, `/spec`, `/docs/integrate`).
+The decks reference live URLs (`memory.wiki/hub/demo`, `/spec`, `/docs/integrate`).
 If those URLs change, search-replace across this directory before re-rendering.

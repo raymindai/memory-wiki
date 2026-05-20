@@ -68,7 +68,7 @@ async function getDynamicEntries(base: string): Promise<MetadataRoute.Sitemap> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = "https://mdfy.app";
+  const base = "https://memory.wiki";
   const now = new Date();
   const dynamic = await getDynamicEntries(base);
 

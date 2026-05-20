@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { CodeBlock, InlineCode, SectionHeading, DocsNav, DocsSidebar, SiteFooter, mono } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "Integrate with AI dev tools — mdfy.app",
+  title: "Integrate with AI dev tools — memory.wiki",
   description:
     "Plug your mdfy hub or bundle into Claude Code, Cursor, Codex, Gemini CLI, Windsurf, and Aider with a single URL. One line in AGENTS.md / CLAUDE.md / .cursor/rules and every AI tool reads your personal knowledge graph.",
-  alternates: { canonical: "https://mdfy.app/docs/integrate" },
+  alternates: { canonical: "https://memory.wiki/docs/integrate" },
   openGraph: {
     title: "Integrate mdfy with AI dev tools",
     description: "One line in AGENTS.md / CLAUDE.md / .cursor/rules — every AI tool reads your hub or bundle as clean markdown.",
-    url: "https://mdfy.app/docs/integrate",
+    url: "https://memory.wiki/docs/integrate",
     images: [{ url: "/api/og?title=Integrate%20with%20AI%20dev%20tools", width: 1200, height: 630 }],
   },
 };
@@ -178,7 +178,7 @@ export default function IntegrateDocsPage() {
           </div>
           <CodeBlock lang="markdown">{`# Project context
 
-Working bundle: https://mdfy.app/b/<bundle-id>
+Working bundle: https://memory.wiki/b/<bundle-id>
 
 Re-read on every session for spec, decisions, prior reasoning.
 The bundle carries its own graph (themes, insights, concept relations).`}</CodeBlock>
@@ -218,19 +218,19 @@ The bundle carries its own graph (themes, insights, concept relations).`}</CodeB
             }}
           >
             <div style={{ display: "grid", gridTemplateColumns: "200px 100px 1fr", gap: 12, alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid var(--border-dim)" }}>
-              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>mdfy.app/&#123;docId&#125;</code>
+              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>memory.wiki/&#123;docId&#125;</code>
               <span style={{ fontSize: 12, fontFamily: mono, color: "var(--text-faint)" }}>single doc</span>
               <span style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>One spec, one decision, one note. Tightest token cost.</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "200px 100px 1fr", gap: 12, alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid var(--border-dim)" }}>
-              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>mdfy.app/b/&#123;bundleId&#125;</code>
+              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>memory.wiki/b/&#123;bundleId&#125;</code>
               <span style={{ fontSize: 12, fontFamily: mono, color: "var(--accent)" }}>bundle</span>
               <span style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
                 <strong style={{ color: "var(--text-primary)" }}>Recommended for AGENTS.md / .cursor/rules.</strong> 3-20+ docs grouped by intent, plus the canvas analysis (themes, insights, concept relations) shipped in the same response.
               </span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "200px 100px 1fr", gap: 12, alignItems: "baseline", padding: "10px 0" }}>
-              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>mdfy.app/hub/&#123;you&#125;</code>
+              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>memory.wiki/hub/&#123;you&#125;</code>
               <span style={{ fontSize: 12, fontFamily: mono, color: "var(--text-faint)" }}>whole hub</span>
               <span style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>Your entire knowledge graph with concept_index. Use sparingly — broad context costs more tokens.</span>
             </div>
@@ -358,7 +358,7 @@ The bundle carries its own graph (themes, insights, concept relations).`}</CodeB
 
 ## Working context
 
-Bundle: https://mdfy.app/b/<bundle-id>
+Bundle: https://memory.wiki/b/<bundle-id>
 
 Fetch this URL when you need this project's spec, decisions, or
 cross-doc reasoning. The bundle's pre-computed graph (themes,
@@ -386,7 +386,7 @@ index call needed.`}
             tagline="Claude Code auto-loads CLAUDE.md from the project root and every parent directory, plus AGENTS.md when present. Either file works; CLAUDE.md is the right home for Claude-specific overrides."
             snippet={`## Project context (from mdfy)
 
-Bundle: https://mdfy.app/b/<bundle-id>
+Bundle: https://memory.wiki/b/<bundle-id>
 
 This bundle carries the project's spec, ADRs, and decisions —
 plus a pre-computed graph (themes, insights, concept relations).
@@ -409,7 +409,7 @@ description: Project context from mdfy
 alwaysApply: true
 ---
 
-Project context lives at https://mdfy.app/b/<bundle-id>.
+Project context lives at https://memory.wiki/b/<bundle-id>.
 
 When you need spec / decisions / prior reasoning, fetch that URL.
 The response is clean markdown with the bundle's graph analysis
@@ -431,7 +431,7 @@ The response is clean markdown with the bundle's graph analysis
 
 ## Working context
 
-Bundle: https://mdfy.app/b/<bundle-id>
+Bundle: https://memory.wiki/b/<bundle-id>
 
 Fetch on demand for spec, decisions, prior reasoning.`}
           />
@@ -445,7 +445,7 @@ Fetch on demand for spec, decisions, prior reasoning.`}
             tagline="Google's Gemini CLI reads GEMINI.md as its session-instructions file. Same content shape as the others."
             snippet={`# Gemini context
 
-Project memory lives at https://mdfy.app/b/<bundle-id>.
+Project memory lives at https://memory.wiki/b/<bundle-id>.
 Fetch on demand for spec, decisions, and cross-doc reasoning.`}
           />
 
@@ -455,7 +455,7 @@ Fetch on demand for spec, decisions, and cross-doc reasoning.`}
             name="Windsurf"
             filePath=".windsurfrules (project root)"
             tagline="Windsurf reads .windsurfrules at the project root for its Cascade agent."
-            snippet={`Project context: https://mdfy.app/b/<bundle-id>
+            snippet={`Project context: https://memory.wiki/b/<bundle-id>
 
 When you need this project's spec / decisions / prior reasoning,
 fetch that URL. It returns clean markdown with the bundle's graph
@@ -471,7 +471,7 @@ analysis included.`}
             snippet={`# Project conventions
 
 External context for this project lives at:
-https://mdfy.app/b/<bundle-id>
+https://memory.wiki/b/<bundle-id>
 
 Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
           />
@@ -502,7 +502,7 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
           </p>
           <ol style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 16, maxWidth: 680, paddingLeft: 22 }}>
             <li style={{ marginBottom: 8 }}>
-              Create the target doc on mdfy.app. The URL chip in the editor shows the id (the <InlineCode>{"<id>"}</InlineCode> in <InlineCode>{"mdfy.app/d/<id>"}</InlineCode>) — that&apos;s your <InlineCode>{"MDFY_DOC_ID"}</InlineCode>.
+              Create the target doc on memory.wiki. The URL chip in the editor shows the id (the <InlineCode>{"<id>"}</InlineCode> in <InlineCode>{"memory.wiki/d/<id>"}</InlineCode>) — that&apos;s your <InlineCode>{"MDFY_DOC_ID"}</InlineCode>.
             </li>
             <li style={{ marginBottom: 8 }}>
               On the same doc, open the <strong style={{ color: "var(--text-primary)" }}>Share</strong> modal (top-right of the editor). Scroll to the <em>Developer access</em> footer and click <strong style={{ color: "var(--text-primary)" }}>Copy edit token</strong>. That&apos;s your <InlineCode>{"MDFY_EDIT_TOKEN"}</InlineCode>. Treat it like a password — anyone with it can write to the doc.
@@ -576,7 +576,7 @@ jobs:
             --arg summary "ci: sync from \${GITHUB_SHA:0:7}" \\
             '{markdown: $md, editToken: $token, changeSummary: $summary}')"
           STATUS=$(curl -sS -o /tmp/resp.json -w '%{http_code}' \\
-            -X PATCH "https://mdfy.app/api/docs/\${MDFY_DOC_ID}" \\
+            -X PATCH "https://memory.wiki/api/docs/\${MDFY_DOC_ID}" \\
             -H 'Content-Type: application/json' \\
             --data "$BODY")
           echo "HTTP $STATUS"
@@ -592,7 +592,7 @@ jobs:
               maxWidth: 680,
             }}
           >
-            <strong style={{ color: "var(--text-muted)" }}>What you get.</strong> One URL like <InlineCode>{"mdfy.app/d/<your-id>"}</InlineCode> that&apos;s always your repo&apos;s current docs. Paste it into Claude Code, Cursor, or any AI tool — they fetch the latest state on every session. Bonus: it makes a clean &ldquo;we use our own product&rdquo; artifact you can link from a README.
+            <strong style={{ color: "var(--text-muted)" }}>What you get.</strong> One URL like <InlineCode>{"memory.wiki/d/<your-id>"}</InlineCode> that&apos;s always your repo&apos;s current docs. Paste it into Claude Code, Cursor, or any AI tool — they fetch the latest state on every session. Bonus: it makes a clean &ldquo;we use our own product&rdquo; artifact you can link from a README.
           </p>
 
           {/* ─── Staleness ─── */}

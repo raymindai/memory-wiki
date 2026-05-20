@@ -23,7 +23,7 @@ export default function GlobalNotFound() {
             That URL doesn&apos;t exist on mdfy. Maybe it was renamed, or the link is wrong.
           </p>
           <p className="text-caption leading-relaxed mb-8" style={{ color: "var(--text-faint)" }}>
-            mdfy URLs look like <code>mdfy.app/&lt;id&gt;</code>, <code>mdfy.app/b/&lt;id&gt;</code>, or <code>mdfy.app/hub/&lt;slug&gt;</code>.
+            mdfy URLs look like <code>memory.wiki/&lt;id&gt;</code>, <code>memory.wiki/b/&lt;id&gt;</code>, or <code>memory.wiki/hub/&lt;slug&gt;</code>.
           </p>
           <div className="flex gap-3 justify-center">
             <Link

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — mdfy.app",
-  description: "Privacy Policy for mdfy.app and the mdfy Chrome Extension.",
+  title: "Privacy Policy — memory.wiki",
+  description: "Privacy Policy for memory.wiki and the mdfy Chrome Extension.",
   openGraph: {
-    title: "Privacy Policy — mdfy.app",
-    url: "https://mdfy.app/privacy",
+    title: "Privacy Policy — memory.wiki",
+    url: "https://memory.wiki/privacy",
   },
 };
 
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       <article className="w-full max-w-2xl space-y-8 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
         <div>
           <Link href="/" className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-            &larr; mdfy.app
+            &larr; memory.wiki
           </Link>
           <h1 className="text-2xl font-bold mt-4" style={{ color: "var(--text-primary)" }}>
             Privacy Policy
@@ -32,16 +32,16 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Overview</h2>
           <p>
-            mdfy.app is a document publishing service operated by Raymind AI.
+            memory.wiki is a document publishing service operated by Raymind AI.
             We respect your privacy and are committed to protecting your data.
-            This policy covers the mdfy.app website, the mdfy Chrome Extension, and the mdfy VS Code Extension.
+            This policy covers the memory.wiki website, the mdfy Chrome Extension, and the mdfy VS Code Extension.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>What We Collect</h2>
 
-          <h3 className="font-medium" style={{ color: "var(--text-primary)" }}>mdfy.app Website</h3>
+          <h3 className="font-medium" style={{ color: "var(--text-primary)" }}>memory.wiki Website</h3>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Documents you publish:</strong> Stored on our servers to provide shareable URLs. You can delete your documents at any time.</li>
             <li><strong>Account information:</strong> If you create an account — email address and display name.</li>
@@ -51,26 +51,26 @@ export default function PrivacyPage() {
 
           <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>Chrome Extension</h3>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Page content:</strong> The extension reads content from AI chat pages (ChatGPT, Claude, Gemini) only when you click &ldquo;Capture.&rdquo; Content is sent directly to mdfy.app — we do not store it elsewhere.</li>
+            <li><strong>Page content:</strong> The extension reads content from AI chat pages (ChatGPT, Claude, Gemini) only when you click &ldquo;Capture.&rdquo; Content is sent directly to memory.wiki — we do not store it elsewhere.</li>
             <li><strong>No background collection:</strong> The extension does not monitor, track, or collect any browsing data. It only activates when you explicitly use it.</li>
-            <li><strong>Authentication:</strong> If you are logged into mdfy.app, the extension reads your auth cookie to enable features like image upload and permanent URLs.</li>
+            <li><strong>Authentication:</strong> If you are logged into memory.wiki, the extension reads your auth cookie to enable features like image upload and permanent URLs.</li>
           </ul>
 
           <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>VS Code Extension</h3>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>File content:</strong> The extension reads Markdown files you explicitly open or publish. Content is sent to mdfy.app only when you use the Publish or Sync features.</li>
+            <li><strong>File content:</strong> The extension reads Markdown files you explicitly open or publish. Content is sent to memory.wiki only when you use the Publish or Sync features.</li>
             <li><strong>No telemetry:</strong> We do not collect usage telemetry from the VS Code extension.</li>
           </ul>
 
           <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>mdfy for Mac</h3>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Local files:</strong> The desktop app reads files you open via Finder or Cmd+O. Files are edited through mdfy.app and auto-saved locally.</li>
+            <li><strong>Local files:</strong> The desktop app reads files you open via Finder or Cmd+O. Files are edited through memory.wiki and auto-saved locally.</li>
             <li><strong>No phone-home:</strong> The app does not send data to any server unless you explicitly publish or sync a document.</li>
           </ul>
 
           <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>MCP Server (mdfy-mcp)</h3>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Document operations:</strong> The MCP server creates, reads, and manages documents on mdfy.app via its API. Documents are stored on mdfy.app servers.</li>
+            <li><strong>Document operations:</strong> The MCP server creates, reads, and manages documents on memory.wiki via its API. Documents are stored on memory.wiki servers.</li>
             <li><strong>Local tokens:</strong> Edit tokens are stored locally at <code style={{ fontSize: "0.85em" }}>~/.mdfy/tokens.json</code> with owner-only permissions (0600).</li>
             <li><strong>Email:</strong> Your email (MDFY_EMAIL) is sent to the API for document ownership. It is not shared with third parties.</li>
           </ul>
@@ -129,7 +129,7 @@ export default function PrivacyPage() {
         </section>
 
         <div className="pt-8 text-xs" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-dim)" }}>
-          <Link href="/" style={{ color: "var(--accent)" }}>mdfy.app</Link>
+          <Link href="/" style={{ color: "var(--accent)" }}>memory.wiki</Link>
           {" "}&middot;{" "}
           <Link href="/about" style={{ color: "var(--text-muted)" }}>About</Link>
         </div>

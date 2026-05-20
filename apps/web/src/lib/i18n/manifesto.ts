@@ -81,7 +81,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         {
           heading: "What mdfy is today",
           paragraphs: [
-            "If you visited mdfy.app right now, you\u2019d see what looks like a markdown publishing tool \u2014 and it is.",
+            "If you visited memory.wiki right now, you\u2019d see what looks like a markdown publishing tool \u2014 and it is.",
             'You can capture markdown from anywhere: ChatGPT, Claude, Gemini (via Chrome extension), GitHub repos, Notion pages, Obsidian vaults, any web URL, your terminal (<code class="manifesto-code">cat README.md | mdfy</code>), VS Code, your Mac clipboard. You can edit it in a beautiful WYSIWYG editor \u2014 no syntax friction, no install required. You can share it with a permanent URL that anyone can read in the browser, that any AI can fetch as context.',
             "It\u2019s a publishing tool. It works. People can use it today.",
             "And it\u2019s grown past the publishing layer. Every saved doc folds into a personal hub that auto-publishes a wiki manifest (index.md, SCHEMA.md, log.md), maintains a concept index across your library, and exposes a recall API any AI can query. The role-split is the load-bearing idea: you set the direction, mdfy structures the URL, any AI reads it.",
@@ -267,7 +267,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         {
           heading: "mdfy\uAC00 \uC9C0\uAE08 \uBB34\uC5C7\uC778\uAC00",
           paragraphs: [
-            "mdfy.app\uB294 \uB9C8\uD06C\uB2E4\uC6B4 \uD5C8\uBE0C\uC785\uB2C8\uB2E4. \uC5B4\uB514\uC11C\uB4E0 \uCEA1\uCC98\uD558\uACE0, AI \uB3C4\uAD6C\uB85C \uD3B8\uC9D1\uD558\uACE0, \uC601\uAD6C URL\uB85C \uD37C\uBE14\uB9AC\uC2DC\uD569\uB2C8\uB2E4.",
+            "memory.wiki\uB294 \uB9C8\uD06C\uB2E4\uC6B4 \uD5C8\uBE0C\uC785\uB2C8\uB2E4. \uC5B4\uB514\uC11C\uB4E0 \uCEA1\uCC98\uD558\uACE0, AI \uB3C4\uAD6C\uB85C \uD3B8\uC9D1\uD558\uACE0, \uC601\uAD6C URL\uB85C \uD37C\uBE14\uB9AC\uC2DC\uD569\uB2C8\uB2E4.",
           ],
           list: [
             "<strong>\uCEA1\uCC98</strong> \u2014 Chrome Extension, VS Code, Mac App, CLI, \uBD99\uC5EC\uB123\uAE30. \uC5B4\uB5A4 AI\uC5D0\uC11C\uB4E0, \uC5B4\uB5A4 \uC5D0\uB514\uD130\uC5D0\uC11C\uB4E0, \uC6D0\uD074\uB9AD\uC73C\uB85C.",

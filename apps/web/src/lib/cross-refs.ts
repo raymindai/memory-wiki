@@ -3,7 +3,7 @@
 // Given a corpus of public document markdown, find every internal
 // mdfy reference and roll them up by target. A "reference" here is any
 // link whose href resolves to /<docId>, /d/<docId>, /b/<bundleId>, or
-// /hub/<slug> on mdfy.app (or staging.mdfy.app). Plain URLs without
+// /hub/<slug> on memory.wiki (or staging.memory.wiki). Plain URLs without
 // markdown link syntax also count, so links pasted into a captured
 // chat transcript are caught too.
 //

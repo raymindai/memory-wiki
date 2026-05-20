@@ -27,7 +27,7 @@ const data: CaseData = {
     },
     {
       step: "Deploy the hub URL",
-      detail: "Paste mdfy.app/hub/<you> into Claude, ChatGPT, or Cursor. It fetches the index + per-concept passages and answers from your actual citations, not training-data hallucinations.",
+      detail: "Paste memory.wiki/hub/<you> into Claude, ChatGPT, or Cursor. It fetches the index + per-concept passages and answers from your actual citations, not training-data hallucinations.",
     },
   ],
   result: [

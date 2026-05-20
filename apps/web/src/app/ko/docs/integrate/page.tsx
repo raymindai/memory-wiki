@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { CodeBlock, InlineCode, SectionHeading, DocsNav, DocsSidebar, SiteFooter, mono } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "AI 개발 도구와 연결 — mdfy.app",
+  title: "AI 개발 도구와 연결 — memory.wiki",
   description:
     "Claude Code, Cursor, Codex, Gemini CLI, Windsurf, Aider 에 한 줄 추가해서 mdfy hub / bundle 을 모든 세션의 컨텍스트로 자동 로드. AGENTS.md / CLAUDE.md / .cursor/rules 한 곳에 URL 만 박으면 끝.",
   alternates: {
-    canonical: "https://mdfy.app/ko/docs/integrate",
-    languages: { en: "https://mdfy.app/docs/integrate" },
+    canonical: "https://memory.wiki/ko/docs/integrate",
+    languages: { en: "https://memory.wiki/docs/integrate" },
   },
   openGraph: {
     title: "AI 개발 도구와 mdfy 연결",
     description: "AGENTS.md / CLAUDE.md / .cursor/rules 에 한 줄 추가하면 모든 AI 도구가 당신의 hub / bundle 을 깨끗한 마크다운으로 읽습니다.",
-    url: "https://mdfy.app/ko/docs/integrate",
+    url: "https://memory.wiki/ko/docs/integrate",
     images: [{ url: "/api/og?title=AI%20개발%20도구와%20연결", width: 1200, height: 630 }],
   },
 };
@@ -180,7 +180,7 @@ export default function IntegrateDocsPageKo() {
           </div>
           <CodeBlock lang="markdown">{`# 프로젝트 컨텍스트
 
-Working bundle: https://mdfy.app/b/<bundle-id>
+Working bundle: https://memory.wiki/b/<bundle-id>
 
 매 세션마다 다시 읽어 스펙, 결정, 이전 추론을 받아오세요.
 번들은 자체 그래프(themes, insights, concept relations)를 함께 전달합니다.`}</CodeBlock>
@@ -220,19 +220,19 @@ Working bundle: https://mdfy.app/b/<bundle-id>
             }}
           >
             <div style={{ display: "grid", gridTemplateColumns: "200px 100px 1fr", gap: 12, alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid var(--border-dim)" }}>
-              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>mdfy.app/&#123;docId&#125;</code>
+              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>memory.wiki/&#123;docId&#125;</code>
               <span style={{ fontSize: 12, fontFamily: mono, color: "var(--text-faint)" }}>단일 문서</span>
               <span style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>한 스펙, 한 결정, 한 노트. 토큰 비용 최소.</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "200px 100px 1fr", gap: 12, alignItems: "baseline", padding: "10px 0", borderBottom: "1px solid var(--border-dim)" }}>
-              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>mdfy.app/b/&#123;bundleId&#125;</code>
+              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>memory.wiki/b/&#123;bundleId&#125;</code>
               <span style={{ fontSize: 12, fontFamily: mono, color: "var(--accent)" }}>번들</span>
               <span style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
                 <strong style={{ color: "var(--text-primary)" }}>AGENTS.md / .cursor/rules 추천 디폴트.</strong> 의도 단위로 묶인 3-20+ 문서, 캔버스 분석 (themes, insights, concept relations) 이 같은 응답에 포함.
               </span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "200px 100px 1fr", gap: 12, alignItems: "baseline", padding: "10px 0" }}>
-              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>mdfy.app/hub/&#123;you&#125;</code>
+              <code style={{ fontSize: 13, fontFamily: mono, color: "var(--text-primary)", fontWeight: 600 }}>memory.wiki/hub/&#123;you&#125;</code>
               <span style={{ fontSize: 12, fontFamily: mono, color: "var(--text-faint)" }}>전체 hub</span>
               <span style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>concept_index 가 포함된 개인 지식 그래프 전체. 사용 자제 — 넓은 컨텍스트는 토큰 비용이 커집니다.</span>
             </div>
@@ -359,7 +359,7 @@ Working bundle: https://mdfy.app/b/<bundle-id>
 
 ## Working context
 
-Bundle: https://mdfy.app/b/<bundle-id>
+Bundle: https://memory.wiki/b/<bundle-id>
 
 이 프로젝트의 스펙, 결정, cross-doc 추론이 필요할 때 이 URL 을 fetch.
 번들의 pre-computed 그래프 (themes, insights, concept relations) 가
@@ -386,7 +386,7 @@ Bundle: https://mdfy.app/b/<bundle-id>
             tagline="Claude Code 는 프로젝트 루트와 부모 디렉터리 모두에서 CLAUDE.md 를 auto-load 합니다 (AGENTS.md 도 함께). 둘 다 동작; CLAUDE.md 는 Claude 전용 override 의 적절한 위치."
             snippet={`## Project context (from mdfy)
 
-Bundle: https://mdfy.app/b/<bundle-id>
+Bundle: https://memory.wiki/b/<bundle-id>
 
 이 번들이 프로젝트의 스펙, ADR, 결정 + pre-computed 그래프
 (themes, insights, concept relations) 를 담음.
@@ -409,7 +409,7 @@ description: Project context from mdfy
 alwaysApply: true
 ---
 
-이 프로젝트 컨텍스트는 https://mdfy.app/b/<bundle-id> 에 있음.
+이 프로젝트 컨텍스트는 https://memory.wiki/b/<bundle-id> 에 있음.
 
 스펙 / 결정 / 이전 추론이 필요할 때 그 URL 을 fetch.
 응답은 번들의 그래프 분석 (themes, insights, gaps, connections) 이
@@ -431,7 +431,7 @@ alwaysApply: true
 
 ## Working context
 
-Bundle: https://mdfy.app/b/<bundle-id>
+Bundle: https://memory.wiki/b/<bundle-id>
 
 스펙, 결정, 이전 추론이 필요할 때 fetch.`}
           />
@@ -444,7 +444,7 @@ Bundle: https://mdfy.app/b/<bundle-id>
             tagline="Google Gemini CLI 가 GEMINI.md 를 session-instructions 파일로 읽음. 다른 도구와 같은 콘텐츠 모양."
             snippet={`# Gemini context
 
-프로젝트 메모리는 https://mdfy.app/b/<bundle-id> 에.
+프로젝트 메모리는 https://memory.wiki/b/<bundle-id> 에.
 스펙, 결정, cross-doc 추론이 필요할 때 fetch.`}
           />
 
@@ -454,7 +454,7 @@ Bundle: https://mdfy.app/b/<bundle-id>
             name="Windsurf"
             filePath=".windsurfrules (project root)"
             tagline="Windsurf 가 프로젝트 루트의 .windsurfrules 를 Cascade 에이전트용으로 읽음."
-            snippet={`Project context: https://mdfy.app/b/<bundle-id>
+            snippet={`Project context: https://memory.wiki/b/<bundle-id>
 
 이 프로젝트의 스펙 / 결정 / 이전 추론이 필요할 때 그 URL 을 fetch.
 번들의 그래프 분석이 포함된 깨끗한 마크다운 응답.`}
@@ -469,7 +469,7 @@ Bundle: https://mdfy.app/b/<bundle-id>
             snippet={`# Project conventions
 
 이 프로젝트의 외부 컨텍스트는:
-https://mdfy.app/b/<bundle-id>
+https://memory.wiki/b/<bundle-id>
 
 스펙, 결정, cross-doc 추론이 필요할 때 그 URL 을 fetch.`}
           />

@@ -11,7 +11,7 @@
 // Configure in Supabase Dashboard → Database → Webhooks:
 //   - Table: bundle_documents
 //   - Events: Insert, Delete
-//   - URL: https://mdfy.app/api/hooks/bundle-membership-changed
+//   - URL: https://memory.wiki/api/hooks/bundle-membership-changed
 //   - HTTP headers: Authorization: Bearer ${WEBHOOK_SECRET}
 
 import { NextRequest, NextResponse, after } from "next/server";

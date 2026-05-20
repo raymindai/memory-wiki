@@ -21,7 +21,7 @@
 
   // Where to send captured docs. The bookmarklet stub sets this so we can
   // run against staging during dev.
-  var BASE = (window.__mdfyHost || "https://mdfy.app").replace(/\/$/, "");
+  var BASE = (window.__mdfyHost || "https://memory.wiki").replace(/\/$/, "");
 
   function detectProvider() {
     var h = location.hostname.toLowerCase();
@@ -346,7 +346,7 @@
         console.error("[mdfy] save failed:", err);
         setStatus(overlay,
           "<strong>mdfy</strong><br>Couldn't save. " + (err && err.message ? err.message : "Try again.") +
-          "<br><span style=\"color:#a1a1aa;font-size:12px\">If this keeps happening, check your network or try mdfy.app directly.</span>"
+          "<br><span style=\"color:#a1a1aa;font-size:12px\">If this keeps happening, check your network or try memory.wiki directly.</span>"
         );
         teardown(overlay, 6000);
       });

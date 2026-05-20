@@ -114,7 +114,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!hub) return { robots: { index: false, follow: false } };
 
   const author = hub.profile.display_name || slug;
-  const title = `${author}'s knowledge hub — mdfy.app`;
+  const title = `${author}'s knowledge hub — memory.wiki`;
   const description = hub.profile.hub_description ||
     `${hub.docs.length} documents, ${hub.bundles.length} bundles. Karpathy's wiki, deployable to any AI.`;
 
@@ -144,8 +144,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     openGraph: {
       title,
       description,
-      url: `https://mdfy.app/hub/${slug}`,
-      siteName: "mdfy.app",
+      url: `https://memory.wiki/hub/${slug}`,
+      siteName: "memory.wiki",
       type: "profile",
       images: [{ url: ogImage, width: 1200, height: 630 }],
     },
@@ -156,8 +156,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       images: [ogImage],
     },
     alternates: {
-      canonical: `https://mdfy.app/hub/${slug}`,
-      types: { "text/markdown": `https://mdfy.app/hub/${slug}.md` },
+      canonical: `https://memory.wiki/hub/${slug}`,
+      types: { "text/markdown": `https://memory.wiki/hub/${slug}.md` },
     },
   };
 }
@@ -187,14 +187,14 @@ export default async function HubPage({ params, searchParams }: Props) {
     return updated >= sevenDaysAgo && updated <= anchor;
   });
   const olderDocs = hub.docs.filter(d => !recent.find(r => r.id === d.id));
-  const hubUrl = `https://mdfy.app/hub/${slug}`;
+  const hubUrl = `https://memory.wiki/hub/${slug}`;
   const atLabel = at ? at.toISOString().slice(0, 10) : null;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
       <ViewerHeader
         title={`${author}'s hub`}
-        breadcrumb={<>mdfy.app/hub/<span style={{ color: "var(--accent)" }}>{slug}</span></>}
+        breadcrumb={<>memory.wiki/hub/<span style={{ color: "var(--accent)" }}>{slug}</span></>}
       />
 
       {atLabel && (

@@ -13,7 +13,7 @@
 // Configure in Supabase Dashboard → Database → Webhooks:
 //   - Table: bundles
 //   - Events: Insert
-//   - URL: https://mdfy.app/api/hooks/bundle-created
+//   - URL: https://memory.wiki/api/hooks/bundle-created
 //   - HTTP headers: Authorization: Bearer ${WEBHOOK_SECRET}
 
 import { NextRequest, NextResponse, after } from "next/server";

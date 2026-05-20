@@ -3,18 +3,18 @@ import Link from "next/link";
 import { CodeBlock, InlineCode, DocsNav, SiteFooter, mono } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "문서 — mdfy.app",
+  title: "문서 — memory.wiki",
   description:
-    "mdfy.app 개발자 문서. REST API, CLI, JavaScript SDK, MCP 서버로 마크다운 문서를 프로그래밍 방식으로 생성, 관리, 공유하세요.",
+    "memory.wiki 개발자 문서. REST API, CLI, JavaScript SDK, MCP 서버로 마크다운 문서를 프로그래밍 방식으로 생성, 관리, 공유하세요.",
   alternates: {
-    canonical: "https://mdfy.app/ko/docs",
-    languages: { en: "https://mdfy.app/docs" },
+    canonical: "https://memory.wiki/ko/docs",
+    languages: { en: "https://memory.wiki/docs" },
   },
   openGraph: {
-    title: "문서 — mdfy.app",
+    title: "문서 — memory.wiki",
     description:
       "개발자 문서. REST API, CLI, SDK, MCP Server.",
-    url: "https://mdfy.app/ko/docs",
+    url: "https://memory.wiki/ko/docs",
     images: [{ url: "/api/og?title=Documentation", width: 1200, height: 630 }],
   },
 };
@@ -180,7 +180,7 @@ export default function DocsPageKo() {
             fontFamily: mono,
           }}
         >
-          기본 URL: <InlineCode>{"https://mdfy.app"}</InlineCode>
+          기본 URL: <InlineCode>{"https://memory.wiki"}</InlineCode>
         </p>
       </section>
 
@@ -195,13 +195,13 @@ export default function DocsPageKo() {
           </div>
           <div className="terminal-mock-body">
             <span className="line comment">{"# Create a document"}</span>
-            <span className="line"><span className="prompt">$ </span><span className="cmd">{"curl -X POST https://mdfy.app/api/docs \\"}</span></span>
+            <span className="line"><span className="prompt">$ </span><span className="cmd">{"curl -X POST https://memory.wiki/api/docs \\"}</span></span>
             <span className="line"><span className="cmd">{"  -H 'Content-Type: application/json' \\"}</span></span>
             <span className="line"><span className="cmd">{"  -d '{\"markdown\": \"# Hello World\"}'"}</span></span>
             <span className="line-gap" />
             <span className="line"><span className="output">{`{`}</span></span>
             <span className="line"><span className="output">{"  \"id\": "}</span><span className="url">{`"abc123"`}</span><span className="output">,</span></span>
-            <span className="line"><span className="output">{"  \"url\": "}</span><span className="url">{`"https://mdfy.app/abc123"`}</span><span className="output">,</span></span>
+            <span className="line"><span className="output">{"  \"url\": "}</span><span className="url">{`"https://memory.wiki/abc123"`}</span><span className="output">,</span></span>
             <span className="line"><span className="output">{"  \"editToken\": \"eyJ...\""}</span></span>
             <span className="line"><span className="output">{`}`}</span></span>
           </div>
@@ -361,13 +361,13 @@ export default function DocsPageKo() {
           >
             30초 안에 첫 문서를 퍼블리시하세요. 인증 필요 없음.
           </p>
-          <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/docs \\
+          <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/docs \\
   -H "Content-Type: application/json" \\
   -d '{"markdown": "# Hello World\\nPublished via API.", "isDraft": false}'
 
 # Response:
 # { "id": "abc123", "editToken": "tok_...", "created_at": "..." }
-# View at: https://mdfy.app/abc123`}</CodeBlock>
+# View at: https://memory.wiki/abc123`}</CodeBlock>
         </div>
       </section>
 

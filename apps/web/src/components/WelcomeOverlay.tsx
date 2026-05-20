@@ -50,7 +50,7 @@ const slides: Slide[] = [
   {
     step: "02",
     title: "Captures become a hub.",
-    desc: "Everything you save lives at one URL: mdfy.app/hub/you. Bundles group related docs, a concept index links them, and Related-in-your-hub surfaces the connections you didn't draw yourself.",
+    desc: "Everything you save lives at one URL: memory.wiki/hub/you. Bundles group related docs, a concept index links them, and Related-in-your-hub surfaces the connections you didn't draw yourself.",
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3" /><circle cx="4" cy="6" r="2" /><circle cx="20" cy="6" r="2" /><circle cx="4" cy="18" r="2" /><circle cx="20" cy="18" r="2" /><path d="M6 7l4 3M18 7l-4 3M6 17l4-3M18 17l-4-3" />

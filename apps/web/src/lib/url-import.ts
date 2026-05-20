@@ -107,7 +107,7 @@ export async function importFromUrl(rawUrl: string): Promise<UrlImportResult> {
     res = await fetch(url.toString(), {
       headers: {
         // Identify ourselves so site owners can recognise the traffic.
-        "User-Agent": "mdfy.app/1.0 (URL import; +https://mdfy.app/about)",
+        "User-Agent": "memory.wiki/1.0 (URL import; +https://memory.wiki/about)",
         "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
       },
       signal: ctrl.signal,

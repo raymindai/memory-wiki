@@ -203,7 +203,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             {t.chrome.downloadLabel}
           </a>
-          <a href="https://mdfy.app/mcRfLTP7" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+          <a href="https://memory.wiki/mcRfLTP7" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             {t.chrome.guideLabel}
           </a>
         </div>
@@ -288,7 +288,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               border: "1px solid var(--border-dim)",
             }}
           >
-            <code>https://mdfy.app/api/mcp</code>
+            <code>https://memory.wiki/api/mcp</code>
           </pre>
 
           <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginTop: 0, marginBottom: 8 }}>
@@ -364,7 +364,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             {t.mcp.footerLinks.npmLabel}
           </a>
           <span style={{ color: "var(--border)", margin: "0 4px" }}>|</span>
-          <a href="https://mdfy.app/r-um_oJp" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+          <a href="https://memory.wiki/r-um_oJp" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             {t.mcp.footerLinks.guideLabel}
           </a>
           <span style={{ color: "var(--border)", margin: "0 4px" }}>|</span>
@@ -434,7 +434,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             {t.vscode.downloadVsixLabel}
           </a>
-          <a href="https://mdfy.app/zOjZPXY7" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+          <a href="https://memory.wiki/zOjZPXY7" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             {t.vscode.guideLabel}
           </a>
         </div>
@@ -497,7 +497,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           >
             {t.desktop.appStoreLabel}
           </span>
-          <a href="https://mdfy.app/CaQ31sfk" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+          <a href="https://memory.wiki/CaQ31sfk" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             {t.desktop.guideLabel}
           </a>
         </div>
@@ -538,12 +538,12 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               <div className="terminal-mock-body">
                 <span className="line comment">{"# Publish a file"}</span>
                 <span className="line"><span className="prompt">$ </span><span className="cmd">mdfy publish README.md</span></span>
-                <span className="line"><span className="url">https://mdfy.app/abc123</span></span>
+                <span className="line"><span className="url">https://memory.wiki/abc123</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
                 <span className="line comment">{"# Pipe anything"}</span>
                 <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | mdfy publish"}</span></span>
-                <span className="line"><span className="url">https://mdfy.app/def456</span></span>
+                <span className="line"><span className="url">https://memory.wiki/def456</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
                 <span className="line comment">{"# Read in terminal"}</span>
@@ -583,7 +583,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             >
               {t.cli.npmLabel}
             </a>
-            <a href="https://mdfy.app/gIHYPRxD" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+            <a href="https://memory.wiki/gIHYPRxD" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
               {t.cli.guideLabel}
             </a>
           </div>
@@ -647,7 +647,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           >
             {t.quicklook.includedLabel}
           </span>
-          <a href="https://mdfy.app/womPEbUm" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+          <a href="https://memory.wiki/womPEbUm" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             {t.quicklook.guideLabel}
           </a>
         </div>

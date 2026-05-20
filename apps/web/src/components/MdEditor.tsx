@@ -84,7 +84,7 @@ import {
 
 // ─── Sample documents for default tabs ───
 
-const SAMPLE_WELCOME = `# Welcome to mdfy.app
+const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
 > **The Markdown Hub.** Collect from anywhere. Edit with AI. Publish with a permanent URL.
 
@@ -93,7 +93,7 @@ const SAMPLE_WELCOME = `# Welcome to mdfy.app
 1. **Type or paste** anything — Markdown, plain text, AI output, code
 2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
 3. **Edit** inline in the Live view, or use Source for raw Markdown
-4. **Share** with one click — generates a permanent URL like \`mdfy.app/abc123\`
+4. **Share** with one click — generates a permanent URL like \`memory.wiki/abc123\`
 
 ## What You Can Do
 
@@ -123,7 +123,7 @@ const SAMPLE_WELCOME = `# Welcome to mdfy.app
 
 | Channel | How |
 |---------|-----|
-| Web | You are here — [mdfy.app](https://mdfy.app) |
+| Web | You are here — [memory.wiki](https://memory.wiki) |
 | VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode) — Cmd+Shift+M to preview |
 | Mac App | Native desktop with sidebar and sync |
 | CLI | \`npm install -g mdfy-cli\` — pipe anything to a URL |
@@ -200,7 +200,7 @@ console.log(\`Detected: \${flavor.primary}\`);
 \`\`\`python
 import requests
 
-response = requests.post("https://mdfy.app/api/docs", json={
+response = requests.post("https://memory.wiki/api/docs", json={
     "markdown": "# Hello World",
 })
 print(response.json()["id"])  # → "abc123"
@@ -335,7 +335,7 @@ erDiagram
 mindmap
   root((mdcore))
     Product
-      mdfy.app
+      memory.wiki
       Chrome Extension
     Engine
       Rust
@@ -352,7 +352,7 @@ mindmap
 timeline
     title mdcore Milestones
     2026 Q1 : Engine v0.1
-             : mdfy.app launch
+             : memory.wiki launch
     2026 Q2 : npm package
              : CLI tool
     2026 Q3 : API platform
@@ -424,7 +424,7 @@ const SAMPLE_ASCII = `# ASCII Art Examples
 
 \`\`\`
 ┌──────────────────────────────────────────┐
-│              mdfy.app                      │
+│              memory.wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -441,8 +441,8 @@ const SAMPLE_ASCII = `# ASCII Art Examples
 │                    │                      │
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
-│  │ mdfy.app/{id} — shareable URL        │ │
-│  │ + "Published with mdfy.app" badge    │ │
+│  │ memory.wiki/{id} — shareable URL        │ │
+│  │ + "Published with memory.wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 \`\`\`
@@ -458,7 +458,7 @@ const SAMPLE_ASCII = `# ASCII Art Examples
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  mdfy.app                     │
+│  memory.wiki                     │
 └─────────────────────────────┘
 \`\`\`
 
@@ -504,7 +504,7 @@ const SAMPLE_IMPORT_EXPORT = `# Import & Export Guide
 
 ## Import — 13+ Formats
 
-Drop any file onto mdfy.app, use the **IMPORT** button in the sidebar, or paste content directly.
+Drop any file onto memory.wiki, use the **IMPORT** button in the sidebar, or paste content directly.
 
 | Format | How it works |
 |--------|-------------|
@@ -575,7 +575,7 @@ Click the **Export** icon in the Live view header (Cmd+Alt+E).
 - **Plain Text** — no formatting
 
 ### Share
-- **Permanent URL** — \`mdfy.app/abc123\` — one click to copy
+- **Permanent URL** — \`memory.wiki/abc123\` — one click to copy
 - **Embed** — iframe code for websites
 - **QR Code** — for mobile sharing
 `;
@@ -590,7 +590,7 @@ Click anywhere in the **Live** view to start editing. Format with the toolbar or
 
 ## Flavor Detection & Conversion
 
-mdfy.app auto-detects your Markdown flavor:
+memory.wiki auto-detects your Markdown flavor:
 
 - **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
 - **CommonMark** — Standard, maximum compatibility
@@ -648,7 +648,7 @@ Open the AI panel in **Hub** mode to chat across your whole hub. Recall fetches 
 
 ## llms.txt + token economy
 
-Every public hub auto-publishes a [\`/llms.txt\`](https://mdfy.app) manifest and a \`/llms-full.txt\` dense bundle so AI agents can discover and ingest your hub the way they do any other site. Append \`?compact\` or \`?digest\` to any \`/raw/\` URL to fetch the same content at a fraction of the token cost — same answer, smaller bill.
+Every public hub auto-publishes a [\`/llms.txt\`](https://memory.wiki) manifest and a \`/llms-full.txt\` dense bundle so AI agents can discover and ingest your hub the way they do any other site. Append \`?compact\` or \`?digest\` to any \`/raw/\` URL to fetch the same content at a fraction of the token cost — same answer, smaller bill.
 
 ## Image Gallery
 
@@ -675,12 +675,12 @@ Your documents sync across all 7 mdfy channels:
 
 | Channel | Install | What it does |
 |---------|---------|-------------|
-| Web | [mdfy.app](https://mdfy.app) | Full editor with AI tools |
+| Web | [memory.wiki](https://memory.wiki) | Full editor with AI tools |
 | VS Code | \`ext install raymindai.mdfy-vscode\` | WYSIWYG preview + sync |
-| Mac App | [Download DMG](https://mdfy.app/plugins) | Native sidebar + offline |
+| Mac App | [Download DMG](https://memory.wiki/plugins) | Native sidebar + offline |
 | CLI | \`npm install -g mdfy-cli\` | Pipe anything to a URL |
 | Chrome | [Chrome Web Store](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) | Capture AI conversations |
-| MCP | \`npx mdfy-mcp\` or hosted at mdfy.app/api/mcp | AI tools integration |
+| MCP | \`npx mdfy-mcp\` or hosted at memory.wiki/api/mcp | AI tools integration |
 | QuickLook | Bundled with Mac app | Space to preview in Finder |
 
 Same URL, same content, everywhere.
@@ -1155,7 +1155,7 @@ Or search "mdfy" in VS Code Extensions.
 | Shortcut | Command |
 |----------|---------|
 | \`Cmd+Shift+M\` | Open WYSIWYG preview |
-| \`Cmd+Alt+P\` | Publish to mdfy.app |
+| \`Cmd+Alt+P\` | Publish to memory.wiki |
 | \`Cmd+Alt+E\` | Export document |
 
 ## Settings
@@ -1174,8 +1174,8 @@ const SAMPLE_DESKTOP = `# mdfy for Mac
 
 ## Install
 
-1. Download the DMG from [mdfy.app/plugins](https://mdfy.app/plugins)
-2. Drag **mdfy.app** to Applications
+1. Download the DMG from [memory.wiki/plugins](https://memory.wiki/plugins)
+2. Drag **memory.wiki** to Applications
 3. Launch mdfy
 
 ## Sidebar
@@ -1183,9 +1183,9 @@ const SAMPLE_DESKTOP = `# mdfy for Mac
 | Tab | Contents |
 |-----|----------|
 | ALL | Everything — local + synced + cloud |
-| SYNCED | Local files linked to mdfy.app |
+| SYNCED | Local files linked to memory.wiki |
 | LOCAL | Unpublished local files |
-| CLOUD | Documents on mdfy.app with folders |
+| CLOUD | Documents on memory.wiki with folders |
 
 ## Editing Modes
 
@@ -1199,7 +1199,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 
 ## Features
 
-- Full WASM rendering engine (same as mdfy.app)
+- Full WASM rendering engine (same as memory.wiki)
 - KaTeX math, Mermaid diagrams, 190+ language highlighting
 - Document outline panel
 - Import: PDF, DOCX, PPTX, XLSX, HTML, CSV
@@ -1224,7 +1224,7 @@ npm install -g mdfy-cli
 \`\`\`bash
 # Publish a file
 mdfy publish README.md
-# → https://mdfy.app/abc123  (copied to clipboard)
+# → https://memory.wiki/abc123  (copied to clipboard)
 
 # Publish from pipe
 echo "# Hello World" | mdfy publish
@@ -1279,7 +1279,7 @@ bind-key M run-shell "tmux capture-pane -p -S -1000 | mdfy publish"
 
 const SAMPLE_MCP = `# MCP Server
 
-> Let AI tools create, read, and manage documents on mdfy.app.
+> Let AI tools create, read, and manage documents on memory.wiki.
 
 ## What is MCP?
 
@@ -1292,7 +1292,7 @@ MCP (Model Context Protocol) lets AI tools call external APIs. The mdfy MCP serv
 For **Claude Web**, **Cursor**, **Windsurf**:
 
 1. Go to Settings → Integrations / MCP
-2. Add server URL: \`https://mdfy.app/api/mcp\`
+2. Add server URL: \`https://memory.wiki/api/mcp\`
 3. Done — 25 tools available
 
 ### Option B: Local stdio MCP
@@ -1320,7 +1320,7 @@ Add to \`.mcp.json\`:
 
 \`\`\`
 You: "Publish my meeting notes to mdfy"
-Claude: → mdfy_create → https://mdfy.app/abc123
+Claude: → mdfy_create → https://memory.wiki/abc123
 
 You: "Show me my documents"
 Claude: → mdfy_list → 8 documents found
@@ -1430,7 +1430,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 ## Install
 
 1. Install mdfy for Mac — QuickLook is bundled automatically
-2. Or download MdfyQuickLook separately from [mdfy.app/plugins](https://mdfy.app/plugins)
+2. Or download MdfyQuickLook separately from [memory.wiki/plugins](https://memory.wiki/plugins)
 3. Enable in **System Settings → Extensions → Quick Look**
 
 ## Usage
@@ -1447,7 +1447,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 - Tables with alignment
 - KaTeX math equations
 - Dark / light theme (follows system preference)
-- "Open on mdfy.app" button
+- "Open on memory.wiki" button
 
 ## Supported Files
 
@@ -1462,7 +1462,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 - Works in Finder, Desktop, and Open/Save dialogs
 - Preview updates when you press Space again after editing
-- Click "Open on mdfy.app" to publish directly from the preview
+- Click "Open on memory.wiki" to publish directly from the preview
 - No background processes — lightweight QuickLook extension
 `;
 
@@ -1472,7 +1472,7 @@ Beyond single docs, mdfy lets you cluster related documents into a **Bundle** an
 
 ## Bundles: from folder to thinking surface
 
-Select multiple docs in the sidebar, choose **Bundle**, and you get a bundle URL like \`mdfy.app/b/xxxx\`. Open it and the docs render as nodes on a **Knowledge Constellation** — a 3D-style force-directed graph that shows how documents and their concepts interconnect.
+Select multiple docs in the sidebar, choose **Bundle**, and you get a bundle URL like \`memory.wiki/b/xxxx\`. Open it and the docs render as nodes on a **Knowledge Constellation** — a 3D-style force-directed graph that shows how documents and their concepts interconnect.
 
 Bundle viewer modes:
 - **Canvas** — the spatial constellation, drag/zoom/pan, click nodes to inspect
@@ -1594,7 +1594,7 @@ Copied a chat thread to clipboard? Paste it. mdfy auto-detects ChatGPT / Claude 
 
 ## Why it matters
 
-Every captured doc lives at a permanent URL like \`mdfy.app/abc123\`. Captures roll up into your hub at \`mdfy.app/hub/<you>\`. That URL is the universal context format — paste it back into any AI and they read your full personal knowledge layer.
+Every captured doc lives at a permanent URL like \`memory.wiki/abc123\`. Captures roll up into your hub at \`memory.wiki/hub/<you>\`. That URL is the universal context format — paste it back into any AI and they read your full personal knowledge layer.
 
 > The answer you didn't save is the context the next AI session won't have.
 `;
@@ -3595,10 +3595,10 @@ export default function MdEditor() {
   });
   const [activeTabId, setActiveTabId] = useState(() => {
     if (typeof window === "undefined") return "";
-    // Root URL contract: visiting mdfy.app/ (no doc path, no
+    // Root URL contract: visiting memory.wiki/ (no doc path, no
     // ?from=/?doc=/?bundle=, no hash share) means "I'm starting
     // fresh — show me Home." Restoring a stale activeTab from
-    // localStorage here was confusing: the user types mdfy.app,
+    // localStorage here was confusing: the user types memory.wiki,
     // expects a landing page, instead lands inside the editor on
     // whatever doc they last looked at (often with an empty body
     // because the doc's cloud markdown wasn't fetched yet).
@@ -3687,7 +3687,7 @@ export default function MdEditor() {
   // when localStorage has examples only), don't fall back to
   // SAMPLE_WELCOME either. The Start screen handles the empty-
   // state case; the editor staying blank prevents the
-  // "# Welcome to mdfy.app" blurb from auto-rendering on refresh.
+  // "# Welcome to memory.wiki" blurb from auto-rendering on refresh.
   const initialMd = activeTab?.markdown
     || (activeTab ? "" : "");
   const [markdown, setMarkdownRaw] = useState(initialMd);
@@ -3847,7 +3847,7 @@ export default function MdEditor() {
       // is either the editor's seed (used to be SAMPLE_WELCOME!) or
       // a Tiptap-normalized version of it. Saving would clobber the
       // real doc body with the seed — which is the failure mode that
-      // produced the "Welcome to [mdfy.app]..." corruption.
+      // produced the "Welcome to [memory.wiki]..." corruption.
       if (!currentTab.markdown) return;
       // Hold off saving while a tab switch is mid-flight. handleTiptapChange
       // already gates on this flag for direct edits, but other call sites
@@ -4488,7 +4488,7 @@ export default function MdEditor() {
     if (isDeepLink) return false;
     // First visit — always show
     if (!localStorage.getItem("mdfy-onboarded")) return true;
-    // Bare root URL (mdfy.app/ with no query / hash / doc path)
+    // Bare root URL (memory.wiki/ with no query / hash / doc path)
     // means the user wants the Home landing, not a restored doc.
     // Pair with the activeTabId useState which already clears in
     // this case — together they make the root URL contract honest.
@@ -6284,7 +6284,7 @@ export default function MdEditor() {
       const detail = (e as CustomEvent<{ slug: string }>).detail;
       if (!detail?.slug) return;
       showToast(
-        `Your hub is live at mdfy.app/hub/${detail.slug}. Rename it any time in Settings → Hub.`,
+        `Your hub is live at memory.wiki/hub/${detail.slug}. Rename it any time in Settings → Hub.`,
         "success",
       );
     };
@@ -6442,7 +6442,7 @@ export default function MdEditor() {
           }
         } catch { /* fall through to default landing */ }
       }
-      // Also accept the bare short-URL form `mdfy.app/<id>` — the
+      // Also accept the bare short-URL form `memory.wiki/<id>` — the
       // /[id]/page.tsx route re-exports this editor, so when a user
       // refreshes (or clicks the URL chip) on a doc URL, the editor
       // must extract the id from the pathname and treat it as `from`.
@@ -6545,7 +6545,7 @@ export default function MdEditor() {
 
             const doc = await res.json();
             setEditorPlaceholder(null);
-            // Deep-link entry (mdfy.app/<id>) — the user came in
+            // Deep-link entry (memory.wiki/<id>) — the user came in
             // pointing at this specific doc, not the dashboard. The
             // Start screen would otherwise stay visible on top of
             // the loaded tab (showOnboarding is initialized true
@@ -9658,13 +9658,13 @@ ${clone.innerHTML}
           <h1
             className="font-bold tracking-tight cursor-pointer shrink-0 flex items-baseline"
             onClick={() => window.open("/about", "_blank")}
-            title="mdfy.app — About"
+            title="memory.wiki — About"
           >
             <MdfyLogo size={isMobile ? 14 : 18} />
           </h1>
           {/* Document / Bundle / Hub URL chip — refined chip group.
-              For doc tabs: shows /{cloudId} → mdfy.app/{cloudId}.
-              For bundle tabs: shows /b/{bundleId} → mdfy.app/b/{bundleId}.
+              For doc tabs: shows /{cloudId} → memory.wiki/{cloudId}.
+              For bundle tabs: shows /b/{bundleId} → memory.wiki/b/{bundleId}.
               When the Hub overlay is up, the chip switches to
               /hub/{slug} so the user can copy the public hub URL
               from the same slot they use for doc/bundle URLs —
@@ -9694,26 +9694,26 @@ ${clone.innerHTML}
             } else if (isSettings) {
               labelPrefix = "/";
               labelId = "settings";
-              fullUrl = "https://mdfy.app/settings";
+              fullUrl = "https://memory.wiki/settings";
               copyable = false;
             } else if (isGalaxy) {
               labelPrefix = "/";
               labelId = "galaxy";
-              fullUrl = "https://mdfy.app/galaxy";
+              fullUrl = "https://memory.wiki/galaxy";
             } else if (isHub) {
               labelPrefix = "/hub/";
               labelId = hubSlug!;
-              fullUrl = `https://mdfy.app/hub/${hubSlug}`;
+              fullUrl = `https://memory.wiki/hub/${hubSlug}`;
             } else if (isBundle) {
               labelPrefix = "/b/";
               labelId = ct!.bundleId!;
-              fullUrl = `https://mdfy.app/b/${ct!.bundleId}`;
+              fullUrl = `https://memory.wiki/b/${ct!.bundleId}`;
             } else {
               const cid = ct?.cloudId || docId;
               if (!cid) return null;
               labelPrefix = "/";
               labelId = cid;
-              fullUrl = `https://mdfy.app/${cid}`;
+              fullUrl = `https://memory.wiki/${cid}`;
             }
             if (!labelId) return null;
             return (<>
@@ -10352,7 +10352,7 @@ ${clone.innerHTML}
                         </button>
                         <button
                           onClick={() => {
-                            const code = `<iframe src="https://mdfy.app/embed/${docId}" width="100%" height="500" frameborder="0" style="border:1px solid #27272a;border-radius:8px;"></iframe>`;
+                            const code = `<iframe src="https://memory.wiki/embed/${docId}" width="100%" height="500" frameborder="0" style="border:1px solid #27272a;border-radius:8px;"></iframe>`;
                             copyToClipboard(code);
                             setShowMenu(false);
                           }}
@@ -10473,7 +10473,7 @@ ${clone.innerHTML}
                   className="text-caption font-mono px-1 py-0.5 rounded shrink-0"
                   style={{ color: "var(--text-faint)", background: "var(--toggle-bg)" }}
                   title="Click to copy document URL"
-                  onClick={async () => { try { await navigator.clipboard.writeText(`https://mdfy.app/${cid}`); showToast("URL copied", "success"); } catch {} }}
+                  onClick={async () => { try { await navigator.clipboard.writeText(`https://memory.wiki/${cid}`); showToast("URL copied", "success"); } catch {} }}
                 >
                   /{cid}
                 </button>
@@ -13604,7 +13604,7 @@ ${clone.innerHTML}
                       };
                       const cards: DeployCard[] = [
                         myHubSlug
-                          ? { label: "Your hub", desc: `mdfy.app/hub/${myHubSlug} · Rename in Settings`, url: `/hub/${myHubSlug}`, color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null }
+                          ? { label: "Your hub", desc: `memory.wiki/hub/${myHubSlug} · Rename in Settings`, url: `/hub/${myHubSlug}`, color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null }
                           : { label: "Sign in to get your hub", desc: "Every signed-in user gets a personal hub URL", url: "/", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
                         { label: "Install /mdfy", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
@@ -15656,7 +15656,7 @@ ${clone.innerHTML}
       >
         {/* Left: Alpha badge + Help + navigation */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <Tooltip text="mdfy.app is in alpha — features can change and bugs are expected. Send feedback to hi@raymind.ai." position="top">
+          <Tooltip text="memory.wiki is in alpha — features can change and bugs are expected. Send feedback to hi@raymind.ai." position="top">
             <span
               className="inline-flex items-center font-semibold uppercase shrink-0"
               style={{
@@ -15740,7 +15740,7 @@ ${clone.innerHTML}
           <button onClick={() => { setShowCommandPalette(true); setCmdSearch(""); }} className="transition-colors hidden sm:inline-flex items-center gap-1" style={{ color: "var(--text-faint)", background: "none", border: "1px solid var(--border-dim)", borderRadius: 4, padding: "1px 6px", fontSize: 10, cursor: "pointer" }} title="Command palette">
             <span style={{ fontSize: 10 }}>{navigator.platform?.includes("Mac") ? "\u2318" : "Ctrl+"}K</span>
           </button>
-          <a href="/about" className="transition-colors inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="About mdfy.app">About</a>
+          <a href="/about" className="transition-colors inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="About memory.wiki">About</a>
           <a href="/plugins" className="transition-colors hidden sm:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Browser and editor plugins">Plugins</a>
           <a href="/discover" className="transition-colors hidden md:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Trending public documents">Trending</a>
           <a href="/docs" className="transition-colors hidden md:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="API documentation">API</a>
@@ -17148,10 +17148,10 @@ ${clone.innerHTML}
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-sm font-mono" style={{ color: "var(--text-secondary)" }}>
-              mdfy.app/{docId}
+              memory.wiki/{docId}
             </p>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://mdfy.app/${docId}`)}&bgcolor=18181b&color=fafafa&format=svg`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://memory.wiki/${docId}`)}&bgcolor=18181b&color=fafafa&format=svg`}
               alt="QR Code"
               width={200}
               height={200}

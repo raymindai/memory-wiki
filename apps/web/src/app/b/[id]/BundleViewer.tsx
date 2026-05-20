@@ -505,7 +505,7 @@ export default function BundleViewer({
           )
         }
         subtitle={description || undefined}
-        breadcrumb={<>mdfy.app/b/<span style={{ color: "var(--accent)" }}>{id}</span></>}
+        breadcrumb={<>memory.wiki/b/<span style={{ color: "var(--accent)" }}>{id}</span></>}
         actions={
           <>
             <button onClick={toggleTheme} className={actionBtn} style={{ background: "var(--toggle-bg)", color: "var(--text-muted)" }} title="Toggle theme" aria-label="Toggle theme">

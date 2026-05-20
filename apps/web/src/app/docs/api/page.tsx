@@ -11,17 +11,17 @@ import {
 } from "@/components/docs";
 
 export const metadata: Metadata = {
-  title: "REST API Reference — mdfy.app",
+  title: "REST API Reference — memory.wiki",
   description:
-    "Complete REST API reference for mdfy.app. Create, read, update, and delete Markdown documents via HTTP. Includes code examples in curl, JavaScript, and Python.",
+    "Complete REST API reference for memory.wiki. Create, read, update, and delete Markdown documents via HTTP. Includes code examples in curl, JavaScript, and Python.",
   alternates: {
-    canonical: "https://mdfy.app/docs/api",
-    languages: { ko: "https://mdfy.app/ko/docs/api" },
+    canonical: "https://memory.wiki/docs/api",
+    languages: { ko: "https://memory.wiki/ko/docs/api" },
   },
   openGraph: {
-    title: "REST API Reference — mdfy.app",
+    title: "REST API Reference — memory.wiki",
     description: "Full REST API reference. Endpoints, parameters, examples.",
-    url: "https://mdfy.app/docs/api",
+    url: "https://memory.wiki/docs/api",
     images: [{ url: "/api/og?title=REST%20API", width: 1200, height: 630 }],
   },
 };
@@ -264,7 +264,7 @@ export default function ApiDocsPage() {
               }}
             >
               All endpoints accept and return JSON. Base URL:{" "}
-              <InlineCode>{"https://mdfy.app"}</InlineCode>
+              <InlineCode>{"https://memory.wiki"}</InlineCode>
             </p>
             <p
               style={{
@@ -308,7 +308,7 @@ export default function ApiDocsPage() {
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/docs \\
+            <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/docs \\
   -H "Content-Type: application/json" \\
   -d '{
     "markdown": "# Hello World\\nThis is my document.",
@@ -317,7 +317,7 @@ export default function ApiDocsPage() {
   }'`}</CodeBlock>
 
             <SubLabel>Request - JavaScript</SubLabel>
-            <CodeBlock lang="javascript">{`const res = await fetch("https://mdfy.app/api/docs", {
+            <CodeBlock lang="javascript">{`const res = await fetch("https://memory.wiki/api/docs", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -331,7 +331,7 @@ const data = await res.json();`}</CodeBlock>
             <SubLabel>Request - Python</SubLabel>
             <CodeBlock lang="python">{`import requests
 
-res = requests.post("https://mdfy.app/api/docs", json={
+res = requests.post("https://memory.wiki/api/docs", json={
     "markdown": "# Hello World\\nThis is my document.",
     "title": "My Document",
     "isDraft": False,
@@ -367,16 +367,16 @@ data = res.json()`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl https://mdfy.app/api/docs/abc123`}</CodeBlock>
+            <CodeBlock lang="bash">{`curl https://memory.wiki/api/docs/abc123`}</CodeBlock>
 
             <SubLabel>Request - JavaScript</SubLabel>
-            <CodeBlock lang="javascript">{`const res = await fetch("https://mdfy.app/api/docs/abc123");
+            <CodeBlock lang="javascript">{`const res = await fetch("https://memory.wiki/api/docs/abc123");
 const doc = await res.json();`}</CodeBlock>
 
             <SubLabel>Request - Python</SubLabel>
             <CodeBlock lang="python">{`import requests
 
-res = requests.get("https://mdfy.app/api/docs/abc123")
+res = requests.get("https://memory.wiki/api/docs/abc123")
 doc = res.json()`}</CodeBlock>
 
             <SubLabel>Response 200</SubLabel>
@@ -427,7 +427,7 @@ doc = res.json()`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl (update content)</SubLabel>
-            <CodeBlock lang="bash">{`curl -X PATCH https://mdfy.app/api/docs/abc123 \\
+            <CodeBlock lang="bash">{`curl -X PATCH https://memory.wiki/api/docs/abc123 \\
   -H "Content-Type: application/json" \\
   -d '{
     "editToken": "tok_aBcDeFgH",
@@ -436,7 +436,7 @@ doc = res.json()`}</CodeBlock>
   }'`}</CodeBlock>
 
             <SubLabel>Request - curl (soft delete)</SubLabel>
-            <CodeBlock lang="bash">{`curl -X PATCH https://mdfy.app/api/docs/abc123 \\
+            <CodeBlock lang="bash">{`curl -X PATCH https://memory.wiki/api/docs/abc123 \\
   -H "Content-Type: application/json" \\
   -d '{
     "editToken": "tok_aBcDeFgH",
@@ -444,7 +444,7 @@ doc = res.json()`}</CodeBlock>
   }'`}</CodeBlock>
 
             <SubLabel>Request - JavaScript</SubLabel>
-            <CodeBlock lang="javascript">{`const res = await fetch("https://mdfy.app/api/docs/abc123", {
+            <CodeBlock lang="javascript">{`const res = await fetch("https://memory.wiki/api/docs/abc123", {
   method: "PATCH",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -456,7 +456,7 @@ doc = res.json()`}</CodeBlock>
             <SubLabel>Request - Python</SubLabel>
             <CodeBlock lang="python">{`import requests
 
-res = requests.patch("https://mdfy.app/api/docs/abc123", json={
+res = requests.patch("https://memory.wiki/api/docs/abc123", json={
     "editToken": "tok_aBcDeFgH",
     "markdown": "# Updated Content",
 })`}</CodeBlock>
@@ -477,14 +477,14 @@ res = requests.patch("https://mdfy.app/api/docs/abc123", json={
             description="Check when a document was last updated. Returns x-updated-at response header. Useful for sync polling without downloading full content."
           >
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -I https://mdfy.app/api/docs/abc123
+            <CodeBlock lang="bash">{`curl -I https://memory.wiki/api/docs/abc123
 
 # Response headers:
 # x-updated-at: 2026-04-15T01:00:00Z
 # x-content-length: 1234`}</CodeBlock>
 
             <SubLabel>Request - JavaScript</SubLabel>
-            <CodeBlock lang="javascript">{`const res = await fetch("https://mdfy.app/api/docs/abc123", {
+            <CodeBlock lang="javascript">{`const res = await fetch("https://memory.wiki/api/docs/abc123", {
   method: "HEAD",
 });
 const updatedAt = res.headers.get("x-updated-at");`}</CodeBlock>
@@ -492,7 +492,7 @@ const updatedAt = res.headers.get("x-updated-at");`}</CodeBlock>
             <SubLabel>Request - Python</SubLabel>
             <CodeBlock lang="python">{`import requests
 
-res = requests.head("https://mdfy.app/api/docs/abc123")
+res = requests.head("https://memory.wiki/api/docs/abc123")
 updated_at = res.headers["x-updated-at"]`}</CodeBlock>
           </EndpointBlock>
 
@@ -511,11 +511,11 @@ updated_at = res.headers["x-updated-at"]`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl https://mdfy.app/api/user/documents \\
+            <CodeBlock lang="bash">{`curl https://memory.wiki/api/user/documents \\
   -H "x-user-id: user-uuid-here"`}</CodeBlock>
 
             <SubLabel>Request - JavaScript</SubLabel>
-            <CodeBlock lang="javascript">{`const res = await fetch("https://mdfy.app/api/user/documents", {
+            <CodeBlock lang="javascript">{`const res = await fetch("https://memory.wiki/api/user/documents", {
   headers: { "x-user-id": "user-uuid-here" },
 });
 const { documents } = await res.json();`}</CodeBlock>
@@ -523,7 +523,7 @@ const { documents } = await res.json();`}</CodeBlock>
             <SubLabel>Request - Python</SubLabel>
             <CodeBlock lang="python">{`import requests
 
-res = requests.get("https://mdfy.app/api/user/documents",
+res = requests.get("https://memory.wiki/api/user/documents",
     headers={"x-user-id": "user-uuid-here"})
 documents = res.json()["documents"]`}</CodeBlock>
 
@@ -550,14 +550,14 @@ documents = res.json()["documents"]`}</CodeBlock>
             description="Upload an image file. Returns a public URL. Accepts multipart form-data with a file field."
           >
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/upload \\
+            <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/upload \\
   -F "file=@screenshot.png"`}</CodeBlock>
 
             <SubLabel>Request - JavaScript</SubLabel>
             <CodeBlock lang="javascript">{`const form = new FormData();
 form.append("file", fileBlob, "screenshot.png");
 
-const res = await fetch("https://mdfy.app/api/upload", {
+const res = await fetch("https://memory.wiki/api/upload", {
   method: "POST",
   body: form,
 });
@@ -567,13 +567,13 @@ const { url } = await res.json();`}</CodeBlock>
             <CodeBlock lang="python">{`import requests
 
 with open("screenshot.png", "rb") as f:
-    res = requests.post("https://mdfy.app/api/upload",
+    res = requests.post("https://memory.wiki/api/upload",
         files={"file": f})
 url = res.json()["url"]`}</CodeBlock>
 
             <SubLabel>Response 200</SubLabel>
             <CodeBlock lang="json">{`{
-  "url": "https://storage.mdfy.app/uploads/screenshot.png"
+  "url": "https://storage.memory.wiki/uploads/screenshot.png"
 }`}</CodeBlock>
           </EndpointBlock>
 
@@ -592,7 +592,7 @@ url = res.json()["url"]`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl https://mdfy.app/api/docs/abc123/related?limit=5 \\
+            <CodeBlock lang="bash">{`curl https://memory.wiki/api/docs/abc123/related?limit=5 \\
   -H "Authorization: Bearer $JWT"`}</CodeBlock>
 
             <SubLabel>Response 200</SubLabel>
@@ -628,7 +628,7 @@ url = res.json()["url"]`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/import/github \\
+            <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/import/github \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $JWT" \\
   -d '{ "url": "https://github.com/owner/repo/tree/main/docs" }'`}</CodeBlock>
@@ -665,7 +665,7 @@ url = res.json()["url"]`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/import/obsidian \\
+            <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/import/obsidian \\
   -H "Authorization: Bearer $JWT" \\
   -F "file=@MyVault.zip"`}</CodeBlock>
 
@@ -706,7 +706,7 @@ url = res.json()["url"]`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/import/notion \\
+            <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/import/notion \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer $JWT" \\
   -d '{
@@ -751,7 +751,7 @@ url = res.json()["url"]`}</CodeBlock>
             </div>
 
             <SubLabel>Request - curl</SubLabel>
-            <CodeBlock lang="bash">{`curl -X POST https://mdfy.app/api/hub/your-slug/recall \\
+            <CodeBlock lang="bash">{`curl -X POST https://memory.wiki/api/hub/your-slug/recall \\
   -H "Content-Type: application/json" \\
   -d '{ "query": "how do bundles work?", "k": 6, "rerank": true }'`}</CodeBlock>
 
@@ -825,7 +825,7 @@ url = res.json()["url"]`}</CodeBlock>
               maxWidth: 640,
             }}
           >
-            Pasting a bundle URL (<InlineCode>mdfy.app/b/&#123;id&#125;</InlineCode>) into Claude, ChatGPT, or Cursor returns more than a doc list.
+            Pasting a bundle URL (<InlineCode>memory.wiki/b/&#123;id&#125;</InlineCode>) into Claude, ChatGPT, or Cursor returns more than a doc list.
             The default response is a digest that also carries the canvas&apos;s cross-document analysis — themes,
             insights, gaps, takeaways, notable connections, and a concept sub-graph — so the consuming AI inherits the prior AI&apos;s work
             instead of redoing it.
@@ -859,12 +859,12 @@ url = res.json()["url"]`}</CodeBlock>
 mdfy_bundle: 1
 id: <bundleId>
 title: "..."
-url: https://mdfy.app/b/<id>
+url: https://memory.wiki/b/<id>
 document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>   # present when the canvas has run
 analysis_stale: true           # only when a member doc was edited after that run
-source: "mdfy.app"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -897,8 +897,8 @@ source: "mdfy.app"
 ## Concept relations
 - **conceptA** ↔ **conceptB** — <edge label>
 
-1. [Doc 1 title](https://mdfy.app/<docId>) — annotation
-2. [Doc 2 title](https://mdfy.app/<docId>) — annotation`}</CodeBlock>
+1. [Doc 1 title](https://memory.wiki/<docId>) — annotation
+2. [Doc 2 title](https://memory.wiki/<docId>) — annotation`}</CodeBlock>
 
           <h3
             style={{
@@ -1014,7 +1014,7 @@ source: "mdfy.app"
               maxWidth: 640,
             }}
           >
-            mdfy.app uses progressive authentication. Basic operations require no auth.
+            memory.wiki uses progressive authentication. Basic operations require no auth.
             Advanced features use edit tokens or user identity.
           </p>
 

@@ -52,7 +52,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: sharedDisallow,
       })),
     ],
-    sitemap: "https://mdfy.app/sitemap.xml",
-    host: "https://mdfy.app",
+    sitemap: "https://memory.wiki/sitemap.xml",
+    host: "https://memory.wiki",
   };
 }

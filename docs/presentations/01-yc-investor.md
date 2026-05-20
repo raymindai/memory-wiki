@@ -34,7 +34,7 @@ style: |
 
 <!-- _class: lead -->
 
-<span class="pill" style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">YC W2026 · mdfy.app</span>
+<span class="pill" style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">YC W2026 · memory.wiki</span>
 
 # **mdfy**
 ## Your AI memory, deployable to any AI.
@@ -73,7 +73,7 @@ We took that local-file shape and made it a URL.
 
 # What mdfy is
 
-A personal knowledge hub that lives at **one URL** — `mdfy.app/hub/you` — that every AI tool can read.
+A personal knowledge hub that lives at **one URL** — `memory.wiki/hub/you` — that every AI tool can read.
 
 <br>
 
@@ -120,7 +120,7 @@ A personal knowledge hub that lives at **one URL** — `mdfy.app/hub/you` — th
 
 The hub URL response is **markdown + an inlined graph_data JSON block** — themes, insights, concept relations all in one fetch. Receiving AI inherits the prior AI's analysis for free.
 
-<span class="faint footnote">Live: mdfy.app/hub/demo</span>
+<span class="faint footnote">Live: memory.wiki/hub/demo</span>
 
 ---
 
@@ -201,7 +201,7 @@ The receiving AI inherits the prior AI's analysis for free — no second fetch, 
 
 <h3>Product</h3>
 
-- mdfy.app live, Vercel
+- memory.wiki live, Vercel
 - 50-doc demo hub
 - Chrome ext on the Store
 - MCP server on npm
@@ -249,7 +249,7 @@ The receiving AI inherits the prior AI's analysis for free — no second fetch, 
 
 Capture · hub · bundle · cross-AI deployment · public URLs · `llms.txt`
 
-Badge ("Published with mdfy.app") on shared docs → viral loop.
+Badge ("Published with memory.wiki") on shared docs → viral loop.
 
 <h3>Pro · price TBD (range $8-16/mo)</h3>
 
@@ -321,7 +321,7 @@ Second engineer when revenue + roadmap demand clearly exceed solo capacity. Bar:
 
 <br>
 
-<span class="muted">Try the demo: mdfy.app/hub/demo · Spec: mdfy.app/spec · Integrate: mdfy.app/docs/integrate</span>
+<span class="muted">Try the demo: memory.wiki/hub/demo · Spec: memory.wiki/spec · Integrate: memory.wiki/docs/integrate</span>
 
 <br>
 

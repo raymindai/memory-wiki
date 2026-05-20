@@ -4,8 +4,8 @@ import type { NextRequest, NextResponse } from "next/server";
  * Server-side anonymous-id, persisted in a cross-site cookie.
  *
  * Why: when the bookmarklet runs on chatgpt.com / claude.ai / gemini.google.com
- * and POSTs to mdfy.app/api/docs, browser localStorage on mdfy.app is
- * unreachable (same-origin policy). A cookie issued on mdfy.app is the
+ * and POSTs to memory.wiki/api/docs, browser localStorage on memory.wiki is
+ * unreachable (same-origin policy). A cookie issued on memory.wiki is the
  * only thing that survives across these cross-origin captures so we can
  * group all of a user's anonymous docs under one id and let them claim
  * the lot when they sign in.
@@ -15,7 +15,7 @@ import type { NextRequest, NextResponse } from "next/server";
  *
  * SameSite=None+Secure is required for the bookmarklet's cross-origin
  * fetch (with credentials: "include") to send and receive the cookie.
- * It's intentionally NOT HttpOnly so client-side scripts on mdfy.app
+ * It's intentionally NOT HttpOnly so client-side scripts on memory.wiki
  * can also read it during the in-app capture flow.
  */
 
@@ -74,8 +74,8 @@ const TRUSTED_ORIGINS = new Set([
   "https://chat.openai.com",
   "https://claude.ai",
   "https://gemini.google.com",
-  "https://mdfy.app",
-  "https://staging.mdfy.app",
+  "https://memory.wiki",
+  "https://staging.memory.wiki",
   "http://localhost:3000",
   "http://localhost:3002",
 ]);

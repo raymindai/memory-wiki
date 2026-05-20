@@ -77,9 +77,9 @@ export async function GET(
     lines.push(`> ${description}`);
   }
   lines.push("");
-  lines.push(`Canonical hub URL: https://mdfy.app/hub/${slug}`);
-  lines.push(`Index-only manifest: https://mdfy.app/hub/${slug}/llms.txt`);
-  lines.push(`Concept digest: https://mdfy.app/raw/hub/${slug}?digest=1&compact=1`);
+  lines.push(`Canonical hub URL: https://memory.wiki/hub/${slug}`);
+  lines.push(`Index-only manifest: https://memory.wiki/hub/${slug}/llms.txt`);
+  lines.push(`Concept digest: https://memory.wiki/raw/hub/${slug}?digest=1&compact=1`);
   lines.push("");
 
   // Append docs in newest-first order until we hit the token cap.
@@ -95,7 +95,7 @@ export async function GET(
       "---",
       `id: ${d.id}`,
       `title: ${(d.title || "Untitled").replace(/[\r\n]+/g, " ")}`,
-      `url: https://mdfy.app/${d.id}`,
+      `url: https://memory.wiki/${d.id}`,
       `updated: ${d.updated_at || ""}`,
       "---",
       "",
@@ -119,10 +119,10 @@ export async function GET(
     lines.push("");
     lines.push(`_Token cap (${cap.toLocaleString()}) reached. ${remaining.length} more document${remaining.length === 1 ? "" : "s"} available — fetch on demand:_`);
     for (const d of remaining.slice(0, 200)) {
-      lines.push(`- [${(d.title || "Untitled").replace(/[\r\n]+/g, " ")}](https://mdfy.app/raw/${d.id}?compact=1)`);
+      lines.push(`- [${(d.title || "Untitled").replace(/[\r\n]+/g, " ")}](https://memory.wiki/raw/${d.id}?compact=1)`);
     }
     if (remaining.length > 200) {
-      lines.push(`- _…and ${remaining.length - 200} more — see https://mdfy.app/hub/${slug}/llms.txt for the full list._`);
+      lines.push(`- _…and ${remaining.length - 200} more — see https://memory.wiki/hub/${slug}/llms.txt for the full list._`);
     }
   }
 
@@ -145,7 +145,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=900",
-      "Link": `<https://mdfy.app/hub/${slug}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/hub/${slug}>; rel="canonical"`,
       "X-Hub-Slug": slug,
       "X-Token-Estimate": String(estimateTokens(body)),
       "X-Token-Cap": String(cap),

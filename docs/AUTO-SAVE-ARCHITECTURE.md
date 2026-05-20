@@ -4,7 +4,7 @@
 
 ## Overview
 
-All documents are automatically saved to Supabase. No manual "save" step. Every document gets a permanent URL (`mdfy.app/{id}`) from the moment it's created.
+All documents are automatically saved to Supabase. No manual "save" step. Every document gets a permanent URL (`memory.wiki/{id}`) from the moment it's created.
 
 ## User Identity
 
@@ -114,7 +114,7 @@ CREATE INDEX idx_visit_history_user ON visit_history(user_id, last_visited_at DE
 ### MdEditor Integration
 - `addTab()` → immediately creates server document, assigns cloudId
 - `setMarkdown()` → triggers `autoSave.scheduleSave()` on every change
-- URL bar shows `mdfy.app/{cloudId}`, click to copy, "Saving..." / "Saved" status
+- URL bar shows `memory.wiki/{cloudId}`, click to copy, "Saving..." / "Saved" status
 - Sidebar: permission badges on all document icons
 - Recently Visited section for logged-in users
 - Tab migration: existing localStorage tabs get cloudIds on first load (max 5)

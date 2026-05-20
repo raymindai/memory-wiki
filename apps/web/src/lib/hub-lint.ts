@@ -116,8 +116,8 @@ export async function computeLintReport(
       if (candidateId === d.id) continue;
       if (referenced.has(candidateId)) continue;
       // mdfy URL shapes:
-      //   mdfy.app/<id>           (canonical, AI-fetcher path)
-      //   mdfy.app/d/<id>         (browser route)
+      //   memory.wiki/<id>           (canonical, AI-fetcher path)
+      //   memory.wiki/d/<id>         (browser route)
       //   /<id>                   (relative link if user wrote one)
       const hay = d.markdown;
       if (
@@ -257,7 +257,7 @@ export function formatLintMarkdown(report: LintReport): string {
     lines.push("");
     for (const o of report.orphans) {
       const t = o.title || "Untitled";
-      lines.push(`- [${t}](https://mdfy.app/${o.id})`);
+      lines.push(`- [${t}](https://memory.wiki/${o.id})`);
     }
   }
   lines.push("");
@@ -273,7 +273,7 @@ export function formatLintMarkdown(report: LintReport): string {
       const aT = p.a.title || "Untitled";
       const bT = p.b.title || "Untitled";
       lines.push(
-        `- [${aT}](https://mdfy.app/${p.a.id}) and [${bT}](https://mdfy.app/${p.b.id}). Distance ${p.distance.toFixed(3)}.`,
+        `- [${aT}](https://memory.wiki/${p.a.id}) and [${bT}](https://memory.wiki/${p.b.id}). Distance ${p.distance.toFixed(3)}.`,
       );
     }
   }
@@ -288,7 +288,7 @@ export function formatLintMarkdown(report: LintReport): string {
     lines.push("");
     for (const m of report.titleMismatches) {
       const t = m.title || "Untitled";
-      lines.push(`- [${t}](https://mdfy.app/${m.id}) — consider mentioning **${m.topConcept}**.`);
+      lines.push(`- [${t}](https://memory.wiki/${m.id}) — consider mentioning **${m.topConcept}**.`);
     }
   }
   lines.push("");

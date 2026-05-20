@@ -103,7 +103,7 @@ export default function VSCodeAuthPage() {
           </svg>
           <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Connected to VS Code</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
-            Your mdfy.app account is now linked. You can close this tab and return to VS Code.
+            Your memory.wiki account is now linked. You can close this tab and return to VS Code.
           </p>
           <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 8 }}>
             Didn&apos;t work? Make sure the mdfy extension is installed in VS Code.
@@ -115,7 +115,7 @@ export default function VSCodeAuthPage() {
         <>
           <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect VS Code</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
-            Use the same account you use on mdfy.app
+            Use the same account you use on memory.wiki
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             <button
@@ -140,7 +140,7 @@ export default function VSCodeAuthPage() {
         <>
           <p style={{ fontSize: 16, fontWeight: 600, color: "#ef4444" }}>Connection Failed</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-            Please sign in to mdfy.app first, then try again from VS Code.
+            Please sign in to memory.wiki first, then try again from VS Code.
           </p>
           <Link
             href="/"
@@ -154,7 +154,7 @@ export default function VSCodeAuthPage() {
               fontWeight: 600,
             }}
           >
-            Go to mdfy.app
+            Go to memory.wiki
           </Link>
         </>
       )}

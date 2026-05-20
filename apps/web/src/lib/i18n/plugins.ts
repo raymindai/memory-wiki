@@ -21,7 +21,7 @@ const texts = {
       items: [
         {
           scenario: "Research across AIs",
-          steps: "ChatGPT researches \u2192 Extension captures \u2192 mdfy.app/abc123 \u2192 Paste URL in Claude \u2192 Claude refines",
+          steps: "ChatGPT researches \u2192 Extension captures \u2192 memory.wiki/abc123 \u2192 Paste URL in Claude \u2192 Claude refines",
           why: "Move knowledge between AIs without copy-paste formatting nightmares. The document is the bridge.",
         },
         {
@@ -31,12 +31,12 @@ const texts = {
         },
         {
           scenario: "AI-readable document references",
-          steps: "Publish to mdfy.app/abc123 \u2192 Tell any AI \"read mdfy.app/abc123\" \u2192 AI fetches and understands",
-          why: "mdfy.app URLs work as context for any AI. Your documents become reusable knowledge across conversations.",
+          steps: "Publish to memory.wiki/abc123 \u2192 Tell any AI \"read memory.wiki/abc123\" \u2192 AI fetches and understands",
+          why: "memory.wiki URLs work as context for any AI. Your documents become reusable knowledge across conversations.",
         },
         {
           scenario: "Preview any .md file in Finder",
-          steps: "Select file \u2192 Press Space \u2192 Full rendering with code, math, diagrams \u2192 Click \"Open in mdfy.app\" to edit",
+          steps: "Select file \u2192 Press Space \u2192 Full rendering with code, math, diagrams \u2192 Click \"Open in memory.wiki\" to edit",
           why: "macOS QuickLook shows raw Markdown by default. mdfy QuickLook shows it beautifully rendered.",
         },
         {
@@ -46,7 +46,7 @@ const texts = {
         },
         {
           scenario: "Build reports from multiple AI sessions",
-          steps: "Capture ChatGPT analysis \u2192 Capture Claude code review \u2192 Capture Gemini summary \u2192 Combine in mdfy.app \u2192 Single URL",
+          steps: "Capture ChatGPT analysis \u2192 Capture Claude code review \u2192 Capture Gemini summary \u2192 Combine in memory.wiki \u2192 Single URL",
           why: "Each AI has strengths. Combine outputs from multiple AIs into one professional document.",
         },
       ],
@@ -54,20 +54,20 @@ const texts = {
 
     shortUrl: {
       heading: "Short URLs that AIs can read",
-      desc: "Every mdfy.app document has a short URL. Share it with humans or paste it into any AI conversation. Claude, ChatGPT, and Gemini can all fetch and understand the content \u2014 your documents become reusable context across AI sessions and platforms.",
+      desc: "Every memory.wiki document has a short URL. Share it with humans or paste it into any AI conversation. Claude, ChatGPT, and Gemini can all fetch and understand the content \u2014 your documents become reusable context across AI sessions and platforms.",
       note: "No login wall. No paywall. The URL works everywhere \u2014 browsers, AI chats, Slack, email, embeds.",
       exampleLabel: "Example",
       lines: [
-        { speaker: "You:", text: "Read mdfy.app/abc123 and summarize the key points" },
-        { speaker: "AI:", text: "Based on the document at mdfy.app/abc123, here are the key points..." },
-        { speaker: "You:", text: "Now compare with mdfy.app/def456" },
+        { speaker: "You:", text: "Read memory.wiki/abc123 and summarize the key points" },
+        { speaker: "AI:", text: "Based on the document at memory.wiki/abc123, here are the key points..." },
+        { speaker: "You:", text: "Now compare with memory.wiki/def456" },
       ],
     },
 
     chrome: {
       title: "Chrome Extension",
-      subtitle: "mdfy.app \u2014 Publish AI Output",
-      desc: "One-click capture from ChatGPT, Claude, and Gemini. Open any GitHub .md file in mdfy.app for beautiful rendering. Turn AI conversations into shareable documents. The captured URL works as context in other AI conversations.",
+      subtitle: "memory.wiki \u2014 Publish AI Output",
+      desc: "One-click capture from ChatGPT, Claude, and Gemini. Open any GitHub .md file in memory.wiki for beautiful rendering. Turn AI conversations into shareable documents. The captured URL works as context in other AI conversations.",
       ctaLabel: "Add to Chrome",
       features: [
         {
@@ -76,7 +76,7 @@ const texts = {
         },
         {
           title: "Capture Methods",
-          items: ["Hover button \u2014 single AI response", "Popup \u2014 full conversation or selection", "GitHub \u2014 Open in mdfy.app button", "Right-click \u2014 any selected text"],
+          items: ["Hover button \u2014 single AI response", "Popup \u2014 full conversation or selection", "GitHub \u2014 Open in memory.wiki button", "Right-click \u2014 any selected text"],
         },
         {
           title: "Smart Conversion",
@@ -84,7 +84,7 @@ const texts = {
         },
         {
           title: "Seamless Transfer",
-          items: ["Small content \u2192 URL hash (instant)", "Large content \u2192 clipboard + toast", "Gzip compression (same as mdfy.app)", "Opens in mdfy.app editor"],
+          items: ["Small content \u2192 URL hash (instant)", "Large content \u2192 clipboard + toast", "Gzip compression (same as memory.wiki)", "Opens in memory.wiki editor"],
         },
       ],
       installHeading: "Install",
@@ -103,7 +103,7 @@ const texts = {
     mcp: {
       title: "MCP Server",
       subtitle: "mdfy-mcp on npm",
-      desc: "Connect any AI tool to mdfy.app. Create, read, update, and manage documents programmatically.",
+      desc: "Connect any AI tool to memory.wiki. Create, read, update, and manage documents programmatically.",
       ctaLabel: "Add to Claude",
       terminal: {
         title: "Claude Code",
@@ -112,7 +112,7 @@ const texts = {
           { type: "output", label: "Claude: ", text: "I'll create the document now." },
           { type: "comment", text: '  mdfy_create({ markdown: "# Meeting Notes..." })' },
           { type: "success", text: "Document created:" },
-          { type: "output", text: "  URL: ", url: "https://mdfy.app/abc123" },
+          { type: "output", text: "  URL: ", url: "https://memory.wiki/abc123" },
           { type: "output", text: "  Status: publicly accessible" },
           { type: "prompt", label: "You: ", text: "Make it private" },
           { type: "comment", text: '  mdfy_publish({ id: "abc123", published: false })' },
@@ -166,8 +166,8 @@ const texts = {
 
     vscode: {
       title: "VS Code Extension",
-      subtitle: "mdfy.app \u2014 Markdown Publisher",
-      desc: "WYSIWYG preview with mdfy.app rendering quality, cloud sync, and real-time collaboration. Edit directly in the rendered view, auto-push on save, and resolve conflicts with the built-in diff editor.",
+      subtitle: "memory.wiki \u2014 Markdown Publisher",
+      desc: "WYSIWYG preview with memory.wiki rendering quality, cloud sync, and real-time collaboration. Edit directly in the rendered view, auto-push on save, and resolve conflicts with the built-in diff editor.",
       ctaLabel: "Install Extension",
       downloadVsixLabel: "Download .vsix",
       features: [
@@ -209,7 +209,7 @@ const texts = {
     desktop: {
       title: "mdfy for Mac",
       subtitle: "Desktop app \u2014 Electron",
-      desc: "Native macOS desktop app with full mdfy.app editing, local file support, and drag-and-drop import for PDF, Word, PowerPoint, Excel, and 10+ formats. Double-click any .md file to open it in mdfy.",
+      desc: "Native macOS desktop app with full memory.wiki editing, local file support, and drag-and-drop import for PDF, Word, PowerPoint, Excel, and 10+ formats. Double-click any .md file to open it in mdfy.",
       ctaLabel: "Download for Mac",
       features: [
         {
@@ -221,7 +221,7 @@ const texts = {
           items: ["Markdown, PDF, Word (.docx)", "PowerPoint (.pptx), Excel (.xlsx)", "HTML, CSV, JSON, XML, LaTeX", "RTF, reStructuredText, plain text"],
         },
         {
-          title: "Full mdfy.app Editor",
+          title: "Full memory.wiki Editor",
           items: ["WYSIWYG + Source editing modes", "Cloud sync and sharing", "All rendering: code, math, diagrams", "Dark/Light theme"],
         },
         {
@@ -284,7 +284,7 @@ const texts = {
       installHeading: "Install",
       installSteps: [
         "Install mdfy for Mac (DMG link above) — QuickLook ships with it",
-        "Open mdfy.app once — it copies MdfyQuickLook.app to ~/Applications automatically",
+        "Open memory.wiki once — it copies MdfyQuickLook.app to ~/Applications automatically",
         "Go to System Settings > General > Login Items & Extensions > Quick Look, and enable mdfy",
         "Select any .md file in Finder and press Space",
       ],
@@ -297,7 +297,7 @@ const texts = {
     roadmap: {
       heading: "On the Roadmap",
       items: [
-        { name: "Obsidian Plugin", desc: "Publish Obsidian notes to mdfy.app with one command", status: "Planned" },
+        { name: "Obsidian Plugin", desc: "Publish Obsidian notes to memory.wiki with one command", status: "Planned" },
         { name: "Raycast Extension", desc: "Quick capture and publish from Raycast", status: "Planned" },
         { name: "Slack Bot", desc: "Share documents directly in Slack channels", status: "Planned" },
         { name: "Alfred Workflow", desc: "Capture clipboard and publish instantly", status: "Planned" },
@@ -326,7 +326,7 @@ const texts = {
       items: [
         {
           scenario: "AI 간 리서치",
-          steps: "ChatGPT 리서치 \u2192 Extension 캡처 \u2192 mdfy.app/abc123 \u2192 Claude에 URL 붙여넣기 \u2192 Claude가 다듬기",
+          steps: "ChatGPT 리서치 \u2192 Extension 캡처 \u2192 memory.wiki/abc123 \u2192 Claude에 URL 붙여넣기 \u2192 Claude가 다듬기",
           why: "복사-붙여넣기 포맷 깨짐 없이 AI 간 지식을 이동하세요. 문서가 다리 역할을 합니다.",
         },
         {
@@ -336,12 +336,12 @@ const texts = {
         },
         {
           scenario: "AI가 읽을 수 있는 문서 참조",
-          steps: "mdfy.app/abc123에 퍼블리시 \u2192 아무 AI에게 \"mdfy.app/abc123 읽어줘\" \u2192 AI가 가져와서 이해",
-          why: "mdfy.app URL은 어떤 AI에서든 컨텍스트로 작동합니다. 문서가 대화 간 재사용 가능한 지식이 됩니다.",
+          steps: "memory.wiki/abc123에 퍼블리시 \u2192 아무 AI에게 \"memory.wiki/abc123 읽어줘\" \u2192 AI가 가져와서 이해",
+          why: "memory.wiki URL은 어떤 AI에서든 컨텍스트로 작동합니다. 문서가 대화 간 재사용 가능한 지식이 됩니다.",
         },
         {
           scenario: "Finder에서 .md 파일 미리보기",
-          steps: "파일 선택 \u2192 Space 누르기 \u2192 코드, 수식, 다이어그램까지 완전 렌더링 \u2192 \"Open in mdfy.app\" 클릭으로 편집",
+          steps: "파일 선택 \u2192 Space 누르기 \u2192 코드, 수식, 다이어그램까지 완전 렌더링 \u2192 \"Open in memory.wiki\" 클릭으로 편집",
           why: "macOS QuickLook은 기본적으로 원시 Markdown을 보여줍니다. mdfy QuickLook은 아름답게 렌더링합니다.",
         },
         {
@@ -351,7 +351,7 @@ const texts = {
         },
         {
           scenario: "여러 AI 세션에서 리포트 작성",
-          steps: "ChatGPT 분석 캡처 \u2192 Claude 코드 리뷰 캡처 \u2192 Gemini 요약 캡처 \u2192 mdfy.app에서 합치기 \u2192 하나의 URL",
+          steps: "ChatGPT 분석 캡처 \u2192 Claude 코드 리뷰 캡처 \u2192 Gemini 요약 캡처 \u2192 memory.wiki에서 합치기 \u2192 하나의 URL",
           why: "각 AI마다 강점이 있습니다. 여러 AI의 출력을 하나의 전문적인 문서로 합치세요.",
         },
       ],
@@ -359,20 +359,20 @@ const texts = {
 
     shortUrl: {
       heading: "AI가 읽을 수 있는 짧은 URL",
-      desc: "모든 mdfy.app 문서는 짧은 URL을 가집니다. 사람에게 공유하거나 AI 대화에 붙여넣으세요. Claude, ChatGPT, Gemini 모두 콘텐츠를 가져와 이해할 수 있습니다 \u2014 문서가 AI 세션과 플랫폼 간 재사용 가능한 컨텍스트가 됩니다.",
+      desc: "모든 memory.wiki 문서는 짧은 URL을 가집니다. 사람에게 공유하거나 AI 대화에 붙여넣으세요. Claude, ChatGPT, Gemini 모두 콘텐츠를 가져와 이해할 수 있습니다 \u2014 문서가 AI 세션과 플랫폼 간 재사용 가능한 컨텍스트가 됩니다.",
       note: "로그인 없음. 유료 결제 없음. URL은 어디서든 작동합니다 \u2014 브라우저, AI 채팅, Slack, 이메일, 임베드.",
       exampleLabel: "Example",
       lines: [
-        { speaker: "You:", text: "mdfy.app/abc123을 읽고 핵심 포인트를 요약해줘" },
-        { speaker: "AI:", text: "mdfy.app/abc123 문서를 기반으로, 핵심 포인트는..." },
-        { speaker: "You:", text: "이제 mdfy.app/def456과 비교해줘" },
+        { speaker: "You:", text: "memory.wiki/abc123을 읽고 핵심 포인트를 요약해줘" },
+        { speaker: "AI:", text: "memory.wiki/abc123 문서를 기반으로, 핵심 포인트는..." },
+        { speaker: "You:", text: "이제 memory.wiki/def456과 비교해줘" },
       ],
     },
 
     chrome: {
       title: "Chrome Extension",
-      subtitle: "mdfy.app \u2014 AI 출력 퍼블리시",
-      desc: "ChatGPT, Claude, Gemini에서 한 번의 클릭으로 캡처. GitHub의 모든 .md 파일을 mdfy.app에서 아름답게 렌더링. AI 대화를 공유 가능한 문서로 변환합니다. 캡처된 URL은 다른 AI 대화의 컨텍스트로 사용됩니다.",
+      subtitle: "memory.wiki \u2014 AI 출력 퍼블리시",
+      desc: "ChatGPT, Claude, Gemini에서 한 번의 클릭으로 캡처. GitHub의 모든 .md 파일을 memory.wiki에서 아름답게 렌더링. AI 대화를 공유 가능한 문서로 변환합니다. 캡처된 URL은 다른 AI 대화의 컨텍스트로 사용됩니다.",
       ctaLabel: "Add to Chrome",
       features: [
         {
@@ -381,7 +381,7 @@ const texts = {
         },
         {
           title: "캡처 방식",
-          items: ["호버 버튼 \u2014 단일 AI 응답", "팝업 \u2014 전체 대화 또는 선택 영역", "GitHub \u2014 Open in mdfy.app 버튼", "우클릭 \u2014 선택한 텍스트"],
+          items: ["호버 버튼 \u2014 단일 AI 응답", "팝업 \u2014 전체 대화 또는 선택 영역", "GitHub \u2014 Open in memory.wiki 버튼", "우클릭 \u2014 선택한 텍스트"],
         },
         {
           title: "스마트 변환",
@@ -389,7 +389,7 @@ const texts = {
         },
         {
           title: "매끄러운 전송",
-          items: ["작은 콘텐츠 \u2192 URL hash (즉시)", "큰 콘텐츠 \u2192 클립보드 + 토스트", "Gzip 압축 (mdfy.app와 동일)", "mdfy.app 에디터에서 열기"],
+          items: ["작은 콘텐츠 \u2192 URL hash (즉시)", "큰 콘텐츠 \u2192 클립보드 + 토스트", "Gzip 압축 (memory.wiki와 동일)", "memory.wiki 에디터에서 열기"],
         },
       ],
       installHeading: "설치",
@@ -408,7 +408,7 @@ const texts = {
     mcp: {
       title: "MCP Server",
       subtitle: "mdfy-mcp on npm",
-      desc: "어떤 AI 도구든 mdfy.app에 연결하세요. 문서를 프로그래밍 방식으로 생성, 읽기, 수정, 관리합니다.",
+      desc: "어떤 AI 도구든 memory.wiki에 연결하세요. 문서를 프로그래밍 방식으로 생성, 읽기, 수정, 관리합니다.",
       ctaLabel: "Add to Claude",
       terminal: {
         title: "Claude Code",
@@ -417,7 +417,7 @@ const texts = {
           { type: "output", label: "Claude: ", text: "지금 문서를 생성하겠습니다." },
           { type: "comment", text: '  mdfy_create({ markdown: "# Meeting Notes..." })' },
           { type: "success", text: "문서 생성 완료:" },
-          { type: "output", text: "  URL: ", url: "https://mdfy.app/abc123" },
+          { type: "output", text: "  URL: ", url: "https://memory.wiki/abc123" },
           { type: "output", text: "  Status: publicly accessible" },
           { type: "prompt", label: "You: ", text: "비공개로 바꿔줘" },
           { type: "comment", text: '  mdfy_publish({ id: "abc123", published: false })' },
@@ -471,8 +471,8 @@ const texts = {
 
     vscode: {
       title: "VS Code Extension",
-      subtitle: "mdfy.app \u2014 Markdown Publisher",
-      desc: "mdfy.app 렌더링 품질의 WYSIWYG 미리보기, 클라우드 싱크, 실시간 협업. 렌더된 뷰에서 직접 편집하고, 저장 시 자동 push, 내장 diff 에디터로 충돌을 해결합니다.",
+      subtitle: "memory.wiki \u2014 Markdown Publisher",
+      desc: "memory.wiki 렌더링 품질의 WYSIWYG 미리보기, 클라우드 싱크, 실시간 협업. 렌더된 뷰에서 직접 편집하고, 저장 시 자동 push, 내장 diff 에디터로 충돌을 해결합니다.",
       ctaLabel: "Install Extension",
       downloadVsixLabel: "Download .vsix",
       features: [
@@ -514,7 +514,7 @@ const texts = {
     desktop: {
       title: "mdfy for Mac",
       subtitle: "Desktop app \u2014 Electron",
-      desc: "mdfy.app의 모든 편집 기능을 갖춘 네이티브 macOS 데스크톱 앱. 로컬 파일 지원, PDF, Word, PowerPoint, Excel 등 10개 이상의 포맷을 드래그 앤 드롭으로 임포트. .md 파일을 더블클릭하면 mdfy에서 열립니다.",
+      desc: "memory.wiki의 모든 편집 기능을 갖춘 네이티브 macOS 데스크톱 앱. 로컬 파일 지원, PDF, Word, PowerPoint, Excel 등 10개 이상의 포맷을 드래그 앤 드롭으로 임포트. .md 파일을 더블클릭하면 mdfy에서 열립니다.",
       ctaLabel: "Download for Mac",
       features: [
         {
@@ -526,7 +526,7 @@ const texts = {
           items: ["Markdown, PDF, Word (.docx)", "PowerPoint (.pptx), Excel (.xlsx)", "HTML, CSV, JSON, XML, LaTeX", "RTF, reStructuredText, 일반 텍스트"],
         },
         {
-          title: "전체 mdfy.app 에디터",
+          title: "전체 memory.wiki 에디터",
           items: ["WYSIWYG + 소스 편집 모드", "클라우드 싱크 및 공유", "모든 렌더링: 코드, 수식, 다이어그램", "다크/라이트 테마"],
         },
         {
@@ -589,7 +589,7 @@ const texts = {
       installHeading: "설치",
       installSteps: [
         "mdfy for Mac (위 DMG 링크) 설치 — QuickLook이 함께 들어있음",
-        "mdfy.app을 한 번 실행 — MdfyQuickLook.app을 ~/Applications에 자동 복사",
+        "memory.wiki을 한 번 실행 — MdfyQuickLook.app을 ~/Applications에 자동 복사",
         "시스템 설정 > 일반 > 로그인 항목 및 확장 > Quick Look에서 mdfy를 활성화하세요",
         "Finder에서 아무 .md 파일을 선택하고 Space를 누르세요",
       ],
@@ -602,7 +602,7 @@ const texts = {
     roadmap: {
       heading: "로드맵",
       items: [
-        { name: "Obsidian Plugin", desc: "Obsidian 노트를 한 번의 명령으로 mdfy.app에 퍼블리시", status: "Planned" },
+        { name: "Obsidian Plugin", desc: "Obsidian 노트를 한 번의 명령으로 memory.wiki에 퍼블리시", status: "Planned" },
         { name: "Raycast Extension", desc: "Raycast에서 빠르게 캡처하고 퍼블리시", status: "Planned" },
         { name: "Slack Bot", desc: "Slack 채널에서 직접 문서 공유", status: "Planned" },
         { name: "Alfred Workflow", desc: "클립보드를 캡처해서 즉시 퍼블리시", status: "Planned" },

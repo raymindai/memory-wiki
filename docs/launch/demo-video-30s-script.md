@@ -21,7 +21,7 @@
 
 ### Shot 2 (6–12s) — Capture
 
-**On screen**: Chrome ext on a Claude chat → click mdfy button → URL pops in a toast → cuts to mdfy.app showing the doc rendered cleanly.
+**On screen**: Chrome ext on a Claude chat → click mdfy button → URL pops in a toast → cuts to memory.wiki showing the doc rendered cleanly.
 
 **VO**:
 > mdfy captures it. One click, permanent URL.
@@ -30,7 +30,7 @@
 
 ### Shot 3 (12–18s) — Bundle / Hub
 
-**On screen**: sidebar showing 8-10 docs cluster into a Bundle. Bundle viewer briefly. Quick cut to `mdfy.app/hub/<you>` page with the stats strip (40 docs · 40 concepts · ~60k tokens).
+**On screen**: sidebar showing 8-10 docs cluster into a Bundle. Bundle viewer briefly. Quick cut to `memory.wiki/hub/<you>` page with the stats strip (40 docs · 40 concepts · ~60k tokens).
 
 **VO**:
 > Captures group into a hub. Concept index links them. Your whole memory at one address.
@@ -48,10 +48,10 @@
 
 ### Shot 5 (25–30s) — Close
 
-**On screen**: just the logo and the tagline center-screen. `mdfy.app` underneath.
+**On screen**: just the logo and the tagline center-screen. `memory.wiki` underneath.
 
 **VO**:
-> Your AI memory, deployable to any AI. Try it — no signup. mdfy.app.
+> Your AI memory, deployable to any AI. Try it — no signup. memory.wiki.
 
 ---
 
@@ -59,14 +59,14 @@
 
 - Record at 1440p so we can crop to 1080p without quality loss
 - Cursor screen-recording shows the system clock / battery — mask it
-- For the "paste into Cursor" shot, use a real project with a `.cursorrules` already containing `# Context\nhttps://mdfy.app/hub/...` — looks more honest than typing it live
+- For the "paste into Cursor" shot, use a real project with a `.cursorrules` already containing `# Context\nhttps://memory.wiki/hub/...` — looks more honest than typing it live
 - Don't fake the AI's response time. If Claude takes 3 seconds, let it take 3 seconds — speeds up later in edit if needed
 - The Hub page screenshot should show real stats, not "Lorem ipsum 999 docs"
 - End frame holds for 1.5 seconds with the URL legible — this is the call to action, don't cut it short
 
 ## Distribution channels
 
-- mdfy.app home page: embed at the top as a muted-by-default autoplay
+- memory.wiki home page: embed at the top as a muted-by-default autoplay
 - About page: embed in the hero
 - Twitter: 16:9 with subtitles burned in (autoplay is muted on TL)
 - LinkedIn: 16:9 with subtitles

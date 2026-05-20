@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "Give the agent an mdfy hub",
-      detail: "Create a hub (mdfy.app/hub/<slug>). The hub URL is the agent's memory address. Bundle URLs inside it scope memory by project or task type.",
+      detail: "Create a hub (memory.wiki/hub/<slug>). The hub URL is the agent's memory address. Bundle URLs inside it scope memory by project or task type.",
     },
     {
       step: "Wire the MCP server",
@@ -38,7 +38,7 @@ const data: CaseData = {
   ],
   example: {
     title: "Example: a coding agent across 30 runs on the same repo",
-    body: "Hub mdfy.app/hub/acme-agent — bundle per major refactor (auth, billing, search). Each run starts by fetching the bundle URL, ends by appending a decision doc. After 30 runs the hub has 47 decisions, a concept index linking \"rate-limit\" across 9 of them, and a fresh AI session can pick up exactly where the last left off — without anyone re-priming.",
+    body: "Hub memory.wiki/hub/acme-agent — bundle per major refactor (auth, billing, search). Each run starts by fetching the bundle URL, ends by appending a decision doc. After 30 runs the hub has 47 decisions, a concept index linking \"rate-limit\" across 9 of them, and a fresh AI session can pick up exactly where the last left off — without anyone re-priming.",
   },
   related: [
     { slug: "cross-tool-handoff", label: "Cross-tool handoff" },

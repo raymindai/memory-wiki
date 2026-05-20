@@ -9,13 +9,13 @@ export const metadata: Metadata = {
 };
 
 const INSTALL_CMD_CLAUDE =
-  "curl -fsSL https://staging.mdfy.app/skills/mdfy/install.sh | sh";
+  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh";
 const INSTALL_CMD_CURSOR =
-  "curl -fsSL https://staging.mdfy.app/skills/mdfy/install.sh | sh -s -- --target=cursor";
+  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=cursor";
 const INSTALL_CMD_CODEX =
-  "curl -fsSL https://staging.mdfy.app/skills/mdfy/install.sh | sh -s -- --target=codex";
+  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=codex";
 const INSTALL_CMD_AIDER =
-  "curl -fsSL https://staging.mdfy.app/skills/mdfy/install.sh | sh -s -- --target=aider";
+  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=aider";
 
 export default function InstallPage() {
   return (

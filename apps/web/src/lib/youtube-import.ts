@@ -184,7 +184,7 @@ export async function importFromYouTube(
     lines.push(transcript);
   } else {
     // Honest fallback. YouTube blocks every public scrape path from
-    // datacenter IPs (where mdfy.app runs). Two one-click recovery
+    // datacenter IPs (where memory.wiki runs). Two one-click recovery
     // paths the user can take right now:
     //   1. youtubetranscript.com gives a plain-text transcript page
     //      they can copy in one drag.

@@ -20,9 +20,9 @@
 
 const TEMPLATE_SIGNATURES = [
   // SAMPLE_WELCOME literal (no link) and its Tiptap-autolinked sibling.
-  "# Welcome to mdfy.app\n\n> **The Markdown Hub.** Collect from anywhere",
-  "# Welcome to [mdfy.app](http://mdfy.app)\n\n> **The Markdown Hub.** Collect from anywhere",
-  "# Welcome to [mdfy.app](https://mdfy.app)\n\n> **The Markdown Hub.** Collect from anywhere",
+  "# Welcome to memory.wiki\n\n> **The Markdown Hub.** Collect from anywhere",
+  "# Welcome to [memory.wiki](http://memory.wiki)\n\n> **The Markdown Hub.** Collect from anywhere",
+  "# Welcome to [memory.wiki](https://memory.wiki)\n\n> **The Markdown Hub.** Collect from anywhere",
 ];
 
 const NORMALIZE_RE = /\s+/g;

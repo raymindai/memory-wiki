@@ -13,7 +13,7 @@ export const metadata: Metadata = {
  * asking users to re-install. Cache-bust on each visit so the install they
  * grab today never goes stale.
  */
-const BOOKMARKLET_HREF = `javascript:void((function(){var s=document.createElement('script');s.src='https://mdfy.app/bookmarklet.js?v='+Date.now();document.body.appendChild(s);})());`;
+const BOOKMARKLET_HREF = `javascript:void((function(){var s=document.createElement('script');s.src='https://memory.wiki/bookmarklet.js?v='+Date.now();document.body.appendChild(s);})());`;
 
 export default function BookmarkletPage() {
   return (
@@ -107,7 +107,7 @@ export default function BookmarkletPage() {
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              mdfy.app/bookmarklet.js
+              memory.wiki/bookmarklet.js
             </a>{" "}
             — read it, fork it, run it from somewhere else if you prefer.
           </p>

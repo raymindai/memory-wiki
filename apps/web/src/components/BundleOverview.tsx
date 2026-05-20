@@ -133,7 +133,7 @@ export default function BundleOverview({
   const [activeTool, setActiveTool] = useState<string>("claude");
   const [copiedTool, setCopiedTool] = useState<string | null>(null);
 
-  const bundleUrl = useMemo(() => `https://mdfy.app/b/${bundleId}`, [bundleId]);
+  const bundleUrl = useMemo(() => `https://memory.wiki/b/${bundleId}`, [bundleId]);
 
   // Access classification — same vocabulary the hub uses:
   //   Public  = !draft && no allowed_emails

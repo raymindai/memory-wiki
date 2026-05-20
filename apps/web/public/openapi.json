@@ -1,12 +1,12 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "mdfy.app API",
+    "title": "memory.wiki API",
     "description": "Publish, read, and manage Markdown documents. Create shareable URLs from any content.",
     "version": "1.0.0"
   },
   "servers": [
-    { "url": "https://mdfy.app" }
+    { "url": "https://memory.wiki" }
   ],
   "paths": {
     "/api/docs": {

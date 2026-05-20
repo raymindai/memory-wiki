@@ -152,9 +152,9 @@ export async function GET(
       const summary = (e.summary || e.event_type).replace(/[\r\n]+/g, " ").trim();
       const link =
         e.target_type === "document" && e.target_id
-          ? ` ([open](https://mdfy.app/${e.target_id}))`
+          ? ` ([open](https://memory.wiki/${e.target_id}))`
           : e.target_type === "bundle" && e.target_id
-            ? ` ([open](https://mdfy.app/b/${e.target_id}))`
+            ? ` ([open](https://memory.wiki/b/${e.target_id}))`
             : "";
       lines.push(`- \`${t}\` — ${summary}${link}`);
     }
@@ -167,7 +167,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300",
-      "Link": `<https://mdfy.app/hub/${slug}>; rel="canonical"`,
+      "Link": `<https://memory.wiki/hub/${slug}>; rel="canonical"`,
       "X-Hub-Slug": slug,
       "X-Token-Estimate": String(estimateTokens(body)),
     },

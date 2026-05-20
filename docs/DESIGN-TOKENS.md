@@ -1,6 +1,6 @@
 # Design Tokens
 
-Single source of truth for mdfy.app's visual system. Adopted at the start of
+Single source of truth for memory.wiki's visual system. Adopted at the start of
 the design polish sprint that followed the Bundle / Discoveries / Compile
 / Concepts feature push.
 

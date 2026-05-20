@@ -361,7 +361,7 @@ export function DocsFooter({
             margin: 0,
           }}
         >
-          &copy; 2026 mdfy.app
+          &copy; 2026 memory.wiki
         </p>
       </div>
     </footer>
@@ -579,7 +579,7 @@ export function SiteFooter({ lang = "en" }: { lang?: "en" | "ko" } = {}) {
               margin: 0,
             }}
           >
-            &copy; 2026 mdfy.app. All rights reserved.
+            &copy; 2026 memory.wiki. All rights reserved.
           </p>
         </div>
       </div>
