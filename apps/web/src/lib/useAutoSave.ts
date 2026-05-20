@@ -208,20 +208,52 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
           // Attach Authorization header from current Supabase session so the
           // server-side verifyAuthToken() can identify the user even if the
           // page was opened a long time ago.
+          // Also pull session.user.{id,email} as a backup identity — the
+          // caller passes args.userId/userEmail from React state, but if
+          // useAuth happened to be transitioning (e.g. token refresh
+          // mid-flight when scheduleSave fired) those args can be
+          // undefined. The server's editor-role check relies on email,
+          // so a missing email there means a real 403 for an actual
+          // editor. Reading the session here gives us a synchronous
+          // ground-truth at PATCH time.
           let bearer: string | null = null;
+          let sessionUserId: string | undefined;
+          let sessionUserEmail: string | undefined;
           try {
             const supabase = getSupabaseBrowserClient();
             if (supabase) {
               const { data } = await supabase.auth.getSession();
               bearer = data?.session?.access_token ?? null;
+              sessionUserId = data?.session?.user?.id ?? undefined;
+              sessionUserEmail = data?.session?.user?.email ?? undefined;
             }
           } catch { /* ignore */ }
+          const effectiveUserId = args.userId || sessionUserId;
+          const effectiveUserEmail = args.userEmail || sessionUserEmail;
+          // Patch body identity too — the server's auto-save handler
+          // reads body.userEmail / body.userId directly (not just the
+          // headers), so make sure both surfaces carry the same value.
+          if (effectiveUserId) patchBody.userId = effectiveUserId;
+          if (effectiveUserEmail) patchBody.userEmail = effectiveUserEmail;
 
+          // Editor-role auto-saves rely on the server resolving the
+          // caller's email and matching it against allowed_editors.
+          // Previously this PATCH only sent `Authorization: Bearer`
+          // — so if the bearer was missing or stale, the server fell
+          // back to verified=null with no x-user-* header to read,
+          // and isAllowedEditor collapsed to false → 403 on every
+          // save (and the auto-recovery retry path also re-fired the
+          // same body). Mirror the same identity headers /api/docs
+          // expects, so the email/uid fallback works whenever bearer
+          // verification fails.
           const doFetch = (token: string | null) => fetch(`/api/docs/${args.cloudId}`, {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              ...(effectiveUserId ? { "x-user-id": effectiveUserId } : {}),
+              ...(effectiveUserEmail ? { "x-user-email": effectiveUserEmail } : {}),
+              ...(args.anonymousId ? { "x-anonymous-id": args.anonymousId } : {}),
             },
             body: JSON.stringify(patchBody),
           });
