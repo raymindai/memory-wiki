@@ -120,6 +120,10 @@ export default function BundleOverview({
   onRenameBundle,
 }: BundleOverviewProps) {
   const [copied, setCopied] = useState(false);
+  // Hero AI digest — 3 lines by default with "More" toggle. Threshold is
+  // a character count rather than a measured overflow because the hero
+  // re-flows on resize and we don't want the More chip to flicker.
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
   // Which URL variant the unified Copy button is currently bound to —
   // digest (default) or ?full=1. Single Copy means single "Copied"
   // flash, no juggling.
@@ -203,6 +207,41 @@ export default function BundleOverview({
               {bundleTitle || "Untitled bundle"}
             </h1>
           )}
+          {/* AI digest — 2-3 sentence summary from graph_data.summary.
+              Sits directly under the title so the gist reads first,
+              ahead of user-set description / intent / meta. Clamped
+              to 3 lines by default; long summaries reveal a More
+              chip that toggles the full text inline. */}
+          {bundleSummary && (() => {
+            const isLong = bundleSummary.length > 180;
+            return (
+              <div className="mt-3 mx-auto" style={{ maxWidth: 560 }}>
+                <p
+                  className="text-body leading-relaxed text-center"
+                  style={{
+                    color: "var(--text-secondary)",
+                    ...(summaryExpanded ? {} : {
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }),
+                  }}
+                >
+                  {bundleSummary}
+                </p>
+                {isLong && (
+                  <button
+                    onClick={() => setSummaryExpanded((v) => !v)}
+                    className="mt-1.5 mx-auto block text-caption font-medium rounded transition-colors hover:bg-[var(--toggle-bg)] px-2 py-0.5"
+                    style={{ color: "var(--text-faint)" }}
+                  >
+                    {summaryExpanded ? "Less" : "More"}
+                  </button>
+                )}
+              </div>
+            );
+          })()}
           {bundleDescription && (
             <p
               className="text-body mt-3 mx-auto leading-relaxed"
@@ -238,21 +277,6 @@ export default function BundleOverview({
               </span>
             )}
           </div>
-
-          {/* AI digest — 2-3 sentence summary from graph_data.summary.
-              Sits below the meta strip so the hero reads as
-              identity (icon/title/description/intent) → vitals
-              (docs/updated/access) → gist. No accent rail; the
-              extra vertical breathing room and softer secondary
-              text colour separate it from the meta strip. */}
-          {bundleSummary && (
-            <p
-              className="text-body mt-6 mx-auto leading-relaxed text-left"
-              style={{ color: "var(--text-secondary)", maxWidth: 560 }}
-            >
-              {bundleSummary}
-            </p>
-          )}
         </header>
 
         {/* Unified "How to use this bundle" — pick the tool, see
