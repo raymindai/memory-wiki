@@ -62,6 +62,9 @@
       "gatekeeperAssess": false,
       "identity": "Hyunsang Cho (W7NL89YGSD)",
       "x64ArchFiles": "Contents/Resources/MdfyQuickLook.app/**/*",
+      "signIgnore": [
+        "Contents/Resources/MdfyQuickLook.app"
+      ],
       "target": [
         {
           "target": "dmg",

@@ -70,15 +70,21 @@ cp -R "${BUILD_APP}" "${BUILD_DIR}/MdfyQuickLook.app"
 
 echo "  [4/5] Signing with Developer ID + hardened runtime..."
 
-# Sign the QuickLook extension first (nested code must be signed before container)
-codesign --force --deep --options runtime \
+# Sign the QuickLook extension first (nested code must be signed before
+# container). MUST include --entitlements so the sandbox + network
+# entitlements from QuickLookExtension/MdfyQLExtension.entitlements
+# survive the re-sign. Without that flag macOS PluginKit rejects the
+# .appex because App Extensions REQUIRE com.apple.security.app-sandbox.
+codesign --force --options runtime \
     --sign "${SIGN_IDENTITY}" \
+    --entitlements "${SCRIPT_DIR}/QuickLookExtension/MdfyQLExtension.entitlements" \
     --timestamp \
     "${BUILD_DIR}/MdfyQuickLook.app/Contents/PlugIns/MdfyQLExtension.appex"
 
-# Sign the main app
-codesign --force --deep --options runtime \
+# Sign the main app with its own entitlements.
+codesign --force --options runtime \
     --sign "${SIGN_IDENTITY}" \
+    --entitlements "${SCRIPT_DIR}/HostApp/MdfyQuickLook.entitlements" \
     --timestamp \
     "${BUILD_DIR}/MdfyQuickLook.app"
 
