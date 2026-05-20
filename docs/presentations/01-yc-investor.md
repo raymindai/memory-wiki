@@ -4,7 +4,7 @@ theme: default
 paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
-title: 'mdfy — YC / Investor deck'
+title: 'memory.wiki — YC / Investor deck'
 style: |
   section { font-family: 'Inter', 'Pretendard', system-ui, sans-serif; padding: 64px 72px; letter-spacing: -0.01em; }
   section.lead { justify-content: center; text-align: left; }
@@ -36,7 +36,7 @@ style: |
 
 <span class="pill" style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">YC W2026 · memory.wiki</span>
 
-# **mdfy**
+# **memory.wiki**
 ## Your AI memory, deployable to any AI.
 
 <br>
@@ -71,7 +71,7 @@ We took that local-file shape and made it a URL.
 
 ---
 
-# What mdfy is
+# What memory.wiki is
 
 A personal knowledge hub that lives at **one URL** — `memory.wiki/hub/you` — that every AI tool can read.
 
@@ -140,7 +140,7 @@ Twelve months ago "AI memory" meant per-product hacks. Today every AI tool ships
 | Claude Projects | project files | ❌ |
 | ChatGPT | memory, GPTs | ❌ |
 | Codex / Claude Code | AGENTS.md / CLAUDE.md | partial (file-shaped) |
-| **mdfy** | **URL-shaped** | **✅** |
+| **memory.wiki** | **URL-shaped** | **✅** |
 
 ---
 
@@ -169,7 +169,7 @@ Two questions, two products.
 | | Question | Example |
 |---|---|---|
 | Extracted | *What should the AI remember about you?* | Mem0, Letta, OpenAI memory |
-| **Authored** | ***What do you want to remember?*** | **mdfy** |
+| **Authored** | ***What do you want to remember?*** | **memory.wiki** |
 
 <br>
 
@@ -183,7 +183,7 @@ Both are legitimate. Authored is the harder problem because the user has to do w
 
 Microsoft GraphRAG / LlamaIndex KG build a graph and traverse it *internally* when an upstream system asks. The graph never leaves the service.
 
-mdfy ships the graph **in the URL response**. Every bundle carries themes, insights, concept relations as markdown.
+memory.wiki ships the graph **in the URL response**. Every bundle carries themes, insights, concept relations as markdown.
 
 <br>
 
@@ -231,7 +231,7 @@ The receiving AI inherits the prior AI's analysis for free — no second fetch, 
 - 5 AI dev tools wired
 - `llms.txt` shipped
 - Hub URLs work in Claude / Cursor / Codex today
-- Founder dogfood: this deck was built using mdfy
+- Founder dogfood: this deck was built using memory.wiki
 
 </div>
 
@@ -296,7 +296,7 @@ No tier locks the core. The cross-AI thesis would die if we paywalled the URL.
 
 <br>
 
-**Hyunsang Cho** — Founder. Built mdfy v6 in 8 weeks of full-time work after 1 month nights/weekends. Prior: shipped 3 Chrome extensions; 10+ years building product. Korean-English bilingual.
+**Hyunsang Cho** — Founder. Built memory.wiki v6 in 8 weeks of full-time work after 1 month nights/weekends. Prior: shipped 3 Chrome extensions; 10+ years building product. Korean-English bilingual.
 
 <br>
 

@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - mdfy QuickLook Preview Generator
+// MARK: - memory.wiki QuickLook Preview Generator
 
 /// Escapes special characters for safe embedding in JavaScript template literals.
 func escapeForJS(_ string: String) -> String {
@@ -19,9 +19,9 @@ func loadTemplate() -> String? {
     let sameDir = executableURL.deletingLastPathComponent().appendingPathComponent("template.html")
     if let content = try? String(contentsOf: sameDir, encoding: .utf8) { return content }
 
-    // ~/.mdfy/quicklook/
+    // ~/.memory.wiki/quicklook/
     let homeDir = FileManager.default.homeDirectoryForCurrentUser
-    let mdfyDir = homeDir.appendingPathComponent(".mdfy/quicklook/template.html")
+    let mdfyDir = homeDir.appendingPathComponent(".memory.wiki/quicklook/template.html")
     if let content = try? String(contentsOf: mdfyDir, encoding: .utf8) { return content }
 
     // Relative to source tree (development)
@@ -39,7 +39,7 @@ func loadCSS() -> String? {
     if let content = try? String(contentsOf: sameDir, encoding: .utf8) { return content }
 
     let homeDir = FileManager.default.homeDirectoryForCurrentUser
-    let mdfyDir = homeDir.appendingPathComponent(".mdfy/quicklook/preview.css")
+    let mdfyDir = homeDir.appendingPathComponent(".memory.wiki/quicklook/preview.css")
     if let content = try? String(contentsOf: mdfyDir, encoding: .utf8) { return content }
 
     let resourceDir = executableURL

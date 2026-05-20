@@ -4,7 +4,7 @@ theme: default
 paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
-title: 'mdfy — 공모전 / 심사용 덱'
+title: 'memory.wiki — 공모전 / 심사용 덱'
 style: |
   section { font-family: 'Pretendard', 'Inter', system-ui, sans-serif; padding: 64px 72px; letter-spacing: -0.01em; }
   section.lead { justify-content: center; text-align: left; }
@@ -36,7 +36,7 @@ style: |
 
 <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">memory.wiki · 2026</span>
 
-# **mdfy**
+# **memory.wiki**
 ## 모든 AI에 배포 가능한 당신의 기억층.
 
 <br>
@@ -159,8 +159,8 @@ ChatGPT, Claude, Cursor, Codex, Gemini — 각자 자기만의 메모리 레이�
 
 - `/spec` — URL 계약, 번들 다이제스트
 - `/llms.txt` 표준 — 모든 허브 자동 노출
-- `@mdfy/engine` (MIT)
-- `@mdfy/mcp-server` (오픈소스)
+- `@memory.wiki/engine` (MIT)
+- `@memory.wiki/mcp-server` (오픈소스)
 - Chrome 확장 (오픈소스)
 - 통합 가이드 + GitHub Action 레시피
 

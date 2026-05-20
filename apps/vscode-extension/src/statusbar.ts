@@ -25,15 +25,15 @@ export class StatusBarManager {
   setIdle(): void {
     this.clearResetTimer();
     this.publishedUrl = undefined;
-    this.item.text = "$(markdown) mdfy";
-    this.item.tooltip = "mdfy.app - Click for sync actions";
+    this.item.text = "$(markdown) memory.wiki";
+    this.item.tooltip = "memory.wiki - Click for sync actions";
     this.item.backgroundColor = undefined;
   }
 
   setSynced(): void {
     this.clearResetTimer();
-    this.item.text = "$(check) mdfy";
-    this.item.tooltip = "mdfy.app - Synced";
+    this.item.text = "$(check) memory.wiki";
+    this.item.tooltip = "memory.wiki - Synced";
     this.item.backgroundColor = undefined;
 
     // Reset to idle after 5 seconds
@@ -44,15 +44,15 @@ export class StatusBarManager {
 
   setSyncing(message?: string): void {
     this.clearResetTimer();
-    this.item.text = `$(sync~spin) mdfy`;
-    this.item.tooltip = `mdfy.app - ${message || "Syncing..."}`;
+    this.item.text = `$(sync~spin) memory.wiki`;
+    this.item.tooltip = `memory.wiki - ${message || "Syncing..."}`;
     this.item.backgroundColor = undefined;
   }
 
   setConflict(): void {
     this.clearResetTimer();
-    this.item.text = "$(warning) mdfy";
-    this.item.tooltip = "mdfy.app - Conflict detected. Click to resolve.";
+    this.item.text = "$(warning) memory.wiki";
+    this.item.tooltip = "memory.wiki - Conflict detected. Click to resolve.";
     this.item.backgroundColor = new vscode.ThemeColor(
       "statusBarItem.warningBackground"
     );
@@ -61,7 +61,7 @@ export class StatusBarManager {
   setPublished(url: string): void {
     this.clearResetTimer();
     this.publishedUrl = url;
-    this.item.text = "$(link) mdfy";
+    this.item.text = "$(link) memory.wiki";
     this.item.tooltip = `${url}\nClick to copy URL`;
     this.item.backgroundColor = undefined;
     this.item.command = "mdfy.copyUrl";
@@ -73,22 +73,22 @@ export class StatusBarManager {
 
   setCollaborating(peerCount: number): void {
     this.clearResetTimer();
-    this.item.text = `$(radio-tower) mdfy (${peerCount} ${peerCount === 1 ? "peer" : "peers"})`;
-    this.item.tooltip = `mdfy.app - Live collaboration with ${peerCount} ${peerCount === 1 ? "peer" : "peers"}`;
+    this.item.text = `$(radio-tower) memory.wiki (${peerCount} ${peerCount === 1 ? "peer" : "peers"})`;
+    this.item.tooltip = `memory.wiki - Live collaboration with ${peerCount} ${peerCount === 1 ? "peer" : "peers"}`;
     this.item.backgroundColor = undefined;
   }
 
   setCollaboratingLive(): void {
     this.clearResetTimer();
-    this.item.text = "$(radio-tower) mdfy Live";
-    this.item.tooltip = "mdfy.app - Live collaboration active";
+    this.item.text = "$(radio-tower) memory.wiki Live";
+    this.item.tooltip = "memory.wiki - Live collaboration active";
     this.item.backgroundColor = undefined;
   }
 
   setError(): void {
     this.clearResetTimer();
-    this.item.text = "$(error) mdfy";
-    this.item.tooltip = "mdfy.app - Sync error";
+    this.item.text = "$(error) memory.wiki";
+    this.item.tooltip = "memory.wiki - Sync error";
     this.item.backgroundColor = new vscode.ThemeColor(
       "statusBarItem.errorBackground"
     );

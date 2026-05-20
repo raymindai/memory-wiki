@@ -1,9 +1,9 @@
 /* =========================================================
-   mdfy for Mac — Electron + Local WASM + Sidebar + Sync
+   memory.wiki for Mac — Electron + Local WASM + Sidebar + Sync
    Architecture: mirrors VS Code extension model
    - Sidebar with file list (ALL/SYNCED/LOCAL/CLOUD)
    - SyncEngine (push/pull/conflict/offline queue/polling)
-   - AuthManager (mdfy:// OAuth callback, JWT tokens)
+   - AuthManager (memory.wiki:// OAuth callback, JWT tokens)
    - Workspace folder scanning
    ========================================================= */
 
@@ -25,7 +25,7 @@ const { createClient } = require("@supabase/supabase-js");
 
 // ─── Constants ───
 
-const MDFY_URL = "https://mdfy.app";
+const MDFY_URL = "https://memory.wiki";
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 const SYNC_POLL_INTERVAL = 30000; // 30 seconds
 const PUSH_DEBOUNCE_MS = 2000;
@@ -51,7 +51,7 @@ const FILE_FILTERS = [
 // Phase 3 of the WASM-to-markdown-it migration (Phase 1 = web,
 // Phase 2 = vsce, this = desktop). Same renderer as the web app and
 // the VS Code extension — preview output stays in sync with what
-// the user will see at mdfy.app/<id> after publish.
+// the user will see at memory.wiki/<id> after publish.
 
 const renderer = require("./render");
 
@@ -625,7 +625,7 @@ const SyncEngine = {
     const sidecarFiles = this.findSidecars();
 
     for (const sidecarPath of sidecarFiles) {
-      const mdPath = sidecarPath.replace(/\.mdfy\.json$/, ".md");
+      const mdPath = sidecarPath.replace(/\.memory.wiki\.json$/, ".md");
       const config = loadMdfyConfig(mdPath);
       if (!config) continue;
 
@@ -1121,7 +1121,7 @@ function openFileInApp(filePath) {
   const ext = path.extname(absolutePath).toLowerCase();
 
   if (!ALL_SUPPORTED_EXTENSIONS.has(ext)) {
-    dialog.showErrorBox("Unsupported Format", `mdfy does not support ${ext} files.`);
+    dialog.showErrorBox("Unsupported Format", `memory.wiki does not support ${ext} files.`);
     return;
   }
 
@@ -1141,7 +1141,7 @@ function openFileInApp(filePath) {
       const result = renderMarkdown(content);
       const config = loadMdfyConfig(absolutePath);
 
-      mainWindow.setTitle(`${path.basename(absolutePath)} — mdfy`);
+      mainWindow.setTitle(`${path.basename(absolutePath)} — memory.wiki`);
       mainWindow.webContents.send("load-document", {
         html: result.html,
         markdown: content,
@@ -1151,7 +1151,7 @@ function openFileInApp(filePath) {
       });
     } else {
       // Non-text: show import message
-      const msg = `Import ${ext} files by opening them on mdfy.app.`;
+      const msg = `Import ${ext} files by opening them on memory.wiki.`;
       const md = `# ${path.basename(absolutePath)}\n\n${msg}`;
       const result = renderMarkdown(md);
       mainWindow.webContents.send("load-document", {
@@ -1175,14 +1175,14 @@ function sendToRenderer(channel, data) {
   }
 }
 
-// ─── URL Scheme: mdfy:// ───
+// ─── URL Scheme: memory.wiki:// ───
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient("mdfy", process.execPath, [path.resolve(process.argv[1])]);
+    app.setAsDefaultProtocolClient("memory.wiki", process.execPath, [path.resolve(process.argv[1])]);
   }
 } else {
-  app.setAsDefaultProtocolClient("mdfy");
+  app.setAsDefaultProtocolClient("memory.wiki");
 }
 
 // ─── Single Instance ───
@@ -1196,7 +1196,7 @@ if (!gotTheLock) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
 
-      const mdfyUrl = argv.find((a) => a.startsWith("mdfy://"));
+      const mdfyUrl = argv.find((a) => a.startsWith("memory.wiki://"));
       if (mdfyUrl) {
         handleMdfyUrl(mdfyUrl);
         return;
@@ -1220,13 +1220,13 @@ function handleMdfyUrl(url) {
   try {
     const parsed = new URL(url);
 
-    // Auth callback: mdfy://auth?token=...&refresh_token=...
+    // Auth callback: memory.wiki://auth?token=...&refresh_token=...
     if (parsed.hostname === "auth" || parsed.pathname.startsWith("/auth")) {
       AuthManager.handleAuthCallback(url);
       return;
     }
 
-    // Open file: mdfy://open?file=/path/to/file.md
+    // Open file: memory.wiki://open?file=/path/to/file.md
     if (parsed.hostname === "open" || parsed.pathname.startsWith("/open")) {
       const filePath = parsed.searchParams.get("file");
       if (filePath && fs.existsSync(filePath)) {
@@ -1242,7 +1242,7 @@ function handleMdfyUrl(url) {
       return;
     }
 
-    // Open cloud doc: mdfy://doc/{docId}
+    // Open cloud doc: memory.wiki://doc/{docId}
     if (parsed.hostname === "doc" || parsed.pathname.startsWith("/doc")) {
       const docId = parsed.pathname.split("/").pop();
       if (docId) openCloudDocumentInApp(docId);
@@ -1258,7 +1258,7 @@ async function openCloudDocumentInApp(docId) {
     const markdown = data.markdown || data.content || "";
     const result = renderMarkdown(markdown);
     currentFilePath = null;
-    mainWindow.setTitle((data.title || docId) + " — mdfy");
+    mainWindow.setTitle((data.title || docId) + " — memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: result.html,
       markdown,
@@ -1371,7 +1371,7 @@ ipcMain.handle("new-document", async () => {
     // User cancelled — open empty editor without file
     currentFilePath = null;
     stopFileWatcher();
-    mainWindow.setTitle("Untitled — mdfy");
+    mainWindow.setTitle("Untitled — memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: "<p><br></p>", markdown: "", filePath: null, flavor: "gfm", config: null,
     });
@@ -1382,7 +1382,7 @@ ipcMain.handle("new-document", async () => {
   currentFilePath = filePath;
   startFileWatcher(filePath);
   addToRecentFiles(filePath);
-  mainWindow.setTitle(`${path.basename(filePath)} — mdfy`);
+  mainWindow.setTitle(`${path.basename(filePath)} — memory.wiki`);
   mainWindow.webContents.send("load-document", {
     html: "<p><br></p>", markdown: "", filePath, flavor: "gfm", config: null,
   });
@@ -1421,7 +1421,7 @@ ipcMain.handle("save-file", async (event, markdown) => {
         mainWindow?.webContents.send("save-error", { path: result.filePath, message: err.message });
         return null;
       }
-      mainWindow.setTitle(`${path.basename(result.filePath)} — mdfy`);
+      mainWindow.setTitle(`${path.basename(result.filePath)} — memory.wiki`);
       addToRecentFiles(result.filePath);
       startFileWatcher(result.filePath);
       return result.filePath;
@@ -1552,7 +1552,7 @@ ipcMain.handle("get-recent-files", () => {
 // --- Auth ---
 
 ipcMain.handle("login", () => {
-  const callbackUrl = encodeURIComponent("mdfy://auth");
+  const callbackUrl = encodeURIComponent("memory.wiki://auth");
   const url = `${MDFY_URL}/auth/desktop?redirect=${callbackUrl}`;
   console.log("[login] Opening:", url);
   shell.openExternal(url).catch((err) => {
@@ -1718,7 +1718,7 @@ ipcMain.handle("duplicate-cloud", async (event, docId, title) => {
     const rendered = renderMarkdown(markdown);
     currentFilePath = null;
     stopFileWatcher();
-    mainWindow.setTitle(newTitle + " — mdfy");
+    mainWindow.setTitle(newTitle + " — memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: rendered.html,
       markdown,
@@ -1798,7 +1798,7 @@ ipcMain.handle("preview-cloud-doc", async (event, docId, title) => {
     const isOwner = !!(userId && data.user_id && data.user_id === userId);
     const editToken = data.editToken || null;
 
-    mainWindow.setTitle((title || docId) + (isOwner ? "" : " (Cloud)") + " — mdfy");
+    mainWindow.setTitle((title || docId) + (isOwner ? "" : " (Cloud)") + " — memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: result.html,
       markdown,
@@ -1996,7 +1996,7 @@ function buildMenu() {
   const isMac = process.platform === "darwin";
   const template = [
     ...(isMac ? [{
-      label: "mdfy",
+      label: "memory.wiki",
       submenu: [
         { role: "about" },
         { type: "separator" },
@@ -2017,7 +2017,7 @@ function buildMenu() {
             if (!mainWindow) return;
             currentFilePath = null;
             stopFileWatcher();
-            mainWindow.setTitle("Untitled — mdfy");
+            mainWindow.setTitle("Untitled — memory.wiki");
             mainWindow.webContents.send("load-document", {
               html: "<p><br></p>", markdown: "", filePath: null, flavor: "gfm", config: null,
             });
@@ -2061,7 +2061,7 @@ function buildMenu() {
         },
         { type: "separator" },
         {
-          label: "Publish to mdfy.app",
+          label: "Publish to memory.wiki",
           accelerator: "CmdOrCtrl+Shift+P",
           click: () => {
             if (mainWindow) mainWindow.webContents.send("trigger-publish");
@@ -2100,8 +2100,8 @@ function buildMenu() {
     {
       label: "Help",
       submenu: [
-        { label: "mdfy.app", click: () => shell.openExternal("https://mdfy.app") },
-        { label: "About mdfy", click: () => shell.openExternal("https://mdfy.app/about") },
+        { label: "memory.wiki", click: () => shell.openExternal("https://memory.wiki") },
+        { label: "About memory.wiki", click: () => shell.openExternal("https://memory.wiki/about") },
       ],
     },
   ];
@@ -2151,11 +2151,11 @@ app.on("open-file", (event, filePath) => {
 
 app.whenReady().then(() => {
   app.setAboutPanelOptions({
-    applicationName: "mdfy",
+    applicationName: "memory.wiki",
     applicationVersion: app.getVersion(),
     version: `Electron ${process.versions.electron}`,
-    copyright: "Copyright 2024-2026 mdfy.app",
-    website: "https://mdfy.app",
+    copyright: "Copyright 2024-2026 memory.wiki",
+    website: "https://memory.wiki",
     iconPath: path.join(__dirname, "assets", "icon.png"),
   });
 

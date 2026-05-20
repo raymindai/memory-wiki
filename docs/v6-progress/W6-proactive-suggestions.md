@@ -5,10 +5,10 @@
 ## Why this is the third exceed
 
 Karpathy's pattern is reactive: the user asks, the LLM responds.
-Graphify is the same: the user runs `/graphify`. mdfy now watches
+Graphify is the same: the user runs `/graphify`. memory.wiki now watches
 hub activity and proposes actions on its own ("you've added 4 docs
 about pricing this week, want a bundle?"). This is the third
-structural capability mdfy ships at launch that's outside what the
+structural capability memory.wiki ships at launch that's outside what the
 source patterns cover.
 
 Combined with W4 (diff/accept synthesis) and W5a (PDF ingest), the

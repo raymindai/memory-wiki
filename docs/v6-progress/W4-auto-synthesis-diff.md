@@ -6,10 +6,10 @@ exceed move)*
 ## Why this is "exceed"
 
 Karpathy's LLM-Wiki pattern can only **regenerate** wiki pages. Every
-refresh blows away the previous version with no review surface. mdfy
+refresh blows away the previous version with no review surface. memory.wiki
 lets the owner see a line-level diff between the existing synthesis
 and the model's proposed update, then accept or reject as a whole.
-This is the first capability mdfy ships that's structurally outside
+This is the first capability memory.wiki ships that's structurally outside
 what the source pattern covers.
 
 ## What shipped

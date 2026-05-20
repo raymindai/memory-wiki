@@ -1,12 +1,12 @@
 /**
- * mdfy.app Chrome Extension — Background Service Worker
+ * memory.wiki Chrome Extension — Background Service Worker
  *
  * Handles context menu and message passing.
  * Works on AI chat pages (full conversation capture) and any page (selection/page capture).
  */
 
-const MDFY_URL = "https://mdfy.app";
-const MDFY_COOKIE_URL = "https://mdfy.app";
+const MDFY_URL = "https://memory.wiki";
+const MDFY_COOKIE_URL = "https://memory.wiki";
 const MAX_URL_BYTES = 8000;
 
 // ─── Compression (same as content.js / share.ts) ───
@@ -28,7 +28,7 @@ async function compressToBase64Url(text) {
     const compressed = await new Response(stream).arrayBuffer();
     return arrayBufferToBase64Url(compressed);
   } catch (err) {
-    console.warn("[mdfy] Compression failed, using plain base64:", err);
+    console.warn("[memory.wiki] Compression failed, using plain base64:", err);
     return btoa(unescape(encodeURIComponent(text)));
   }
 }
@@ -50,12 +50,12 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: "mdfy-send-selection",
-      title: "Send selection to mdfy.app",
+      title: "Send selection to memory.wiki",
       contexts: ["selection"],
     });
     chrome.contextMenus.create({
       id: "mdfy-capture-page",
-      title: "Send this page to mdfy.app",
+      title: "Send this page to memory.wiki",
       contexts: ["page"],
     });
   });
@@ -73,7 +73,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         return;
       }
     } catch (err) {
-      console.warn("[mdfy] Content script not available for selection capture:", err);
+      console.warn("[memory.wiki] Content script not available for selection capture:", err);
     }
 
     // Fallback: use plain selection text
@@ -93,7 +93,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         return;
       }
     } catch (err) {
-      console.warn("[mdfy] Content script not available for page capture:", err);
+      console.warn("[memory.wiki] Content script not available for page capture:", err);
     }
 
     // Fallback: inject a script to extract page content
@@ -193,8 +193,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         await sendToMdfy(result.result);
       }
     } catch (err) {
-      console.warn("[mdfy] Page extraction failed:", err);
-      // Last resort: just open mdfy.app
+      console.warn("[memory.wiki] Page extraction failed:", err);
+      // Last resort: just open memory.wiki
       chrome.tabs.create({ url: MDFY_URL });
     }
   }
@@ -215,7 +215,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // async
   }
 
-  // Upload image data URL to mdfy.app (bypasses CORS)
+  // Upload image data URL to memory.wiki (bypasses CORS)
   if (request.action === "upload-image") {
     const { dataUrl, userId } = request;
     (async () => {
@@ -253,8 +253,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const { url, options } = request;
     try {
       const parsed = new URL(url);
-      if (parsed.origin !== "https://mdfy.app") {
-        sendResponse({ ok: false, error: "Only requests to mdfy.app are allowed" });
+      if (parsed.origin !== "https://memory.wiki") {
+        sendResponse({ ok: false, error: "Only requests to memory.wiki are allowed" });
         return true;
       }
     } catch {
@@ -280,7 +280,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "get-user-id") {
-    // Get user ID from Supabase auth cookies on mdfy.app
+    // Get user ID from Supabase auth cookies on memory.wiki
     // Supabase stores auth as base64-encoded JSON split across multiple cookies:
     //   sb-{ref}-auth-token.0, sb-{ref}-auth-token.1, etc.
     // Value format: "base64-" prefix + base64(JSON with {access_token, user: {id}})
@@ -302,12 +302,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const json = JSON.parse(atob(combined));
             resolve({ userId: json.user?.id || null });
           } catch {
-            console.warn("[mdfy] Failed to parse auth cookies");
+            console.warn("[memory.wiki] Failed to parse auth cookies");
             resolve({ userId: null });
           }
         });
       } catch (err) {
-        console.warn("[mdfy] Cookie access error:", err);
+        console.warn("[memory.wiki] Cookie access error:", err);
         resolve({ userId: null });
       }
     });

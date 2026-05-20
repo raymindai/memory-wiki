@@ -56,7 +56,7 @@ console.log(`Detected: ${flavor.primary}`);
 ```python
 import requests
 
-response = requests.post("https://mdfy.app/api/docs", json={
+response = requests.post("https://memory.wiki/api/docs", json={
     "markdown": "# Hello World",
 })
 print(response.json()["id"])  # → "abc123"

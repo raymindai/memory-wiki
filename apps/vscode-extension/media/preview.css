@@ -1,6 +1,6 @@
 /* =========================================================
-   mdfy VS Code Preview — Dark/Light theme
-   Ported from mdfy.app globals.css + mdcore-rendered styles
+   memory.wiki VS Code Preview — Dark/Light theme
+   Ported from memory.wiki globals.css + mdcore-rendered styles
    ========================================================= */
 
 :root {
@@ -438,7 +438,7 @@ html, body {
   line-height: 1.65;
 }
 
-/* Override highlight.js background to match mdfy.app */
+/* Override highlight.js background to match memory.wiki */
 .mdcore-rendered .hljs {
   background: transparent !important;
 }
@@ -646,9 +646,9 @@ pre.ascii-original.hidden {
   outline-color: var(--accent);
 }
 
-/* === Pane-based layout (like mdfy.app) === */
+/* === Pane-based layout (like memory.wiki) === */
 
-/* Pane header — label + toggle icons (compact, like mdfy.app header row) */
+/* Pane header — label + toggle icons (compact, like memory.wiki header row) */
 .pane-header {
   display: flex;
   align-items: center;

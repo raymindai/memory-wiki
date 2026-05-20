@@ -14,7 +14,7 @@ supporting Karpathy-pattern files.
 ## W5a. PDF ingest end-to-end
 
 Karpathy hand-waves source ingestion as "raw documents" and Graphify
-scopes its multi-format reader to project folders. mdfy brings
+scopes its multi-format reader to project folders. memory.wiki brings
 multi-modal source ingest into the personal hub.
 
 `/api/import/pdf` gains a `?save=1` mode. Same multipart upload as
@@ -58,7 +58,7 @@ markdown later).
 ## W5b. Hub-wide append-only log.md
 
 Karpathy names `log.md` alongside the wiki itself: a chronological
-record of every meaningful mutation. mdfy now writes one per user
+record of every meaningful mutation. memory.wiki now writes one per user
 and surfaces it both as in-app JSON and as a Karpathy-shaped
 markdown URL that AI fetchers can pull alongside the hub.
 

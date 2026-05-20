@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ================================================================
-# mdfy QuickLook — Build & Install Script
+# memory.wiki QuickLook — Build & Install Script
 # ================================================================
 #
 # Builds the mdfy-quicklook CLI tool and installs it to /usr/local/bin.
@@ -19,7 +19,7 @@ INSTALL_DIR="/usr/local/bin"
 TOOL_NAME="mdfy-quicklook"
 
 echo ""
-echo "  mdfy QuickLook — Build & Install"
+echo "  memory.wiki QuickLook — Build & Install"
 echo "  ================================="
 echo ""
 
@@ -62,14 +62,14 @@ echo "  Installing to $INSTALL_DIR/$TOOL_NAME..."
 if [ -w "$INSTALL_DIR" ]; then
     cp "$BUILD_DIR/$TOOL_NAME" "$INSTALL_DIR/$TOOL_NAME"
     # Also install resources to a known location
-    RESOURCE_DIR="$HOME/.mdfy/quicklook"
+    RESOURCE_DIR="$HOME/.memory.wiki/quicklook"
     mkdir -p "$RESOURCE_DIR"
     cp "$BUILD_DIR/template.html" "$RESOURCE_DIR/template.html"
     cp "$BUILD_DIR/preview.css" "$RESOURCE_DIR/preview.css"
 else
     echo "  Need sudo for $INSTALL_DIR..."
     sudo cp "$BUILD_DIR/$TOOL_NAME" "$INSTALL_DIR/$TOOL_NAME"
-    RESOURCE_DIR="$HOME/.mdfy/quicklook"
+    RESOURCE_DIR="$HOME/.memory.wiki/quicklook"
     mkdir -p "$RESOURCE_DIR"
     cp "$BUILD_DIR/template.html" "$RESOURCE_DIR/template.html"
     cp "$BUILD_DIR/preview.css" "$RESOURCE_DIR/preview.css"
@@ -78,7 +78,7 @@ fi
 echo ""
 echo "  Done! Installed:"
 echo "    Binary:    $INSTALL_DIR/$TOOL_NAME"
-echo "    Resources: $HOME/.mdfy/quicklook/"
+echo "    Resources: $HOME/.memory.wiki/quicklook/"
 echo ""
 echo "  Usage:"
 echo "    $TOOL_NAME README.md               # HTML to stdout"

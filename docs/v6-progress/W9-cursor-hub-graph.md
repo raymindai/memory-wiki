@@ -1,12 +1,12 @@
-# W9: `/mdfy` for Cursor + hub-level graph view
+# W9: `/memory.wiki` for Cursor + hub-level graph view
 
-**Commit.** `6e46b47a`. *W9: /mdfy for Cursor + hub-level graph view*
+**Commit.** `6e46b47a`. *W9: /memory.wiki for Cursor + hub-level graph view*
 
-## `/mdfy` in Cursor
+## `/memory.wiki` in Cursor
 
 ### What ships
 
-`public/skills/mdfy/cursor-rule.mdc` is Cursor's `.mdc` rule
+`public/skills/memory.wiki/cursor-rule.mdc` is Cursor's `.mdc` rule
 counterpart to the Claude Code SKILL.md from W8. Same three actions
 (capture / bundle / hub), same hub-aware copy, formatted for
 Cursor's rule loader. `alwaysApply: true` so the rule is in every
@@ -15,7 +15,7 @@ this," "bundle my docs about X," "give me my hub URL") so the
 model only acts when the user actually wants it.
 
 `install.sh` gained a `--target` flag. Default installs the Claude
-Code skill at `~/.claude/skills/mdfy/`. `--target=cursor` drops
+Code skill at `~/.claude/skills/memory.wiki/`. `--target=cursor` drops
 `mdfy.mdc` into `~/.cursor/rules/` (Cursor's global rules
 directory). Both targets share the same fetch helper, error path,
 and post-install hint.
@@ -25,7 +25,7 @@ each with its own one-line installer.
 
 ### Verified
 
-- `/skills/mdfy/cursor-rule.mdc` served. 2781 bytes, HTTP 200.
+- `/skills/memory.wiki/cursor-rule.mdc` served. 2781 bytes, HTTP 200.
 - `install.sh --target=cursor` branch reachable in the shipped
   script. Lands the rule at `~/.cursor/rules/mdfy.mdc`.
 - `/install` page renders both sections; "Cursor" appears 14
@@ -35,8 +35,8 @@ each with its own one-line installer.
 
 | Path | Role |
 |------|------|
-| `apps/web/public/skills/mdfy/cursor-rule.mdc` | Cursor rule body |
-| `apps/web/public/skills/mdfy/install.sh` | Multi-target installer |
+| `apps/web/public/skills/memory.wiki/cursor-rule.mdc` | Cursor rule body |
+| `apps/web/public/skills/memory.wiki/install.sh` | Multi-target installer |
 | `apps/web/src/app/install/page.tsx` | Landing with both editor sections |
 
 ## Hub-level graph view
@@ -96,7 +96,7 @@ regression baseline.
 
 ## Deferred
 
-- **Codex / Aider versions** of `/mdfy`. Both are simpler in shape
+- **Codex / Aider versions** of `/memory.wiki`. Both are simpler in shape
   than Cursor (Aider has its own `.aider.md` convention; Codex CLI
   has prompt files). W10 work.
 - **Public `/raw/hub/<slug>/graph.json`**. AI fetchers could

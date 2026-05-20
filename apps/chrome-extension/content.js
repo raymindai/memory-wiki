@@ -1,9 +1,9 @@
 /**
- * mdfy.app Chrome Extension — Content Script
+ * memory.wiki Chrome Extension — Content Script
  *
  * Injected into ChatGPT, Claude, and Gemini pages.
- * Adds a floating "mdfy" button and per-message mini buttons.
- * Extracts conversation content as Markdown and sends to mdfy.app.
+ * Adds a floating "memory.wiki" button and per-message mini buttons.
+ * Extracts conversation content as Markdown and sends to memory.wiki.
  */
 
 (function () {
@@ -13,7 +13,7 @@
   if (document.documentElement.dataset.mdfyInjected) return;
   document.documentElement.dataset.mdfyInjected = "1";
 
-  const MDFY_URL = "https://mdfy.app";
+  const MDFY_URL = "https://memory.wiki";
   const MAX_URL_BYTES = 8000; // ~8KB limit for URL hash
 
   // ─── Platform Detection ───
@@ -29,7 +29,7 @@
   const platform = detectPlatform();
   if (!platform) return;
 
-  // ─── Compression (matches mdfy.app's share.ts) ───
+  // ─── Compression (matches memory.wiki's share.ts) ───
 
   function arrayBufferToBase64Url(buffer) {
     const bytes = new Uint8Array(buffer);
@@ -48,7 +48,7 @@
       const compressed = await new Response(stream).arrayBuffer();
       return arrayBufferToBase64Url(compressed);
     } catch (err) {
-      console.warn("[mdfy] Compression failed, using plain base64:", err);
+      console.warn("[memory.wiki] Compression failed, using plain base64:", err);
       // Fallback: plain base64
       return btoa(unescape(encodeURIComponent(text)));
     }
@@ -150,7 +150,7 @@
 
     // ── Step 0b: Remove injected UI (but NOT aria-hidden yet — math needs it) ──
     clone.querySelectorAll(
-      ".mdfy-mini-btn, .mdfy-float-btn, #mdfy-float-btn, [class*='mdfy'], " +
+      ".mdfy-mini-btn, .mdfy-float-btn, #mdfy-float-btn, [class*='memory.wiki'], " +
       "button[class*='copy'], button[class*='Copy'], button[class*='group/status'], " +
       "style, script, noscript, " +
       "button[class*='skill'], button[class*='status'], " +
@@ -833,7 +833,7 @@
         // Upload
         const uploadUrl = await uploadImageToMdfy(croppedDataUrl);
         if (uploadUrl) {
-          console.log("[mdfy] diagram uploaded:", uploadUrl);
+          console.log("[memory.wiki] diagram uploaded:", uploadUrl);
           const img = document.createElement("img");
           img.src = uploadUrl;
           img.alt = "diagram";
@@ -841,7 +841,7 @@
           iframe.replaceWith(img);
         }
       } catch (err) {
-        console.error("[mdfy] diagram capture failed:", err);
+        console.error("[memory.wiki] diagram capture failed:", err);
       }
     }
   }
@@ -924,10 +924,10 @@
       });
 
       if (response.url) return response.url;
-      console.warn("[mdfy] Image upload failed:", response.error);
+      console.warn("[memory.wiki] Image upload failed:", response.error);
       return null;
     } catch (err) {
-      console.warn("[mdfy] Image upload failed:", err);
+      console.warn("[memory.wiki] Image upload failed:", err);
       return null;
     }
   }
@@ -953,14 +953,14 @@
 
     if (matches.length === 0) return markdown;
 
-    // If logged in, upload images to mdfy.app permanent storage
+    // If logged in, upload images to memory.wiki permanent storage
     const userId = await getUserId();
     if (!userId) return markdown; // Keep original URLs as-is
 
     // Filter to uploadable images (include data: URLs from captured diagrams)
     const uploadable = matches.filter((match) => {
       const url = match[2];
-      if (url.includes("supabase") || url.includes("mdfy.app")) return false;
+      if (url.includes("supabase") || url.includes("memory.wiki")) return false;
       if (url.startsWith("data:")) return true; // captured diagram screenshots
       if (!url.startsWith("http")) return false;
       return true;
@@ -975,7 +975,7 @@
         const permanentUrl = await uploadImageToMdfy(originalUrl);
         return { originalUrl, permanentUrl };
       } catch (err) {
-        console.warn("[mdfy] Failed to upload image:", originalUrl, err);
+        console.warn("[memory.wiki] Failed to upload image:", originalUrl, err);
         return { originalUrl, permanentUrl: null };
       }
     });
@@ -992,7 +992,7 @@
     return result;
   }
 
-  // ─── Send to mdfy.app ───
+  // ─── Send to memory.wiki ───
 
   async function sendToMdfy(markdown) {
     if (!markdown || markdown.trim().length === 0) {
@@ -1020,7 +1020,7 @@
           try {
             parsed = JSON.parse(res.body);
           } catch (parseErr) {
-            console.warn("[mdfy] Failed to parse response:", parseErr);
+            console.warn("[memory.wiki] Failed to parse response:", parseErr);
             throw parseErr;
           }
           const { id, editToken } = parsed;
@@ -1030,10 +1030,10 @@
         }
         // Check for auth failure
         if (res.status === 401 || res.status === 403) {
-          showToast("Session expired. Log in at mdfy.app to sync.", 5000);
+          showToast("Session expired. Log in at memory.wiki to sync.", 5000);
         }
       } catch (err) {
-        console.warn("[mdfy] Authenticated share failed, falling back to hash URL:", err);
+        console.warn("[memory.wiki] Authenticated share failed, falling back to hash URL:", err);
       }
     }
 
@@ -1069,7 +1069,7 @@
     const btn = document.createElement("button");
     btn.id = "mdfy-float-btn";
     btn.innerHTML = '<span class="mdfy-btn-logo"><span class="mdfy-logo-md">md</span><span class="mdfy-logo-fy">fy</span></span><span class="mdfy-btn-label">All</span>';
-    btn.title = "Capture entire conversation and publish on mdfy.app";
+    btn.title = "Capture entire conversation and publish on memory.wiki";
 
     const toggle = document.createElement("button");
     toggle.id = "mdfy-float-toggle";
@@ -1117,7 +1117,7 @@
         setFloatStatus("Published ✓", "done");
         setTimeout(() => { container.classList.remove("mdfy-done"); resetFloat(); }, 3000);
       } catch (err) {
-        console.error("[mdfy] capture failed:", err);
+        console.error("[memory.wiki] capture failed:", err);
         container.classList.remove("mdfy-loading");
         container.classList.add("mdfy-error");
         setFloatStatus("Failed", "error");
@@ -1233,7 +1233,7 @@
       const miniBtn = document.createElement("button");
       miniBtn.className = "mdfy-mini-btn";
       miniBtn.innerHTML = '<span class="mdfy-mini-logo"><span class="mdfy-mini-md">md</span><span class="mdfy-mini-fy">fy</span></span><span class="mdfy-mini-label">this</span>';
-      miniBtn.title = "Send this Q&A to mdfy.app";
+      miniBtn.title = "Send this Q&A to memory.wiki";
 
       const resetMini = () => {
         miniBtn.innerHTML = '<span class="mdfy-mini-logo"><span class="mdfy-mini-md">md</span><span class="mdfy-mini-fy">fy</span></span><span class="mdfy-mini-label">this</span>';
@@ -1262,7 +1262,7 @@
           setMiniStatus("Published ✓", "done");
           setTimeout(() => { miniBtn.classList.remove("mdfy-done"); resetMini(); }, 3000);
         } catch (err) {
-          console.error("[mdfy] capture failed:", err);
+          console.error("[memory.wiki] capture failed:", err);
           miniBtn.classList.remove("mdfy-loading");
           miniBtn.classList.add("mdfy-error");
           setMiniStatus("Failed", "error");
@@ -1349,7 +1349,7 @@
   document.documentElement.style.setProperty("--mdfy-header-h", layout.headerH + "px");
   document.documentElement.style.setProperty("--mdfy-input-h", layout.inputH + "px");
 
-  // Align mdfy All to the right edge of the message content area
+  // Align memory.wiki All to the right edge of the message content area
   function measureContentRight() {
     const msgSelectors = {
       chatgpt: "[data-message-author-role='assistant']",
@@ -1367,7 +1367,7 @@
 
   // ─── Initialize ───
 
-  // Only show floating "mdfy All" button if user opted in (default: hidden)
+  // Only show floating "memory.wiki All" button if user opted in (default: hidden)
   try {
     chrome.storage.sync.get({ showFloatingButton: false }, (data) => {
       if (data && data.showFloatingButton) {
@@ -1375,7 +1375,7 @@
       }
     });
   } catch (e) {
-    console.warn("[mdfy] storage access failed, skipping float button", e);
+    console.warn("[memory.wiki] storage access failed, skipping float button", e);
   }
   addMiniButtons();
 

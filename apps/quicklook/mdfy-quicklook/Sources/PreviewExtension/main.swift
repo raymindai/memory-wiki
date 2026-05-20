@@ -6,7 +6,7 @@ let args = CommandLine.arguments
 
 if args.count < 2 {
     print("""
-    mdfy QuickLook Preview Generator
+    memory.wiki QuickLook Preview Generator
 
     Usage:
       mdfy-quicklook <markdown-file>           Print rendered HTML to stdout

@@ -1,4 +1,4 @@
-# Welcome to mdfy.app
+# Welcome to memory.wiki
 
 > **Your Markdown, Beautifully Published.**
 > Import anything. Render beautifully. Share instantly.
@@ -8,7 +8,7 @@
 1. **Type or paste** anything — Markdown, plain text, Claude Code output
 2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
 3. **Edit** inline in the Live view, or use Source for raw Markdown
-4. **Share** with one click — generates a short URL like `mdfy.app/abc123`
+4. **Share** with one click — generates a short URL like `memory.wiki/abc123`
 
 ## What You Can Do
 
@@ -36,7 +36,7 @@
 
 ## Try It Now
 
-- **Drop a PDF here** — see AI mdfy turn it into clean Markdown
+- **Drop a PDF here** — see AI memory.wiki turn it into clean Markdown
 - **Click +** in the sidebar to start a new doc from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during the beta, no credit card
 

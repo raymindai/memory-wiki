@@ -1,4 +1,4 @@
-# mdfy VS Code Extension Test Document
+# memory.wiki VS Code Extension Test Document
 
 This file contains every Markdown element to test the WYSIWYG preview.
 
@@ -20,7 +20,7 @@ You can also combine them: ***bold italic***, **~~bold strikethrough~~**, *~~ita
 
 ## Links and Images
 
-Here is a [link to mdfy.app](https://mdfy.app) and another [link to GitHub](https://github.com).
+Here is a [link to memory.wiki](https://memory.wiki) and another [link to GitHub](https://github.com).
 
 ![Sample Image](https://picsum.photos/600/300)
 
@@ -69,7 +69,7 @@ function greet(name) {
   return { greeting: `Hello, ${name}!` };
 }
 
-greet("mdfy");
+greet("memory.wiki");
 ```
 
 ```python
@@ -109,7 +109,7 @@ LIMIT 10;
 | Feature | Status | Notes |
 | --- | --- | --- |
 | WYSIWYG Preview | Done | contentEditable |
-| Publish to mdfy.app | Done | One-click |
+| Publish to memory.wiki | Done | One-click |
 | Bidirectional Sync | Done | Push/Pull |
 | Code Highlighting | Done | highlight.js |
 | Math Rendering | Done | KaTeX |
@@ -166,7 +166,7 @@ graph TD
 sequenceDiagram
     participant U as User
     participant V as VS Code
-    participant S as mdfy.app
+    participant S as memory.wiki
     U->>V: Edit markdown
     V->>V: WYSIWYG Preview
     V->>S: Publish
@@ -207,11 +207,11 @@ Ellipsis: ...
 
 ## Mixed Content
 
-Here's a paragraph with **bold**, *italic*, `code`, and a [link](https://mdfy.app) all together. Following this is a code block, then a table, then a diagram:
+Here's a paragraph with **bold**, *italic*, `code`, and a [link](https://memory.wiki) all together. Following this is a code block, then a table, then a diagram:
 
 ```bash
 echo "Hello, World!"
-curl -s https://mdfy.app/api/docs | jq '.id'
+curl -s https://memory.wiki/api/docs | jq '.id'
 ```
 
 | Input | Output |
@@ -230,4 +230,4 @@ pie title Document Types
 
 ---
 
-*Published with [mdfy.app](https://mdfy.app) -- Your Markdown, Beautifully Published.*
+*Published with [memory.wiki](https://memory.wiki) -- Your Markdown, Beautifully Published.*

@@ -1,5 +1,5 @@
 /* =========================================================
-   mdfy VS Code Preview — Webview Client Script
+   memory.wiki VS Code Preview — Webview Client Script
    WYSIWYG editing via contentEditable + message passing
    ========================================================= */
 
@@ -2164,7 +2164,7 @@
   // Initialize flavor badge with detected flavor
   updateFlavorBadge(currentFlavor);
 
-  // ─── Custom Tooltips (instant, like mdfy.app) ───
+  // ─── Custom Tooltips (instant, like memory.wiki) ───
 
   var tooltipEl = null;
   var tooltipTimer = null;

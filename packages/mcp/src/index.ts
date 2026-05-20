@@ -7,12 +7,12 @@ import { homedir } from "os";
 
 // ─── Config ───
 
-const BASE_URL = (process.env.MDFY_BASE_URL || "https://mdfy.app").replace(/\/$/, "");
-const MDFY_DIR = join(homedir(), ".mdfy");
+const BASE_URL = (process.env.MDFY_BASE_URL || "https://memory.wiki").replace(/\/$/, "");
+const MDFY_DIR = join(homedir(), ".memory.wiki");
 const CONFIG_FILE = join(MDFY_DIR, "config.json");
 const TOKEN_FILE = join(MDFY_DIR, "tokens.json");
 
-// ─── Auth (JWT from `mdfy login`) ───
+// ─── Auth (JWT from `memory.wiki login`) ───
 
 interface MdfyConfig {
   token?: string;
@@ -84,7 +84,7 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!res.ok) {
     if (res.status === 401 || res.status === 403) {
       throw new Error(
-        "Authentication expired. Run 'mdfy login' in your terminal to re-authenticate."
+        "Authentication expired. Run 'memory.wiki login' in your terminal to re-authenticate."
       );
     }
     const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
@@ -113,7 +113,7 @@ function loginRequiredResult() {
   return {
     content: [{
       type: "text" as const,
-      text: "Not logged in. Run `mdfy login` in your terminal first to authenticate with mdfy.app.",
+      text: "Not logged in. Run `memory.wiki login` in your terminal first to authenticate with memory.wiki.",
     }],
     isError: true as const,
   };
@@ -170,7 +170,7 @@ async function fetchDoc(id: string): Promise<DocRecord> {
 // ─── MCP Server ───
 
 const server = new McpServer({
-  name: "mdfy",
+  name: "memory.wiki",
   version: "1.4.0",
 });
 
@@ -180,7 +180,7 @@ const server = new McpServer({
 
 server.tool(
   "mdfy_create",
-  "Create a new Markdown document on mdfy.app and get a shareable URL",
+  "Create a new Markdown document on memory.wiki and get a shareable URL",
   {
     markdown: z.string().describe("Markdown content for the document"),
     title: z.string().optional().describe("Document title (extracted from H1 if omitted)"),
@@ -204,7 +204,7 @@ server.tool(
 
 server.tool(
   "mdfy_read",
-  "Fetch a document's markdown content from mdfy.app",
+  "Fetch a document's markdown content from memory.wiki",
   { id: z.string().describe("Document ID (the short code from the URL)") },
   async ({ id }) => {
     try {
@@ -216,7 +216,7 @@ server.tool(
 
 server.tool(
   "mdfy_update",
-  "Update an existing document's content on mdfy.app",
+  "Update an existing document's content on memory.wiki",
   {
     id: z.string().describe("Document ID"),
     markdown: z.string().describe("New markdown content"),
@@ -236,7 +236,7 @@ server.tool(
 
 server.tool(
   "mdfy_list",
-  "List all documents owned by the current user on mdfy.app",
+  "List all documents owned by the current user on memory.wiki",
   {},
   async () => {
     if (!isLoggedIn()) return loginRequiredResult();
@@ -256,7 +256,7 @@ server.tool(
 
 server.tool(
   "mdfy_delete",
-  "Delete a document from mdfy.app (moves to trash, can be restored)",
+  "Delete a document from memory.wiki (moves to trash, can be restored)",
   {
     id: z.string().describe("Document ID to delete"),
     permanent: z.boolean().optional().describe("If true, permanently delete (default: false = soft delete / trash)"),
@@ -282,7 +282,7 @@ server.tool(
 
 server.tool(
   "mdfy_search",
-  "Search your documents on mdfy.app by keyword (full-text search)",
+  "Search your documents on memory.wiki by keyword (full-text search)",
   { query: z.string().describe("Search query (keywords to find in your documents)") },
   async ({ query }) => {
     if (!isLoggedIn()) return loginRequiredResult();
@@ -305,7 +305,7 @@ server.tool(
   "Get the user's hub as a structured graph (concept nodes + typed edges + doc clusters). " +
     "Use this when an answer needs to navigate the user's knowledge by relationship — e.g. " +
     "'what depends on X', 'which docs cover X and Y together', 'what's at the center of this hub'. " +
-    "URL-fetch (mdfy.app/hub/<slug>) gives the same data rendered as markdown; this returns the " +
+    "URL-fetch (memory.wiki/hub/<slug>) gives the same data rendered as markdown; this returns the " +
     "underlying JSON so you can traverse it programmatically.",
   {
     limit_concepts: z.number().int().min(1).max(200).optional()
@@ -401,10 +401,10 @@ server.tool(
     "mdfy_hub_constellation but bounded to one bundle — use this when an answer " +
     "needs to reason within a curated set, e.g. 'how do the ideas in this bundle " +
     "connect', 'which concept is central to this bundle'. URL-fetch " +
-    "(mdfy.app/b/<id>) gives you the LLM-extracted graph_data narrative; this " +
+    "(memory.wiki/b/<id>) gives you the LLM-extracted graph_data narrative; this " +
     "returns the user's hub-level ontology sliced to the bundle's docs.",
   {
-    bundle_id: z.string().describe("Bundle ID (the part after mdfy.app/b/)"),
+    bundle_id: z.string().describe("Bundle ID (the part after memory.wiki/b/)"),
   },
   async ({ bundle_id }) => {
     if (!isLoggedIn()) return loginRequiredResult();
@@ -579,7 +579,7 @@ server.tool(
 
 server.tool(
   "mdfy_import_url",
-  "Fetch a webpage and import it as a new mdfy.app document",
+  "Fetch a webpage and import it as a new memory.wiki document",
   {
     url: z.string().describe("URL to fetch"),
     title: z.string().optional().describe("Document title (extracted from <title> if omitted)"),
@@ -620,7 +620,7 @@ server.tool(
 
 server.tool(
   "mdfy_publish",
-  "Toggle a document between public (shared) and private (draft) on mdfy.app",
+  "Toggle a document between public (shared) and private (draft) on memory.wiki",
   {
     id: z.string().describe("Document ID"),
     published: z.boolean().describe("true = make publicly accessible, false = make private"),
@@ -905,7 +905,7 @@ server.tool(
 server.tool(
   "mdfy_render_preview",
   "Get a preview-friendly hint for unsaved markdown. For a permanent rendered URL, use mdfy_create with draft=true instead.",
-  { markdown: z.string().describe("Markdown content (passed for client-side analysis, not sent to mdfy.app)") },
+  { markdown: z.string().describe("Markdown content (passed for client-side analysis, not sent to memory.wiki)") },
   async ({ markdown }) => {
     const wordCount = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
     const headingCount = (markdown.match(/^#{1,6}\s/gm) || []).length;

@@ -1,24 +1,24 @@
-# W10: `/mdfy` for Codex + Aider · time-traveling hub · two-door landing draft
+# W10: `/memory.wiki` for Codex + Aider · time-traveling hub · two-door landing draft
 
-**Commit.** `d8e9e0f4`. *W10: /mdfy for Codex+Aider, time-traveling hub, two-door landing draft*
+**Commit.** `d8e9e0f4`. *W10: /memory.wiki for Codex+Aider, time-traveling hub, two-door landing draft*
 
-## `/mdfy` for Codex CLI + Aider
+## `/memory.wiki` for Codex CLI + Aider
 
 ### What ships
 
-`public/skills/mdfy/agent-prompt.md` is a generic agent prompt that
+`public/skills/memory.wiki/agent-prompt.md` is a generic agent prompt that
 documents the same three actions as W8/W9 — capture, bundle, hub —
-in a tool-agnostic shape. Wrapped in `<!-- mdfy:start -->` /
-`<!-- mdfy:end -->` markers so installers can replace just the
-mdfy block when rerun.
+in a tool-agnostic shape. Wrapped in `<!-- memory.wiki:start -->` /
+`<!-- memory.wiki:end -->` markers so installers can replace just the
+memory.wiki block when rerun.
 
 `install.sh` gained two new `--target` branches:
 
 - `--target=codex` appends the agent prompt to
-  `~/.codex/AGENTS.md`. If a previous mdfy block is already there,
+  `~/.codex/AGENTS.md`. If a previous memory.wiki block is already there,
   a Python regex replaces just that block in place — the rest of
   the user's AGENTS.md is preserved. If AGENTS.md exists with no
-  mdfy block, the prompt is appended; if it doesn't exist, the
+  memory.wiki block, the prompt is appended; if it doesn't exist, the
   prompt is the new file.
 - `--target=aider` drops the agent prompt at
   `~/.aider/conventions.md`. The post-install hint tells the user
@@ -31,13 +31,13 @@ Cursor, Codex CLI, Aider) — each with its own one-liner.
 
 ### Verified
 
-- `/skills/mdfy/agent-prompt.md` served. 1981 bytes, HTTP 200.
-- `--target=codex` first run: appends mdfy block, AGENTS.md = 51
+- `/skills/memory.wiki/agent-prompt.md` served. 1981 bytes, HTTP 200.
+- `--target=codex` first run: appends memory.wiki block, AGENTS.md = 51
   lines.
 - `--target=codex` rerun against an AGENTS.md that already has user
-  content + mdfy block: user's first 5 lines preserved verbatim,
-  mdfy block replaced in place, exactly one `mdfy:start` and one
-  `mdfy:end` marker remain.
+  content + memory.wiki block: user's first 5 lines preserved verbatim,
+  memory.wiki block replaced in place, exactly one `memory.wiki:start` and one
+  `memory.wiki:end` marker remain.
 - `--target=aider` writes `~/.aider/conventions.md` (51 lines).
 - Unknown target rejected with "Supported targets: claude, cursor,
   codex, aider" and exit 2.
@@ -48,8 +48,8 @@ Cursor, Codex CLI, Aider) — each with its own one-liner.
 
 | Path | Role |
 |------|------|
-| `apps/web/public/skills/mdfy/agent-prompt.md` | Tool-agnostic agent prompt |
-| `apps/web/public/skills/mdfy/install.sh` | Multi-target installer (claude, cursor, codex, aider) |
+| `apps/web/public/skills/memory.wiki/agent-prompt.md` | Tool-agnostic agent prompt |
+| `apps/web/public/skills/memory.wiki/install.sh` | Multi-target installer (claude, cursor, codex, aider) |
 | `apps/web/src/app/install/page.tsx` | Landing with all four editor sections |
 
 ## Time-traveling hub
@@ -118,12 +118,12 @@ v6 launch landing. The structure:
   CTA drops the visitor at the live editor (`/`).
 - **Door 2 — power users**: *"An LLM-maintained personal wiki."*
   Anchors auto-synthesis, semantic bundles, lint pass. CTA links
-  to `/install` for the `/mdfy` skill.
+  to `/install` for the `/memory.wiki` skill.
 - **Same actions, both doors**: a 3-card strip showing
-  `/mdfy capture`, `/mdfy bundle`, `/mdfy hub` so each door knows
+  `/memory.wiki capture`, `/memory.wiki bundle`, `/memory.wiki hub` so each door knows
   the underlying surface is the same.
 - **Why this matters**: one-paragraph framing — vendor memory
-  layers are racing to own context inside walls; mdfy is the bet
+  layers are racing to own context inside walls; memory.wiki is the bet
   that the public URL is the universal context format.
 
 It lives at `/v6-landing` because the live `/` is still the
@@ -134,7 +134,7 @@ intentionally deferred until copy is signed off.
 
 - `GET /v6-landing` → 200, 53 740 bytes.
 - All seven section headlines render verbatim.
-- All three `/mdfy …` action codes render.
+- All three `/memory.wiki …` action codes render.
 - `<meta name="robots" content="noindex,nofollow">` is in the head.
 
 ### Files

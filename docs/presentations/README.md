@@ -1,4 +1,4 @@
-# mdfy presentations
+# memory.wiki presentations
 
 Four Marp decks, one per audience. Each is a single self-contained
 `.md` file — Marp front-matter + inline CSS theme + slide content.
@@ -41,7 +41,7 @@ live preview without a CLI install.
 ## Brand notes
 
 - Background: `#0a0a0a` (near-black)
-- Accent: `#fb923c` (mdfy orange)
+- Accent: `#fb923c` (memory.wiki orange)
 - Text: `#f4f4f5` (zinc-100)
 - Muted: `#a1a1aa` (zinc-400)
 - Type: Inter / Pretendard / system stack

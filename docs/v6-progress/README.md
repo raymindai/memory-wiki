@@ -15,9 +15,9 @@ commits, verified scenarios, and any deferred work.
 | W5 | PDF ingest (exceed move 2), hub log.md, hub lint v1 | `a6851d67`, `7c3e3019`, `9631b878` | shipped |
 | W6 | Proactive bundle suggestions (exceed move 3) | `4368d47c` | shipped |
 | W7 | Shared bundles MVP, confidence tags | `ae0b33fd` | shipped |
-| W8 | `/mdfy` slash for Claude Code, suggested queries | `369e7755` | shipped |
-| W9 | `/mdfy` for Cursor, hub-level graph view | `6e46b47a` | shipped |
-| W10 | `/mdfy` for Codex+Aider, time-traveling hub, two-door landing draft | `d8e9e0f4` | shipped |
+| W8 | `/memory.wiki` slash for Claude Code, suggested queries | `369e7755` | shipped |
+| W9 | `/memory.wiki` for Cursor, hub-level graph view | `6e46b47a` | shipped |
+| W10 | `/memory.wiki` for Codex+Aider, time-traveling hub, two-door landing draft | `d8e9e0f4` | shipped |
 | W11 | Permission-aware AI fetching, shared bundles discoverable | `dfcb0f0a` | shipped |
 | W12 | Social hub feed, cross-reference graph, launch readiness | `9e4c8413` | shipped (launch flip held for end of August 2026) |
 

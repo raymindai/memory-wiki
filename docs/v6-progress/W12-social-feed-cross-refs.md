@@ -37,7 +37,7 @@ docs, and email-restricted bundles never appear.
 
 ### What ships
 
-`lib/cross-refs.ts` extracts internal mdfy URL references from a
+`lib/cross-refs.ts` extracts internal memory.wiki URL references from a
 markdown corpus and rolls them up by target. A reference is any
 `/{docId}`, `/d/{docId}`, `/b/{bundleId}`, or `/hub/{slug}` URL,
 with or without the `https://(staging.)?memory.wiki` host prefix.
@@ -108,7 +108,7 @@ sources linking to it), confirms target surfaces in the API with
   live at `/v6-landing` since W10. The flip from `/` (editor) to
   this landing is the launch lever; deliberately deferred until
   end of August 2026 per the single-ship plan.
-- **`/mdfy` skill teaches X-Mdfy-Permission recovery**. SKILL.md
+- **`/memory.wiki` skill teaches X-Mdfy-Permission recovery**. SKILL.md
   and the agent-prompt.md don't yet instruct agents to read the
   W11 permission headers and re-prompt the user for an email.
   Easy follow-up; doesn't block launch.

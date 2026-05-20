@@ -1,12 +1,12 @@
 {
   "name": "mdfy-cli",
   "version": "1.3.2",
-  "description": "mdfy CLI — publish Markdown from anywhere",
+  "description": "memory.wiki CLI — publish Markdown from anywhere",
   "bin": {
-    "mdfy": "./bin/mdfy.js"
+    "memory.wiki": "./bin/mdfy.js"
   },
   "files": ["bin/", "README.md"],
-  "keywords": ["markdown", "publish", "cli", "mdfy"],
+  "keywords": ["markdown", "publish", "cli", "memory.wiki"],
   "license": "MIT",
   "repository": {
     "type": "git",

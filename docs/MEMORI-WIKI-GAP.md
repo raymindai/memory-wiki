@@ -2,21 +2,21 @@
 
 > Companion to `MEMORI-WIKI-SPEC.md`. Audited against `apps/web/` on
 > 2026-05-14 and re-framed after a strategic decision to position
-> mdfy as an **AI-era wiki**, not a literal Wikipedia-shape wiki.
+> memory.wiki as an **AI-era wiki**, not a literal Wikipedia-shape wiki.
 >
 > Original draft of this file treated every Tier 1 feature in the
-> spec as a blocker. That assumed mdfy needed `[[wikilinks]]` + a
+> spec as a blocker. That assumed memory.wiki needed `[[wikilinks]]` + a
 > manual link graph because the brand says "wiki." This rewrite
 > rejects that assumption: the *AI-era* version of a wiki replaces
-> hand-authored linking with semantic concept extraction, which mdfy
+> hand-authored linking with semantic concept extraction, which memory.wiki
 > already ships at production grade.
 
 ---
 
 ## 0. TL;DR
 
-mdfy is already an **AI-era wiki** at production depth. What the
-2003-era wiki does with `[[wikilinks]]`, mdfy does with
+memory.wiki is already an **AI-era wiki** at production depth. What the
+2003-era wiki does with `[[wikilinks]]`, memory.wiki does with
 `concept_index` + `concept_relations` + hybrid semantic retrieval +
 Anthropic Haiku reranker. The graph isn't missing — it's built by
 the AI from the prose, not by the human typing brackets.
@@ -49,7 +49,7 @@ the rationale.
 | Curation | Categories typed by hand | Bundles + auto-lint |
 | Index update | Manual category/redirect work | Nightly lint + concept rebuild |
 
-mdfy commits to the AI-era column. Importing 2003-era mechanics on
+memory.wiki commits to the AI-era column. Importing 2003-era mechanics on
 top would dilute the differentiator: a 2026 product with `[[link]]`
 syntax becomes "Obsidian with cloud sync." The differentiator is
 that **the AI does the linking; you write**.
@@ -113,7 +113,7 @@ Links from footer of every viewer page + About + DocsNav.
 ### 3.3 F2′ — Concept-backlinks panel (re-packaging, not new build)
 
 **Why**: This is the AI-era replacement for traditional backlinks.
-Spec's F2 says "Referenced by N docs." mdfy's `concept_index`
+Spec's F2 says "Referenced by N docs." memory.wiki's `concept_index`
 already knows, for every concept in a doc, which other docs share
 that concept. Surface it.
 

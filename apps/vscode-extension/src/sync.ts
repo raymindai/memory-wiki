@@ -105,7 +105,7 @@ export class SyncEngine {
   }
 
   /**
-   * Push local changes to mdfy.app.
+   * Push local changes to memory.wiki.
    */
   async push(document: vscode.TextDocument): Promise<void> {
     const filePath = document.fileName;
@@ -118,7 +118,7 @@ export class SyncEngine {
 
     if (!config) {
       vscode.window.showWarningMessage(
-        "This file has not been published to mdfy.app yet. Use 'mdfy: Publish' first."
+        "This file has not been published to memory.wiki yet. Use 'memory.wiki: Publish' first."
       );
       return;
     }
@@ -145,7 +145,7 @@ export class SyncEngine {
         await vscode.workspace.fs.delete(vscode.Uri.file(configPath));
       } catch { /* already gone */ }
       vscode.window.showWarningMessage(
-        `"${vscode.workspace.asRelativePath(document.uri)}" was deleted on mdfy.app. Local sync removed.`
+        `"${vscode.workspace.asRelativePath(document.uri)}" was deleted on memory.wiki. Local sync removed.`
       );
       this.statusBar.setIdle();
       return;
@@ -250,7 +250,7 @@ export class SyncEngine {
   }
 
   /**
-   * Pull latest content from mdfy.app into the local file.
+   * Pull latest content from memory.wiki into the local file.
    */
   async pull(document: vscode.TextDocument): Promise<void> {
     const filePath = document.fileName;
@@ -258,7 +258,7 @@ export class SyncEngine {
 
     if (!config) {
       vscode.window.showWarningMessage(
-        "This file has not been published to mdfy.app yet. Use 'mdfy: Publish' first."
+        "This file has not been published to memory.wiki yet. Use 'memory.wiki: Publish' first."
       );
       return;
     }
@@ -289,7 +289,7 @@ export class SyncEngine {
 
       this.statusBar.setSynced();
       PreviewPanel.updateSyncStatusForDocument(document.uri, "synced");
-      vscode.window.showInformationMessage("Pulled latest from mdfy.app.");
+      vscode.window.showInformationMessage("Pulled latest from memory.wiki.");
     } catch (err) {
       this.statusBar.setError();
       PreviewPanel.updateSyncStatusForDocument(document.uri, "error");
@@ -316,7 +316,7 @@ export class SyncEngine {
       // Derive the .md file path: .foo.mdfy.json → foo.md
       const dir = sidecarPath.substring(0, sidecarPath.lastIndexOf("/") + 1);
       const sidecarName = sidecarPath.substring(sidecarPath.lastIndexOf("/") + 1);
-      const mdName = sidecarName.replace(/^\./, "").replace(/\.mdfy\.json$/, ".md");
+      const mdName = sidecarName.replace(/^\./, "").replace(/\.memory.wiki\.json$/, ".md");
       const mdPath = dir + mdName;
 
       const config = await loadMdfyConfig(mdPath);
@@ -332,9 +332,9 @@ export class SyncEngine {
 
         if (result.status === "deleted") {
           try { await vscode.workspace.fs.delete(sidecarUri); } catch { /* already gone */ }
-          const fileName = sidecarPath.replace(/\.mdfy\.json$/, ".md");
+          const fileName = sidecarPath.replace(/\.memory.wiki\.json$/, ".md");
           vscode.window.showInformationMessage(
-            `"${vscode.workspace.asRelativePath(fileName)}" was deleted on mdfy.app. Sync removed.`
+            `"${vscode.workspace.asRelativePath(fileName)}" was deleted on memory.wiki. Sync removed.`
           );
           continue;
         }
@@ -408,7 +408,7 @@ export class SyncEngine {
         "vscode.diff",
         serverDoc.uri,
         document.uri,
-        `mdfy.app (server) <-> ${vscode.workspace.asRelativePath(document.uri)} (local)`
+        `memory.wiki (server) <-> ${vscode.workspace.asRelativePath(document.uri)} (local)`
       );
     } catch (err) {
       vscode.window.showErrorMessage(

@@ -1,6 +1,6 @@
 #!/bin/bash
 # =========================================================
-# mdfy QuickLook Extension — Build + Notarize Script
+# memory.wiki QuickLook Extension — Build + Notarize Script
 #
 # Builds the host app + QuickLook preview extension,
 # signs with Developer ID, and notarizes with Apple.
@@ -16,7 +16,7 @@ SIGN_IDENTITY="Developer ID Application: Hyunsang Cho (${TEAM_ID})"
 BUNDLE_ID="cc.mdfy.quicklook"
 
 echo ""
-echo "  mdfy QuickLook Extension — Build + Notarize"
+echo "  memory.wiki QuickLook Extension — Build + Notarize"
 echo "  ============================================="
 echo ""
 

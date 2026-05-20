@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     authManager.onDidLogin(() => {
       vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: "mdfy: Signing in...", cancellable: false },
+        { location: vscode.ProgressLocation.Notification, title: "memory.wiki: Signing in...", cancellable: false },
         async (progress) => {
           progress.report({ message: "Loading your documents..." });
           await sidebarProvider?.refresh();
@@ -202,7 +202,7 @@ export function activate(context: vscode.ExtensionContext): void {
       // Require login for publish
       if (!await authManager?.isLoggedIn()) {
         const choice = await vscode.window.showWarningMessage(
-          "Sign in to mdfy.app to publish documents.",
+          "Sign in to memory.wiki to publish documents.",
           "Sign In"
         );
         if (choice === "Sign In") { vscode.commands.executeCommand("mdfy.login"); }
@@ -338,7 +338,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("mdfy.login", async () => {
       await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: "mdfy: Opening browser for login...", cancellable: false },
+        { location: vscode.ProgressLocation.Notification, title: "memory.wiki: Opening browser for login...", cancellable: false },
         async () => {
           await authManager?.login();
         }
@@ -526,14 +526,14 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("mdfy.sync", async () => {
       const items: vscode.QuickPickItem[] = [
-        { label: "$(cloud-upload) Publish", description: "Publish current file to mdfy.app" },
-        { label: "$(arrow-up) Push", description: "Push local changes to mdfy.app" },
-        { label: "$(arrow-down) Pull", description: "Pull latest from mdfy.app" },
-        { label: "$(sign-in) Login", description: "Login to mdfy.app" },
+        { label: "$(cloud-upload) Publish", description: "Publish current file to memory.wiki" },
+        { label: "$(arrow-up) Push", description: "Push local changes to memory.wiki" },
+        { label: "$(arrow-down) Pull", description: "Pull latest from memory.wiki" },
+        { label: "$(sign-in) Login", description: "Login to memory.wiki" },
       ];
 
       const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: "mdfy.app Sync Actions",
+        placeHolder: "memory.wiki Sync Actions",
       });
 
       if (!selected) {return;}
@@ -621,7 +621,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
         // Auto-open preview if enabled (skip if sidebar just opened it)
         if (!suppressAutoPreview) {
-          const autoPreview = vscode.workspace.getConfiguration("mdfy").get<boolean>("autoPreview", true);
+          const autoPreview = vscode.workspace.getConfiguration("memory.wiki").get<boolean>("autoPreview", true);
           if (autoPreview) {
             PreviewPanel.createIfNotExists(context.extensionUri, editor.document);
           }
@@ -671,7 +671,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Always start sync polling — published files need cloud change detection
   {
-    const config = vscode.workspace.getConfiguration("mdfy");
+    const config = vscode.workspace.getConfiguration("memory.wiki");
     const interval = config.get<number>("syncInterval") ?? 30;
     syncEngine.startPolling(interval);
   }
@@ -695,7 +695,7 @@ export function activate(context: vscode.ExtensionContext): void {
         );
       }
     });
-    const autoPreview = vscode.workspace.getConfiguration("mdfy").get<boolean>("autoPreview", true);
+    const autoPreview = vscode.workspace.getConfiguration("memory.wiki").get<boolean>("autoPreview", true);
     if (autoPreview) {
       PreviewPanel.createIfNotExists(context.extensionUri, vscode.window.activeTextEditor.document);
     }
@@ -728,8 +728,8 @@ export function getAuthManager(): AuthManager | undefined {
 }
 
 export function getApiBaseUrl(): string {
-  const config = vscode.workspace.getConfiguration("mdfy");
-  return config.get<string>("apiBaseUrl") ?? "https://mdfy.app";
+  const config = vscode.workspace.getConfiguration("memory.wiki");
+  return config.get<string>("apiBaseUrl") ?? "https://memory.wiki";
 }
 
 export interface MdfyConfig {

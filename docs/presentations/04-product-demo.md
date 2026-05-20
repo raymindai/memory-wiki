@@ -4,7 +4,7 @@ theme: default
 paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
-title: 'mdfy — 사용자 / 제품 데모 덱'
+title: 'memory.wiki — 사용자 / 제품 데모 덱'
 style: |
   section { font-family: 'Pretendard', 'Inter', system-ui, sans-serif; padding: 64px 72px; letter-spacing: -0.01em; }
   section.lead { justify-content: center; text-align: left; }
@@ -31,12 +31,12 @@ style: |
 
 <!-- _class: lead -->
 
-# **mdfy**
+# **memory.wiki**
 ## 모든 AI에 배포 가능한 당신의 기억층.
 
 <br>
 
-<span class="muted">ChatGPT, Claude, Cursor, Codex — 다 잊는다. mdfy는 안 잊는다.</span>
+<span class="muted">ChatGPT, Claude, Cursor, Codex — 다 잊는다. memory.wiki는 안 잊는다.</span>
 
 ---
 
@@ -102,7 +102,7 @@ memory.wiki/d/&lt;id&gt;
 
 <div>
 
-<h3>mdfy 가 하는 것</h3>
+<h3>memory.wiki 가 하는 것</h3>
 
 - 핵심 개념 자동 추출
 - 문서 간 의미 연결 발견

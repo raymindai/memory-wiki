@@ -1,10 +1,10 @@
-# mdfy
+# memory.wiki
 
 ## The fastest way from thought to shared document.
 
 **Markdown URLs that humans write and AI reads.** Capture from any AI tool. Share anywhere with a permanent short URL.
 
-[![Live](https://img.shields.io/badge/mdfy.app-live-orange)](https://mdfy.app)
+[![Live](https://img.shields.io/badge/memory.wiki-live-orange)](https://memory.wiki)
 [![VS Code](https://img.shields.io/badge/VS%20Code-Marketplace-blue)](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode)
 [![MCP](https://img.shields.io/badge/MCP-npm-red)](https://www.npmjs.com/package/mdfy-mcp)
 [![CLI](https://img.shields.io/badge/CLI-npm-green)](https://www.npmjs.com/package/mdfy-cli)
@@ -13,7 +13,7 @@
 
 ## What is this?
 
-**mdfy.app** is a document platform with one promise: every document gets a permanent short URL (`mdfy.app/abc123`) that works everywhere — browsers, AI chats, Slack, email, embeds. No login to view. No paywall.
+**memory.wiki** is a document platform with one promise: every document gets a permanent short URL (`memory.wiki/abc123`) that works everywhere — browsers, AI chats, Slack, email, embeds. No login to view. No paywall.
 
 It ships across 7 channels, all driven by the same shared rendering pipeline (markdown-it + highlight.js + KaTeX + Mermaid) so a doc looks identical wherever you open it.
 
@@ -21,14 +21,14 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 
 | Channel | Status | Install |
 |---------|--------|---------|
-| [**Web**](https://mdfy.app) | Live | Just open mdfy.app |
+| [**Web**](https://memory.wiki) | Live | Just open memory.wiki |
 | [**VS Code**](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode) | v1.4.0 | Marketplace |
 | **Desktop (Mac)** | v2.2.0 | DMG from releases |
 | [**CLI**](https://www.npmjs.com/package/mdfy-cli) | v1.3.x | `npm install -g mdfy-cli` |
-| [**MCP Server**](https://www.npmjs.com/package/mdfy-mcp) | v1.3.x | `npx mdfy-mcp` or hosted `mdfy.app/api/mcp` |
+| [**MCP Server**](https://www.npmjs.com/package/mdfy-mcp) | v1.3.x | `npx mdfy-mcp` or hosted `memory.wiki/api/mcp` |
 | **Chrome Extension** | v2.x | Web Store |
 | **QuickLook (Mac)** | Bundled with Desktop DMG | — |
-| **API** | Live | `https://mdfy.app/api/docs` |
+| **API** | Live | `https://memory.wiki/api/docs` |
 
 ## Features
 
@@ -74,29 +74,29 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 
 ```bash
 # Publish a file
-mdfy publish README.md
+memory.wiki publish README.md
 
 # Pipe from any command
-echo "# Hello" | mdfy publish
-tmux capture-pane -p | mdfy publish
-pbpaste | mdfy publish
+echo "# Hello" | memory.wiki publish
+tmux capture-pane -p | memory.wiki publish
+pbpaste | memory.wiki publish
 
 # Manage documents
-mdfy list
-mdfy read abc123
-mdfy update abc123 updated.md
-mdfy search "meeting notes"
-mdfy pull abc123 -o doc.md
+memory.wiki list
+memory.wiki read abc123
+memory.wiki update abc123 updated.md
+memory.wiki search "meeting notes"
+memory.wiki pull abc123 -o doc.md
 ```
 
 ## MCP Server
 
-Connect any AI tool to mdfy.app:
+Connect any AI tool to memory.wiki:
 
 ```json
 {
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -104,7 +104,7 @@ Connect any AI tool to mdfy.app:
 }
 ```
 
-Or use the hosted endpoint: `https://mdfy.app/api/mcp`
+Or use the hosted endpoint: `https://memory.wiki/api/mcp`
 
 25 tools: create, read, update, delete, list, search, append, prepend, sections, sharing, versions, folders, stats, and more.
 
@@ -148,7 +148,7 @@ npx @vscode/vsce publish
 ```text
 mdcore/
 ├── apps/
-│   ├── web/                  # Next.js 15 (mdfy.app)
+│   ├── web/                  # Next.js 15 (memory.wiki)
 │   ├── desktop/              # Electron Mac app
 │   ├── vscode-extension/     # VS Code extension
 │   ├── chrome-extension/     # Chrome extension
@@ -181,6 +181,6 @@ MIT
 
 ---
 
-**mdfy** — *The fastest way from thought to shared document.*
+**memory.wiki** — *The fastest way from thought to shared document.*
 
-[mdfy.app](https://mdfy.app) · [Docs](https://mdfy.app/docs) · [Plugins](https://mdfy.app/plugins) · [GitHub](https://github.com/raymindai/mdcore)
+[memory.wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/mdcore)

@@ -9,8 +9,8 @@ A native macOS App Extension (.appex) that provides beautiful Markdown previews 
 - KaTeX math equations
 - Mermaid diagrams
 - Automatic dark/light mode (follows macOS system appearance)
-- mdfy.app-identical styling
-- "Open in mdfy" and "Publish" buttons
+- memory.wiki-identical styling
+- "Open in memory.wiki" and "Publish" buttons
 - Offline fallback: shows formatted raw markdown if CDN is unavailable
 
 ## Requirements

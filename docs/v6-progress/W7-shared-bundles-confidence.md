@@ -32,7 +32,7 @@ a person should pass the header.
 
 ### Verified end-to-end
 
-Live on yc-demo's *mdfy Launch Pack* bundle
+Live on yc-demo's *memory.wiki Launch Pack* bundle
 (`allowed_emails = ["yc@mdfy.app", "partner@ycombinator.com"]`):
 
 | Path | Caller | Expected | Got |
@@ -74,7 +74,7 @@ Tags are constrained to the Key claims section. No spillover into
 cross-references or provenance.
 
 This is Graphify's confidence convention (`EXTRACTED` /
-`INFERRED` / `AMBIGUOUS`) brought into mdfy synthesis output. Hub
+`INFERRED` / `AMBIGUOUS`) brought into memory.wiki synthesis output. Hub
 readers and AI fetchers can skim a synthesis and immediately tell
 which claims are direct vs derived vs unsettled.
 

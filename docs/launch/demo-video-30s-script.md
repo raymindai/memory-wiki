@@ -21,10 +21,10 @@
 
 ### Shot 2 (6–12s) — Capture
 
-**On screen**: Chrome ext on a Claude chat → click mdfy button → URL pops in a toast → cuts to memory.wiki showing the doc rendered cleanly.
+**On screen**: Chrome ext on a Claude chat → click memory.wiki button → URL pops in a toast → cuts to memory.wiki showing the doc rendered cleanly.
 
 **VO**:
-> mdfy captures it. One click, permanent URL.
+> memory.wiki captures it. One click, permanent URL.
 
 ---
 

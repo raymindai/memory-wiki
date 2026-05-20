@@ -1,6 +1,6 @@
-# mdfy for Mac
+# memory.wiki for Mac
 
-Native macOS app wrapping mdfy.app with file integration and offline support.
+Native macOS app wrapping memory.wiki with file integration and offline support.
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ Output: `dist/mdfy-{version}-universal.dmg`
 
 ## What It Does
 
-mdfy for Mac loads the mdfy.app web app inside a native Electron shell, adding:
+memory.wiki for Mac loads the memory.wiki web app inside a native Electron shell, adding:
 
 - Native macOS title bar with traffic lights
 - File associations (md, txt, pdf, docx, pptx, xlsx, html, csv, json)
@@ -54,8 +54,8 @@ build/
 
 ## How File Opening Works
 
-- **Text files** (.md, .txt): Read content, encode as base64, load `mdfy.app/#md={base64}`
-- **Binary files** (.pdf, .docx, etc.): Load mdfy.app, then inject a synthetic drag-drop event with the file data
+- **Text files** (.md, .txt): Read content, encode as base64, load `memory.wiki/#md={base64}`
+- **Binary files** (.pdf, .docx, etc.): Load memory.wiki, then inject a synthetic drag-drop event with the file data
 
 ## Keyboard Shortcuts
 

@@ -1,4 +1,4 @@
-# CLAUDE.md — mdfy Project Context
+# CLAUDE.md — memory.wiki Project Context
 
 > 이 파일은 Claude Code CLI가 자동으로 읽는 프로젝트 컨텍스트 파일이다.
 > 프로젝트에 대한 모든 핵심 정보를 담고 있다.
@@ -11,7 +11,7 @@
 
 AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이지 인터페이스가 아니다.
 사용자는 MD를 몰라도 된다. AI 회사가 구조적으로 복제 불가능한 포지션(크로스 AI 레이어).
-핵심 해자: 바이럴 뱃지("Published with mdfy.app") + 크로스 AI + 렌더링 품질.
+핵심 해자: 바이럴 뱃지("Published with memory.wiki") + 크로스 AI + 렌더링 품질.
 상세 전략 (v6): `docs/direction_v6_2026_05.md` 또는 memory의 `direction_v6_2026_05`.
 
 ## 팀
@@ -21,16 +21,16 @@ AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이
 
 ## 도메인
 
-- **mdfy.app** — 핵심 제품, 라이브, Vercel 자동 배포
-- **mdfy.online** — mdfy.app로 리다이렉트 (보조)
+- **memory.wiki** — 핵심 제품, 라이브, Vercel 자동 배포
+- **mdfy.online** — memory.wiki로 리다이렉트 (보조)
 - **mdcore.ai / mdcore.org / mdcore.md** — 과거 "Rust 엔진을 제품화" 전략의 잔재. 현재는
-  파킹/리다이렉트 상태. 차후 일몰 예정 (mdfy.app으로 통합).
+  파킹/리다이렉트 상태. 차후 일몰 예정 (memory.wiki으로 통합).
 
 ## GitHub
 
-- **Repo**: `raymindai/mdcore` (이름은 역사적 — 향후 `raymindai/mdfy`로 rename 검토 중)
+- **Repo**: `raymindai/mdcore` (이름은 역사적 — 향후 `raymindai/memory.wiki`로 rename 검토 중)
 - **CI**: GitHub Actions (`.github/workflows/ci.yml` — build-web + e2e-test)
-- **Deploy**: Vercel 자동 배포, push하면 mdfy.app에 반영
+- **Deploy**: Vercel 자동 배포, push하면 memory.wiki에 반영
 
 ---
 
@@ -41,7 +41,7 @@ mdcore/
 ├── packages/
 │   └── mcp/                 # mdfy-mcp — MCP server (npm 출시됨, v1.3.x)
 ├── apps/
-│   ├── web/                 # Next.js 15 웹앱 (mdfy.app) — 메인 제품
+│   ├── web/                 # Next.js 15 웹앱 (memory.wiki) — 메인 제품
 │   │   ├── src/
 │   │   │   ├── app/
 │   │   │   │   ├── layout.tsx
@@ -68,8 +68,8 @@ mdcore/
 │   │   │       └── ...
 │   │   └── package.json
 │   ├── vscode-extension/    # mdfy-vscode — Marketplace 출시 (v1.4.0+)
-│   ├── desktop/             # mdfy Desktop — DMG (v2.2.0+, Developer ID 사인+notarize)
-│   ├── chrome-extension/    # mdfy Chrome — Web Store 출시 (v2.x)
+│   ├── desktop/             # memory.wiki Desktop — DMG (v2.2.0+, Developer ID 사인+notarize)
+│   ├── chrome-extension/    # memory.wiki Chrome — Web Store 출시 (v2.x)
 │   ├── cli/                 # mdfy-cli — npm 출시 (v1.3.x)
 │   └── quicklook/           # macOS QuickLook 플러그인
 ├── docs/
@@ -133,7 +133,7 @@ Live 탭(편집)은 TipTap이 같은 markdown-it 인스턴스로 ProseMirror 트
 
 | 디렉토리 | 출시 채널 | 상태 |
 | --- | --- | --- |
-| `apps/web` | mdfy.app (Vercel) | 라이브 |
+| `apps/web` | memory.wiki (Vercel) | 라이브 |
 | `apps/vscode-extension` | VS Code Marketplace (mdfy-vscode) | v1.4.0 |
 | `apps/desktop` | DMG 다운로드 | v2.2.0 (Developer ID 사인+notarize) |
 | `apps/chrome-extension` | Chrome Web Store | v2.x |
@@ -149,9 +149,9 @@ Live 탭(편집)은 TipTap이 같은 markdown-it 인스턴스로 ProseMirror 트
 
 ### 라이브 + 검증된 것
 
-- mdfy.app 메인 (Next.js 15, Vercel)
+- memory.wiki 메인 (Next.js 15, Vercel)
 - GFM 전체, KaTeX, Mermaid, 코드 하이라이팅
-- 짧은 URL 공유 (`mdfy.app/{nanoid}`) + 권한 모델
+- 짧은 URL 공유 (`memory.wiki/{nanoid}`) + 권한 모델
 - 다크/라이트 토글, 모바일 반응형, 드래그 앤 드롭
 - 문서 / 번들 / 허브 (3-tier URL 아키텍처)
 - AI 통합 (Gemini, OpenAI, Anthropic), AI 사이드 패널, 컨셉 인덱스
@@ -182,7 +182,7 @@ npm run dev    # → http://localhost:3000
 
 ### 빌드 & 배포
 
-- `git push origin main` → GitHub Actions CI → Vercel 자동 배포 (mdfy.app)
+- `git push origin main` → GitHub Actions CI → Vercel 자동 배포 (memory.wiki)
 - VS Code ext: `cd apps/vscode-extension && npx @vscode/vsce publish`
 - Desktop DMG: `cd apps/desktop && npm run build:dmg`
   (사전 설치: Developer ID Application 인증서 + 환경변수 `APPLE_ID`,
@@ -221,5 +221,5 @@ npm run dev    # → http://localhost:3000
 | Mermaid가 텍스트로 표시 | `useEffect`에서 mermaid.js가 늦게 로드되거나 `<pre lang="mermaid">` 형식 깨짐 | 콘솔에서 `window.mermaid` 확인, render.ts 출력 형식 점검 |
 | KaTeX가 `$..$` 그대로 노출 | `processKatex()`가 `<pre>` 안만 스킵하므로 inline `<code>` 안의 math는 미처리 | 의도된 동작 (코드 안 수식은 드물고 위험성 큼). 정말 필요하면 \\$로 이스케이프 |
 | Live 탭과 뷰어 출력 차이 | TipTap의 markdown-it 설정이 `lib/render.ts`와 어긋남 | thead/tbody nooped 여부 + footnote 플러그인 일치 확인 |
-| Desktop 로그인 후 Electron welcome 뜸 | dev 모드 (`npm start`)는 `mdfy://` 프로토콜이 generic Electron에 등록됨 | production DMG 빌드 → /Applications 설치 후 실행 |
+| Desktop 로그인 후 Electron welcome 뜸 | dev 모드 (`npm start`)는 `memory.wiki://` 프로토콜이 generic Electron에 등록됨 | production DMG 빌드 → /Applications 설치 후 실행 |
 | Vercel 빌드 시 `npm ci` 실패 | package-lock.json 없음 또는 충돌 | `npm install` 사용 (`vercel.json` `installCommand` 참고) |

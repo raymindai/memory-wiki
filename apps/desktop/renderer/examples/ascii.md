@@ -6,7 +6,7 @@
 
 ```
 ┌──────────────────────────────────────────┐
-│              mdfy.app                      │
+│              memory.wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -23,8 +23,8 @@
 │                    │                      │
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
-│  │ mdfy.app/{id} — shareable URL        │ │
-│  │ + "Published with mdfy.app" badge    │ │
+│  │ memory.wiki/{id} — shareable URL        │ │
+│  │ + "Published with memory.wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 ```
@@ -40,7 +40,7 @@
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  mdfy.app                     │
+│  memory.wiki                     │
 └─────────────────────────────┘
 ```
 
@@ -76,7 +76,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI mdfy structuring    │
+│ AI memory.wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 ```

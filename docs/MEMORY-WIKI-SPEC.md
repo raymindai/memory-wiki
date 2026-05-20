@@ -15,7 +15,7 @@
 
 핵심 약속 한 줄: **"You author. AI uses. The wiki maintains itself."**
 
-이 약속을 정직하게 만들기 위해 현재 mdfy 대비 부족한 것은 — 한 문장으로 — **링크 그래프, 의미 기반 검색, LLM 자가 정리** 셋. 이 spec은 그 셋을 핵심으로 두고, 그 위에 신뢰/네트워크 효과 layer를 얹는다.
+이 약속을 정직하게 만들기 위해 현재 memory.wiki 대비 부족한 것은 — 한 문장으로 — **링크 그래프, 의미 기반 검색, LLM 자가 정리** 셋. 이 spec은 그 셋을 핵심으로 두고, 그 위에 신뢰/네트워크 효과 layer를 얹는다.
 
 ---
 
@@ -427,7 +427,7 @@ def lint_hub(hub_id):
 LLM tool fetches `memory.wiki/{user}/llms.txt` → parses → uses as index → fetches relevant docs on demand.
 
 #### Pattern C: MCP server
-mdfy MCP server (already shipped) exposes hub as tool → AI agent calls `memory.search(q=...)` directly.
+memory.wiki MCP server (already shipped) exposes hub as tool → AI agent calls `memory.search(q=...)` directly.
 
 #### Pattern D: Native partner integration (target)
 Cursor / Claude Skills 가 `memory.wiki/{user}` 를 인지 → 자동 fetch + cache + use.
@@ -503,7 +503,7 @@ memory.wiki/hub/{slug}      → memory.wiki/{slug}      (hub home as primary pat
 
 | 영역 | 추정 변경량 |
 |---|---|
-| 텍스트 references ("memory.wiki", "mdfy") | 200+ 곳 |
+| 텍스트 references ("memory.wiki", "memory.wiki") | 200+ 곳 |
 | Branding assets (로고, OG 이미지, favicon) | 50+ 파일 |
 | Welcome/onboarding 카피 | 5+ 컴포넌트 |
 | Email templates | 3-5개 |

@@ -1,18 +1,18 @@
-# mdfy.app -- Markdown Publisher for VS Code
+# memory.wiki -- Markdown Publisher for VS Code
 
 **Write Markdown in VS Code. Publish as a beautiful web document. Share a permanent URL.**
 
-![mdfy WYSIWYG Preview](https://mdfy.app/images/plugin-vscode.webp)
+![memory.wiki WYSIWYG Preview](https://memory.wiki/images/plugin-vscode.webp)
 
-mdfy.app turns your Markdown files into shareable, beautifully rendered documents with a permanent URL -- directly from VS Code. No copy-pasting into Google Docs. No screenshots. No "can you open this .md file?" conversations.
+memory.wiki turns your Markdown files into shareable, beautifully rendered documents with a permanent URL -- directly from VS Code. No copy-pasting into Google Docs. No screenshots. No "can you open this .md file?" conversations.
 
-Powered by a Rust + WASM rendering engine with GFM, KaTeX math, Mermaid diagrams, and 190+ language syntax highlighting. The same engine that powers [mdfy.app](https://mdfy.app), the Chrome extension, and the Mac desktop app.
+Powered by a Rust + WASM rendering engine with GFM, KaTeX math, Mermaid diagrams, and 190+ language syntax highlighting. The same engine that powers [memory.wiki](https://memory.wiki), the Chrome extension, and the Mac desktop app.
 
 ---
 
 ## Table of Contents
 
-- [Why mdfy?](#why-mdfy)
+- [Why memory.wiki?](#why-mdfy)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Commands](#commands)
@@ -21,16 +21,16 @@ Powered by a Rust + WASM rendering engine with GFM, KaTeX math, Mermaid diagrams
 - [AI Tools](#ai-tools)
 - [How Sync Works](#how-sync-works)
 - [Use Cases](#use-cases)
-- [mdfy Ecosystem](#mdfy-ecosystem)
+- [memory.wiki Ecosystem](#mdfy-ecosystem)
 - [FAQ](#faq)
 
 ---
 
-## Why mdfy?
+## Why memory.wiki?
 
-VS Code's built-in Markdown preview is read-only and local. mdfy gives you:
+VS Code's built-in Markdown preview is read-only and local. memory.wiki gives you:
 
-| | Built-in Preview | mdfy Preview |
+| | Built-in Preview | memory.wiki Preview |
 |--|-----------------|--------------|
 | Edit in preview | No | Yes -- click and type directly |
 | Share with others | No | Yes -- one-click URL |
@@ -46,7 +46,7 @@ VS Code's built-in Markdown preview is read-only and local. mdfy gives you:
 
 ### WYSIWYG Preview
 
-Press **Cmd+Shift+M** to open the mdfy preview panel. Unlike the built-in preview, you can **edit directly in the rendered view**.
+Press **Cmd+Shift+M** to open the memory.wiki preview panel. Unlike the built-in preview, you can **edit directly in the rendered view**.
 
 - Click any text to edit it in place
 - Formatting toolbar appears on selection: bold, italic, headings, lists, links, code, tables
@@ -90,8 +90,8 @@ Click the **Outline** button in the preview toolbar to open a document structure
 Turn any `.md` file into a shareable URL in one click.
 
 1. Open a `.md` file
-2. **Cmd+Alt+P** or right-click > **Publish to mdfy.app**
-3. URL is generated: `mdfy.app/abc123`
+2. **Cmd+Alt+P** or right-click > **Publish to memory.wiki**
+3. URL is generated: `memory.wiki/abc123`
 4. URL is copied to clipboard -- paste it anywhere
 
 **No account required** for basic publishing. The recipient sees a beautifully rendered document in their browser -- they don't need VS Code, Markdown knowledge, or an account.
@@ -101,7 +101,7 @@ Turn any `.md` file into a shareable URL in one click.
 Keep your local files in sync with the published version.
 
 - **Auto-push on save** -- your published document updates when you save locally (configurable)
-- **Pull remote changes** -- if someone edits on mdfy.app, pull the changes to your local file
+- **Pull remote changes** -- if someone edits on memory.wiki, pull the changes to your local file
 - **Conflict detection** -- when both sides change, VS Code's diff editor opens with three merge options: pull, push, or view diff
 - **Offline queue** -- if you save while offline, changes are queued and pushed when you reconnect
 - **Status bar indicator** -- always shows the current state: synced, pushing, pulling, or conflict
@@ -110,11 +110,11 @@ Keep your local files in sync with the published version.
 
 Browse all your documents in one place.
 
-Click the mdfy icon in the Activity Bar to open the sidebar:
+Click the memory.wiki icon in the Activity Bar to open the sidebar:
 
 - **Local files** -- all `.md` files in your workspace with sync status
-- **Synced documents** -- locally edited files that are published to mdfy.app
-- **Cloud documents** -- documents on mdfy.app that you can pull locally
+- **Synced documents** -- locally edited files that are published to memory.wiki
+- **Cloud documents** -- documents on memory.wiki that you can pull locally
 - **Cloud folders** -- organized with expand/collapse
 - **Search** -- filter across all document types
 - **File path** -- hover to see full path, click to open
@@ -144,7 +144,7 @@ Keyboard shortcut: **Cmd+Alt+E**
 ### With Account (for sync and AI)
 
 1. Open Command Palette (**Cmd+Shift+P**)
-2. Run **mdfy: Login to mdfy.app**
+2. Run **memory.wiki: Login to memory.wiki**
 3. Browser opens for Google or GitHub OAuth
 4. You're authenticated -- sync and AI features are now available
 
@@ -152,22 +152,22 @@ Keyboard shortcut: **Cmd+Alt+E**
 
 ## Commands
 
-All commands are available via Command Palette (**Cmd+Shift+P**, type "mdfy"):
+All commands are available via Command Palette (**Cmd+Shift+P**, type "memory.wiki"):
 
 | Command | Description |
 |---------|-------------|
-| **mdfy: Preview (WYSIWYG)** | Open live preview with inline editing |
-| **mdfy: Publish to mdfy.app** | Publish and get a shareable URL |
-| **mdfy: Push to mdfy.app** | Push local changes to cloud |
-| **mdfy: Pull from mdfy.app** | Pull latest version from cloud |
-| **mdfy: Export** | Export to HTML or rich text |
-| **mdfy: Login to mdfy.app** | Authenticate for account features |
-| **mdfy: Sync Status** | Show current sync state |
-| **mdfy: AI Polish** | Improve writing quality and clarity |
-| **mdfy: AI Summary** | Generate a concise summary |
-| **mdfy: AI TL;DR** | Extract key bullet points |
-| **mdfy: AI Translate** | Translate to a specified language |
-| **mdfy: Ask AI to Edit** | Describe changes in natural language |
+| **memory.wiki: Preview (WYSIWYG)** | Open live preview with inline editing |
+| **memory.wiki: Publish to memory.wiki** | Publish and get a shareable URL |
+| **memory.wiki: Push to memory.wiki** | Push local changes to cloud |
+| **memory.wiki: Pull from memory.wiki** | Pull latest version from cloud |
+| **memory.wiki: Export** | Export to HTML or rich text |
+| **memory.wiki: Login to memory.wiki** | Authenticate for account features |
+| **memory.wiki: Sync Status** | Show current sync state |
+| **memory.wiki: AI Polish** | Improve writing quality and clarity |
+| **memory.wiki: AI Summary** | Generate a concise summary |
+| **memory.wiki: AI TL;DR** | Extract key bullet points |
+| **memory.wiki: AI Translate** | Translate to a specified language |
+| **memory.wiki: Ask AI to Edit** | Describe changes in natural language |
 
 All commands are also available in the right-click context menu when editing a Markdown file.
 
@@ -178,22 +178,22 @@ All commands are also available in the right-click context menu when editing a M
 | Shortcut | Command |
 |----------|---------|
 | `Cmd+Shift+M` | Open WYSIWYG preview |
-| `Cmd+Alt+P` | Publish to mdfy.app |
+| `Cmd+Alt+P` | Publish to memory.wiki |
 | `Cmd+Alt+E` | Export document |
 
 ---
 
 ## Settings
 
-Configure via VS Code Settings (Cmd+,) under "mdfy.app":
+Configure via VS Code Settings (Cmd+,) under "memory.wiki":
 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `mdfy.theme` | `auto` | Preview theme. `auto` follows VS Code's color theme. Options: `auto`, `dark`, `light` |
 | `mdfy.autoSync` | `false` | Automatically push changes on file save |
-| `mdfy.autoPreview` | `true` | Automatically open mdfy preview when opening a .md file |
+| `mdfy.autoPreview` | `true` | Automatically open memory.wiki preview when opening a .md file |
 | `mdfy.syncInterval` | `30` | Polling interval for remote changes (seconds, 10-300) |
-| `mdfy.apiBaseUrl` | `https://mdfy.app` | API endpoint (for self-hosted instances) |
+| `mdfy.apiBaseUrl` | `https://memory.wiki` | API endpoint (for self-hosted instances) |
 
 ---
 
@@ -267,9 +267,9 @@ This file tracks sync state. Add it to `.gitignore` if you don't want it in vers
 ### Sync flow
 
 ```
-Local save --> auto-push (if enabled) --> mdfy.app updated
+Local save --> auto-push (if enabled) --> memory.wiki updated
                                               |
-Someone edits on mdfy.app                      |
+Someone edits on memory.wiki                      |
                                               v
 Polling detects change --> pull notification --> accept or diff
 ```
@@ -290,11 +290,11 @@ When both local and remote have changed:
 
 ### Share technical documentation
 
-Write your README, API docs, or architecture decisions in VS Code. Publish to mdfy.app. Share the URL with your team. They see a beautifully rendered document -- no `.md` file viewer needed.
+Write your README, API docs, or architecture decisions in VS Code. Publish to memory.wiki. Share the URL with your team. They see a beautifully rendered document -- no `.md` file viewer needed.
 
 ### Capture and refine AI output
 
-Use the [Chrome extension](https://mdfy.app/plugins) to capture an AI conversation. Pull it into VS Code for editing. Push refined version back. The URL stays the same.
+Use the [Chrome extension](https://memory.wiki/plugins) to capture an AI conversation. Pull it into VS Code for editing. Push refined version back. The URL stays the same.
 
 ### Publish from CI/CD
 
@@ -302,7 +302,7 @@ Use the [CLI](https://www.npmjs.com/package/mdfy-cli) in your pipeline to auto-p
 
 ### Cross-AI knowledge base
 
-Publish a document from VS Code. Paste the URL into any AI conversation. Claude, ChatGPT, and Gemini can all read mdfy.app URLs. For programmatic access from Claude Web, Cursor, or Windsurf, point them at the [hosted MCP](https://mdfy.app/docs/mcp) at `https://mdfy.app/api/mcp` — or install the [local stdio MCP](https://www.npmjs.com/package/mdfy-mcp) for Claude Desktop.
+Publish a document from VS Code. Paste the URL into any AI conversation. Claude, ChatGPT, and Gemini can all read memory.wiki URLs. For programmatic access from Claude Web, Cursor, or Windsurf, point them at the [hosted MCP](https://memory.wiki/docs/mcp) at `https://memory.wiki/api/mcp` — or install the [local stdio MCP](https://www.npmjs.com/package/mdfy-mcp) for Claude Desktop.
 
 ### Meeting notes to shareable document
 
@@ -310,29 +310,29 @@ Take notes in Markdown during a meeting. When done, Cmd+Alt+P to publish. Share 
 
 ---
 
-## mdfy Ecosystem
+## memory.wiki Ecosystem
 
-mdfy.app is a cross-platform document publishing system. All platforms share the same rendering engine and the same document URLs.
+memory.wiki is a cross-platform document publishing system. All platforms share the same rendering engine and the same document URLs.
 
 | Platform | What it does | Install |
 |----------|-------------|---------|
-| **[Web Editor](https://mdfy.app)** | Full editor with WYSIWYG, image gallery, AI tools | [mdfy.app](https://mdfy.app) |
+| **[Web Editor](https://memory.wiki)** | Full editor with WYSIWYG, image gallery, AI tools | [memory.wiki](https://memory.wiki) |
 | **VS Code** | Preview, publish, sync from your editor | You are here |
-| **[Mac Desktop](https://mdfy.app/plugins)** | Native app with sidebar, file import (PDF, DOCX, PPTX) | [Download DMG](https://github.com/raymindai/mdcore/releases) |
-| **[Chrome Extension](https://mdfy.app/plugins)** | Capture from ChatGPT, Claude, Gemini, GitHub | [Download](https://mdfy.app/plugins) |
-| **[CLI](https://www.npmjs.com/package/mdfy-cli)** | `mdfy publish`, pipe support, tmux capture | `npm i -g mdfy-cli` |
-| **[Hosted MCP](https://mdfy.app/docs/mcp)** | AI agents (Claude Web, Cursor) — 25 tools | URL: `https://mdfy.app/api/mcp` |
+| **[Mac Desktop](https://memory.wiki/plugins)** | Native app with sidebar, file import (PDF, DOCX, PPTX) | [Download DMG](https://github.com/raymindai/mdcore/releases) |
+| **[Chrome Extension](https://memory.wiki/plugins)** | Capture from ChatGPT, Claude, Gemini, GitHub | [Download](https://memory.wiki/plugins) |
+| **[CLI](https://www.npmjs.com/package/mdfy-cli)** | `memory.wiki publish`, pipe support, tmux capture | `npm i -g mdfy-cli` |
+| **[Hosted MCP](https://memory.wiki/docs/mcp)** | AI agents (Claude Web, Cursor) — 25 tools | URL: `https://memory.wiki/api/mcp` |
 | **[Local MCP](https://www.npmjs.com/package/mdfy-mcp)** | AI agents (Claude Desktop, Code) — 6 core tools | `npx mdfy-mcp` |
-| **[QuickLook](https://mdfy.app/plugins)** | Press Space on .md in Finder for rendered preview | [Download](https://github.com/raymindai/mdcore/releases) |
+| **[QuickLook](https://memory.wiki/plugins)** | Press Space on .md in Finder for rendered preview | [Download](https://github.com/raymindai/mdcore/releases) |
 | **tmux** | Capture pane output and publish | [Install guide](https://github.com/raymindai/mdcore/tree/main/apps/tmux) |
 
 ### The URL is the bridge
 
-Every mdfy document has a permanent short URL (`mdfy.app/abc123`). This URL:
+Every memory.wiki document has a permanent short URL (`memory.wiki/abc123`). This URL:
 
 - Renders beautifully in any browser
-- Is readable by any AI -- paste `mdfy.app/abc123` into Claude or ChatGPT and they can read the full content
-- Can be embedded in websites via iframe (`mdfy.app/embed/abc123`)
+- Is readable by any AI -- paste `memory.wiki/abc123` into Claude or ChatGPT and they can read the full content
+- Can be embedded in websites via iframe (`memory.wiki/embed/abc123`)
 - Updates in place when you push changes
 
 ---
@@ -343,22 +343,22 @@ Every mdfy document has a permanent short URL (`mdfy.app/abc123`). This URL:
 A: No. You can publish without logging in. The document gets a permanent URL and an edit token (stored locally). Login is needed for cloud sync, document listing, and AI tools.
 
 **Q: Is my Markdown sent to a server?**
-A: Rendering happens entirely in your browser via WASM. When you publish, the Markdown is stored on mdfy.app (Supabase PostgreSQL). Documents can be private or public.
+A: Rendering happens entirely in your browser via WASM. When you publish, the Markdown is stored on memory.wiki (Supabase PostgreSQL). Documents can be private or public.
 
 **Q: Can I use this with private/internal documents?**
 A: Yes. Published documents are public by default but can be made private (draft) from the web editor. Documents can also be password-protected or restricted to specific email addresses.
 
 **Q: What happens if I uninstall the extension?**
-A: Your local `.md` files are unchanged. Published documents remain on mdfy.app. The `.mdfy.json` sidecar files can be deleted.
+A: Your local `.md` files are unchanged. Published documents remain on memory.wiki. The `.mdfy.json` sidecar files can be deleted.
 
 **Q: Does it work with existing Markdown extensions?**
-A: Yes. mdfy adds its own preview panel and does not interfere with the built-in Markdown preview or other extensions.
+A: Yes. memory.wiki adds its own preview panel and does not interfere with the built-in Markdown preview or other extensions.
 
 **Q: How is this different from GitHub Gists?**
-A: mdfy renders Markdown with KaTeX math, Mermaid diagrams, and full GFM. It has WYSIWYG editing, AI tools, bidirectional sync, and works across 9 platforms. Gists are static text files.
+A: memory.wiki renders Markdown with KaTeX math, Mermaid diagrams, and full GFM. It has WYSIWYG editing, AI tools, bidirectional sync, and works across 9 platforms. Gists are static text files.
 
 **Q: Can AI read my published documents?**
-A: Yes. Paste any mdfy.app URL into Claude or ChatGPT and they can read the full document content. This makes mdfy a cross-AI knowledge sharing layer.
+A: Yes. Paste any memory.wiki URL into Claude or ChatGPT and they can read the full document content. This makes memory.wiki a cross-AI knowledge sharing layer.
 
 ---
 
@@ -369,9 +369,9 @@ A: Yes. Paste any mdfy.app URL into Claude or ChatGPT and they can read the full
 
 ## Links
 
-- [mdfy.app](https://mdfy.app) -- Web editor
-- [Plugins page](https://mdfy.app/plugins) -- All platforms and downloads
-- [API Documentation](https://mdfy.app/docs) -- REST API reference
+- [memory.wiki](https://memory.wiki) -- Web editor
+- [Plugins page](https://memory.wiki/plugins) -- All platforms and downloads
+- [API Documentation](https://memory.wiki/docs) -- REST API reference
 - [GitHub](https://github.com/raymindai/mdcore) -- Source code
 - [Issues](https://github.com/raymindai/mdcore/issues) -- Bug reports and feature requests
 

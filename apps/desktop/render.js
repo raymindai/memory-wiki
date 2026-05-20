@@ -3,7 +3,7 @@
 // drops into main.js's IPC handler without a build step. Same
 // markdown-it configuration as the web app and the VS Code extension
 // (Phase 1 = web, Phase 2 = vsce, Phase 3 = this) — a doc previewed
-// in the desktop app paints identically to the mdfy.app viewer it
+// in the desktop app paints identically to the memory.wiki viewer it
 // will publish to.
 //
 // Config parity with TipTap's tiptap-markdown instance:

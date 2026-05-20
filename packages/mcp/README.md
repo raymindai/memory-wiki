@@ -1,12 +1,12 @@
 # mdfy-mcp
 
-MCP server for [mdfy.app](https://mdfy.app) — let any AI tool create, read, update, and manage Markdown documents with permanent shareable URLs.
+MCP server for [memory.wiki](https://memory.wiki) — let any AI tool create, read, update, and manage Markdown documents with permanent shareable URLs.
 
 Works with **Claude Code**, **Claude Desktop**, **Cursor**, and any [Model Context Protocol](https://modelcontextprotocol.io/) compatible client.
 
 > **Two ways to connect:**
 >
-> - **Hosted HTTP MCP** (recommended for Claude Web, Cursor, etc.) — no install. Just add `https://mdfy.app/api/mcp` in your client's MCP/Connectors settings. Exposes 25 tools.
+> - **Hosted HTTP MCP** (recommended for Claude Web, Cursor, etc.) — no install. Just add `https://memory.wiki/api/mcp` in your client's MCP/Connectors settings. Exposes 25 tools.
 > - **Local stdio MCP** (this npm package) — for Claude Desktop and Claude Code. Exposes 6 core tools. See setup below.
 
 ## Quick Start
@@ -17,7 +17,7 @@ Works with **Claude Code**, **Claude Desktop**, **Cursor**, and any [Model Conte
 npx mdfy-cli login
 ```
 
-Opens your browser for OAuth. Credentials are stored locally in `~/.mdfy/`.
+Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/`.
 
 ### 2. Add to your AI tool
 
@@ -26,7 +26,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.mdfy/`.
 ```json
 {
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -39,7 +39,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.mdfy/`.
 ```json
 {
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -47,7 +47,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.mdfy/`.
 }
 ```
 
-No API keys or environment variables needed. Authentication is handled via `mdfy login`.
+No API keys or environment variables needed. Authentication is handled via `memory.wiki login`.
 
 ## Tools
 
@@ -64,7 +64,7 @@ No API keys or environment variables needed. Authentication is handled via `mdfy
 
 ```
 You: "Create a document with my meeting notes"
-AI:  mdfy_create → https://mdfy.app/abc123 (URL copied!)
+AI:  mdfy_create → https://memory.wiki/abc123 (URL copied!)
 
 You: "List my documents"
 AI:  mdfy_list → 8 documents found
@@ -84,26 +84,26 @@ AI:  mdfy_delete → Moved to trash
 
 ### Cross-AI Workflow
 
-mdfy.app URLs work as context across AI conversations:
+memory.wiki URLs work as context across AI conversations:
 
 ```
-You (in Claude): "Summarize the research at mdfy.app/abc123"
+You (in Claude): "Summarize the research at memory.wiki/abc123"
 AI:  mdfy_read → reads the document → provides summary
 
-You (in ChatGPT): "Read mdfy.app/abc123 and suggest improvements"
+You (in ChatGPT): "Read memory.wiki/abc123 and suggest improvements"
 ChatGPT: fetches the URL → gives feedback
 
-You (in Claude): "Update mdfy.app/abc123 with the improvements"
+You (in Claude): "Update memory.wiki/abc123 with the improvements"
 AI:  mdfy_update → document updated, same URL
 ```
 
 ## How Authentication Works
 
-The MCP server shares credentials with the `mdfy` CLI:
+The MCP server shares credentials with the `memory.wiki` CLI:
 
-1. `mdfy login` opens your browser for Google/GitHub OAuth
-2. JWT token is stored locally in `~/.mdfy/config.json`
-3. Edit tokens for each document are stored in `~/.mdfy/tokens.json`
+1. `memory.wiki login` opens your browser for Google/GitHub OAuth
+2. JWT token is stored locally in `~/.memory.wiki/config.json`
+3. Edit tokens for each document are stored in `~/.memory.wiki/tokens.json`
 4. All API requests use `Authorization: Bearer` headers
 5. Tokens auto-refresh when expired (clear error message if re-login needed)
 
@@ -111,7 +111,7 @@ No email spoofing possible — all requests are authenticated via JWT.
 
 ## Features
 
-- **Permanent URLs** — every document gets a short URL (`mdfy.app/...`) that never expires
+- **Permanent URLs** — every document gets a short URL (`memory.wiki/...`) that never expires
 - **Auto-managed edit tokens** — create a doc, get edit access automatically
 - **Public or private** — toggle visibility with `mdfy_publish`
 - **Markdown rendering** — documents render with syntax highlighting, KaTeX math, Mermaid diagrams
@@ -120,21 +120,21 @@ No email spoofing possible — all requests are authenticated via JWT.
 
 ## Other Channels
 
-mdfy.app is available everywhere:
+memory.wiki is available everywhere:
 
 | Channel | Install |
 |---------|---------|
-| [Web Editor](https://mdfy.app) | Just open the URL |
+| [Web Editor](https://memory.wiki) | Just open the URL |
 | [CLI](https://www.npmjs.com/package/mdfy-cli) | `npm install -g mdfy-cli` |
-| [VS Code Extension](https://mdfy.app/plugins) | Download .vsix from Plugins page |
-| [Chrome Extension](https://mdfy.app/plugins) | Download from Plugins page |
-| [Mac Desktop App](https://mdfy.app/plugins) | Download .dmg from Plugins page |
+| [VS Code Extension](https://memory.wiki/plugins) | Download .vsix from Plugins page |
+| [Chrome Extension](https://memory.wiki/plugins) | Download from Plugins page |
+| [Mac Desktop App](https://memory.wiki/plugins) | Download .dmg from Plugins page |
 
 ## Links
 
-- Website: [mdfy.app](https://mdfy.app)
-- Plugins: [mdfy.app/plugins](https://mdfy.app/plugins)
-- API Docs: [mdfy.app/docs](https://mdfy.app/docs)
+- Website: [memory.wiki](https://memory.wiki)
+- Plugins: [memory.wiki/plugins](https://memory.wiki/plugins)
+- API Docs: [memory.wiki/docs](https://memory.wiki/docs)
 - GitHub: [github.com/raymindai/mdcore](https://github.com/raymindai/mdcore)
 
 ## License

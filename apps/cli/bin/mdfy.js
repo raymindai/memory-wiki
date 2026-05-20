@@ -1,35 +1,35 @@
 #!/usr/bin/env node
 
 /* =========================================================
-   mdfy CLI — Publish Markdown from anywhere
+   memory.wiki CLI — Publish Markdown from anywhere
 
    Usage:
-     mdfy publish <file>          Publish a .md file → get URL
-     mdfy publish                 Publish from stdin
-     mdfy update <id> <file>      Update an existing document
-     mdfy pull <id>               Download a document
-     mdfy pull <id> -o <file>     Download and save to file
-     mdfy delete <id>             Delete a document
-     mdfy list                    List your documents
-     mdfy open <id>               Open document in browser
-     mdfy render <file>           Render markdown to HTML
-     mdfy login                   Authenticate with mdfy.app
-     mdfy logout                  Clear stored credentials
-     mdfy whoami                  Show current user
+     memory.wiki publish <file>          Publish a .md file → get URL
+     memory.wiki publish                 Publish from stdin
+     memory.wiki update <id> <file>      Update an existing document
+     memory.wiki pull <id>               Download a document
+     memory.wiki pull <id> -o <file>     Download and save to file
+     memory.wiki delete <id>             Delete a document
+     memory.wiki list                    List your documents
+     memory.wiki open <id>               Open document in browser
+     memory.wiki render <file>           Render markdown to HTML
+     memory.wiki login                   Authenticate with memory.wiki
+     memory.wiki logout                  Clear stored credentials
+     memory.wiki whoami                  Show current user
 
    Pipe support:
-     echo "# Hello" | mdfy publish
-     cat README.md | mdfy publish
-     tmux capture-pane -p | mdfy publish
-     pbpaste | mdfy publish
+     echo "# Hello" | memory.wiki publish
+     cat README.md | memory.wiki publish
+     tmux capture-pane -p | memory.wiki publish
+     pbpaste | memory.wiki publish
    ========================================================= */
 
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const BASE_URL = process.env.MDFY_URL || "https://mdfy.app";
-const CONFIG_DIR = path.join(os.homedir(), ".mdfy");
+const BASE_URL = process.env.MDFY_URL || "https://memory.wiki";
+const CONFIG_DIR = path.join(os.homedir(), ".memory.wiki");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 const TOKENS_FILE = path.join(CONFIG_DIR, "tokens.json");
 
@@ -106,8 +106,8 @@ async function cmdPublish(args) {
   } else {
     markdown = await readStdin();
     if (!markdown) {
-      console.error("Usage: mdfy publish <file>");
-      console.error("       echo '# Hello' | mdfy publish");
+      console.error("Usage: memory.wiki publish <file>");
+      console.error("       echo '# Hello' | memory.wiki publish");
       process.exit(1);
     }
   }
@@ -146,14 +146,14 @@ async function cmdPublish(args) {
 async function cmdUpdate(args) {
   const id = args[0];
   const file = args[1];
-  if (!id) { console.error("Usage: mdfy update <id> <file>"); process.exit(1); }
+  if (!id) { console.error("Usage: memory.wiki update <id> <file>"); process.exit(1); }
 
   let markdown;
   if (file) {
     markdown = fs.readFileSync(file, "utf8");
   } else {
     markdown = await readStdin();
-    if (!markdown) { console.error("Usage: mdfy update <id> <file>"); process.exit(1); }
+    if (!markdown) { console.error("Usage: memory.wiki update <id> <file>"); process.exit(1); }
   }
 
   const tokens = loadTokens();
@@ -175,7 +175,7 @@ async function cmdUpdate(args) {
 
 async function cmdPull(args) {
   const id = args[0];
-  if (!id) { console.error("Usage: mdfy pull <id> [-o file]"); process.exit(1); }
+  if (!id) { console.error("Usage: memory.wiki pull <id> [-o file]"); process.exit(1); }
 
   try {
     const doc = await api("GET", `/api/docs/${id}`);
@@ -196,7 +196,7 @@ async function cmdPull(args) {
 
 async function cmdDelete(args) {
   const id = args[0];
-  if (!id) { console.error("Usage: mdfy delete <id>"); process.exit(1); }
+  if (!id) { console.error("Usage: memory.wiki delete <id>"); process.exit(1); }
 
   const tokens = loadTokens();
   const editToken = tokens[id];
@@ -216,7 +216,7 @@ async function cmdDelete(args) {
 
 async function cmdList() {
   const config = loadConfig();
-  if (!config.userId) { console.error("Not logged in. Run: mdfy login"); process.exit(1); }
+  if (!config.userId) { console.error("Not logged in. Run: memory.wiki login"); process.exit(1); }
 
   try {
     const data = await api("GET", "/api/user/documents");
@@ -239,7 +239,7 @@ async function cmdList() {
 
 async function cmdOpen(args) {
   const id = args[0];
-  if (!id) { console.error("Usage: mdfy open <id>"); process.exit(1); }
+  if (!id) { console.error("Usage: memory.wiki open <id>"); process.exit(1); }
   const url = `${BASE_URL}/${id}`;
   if (process.platform === "darwin") {
     require("child_process").exec(`open "${url}"`);
@@ -252,7 +252,7 @@ async function cmdOpen(args) {
 }
 
 async function cmdLogin() {
-  console.log("Opening mdfy.app in your browser...");
+  console.log("Opening memory.wiki in your browser...");
   console.log("After signing in, click 'Copy token' and paste it below.");
   console.log("");
 
@@ -300,42 +300,42 @@ function cmdWhoami() {
   } else if (config.userId) {
     console.log(config.userId);
   } else {
-    console.log("Not logged in. Run: mdfy login");
+    console.log("Not logged in. Run: memory.wiki login");
   }
 }
 
 function cmdHelp() {
-  console.log(`mdfy — Publish Markdown from anywhere
+  console.log(`memory.wiki — Publish Markdown from anywhere
 
 Usage:
-  mdfy publish <file>          Publish a .md file and get a URL
-  mdfy publish                 Publish from stdin (pipe support)
-  mdfy search <query>           Search your documents
-  mdfy read <id>               Read a document in terminal
-  mdfy capture [source]        Capture terminal/AI output and publish
-  mdfy update <id> <file>      Update an existing document
-  mdfy pull <id>               Download a document to stdout
-  mdfy pull <id> -o <file>     Download and save to file
-  mdfy delete <id>             Delete a document
-  mdfy list                    List your documents
-  mdfy open <id>               Open document in browser
-  mdfy login                   Authenticate with mdfy.app
-  mdfy logout                  Clear stored credentials
-  mdfy whoami                  Show current user
+  memory.wiki publish <file>          Publish a .md file and get a URL
+  memory.wiki publish                 Publish from stdin (pipe support)
+  memory.wiki search <query>           Search your documents
+  memory.wiki read <id>               Read a document in terminal
+  memory.wiki capture [source]        Capture terminal/AI output and publish
+  memory.wiki update <id> <file>      Update an existing document
+  memory.wiki pull <id>               Download a document to stdout
+  memory.wiki pull <id> -o <file>     Download and save to file
+  memory.wiki delete <id>             Delete a document
+  memory.wiki list                    List your documents
+  memory.wiki open <id>               Open document in browser
+  memory.wiki login                   Authenticate with memory.wiki
+  memory.wiki logout                  Clear stored credentials
+  memory.wiki whoami                  Show current user
 
 Examples:
-  echo "# Hello World" | mdfy publish
-  cat README.md | mdfy publish
-  tmux capture-pane -p | mdfy publish
-  pbpaste | mdfy publish
-  mdfy publish ./notes/meeting.md
-  mdfy pull abc123 -o meeting.md
+  echo "# Hello World" | memory.wiki publish
+  cat README.md | memory.wiki publish
+  tmux capture-pane -p | memory.wiki publish
+  pbpaste | memory.wiki publish
+  memory.wiki publish ./notes/meeting.md
+  memory.wiki pull abc123 -o meeting.md
 
 Environment:
-  MDFY_URL    Base URL (default: https://mdfy.app)
+  MDFY_URL    Base URL (default: https://memory.wiki)
 
-Config:  ~/.mdfy/config.json
-Tokens:  ~/.mdfy/tokens.json
+Config:  ~/.memory.wiki/config.json
+Tokens:  ~/.memory.wiki/tokens.json
 `);
 }
 
@@ -343,10 +343,10 @@ Tokens:  ~/.mdfy/tokens.json
 
 async function cmdRead(args) {
   let id = args[0];
-  if (!id) { console.error("Usage: mdfy read <id>"); process.exit(1); }
+  if (!id) { console.error("Usage: memory.wiki read <id>"); process.exit(1); }
 
   // Accept full URL or just ID
-  id = id.replace(/^https?:\/\/mdfy\.(cc|app)\/\?doc=/, "").replace(/^https?:\/\/mdfy\.(cc|app)\/d\//, "").replace(/^https?:\/\/mdfy\.(cc|app)\//, "").replace(/^mdfy\.(cc|app)\/\?doc=/, "").replace(/^mdfy\.(cc|app)\/d\//, "").replace(/^mdfy\.(cc|app)\//, "");
+  id = id.replace(/^https?:\/\/memory.wiki\.(cc|app)\/\?doc=/, "").replace(/^https?:\/\/memory.wiki\.(cc|app)\/d\//, "").replace(/^https?:\/\/memory.wiki\.(cc|app)\//, "").replace(/^memory.wiki\.(cc|app)\/\?doc=/, "").replace(/^memory.wiki\.(cc|app)\/d\//, "").replace(/^memory.wiki\.(cc|app)\//, "");
 
   try {
     const doc = await api("GET", `/api/docs/${id}`);
@@ -437,7 +437,7 @@ async function cmdCapture(args) {
   } else if (target === "last") {
     // Read stdin for piped last command
     raw = await readStdin();
-    if (!raw) { console.error("Usage: some-command 2>&1 | mdfy capture last"); process.exit(1); }
+    if (!raw) { console.error("Usage: some-command 2>&1 | memory.wiki capture last"); process.exit(1); }
   } else if (!target) {
     // Auto: try stdin, then clipboard
     raw = await readStdin();
@@ -445,7 +445,7 @@ async function cmdCapture(args) {
       try { raw = require("child_process").execSync("pbpaste", { encoding: "utf8" }); }
       catch {}
     }
-    if (!raw) { console.error("Usage: mdfy capture [tmux|clipboard|last]"); process.exit(1); }
+    if (!raw) { console.error("Usage: memory.wiki capture [tmux|clipboard|last]"); process.exit(1); }
   } else {
     // Treat as file
     if (fs.existsSync(target)) {
@@ -583,10 +583,10 @@ function formatCliSession(text) {
 
 async function cmdSearch(args) {
   const query = args.join(" ").trim();
-  if (!query) { console.error("Usage: mdfy search <query>"); process.exit(1); }
+  if (!query) { console.error("Usage: memory.wiki search <query>"); process.exit(1); }
 
   const config = loadConfig();
-  if (!config.userId && !config.token) { console.error("Not logged in. Run: mdfy login"); process.exit(1); }
+  if (!config.userId && !config.token) { console.error("Not logged in. Run: memory.wiki login"); process.exit(1); }
 
   try {
     const data = await api("GET", `/api/search?q=${encodeURIComponent(query)}`);
@@ -683,7 +683,7 @@ async function main() {
         }
       } else {
         console.error(`Unknown command: ${cmd}`);
-        console.error("Run 'mdfy help' for usage.");
+        console.error("Run 'memory.wiki help' for usage.");
         process.exit(1);
       }
   }

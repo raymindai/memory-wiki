@@ -2,7 +2,7 @@
 
 ## Import — 13+ Formats
 
-Drop any file onto mdfy.app or click **IMPORT** in the sidebar.
+Drop any file onto memory.wiki or click **IMPORT** in the sidebar.
 
 | Format | How it works |
 |--------|-------------|
@@ -15,9 +15,9 @@ Drop any file onto mdfy.app or click **IMPORT** in the sidebar.
 | **RST** | reStructuredText headings, links → Markdown |
 | **RTF / JSON / XML / TXT** | Text extraction with format hints |
 
-### AI mdfy Structuring
+### AI memory.wiki Structuring
 
-After importing, you'll see **"mdfy this document?"** — click **mdfy it** to let AI:
+After importing, you'll see **"memory.wiki this document?"** — click **memory.wiki it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks

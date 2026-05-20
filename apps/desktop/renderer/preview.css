@@ -1,5 +1,5 @@
 /* =========================================================
-   mdfy for Mac — Complete Stylesheet
+   memory.wiki for Mac — Complete Stylesheet
    Dark/Light theme, sidebar, editor, document styles
    ========================================================= */
 
@@ -349,7 +349,7 @@ html, body {
 
 /* =========================================================
    DOCUMENT STYLES (.mdcore-rendered)
-   Synced with mdfy.app globals.css
+   Synced with memory.wiki globals.css
    ========================================================= */
 
 .mdcore-rendered {

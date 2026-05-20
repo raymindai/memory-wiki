@@ -45,7 +45,7 @@ export class PreviewPanel {
 
     const panel = vscode.window.createWebviewPanel(
       PreviewPanel.viewType,
-      `mdfy Preview: ${path.basename(document.fileName)}`,
+      `memory.wiki Preview: ${path.basename(document.fileName)}`,
       column,
       {
         enableScripts: true,
@@ -129,7 +129,7 @@ export class PreviewPanel {
 
     const panel = vscode.window.createWebviewPanel(
       PreviewPanel.viewType,
-      `mdfy Preview: ${path.basename(document.fileName)}`,
+      `memory.wiki Preview: ${path.basename(document.fileName)}`,
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       {
         enableScripts: true,
@@ -380,7 +380,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
                   "Open Sidebar"
                 ).then(choice => {
                   if (choice === "Open Sidebar") {
-                    vscode.commands.executeCommand("workbench.view.extension.mdfy");
+                    vscode.commands.executeCommand("workbench.view.extension.memory.wiki");
                   }
                 });
               }
@@ -392,7 +392,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
               const match = [...PreviewPanel.panels.entries()].find(([, p]) => p === this);
               const docId = match?.[0]?.replace("cloud:", "") || "";
               if (docId) {
-                const baseUrl = vscode.workspace.getConfiguration("mdfy").get<string>("apiBaseUrl", "https://mdfy.app");
+                const baseUrl = vscode.workspace.getConfiguration("memory.wiki").get<string>("apiBaseUrl", "https://memory.wiki");
                 vscode.env.openExternal(vscode.Uri.parse(`${baseUrl}/${docId}`));
               }
             }
@@ -443,11 +443,11 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       ? `<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#94a3b8;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:8px">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg>
-            <span>This is a cloud document. View only — to edit, sync to local or open in mdfy.app.</span>
+            <span>This is a cloud document. View only — to edit, sync to local or open in memory.wiki.</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:#fb923c;color:#0a0a0c;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
-            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in mdfy.app</button>
+            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in memory.wiki</button>
           </div>
         </div>`
       : "";
@@ -539,7 +539,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const userId = await auth?.getUserId();
     if (!auth || !userId) {
       const action = await vscode.window.showInformationMessage(
-        "Sign in to mdfy.app to use ASCII to Mermaid conversion.",
+        "Sign in to memory.wiki to use ASCII to Mermaid conversion.",
         "Sign in"
       );
       if (action === "Sign in") {
@@ -549,8 +549,8 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     }
 
     const apiBaseUrl = vscode.workspace
-      .getConfiguration("mdfy")
-      .get<string>("apiBaseUrl", "https://mdfy.app");
+      .getConfiguration("memory.wiki")
+      .get<string>("apiBaseUrl", "https://memory.wiki");
 
     const token = await auth.getToken();
 
@@ -790,7 +790,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     if (!auth || !loggedIn) {
       this.panel.webview.postMessage({ type: "aiResult", error: "Sign in to use AI features." });
       const choice = await vscode.window.showWarningMessage(
-        "Sign in to mdfy.app to use AI features.",
+        "Sign in to memory.wiki to use AI features.",
         "Sign in"
       );
       if (choice === "Sign in") {
@@ -887,7 +887,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const userId = await auth?.getUserId();
     if (!auth || !userId) {
       vscode.window.showWarningMessage(
-        "Sign in to mdfy.app to upload images (mdfy: Login)."
+        "Sign in to memory.wiki to upload images (memory.wiki: Login)."
       );
       this.panel.webview.postMessage({ type: "imageUploadFailed" });
       return;
@@ -908,8 +908,8 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       const fileName = name || `image.${ext}`;
 
       const apiBaseUrl = vscode.workspace
-        .getConfiguration("mdfy")
-        .get<string>("apiBaseUrl", "https://mdfy.app");
+        .getConfiguration("memory.wiki")
+        .get<string>("apiBaseUrl", "https://memory.wiki");
 
       // Build multipart/form-data manually
       const boundary =
@@ -1007,18 +1007,18 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       ? `<div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#94a3b8;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:8px">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg>
-            <span>This is a cloud document. View only — to edit, sync to local or open in mdfy.app.</span>
+            <span>This is a cloud document. View only — to edit, sync to local or open in memory.wiki.</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
             <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:#fb923c;color:#0a0a0c;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
-            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in mdfy.app</button>
+            <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in memory.wiki</button>
           </div>
         </div>`
       : "";
     const renderedHtml = cloudBanner + result.html;
 
     const themeSetting = vscode.workspace
-      .getConfiguration("mdfy")
+      .getConfiguration("memory.wiki")
       .get<string>("theme", "auto");
 
     let themeClass: string;
@@ -1054,7 +1054,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     body { cursor: default; }
     article[contenteditable="false"] { user-select: text; cursor: default; }
   </style>` : ""}
-  <title>mdfy Preview</title>
+  <title>memory.wiki Preview</title>
 </head>
 <body${this.isCloudPreview ? ' class="live-mode"' : ""}>
   <!-- Loading state -->
@@ -1067,7 +1067,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   <style>@keyframes loadbar{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(-100%)}}</style>
   <!-- Global toolbar: logo + view mode only -->
   <div id="toolbar">
-    <a class="toolbar-logo" href="https://mdfy.app" target="_blank" style="text-decoration:none;cursor:pointer"><span style="color:var(--accent)">md</span><span style="color:var(--fg)">fy</span><span style="color:#737373">.app</span></a>
+    <a class="toolbar-logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><span style="color:var(--accent)">md</span><span style="color:var(--fg)">fy</span><span style="color:#737373">.app</span></a>
     <div class="view-switcher" style="margin-left:6px">
       <button class="view-btn active" data-view="live" title="Live preview"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5.5 6l2.5 2-2.5 2"/><line x1="9" y1="10" x2="11.5" y2="10"/></svg> Live</button>
       <button class="view-btn" data-view="split" title="Split view"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="8" y1="2" x2="8" y2="14"/></svg> Split</button>
@@ -1078,7 +1078,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   <div id="editor-wrapper">
     <!-- Live pane: own header + content -->
     <div id="live-pane">
-      <!-- Live pane header: label + toggle icons (like mdfy.app) -->
+      <!-- Live pane header: label + toggle icons (like memory.wiki) -->
       <div id="live-header" class="pane-header">
         <span class="pane-label" style="color:var(--accent)">LIVE</span>
         <span style="flex:1"></span>
@@ -1343,9 +1343,9 @@ interface RenderResult {
 
 function renderMarkdownWithFlavor(markdown: string): RenderResult {
   try {
-    // Same render pipeline as mdfy.app's web viewers (Phase 2 of the
+    // Same render pipeline as memory.wiki's web viewers (Phase 2 of the
     // WASM-to-markdown-it migration) — keeps preview output in sync
-    // with what the user will see at mdfy.app/<id> after they publish.
+    // with what the user will see at memory.wiki/<id> after they publish.
     const result = renderMarkdown(markdown);
     const f = result.flavor;
     return {

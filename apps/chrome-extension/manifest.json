@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "mdfy.app — Capture. Edit. Share. One URL for your Markdown",
+  "name": "memory.wiki — Capture. Edit. Share. One URL for your Markdown",
   "version": "2.2.0",
   "description": "Capture AI conversations from ChatGPT, Claude, and Gemini. Edit in WYSIWYG, share with a permanent link.",
   "permissions": ["activeTab", "tabs", "contextMenus", "storage", "scripting", "cookies"],

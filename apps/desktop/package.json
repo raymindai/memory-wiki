@@ -1,7 +1,7 @@
 {
   "name": "mdfy-desktop",
   "version": "2.2.0",
-  "description": "mdfy for Mac — Markdown publishing with sidebar, sync, and local rendering",
+  "description": "memory.wiki for Mac — Markdown publishing with sidebar, sync, and local rendering",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -25,7 +25,7 @@
   },
   "build": {
     "appId": "cc.mdfy.desktop",
-    "productName": "mdfy",
+    "productName": "memory.wiki",
     "directories": {
       "output": "dist"
     },
@@ -48,9 +48,9 @@
     ],
     "protocols": [
       {
-        "name": "mdfy",
+        "name": "memory.wiki",
         "schemes": [
-          "mdfy"
+          "memory.wiki"
         ]
       }
     ],
@@ -83,7 +83,7 @@
       "type": "distribution"
     },
     "dmg": {
-      "title": "mdfy",
+      "title": "memory.wiki",
       "contents": [
         {
           "x": 130,

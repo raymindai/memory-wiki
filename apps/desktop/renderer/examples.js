@@ -2,7 +2,7 @@
 // Loaded by index.html before editor.js
 
 window.MDFY_EXAMPLES = {
-  welcome: `# Welcome to mdfy.app
+  welcome: `# Welcome to memory.wiki
 
 > **Your Markdown, Beautifully Published.**
 > Import anything. Render beautifully. Share instantly.
@@ -12,7 +12,7 @@ window.MDFY_EXAMPLES = {
 1. **Type or paste** anything — Markdown, plain text, Claude Code output
 2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
 3. **Edit** inline in the Live view, or use Source for raw Markdown
-4. **Share** with one click — generates a short URL like \`mdfy.app/abc123\`
+4. **Share** with one click — generates a short URL like \`memory.wiki/abc123\`
 
 ## What You Can Do
 
@@ -40,7 +40,7 @@ window.MDFY_EXAMPLES = {
 
 ## Try It Now
 
-- **Drop a PDF here** — see AI mdfy turn it into clean Markdown
+- **Drop a PDF here** — see AI memory.wiki turn it into clean Markdown
 - **Click +** in the sidebar to start a new doc from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during the beta, no credit card
 
@@ -106,7 +106,7 @@ console.log(\`Detected: \${flavor.primary}\`);
 \`\`\`python
 import requests
 
-response = requests.post("https://mdfy.app/api/docs", json={
+response = requests.post("https://memory.wiki/api/docs", json={
     "markdown": "# Hello World",
 })
 print(response.json()["id"])  # → "abc123"
@@ -240,7 +240,7 @@ erDiagram
 mindmap
   root((mdcore))
     Product
-      mdfy.app
+      memory.wiki
       Chrome Extension
     Engine
       Rust
@@ -257,7 +257,7 @@ mindmap
 timeline
     title mdcore Milestones
     2026 Q1 : Engine v0.1
-             : mdfy.app launch
+             : memory.wiki launch
     2026 Q2 : npm package
              : CLI tool
     2026 Q3 : API platform
@@ -327,7 +327,7 @@ xychart-beta
 
 \`\`\`
 ┌──────────────────────────────────────────┐
-│              mdfy.app                      │
+│              memory.wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -344,8 +344,8 @@ xychart-beta
 │                    │                      │
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
-│  │ mdfy.app/{id} — shareable URL        │ │
-│  │ + "Published with mdfy.app" badge    │ │
+│  │ memory.wiki/{id} — shareable URL        │ │
+│  │ + "Published with memory.wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 \`\`\`
@@ -361,7 +361,7 @@ xychart-beta
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  mdfy.app                     │
+│  memory.wiki                     │
 └─────────────────────────────┘
 \`\`\`
 
@@ -397,7 +397,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI mdfy structuring    │
+│ AI memory.wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 \`\`\``,
@@ -406,7 +406,7 @@ Everything is unlocked while we're testing — no credit card required.
 
 ## Import — 13+ Formats
 
-Drop any file onto mdfy.app or click **IMPORT** in the sidebar.
+Drop any file onto memory.wiki or click **IMPORT** in the sidebar.
 
 | Format | How it works |
 |--------|-------------|
@@ -419,9 +419,9 @@ Drop any file onto mdfy.app or click **IMPORT** in the sidebar.
 | **RST** | reStructuredText headings, links → Markdown |
 | **RTF / JSON / XML / TXT** | Text extraction with format hints |
 
-### AI mdfy Structuring
+### AI memory.wiki Structuring
 
-After importing, you'll see **"mdfy this document?"** — click **mdfy it** to let AI:
+After importing, you'll see **"memory.wiki this document?"** — click **memory.wiki it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks
@@ -458,7 +458,7 @@ Click anywhere in the **Live** view to start editing. Format with the toolbar or
 
 ## Flavor Detection & Conversion
 
-mdfy.app auto-detects your Markdown flavor:
+memory.wiki auto-detects your Markdown flavor:
 
 - **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
 - **CommonMark** — Standard, maximum compatibility
@@ -527,9 +527,9 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 ## Cross-Platform
 
-Your documents sync across all mdfy channels:
+Your documents sync across all memory.wiki channels:
 
-- **Web** — mdfy.app
+- **Web** — memory.wiki
 - **VS Code** — Extension with WYSIWYG preview
 - **Mac Desktop** — Native app with sidebar
 - **CLI** — \`npm install -g mdfy-cli\`

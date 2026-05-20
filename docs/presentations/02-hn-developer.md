@@ -4,7 +4,7 @@ theme: default
 paginate: true
 backgroundColor: '#0a0a0a'
 color: '#f4f4f5'
-title: 'mdfy — HN / developer deck'
+title: 'memory.wiki — HN / developer deck'
 style: |
   section { font-family: 'Inter', 'Pretendard', system-ui, sans-serif; padding: 64px 72px; letter-spacing: -0.01em; }
   section.lead { justify-content: center; text-align: left; }
@@ -36,7 +36,7 @@ style: |
 
 <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:rgba(251,146,60,0.12);color:#fb923c;font-size:13px;font-weight:600;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">Show HN · 2026-08</span>
 
-# **mdfy**
+# **memory.wiki**
 ## Markdown URLs as a memory layer for Claude, ChatGPT, Cursor, Codex.
 
 <br>
@@ -69,7 +69,7 @@ So your personal memory should be:
 
 ```
                 ┌───────────────────────┐
-   capture ───→ │   mdfy hub @ /hub/you │ ───→ deploy
+   capture ───→ │   memory.wiki hub @ /hub/you │ ───→ deploy
                 └───────────┬───────────┘
                             │
               ┌─────────────┼─────────────┐
@@ -106,11 +106,11 @@ Notion's AI works in Notion. ChatGPT's memory works in ChatGPT. Cursor's project
 | | Question | What you get |
 |---|---|---|
 | Mem0 / Letta | *What should the AI remember about you?* | A generated profile from inference. |
-| **mdfy** | ***What do you want to remember?*** | A curated hub from authorship. |
+| **memory.wiki** | ***What do you want to remember?*** | A curated hub from authorship. |
 
 Both legitimate. Different artifacts, different audiences.
 
-The extracted-memory companies make their tools smarter for you. mdfy makes **you** legible to every AI tool you use.
+The extracted-memory companies make their tools smarter for you. memory.wiki makes **you** legible to every AI tool you use.
 
 ---
 
@@ -120,14 +120,14 @@ The extracted-memory companies make their tools smarter for you. mdfy makes **yo
 
 Microsoft GraphRAG / LlamaIndex KG build a knowledge graph and traverse it internally when an upstream system queries. The graph is API-private.
 
-mdfy ships the graph **in the URL response** — themes, insights, concept relations all inlined as markdown.
+memory.wiki ships the graph **in the URL response** — themes, insights, concept relations all inlined as markdown.
 
 <br>
 
 ```bash
 $ curl https://memory.wiki/b/<bundle-id>
 # ... markdown body ...
-```mdfy:graph
+```memory.wiki:graph
 { "themes": [...], "insights": [...], "connections": [...] }
 ``` 
 ```
@@ -216,7 +216,7 @@ Everything that matters is documented or open source.
 
 <h3>"Isn't this Notion + AI?"</h3>
 
-Notion's AI works in Notion. mdfy works wherever the URL goes. The lock-in difference is the whole point.
+Notion's AI works in Notion. memory.wiki works wherever the URL goes. The lock-in difference is the whole point.
 
 <h3>"Won't AI companies build this themselves?"</h3>
 

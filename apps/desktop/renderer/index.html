@@ -9,14 +9,14 @@
   <link rel="stylesheet" href="lib/codemirror/codemirror.min.css">
   <link rel="stylesheet" href="lib/codemirror/material-darker.css">
   <link rel="stylesheet" href="preview.css">
-  <title>mdfy</title>
+  <title>memory.wiki</title>
 </head>
 <body>
   <!-- ════════════════ LOADING OVERLAY ════════════════ -->
   <div id="loading-overlay" class="loading-overlay">
     <div class="loading-inner">
-      <img src="logo-dark.svg" alt="mdfy" class="logo-dark loading-logo" height="24">
-      <img src="logo-light.svg" alt="mdfy" class="logo-light loading-logo" height="24">
+      <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark loading-logo" height="24">
+      <img src="logo-light.svg" alt="memory.wiki" class="logo-light loading-logo" height="24">
       <div class="loading-bar"><div class="loading-bar-fill"></div></div>
     </div>
   </div>
@@ -25,8 +25,8 @@
   <aside id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <img src="logo-dark.svg" alt="mdfy" class="logo-dark" height="16">
-        <img src="logo-light.svg" alt="mdfy" class="logo-light" height="16">
+        <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark" height="16">
+        <img src="logo-light.svg" alt="memory.wiki" class="logo-light" height="16">
       </div>
       <div class="sidebar-actions">
         <button class="sidebar-icon-btn" id="btn-search-toggle" title="Search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg></button>
@@ -36,25 +36,25 @@
     </div>
     <div class="sidebar-search hidden" id="search-box"><input type="text" id="search-input" placeholder="Search files..." spellcheck="false"></div>
     <div class="sidebar-help hidden" id="help-panel">
-      <div class="help-row"><span class="help-icon" style="color:#22c55e"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to mdfy.app. Edits sync automatically.</span></div></div>
-      <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Publish to upload to mdfy.app.</span></div></div>
-      <div class="help-row"><span class="help-icon" style="color:#60a5fa"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on mdfy.app. Sync to download a local copy.</span></div></div>
+      <div class="help-row"><span class="help-icon" style="color:#22c55e"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits sync automatically.</span></div></div>
+      <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Publish to upload to memory.wiki.</span></div></div>
+      <div class="help-row"><span class="help-icon" style="color:#60a5fa"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
       <div class="help-divider"></div>
-      <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg></span><div><strong>Copy URL</strong><span class="help-desc">Copy the mdfy.app link to clipboard.</span></div></div>
-      <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 10V2"/><path d="M5 4.5L8 1.5l3 3"/></svg></span><div><strong>Publish</strong><span class="help-desc">Upload local file to mdfy.app and get a shareable URL.</span></div></div>
+      <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg></span><div><strong>Copy URL</strong><span class="help-desc">Copy the memory.wiki link to clipboard.</span></div></div>
+      <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 10V2"/><path d="M5 4.5L8 1.5l3 3"/></svg></span><div><strong>Publish</strong><span class="help-desc">Upload local file to memory.wiki and get a shareable URL.</span></div></div>
       <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 2v8"/><path d="M5 7.5L8 10.5l3-3"/></svg></span><div><strong>Sync Down</strong><span class="help-desc">Download cloud document to your local workspace.</span></div></div>
       <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8A6 6 0 004.8 3.3L2 6"/><path d="M2 8a6 6 0 009.2 4.7L14 10"/><path d="M4 4l8 8"/></svg></span><div><strong>Unsync</strong><span class="help-desc">Remove sync connection. File stays local.</span></div></div>
       <div class="help-divider"></div>
       <div class="help-row"><span class="help-icon" style="font-size:10px;font-weight:600;color:var(--accent)">ALL</span><div><span class="help-desc">All files in folder tree + cloud documents.</span></div></div>
       <div class="help-row"><span class="help-icon" style="font-size:10px;font-weight:600">LOC</span><div><span class="help-desc">Synced + local files (everything on your machine).</span></div></div>
-      <div class="help-row"><span class="help-icon" style="font-size:10px;font-weight:600">CLD</span><div><span class="help-desc">Synced + cloud-only docs (everything on mdfy.app).</span></div></div>
+      <div class="help-row"><span class="help-icon" style="font-size:10px;font-weight:600">CLD</span><div><span class="help-desc">Synced + cloud-only docs (everything on memory.wiki).</span></div></div>
     </div>
 
     <div class="sidebar-filters">
       <button class="filter-tab active" data-filter="all" title="All documents">All</button>
-      <button class="filter-tab" data-filter="synced" title="Files linked to mdfy.app">Synced</button>
+      <button class="filter-tab" data-filter="synced" title="Files linked to memory.wiki">Synced</button>
       <button class="filter-tab" data-filter="local" title="All files on your machine">Local</button>
-      <button class="filter-tab" data-filter="cloud" title="All documents on mdfy.app">Cloud</button>
+      <button class="filter-tab" data-filter="cloud" title="All documents on memory.wiki">Cloud</button>
     </div>
     <div class="sidebar-files" id="file-list"></div>
     <div class="sidebar-user" id="user-bar"></div>
@@ -79,7 +79,7 @@
       </div>
       <div class="header-right">
         <button class="header-url" id="header-url" style="display:none" title="Click to copy URL"></button>
-        <button class="header-btn" id="btn-publish" title="Publish to mdfy.app"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 11V3M4.5 6L8 2.5 11.5 6"/><path d="M2 11v2.5h12V11"/></svg><span>Publish</span></button>
+        <button class="header-btn" id="btn-publish" title="Publish to memory.wiki"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 11V3M4.5 6L8 2.5 11.5 6"/><path d="M2 11v2.5h12V11"/></svg><span>Publish</span></button>
       </div>
     </div>
 
@@ -223,8 +223,8 @@
     <div id="welcome" class="welcome-state">
       <div class="welcome-inner">
         <div class="welcome-logo">
-          <img src="logo-dark.svg" alt="mdfy" class="logo-dark" height="28">
-          <img src="logo-light.svg" alt="mdfy" class="logo-light" height="28">
+          <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark" height="28">
+          <img src="logo-light.svg" alt="memory.wiki" class="logo-light" height="28">
         </div>
         <p class="welcome-tagline">Your Markdown, Beautifully Published.</p>
         <div class="welcome-actions">
@@ -335,9 +335,9 @@
       <div class="bar-left">
         <span class="bar-link" id="footer-help" title="Cmd+B Bold, Cmd+I Italic, Cmd+K Link, Cmd+S Save">Help</span>
         <span class="bar-sep">·</span>
-        <span class="bar-link" onclick="window.mdfyDesktop.openInBrowser('https://mdfy.app/about')">About</span>
+        <span class="bar-link" onclick="window.mdfyDesktop.openInBrowser('https://memory.wiki/about')">About</span>
         <span class="bar-sep">·</span>
-        <span class="bar-link" onclick="window.mdfyDesktop.openInBrowser('https://mdfy.app/plugins')">Plugins</span>
+        <span class="bar-link" onclick="window.mdfyDesktop.openInBrowser('https://memory.wiki/plugins')">Plugins</span>
       </div>
       <div class="bar-right">
         <span class="bar-stat" id="stat-views" style="display:none"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5S1 8 1 8z"/><circle cx="8" cy="8" r="2"/></svg><span id="stat-views-count">0</span> views</span>

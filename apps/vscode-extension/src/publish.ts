@@ -18,7 +18,7 @@ interface PullResult {
 }
 
 /**
- * Publish a new document to mdfy.app.
+ * Publish a new document to memory.wiki.
  * POST /api/docs → { id, editToken }
  */
 export async function publishDocument(
@@ -68,7 +68,7 @@ export async function publishDocument(
 }
 
 /**
- * Update an existing document on mdfy.app.
+ * Update an existing document on memory.wiki.
  * PATCH /api/docs/{id} → { ok: true, updated_at }
  */
 export async function updateDocument(
@@ -151,7 +151,7 @@ export interface ConflictError extends Error {
 }
 
 /**
- * Pull the latest document content from mdfy.app.
+ * Pull the latest document content from memory.wiki.
  * GET /api/docs/{id} → { markdown, title, updated_at, ... }
  */
 export async function pullDocument(

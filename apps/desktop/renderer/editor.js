@@ -1,5 +1,5 @@
 /* =========================================================
-   mdfy for Mac — Unified Editor + Sidebar
+   memory.wiki for Mac — Unified Editor + Sidebar
    Architecture mirrors VS Code extension:
    - Left sidebar: file list (ALL/SYNCED/LOCAL/CLOUD)
    - Right: WYSIWYG editor with toolbar
@@ -335,12 +335,12 @@
       }
     } else if (currentFilter === "synced") {
       if (!sidebarState.authState.loggedIn) {
-        html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to mdfy.app to sync them across devices</p><button class="login-prompt-btn" onclick="window.mdfyDesktop.login()">Sign in</button></div>';
+        html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to memory.wiki to sync them across devices</p><button class="login-prompt-btn" onclick="window.mdfyDesktop.login()">Sign in</button></div>';
       } else if (synced.length > 0) {
         html += secHeader("synced", "Synced", synced.length);
         for (var s = 0; s < synced.length; s++) html += renderSyncedItem(synced[s]);
       } else {
-        html += '<div class="sidebar-empty"><p>No synced documents</p><p class="sidebar-empty-hint">Publish a file to sync it with mdfy.app</p></div>';
+        html += '<div class="sidebar-empty"><p>No synced documents</p><p class="sidebar-empty-hint">Publish a file to sync it with memory.wiki</p></div>';
       }
 
     } else if (currentFilter === "local") {
@@ -652,7 +652,7 @@
     var meta = synced ? "synced " + synced : f.relativePath;
     var active = f.filePath === currentFilePath ? " active" : "";
     return '<div class="file-item' + active + '" data-path="' + esc(f.filePath) + '">' +
-      '<div class="file-icon shared" title="Synced with mdfy.app">' + SBI.share + syncBadgeHtml + '</div>' +
+      '<div class="file-icon shared" title="Synced with memory.wiki">' + SBI.share + syncBadgeHtml + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
         '<button data-action="copy-url" data-path="' + esc(f.filePath) + '" title="Copy URL">' + SBI.copy + '</button>' +
@@ -670,7 +670,7 @@
       '<div class="file-icon local">' + SBI.file + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(f.relativePath) + '</div></div>' +
       '<div class="file-actions">' +
-        '<button data-action="publish" data-path="' + esc(f.filePath) + '" title="Sync to mdfy.app">' + SBI.upload + '</button>' +
+        '<button data-action="publish" data-path="' + esc(f.filePath) + '" title="Sync to memory.wiki">' + SBI.upload + '</button>' +
       '</div>' +
       '<span class="file-time">' + timeAgo(f.modifiedAt) + '</span>' +
     '</div>';
@@ -806,7 +806,7 @@
         '<div class="user-signin-wrap">' +
           '<button class="user-signin" id="btn-signin">' +
             '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.5-5 6-5s6 2 6 5"/></svg>' +
-            'Sign in to mdfy.app' +
+            'Sign in to memory.wiki' +
           '</button>' +
           '<div class="user-signin-hint">Sync, publish, and access cloud documents</div>' +
         '</div>';
@@ -824,14 +824,14 @@
       case "copy-url": {
         var config = findConfigByPath(pathOrId);
         if (config) {
-          window.mdfyDesktop.writeClipboard("https://mdfy.app/" + config.docId);
+          window.mdfyDesktop.writeClipboard("https://memory.wiki/" + config.docId);
           showToast("URL copied");
         }
         break;
       }
       case "open-browser": {
         var config2 = findConfigByPath(pathOrId);
-        if (config2) window.mdfyDesktop.openInBrowser("https://mdfy.app/" +config2.docId);
+        if (config2) window.mdfyDesktop.openInBrowser("https://memory.wiki/" +config2.docId);
         break;
       }
       case "unlink":
@@ -854,10 +854,10 @@
         }
         break;
       case "open-cloud-browser":
-        window.mdfyDesktop.openInBrowser("https://mdfy.app/" +pathOrId);
+        window.mdfyDesktop.openInBrowser("https://memory.wiki/" +pathOrId);
         break;
       case "delete-synced":
-        if (confirm("Delete this document from mdfy.app? The local file will remain.")) {
+        if (confirm("Delete this document from memory.wiki? The local file will remain.")) {
           await window.mdfyDesktop.syncDelete(pathOrId);
           await refreshSidebarData();
           renderSidebar();
@@ -865,7 +865,7 @@
         }
         break;
       case "delete-cloud":
-        if (confirm("Delete this document from mdfy.app?")) {
+        if (confirm("Delete this document from memory.wiki?")) {
           await window.mdfyDesktop.deleteCloudDoc(pathOrId);
           await refreshSidebarData();
           renderSidebar();
@@ -1478,7 +1478,7 @@
         var openBrowserBtn = document.getElementById("cloud-open-browser");
         if (openBrowserBtn) {
           openBrowserBtn.addEventListener("click", function() {
-            window.mdfyDesktop.openInBrowser("https://mdfy.app/" +currentCloudDoc.docId);
+            window.mdfyDesktop.openInBrowser("https://memory.wiki/" +currentCloudDoc.docId);
           });
         }
         var duplicateBtn = document.getElementById("cloud-duplicate-edit");
@@ -1648,7 +1648,7 @@
 
     var authState = await window.mdfyDesktop.getAuthState();
     if (!authState.loggedIn) {
-      if (confirm("Sign in required to publish.\n\nYour document will be published as a shareable URL on mdfy.app.\n\nSign in now?")) {
+      if (confirm("Sign in required to publish.\n\nYour document will be published as a shareable URL on memory.wiki.\n\nSign in now?")) {
         window.mdfyDesktop.login();
       }
       return;
@@ -1657,7 +1657,7 @@
     // Confirm first publish
     var isUpdate = currentConfig && currentConfig.docId;
     if (!isUpdate) {
-      if (!confirm("Publish to mdfy.app?\n\nA shareable URL will be created and copied to your clipboard.")) return;
+      if (!confirm("Publish to memory.wiki?\n\nA shareable URL will be created and copied to your clipboard.")) return;
     }
 
     // Save first if needed
@@ -1849,7 +1849,7 @@
         btn.style.opacity = "0.7";
 
         try {
-          var res = await fetch("https://mdfy.app/api/ascii-to-mermaid", {
+          var res = await fetch("https://memory.wiki/api/ascii-to-mermaid", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ascii: text, context: (currentMarkdown || "").substring(0, 2000) }),
@@ -2500,7 +2500,7 @@
         temp.querySelectorAll("*").forEach(function(el) {
           el.removeAttribute("class"); el.removeAttribute("id"); el.removeAttribute("style");
         });
-        // Convert to markdown then re-render to get clean mdfy HTML
+        // Convert to markdown then re-render to get clean memory.wiki HTML
         var pastedMd = htmlToMarkdown(temp).trim();
         if (pastedMd) {
           window.mdfyDesktop.renderMarkdown(pastedMd).then(function(r) {
@@ -3077,7 +3077,7 @@
 
   // ─── Tooltips ───
 
-  // ─── Custom Instant Tooltips (mdfy.app style) ───
+  // ─── Custom Instant Tooltips (memory.wiki style) ───
   var tipEl = null;
   var tipHideTimer = null;
 
@@ -3304,11 +3304,11 @@
 
     if (config && config.docId) {
       items.push({ label: "Copy URL", action: function() {
-        window.mdfyDesktop.writeClipboard("https://mdfy.app/" + config.docId);
+        window.mdfyDesktop.writeClipboard("https://memory.wiki/" + config.docId);
         showToast("URL copied");
       }});
       items.push({ label: "Open in Browser", action: function() {
-        window.mdfyDesktop.openInBrowser("https://mdfy.app/" +config.docId);
+        window.mdfyDesktop.openInBrowser("https://memory.wiki/" +config.docId);
       }});
       items.push({ divider: true });
       items.push({ label: "Unsync", action: async function() {
@@ -3316,14 +3316,14 @@
         await refreshSidebarData(); renderSidebar();
       }});
       items.push({ label: "Delete from Cloud", danger: true, action: async function() {
-        if (confirm("Delete from mdfy.app? Local file stays.")) {
+        if (confirm("Delete from memory.wiki? Local file stays.")) {
           await window.mdfyDesktop.syncDelete(filePath);
           await refreshSidebarData(); renderSidebar();
           showToast("Deleted from cloud");
         }
       }});
     } else {
-      items.push({ label: "Publish to mdfy.app", action: function() {
+      items.push({ label: "Publish to memory.wiki", action: function() {
         window.mdfyDesktop.openFilePath(filePath);
         setTimeout(function() { doPublish(); }, 500);
       }});
@@ -3349,10 +3349,10 @@
         var r = await window.mdfyDesktop.syncPullCloud(docId, title);
         if (r && r.ok) { await refreshSidebarData(); renderSidebar(); }
       }},
-      { label: "Open in Browser", action: function() { window.mdfyDesktop.openInBrowser("https://mdfy.app/" +docId); } },
+      { label: "Open in Browser", action: function() { window.mdfyDesktop.openInBrowser("https://memory.wiki/" +docId); } },
       { divider: true },
       { label: "Copy URL", action: function() {
-        window.mdfyDesktop.writeClipboard("https://mdfy.app/" + docId);
+        window.mdfyDesktop.writeClipboard("https://memory.wiki/" + docId);
         showToast("URL copied");
       }},
     ];
@@ -3378,7 +3378,7 @@
 
     items.push({ divider: true });
     items.push({ label: "Delete from Cloud", danger: true, action: async function() {
-      if (confirm("Delete from mdfy.app?")) {
+      if (confirm("Delete from memory.wiki?")) {
         await window.mdfyDesktop.deleteCloudDoc(docId);
         await refreshSidebarData(); renderSidebar();
         showToast("Deleted");
@@ -3458,7 +3458,7 @@
   function updatePublishedUrl() {
     if (!headerUrlBtn) return;
     if (currentConfig && currentConfig.docId) {
-      var url = "mdfy.app/" + currentConfig.docId;
+      var url = "memory.wiki/" + currentConfig.docId;
       headerUrlBtn.textContent = url;
       headerUrlBtn.style.display = "";
       headerUrlBtn.setAttribute("data-url", "https://" + url);
