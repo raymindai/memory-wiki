@@ -12533,16 +12533,36 @@ ${clone.innerHTML}
                     <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]" style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }} title="Move to folder">
                       <Folder width={11} height={11} /><span className="mdfy-collapse-label">Move</span><ChevronDown width={8} height={8} />
                     </button>
-                    <div className="absolute bottom-full left-0 right-0 mb-1 rounded-lg py-1 hidden group-hover/move:block" style={{ background: "var(--menu-bg)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 9999 }}>
+                    <div
+                      className="absolute bottom-full left-0 mb-1 rounded-lg py-1 hidden group-hover/move:block"
+                      style={{
+                        background: "var(--menu-bg)",
+                        border: "1px solid var(--border)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                        zIndex: 9999,
+                        // Size to longest folder name so labels stay
+                        // on a single line, but never narrower than
+                        // the Move button (minWidth: 100%) and never
+                        // wider than 18rem so a runaway folder name
+                        // can't escape the sidebar.
+                        width: "max-content",
+                        minWidth: "100%",
+                        maxWidth: "18rem",
+                      }}
+                    >
                       {folders.filter(f => !f.section || f.section === "my").map(f => (
                         <button key={f.id} onClick={() => { setTabs(prev => prev.map(t => selectedTabIds.has(t.id) ? { ...t, folderId: f.id } : t)); setSelectedTabIds(new Set()); }}
-                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2" style={{ color: "var(--text-secondary)" }}>
-                          <Folder width={11} height={11} style={{ color: "var(--text-faint)" }} />{f.name}
+                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2 whitespace-nowrap"
+                          style={{ color: "var(--text-secondary)" }}
+                          title={f.name}>
+                          <Folder width={11} height={11} style={{ color: "var(--text-faint)", flexShrink: 0 }} />
+                          <span className="truncate">{f.name}</span>
                         </button>
                       ))}
                       <button onClick={() => { setTabs(prev => prev.map(t => selectedTabIds.has(t.id) ? { ...t, folderId: undefined } : t)); setSelectedTabIds(new Set()); }}
-                        className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2" style={{ color: "var(--text-secondary)", borderTop: "1px solid var(--border-dim)" }}>
-                        <FileIcon width={11} height={11} style={{ color: "var(--text-faint)" }} />Root
+                        className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2 whitespace-nowrap"
+                        style={{ color: "var(--text-secondary)", borderTop: "1px solid var(--border-dim)" }}>
+                        <FileIcon width={11} height={11} style={{ color: "var(--text-faint)", flexShrink: 0 }} />Root
                       </button>
                     </div>
                   </div>
