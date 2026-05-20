@@ -5096,10 +5096,32 @@ export default function MdEditor() {
           tiptapRef.current?.setMarkdown(md);
           // Seed the conflict detection timestamp
           if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at);
+          // Reconcile permission from the server. Sidebar entries
+          // populated from the recent-visit / notification feeds
+          // didn't always have an up-to-date role (the cached tab
+          // might say "readonly" even though the owner promoted us
+          // to Editor since). Trust the freshly-fetched isOwner /
+          // isEditor flags and update the tab + the canEdit state
+          // setters in lockstep — otherwise the View-only banner
+          // sticks even for legitimate editors.
+          const freshPerm: "mine" | "editable" | "readonly" =
+            doc.isOwner ? "mine"
+            : doc.isEditor ? "editable"
+            : "readonly";
+          setIsOwner(freshPerm === "mine");
+          setIsSharedDoc(freshPerm !== "mine");
+          setIsEditor(freshPerm === "editable");
+          if (doc.editMode) setDocEditMode(doc.editMode);
           setTabs(prev => prev.map(x => x.id === tab.id ? {
             ...x,
             markdown: md,
             title: t,
+            permission: freshPerm,
+            shared: freshPerm !== "mine",
+            editMode: doc.editMode || x.editMode,
+            ownerEmail: doc.ownerEmail || x.ownerEmail,
+            allowedEmails: Array.isArray(doc.allowedEmails) ? doc.allowedEmails : x.allowedEmails,
+            allowedEditors: Array.isArray(doc.allowedEditors) ? doc.allowedEditors : x.allowedEditors,
             compileKind: doc.compile_kind || undefined,
             compileFrom: doc.compile_from || undefined,
             compiledAt: doc.compiled_at || undefined,
@@ -10011,14 +10033,17 @@ ${clone.innerHTML}
                                 return;
                               }
                               const d = await res.json();
-                              const perm = d.isOwner ? "mine" : "readonly";
+                              const perm: "mine" | "editable" | "readonly" =
+                                d.isOwner ? "mine"
+                                : d.isEditor ? "editable"
+                                : "readonly";
                               const newId = `tab-${Date.now()}`;
-                              const newTab: Tab = { id: newId, title: d.title || n.documentTitle || "Untitled", markdown: d.markdown, cloudId: n.documentId, permission: perm as "mine" | "editable" | "readonly", shared: perm !== "mine", ownerEmail: d.ownerEmail || n.fromUserName || undefined };
+                              const newTab: Tab = { id: newId, title: d.title || n.documentTitle || "Untitled", markdown: d.markdown, cloudId: n.documentId, permission: perm, shared: perm !== "mine", ownerEmail: d.ownerEmail || n.fromUserName || undefined };
                               // Render immediately, then update tabs
                               setTabs(prev => {
                                 const dup = prev.find(t => t.cloudId === n.documentId);
                                 if (dup) {
-                                  return prev.map(t => t.cloudId === n.documentId ? { ...t, markdown: d.markdown, title: d.title || t.title, permission: perm as "mine" | "editable" | "readonly" } : t);
+                                  return prev.map(t => t.cloudId === n.documentId ? { ...t, markdown: d.markdown, title: d.title || t.title, permission: perm } : t);
                                 }
                                 const saved = prev.map(t => t.id !== activeTabIdRef.current || t.readonly ? t : { ...t, markdown: markdownRef.current });
                                 return [...saved, newTab];
@@ -11839,9 +11864,17 @@ ${clone.innerHTML}
                                 return;
                               }
                               const d = await res.json();
-                              const perm = "readonly";
+                              // Editor-role docs (allowed_editors) come back
+                              // with isEditor=true. Default everyone else to
+                              // readonly. Without this branch the sidebar
+                              // entry opens as view-only even though the
+                              // server has the user in allowed_editors.
+                              const perm: "mine" | "editable" | "readonly" =
+                                d.isOwner ? "mine"
+                                : d.isEditor ? "editable"
+                                : "readonly";
                               const newId = `tab-${Date.now()}`;
-                              const newTab: Tab = { id: newId, title: d.title || "Untitled", markdown: d.markdown, cloudId: doc.id, permission: perm as "mine" | "editable" | "readonly", shared: true, ownerEmail: d.ownerEmail || undefined };
+                              const newTab: Tab = { id: newId, title: d.title || "Untitled", markdown: d.markdown, cloudId: doc.id, permission: perm, shared: perm !== "mine", ownerEmail: d.ownerEmail || undefined };
                               // Render immediately, then update tabs
                               setTabs(prev => {
                                 const dup = prev.find(t => !t.deleted && t.cloudId === doc.id);
