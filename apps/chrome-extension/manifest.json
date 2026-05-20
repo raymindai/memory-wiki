@@ -1,9 +1,16 @@
 {
   "manifest_version": 3,
   "name": "memory.wiki — Capture. Edit. Share. One URL for your Markdown",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Capture AI conversations from ChatGPT, Claude, and Gemini. Edit in WYSIWYG, share with a permanent link.",
-  "permissions": ["activeTab", "tabs", "contextMenus", "storage", "scripting", "cookies"],
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "contextMenus",
+    "storage",
+    "scripting",
+    "cookies"
+  ],
   "host_permissions": [
     "<all_urls>"
   ],
@@ -27,16 +34,24 @@
         "https://claude.ai/*",
         "https://gemini.google.com/*"
       ],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle"
     },
     {
       "matches": [
         "https://github.com/*"
       ],
-      "js": ["github.js"],
-      "css": ["github.css"],
+      "js": [
+        "github.js"
+      ],
+      "css": [
+        "github.css"
+      ],
       "run_at": "document_idle"
     }
   ],
