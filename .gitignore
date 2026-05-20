@@ -54,3 +54,4 @@ apps/web/test-results/
 
 # VS Code extension build artifacts
 apps/vscode-extension/*.vsix
+apps/desktop/build.log
