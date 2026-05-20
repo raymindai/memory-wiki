@@ -13449,9 +13449,22 @@ ${clone.innerHTML}
                     Create
                   </button>
                   {startSections.create && (<>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     {[
                       { label: "New Document", desc: "Blank page", kbd: "", color: "#fb923c", icon: <Plus width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} addTab(); } },
+                      { label: "New Bundle", desc: "Group docs into a thinking surface", kbd: "", color: "#a78bfa", icon: <Layers width={16} height={16} />, fn: () => {
+                        // Open the BundleCreator modal with an empty
+                        // doc list. The user picks docs (or starts
+                        // empty and adds later) inside the modal —
+                        // same flow as the sidebar's "+ New bundle"
+                        // shortcut, so no second code path to
+                        // maintain.
+                        setShowOnboarding(false);
+                        try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+                        setBundleCreatorDocs([]);
+                        setShowMyBundles(true);
+                        setShowBundleCreator(true);
+                      } },
                       { label: "Paste", desc: "Text or AI share URL", kbd: "", color: "#4ade80", icon: <FileText width={16} height={16} />, fn: async () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} try { const text = await navigator.clipboard.readText(); if (text) { addTab(); setTimeout(() => { setMarkdown(text); doRender(text); cmSetDocRef.current?.(text); }, 100); } } catch { /* clipboard permission denied — user can Cmd+V manually */ } } },
                       { label: "Import", desc: "PDF, Word, Excel...", kbd: "", color: "#60a5fa", icon: <Upload width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} imageFileRef.current?.click(); } },
                     ].map((item) => (
