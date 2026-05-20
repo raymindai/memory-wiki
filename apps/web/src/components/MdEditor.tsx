@@ -5,6 +5,7 @@ import { flushSync, createPortal } from "react-dom";
 // Aliased because lucide-react also exports a `Link` icon used
 // elsewhere in this file. NextLink is the routing component.
 import NextLink from "next/link";
+import nextDynamic from "next/dynamic";
 import { userColor } from "@/lib/user-color";
 import { useCursorPresence } from "@/lib/useCursorPresence";
 import { render } from "@/lib/render";
@@ -23,6 +24,9 @@ import MdCanvas from "@/components/MdCanvas";
 // import HubFrontier from "@/components/HubFrontier";
 import BundleEmbed from "@/components/BundleEmbed";
 import HubEmbed from "@/components/HubEmbed";
+// HubGalaxy depends on xyflow + elkjs — heavy. Keep it out of the
+// editor's initial bundle and load only when the Galaxy overlay opens.
+const HubGalaxy = nextDynamic(() => import("@/components/HubGalaxy"), { ssr: false, loading: () => null });
 import SettingsEmbed from "@/components/SettingsEmbed";
 import BundleChat from "@/components/BundleChat";
 import HubChat from "@/components/HubChat";
@@ -50,7 +54,7 @@ import {
   Columns2, Bell, Share2, Menu, PanelLeft, Download, Plus, ArrowUpDown,
   FolderPlus, Folder, FolderOpen, File as FileIcon, MoreHorizontal,
   User, Users, Search, X, Trash2, RefreshCw, Lock, ShieldAlert, FileX,
-  LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus, Wand2,
+  LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus, Wand2, Atom,
   ChevronsDownUp, ChevronsUpDown,
 } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
@@ -4508,6 +4512,10 @@ export default function MdEditor() {
   // meant clicking Hub deselected whatever was in the sidebar — that's
   // the founder complaint this state replaces.
   const [showHub, setShowHub] = useState(false);
+  // Galaxy overlay — owner's full hub as a force-laid-out graph.
+  // Same overlay slot as Hub / Bundle; mutually exclusive with the
+  // other surface overlays. Opens via the Atom pill next to Hub.
+  const [showGalaxy, setShowGalaxy] = useState(false);
   // Per-section fold state for the Start screen. Hot sections
   // (Recent, Create, Drop, Deploy) stay open by default; learning
   // sections (Cases, Guides, Explore) collapse so the surface stops
@@ -5324,10 +5332,12 @@ export default function MdEditor() {
   const [navTick, setNavTick] = useState(0); // forces re-render when history changes
 
   const switchTab = useCallback((tabId: string) => {
-    // Any explicit tab switch dismisses the Hub + Settings overlays —
-    // the user is leaving them to view that tab. Mirrors the
-    // showOnboarding=false calls scattered across the tab-open paths.
+    // Any explicit tab switch dismisses the Hub / Galaxy / Settings
+    // overlays — the user is leaving them to view that tab. Mirrors
+    // the showOnboarding=false calls scattered across the tab-open
+    // paths.
     setShowHub(false);
+    setShowGalaxy(false);
     setShowSettings(false);
     // Flush any pending WYSIWYG edits before switching
     if (wysiwygDebounce.current) {
@@ -9666,8 +9676,9 @@ ${clone.innerHTML}
             // user is looking right now," not "what tab is active."
             const isStart = showOnboarding;
             const isSettings = showSettings;
-            const isHub = !isStart && !isSettings && showHub && !!hubSlug;
-            const isBundle = !isStart && !isSettings && !showHub && ct?.kind === "bundle" && !!ct?.bundleId;
+            const isGalaxy = !isStart && !isSettings && showGalaxy;
+            const isHub = !isStart && !isSettings && !isGalaxy && showHub && !!hubSlug;
+            const isBundle = !isStart && !isSettings && !isGalaxy && !showHub && ct?.kind === "bundle" && !!ct?.bundleId;
             // Pick the surface-specific label + URL. Start has no
             // meaningful URL to display (root /) so we hide the chip
             // entirely on that surface (founder ask). Settings still
@@ -9683,6 +9694,10 @@ ${clone.innerHTML}
               labelId = "settings";
               fullUrl = "https://mdfy.app/settings";
               copyable = false;
+            } else if (isGalaxy) {
+              labelPrefix = "/";
+              labelId = "galaxy";
+              fullUrl = "https://mdfy.app/galaxy";
             } else if (isHub) {
               labelPrefix = "/hub/";
               labelId = hubSlug!;
@@ -9834,7 +9849,7 @@ ${clone.innerHTML}
           <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
           {/* Start (private workspace landing) */}
           <button
-            onClick={() => { setShowOnboarding(true); setShowHub(false); setShowSettings(false); if (viewMode === "editor") setViewMode("preview"); }}
+            onClick={() => { setShowOnboarding(true); setShowHub(false); setShowGalaxy(false); setShowSettings(false); if (viewMode === "editor") setViewMode("preview"); }}
             className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
             style={{
               background: showOnboarding && !viewMode ? "var(--accent-dim)" : showOnboarding ? "var(--accent-dim)" : "var(--toggle-bg)",
@@ -9851,9 +9866,10 @@ ${clone.innerHTML}
             // no-op — same as the Start button. To return to a
             // doc/bundle the user clicks the sidebar row (which is
             // still highlighted because activeTabId is untouched).
-            // Mutually exclusive with the Start and Settings
+            // Mutually exclusive with the Start / Settings / Galaxy
             // overlays — opening one closes the others.
-            const isHubActive = showHub && !showOnboarding;
+            const isHubActive = showHub && !showOnboarding && !showGalaxy;
+            const isGalaxyActive = showGalaxy && !showOnboarding;
             return (
               <>
                 <div style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
@@ -9863,6 +9879,7 @@ ${clone.innerHTML}
                       if (isHubActive) return;
                       setShowOnboarding(false);
                       setShowSettings(false);
+                      setShowGalaxy(false);
                       setShowHub(true);
                     }}
                     className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
@@ -9874,6 +9891,27 @@ ${clone.innerHTML}
                   >
                     <LayoutDashboard width={13} height={13} />
                     <span className="hidden sm:inline">Hub</span>
+                  </button>
+                </Tooltip>
+                <div style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
+                <Tooltip text="Open Galaxy — your hub as a constellation" position="bottom">
+                  <button
+                    onClick={() => {
+                      if (isGalaxyActive) return;
+                      setShowOnboarding(false);
+                      setShowSettings(false);
+                      setShowHub(false);
+                      setShowGalaxy(true);
+                    }}
+                    className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
+                    style={{
+                      background: isGalaxyActive ? "var(--accent-dim)" : "var(--toggle-bg)",
+                      color: isGalaxyActive ? "var(--accent)" : "var(--text-muted)",
+                    }}
+                    aria-pressed={isGalaxyActive}
+                    aria-label="Galaxy"
+                  >
+                    <Atom width={13} height={13} />
                   </button>
                 </Tooltip>
               </>
@@ -9916,9 +9954,9 @@ ${clone.innerHTML}
               // the bundle is hidden, so the pill must NOT stay
               // highlighted (was the visible asymmetry between Home
               // and Hub: Home cleared the highlight, Hub didn't).
-              const active = !showOnboarding && !showHub && !showSettings && bundleView === mode;
+              const active = !showOnboarding && !showHub && !showGalaxy && !showSettings && bundleView === mode;
               return (
-                <button key={mode} onClick={() => { setBundleView(mode); setShowOnboarding(false); setShowHub(false); setShowSettings(false); }} title={`${label} (Alt+${shortcut})`}
+                <button key={mode} onClick={() => { setBundleView(mode); setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(false); }} title={`${label} (Alt+${shortcut})`}
                   className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
                   style={{
                     background: active ? "var(--accent-dim)" : "var(--toggle-bg)",
@@ -9947,17 +9985,17 @@ ${clone.innerHTML}
             // Onboarding nothing is rendering at viewMode, so the pills
             // stay inactive (the user's last choice persists for when
             // they return to a doc).
-            const active = !showOnboarding && !showHub && !showSettings && viewMode === mode;
+            const active = !showOnboarding && !showHub && !showGalaxy && !showSettings && viewMode === mode;
             const hasActiveDoc = tabs.some(t => t.id === activeTabId && !t.deleted);
             // Disable clicks when an overlay surface (Hub / Settings)
             // is on top, or when Onboarding is showing without a real
             // doc to return to. View modes don't apply on those
             // surfaces so a click would be a hidden no-op.
-            const disabled = showHub || showSettings || (showOnboarding && !hasActiveDoc);
+            const disabled = showHub || showGalaxy || showSettings || (showOnboarding && !hasActiveDoc);
             return (
               <button
                 key={mode}
-                onClick={() => { if (!disabled) { setViewMode(mode); setShowOnboarding(false); setShowHub(false); setShowSettings(false); } }}
+                onClick={() => { if (!disabled) { setViewMode(mode); setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(false); } }}
                 disabled={disabled}
                 title={`${label} (Alt+${shortcut})`}
                 className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
@@ -12707,7 +12745,7 @@ ${clone.innerHTML}
                     just want to jump straight into preferences. */}
                 <Tooltip text="Account settings" position="top">
                   <button
-                    onClick={() => { setShowOnboarding(false); setShowHub(false); setShowSettings(true); }}
+                    onClick={() => { setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(true); }}
                     className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md transition-colors hover:bg-[var(--accent-dim)]"
                     style={{ color: "var(--text-faint)" }}
                     aria-label="Account settings"
@@ -12877,6 +12915,7 @@ ${clone.innerHTML}
                             setShowAuthMenu(false);
                             setShowOnboarding(false);
                             setShowHub(false);
+                            setShowGalaxy(false);
                             setShowSettings(true);
                           }}
                           className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--menu-hover)] flex items-center gap-2"
@@ -14078,7 +14117,7 @@ ${clone.innerHTML}
             )}
             {/* Toolbar hint for new users — visible only in Live view when toolbar is hidden */}
             {/* Toolbar hint removed — now integrated into toolbar toggle button */}
-            {(activeTab?.readonly || activeTab?.permission === "readonly") && !showHub && !showSettings && !showOnboarding && (
+            {(activeTab?.readonly || activeTab?.permission === "readonly") && !showHub && !showGalaxy && !showSettings && !showOnboarding && (
               <div
                 className="flex items-center justify-between gap-3 px-3 py-2 text-caption"
                 style={{
@@ -14133,7 +14172,7 @@ ${clone.innerHTML}
                 on (doc or bundle), so the sidebar selection for that
                 tab stays intact. Same overlay slot as BundleEmbed —
                 respects the right-side panels. */}
-            {showHub && hubSlug && !showOnboarding && !showSettings && (
+            {showHub && hubSlug && !showOnboarding && !showSettings && !showGalaxy && (
               <div
                 className="absolute top-0 bottom-0 left-0 z-10 flex"
                 style={{
@@ -14301,7 +14340,23 @@ ${clone.innerHTML}
                 </div>
               </div>
             )}
-            {activeTab?.kind === "bundle" && activeTab.bundleId && !showOnboarding && !showHub && !showSettings && (
+            {/* Galaxy — same overlay slot as Hub / Bundle. Renders
+                the full hub graph (xyflow + elkjs). Mutex with Hub
+                via the active checks above. */}
+            {showGalaxy && !showOnboarding && !showHub && !showSettings && (
+              <div
+                className="absolute top-0 bottom-0 left-0 z-10 flex"
+                style={{
+                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
+                  background: "var(--background)",
+                }}
+              >
+                <div className="flex-1 min-w-0">
+                  <HubGalaxy authHeaders={authHeaders} userEmail={user?.email ?? null} />
+                </div>
+              </div>
+            )}
+            {activeTab?.kind === "bundle" && activeTab.bundleId && !showOnboarding && !showHub && !showGalaxy && !showSettings && (
               <div
                 className="absolute top-0 bottom-0 left-0 z-10 flex"
                 style={{
@@ -14431,7 +14486,7 @@ ${clone.innerHTML}
                 concepts that also appear in OTHER docs, surface a pill row
                 so the user can jump to the cross-doc context. Only shown for
                 regular doc tabs (not bundles, not onboarding). */}
-            {activeTab?.kind !== "bundle" && !showHub && !showOnboarding && relatedConcepts.length > 0 && (
+            {activeTab?.kind !== "bundle" && !showHub && !showGalaxy && !showOnboarding && relatedConcepts.length > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 flex-wrap shrink-0"
                 style={{ borderBottom: "1px solid var(--border-dim)", background: "var(--toggle-bg)" }}>
                 <span className="text-caption font-semibold uppercase tracking-wider shrink-0" style={{ color: "var(--text-faint)" }}>
@@ -15634,7 +15689,7 @@ ${clone.innerHTML}
             doc. Start / Hub / Settings / Bundle surfaces have no
             markdown to count, so "0 words 0 chars 1 lines" was just
             visual noise. */}
-        {!showOnboarding && !showHub && !showSettings && activeTab?.kind !== "bundle" && (
+        {!showOnboarding && !showHub && !showGalaxy && !showSettings && activeTab?.kind !== "bundle" && (
         <div className="flex items-center gap-3 shrink-0">
           {/* Desktop: always visible */}
           <span className="hidden sm:inline">{wordCount.toLocaleString()} words</span>
@@ -17486,10 +17541,10 @@ ${clone.innerHTML}
 
         // Surfaces — always-available navigation targets.
         const surfaces: PaletteItem[] = [
-          { id: "surface-start", label: "Start", hint: "Personal workspace", icon: <Smile width={13} height={13} />, action: () => { setShowOnboarding(true); setShowHub(false); setShowSettings(false); } },
-          ...(hubSlug ? [{ id: "surface-hub", label: "Hub", hint: `/hub/${hubSlug}`, icon: <LayoutDashboard width={13} height={13} />, action: () => { setShowOnboarding(false); setShowSettings(false); setShowHub(true); } }] : []),
-          ...(hubSlug ? [{ id: "surface-galaxy", label: "Galaxy", hint: "Your hub as a constellation", icon: <Network width={13} height={13} />, action: () => { window.open("/galaxy", "_blank"); closePalette(); } }] : []),
-          { id: "surface-settings", label: "Settings", hint: "Profile, appearance, auto-management", icon: <Settings width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowSettings(true); } },
+          { id: "surface-start", label: "Start", hint: "Personal workspace", icon: <Smile width={13} height={13} />, action: () => { setShowOnboarding(true); setShowHub(false); setShowGalaxy(false); setShowSettings(false); } },
+          ...(hubSlug ? [{ id: "surface-hub", label: "Hub", hint: `/hub/${hubSlug}`, icon: <LayoutDashboard width={13} height={13} />, action: () => { setShowOnboarding(false); setShowSettings(false); setShowGalaxy(false); setShowHub(true); } }] : []),
+          ...(hubSlug ? [{ id: "surface-galaxy", label: "Galaxy", hint: "Your hub as a constellation", icon: <Atom width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowSettings(false); setShowGalaxy(true); } }] : []),
+          { id: "surface-settings", label: "Settings", hint: "Profile, appearance, auto-management", icon: <Settings width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(true); } },
         ];
 
         // Recent (last 5 visited tabs, excluding hub-overlay ids)
