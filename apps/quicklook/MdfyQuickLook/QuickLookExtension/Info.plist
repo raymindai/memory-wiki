@@ -24,8 +24,6 @@
 	<dict>
 		<key>NSExtensionAttributes</key>
 		<dict>
-			<key>QLSupportsSearchableItems</key>
-			<true/>
 			<key>QLSupportedContentTypes</key>
 			<array>
 				<string>net.daringfireball.markdown</string>
@@ -33,6 +31,8 @@
 				<string>dyn.ah62d4rv4ge81e5pe</string>
 			</array>
 			<key>QLSupportsFilePreviewsForTransientDocuments</key>
+			<true/>
+			<key>QLSupportsSearchableItems</key>
 			<true/>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>

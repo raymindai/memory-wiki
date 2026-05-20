@@ -539,7 +539,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     <div class="mw-topbar">
       <div class="mw-topbar-left">
         <div class="mw-logo">
-          <span style="font-size:16px;font-weight:800;letter-spacing:-0.5px"><span style="color:var(--accent)">md</span><span style="color:var(--fg)">fy</span><span style="color:var(--muted)">.cc</span></span>
+          <span style="font-size:16px;font-weight:800;letter-spacing:-0.5px"><span style="color:var(--accent)">Memory</span><span style="color:var(--fg)">.Wiki</span></span>
         </div>
         <span class="mw-filename">{{FILE_NAME}}</span>
       </div>

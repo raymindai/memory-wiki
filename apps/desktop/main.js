@@ -2114,7 +2114,11 @@ function buildMenu() {
 // Extensions in Contents/Resources/ of another app are NOT discovered by macOS.
 
 function installQuickLook() {
-  const marker = path.join(USER_DATA_DIR, ".quicklook-installed");
+  // Marker is keyed by Desktop version so each new Desktop release
+  // refreshes the bundled QuickLook copy in ~/Applications. Without
+  // the version suffix a user on v2.3.3 → v2.3.4 would keep the old
+  // QuickLook (whose template still showed mdfy.cc text).
+  const marker = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
   if (fs.existsSync(marker)) return;
 
   const qlSource = path.join(process.resourcesPath, "MdfyQuickLook.app");
@@ -2125,17 +2129,15 @@ function installQuickLook() {
 
   try {
     if (!fs.existsSync(userApps)) fs.mkdirSync(userApps, { recursive: true });
-    // Always replace with latest version
     if (fs.existsSync(qlDest)) {
       const { execSync } = require("child_process");
       execSync(`rm -rf "${qlDest}"`);
     }
     const { execSync } = require("child_process");
     execSync(`cp -R "${qlSource}" "${qlDest}"`);
-    // Open the app to register the extension with macOS
     execSync(`open "${qlDest}"`);
     fs.writeFileSync(marker, new Date().toISOString());
-    console.log("[quicklook] Installed to ~/Applications/");
+    console.log("[quicklook] Installed/refreshed to ~/Applications/");
   } catch (err) {
     console.log("[quicklook] Install failed (non-critical):", err.message);
   }
