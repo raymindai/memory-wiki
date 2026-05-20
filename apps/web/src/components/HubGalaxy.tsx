@@ -1727,30 +1727,34 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
                           else next.add(k);
                           setVisibleKinds(next);
                         }}
-                        title={k}
+                        title={`Show / hide ${k} stars`}
                         className="text-caption"
                         style={{
-                          width: 22,
                           height: 22,
                           borderRadius: 4,
                           background: active ? "var(--toggle-bg)" : "transparent",
                           border: "1px solid var(--border-dim)",
-                          padding: 0,
+                          padding: "0 8px 0 6px",
                           display: "inline-flex",
                           alignItems: "center",
-                          justifyContent: "center",
+                          gap: 5,
                           cursor: "pointer",
+                          color: active ? "var(--text-primary)" : "var(--text-faint)",
+                          textTransform: "capitalize",
+                          letterSpacing: 0.2,
                         }}
                       >
                         <span
                           style={{
-                            width: 8,
-                            height: 8,
+                            width: 7,
+                            height: 7,
                             borderRadius: "50%",
                             background: `radial-gradient(circle, #fff 0%, ${c} 50%, transparent 100%)`,
                             opacity: active ? 1 : 0.35,
+                            flexShrink: 0,
                           }}
                         />
+                        {k}
                       </button>
                     );
                   })}
