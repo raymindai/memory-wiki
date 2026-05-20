@@ -4,7 +4,7 @@
 window.MDFY_EXAMPLES = {
   welcome: `# Welcome to Memory.Wiki
 
-> **Your Markdown, Beautifully Published.**
+> **Your AI memory, deployable to any AI.**
 > Import anything. Render beautifully. Share instantly.
 
 ## Get Started

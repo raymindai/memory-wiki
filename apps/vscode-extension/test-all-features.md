@@ -230,4 +230,4 @@ pie title Document Types
 
 ---
 
-*Published with [Memory.Wiki](https://memory.wiki) -- Your Markdown, Beautifully Published.*
+*Published with [Memory.Wiki](https://memory.wiki) -- Your AI memory, deployable to any AI.*
