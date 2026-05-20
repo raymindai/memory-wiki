@@ -520,7 +520,7 @@ export function SiteFooter({ lang = "en" }: { lang?: "en" | "ko" } = {}) {
             </p>
             {[
               { label: "GitHub", href: "https://github.com/raymindai/mdcore" },
-              { label: "hi@mdfy.app", href: "mailto:hi@mdfy.app" },
+              { label: "hi@raymind.ai", href: "mailto:hi@raymind.ai" },
               { label: t.privacy, href: "/privacy" },
             ].map((l) => (
               <a

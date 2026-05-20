@@ -3,13 +3,13 @@
  * All emails use memory.wiki dark branding: #09090b bg, #18181b card, #27272a border, #fb923c accent.
  */
 
-const FROM_ADDRESS = "memory.wiki <notifications@mdfy.app>";
+const FROM_ADDRESS = "memory.wiki <notifications@memory.wiki>";
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 // ─── Shared template parts ───
 
 function logoHtml(): string {
-  return `<span style="font-weight:800;font-size:20px;letter-spacing:-0.5px"><span style="color:#fb923c">md</span><span style="color:#a1a1aa">fy</span></span>`;
+  return `<span style="font-weight:800;font-size:20px;letter-spacing:-0.5px"><span style="color:#fb923c">mem</span><span style="color:#fafafa">ory</span><span style="color:#737373">.wiki</span></span>`;
 }
 
 function footerHtml(to: string): string {
