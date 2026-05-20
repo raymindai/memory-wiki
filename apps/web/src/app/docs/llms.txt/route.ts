@@ -312,7 +312,7 @@ Error response format:
 Install: npm install -g mdfy-cli
 
 Commands:
-- Memory.Wiki publish <file>: Publish a file or stdin
+- mdfy publish <file>: Publish a file or stdin
 - Memory.Wiki update <id> <file>: Update existing document
 - Memory.Wiki pull <id>: Download document content
 - Memory.Wiki delete <id>: Soft-delete a document
@@ -324,10 +324,10 @@ Commands:
 - Memory.Wiki whoami: Show current user
 
 Pipe examples:
-- echo "# Hello" | Memory.Wiki publish
-- pbpaste | Memory.Wiki publish
-- cat file.md | Memory.Wiki publish
-- tmux capture-pane -p | Memory.Wiki publish
+- echo "# Hello" | mdfy publish
+- pbpaste | mdfy publish
+- cat file.md | mdfy publish
+- tmux capture-pane -p | mdfy publish
 
 ## HTTP API
 

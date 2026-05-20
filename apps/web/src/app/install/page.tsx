@@ -190,7 +190,7 @@ export default function InstallPage() {
           </p>
           <p className="mt-4 text-sm">
             <Link
-              href="/how-mdfy-works"
+              href="/docs"
               className="underline"
               style={{ color: "var(--accent)" }}
             >
@@ -199,11 +199,11 @@ export default function InstallPage() {
           </p>
           <p className="mt-2 text-sm">
             <Link
-              href="/mdfy-memory"
+              href="/docs/integrate"
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              How Memory.Wiki Memory works (chunked, hybrid, public) &rarr;
+              How Memory.Wiki memory works (chunked, hybrid, public) &rarr;
             </Link>
           </p>
         </section>

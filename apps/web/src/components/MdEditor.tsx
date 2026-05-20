@@ -133,13 +133,9 @@ const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
 
 ## Try It Now
 
-- **Drop a PDF here** — AI Memory.Wiki turns it into clean Markdown
+- **Drop a PDF here** — AI converts it into clean Markdown
 - **Click +** in the sidebar to start from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during beta
-
----
-
-*Powered by **mdcore engine** — Rust + WASM*
 `;
 
 const SAMPLE_FORMATTING = `# Markdown Syntax Guide
@@ -494,7 +490,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI Memory.Wiki structuring    │
+│ AI structuring    │
 │ All formats supported  │
 └────────────────────────┘
 \`\`\`
@@ -517,9 +513,9 @@ Drop any file onto Memory.Wiki, use the **IMPORT** button in the sidebar, or pas
 | **RST** | reStructuredText headings, links → Markdown |
 | **RTF / JSON / XML / TXT** | Text extraction with format hints |
 
-### AI Memory.Wiki Structuring
+### AI Structuring
 
-After importing, you'll see **"Memory.Wiki this document?"** — click **Memory.Wiki it** to let AI:
+After importing, you'll see **"Structure this document?"** — click **Structure it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks
@@ -532,8 +528,8 @@ After importing, you'll see **"Memory.Wiki this document?"** — click **Memory.
 
 \`\`\`bash
 # Pipe any file content
-cat report.md | Memory.Wiki publish
-pbpaste | Memory.Wiki publish
+cat report.md | mdfy publish
+pbpaste | mdfy publish
 \`\`\`
 
 ### Import from GitHub
@@ -1170,7 +1166,7 @@ Or search "Memory.Wiki" in VS Code Extensions.
 
 const SAMPLE_DESKTOP = `# Memory.Wiki for Mac
 
-> Native desktop app with sidebar, sync, and local WASM rendering.
+> Native desktop app with sidebar, sync, and local rendering.
 
 ## Install
 
@@ -1199,7 +1195,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 
 ## Features
 
-- Full WASM rendering engine (same as Memory.Wiki)
+- Full rendering engine (same as Memory.Wiki web)
 - KaTeX math, Mermaid diagrams, 190+ language highlighting
 - Document outline panel
 - Import: PDF, DOCX, PPTX, XLSX, HTML, CSV
@@ -1223,23 +1219,23 @@ npm install -g mdfy-cli
 
 \`\`\`bash
 # Publish a file
-Memory.Wiki publish README.md
+mdfy publish README.md
 # → https://memory.wiki/abc123  (copied to clipboard)
 
 # Publish from pipe
-echo "# Hello World" | Memory.Wiki publish
+echo "# Hello World" | mdfy publish
 
 # Publish clipboard
-pbpaste | Memory.Wiki publish
+pbpaste | mdfy publish
 \`\`\`
 
 ## Pipe Anything
 
 \`\`\`bash
-claude "explain React hooks" | Memory.Wiki publish
-git log --oneline -20 | Memory.Wiki publish
-man grep | Memory.Wiki publish
-curl -s https://api.example.com/status | Memory.Wiki publish
+claude "explain React hooks" | mdfy publish
+git log --oneline -20 | mdfy publish
+man grep | mdfy publish
+curl -s https://api.example.com/status | mdfy publish
 \`\`\`
 
 ## Read in Terminal
@@ -1264,7 +1260,7 @@ Memory.Wiki open abc123                # Open in browser
 Add to \`~/.tmux.conf\`:
 
 \`\`\`bash
-bind-key M run-shell "tmux capture-pane -p -S -1000 | Memory.Wiki publish"
+bind-key M run-shell "tmux capture-pane -p -S -1000 | mdfy publish"
 \`\`\`
 
 ## Short Aliases
@@ -1533,7 +1529,7 @@ Click any concept → drawer with all citations across your library:
 
 \`\`\`
 AI Memory Ownership — 4 docs, 7 mentions
-  ┌─ "mdfy.cc V2"               [concept] excerpt…
+  ┌─ "Memory.Wiki V2"           [concept] excerpt…
   ├─ "Bundle Strategy Brief"    [definition] excerpt…
   └─ "Launch Plan"              [concept] excerpt…
 \`\`\`
@@ -3486,7 +3482,7 @@ export default function MdEditor() {
   const [mdfyElapsed, setMdfyElapsed] = useState(0);
   const [showFlavorMenu, setShowFlavorMenu] = useState(false);
 
-  // Tick elapsed time while AI Memory.Wiki is processing
+  // Tick elapsed time while AI processing
   useEffect(() => {
     if (!mdfyLoading) {
       setMdfyElapsed(0);
@@ -16364,7 +16360,7 @@ ${clone.innerHTML}
                     Processing{mdfyElapsed > 0 ? ` ${mdfyElapsed}s` : "..."}
                   </>
                 ) : (
-                  <>Memory.Wiki it</>
+                  <>Structure it</>
                 )}
               </button>
             </div>

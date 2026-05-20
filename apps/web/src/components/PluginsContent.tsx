@@ -537,12 +537,12 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               </div>
               <div className="terminal-mock-body">
                 <span className="line comment">{"# Publish a file"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">Memory.Wiki publish README.md</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">mdfy publish README.md</span></span>
                 <span className="line"><span className="url">https://memory.wiki/abc123</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
                 <span className="line comment">{"# Pipe anything"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | Memory.Wiki publish"}</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | mdfy publish"}</span></span>
                 <span className="line"><span className="url">https://memory.wiki/def456</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
