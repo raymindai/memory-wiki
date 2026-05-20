@@ -9656,7 +9656,7 @@ ${clone.innerHTML}
             onClick={() => window.open("/about", "_blank")}
             title="Memory.Wiki — About"
           >
-            <MemoryWikiLogo size={isMobile ? 14 : 18} />
+            <MemoryWikiLogo size={isMobile ? 12 : 14} />
           </h1>
           {/* Document / Bundle / Hub URL chip — refined chip group.
               For doc tabs: shows /{cloudId} → memory.wiki/{cloudId}.
