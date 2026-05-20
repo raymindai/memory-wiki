@@ -2,16 +2,16 @@
 
 /**
  * Canonical Memory.Wiki logo component.
- * Inline text wordmark — three coloured spans so CSS variables
- * carry theme switches.
+ * Two-tone wordmark — orange "Memory" + theme-primary ".Wiki".
+ * Gray is intentionally NOT used in the wordmark (founder spec).
  *
  * Default split ("Memory.Wiki"):
- *   prefix  "Mem"   accent           (#fb923c dark / #ea580c light)
- *   middle  "ory"   text-primary     (#fafafa dark / #09090b light)
- *   suffix  ".Wiki" text-faint       (#737373 dark / #a1a1aa light)
+ *   "Memory"   accent         (#fb923c dark / #ea580c light)
+ *   ".Wiki"    text-primary   (#fafafa dark / #09090b light)
  *
- * Compact mobile collapses to the "M.W" mark so the toolbar
- * doesn't crowd on narrow viewports.
+ * Compact mobile collapses to "M.W" — same two-tone split:
+ *   "M"    accent
+ *   ".W"   text-primary
  */
 export default function MdfyLogo({
   size = 22,
@@ -27,9 +27,8 @@ export default function MdfyLogo({
 }) {
   const weight = 800;
   const letterSpacing = "-0.02em";
-  const prefix = variant === "mdcore.ai" ? "md" : "Mem";
-  const middle = variant === "mdcore.ai" ? "core" : "ory";
-  const suffix = variant === "mdcore.ai" ? ".ai" : ".Wiki";
+  const left = variant === "mdcore.ai" ? "md" : "Memory";
+  const right = variant === "mdcore.ai" ? "core.ai" : ".Wiki";
 
   if (compact) {
     const baseStyle = { fontSize: size, fontWeight: weight, letterSpacing, whiteSpace: "nowrap" as const };
@@ -37,13 +36,11 @@ export default function MdfyLogo({
       <>
         <span className="sm:hidden" style={baseStyle} aria-label={variant}>
           <span style={{ color: "var(--accent)" }}>{variant === "mdcore.ai" ? "m" : "M"}</span>
-          <span style={{ color: "var(--text-faint)" }}>.</span>
-          <span style={{ color: "var(--text-primary)" }}>{variant === "mdcore.ai" ? "d" : "W"}</span>
+          <span style={{ color: "var(--text-primary)" }}>{variant === "mdcore.ai" ? "d" : ".W"}</span>
         </span>
         <span className="hidden sm:inline" style={baseStyle} aria-label={variant}>
-          <span style={{ color: "var(--accent)" }}>{prefix}</span>
-          <span style={{ color: "var(--text-primary)" }}>{middle}</span>
-          <span style={{ color: "var(--text-faint)" }}>{suffix}</span>
+          <span style={{ color: "var(--accent)" }}>{left}</span>
+          <span style={{ color: "var(--text-primary)" }}>{right}</span>
         </span>
       </>
     );
@@ -54,9 +51,8 @@ export default function MdfyLogo({
       style={{ fontSize: size, fontWeight: weight, letterSpacing, whiteSpace: "nowrap" }}
       aria-label={variant}
     >
-      <span style={{ color: "var(--accent)" }}>{prefix}</span>
-      <span style={{ color: "var(--text-primary)" }}>{middle}</span>
-      <span style={{ color: "var(--text-faint)" }}>{suffix}</span>
+      <span style={{ color: "var(--accent)" }}>{left}</span>
+      <span style={{ color: "var(--text-primary)" }}>{right}</span>
     </span>
   );
 }

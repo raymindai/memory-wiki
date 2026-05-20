@@ -9,7 +9,7 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 // ─── Shared template parts ───
 
 function logoHtml(): string {
-  return `<span style="font-weight:800;font-size:20px;letter-spacing:-0.5px"><span style="color:#fb923c">Mem</span><span style="color:#fafafa">ory</span><span style="color:#737373">.Wiki</span></span>`;
+  return `<span style="font-weight:800;font-size:20px;letter-spacing:-0.5px"><span style="color:#fb923c">Memory</span><span style="color:#fafafa">.Wiki</span></span>`;
 }
 
 function footerHtml(to: string): string {
