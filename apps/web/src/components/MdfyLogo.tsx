@@ -2,11 +2,16 @@
 
 /**
  * Canonical memory.wiki logo component.
- * Renders inline SVG so CSS variables are respected for theming.
- * Source of truth: assets/brand/
+ * Inline text wordmark — three coloured spans so CSS variables
+ * carry theme switches.
  *
- * Colors (dark):  md=#fb923c  fy=#fafafa  .app=#737373
- * Colors (light): md=#ea580c  fy=#09090b  .app=#a1a1aa
+ * Default split ("memory.wiki"):
+ *   prefix  "mem"   accent           (#fb923c dark / #ea580c light)
+ *   middle  "ory"   text-primary     (#fafafa dark / #09090b light)
+ *   suffix  ".wiki" text-faint       (#737373 dark / #a1a1aa light)
+ *
+ * Compact mobile collapses the wordmark to the two-letter "mw" mark
+ * so the toolbar doesn't crowd on narrow viewports.
  */
 export default function MdfyLogo({
   size = 22,
@@ -15,32 +20,29 @@ export default function MdfyLogo({
 }: {
   size?: number;
   variant?: "memory.wiki" | "mdcore.ai";
-  /** When true, render only the orange "md" mark — useful in tight spots
-   *  (app toolbar) where the full wordmark crowds the row. */
+  /** When true, render only the two-letter "mw" mark on mobile and
+   *  the full wordmark on desktop. Useful in tight rows (app
+   *  toolbar) where the full wordmark would crowd. */
   compact?: boolean;
 }) {
   const weight = 800;
   const letterSpacing = "-0.02em";
-  const suffix = variant === "mdcore.ai" ? ".ai" : ".app";
-  const middle = variant === "mdcore.ai" ? "core" : "fy";
+  const prefix = variant === "mdcore.ai" ? "md" : "mem";
+  const middle = variant === "mdcore.ai" ? "core" : "ory";
+  const suffix = variant === "mdcore.ai" ? ".ai" : ".wiki";
 
-  // Compact = "show only the md mark on mobile, full wordmark at
-  // sm+". The two breakpoints render different colour pairings:
-  // mobile splits the mark into m=accent + d=text-primary (the
-  // founder's spec), desktop keeps the canonical md=accent /
-  // fy=text-primary / .app=text-faint stripe. Easiest correct way
-  // is to render both and let Tailwind hide whichever doesn't fit
-  // the breakpoint.
   if (compact) {
     const baseStyle = { fontSize: size, fontWeight: weight, letterSpacing, whiteSpace: "nowrap" as const };
+    const compactPrefix = variant === "mdcore.ai" ? "m" : "m";
+    const compactSecond = variant === "mdcore.ai" ? "d" : "w";
     return (
       <>
         <span className="sm:hidden" style={baseStyle} aria-label={variant}>
-          <span style={{ color: "var(--accent)" }}>m</span>
-          <span style={{ color: "var(--text-primary)" }}>d</span>
+          <span style={{ color: "var(--accent)" }}>{compactPrefix}</span>
+          <span style={{ color: "var(--text-primary)" }}>{compactSecond}</span>
         </span>
         <span className="hidden sm:inline" style={baseStyle} aria-label={variant}>
-          <span style={{ color: "var(--accent)" }}>md</span>
+          <span style={{ color: "var(--accent)" }}>{prefix}</span>
           <span style={{ color: "var(--text-primary)" }}>{middle}</span>
           <span style={{ color: "var(--text-faint)" }}>{suffix}</span>
         </span>
@@ -53,7 +55,7 @@ export default function MdfyLogo({
       style={{ fontSize: size, fontWeight: weight, letterSpacing, whiteSpace: "nowrap" }}
       aria-label={variant}
     >
-      <span style={{ color: "var(--accent)" }}>md</span>
+      <span style={{ color: "var(--accent)" }}>{prefix}</span>
       <span style={{ color: "var(--text-primary)" }}>{middle}</span>
       <span style={{ color: "var(--text-faint)" }}>{suffix}</span>
     </span>

@@ -59,7 +59,7 @@ export default function SpecPageKo() {
           AI 시대 wiki 의 공개 스펙.
         </h1>
         <p style={{ fontSize: 17, lineHeight: 1.7, color: "var(--text-muted)", marginBottom: 24, maxWidth: 720 }}>
-          memori.wiki 는 어떤 AI 도 읽을 수 있는 개인 지식 wiki 입니다. 이 페이지는 URL 계약, retrieval API, llms.txt 매니페스트, bundle digest 를 문서화합니다 — mdfy 레퍼런스 구현이 오늘 ship 하는 같은 primitives. 다른 도구도 이 스펙을 구현해서 플랫폼 lock-in 없이 interop 가능합니다.
+          memori.wiki 는 어떤 AI 도 읽을 수 있는 개인 지식 wiki 입니다. 이 페이지는 URL 계약, retrieval API, llms.txt 매니페스트, bundle digest 를 문서화합니다 — memory.wiki 레퍼런스 구현이 오늘 ship 하는 같은 primitives. 다른 도구도 이 스펙을 구현해서 플랫폼 lock-in 없이 interop 가능합니다.
         </p>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-faint)", marginBottom: 48, maxWidth: 720 }}>
           엔진 라이선스: MIT. 레퍼런스 구현:{" "}

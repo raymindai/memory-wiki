@@ -431,7 +431,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             Settings
           </h1>
           <p className="text-body mt-1.5" style={{ color: "var(--text-secondary)" }}>
-            Tune your account, hub, and how mdfy auto-manages your knowledge.
+            Tune your account, hub, and how memory.wiki auto-manages your knowledge.
           </p>
         </header>
 
@@ -1040,7 +1040,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             const PRO_FEATURES = [
               "Everything in Free",
               "Custom domain (yourname.memory.wiki)",
-              "Remove mdfy badge from public hub",
+              "Remove memory.wiki badge from public hub",
               "Viewer analytics (who opened, how long)",
               "Priority concept extraction + larger limits",
             ];

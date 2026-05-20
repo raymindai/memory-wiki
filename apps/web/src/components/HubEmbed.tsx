@@ -236,7 +236,7 @@ export default function HubEmbed({
   onOpenGalaxy,
 }: HubEmbedProps) {
   // Needs Review + Suggestions default to COLLAPSED when auto-
-  // management is on — the assumption is mdfy is handling them
+  // management is on — the assumption is memory.wiki is handling them
   // for you, so the user shouldn't have to scroll past detailed
   // lists every Hub visit. When auto-management is off, both
   // sections default OPEN so manual triage is still front-and-
@@ -615,8 +615,8 @@ export default function HubEmbed({
             Deploy + Setup split. One panel: pick the tool, see
             exactly what to do, copy, done. URL tools (chat AIs +
             Generic) show a URL row with the Compact/Full chip
-            toggle; snippet tools (editor + mdfy native) show their
-            specific snippet. No "via mdfy:" group label — every
+            toggle; snippet tools (editor + memory.wiki native) show their
+            specific snippet. No "via memory.wiki:" group label — every
             tool sits at the same level. */}
         <section
           className="mb-8 px-5 py-4 rounded-xl"
@@ -626,8 +626,8 @@ export default function HubEmbed({
                 Row 1 — "where you do AI" (Claude / ChatGPT / Gemini /
                 Claude Code / Cursor / Generic), ordered by likely-
                 use frequency (chat surfaces first, IDE next).
-                Row 2 — "mdfy native" runtime (MCP / Skill / CLI)
-                under a small "via mdfy:" label so users see them
+                Row 2 — "memory.wiki native" runtime (MCP / Skill / CLI)
+                under a small "via memory.wiki:" label so users see them
                 as add-on capabilities, not yet-another-vendor.
               The active tab's snippet card carries a one-line hint,
               the snippet itself, a multi-sentence user-friendly
@@ -652,39 +652,39 @@ export default function HubEmbed({
             const compactAvailable = compactTokens > 0;
             const projCtx = `# Project context
 
-mdfy hub: ${url}
+memory.wiki hub: ${url}
 
 Fetch this URL on every session. The response carries clean
 markdown of the user's knowledge graph (concept index, bundle
 analyses, doc list) — paste-and-go context.`;
             const cursorRule = `---
-description: mdfy hub context
+description: memory.wiki hub context
 alwaysApply: true
 ---
-mdfy hub: ${url}
+memory.wiki hub: ${url}
 
 Fetch this URL on every session for the user's knowledge graph
 (concept index, bundle analyses, doc list).`;
             const mcpConfig = `{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["-y", "mdfy-mcp"]
     }
   }
 }`;
             const skillUse = `# Install once
-claude skill install mdfy
+claude skill install memory.wiki
 
 # Inside any Claude Code session
-/mdfy capture "your idea"
-/mdfy search "topic"
-/mdfy hub`;
+/memory.wiki capture "your idea"
+/memory.wiki search "topic"
+/memory.wiki hub`;
             const cliUse = `npm install -g mdfy-cli
 
-mdfy capture "your idea"
-mdfy search "topic"
-mdfy hub`;
+memory.wiki capture "your idea"
+memory.wiki search "topic"
+memory.wiki hub`;
 
             type Tool = {
               id: string;
@@ -773,10 +773,10 @@ mdfy hub`;
                 id: "skill",
                 label: "Skill",
                 group: "native",
-                hint: "Use /mdfy slash commands inside Claude Code",
+                hint: "Use /memory.wiki slash commands inside Claude Code",
                 snippet: skillUse,
                 explanation:
-                  "Install once with `claude skill install mdfy`. Then in any Claude Code session, run slash commands like /mdfy capture, /mdfy search, /mdfy hub. The skill is namespaced so it doesn't collide with Claude's built-ins.",
+                  "Install once with `claude skill install memory.wiki`. Then in any Claude Code session, run slash commands like /memory.wiki capture, /memory.wiki search, /memory.wiki hub. The skill is namespaced so it doesn't collide with Claude's built-ins.",
                 docHref: "/docs/integrate",
               },
               {
@@ -786,7 +786,7 @@ mdfy hub`;
                 hint: "Capture and search from your terminal",
                 snippet: cliUse,
                 explanation:
-                  "Globally-installed npm package. Run mdfy capture, mdfy search, mdfy hub from any directory. Handy for scripting, terminal-first workflows, or piping shell output into your hub.",
+                  "Globally-installed npm package. Run memory.wiki capture, memory.wiki search, memory.wiki hub from any directory. Handy for scripting, terminal-first workflows, or piping shell output into your hub.",
                 docHref: "/docs/cli",
               },
             ];

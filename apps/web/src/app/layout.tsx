@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "memory.wiki — Your AI memory, deployable to any AI.",
   description:
-    "One URL, every AI. Capture from ChatGPT, Claude, Notion, GitHub, Obsidian — your knowledge becomes a citable URL that Claude, ChatGPT, Cursor, and Codex all fetch the same way. You set the direction; mdfy structures the URL.",
+    "One URL, every AI. Capture from ChatGPT, Claude, Notion, GitHub, Obsidian — your knowledge becomes a citable URL that Claude, ChatGPT, Cursor, and Codex all fetch the same way. You set the direction; memory.wiki structures the URL.",
   keywords: [
     "personal knowledge hub",
     "AI memory",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     "Codex",
     "knowledge management",
   ],
-  authors: [{ name: "mdfy", url: "https://memory.wiki" }],
+  authors: [{ name: "memory.wiki", url: "https://memory.wiki" }],
   metadataBase: new URL("https://memory.wiki"),
   openGraph: {
     title: "memory.wiki — Your AI memory, deployable to any AI.",

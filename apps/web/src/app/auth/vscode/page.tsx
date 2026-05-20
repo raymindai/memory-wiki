@@ -106,7 +106,7 @@ export default function VSCodeAuthPage() {
             Your memory.wiki account is now linked. You can close this tab and return to VS Code.
           </p>
           <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 8 }}>
-            Didn&apos;t work? Make sure the mdfy extension is installed in VS Code.
+            Didn&apos;t work? Make sure the memory.wiki extension is installed in VS Code.
           </p>
         </>
       )}

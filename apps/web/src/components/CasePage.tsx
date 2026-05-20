@@ -2,7 +2,7 @@
 //
 // Each case follows the Pain → Action → Result shape that Hermes Agent
 // uses for its 활용 사례 grid. The home onboarding's "What people put
-// in mdfy" cards each link to one of these. Keep the body tight —
+// in memory.wiki" cards each link to one of these. Keep the body tight —
 // readers should be able to scan in under a minute and decide whether
 // the shape fits their week.
 //
@@ -24,9 +24,9 @@ export interface CaseData {
   sub: string;
   /** Visual signature: 1-2 words + accent color. */
   accent: string;
-  /** Pain — what's broken without mdfy. 3-5 bullets, short. */
+  /** Pain — what's broken without memory.wiki. 3-5 bullets, short. */
   pain: string[];
-  /** Action — what the user does in mdfy. Ordered steps. */
+  /** Action — what the user does in memory.wiki. Ordered steps. */
   action: { step: string; detail: string }[];
   /** Result — what they get back. 3-5 bullets, short. */
   result: string[];
@@ -103,7 +103,7 @@ export default function CasePage({ data }: { data: CaseData }) {
         </Section>
 
         {/* Action */}
-        <Section heading="What you do in mdfy" accent={data.accent}>
+        <Section heading="What you do in memory.wiki" accent={data.accent}>
           <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
             {data.action.map((a, i) => (
               <li key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -200,7 +200,7 @@ export default function CasePage({ data }: { data: CaseData }) {
               textDecoration: "none",
             }}
           >
-            Open mdfy →
+            Open memory.wiki →
           </Link>
         </section>
 

@@ -4,7 +4,7 @@ import AboutContent from "@/components/AboutContent";
 export const metadata: Metadata = {
   title: "About — memory.wiki",
   description:
-    "mdfy is your personal knowledge hub for the AI era. Capture from any AI chat, bundle by topic, deploy to any AI as a URL. Document, Bundle, and Hub URLs — same primitive, three scopes.",
+    "memory.wiki is your personal knowledge hub for the AI era. Capture from any AI chat, bundle by topic, deploy to any AI as a URL. Document, Bundle, and Hub URLs — same primitive, three scopes.",
   alternates: {
     canonical: "https://memory.wiki/about",
     languages: { ko: "https://memory.wiki/ko/about" },

@@ -2,7 +2,7 @@
 
 // Hub Pulse — Layer 1 of the "growing knowledge hub" surface on the Start
 // tab. A 365-day contribution heatmap + streak + totals strip, designed
-// to give the user one daily reason to open mdfy: see what they built,
+// to give the user one daily reason to open memory.wiki: see what they built,
 // keep the streak alive.
 //
 // Anti-patterns explicitly avoided (see memory note

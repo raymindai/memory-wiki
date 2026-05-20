@@ -55,7 +55,7 @@ function instructionsFor(reason: PermissionReason, canonicalUrl: string): string
         "",
         "  - `Authorization: Bearer <user_token>` if the user is signed in",
         "    at https://staging.memory.wiki and you have their token from",
-        "    `~/.config/mdfy/token`.",
+        "    `~/.config/memory.wiki/token`.",
         "  - `X-User-Email: <user_email>` if you only have the user's email",
         "    on hand and they're already on the bundle's allow-list.",
       ].join("\n");
@@ -78,7 +78,7 @@ function instructionsFor(reason: PermissionReason, canonicalUrl: string): string
         "or unpublished it.",
       ].join("\n");
     case "service_unavailable":
-      return "The mdfy backend is temporarily unavailable. Try again shortly.";
+      return "The memory.wiki backend is temporarily unavailable. Try again shortly.";
   }
 }
 

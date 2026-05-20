@@ -4,10 +4,10 @@ import { CodeBlock, InlineCode, SectionHeading, DocsNav, DocsSidebar, SiteFooter
 export const metadata: Metadata = {
   title: "Integrate with AI dev tools — memory.wiki",
   description:
-    "Plug your mdfy hub or bundle into Claude Code, Cursor, Codex, Gemini CLI, Windsurf, and Aider with a single URL. One line in AGENTS.md / CLAUDE.md / .cursor/rules and every AI tool reads your personal knowledge graph.",
+    "Plug your memory.wiki hub or bundle into Claude Code, Cursor, Codex, Gemini CLI, Windsurf, and Aider with a single URL. One line in AGENTS.md / CLAUDE.md / .cursor/rules and every AI tool reads your personal knowledge graph.",
   alternates: { canonical: "https://memory.wiki/docs/integrate" },
   openGraph: {
-    title: "Integrate mdfy with AI dev tools",
+    title: "Integrate memory.wiki with AI dev tools",
     description: "One line in AGENTS.md / CLAUDE.md / .cursor/rules — every AI tool reads your hub or bundle as clean markdown.",
     url: "https://memory.wiki/docs/integrate",
     images: [{ url: "/api/og?title=Integrate%20with%20AI%20dev%20tools", width: 1200, height: 630 }],
@@ -127,7 +127,7 @@ export default function IntegrateDocsPage() {
                 maxWidth: 680,
               }}
             >
-              Claude Code, Cursor, Codex, and every other agent boot with whatever you wrote in <InlineCode>{"CLAUDE.md"}</InlineCode> / <InlineCode>{"AGENTS.md"}</InlineCode> / <InlineCode>{".cursor/rules"}</InlineCode>. Add a single line that points at your mdfy bundle or hub, and the next session opens with your prior decisions, notes, and analysis already loaded.
+              Claude Code, Cursor, Codex, and every other agent boot with whatever you wrote in <InlineCode>{"CLAUDE.md"}</InlineCode> / <InlineCode>{"AGENTS.md"}</InlineCode> / <InlineCode>{".cursor/rules"}</InlineCode>. Add a single line that points at your memory.wiki bundle or hub, and the next session opens with your prior decisions, notes, and analysis already loaded.
             </p>
             <p
               style={{
@@ -206,7 +206,7 @@ The bundle carries its own graph (themes, insights, concept relations).`}</CodeB
               maxWidth: 680,
             }}
           >
-            mdfy exposes three URL shapes. For project-scoped tool config, the bundle URL is almost always the right choice — it carries the canvas analysis with it.
+            memory.wiki exposes three URL shapes. For project-scoped tool config, the bundle URL is almost always the right choice — it carries the canvas analysis with it.
           </p>
           <div
             style={{
@@ -374,7 +374,7 @@ index call needed.`}
               maxWidth: 680,
             }}
           >
-            Pattern: keep tool-specific overrides in their respective files (<InlineCode>{".cursor/rules/"}</InlineCode>, <InlineCode>{"GEMINI.md"}</InlineCode>, <InlineCode>{".windsurfrules"}</InlineCode>) but put the mdfy URL in <InlineCode>{"AGENTS.md"}</InlineCode>. The URL is the portable bit; per-tool nuance stays per-tool.
+            Pattern: keep tool-specific overrides in their respective files (<InlineCode>{".cursor/rules/"}</InlineCode>, <InlineCode>{"GEMINI.md"}</InlineCode>, <InlineCode>{".windsurfrules"}</InlineCode>) but put the memory.wiki URL in <InlineCode>{"AGENTS.md"}</InlineCode>. The URL is the portable bit; per-tool nuance stays per-tool.
           </p>
 
           {/* ─── Per-tool blocks (alternatives + tool-specific notes) ─── */}
@@ -384,7 +384,7 @@ index call needed.`}
             name="Claude Code"
             filePath="CLAUDE.md (project root) — and AGENTS.md"
             tagline="Claude Code auto-loads CLAUDE.md from the project root and every parent directory, plus AGENTS.md when present. Either file works; CLAUDE.md is the right home for Claude-specific overrides."
-            snippet={`## Project context (from mdfy)
+            snippet={`## Project context (from memory.wiki)
 
 Bundle: https://memory.wiki/b/<bundle-id>
 
@@ -403,9 +403,9 @@ Re-read it whenever you need cross-doc context.`}
             id="cursor-tool"
             name="Cursor"
             filePath=".cursor/rules/mdfy.mdc"
-            tagline="Cursor's newer multi-rule format. Frontmatter scopes when the rule applies; body holds the mdfy URL. Use one file per bundle for clean separation."
+            tagline="Cursor's newer multi-rule format. Frontmatter scopes when the rule applies; body holds the memory.wiki URL. Use one file per bundle for clean separation."
             snippet={`---
-description: Project context from mdfy
+description: Project context from memory.wiki
 alwaysApply: true
 ---
 
@@ -477,7 +477,7 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
           />
 
           {/* ─── GitHub Action sync ─── */}
-          <SectionHeading id="github-action">GitHub Action sync — keep one mdfy doc in step with your repo</SectionHeading>
+          <SectionHeading id="github-action">GitHub Action sync — keep one memory.wiki doc in step with your repo</SectionHeading>
           <p
             style={{
               fontSize: 14,
@@ -487,7 +487,7 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
               maxWidth: 680,
             }}
           >
-            Treat one mdfy doc as your repo&apos;s &ldquo;working knowledge URL&rdquo;. Every push to <InlineCode>main</InlineCode> that touches <InlineCode>{"CLAUDE.md"}</InlineCode>, <InlineCode>{"AGENTS.md"}</InlineCode>, or <InlineCode>{"docs/**.md"}</InlineCode> PATCHes the combined markdown to your mdfy doc. Paste the doc URL into Claude, Cursor, or Codex and they always see the latest state of your repo&apos;s docs.
+            Treat one memory.wiki doc as your repo&apos;s &ldquo;working knowledge URL&rdquo;. Every push to <InlineCode>main</InlineCode> that touches <InlineCode>{"CLAUDE.md"}</InlineCode>, <InlineCode>{"AGENTS.md"}</InlineCode>, or <InlineCode>{"docs/**.md"}</InlineCode> PATCHes the combined markdown to your memory.wiki doc. Paste the doc URL into Claude, Cursor, or Codex and they always see the latest state of your repo&apos;s docs.
           </p>
           <p
             style={{
@@ -511,13 +511,13 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
               On GitHub: <em>Settings → Secrets and variables → Actions → New repository secret</em>. Add both <InlineCode>{"MDFY_DOC_ID"}</InlineCode> and <InlineCode>{"MDFY_EDIT_TOKEN"}</InlineCode>.
             </li>
             <li style={{ marginBottom: 8 }}>
-              Drop the workflow file below at <InlineCode>{".github/workflows/sync-mdfy.yml"}</InlineCode> and push. Run it once via <em>Actions → Sync repo docs → mdfy → Run workflow</em> to verify.
+              Drop the workflow file below at <InlineCode>{".github/workflows/sync-mdfy.yml"}</InlineCode> and push. Run it once via <em>Actions → Sync repo docs → memory.wiki → Run workflow</em> to verify.
             </li>
           </ol>
           <p style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 4, marginBottom: 6, fontFamily: mono }}>
             .github/workflows/sync-mdfy.yml
           </p>
-          <CodeBlock lang="yaml">{`name: Sync repo docs → mdfy
+          <CodeBlock lang="yaml">{`name: Sync repo docs → memory.wiki
 
 on:
   push:

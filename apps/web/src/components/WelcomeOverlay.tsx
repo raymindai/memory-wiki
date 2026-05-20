@@ -12,7 +12,7 @@ const STORAGE_KEY = "mdfy-welcome-seen";
 //
 // One CTA per slide (the Next button). No inline links — those competed
 // with Next and broke the "one screen, one action" rule. The dashboard
-// surfaces (Install /mdfy, mdfy Foundations bundle, etc.) are the
+// surfaces (Install /memory.wiki, memory.wiki Foundations bundle, etc.) are the
 // click targets once the user dismisses the overlay.
 
 type Surface = { name: string; desc: string; color: string };
@@ -34,7 +34,7 @@ const slides: Slide[] = [
     // when the badge wraps on narrow viewports.
     badge: "Personal knowledge hub\nfor the AI era",
     title: "Your AI memory,\ndeployable to any AI.",
-    desc: "ChatGPT, Claude, and Cursor forget you between sessions. mdfy turns what you write into a URL any AI can read — you decide the shape, mdfy keeps the index.",
+    desc: "ChatGPT, Claude, and Cursor forget you between sessions. memory.wiki turns what you write into a URL any AI can read — you decide the shape, memory.wiki keeps the index.",
     icon: null,
   },
   {
@@ -73,7 +73,7 @@ const slides: Slide[] = [
     desc: null,
     icon: null,
     surfaces: [
-      { name: "Claude Code", desc: "/mdfy capture, bundle, hub", color: "#fb923c" },
+      { name: "Claude Code", desc: "/memory.wiki capture, bundle, hub", color: "#fb923c" },
       { name: "Cursor", desc: ".mdc rule + project context", color: "#fbbf24" },
       { name: "Codex CLI", desc: "AGENTS.md block, idempotent", color: "#4ade80" },
       { name: "Aider", desc: "CONVENTIONS.md", color: "#60a5fa" },

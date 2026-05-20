@@ -31,7 +31,7 @@ export default function ViewerFooter({ stats, hideCta = false }: ViewerFooterPro
     >
       <div className="flex items-center gap-3 sm:gap-4">
         <Link href="/about" className="transition-colors hover:text-[var(--text-primary)]">About</Link>
-        <Link href="/install" className="transition-colors hover:text-[var(--text-primary)] hidden sm:inline">Install /mdfy</Link>
+        <Link href="/install" className="transition-colors hover:text-[var(--text-primary)] hidden sm:inline">Install /memory.wiki</Link>
         <Link href="/plugins" className="transition-colors hover:text-[var(--text-primary)] hidden sm:inline">Plugins</Link>
         <a
           href="https://github.com/raymindai/mdcore"

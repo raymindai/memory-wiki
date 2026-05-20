@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import InstallButton from "./InstallButton";
 
 export const metadata: Metadata = {
-  title: "mdfy bookmarklet — capture any AI conversation",
+  title: "memory.wiki bookmarklet — capture any AI conversation",
   description:
-    "Drag this to your bookmarks bar. One click on chatgpt.com, claude.ai, or gemini.google.com saves the current conversation to your mdfy hub.",
+    "Drag this to your bookmarks bar. One click on chatgpt.com, claude.ai, or gemini.google.com saves the current conversation to your memory.wiki hub.",
 };
 
 /**
@@ -23,7 +23,7 @@ export default function BookmarkletPage() {
     >
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
-          The mdfy bookmarklet
+          The memory.wiki bookmarklet
         </h1>
         <p
           className="text-base mb-10"
@@ -84,7 +84,7 @@ export default function BookmarkletPage() {
           <ol className="space-y-2 list-decimal list-inside" style={{ color: "var(--text-secondary)" }}>
             <li>The bookmarklet detects which AI you&apos;re on.</li>
             <li>It walks the visible conversation in the page DOM and converts it to clean markdown.</li>
-            <li>It saves the markdown to mdfy and opens the new doc URL in a new tab.</li>
+            <li>It saves the markdown to memory.wiki and opens the new doc URL in a new tab.</li>
             <li>Anonymous by default — sign in later to claim every doc you&apos;ve captured into your hub.</li>
           </ol>
         </section>

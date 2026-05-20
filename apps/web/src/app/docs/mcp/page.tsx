@@ -191,7 +191,7 @@ export default function McpDocsPage() {
               The MCP-native memory layer for AI agents.
             </p>
             <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 20px", lineHeight: 1.7 }}>
-              Read mdfy URLs as context today. Write memory back via MCP in Phase 2.
+              Read memory.wiki URLs as context today. Write memory back via MCP in Phase 2.
             </p>
             <div className="about-grid-2" style={{ gap: 16 }}>
               <div>
@@ -199,7 +199,7 @@ export default function McpDocsPage() {
                   Today <span className="live-badge">Live</span>
                 </p>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-muted)" }}>
-                  <li style={{ padding: "3px 0" }}>Read mdfy URLs as AI context</li>
+                  <li style={{ padding: "3px 0" }}>Read memory.wiki URLs as AI context</li>
                   <li style={{ padding: "3px 0" }}>Document CRUD via 25 MCP tools</li>
                   <li style={{ padding: "3px 0" }}>Auto-source detection</li>
                 </ul>
@@ -223,7 +223,7 @@ export default function McpDocsPage() {
           <Card>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
               The <strong style={{ color: "var(--text-primary)" }}>Model Context Protocol (MCP)</strong> is an open standard
-              that lets AI assistants interact with external tools and services. The mdfy MCP server exposes
+              that lets AI assistants interact with external tools and services. The memory.wiki MCP server exposes
               25 tools across 7 categories — core CRUD, append/prepend, section editing, sharing controls,
               version history, folders, and stats. The hosted endpoint at <InlineCode>{"https://memory.wiki/api/mcp"}</InlineCode> works
               with any MCP-compatible client (Claude Web, Cursor, etc.).
@@ -252,9 +252,9 @@ export default function McpDocsPage() {
             For local stdio-based clients (Claude Desktop, Claude Code, Cursor stdio mode), install the npm package:
           </p>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli && mdfy login`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g mdfy-cli && memory.wiki login`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0, lineHeight: 1.7 }}>
-              The MCP server uses JWT authentication from <InlineCode>{"mdfy login"}</InlineCode>. No environment variables needed.
+              The MCP server uses JWT authentication from <InlineCode>{"memory.wiki login"}</InlineCode>. No environment variables needed.
             </p>
           </Card>
 
@@ -266,7 +266,7 @@ export default function McpDocsPage() {
           <Card>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -290,7 +290,7 @@ export default function McpDocsPage() {
             </p>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -307,7 +307,7 @@ export default function McpDocsPage() {
             <SubLabel>Cursor — Settings → MCP → Add new global MCP server</SubLabel>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "url": "https://memory.wiki/api/mcp"
     }
   }

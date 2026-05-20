@@ -139,7 +139,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               <div key={n} className="img-glow" style={{ borderRadius: 12, overflow: "hidden" }}>
                 <img
                   src={`/images/plugin-chrome-${n}.webp`}
-                  alt={`mdfy Chrome extension screenshot ${n}`}
+                  alt={`memory.wiki Chrome extension screenshot ${n}`}
                   className="lightbox-img"
                   style={{ width: "100%", display: "block" }}
                 />
@@ -333,7 +333,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           >
             <code>{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -394,7 +394,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           <div className="img-glow" style={{ borderRadius: 12, overflow: "hidden" }}>
             <img
               src="/images/plugin-vscode.webp"
-              alt="mdfy VS Code extension — WYSIWYG preview with sidebar, toolbar, and document outline"
+              alt="memory.wiki VS Code extension — WYSIWYG preview with sidebar, toolbar, and document outline"
               className="lightbox-img"
               style={{ width: "100%", display: "block", borderRadius: 12 }}
             />
@@ -461,7 +461,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           <div className="img-glow" style={{ borderRadius: 12, overflow: "hidden" }}>
             <img
               src="/images/plugin-desktop.webp"
-              alt="mdfy for Mac — sidebar with cloud folders, Mermaid diagrams, tables, and document outline"
+              alt="memory.wiki for Mac — sidebar with cloud folders, Mermaid diagrams, tables, and document outline"
               className="lightbox-img"
               style={{ width: "100%", display: "block", borderRadius: 12 }}
             />
@@ -537,17 +537,17 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               </div>
               <div className="terminal-mock-body">
                 <span className="line comment">{"# Publish a file"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">mdfy publish README.md</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">memory.wiki publish README.md</span></span>
                 <span className="line"><span className="url">https://memory.wiki/abc123</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
                 <span className="line comment">{"# Pipe anything"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | mdfy publish"}</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | memory.wiki publish"}</span></span>
                 <span className="line"><span className="url">https://memory.wiki/def456</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
                 <span className="line comment">{"# Read in terminal"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">mdfy read abc123</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">memory.wiki read abc123</span></span>
                 <span className="line"><span className="output">{"# Hello World"}</span></span>
                 <span className="line"><span className="output">{"This is a published document..."}</span></span>
               </div>
@@ -611,7 +611,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           <div className="img-glow" style={{ borderRadius: 12, overflow: "hidden" }}>
             <img
               src="/images/plugin-quicklook.webp"
-              alt="mdfy QuickLook — press Space in Finder to preview rendered Markdown with tables and code"
+              alt="memory.wiki QuickLook — press Space in Finder to preview rendered Markdown with tables and code"
               className="lightbox-img"
               style={{ width: "100%", display: "block", borderRadius: 12 }}
             />

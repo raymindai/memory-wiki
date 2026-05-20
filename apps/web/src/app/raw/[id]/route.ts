@@ -5,7 +5,7 @@ import { verifyAuthToken } from "@/lib/verify-auth";
 import { compactMarkdown, estimateTokens, isCompactRequested, tokenEconomyHeaders } from "@/lib/markdown-compact";
 import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
 
-// Public, AI-deployable representation of a single mdfy document.
+// Public, AI-deployable representation of a single memory.wiki document.
 // Hit by:
 //   - explicit /raw/{id} requests
 //   - middleware-rewritten /{id} requests where the caller signaled "I want
@@ -15,7 +15,7 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
 // Output is plain markdown with a YAML frontmatter block carrying the bits
 // an AI reader needs to attribute and reuse the doc:
 //   - title  — human title
-//   - url    — canonical mdfy URL (so the LLM can cite it back)
+//   - url    — canonical memory.wiki URL (so the LLM can cite it back)
 //   - updated — ISO timestamp
 //   - source  — always "memory.wiki" so the LLM knows the origin
 //

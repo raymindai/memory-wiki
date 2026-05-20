@@ -222,7 +222,7 @@ export default function DiscoverPage() {
                                 background: isOpening ? "rgba(74,222,128,0.15)" : "var(--accent-dim)",
                                 color: isOpening ? "#4ade80" : "var(--accent)",
                               }}>
-                                {isOpening ? "Opening..." : "mdfy"}
+                                {isOpening ? "Opening..." : "memory.wiki"}
                               </span>
                             </div>
                           );

@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 // Sits between the viewer content and the footer. The v6 thesis in one
-// line plus three concrete actions — Browse hubs, Install /mdfy, Start
+// line plus three concrete actions — Browse hubs, Install /memory.wiki, Start
 // your hub. Owners see a short, less aggressive variant; everyone else
 // gets the full pitch.
 //
@@ -35,7 +35,7 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
             className="font-medium"
             style={{ color: "var(--accent)" }}
           >
-            Go to mdfy →
+            Go to memory.wiki →
           </Link>
         </p>
       </section>
@@ -99,7 +99,7 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
               fontSize: 13,
             }}
           >
-            <span className="flex-1 font-medium">Install /mdfy</span>
+            <span className="flex-1 font-medium">Install /memory.wiki</span>
             <span className="text-caption" style={{ color: "var(--text-faint)" }}>any AI tool</span>
           </Link>
           <Link
@@ -122,14 +122,14 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
             className="text-caption"
             style={{ color: "var(--text-faint)" }}
           >
-            How mdfy works &rarr;
+            How memory.wiki works &rarr;
           </Link>
           <Link
             href="/mdfy-memory"
             className="text-caption"
             style={{ color: "var(--text-faint)" }}
           >
-            How mdfy Memory works &rarr;
+            How memory.wiki Memory works &rarr;
           </Link>
         </div>
       </div>

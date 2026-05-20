@@ -133,7 +133,7 @@ const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
 ## Try It Now
 
-- **Drop a PDF here** — AI mdfy turns it into clean Markdown
+- **Drop a PDF here** — AI memory.wiki turns it into clean Markdown
 - **Click +** in the sidebar to start from a template
 - **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during beta
 
@@ -494,7 +494,7 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI mdfy structuring    │
+│ AI memory.wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 \`\`\`
@@ -517,9 +517,9 @@ Drop any file onto memory.wiki, use the **IMPORT** button in the sidebar, or pas
 | **RST** | reStructuredText headings, links → Markdown |
 | **RTF / JSON / XML / TXT** | Text extraction with format hints |
 
-### AI mdfy Structuring
+### AI memory.wiki Structuring
 
-After importing, you'll see **"mdfy this document?"** — click **mdfy it** to let AI:
+After importing, you'll see **"memory.wiki this document?"** — click **memory.wiki it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks
@@ -532,13 +532,13 @@ After importing, you'll see **"mdfy this document?"** — click **mdfy it** to l
 
 \`\`\`bash
 # Pipe any file content
-cat report.md | mdfy publish
-pbpaste | mdfy publish
+cat report.md | memory.wiki publish
+pbpaste | memory.wiki publish
 \`\`\`
 
 ### Import from GitHub
 
-Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. mdfy fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
+Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. memory.wiki fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
 
 Works on:
 - \`github.com/owner/repo\` — repo root, recursive
@@ -548,13 +548,13 @@ Works on:
 
 ### Import an Obsidian vault
 
-Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. mdfy walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
+Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. memory.wiki walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
 
 > v1 doesn't follow \`[[wikilinks]]\` or rewrite attachments — they come through as plain text. The concept index will still connect notes that share concepts once the ontology refresh catches up.
 
 ### Import via Chrome Extension
 
-Click the mdfy button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
+Click the memory.wiki button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
 
 ## Export — Every Destination
 
@@ -640,7 +640,7 @@ Click the **Outline** button to see your document structure. All headings (H1-H6
 
 ## Related in your hub
 
-Under every doc you own, mdfy lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
+Under every doc you own, memory.wiki lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
 
 ## Hub recall + reranker
 
@@ -671,7 +671,7 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 ## Cross-Platform Sync
 
-Your documents sync across all 7 mdfy channels:
+Your documents sync across all 7 memory.wiki channels:
 
 | Channel | Install | What it does |
 |---------|---------|-------------|
@@ -1094,13 +1094,13 @@ const SAMPLE_CHROME_EXT = `# Chrome Extension
 ### Capture from ChatGPT / Claude / Gemini
 
 1. Open any AI conversation
-2. Click the **mdfy** floating button (bottom-right corner)
+2. Click the **memory.wiki** floating button (bottom-right corner)
 3. Conversation is auto-formatted with User/Assistant roles
 4. URL is copied to clipboard
 
 ### Capture from Any Page
 
-1. Click the mdfy icon in the toolbar
+1. Click the memory.wiki icon in the toolbar
 2. Select "Capture Page"
 3. Page content is converted to Markdown and published
 
@@ -1131,7 +1131,7 @@ const SAMPLE_VSCODE_EXT = `# VS Code Extension
 ext install raymindai.mdfy-vscode
 \`\`\`
 
-Or search "mdfy" in VS Code Extensions.
+Or search "memory.wiki" in VS Code Extensions.
 
 ## Quick Start
 
@@ -1168,7 +1168,7 @@ Or search "mdfy" in VS Code Extensions.
 | \`mdfy.syncInterval\` | \`30\` | Polling interval (seconds) |
 `;
 
-const SAMPLE_DESKTOP = `# mdfy for Mac
+const SAMPLE_DESKTOP = `# memory.wiki for Mac
 
 > Native desktop app with sidebar, sync, and local WASM rendering.
 
@@ -1176,7 +1176,7 @@ const SAMPLE_DESKTOP = `# mdfy for Mac
 
 1. Download the DMG from [memory.wiki/plugins](https://memory.wiki/plugins)
 2. Drag **memory.wiki** to Applications
-3. Launch mdfy
+3. Launch memory.wiki
 
 ## Sidebar
 
@@ -1209,7 +1209,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 - Offline support
 `;
 
-const SAMPLE_CLI = `# mdfy CLI
+const SAMPLE_CLI = `# memory.wiki CLI
 
 > Publish Markdown from the terminal. Pipe anything to a URL.
 
@@ -1223,40 +1223,40 @@ npm install -g mdfy-cli
 
 \`\`\`bash
 # Publish a file
-mdfy publish README.md
+memory.wiki publish README.md
 # → https://memory.wiki/abc123  (copied to clipboard)
 
 # Publish from pipe
-echo "# Hello World" | mdfy publish
+echo "# Hello World" | memory.wiki publish
 
 # Publish clipboard
-pbpaste | mdfy publish
+pbpaste | memory.wiki publish
 \`\`\`
 
 ## Pipe Anything
 
 \`\`\`bash
-claude "explain React hooks" | mdfy publish
-git log --oneline -20 | mdfy publish
-man grep | mdfy publish
-curl -s https://api.example.com/status | mdfy publish
+claude "explain React hooks" | memory.wiki publish
+git log --oneline -20 | memory.wiki publish
+man grep | memory.wiki publish
+curl -s https://api.example.com/status | memory.wiki publish
 \`\`\`
 
 ## Read in Terminal
 
 \`\`\`bash
-mdfy read abc123
+memory.wiki read abc123
 # → Color-coded headings, bold, code blocks, lists
 \`\`\`
 
 ## Manage Documents
 
 \`\`\`bash
-mdfy list                       # List your documents
-mdfy update abc123 updated.md   # Update
-mdfy pull abc123 -o doc.md      # Download
-mdfy delete abc123              # Delete
-mdfy open abc123                # Open in browser
+memory.wiki list                       # List your documents
+memory.wiki update abc123 updated.md   # Update
+memory.wiki pull abc123 -o doc.md      # Download
+memory.wiki delete abc123              # Delete
+memory.wiki open abc123                # Open in browser
 \`\`\`
 
 ## tmux Integration
@@ -1264,17 +1264,17 @@ mdfy open abc123                # Open in browser
 Add to \`~/.tmux.conf\`:
 
 \`\`\`bash
-bind-key M run-shell "tmux capture-pane -p -S -1000 | mdfy publish"
+bind-key M run-shell "tmux capture-pane -p -S -1000 | memory.wiki publish"
 \`\`\`
 
 ## Short Aliases
 
 | Short | Full |
 |-------|------|
-| \`mdfy p\` | \`mdfy publish\` |
-| \`mdfy ls\` | \`mdfy list\` |
-| \`mdfy rm\` | \`mdfy delete\` |
-| \`mdfy cat\` | \`mdfy read\` |
+| \`memory.wiki p\` | \`memory.wiki publish\` |
+| \`memory.wiki ls\` | \`memory.wiki list\` |
+| \`memory.wiki rm\` | \`memory.wiki delete\` |
+| \`memory.wiki cat\` | \`memory.wiki read\` |
 `;
 
 const SAMPLE_MCP = `# MCP Server
@@ -1283,7 +1283,7 @@ const SAMPLE_MCP = `# MCP Server
 
 ## What is MCP?
 
-MCP (Model Context Protocol) lets AI tools call external APIs. The mdfy MCP server gives Claude the ability to publish and manage documents.
+MCP (Model Context Protocol) lets AI tools call external APIs. The memory.wiki MCP server gives Claude the ability to publish and manage documents.
 
 ## Setup
 
@@ -1308,7 +1308,7 @@ Add to \`.mcp.json\`:
 \`\`\`json
 {
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -1319,7 +1319,7 @@ Add to \`.mcp.json\`:
 ## Usage Examples
 
 \`\`\`
-You: "Publish my meeting notes to mdfy"
+You: "Publish my meeting notes to memory.wiki"
 Claude: → mdfy_create → https://memory.wiki/abc123
 
 You: "Show me my documents"
@@ -1346,9 +1346,9 @@ Claude: → mdfy_update → Document updated, same URL
 The hosted HTTP MCP exposes 25 tools including append, sections, versions, folders, and more.
 `;
 
-const SAMPLE_FRESHNESS = `# How mdfy keeps your docs, bundles, and hub fresh
+const SAMPLE_FRESHNESS = `# How memory.wiki keeps your docs, bundles, and hub fresh
 
-> Every mdfy URL is what the AI reads when you paste it. Freshness is part of the deal.
+> Every memory.wiki URL is what the AI reads when you paste it. Freshness is part of the deal.
 
 ## TL;DR
 
@@ -1385,7 +1385,7 @@ Normal flow: concept changes show up in the hub URL within seconds. Two guardrai
 
 ## The "Re-analyze (N)" banner
 
-When the Hub opens, mdfy compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
+When the Hub opens, memory.wiki compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
 
 > 🟡 Concepts out of date · N docs have changed
 > [Re-analyze (N)]
@@ -1414,7 +1414,7 @@ Right-click any doc in the sidebar → **Re-analyze concepts**. Same machinery, 
 - You haven't touched anything (just reading) — nothing to refresh
 - You're not signed in — no concept index applies
 
-## Why mdfy doesn't auto-rebuild more aggressively
+## Why memory.wiki doesn't auto-rebuild more aggressively
 
 **Cost discipline.** Concept extraction is a Haiku call per doc. Auto-rebuilding on every save would burn tokens during noisy editing.
 
@@ -1429,7 +1429,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 ## Install
 
-1. Install mdfy for Mac — QuickLook is bundled automatically
+1. Install memory.wiki for Mac — QuickLook is bundled automatically
 2. Or download MdfyQuickLook separately from [memory.wiki/plugins](https://memory.wiki/plugins)
 3. Enable in **System Settings → Extensions → Quick Look**
 
@@ -1468,7 +1468,7 @@ const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 const SAMPLE_BUNDLES = `# Bundles, Discoveries, Compile & Concepts
 
-Beyond single docs, mdfy lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
+Beyond single docs, memory.wiki lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
 
 ## Bundles: from folder to thinking surface
 
@@ -1558,7 +1558,7 @@ The home screen shows compounding stats:
 The bundle is no longer a folder. It's a thinking partner that reads what you've gathered and tells you what it sees.
 `;
 
-// Server-seeded "Sample Bundle: Tour of mdfy". The bundle row and its
+// Server-seeded "Sample Bundle: Tour of memory.wiki". The bundle row and its
 // 3 member docs are inserted by supabase/migrations/033_example_bundle.sql
 // with fixed ids (mdfy-ex-bundle / mdfy-ex-fmt / mdfy-ex-diag / mdfy-ex-feat),
 // so this id can be hardcoded on the client. Listed in EXAMPLE_TABS as a
@@ -1569,13 +1569,13 @@ const EXAMPLE_BUNDLE_ID = "mdfy-ex-bundle";
 
 const SAMPLE_AI_CAPTURE = `# Capture AI conversations
 
-mdfy is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
+memory.wiki is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
 
 ## Three ways in
 
 ### 1. Paste a share URL
 
-Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. mdfy fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
+Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. memory.wiki fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
 
 \`\`\`
 https://chat.openai.com/share/abc-...
@@ -1584,11 +1584,11 @@ https://claude.ai/share/xyz-...
 
 ### 2. Drop a transcript
 
-Copied a chat thread to clipboard? Paste it. mdfy auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
+Copied a chat thread to clipboard? Paste it. memory.wiki auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
 
 ### 3. Capture from where you work
 
-- **\`/mdfy capture\`** in Claude Code, Cursor, Codex, or Aider — saves the current conversation segment as a permanent URL.
+- **\`/memory.wiki capture\`** in Claude Code, Cursor, Codex, or Aider — saves the current conversation segment as a permanent URL.
 - **Chrome extension** — one-click capture from any AI web UI.
 - **API / MCP** — agents can write into your hub directly.
 
@@ -1612,7 +1612,7 @@ const EXAMPLE_TABS: Tab[] = [
   // Markdown is "" because BundleEmbed fetches member docs by bundleId,
   // not from this tab's local body. readonly:true so the tab persists
   // across sessions like other Guides & Examples entries.
-  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of mdfy", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
+  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of memory.wiki", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-import", title: extractTitleFromMd(SAMPLE_IMPORT_EXPORT), markdown: SAMPLE_IMPORT_EXPORT, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-features", title: extractTitleFromMd(SAMPLE_FEATURES), markdown: SAMPLE_FEATURES, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-syntax", title: extractTitleFromMd(SAMPLE_FORMATTING), markdown: SAMPLE_FORMATTING, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
@@ -3486,7 +3486,7 @@ export default function MdEditor() {
   const [mdfyElapsed, setMdfyElapsed] = useState(0);
   const [showFlavorMenu, setShowFlavorMenu] = useState(false);
 
-  // Tick elapsed time while AI mdfy is processing
+  // Tick elapsed time while AI memory.wiki is processing
   useEffect(() => {
     if (!mdfyLoading) {
       setMdfyElapsed(0);
@@ -3639,7 +3639,7 @@ export default function MdEditor() {
   // the user is *intentionally* viewing it (they just clicked it in
   // the Guides sidebar / Start grid). Honour that click — previously
   // we filtered it out and silently fell back to an owned doc, which
-  // is why clicking "Sample Bundle: Tour of mdfy" in the sidebar
+  // is why clicking "Sample Bundle: Tour of memory.wiki" in the sidebar
   // showed someone else's doc (or blank) instead of the bundle.
   const activeTab = (() => {
     const isOwn = (t: typeof tabs[number]) => !t.deleted && t.ownerEmail !== EXAMPLE_OWNER;
@@ -5852,7 +5852,7 @@ export default function MdEditor() {
       });
     };
 
-    waitForMermaid().catch(() => { console.warn("[mdfy] Mermaid failed to load"); return null; }).then(async (mermaid) => {
+    waitForMermaid().catch(() => { console.warn("[memory.wiki] Mermaid failed to load"); return null; }).then(async (mermaid) => {
       if (!mermaid) return;
       mermaid.initialize({
         startOnLoad: false,
@@ -6414,7 +6414,7 @@ export default function MdEditor() {
           return;
         }
       }
-      // ?fork=<id> — visitor clicked "Save in mdfy" on the public
+      // ?fork=<id> — visitor clicked "Save in memory.wiki" on the public
       // viewer's Ask AI panel. Fetch the source doc, drop it into a
       // fresh local tab as a draft (no cloudId — autoSave creates a
       // new row under the signed-in user's account, or anon cookie
@@ -13324,7 +13324,7 @@ ${clone.innerHTML}
                     toolbar was redundant. The greeting falls through
                     profile.display_name → email prefix → bare time
                     string so it never renders an empty name slot.
-                    Signed-out users see "Welcome to mdfy" + the
+                    Signed-out users see "Welcome to memory.wiki" + the
                     deploy-to-any-AI subtitle. */}
                 {(() => {
                   const hour = new Date().getHours();
@@ -13342,7 +13342,7 @@ ${clone.innerHTML}
                       <h1 className="text-display font-bold tracking-tight" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
                         {isSignedIn
                           ? (displayName ? `${timeGreeting}, ${displayName}` : timeGreeting)
-                          : "Welcome to mdfy"}
+                          : "Welcome to memory.wiki"}
                       </h1>
                       <p className="text-body mt-1.5" style={{ color: "var(--text-secondary)" }}>
                         {isSignedIn
@@ -13570,7 +13570,7 @@ ${clone.innerHTML}
                 </div>
 
                 {/* Deploy to AI — v6 hero. Goes above Guides because the hub story
-                    is the v6 thesis; tutorials come second. Install /mdfy is the
+                    is the v6 thesis; tutorials come second. Install /memory.wiki is the
                     primary CTA, highlighted via an inline tag rather than a
                     full-card border (the border made the card visually heavier
                     than its neighbors and read as "warning" yellow). */}
@@ -13606,9 +13606,9 @@ ${clone.innerHTML}
                         myHubSlug
                           ? { label: "Your hub", desc: `memory.wiki/hub/${myHubSlug} · Rename in Settings`, url: `/hub/${myHubSlug}`, color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null }
                           : { label: "Sign in to get your hub", desc: "Every signed-in user gets a personal hub URL", url: "/", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
-                        { label: "Install /mdfy", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
+                        { label: "Install /memory.wiki", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
-                        { label: "How mdfy stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
+                        { label: "How memory.wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
                       ];
                       return cards.map((item) => {
                         const sharedProps = {
@@ -13667,7 +13667,7 @@ ${clone.innerHTML}
                   </>)}
                 </div>
 
-                {/* How people use mdfy — short Pain → Action → Result case
+                {/* How people use memory.wiki — short Pain → Action → Result case
                     studies. Each card opens a published doc in the founder
                     hub. Sits between the v6 hero (Deploy to AI) and the
                     tutorial-shaped Guides & Examples — answers "why would
@@ -13684,7 +13684,7 @@ ${clone.innerHTML}
                       style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
                     >
                       <ChevronDown width={11} height={11} style={{ transform: startSections.cases ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
-                      What people put in mdfy
+                      What people put in memory.wiki
                     </button>
                     {startSections.cases && (
                       <button
@@ -13769,10 +13769,10 @@ ${clone.innerHTML}
                       { label: "Documentation", desc: "API and SDK reference", url: "/docs", color: "#60a5fa", icon: <FileText width={14} height={14} /> },
                       { label: "Plugins", desc: "Chrome, VS Code, Mac, CLI", url: "/plugins", color: "#4ade80", icon: <Download width={14} height={14} /> },
                       { label: "How it works", desc: "Architecture, end to end", url: "/about#how-it-works", color: "#c4b5fd", icon: <HelpCircle width={14} height={14} /> },
-                      { label: "mdfy Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
+                      { label: "memory.wiki Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
                     ]).map((item) => (
                       // Same-window navigation (Link, no target=_blank)
-                      // for internal mdfy pages — keeps the user in one
+                      // for internal memory.wiki pages — keeps the user in one
                       // browser tab; editor state restores on back.
                       <NextLink key={item.label} href={item.url}
                         className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-left cursor-pointer"
@@ -14245,7 +14245,7 @@ ${clone.innerHTML}
                       setShowHub(false);
                       const newId = `local-expand-${Date.now()}`;
                       const neighbourHint = neighbors.length > 0
-                        ? `<!-- mdfy: this concept connects to ${neighbors.slice(0, 5).join(", ")} — referenced in /${sourceDocId} -->\n\n`
+                        ? `<!-- memory.wiki: this concept connects to ${neighbors.slice(0, 5).join(", ")} — referenced in /${sourceDocId} -->\n\n`
                         : "";
                       const seedMd = `${neighbourHint}# ${concept}\n\n`;
                       const newTab: Tab = {
@@ -14707,7 +14707,7 @@ ${clone.innerHTML}
               {/* ─── AI Panel (side-by-side) ─── */}
               {showAIPanel && (canEdit || activeTab?.kind === "bundle" || showHub || (aiPanelMode === "hub" && hubSlug)) && (() => {
                 // Three assistants — Document, Bundle, Hub. All share the
-                // mdfy orange palette; the radio tabs above the panel are
+                // memory.wiki orange palette; the radio tabs above the panel are
                 // the single source of mode identity. The header below
                 // just shows "what the active assistant is working with"
                 // (title + word count, doc count + bundle name, concept
@@ -16188,7 +16188,7 @@ ${clone.innerHTML}
         </div>
       )}
 
-      {/* mdfy AI structuring prompt */}
+      {/* memory.wiki AI structuring prompt */}
       {/* Sign In / Sign Up modal */}
       {showAuthMenu && !isAuthenticated && (
         // Slim sign-in modal. Previous version was a 560px-wide
@@ -16203,7 +16203,7 @@ ${clone.innerHTML}
           <div className="rounded-xl w-[400px] max-w-[92vw]" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 16px 64px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="px-6 pt-6 pb-4">
               <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-                Sign in to <span style={{ color: "var(--accent)" }}>mdfy</span>.app
+                Sign in to <span style={{ color: "var(--accent)" }}>memory.wiki</span>.app
               </h2>
               <p className="text-caption mt-1" style={{ color: "var(--text-muted)" }}>
                 Save, sync, and publish your knowledge hub.
@@ -16299,7 +16299,7 @@ ${clone.innerHTML}
         <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => !mdfyLoading && setMdfyPrompt(null)}>
           <div className="rounded-xl p-5 w-80" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--accent)" }}>mdfy</span> this document?</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--accent)" }}>memory.wiki</span> this document?</span>
               <span className="text-caption font-mono" style={{ color: "var(--text-muted)" }}>
                 {(mdfyPrompt.text.length / 1024).toFixed(0)} KB
               </span>
@@ -16308,7 +16308,7 @@ ${clone.innerHTML}
               This file was imported as raw text — all formatting (headings, lists, tables, emphasis) was lost during extraction.
             </p>
             <p className="text-caption mb-4" style={{ color: "var(--text-muted)" }}>
-              <strong style={{ color: "var(--accent)" }}>mdfy</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
+              <strong style={{ color: "var(--accent)" }}>memory.wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
               {mdfyPrompt.text.length > 200_000 && (
                 <span style={{ color: "var(--text-faint)" }}> Large documents may take 30–60 seconds.</span>
               )}
@@ -16348,7 +16348,7 @@ ${clone.innerHTML}
                       showToast("Document structured successfully", "success");
                     }
                   } catch (err) {
-                    console.error("mdfy failed:", err);
+                    console.error("memory.wiki failed:", err);
                     const message = err instanceof Error ? err.message : "AI processing failed";
                     showToast(message, "error");
                   }
@@ -16364,7 +16364,7 @@ ${clone.innerHTML}
                     Processing{mdfyElapsed > 0 ? ` ${mdfyElapsed}s` : "..."}
                   </>
                 ) : (
-                  <>mdfy it</>
+                  <>memory.wiki it</>
                 )}
               </button>
             </div>

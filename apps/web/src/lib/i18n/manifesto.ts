@@ -45,9 +45,9 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       backLabel: "\u2190 About",
       backHref: "/about",
       readingTime: "12 min read",
-      title: "Why I\u2019m building mdfy",
+      title: "Why I\u2019m building memory.wiki",
       intro: [
-        "I built mdfy in one month while doing other work. Now I\u2019m going full-time.",
+        "I built memory.wiki in one month while doing other work. Now I\u2019m going full-time.",
         "This is why.",
       ],
 
@@ -75,16 +75,16 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
             "When you let an AI extract your memory, you let an AI define what mattered. You let an algorithm decide which thread of yesterday\u2019s thinking is worth carrying forward, which insight to compress into a fact, which piece of yourself to keep.",
             "That\u2019s a strange thing to outsource.",
             "Some people will outsource it gladly. The convenience is real. But for those of us who think carefully about what we want our future selves to know \u2014 for those of us who treat our knowledge as a craft, not a byproduct \u2014 there should be another option.",
-            "That option is mdfy.",
+            "That option is memory.wiki.",
           ],
         },
         {
-          heading: "What mdfy is today",
+          heading: "What memory.wiki is today",
           paragraphs: [
             "If you visited memory.wiki right now, you\u2019d see what looks like a markdown publishing tool \u2014 and it is.",
-            'You can capture markdown from anywhere: ChatGPT, Claude, Gemini (via Chrome extension), GitHub repos, Notion pages, Obsidian vaults, any web URL, your terminal (<code class="manifesto-code">cat README.md | mdfy</code>), VS Code, your Mac clipboard. You can edit it in a beautiful WYSIWYG editor \u2014 no syntax friction, no install required. You can share it with a permanent URL that anyone can read in the browser, that any AI can fetch as context.',
+            'You can capture markdown from anywhere: ChatGPT, Claude, Gemini (via Chrome extension), GitHub repos, Notion pages, Obsidian vaults, any web URL, your terminal (<code class="manifesto-code">cat README.md | memory.wiki</code>), VS Code, your Mac clipboard. You can edit it in a beautiful WYSIWYG editor \u2014 no syntax friction, no install required. You can share it with a permanent URL that anyone can read in the browser, that any AI can fetch as context.',
             "It\u2019s a publishing tool. It works. People can use it today.",
-            "And it\u2019s grown past the publishing layer. Every saved doc folds into a personal hub that auto-publishes a wiki manifest (index.md, SCHEMA.md, log.md), maintains a concept index across your library, and exposes a recall API any AI can query. The role-split is the load-bearing idea: you set the direction, mdfy structures the URL, any AI reads it.",
+            "And it\u2019s grown past the publishing layer. Every saved doc folds into a personal hub that auto-publishes a wiki manifest (index.md, SCHEMA.md, log.md), maintains a concept index across your library, and exposes a recall API any AI can query. The role-split is the load-bearing idea: you set the direction, memory.wiki structures the URL, any AI reads it.",
             "Shipped so far:",
           ],
           list: [
@@ -117,10 +117,10 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         {
           heading: "What\u2019s coming next",
           paragraphs: [
-            "The memory layer is now live. Hub URLs, recall API, concept index, and the wiki manifests all shipped. What\u2019s left is the part that turns mdfy from a tool people learn into one they reach for without thinking.",
+            "The memory layer is now live. Hub URLs, recall API, concept index, and the wiki manifests all shipped. What\u2019s left is the part that turns memory.wiki from a tool people learn into one they reach for without thinking.",
           ],
           highlight:
-            "You should be able to take what you\u2019ve authored and deploy it as context to any AI, anywhere \u2014 without remembering how mdfy works.",
+            "You should be able to take what you\u2019ve authored and deploy it as context to any AI, anywhere \u2014 without remembering how memory.wiki works.",
           afterHighlight: [
             "Deeper ingest: Bear, Apple Notes, Roam, Drive. Native ingestion from every place people already keep notes, with the same dedup contract that makes re-importing safe.",
             "Sharper recall: latency budgets on the cross-encoder rerank, a hybrid scoring that the user can dial without reading docs, and citations that visibly improve the answer instead of just appearing under it.",
@@ -166,7 +166,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       whyNow: [
         "For the past two years, the industry has been building closed AI memory systems \u2014 OpenAI Memory inside ChatGPT, Google\u2019s Memory Bank inside Gemini. Each one is trying to own your memory inside their walls.",
         "In another two years, either the closed systems will have won, or an open standard will have emerged. I\u2019m betting on the second outcome. I\u2019m betting that markdown URLs become the open standard for AI memory the way HTTP became the open standard for documents.",
-        "mdfy exists to make that outcome more likely.",
+        "memory.wiki exists to make that outcome more likely.",
       ],
 
       roadmapHeading: "The roadmap",
@@ -205,7 +205,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       invitation: [
         {
           audience: "If you use AI daily",
-          body: "Try mdfy. The Chrome extension is the fastest entry. Beta is free.",
+          body: "Try memory.wiki. The Chrome extension is the fastest entry. Beta is free.",
         },
         {
           audience: "If you build AI agents or tools",
@@ -228,7 +228,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
 
       closing: {
         line1Html:
-          'mdfy is built by Hyunsang at <a href="https://raymind.ai" class="manifesto-link">Raymind.AI</a>.',
+          'memory.wiki is built by Hyunsang at <a href="https://raymind.ai" class="manifesto-link">Raymind.AI</a>.',
         line2Html:
           'The codebase is <a href="https://github.com/raymindai/mdcore" target="_blank" rel="noopener noreferrer" class="manifesto-link">open source on GitHub</a>.',
         line3: "The Bundle spec will be published before Phase 2 ships.",
@@ -241,9 +241,9 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       backLabel: "\u2190 About",
       backHref: "/ko/about",
       readingTime: "12\uBD84",
-      title: "\uB0B4\uAC00 mdfy\uB97C \uB9CC\uB4DC\uB294 \uC774\uC720",
+      title: "\uB0B4\uAC00 memory.wiki\uB97C \uB9CC\uB4DC\uB294 \uC774\uC720",
       intro: [
-        "\uB2E4\uB978 \uC77C\uC744 \uD558\uBA74\uC11C \uD55C \uB2EC \uB9CC\uC5D0 mdfy\uB97C \uB9CC\uB4E4\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uC81C \uD480\uD0C0\uC784\uC73C\uB85C \uC804\uD658\uD569\uB2C8\uB2E4.",
+        "\uB2E4\uB978 \uC77C\uC744 \uD558\uBA74\uC11C \uD55C \uB2EC \uB9CC\uC5D0 memory.wiki\uB97C \uB9CC\uB4E4\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uC81C \uD480\uD0C0\uC784\uC73C\uB85C \uC804\uD658\uD569\uB2C8\uB2E4.",
         "\uC774\uAC8C \uADF8 \uC774\uC720\uC785\uB2C8\uB2E4.",
       ],
 
@@ -261,11 +261,11 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
           paragraphs: [
             "AI\uB294 \uD14D\uC2A4\uD2B8\uB97C \uC0DD\uC131\uD569\uB2C8\uB2E4. \uD558\uC9C0\uB9CC \uADF8 \uD14D\uC2A4\uD2B8\uB97C \u201C\uBB38\uC11C\u201D\uB85C \uB9CC\uB4DC\uB294 \uAC74 \uC0AC\uB78C\uC785\uB2C8\uB2E4. \uAD6C\uC870\uB97C \uC7A1\uACE0, \uB9E5\uB77D\uC744 \uB354\uD558\uACE0, \uD544\uC694 \uC5C6\uB294 \uBD80\uBD84\uC744 \uC798\uB77C\uB0B4\uACE0, \uC790\uAE30 \uBAA9\uC18C\uB9AC\uB97C \uC785\uD799\uB2C8\uB2E4.",
             "\uC774 \uACFC\uC815\uC774 authorship\uC785\uB2C8\uB2E4. AI \uCD9C\uB825\uBB3C\uC758 \uB2E8\uC21C \uCD94\uCD9C\uC774 \uC544\uB2C8\uB77C, \uC0AC\uB78C\uC758 \uD310\uB2E8\uACFC \uD3B8\uC9D1\uC774 \uB4E4\uC5B4\uAC04 \u201C\uC800\uC791\u201D\uC785\uB2C8\uB2E4.",
-            "mdfy\uB294 \uC774 authorship\uC744 \uC9C0\uC6D0\uD558\uB294 \uB3C4\uAD6C\uC785\uB2C8\uB2E4. AI\uAC00 \uB9CC\uB4E0 \uC6D0\uC7AC\uB8CC\uB97C \uB2F9\uC2E0\uC758 \uBB38\uC11C\uB85C \uBC14\uAFB8\uB294 \uACF3. \uADF8\uB9AC\uACE0 \uADF8 \uBB38\uC11C\uC5D0 \uC601\uAD6C\uC801\uC778 URL\uC744 \uBD80\uC5EC\uD558\uB294 \uACF3.",
+            "memory.wiki\uB294 \uC774 authorship\uC744 \uC9C0\uC6D0\uD558\uB294 \uB3C4\uAD6C\uC785\uB2C8\uB2E4. AI\uAC00 \uB9CC\uB4E0 \uC6D0\uC7AC\uB8CC\uB97C \uB2F9\uC2E0\uC758 \uBB38\uC11C\uB85C \uBC14\uAFB8\uB294 \uACF3. \uADF8\uB9AC\uACE0 \uADF8 \uBB38\uC11C\uC5D0 \uC601\uAD6C\uC801\uC778 URL\uC744 \uBD80\uC5EC\uD558\uB294 \uACF3.",
           ],
         },
         {
-          heading: "mdfy\uAC00 \uC9C0\uAE08 \uBB34\uC5C7\uC778\uAC00",
+          heading: "memory.wiki\uAC00 \uC9C0\uAE08 \uBB34\uC5C7\uC778\uAC00",
           paragraphs: [
             "memory.wiki\uB294 \uB9C8\uD06C\uB2E4\uC6B4 \uD5C8\uBE0C\uC785\uB2C8\uB2E4. \uC5B4\uB514\uC11C\uB4E0 \uCEA1\uCC98\uD558\uACE0, AI \uB3C4\uAD6C\uB85C \uD3B8\uC9D1\uD558\uACE0, \uC601\uAD6C URL\uB85C \uD37C\uBE14\uB9AC\uC2DC\uD569\uB2C8\uB2E4.",
           ],
@@ -281,7 +281,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         {
           heading: "\uB354 \uD070 \uBCA0\uD305",
           paragraphs: [
-            "mdfy\uB294 \uB9C8\uD06C\uB2E4\uC6B4 \uB3C4\uAD6C\uB85C \uC2DC\uC791\uD558\uC9C0\uB9CC, \uAD81\uADF9\uC801\uC73C\uB85C\uB294 AI \uC2DC\uB300\uC758 memory layer\uB97C \uB9CC\uB4E4\uB824\uACE0 \uD569\uB2C8\uB2E4.",
+            "memory.wiki\uB294 \uB9C8\uD06C\uB2E4\uC6B4 \uB3C4\uAD6C\uB85C \uC2DC\uC791\uD558\uC9C0\uB9CC, \uAD81\uADF9\uC801\uC73C\uB85C\uB294 AI \uC2DC\uB300\uC758 memory layer\uB97C \uB9CC\uB4E4\uB824\uACE0 \uD569\uB2C8\uB2E4.",
             "\uBAA8\uB4E0 AI \uB300\uD654, \uBAA8\uB4E0 \uBA54\uBAA8, \uBAA8\uB4E0 \uBB38\uC11C\uAC00 \uD558\uB098\uC758 \uC8FC\uC18C\uB97C \uAC16\uACE0, \uD558\uB098\uC758 \uC7A5\uC18C\uC5D0\uC11C \uAD00\uB9AC\uB418\uACE0, \uC5B4\uB5A4 AI\uC5D0\uB4E0 \uCEE8\uD14D\uC2A4\uD2B8\uB85C \uC804\uB2EC\uB420 \uC218 \uC788\uB294 \uC138\uACC4. \uB9C8\uD06C\uB2E4\uC6B4 URL\uC774 AI \uC2DC\uB300 \uC9C0\uC2DD\uC758 substrate\uAC00 \uB418\uB294 \uC138\uACC4.",
             "\uC774\uAC74 \uB2E8\uC21C\uD55C \uC5D0\uB514\uD130 \uB9CC\uB4E4\uAE30\uAC00 \uC544\uB2D9\uB2C8\uB2E4. AI\uC640 \uC0AC\uB78C \uC0AC\uC774\uC758 \uC778\uD130\uD398\uC774\uC2A4\uB97C \uC7AC\uC815\uC758\uD558\uB294 \uC77C\uC785\uB2C8\uB2E4.",
           ],
@@ -291,7 +291,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
           paragraphs: [],
           list: [
             "<strong>Bundle as context</strong> \u2014 \uC5EC\uB7EC \uBB38\uC11C\uB97C \uD558\uB098\uC758 \uBC88\uB4E4\uB85C \uBB36\uC5B4 AI\uC5D0\uAC8C \uC804\uB2EC. \u201C\uC774 \uD504\uB85C\uC81D\uD2B8\uC758 \uBAA8\uB4E0 \uBB38\uC11C\uB97C \uC77D\uC5B4\u201D\uAC00 \uAC00\uB2A5\uD574\uC9D1\uB2C8\uB2E4.",
-            "<strong>MCP Server & REST API</strong> \u2014 \uC5B4\uB5A4 AI \uC5D0\uC774\uC804\uD2B8\uB4E0 mdfy \uBB38\uC11C\uB97C \uC77D\uACE0, \uC4F0\uACE0, \uC5C5\uB370\uC774\uD2B8\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
+            "<strong>MCP Server & REST API</strong> \u2014 \uC5B4\uB5A4 AI \uC5D0\uC774\uC804\uD2B8\uB4E0 memory.wiki \uBB38\uC11C\uB97C \uC77D\uACE0, \uC4F0\uACE0, \uC5C5\uB370\uC774\uD2B8\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
             "<strong>Hub \uAE30\uBC18 knowledge memory</strong> \u2014 \uCEE8\uC149 \uC778\uB371\uC2A4, Related-in-your-hub, Needs-review lint\uC73C\uB85C \uAC1C\uC778 \uC704\uD0A4\uAC00 \uC790\uB77C\uB0A9\uB2C8\uB2E4.",
           ],
         },
@@ -335,9 +335,9 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         "\uC9C0\uAE08\uC774 \uC544\uB2C8\uBA74 \uC774 \uC790\uB9AC\uB294 \uB2E4\uB978 \uB204\uAD70\uAC00\uAC00 \uCC28\uC9C0\uD569\uB2C8\uB2E4. \uC9C0\uAE08\uC774 \uC815\uD655\uD788 \uB9DE\uB294 \uD0C0\uC774\uBC0D\uC785\uB2C8\uB2E4.",
       ],
 
-      whyMdfyHeading: "\uC99D mdfy\uC778\uAC00",
+      whyMdfyHeading: "\uC99D memory.wiki\uC778\uAC00",
       whyMdfy: [
-        "mdfy\uB294 \u201Cmodify\u201D\uC5D0\uC11C \uC654\uC2B5\uB2C8\uB2E4. \uB9C8\uD06C\uB2E4\uC6B4\uC744 \uC218\uC815\uD558\uACE0(modify), \uC544\uB984\uB2F5\uAC8C \uB9CC\uB4E4\uACE0(beautify), \uD37C\uBE14\uB9AC\uC2DC\uD558\uB294(publish) \uB3C4\uAD6C. md + fy = \uB9C8\uD06C\uB2E4\uC6B4\uC744 ~\uD558\uAC8C \uB9CC\uB4E4\uB2E4.",
+        "memory.wiki\uB294 \u201Cmodify\u201D\uC5D0\uC11C \uC654\uC2B5\uB2C8\uB2E4. \uB9C8\uD06C\uB2E4\uC6B4\uC744 \uC218\uC815\uD558\uACE0(modify), \uC544\uB984\uB2F5\uAC8C \uB9CC\uB4E4\uACE0(beautify), \uD37C\uBE14\uB9AC\uC2DC\uD558\uB294(publish) \uB3C4\uAD6C. md + fy = \uB9C8\uD06C\uB2E4\uC6B4\uC744 ~\uD558\uAC8C \uB9CC\uB4E4\uB2E4.",
       ],
 
       roadmapHeading: "\uB85C\uB4DC\uB9F5",
@@ -368,7 +368,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       invitationHeading: "\uC5F4\uB9B0 \uCD08\uB300",
       invitation: [],
       invitationParagraphs: [
-        "mdfy\uB294 1\uC778 + AI \uD300\uC774 \uB9CC\uB4E4\uACE0 \uC788\uC2B5\uB2C8\uB2E4. \uC624\uD508\uC18C\uC2A4 \uAE30\uC5EC, \uD53C\uB4DC\uBC31, \uC544\uC774\uB514\uC5B4 \u2014 \uBAA8\uB450 \uD658\uC601\uD569\uB2C8\uB2E4.",
+        "memory.wiki\uB294 1\uC778 + AI \uD300\uC774 \uB9CC\uB4E4\uACE0 \uC788\uC2B5\uB2C8\uB2E4. \uC624\uD508\uC18C\uC2A4 \uAE30\uC5EC, \uD53C\uB4DC\uBC31, \uC544\uC774\uB514\uC5B4 \u2014 \uBAA8\uB450 \uD658\uC601\uD569\uB2C8\uB2E4.",
         "\uB9C8\uD06C\uB2E4\uC6B4\uC774 AI \uC2DC\uB300\uC758 lingua franca\uAC00 \uB420 \uC218 \uC788\uB2E4\uACE0 \uBFF0\uB294\uB2E4\uBA74, \uD568\uAED8 \uB9CC\uB4E4\uC5B4 \uAC11\uC2DC\uB2E4.",
       ],
       invitationButtons: {
@@ -379,7 +379,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
 
       closing: {
         line1Html:
-          'mdfy is built by Hyunsang at <a href="https://raymind.ai" class="manifesto-link">Raymind.AI</a>.',
+          'memory.wiki is built by Hyunsang at <a href="https://raymind.ai" class="manifesto-link">Raymind.AI</a>.',
         line2Html:
           'The codebase is <a href="https://github.com/raymindai/mdcore" target="_blank" rel="noopener noreferrer" class="manifesto-link">open source on GitHub</a>.',
         line3: "The Bundle spec will be published before Phase 2 ships.",

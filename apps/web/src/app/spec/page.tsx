@@ -63,7 +63,7 @@ export default function SpecPage() {
         </h1>
         <p style={{ fontSize: 17, lineHeight: 1.7, color: "var(--text-muted)", marginBottom: 24, maxWidth: 720 }}>
           memori.wiki is a personal knowledge wiki that any AI can read. This page documents the URL contract, the
-          retrieval API, the llms.txt manifest, and the bundle digest — the same primitives the mdfy reference
+          retrieval API, the llms.txt manifest, and the bundle digest — the same primitives the memory.wiki reference
           implementation ships today. Other tools can implement this spec and interop with no platform lock-in.
         </p>
         <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-faint)", marginBottom: 48, maxWidth: 720 }}>

@@ -191,7 +191,7 @@ export default function McpDocsPageKo() {
               AI 에이전트를 위한 MCP-native memory layer.
             </p>
             <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "0 0 20px", lineHeight: 1.7 }}>
-              오늘 mdfy URL을 컨텍스트로 읽고, Phase 2에서 MCP를 통해 메모리를 기록합니다.
+              오늘 memory.wiki URL을 컨텍스트로 읽고, Phase 2에서 MCP를 통해 메모리를 기록합니다.
             </p>
             <div className="about-grid-2" style={{ gap: 16 }}>
               <div>
@@ -199,7 +199,7 @@ export default function McpDocsPageKo() {
                   오늘 <span className="live-badge">Live</span>
                 </p>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: 13, color: "var(--text-muted)" }}>
-                  <li style={{ padding: "3px 0" }}>mdfy URL을 AI 컨텍스트로 읽기</li>
+                  <li style={{ padding: "3px 0" }}>memory.wiki URL을 AI 컨텍스트로 읽기</li>
                   <li style={{ padding: "3px 0" }}>25개 MCP 도구를 통한 문서 CRUD</li>
                   <li style={{ padding: "3px 0" }}>자동 소스 감지</li>
                 </ul>
@@ -223,7 +223,7 @@ export default function McpDocsPageKo() {
           <Card>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, margin: 0 }}>
               <strong style={{ color: "var(--text-primary)" }}>Model Context Protocol (MCP)</strong>은 AI 어시스턴트가
-              외부 도구 및 서비스와 상호작용할 수 있게 하는 개방형 표준입니다. mdfy MCP 서버는
+              외부 도구 및 서비스와 상호작용할 수 있게 하는 개방형 표준입니다. memory.wiki MCP 서버는
               7개 카테고리에 걸쳐 25개 도구를 제공합니다 -- 핵심 CRUD, append/prepend, 섹션 편집, 공유 설정,
               버전 이력, 폴더, 통계. <InlineCode>{"https://memory.wiki/api/mcp"}</InlineCode>의 호스팅 엔드포인트는
               모든 MCP 호환 클라이언트(Claude Web, Cursor 등)에서 사용할 수 있습니다.
@@ -252,9 +252,9 @@ export default function McpDocsPageKo() {
             로컬 stdio 기반 클라이언트(Claude Desktop, Claude Code, Cursor stdio 모드)의 경우, npm 패키지를 설치합니다:
           </p>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli && mdfy login`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g mdfy-cli && memory.wiki login`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0, lineHeight: 1.7 }}>
-              MCP 서버는 <InlineCode>{"mdfy login"}</InlineCode>의 JWT 인증을 사용합니다. 환경 변수 설정이 필요 없습니다.
+              MCP 서버는 <InlineCode>{"memory.wiki login"}</InlineCode>의 JWT 인증을 사용합니다. 환경 변수 설정이 필요 없습니다.
             </p>
           </Card>
 
@@ -266,7 +266,7 @@ export default function McpDocsPageKo() {
           <Card>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -290,7 +290,7 @@ export default function McpDocsPageKo() {
             </p>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }
@@ -307,7 +307,7 @@ export default function McpDocsPageKo() {
             <SubLabel>Cursor -- Settings &rarr; MCP &rarr; Add new global MCP server</SubLabel>
             <CodeBlock lang="json">{`{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "url": "https://memory.wiki/api/mcp"
     }
   }

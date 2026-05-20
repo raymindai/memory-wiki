@@ -4,7 +4,7 @@ import AboutContent from "@/components/AboutContent";
 export const metadata: Metadata = {
   title: "소개 — 당신의 AI 메모리, 어떤 AI에도 deploy",
   description:
-    "URL 하나, 모든 AI. ChatGPT·Claude·GitHub·Obsidian·Notion에서 캡처한 모든 문서가 하나의 허브가 되고, Claude·Cursor·ChatGPT·Codex가 같은 방식으로 가져갑니다. 방향은 당신이, 구조는 mdfy가.",
+    "URL 하나, 모든 AI. ChatGPT·Claude·GitHub·Obsidian·Notion에서 캡처한 모든 문서가 하나의 허브가 되고, Claude·Cursor·ChatGPT·Codex가 같은 방식으로 가져갑니다. 방향은 당신이, 구조는 memory.wiki가.",
   alternates: {
     canonical: "https://memory.wiki/ko/about",
     languages: { en: "https://memory.wiki/about" },

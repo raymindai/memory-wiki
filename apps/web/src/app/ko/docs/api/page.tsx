@@ -597,7 +597,7 @@ url = res.json()["url"]`}</CodeBlock>
               maxWidth: 640,
             }}
           >
-            모든 공개 mdfy URL 은 AI 에이전트용 클린 마크다운 변형을 함께 제공합니다.
+            모든 공개 memory.wiki URL 은 AI 에이전트용 클린 마크다운 변형을 함께 제공합니다.
             <InlineCode>{"?compact"}</InlineCode> 또는 <InlineCode>{"?digest"}</InlineCode> 을 붙이면 토큰을 줄일 수 있습니다 — 답변은 동일하고, 비용만 줄어듭니다.
           </p>
           <div
@@ -771,7 +771,7 @@ source: "memory.wiki"
               maxWidth: 640,
             }}
           >
-            mdfy 는 두 개의 서로 다른 온톨로지 레이어를 제공하며, 각각 별도의 URL 에 실립니다:
+            memory.wiki 는 두 개의 서로 다른 온톨로지 레이어를 제공하며, 각각 별도의 URL 에 실립니다:
           </p>
           <ul
             style={{
@@ -856,7 +856,7 @@ source: "memory.wiki"
               },
               {
                 title: "MCP / CLI 인증",
-                desc: "MCP 서버와 CLI 모두 mdfy login의 JWT를 사용합니다. 실행: npm install -g mdfy-cli && mdfy login",
+                desc: "MCP 서버와 CLI 모두 memory.wiki login의 JWT를 사용합니다. 실행: npm install -g mdfy-cli && memory.wiki login",
               },
             ].map((item) => (
               <div

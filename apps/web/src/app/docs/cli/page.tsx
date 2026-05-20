@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: "CLI Reference — memory.wiki",
   description:
-    "mdfy CLI reference. Publish Markdown from the command line. Pipe stdin, capture tmux panes, manage documents with simple terminal commands.",
+    "memory.wiki CLI reference. Publish Markdown from the command line. Pipe stdin, capture tmux panes, manage documents with simple terminal commands.",
   alternates: {
     canonical: "https://memory.wiki/docs/cli",
     languages: { ko: "https://memory.wiki/ko/docs/cli" },
@@ -89,23 +89,23 @@ export default function CliDocsPage() {
           <Card>
             <CodeBlock lang="bash">{`npm install -g mdfy-cli`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
-              Requires Node.js 18+. After install, use the <InlineCode>{"mdfy"}</InlineCode> command.
+              Requires Node.js 18+. After install, use the <InlineCode>{"memory.wiki"}</InlineCode> command.
             </p>
           </Card>
 
           {/* Commands Overview */}
           <SectionHeading id="commands">Commands</SectionHeading>
           <Card>
-            <CommandRow cmd="mdfy publish <file>" desc="Publish a Markdown file or stdin to memory.wiki." />
-            <CommandRow cmd="mdfy update <id> <file>" desc="Update an existing document with new content." />
-            <CommandRow cmd="mdfy pull <id>" desc="Download a document's Markdown content." />
-            <CommandRow cmd="mdfy delete <id>" desc="Soft-delete a document." />
-            <CommandRow cmd="mdfy list" desc="List all your documents." />
-            <CommandRow cmd="mdfy open <id>" desc="Open a document in the browser." />
-            <CommandRow cmd="mdfy capture" desc="Capture the current tmux pane and publish." />
-            <CommandRow cmd="mdfy login" desc="Authenticate with memory.wiki." />
-            <CommandRow cmd="mdfy logout" desc="Clear stored credentials." />
-            <CommandRow cmd="mdfy whoami" desc="Show current authenticated user." />
+            <CommandRow cmd="memory.wiki publish <file>" desc="Publish a Markdown file or stdin to memory.wiki." />
+            <CommandRow cmd="memory.wiki update <id> <file>" desc="Update an existing document with new content." />
+            <CommandRow cmd="memory.wiki pull <id>" desc="Download a document's Markdown content." />
+            <CommandRow cmd="memory.wiki delete <id>" desc="Soft-delete a document." />
+            <CommandRow cmd="memory.wiki list" desc="List all your documents." />
+            <CommandRow cmd="memory.wiki open <id>" desc="Open a document in the browser." />
+            <CommandRow cmd="memory.wiki capture" desc="Capture the current tmux pane and publish." />
+            <CommandRow cmd="memory.wiki login" desc="Authenticate with memory.wiki." />
+            <CommandRow cmd="memory.wiki logout" desc="Clear stored credentials." />
+            <CommandRow cmd="memory.wiki whoami" desc="Show current authenticated user." />
           </Card>
 
           {/* publish */}
@@ -115,22 +115,22 @@ export default function CliDocsPage() {
           </p>
           <Card>
             <CodeBlock lang="bash">{`# Publish a file
-mdfy publish README.md
+memory.wiki publish README.md
 
 # Publish from stdin
-echo "# Hello World" | mdfy publish
+echo "# Hello World" | memory.wiki publish
 
 # Publish as draft
-mdfy publish README.md --draft
+memory.wiki publish README.md --draft
 
 # Publish with title
-mdfy publish README.md --title "My Document"
+memory.wiki publish README.md --title "My Document"
 
 # Place in a specific folder
-mdfy publish README.md --folder "folder-uuid"
+memory.wiki publish README.md --folder "folder-uuid"
 
 # Open in browser after publishing
-mdfy publish README.md --open`}</CodeBlock>
+memory.wiki publish README.md --open`}</CodeBlock>
             <SubLabel>Options</SubLabel>
             <CommandRow cmd="--draft, -d" desc="Publish as draft (only visible to you)." />
             <CommandRow cmd="--title, -t" desc="Set document title." />
@@ -145,13 +145,13 @@ mdfy publish README.md --open`}</CodeBlock>
           </p>
           <Card>
             <CodeBlock lang="bash">{`# Update from file
-mdfy update abc123 README.md
+memory.wiki update abc123 README.md
 
 # Update from stdin
-echo "# Updated" | mdfy update abc123
+echo "# Updated" | memory.wiki update abc123
 
 # Update with version note
-mdfy update abc123 README.md --message "Fixed typos"`}</CodeBlock>
+memory.wiki update abc123 README.md --message "Fixed typos"`}</CodeBlock>
           </Card>
 
           {/* pull */}
@@ -161,25 +161,25 @@ mdfy update abc123 README.md --message "Fixed typos"`}</CodeBlock>
           </p>
           <Card>
             <CodeBlock lang="bash">{`# Print to stdout
-mdfy pull abc123
+memory.wiki pull abc123
 
 # Save to file
-mdfy pull abc123 -o output.md`}</CodeBlock>
+memory.wiki pull abc123 -o output.md`}</CodeBlock>
           </Card>
 
           {/* delete */}
           <SectionHeading id="delete">delete</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`mdfy delete abc123
+            <CodeBlock lang="bash">{`memory.wiki delete abc123
 
 # Skip confirmation
-mdfy delete abc123 --yes`}</CodeBlock>
+memory.wiki delete abc123 --yes`}</CodeBlock>
           </Card>
 
           {/* list */}
           <SectionHeading id="list">list</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`mdfy list
+            <CodeBlock lang="bash">{`memory.wiki list
 
 # Output:
 #  ID       TITLE              UPDATED         STATUS
@@ -190,7 +190,7 @@ mdfy delete abc123 --yes`}</CodeBlock>
           {/* open */}
           <SectionHeading id="open">open</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`mdfy open abc123
+            <CodeBlock lang="bash">{`memory.wiki open abc123
 # Opens https://memory.wiki/abc123 in your default browser`}</CodeBlock>
           </Card>
 
@@ -201,73 +201,73 @@ mdfy delete abc123 --yes`}</CodeBlock>
           </p>
           <Card>
             <CodeBlock lang="bash">{`# Capture current pane
-mdfy capture
+memory.wiki capture
 
 # Capture specific pane
-mdfy capture -t %3
+memory.wiki capture -t %3
 
 # Capture last N lines
-mdfy capture --lines 50`}</CodeBlock>
+memory.wiki capture --lines 50`}</CodeBlock>
           </Card>
 
           {/* Auth */}
           <SectionHeading id="auth-commands">Authentication</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# Authenticate (opens browser for OAuth)
-mdfy login
+memory.wiki login
 
 # Clear stored credentials
-mdfy logout
+memory.wiki logout
 
 # Show current user
-mdfy whoami
+memory.wiki whoami
 # user@example.com (authenticated via OAuth)`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
               Authentication is optional. Without login, documents are created anonymously with edit tokens.
-              Login enables <InlineCode>{"mdfy list"}</InlineCode> and account-based ownership.
+              Login enables <InlineCode>{"memory.wiki list"}</InlineCode> and account-based ownership.
             </p>
           </Card>
 
           {/* Pipe Examples */}
           <SectionHeading id="pipes">Pipe Examples</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`# Clipboard to mdfy
-pbpaste | mdfy publish
+            <CodeBlock lang="bash">{`# Clipboard to memory.wiki
+pbpaste | memory.wiki publish
 
 # Command output
-ls -la | mdfy publish
+ls -la | memory.wiki publish
 
 # Cat a file
-cat report.md | mdfy publish
+cat report.md | memory.wiki publish
 
 # Generate with AI, publish directly
-claude "Write a guide to Rust" | mdfy publish
+claude "Write a guide to Rust" | memory.wiki publish
 
 # Git diff
-git diff | mdfy publish --title "Changes"
+git diff | memory.wiki publish --title "Changes"
 
 # Docker logs
-docker logs my-app 2>&1 | mdfy publish
+docker logs my-app 2>&1 | memory.wiki publish
 
 # Pipe through multiple commands
-curl -s https://api.example.com/data | jq . | mdfy publish`}</CodeBlock>
+curl -s https://api.example.com/data | jq . | memory.wiki publish`}</CodeBlock>
           </Card>
 
           {/* tmux */}
           <SectionHeading id="tmux">tmux Integration</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# Capture current pane
-tmux capture-pane -p | mdfy publish
+tmux capture-pane -p | memory.wiki publish
 
 # Capture and share with one keybinding
 # Add to ~/.tmux.conf:
-bind-key M run-shell "tmux capture-pane -p | mdfy publish"
+bind-key M run-shell "tmux capture-pane -p | memory.wiki publish"
 
 # Capture specific pane
-tmux capture-pane -t %3 -p | mdfy publish
+tmux capture-pane -t %3 -p | memory.wiki publish
 
 # Capture full scrollback
-tmux capture-pane -p -S - | mdfy publish`}</CodeBlock>
+tmux capture-pane -p -S - | memory.wiki publish`}</CodeBlock>
           </Card>
 
           {/* Aliases */}
@@ -276,16 +276,16 @@ tmux capture-pane -p -S - | mdfy publish`}</CodeBlock>
             <CodeBlock lang="bash">{`# Add to ~/.zshrc or ~/.bashrc
 
 # Quick publish
-alias mp="mdfy publish"
+alias mp="memory.wiki publish"
 
 # Publish clipboard
-alias mpc="pbpaste | mdfy publish"
+alias mpc="pbpaste | memory.wiki publish"
 
 # Publish and open
-alias mpo="mdfy publish --open"
+alias mpo="memory.wiki publish --open"
 
 # Capture tmux
-alias mtx="tmux capture-pane -p | mdfy publish"`}</CodeBlock>
+alias mtx="tmux capture-pane -p | memory.wiki publish"`}</CodeBlock>
           </Card>
 
           {/* Configuration */}
@@ -296,10 +296,10 @@ alias mtx="tmux capture-pane -p | mdfy publish"`}</CodeBlock>
 
             <SubLabel>Config File</SubLabel>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, marginBottom: 12, lineHeight: 1.7 }}>
-              Credentials are stored in <InlineCode>{"~/.mdfy/config.json"}</InlineCode> after <InlineCode>{"mdfy login"}</InlineCode>.
-              Edit tokens for published documents are stored in <InlineCode>{"~/.mdfy/tokens.json"}</InlineCode>.
+              Credentials are stored in <InlineCode>{"~/.memory.wiki/config.json"}</InlineCode> after <InlineCode>{"memory.wiki login"}</InlineCode>.
+              Edit tokens for published documents are stored in <InlineCode>{"~/.memory.wiki/tokens.json"}</InlineCode>.
             </p>
-            <CodeBlock lang="json">{`// ~/.mdfy/config.json
+            <CodeBlock lang="json">{`// ~/.memory.wiki/config.json
 {
   "apiUrl": "https://memory.wiki",
   "email": "user@example.com",

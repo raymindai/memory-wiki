@@ -3,19 +3,19 @@ import Link from "next/link";
 import ClaudeMdSnippet from "./ClaudeMdSnippet";
 
 export const metadata: Metadata = {
-  title: "Install /mdfy in Claude Code | mdfy",
+  title: "Install /memory.wiki in Claude Code | memory.wiki",
   description:
-    "One-line install for the /mdfy slash command in Claude Code. Capture, bundle, and deploy your conversations through your personal mdfy hub.",
+    "One-line install for the /memory.wiki slash command in Claude Code. Capture, bundle, and deploy your conversations through your personal memory.wiki hub.",
 };
 
 const INSTALL_CMD_CLAUDE =
-  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh";
+  "curl -fsSL https://staging.memory.wiki/skills/memory.wiki/install.sh | sh";
 const INSTALL_CMD_CURSOR =
-  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=cursor";
+  "curl -fsSL https://staging.memory.wiki/skills/memory.wiki/install.sh | sh -s -- --target=cursor";
 const INSTALL_CMD_CODEX =
-  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=codex";
+  "curl -fsSL https://staging.memory.wiki/skills/memory.wiki/install.sh | sh -s -- --target=codex";
 const INSTALL_CMD_AIDER =
-  "curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=aider";
+  "curl -fsSL https://staging.memory.wiki/skills/memory.wiki/install.sh | sh -s -- --target=aider";
 
 export default function InstallPage() {
   return (
@@ -25,7 +25,7 @@ export default function InstallPage() {
     >
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
-          Install mdfy in your AI coding tool
+          Install memory.wiki in your AI coding tool
         </h1>
         <p
           className="text-base mb-10"
@@ -55,7 +55,7 @@ export default function InstallPage() {
             className="text-xs mt-2"
             style={{ color: "var(--text-faint)" }}
           >
-            Drops SKILL.md into <code>~/.claude/skills/mdfy/</code>. Restart Claude Code (or run <code>/reload-skills</code>) to pick it up. Then call <code>/mdfy capture &lt;title&gt;</code> in any chat.
+            Drops SKILL.md into <code>~/.claude/skills/memory.wiki/</code>. Restart Claude Code (or run <code>/reload-skills</code>) to pick it up. Then call <code>/memory.wiki capture &lt;title&gt;</code> in any chat.
           </p>
         </section>
 
@@ -80,7 +80,7 @@ export default function InstallPage() {
             className="text-xs mt-2"
             style={{ color: "var(--text-faint)" }}
           >
-            Drops <code>mdfy.mdc</code> into <code>~/.cursor/rules/</code>. Cursor picks it up on next launch (or after toggling rules in Settings). Then say things like &quot;save this to mdfy as &lt;title&gt;&quot; in any chat.
+            Drops <code>mdfy.mdc</code> into <code>~/.cursor/rules/</code>. Cursor picks it up on next launch (or after toggling rules in Settings). Then say things like &quot;save this to memory.wiki as &lt;title&gt;&quot; in any chat.
           </p>
         </section>
 
@@ -105,7 +105,7 @@ export default function InstallPage() {
             className="text-xs mt-2"
             style={{ color: "var(--text-faint)" }}
           >
-            Appends an <code>mdfy actions</code> block to <code>~/.codex/AGENTS.md</code>. Idempotent: rerunning replaces just the mdfy block, leaves the rest of your AGENTS.md alone. Restart Codex CLI to pick it up.
+            Appends an <code>memory.wiki actions</code> block to <code>~/.codex/AGENTS.md</code>. Idempotent: rerunning replaces just the memory.wiki block, leaves the rest of your AGENTS.md alone. Restart Codex CLI to pick it up.
           </p>
         </section>
 
@@ -159,17 +159,17 @@ export default function InstallPage() {
           </h2>
           <ul className="space-y-3" style={{ color: "var(--text-secondary)" }}>
             <li>
-              <strong>/mdfy capture &lt;title&gt;</strong>
+              <strong>/memory.wiki capture &lt;title&gt;</strong>
               <br />
-              Save the conversation segment as a public mdfy URL. Pasted into any AI, it loads as context.
+              Save the conversation segment as a public memory.wiki URL. Pasted into any AI, it loads as context.
             </li>
             <li>
-              <strong>/mdfy bundle &lt;topic&gt;</strong>
+              <strong>/memory.wiki bundle &lt;topic&gt;</strong>
               <br />
               Generate a curated bundle from your existing hub docs around a topic.
             </li>
             <li>
-              <strong>/mdfy hub</strong>
+              <strong>/memory.wiki hub</strong>
               <br />
               Print your hub URL. Paste it into Claude, ChatGPT, Gemini, or Cursor and they read your full personal knowledge as context.
             </li>
@@ -186,7 +186,7 @@ export default function InstallPage() {
           <p
             style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}
           >
-            Karpathy hand-maintains a personal LLM wiki because no consumer surface does this yet. Graphify proved that <code>/&lt;tool&gt;</code> shipped as a skill scales across Claude Code, Cursor, Codex, and Aider. The /mdfy skill is the same shape: one install, then every coding-AI session can capture into your hub and pull from it as context. Same URL works for every AI.
+            Karpathy hand-maintains a personal LLM wiki because no consumer surface does this yet. Graphify proved that <code>/&lt;tool&gt;</code> shipped as a skill scales across Claude Code, Cursor, Codex, and Aider. The /memory.wiki skill is the same shape: one install, then every coding-AI session can capture into your hub and pull from it as context. Same URL works for every AI.
           </p>
           <p className="mt-4 text-sm">
             <Link
@@ -194,7 +194,7 @@ export default function InstallPage() {
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              Read the deep dive: How mdfy works &rarr;
+              Read the deep dive: How memory.wiki works &rarr;
             </Link>
           </p>
           <p className="mt-2 text-sm">
@@ -203,7 +203,7 @@ export default function InstallPage() {
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              How mdfy Memory works (chunked, hybrid, public) &rarr;
+              How memory.wiki Memory works (chunked, hybrid, public) &rarr;
             </Link>
           </p>
         </section>
@@ -224,24 +224,24 @@ export default function InstallPage() {
           <p>
             <strong>Open source.</strong> Read the script:{" "}
             <a
-              href="/skills/mdfy/install.sh"
+              href="/skills/memory.wiki/install.sh"
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              /skills/mdfy/install.sh
+              /skills/memory.wiki/install.sh
             </a>
             . Read the skill:{" "}
             <a
-              href="/skills/mdfy/SKILL.md"
+              href="/skills/memory.wiki/SKILL.md"
               className="underline"
               style={{ color: "var(--accent)" }}
             >
-              /skills/mdfy/SKILL.md
+              /skills/memory.wiki/SKILL.md
             </a>
             .
           </p>
           <p className="mt-4">
-            Cursor, Codex, and Aider versions of /mdfy follow in W9 and W10.
+            Cursor, Codex, and Aider versions of /memory.wiki follow in W9 and W10.
           </p>
         </section>
       </div>

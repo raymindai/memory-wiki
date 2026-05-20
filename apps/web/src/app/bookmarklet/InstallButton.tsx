@@ -34,7 +34,7 @@ export default function InstallButton({ href }: Props) {
       className="px-6 py-3 rounded-lg text-base font-medium select-none"
       style={{ background: "var(--accent)", color: "#000", cursor: "grab" }}
     >
-      📎 Save to mdfy
+      📎 Save to memory.wiki
     </a>
   );
 }

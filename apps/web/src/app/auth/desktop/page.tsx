@@ -3,8 +3,8 @@
 // /auth/desktop — auth flow for the memory.wiki Electron desktop app.
 //
 // Lifecycle: main.js's "login" IPC handler opens this URL in the system
-// browser with redirect=mdfy://auth. If the visitor already has an
-// memory.wiki Supabase session, we immediately bounce to the mdfy:// URI
+// browser with redirect=memory.wiki://auth. If the visitor already has an
+// memory.wiki Supabase session, we immediately bounce to the memory.wiki:// URI
 // scheme with token + refresh_token attached as query params — the
 // Electron AuthManager.handleProtocolUrl() picks them up and signs the
 // app in.
@@ -53,7 +53,7 @@ export default function DesktopAuthPage() {
 
       const token = session.access_token;
       const refreshToken = (session as { refresh_token?: string }).refresh_token;
-      let desktopUri = `mdfy://auth?token=${encodeURIComponent(token)}`;
+      let desktopUri = `memory.wiki://auth?token=${encodeURIComponent(token)}`;
       if (refreshToken) {
         desktopUri += `&refresh_token=${encodeURIComponent(refreshToken)}`;
       }
@@ -83,7 +83,7 @@ export default function DesktopAuthPage() {
           <div style={{ width: 128, height: 2, borderRadius: 2, overflow: "hidden", background: "var(--border-dim)" }}>
             <div style={{ height: "100%", borderRadius: 2, background: "var(--accent)", animation: "loadbar 1.2s ease-in-out infinite" }} />
           </div>
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Connecting to mdfy for Mac...</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Connecting to memory.wiki for Mac...</p>
         </>
       )}
 
@@ -93,7 +93,7 @@ export default function DesktopAuthPage() {
             <circle cx="12" cy="12" r="10" />
             <path d="M8 12l3 3 5-5" />
           </svg>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Connected to mdfy for Mac</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Connected to memory.wiki for Mac</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
             Your memory.wiki account is now linked. You can close this tab and return to the app.
           </p>
@@ -102,7 +102,7 @@ export default function DesktopAuthPage() {
 
       {status === "choose-provider" && (
         <>
-          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect mdfy for Mac</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>Sign in to connect memory.wiki for Mac</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", maxWidth: 400 }}>
             Use the same account you use on memory.wiki
           </p>

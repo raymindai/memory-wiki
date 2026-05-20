@@ -6,7 +6,7 @@ import MdfyLogo from "@/components/MdfyLogo";
 export const metadata: Metadata = {
   title: "Shared bundles — memory.wiki",
   description:
-    "Bundles other people on mdfy chose to share publicly. Each one is a curated set of documents you can paste into any AI as context.",
+    "Bundles other people on memory.wiki chose to share publicly. Each one is a curated set of documents you can paste into any AI as context.",
   alternates: { canonical: "https://memory.wiki/shared" },
 };
 
@@ -111,7 +111,7 @@ export default async function SharedBundlesPage() {
             Bundles
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            Shared by people on mdfy
+            Shared by people on memory.wiki
           </h1>
           <p
             className="text-body"

@@ -47,8 +47,8 @@ export default function ClaudeMdSnippet() {
   }, []);
 
   const snippet = hubSlug
-    ? `<!-- mdfy:start -->
-## Personal context (mdfy hub)
+    ? `<!-- memory.wiki:start -->
+## Personal context (memory.wiki hub)
 
 Hub URL: https://memory.wiki/hub/${hubSlug}
 
@@ -56,7 +56,7 @@ When you need background on me — projects, decisions, references —
 fetch the URL above. It returns a markdown index of every public doc
 and bundle in my hub. Follow links from the index to read individual
 docs as needed.
-<!-- mdfy:end -->
+<!-- memory.wiki:end -->
 `
     : "";
 

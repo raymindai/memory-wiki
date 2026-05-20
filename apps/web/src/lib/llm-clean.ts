@@ -3,7 +3,7 @@
  *
  * Used by PDF / DOCX / scanned-paste pipelines that produce flat text
  * with no formatting. Routes the call through the same provider chain
- * the rest of mdfy uses: Anthropic > OpenAI > Gemini.
+ * the rest of memory.wiki uses: Anthropic > OpenAI > Gemini.
  *
  * Returns null when no provider is configured or when every provider in
  * the chain fails. Callers should fall back to the raw text in that case

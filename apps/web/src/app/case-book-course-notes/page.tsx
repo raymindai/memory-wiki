@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "One doc per chapter (or per lecture)",
-      detail: "Drop in your raw takeaways. mdfy doesn't care if it's bullet form or prose. The title is the chapter — that's the H1, that's the address.",
+      detail: "Drop in your raw takeaways. memory.wiki doesn't care if it's bullet form or prose. The title is the chapter — that's the H1, that's the address.",
     },
     {
       step: "Let recurring concepts surface themselves",

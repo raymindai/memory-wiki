@@ -1,5 +1,5 @@
 // Curator options — user-configurable list of auto-management
-// signals that mdfy runs against the user's hub. Each option owns
+// signals that memory.wiki runs against the user's hub. Each option owns
 // one rule; the user toggles which ones surface in Needs Review.
 //
 // Storage: localStorage in v1 (key `mdfy-curator-settings`). v2 can
@@ -77,7 +77,7 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
   {
     id: "rollup",
     label: "Roll-up suggestions",
-    description: "When 10+ docs share a concept, mdfy suggests synthesising them into a single summary doc you can compile.",
+    description: "When 10+ docs share a concept, memory.wiki suggests synthesising them into a single summary doc you can compile.",
     shipped: false,
     defaultEnabled: false,
   },

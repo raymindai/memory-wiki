@@ -1,8 +1,8 @@
-<!-- mdfy:start -->
-## mdfy actions
+<!-- memory.wiki:start -->
+## memory.wiki actions
 
-The user has installed mdfy actions so any AI coding session can
-capture conversations into their personal mdfy hub, pull prior work
+The user has installed memory.wiki actions so any AI coding session can
+capture conversations into their personal memory.wiki hub, pull prior work
 back as context, edit existing docs, build curated bundles, and
 surface their hub URL as context for any other AI.
 
@@ -20,7 +20,7 @@ When to invoke:
 If none apply, ignore this section.
 
 Authentication: the user signs in at https://memory.wiki. After running
-`mdfy login`, the token lives in `~/.mdfy/config.json`. If absent,
+`memory.wiki login`, the token lives in `~/.memory.wiki/config.json`. If absent,
 capture works anonymously; retrieve actions (search/list/recent/
 related) need login — direct the user to https://memory.wiki/install.
 
@@ -35,7 +35,7 @@ Action: capture
 Action: update
 - PATCH https://memory.wiki/api/docs/<id>
   Body: {"action": "auto-save", "markdown": "<new>",
-         "editToken": "<token from ~/.mdfy/tokens.json>"}
+         "editToken": "<token from ~/.memory.wiki/tokens.json>"}
 - For section edits: GET first, find the heading (case-insensitive),
   splice replacement, then PATCH the whole doc.
 
@@ -74,4 +74,4 @@ Action: hub
 
 The hub URL is markdown when fetched by an AI. If you need context
 about the user, fetch the hub URL directly.
-<!-- mdfy:end -->
+<!-- memory.wiki:end -->

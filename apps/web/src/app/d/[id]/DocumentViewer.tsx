@@ -441,7 +441,7 @@ export default function DocumentViewer({
             </span>
           </div>
         ) : markdown ? (
-          // Single source of truth for rendered markdown across mdfy:
+          // Single source of truth for rendered markdown across memory.wiki:
           // the editor's Live tab and this public viewer both mount
           // TiptapLiveEditor — same node handlers, same Mermaid +
           // KaTeX NodeViews, same paragraph/list/table HTML. canEdit

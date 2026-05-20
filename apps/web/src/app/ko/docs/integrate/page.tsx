@@ -4,13 +4,13 @@ import { CodeBlock, InlineCode, SectionHeading, DocsNav, DocsSidebar, SiteFooter
 export const metadata: Metadata = {
   title: "AI 개발 도구와 연결 — memory.wiki",
   description:
-    "Claude Code, Cursor, Codex, Gemini CLI, Windsurf, Aider 에 한 줄 추가해서 mdfy hub / bundle 을 모든 세션의 컨텍스트로 자동 로드. AGENTS.md / CLAUDE.md / .cursor/rules 한 곳에 URL 만 박으면 끝.",
+    "Claude Code, Cursor, Codex, Gemini CLI, Windsurf, Aider 에 한 줄 추가해서 memory.wiki hub / bundle 을 모든 세션의 컨텍스트로 자동 로드. AGENTS.md / CLAUDE.md / .cursor/rules 한 곳에 URL 만 박으면 끝.",
   alternates: {
     canonical: "https://memory.wiki/ko/docs/integrate",
     languages: { en: "https://memory.wiki/docs/integrate" },
   },
   openGraph: {
-    title: "AI 개발 도구와 mdfy 연결",
+    title: "AI 개발 도구와 memory.wiki 연결",
     description: "AGENTS.md / CLAUDE.md / .cursor/rules 에 한 줄 추가하면 모든 AI 도구가 당신의 hub / bundle 을 깨끗한 마크다운으로 읽습니다.",
     url: "https://memory.wiki/ko/docs/integrate",
     images: [{ url: "/api/og?title=AI%20개발%20도구와%20연결", width: 1200, height: 630 }],
@@ -129,7 +129,7 @@ export default function IntegrateDocsPageKo() {
                 maxWidth: 680,
               }}
             >
-              Claude Code, Cursor, Codex, 그 외 모든 에이전트가 이미 <InlineCode>{"CLAUDE.md"}</InlineCode> / <InlineCode>{"AGENTS.md"}</InlineCode> / <InlineCode>{".cursor/rules"}</InlineCode> 의 내용으로 부팅합니다. mdfy bundle 또는 hub 를 가리키는 한 줄만 추가하면, 다음 세션은 이전 결정, 노트, 분석이 *이미 로드된 상태로* 시작됩니다.
+              Claude Code, Cursor, Codex, 그 외 모든 에이전트가 이미 <InlineCode>{"CLAUDE.md"}</InlineCode> / <InlineCode>{"AGENTS.md"}</InlineCode> / <InlineCode>{".cursor/rules"}</InlineCode> 의 내용으로 부팅합니다. memory.wiki bundle 또는 hub 를 가리키는 한 줄만 추가하면, 다음 세션은 이전 결정, 노트, 분석이 *이미 로드된 상태로* 시작됩니다.
             </p>
             <p
               style={{
@@ -208,7 +208,7 @@ Working bundle: https://memory.wiki/b/<bundle-id>
               maxWidth: 680,
             }}
           >
-            mdfy 는 세 가지 URL 모양을 제공합니다. 프로젝트 스코프 도구 설정에는 거의 항상 bundle URL 이 맞습니다 — 캔버스 분석을 같이 가져가니까요.
+            memory.wiki 는 세 가지 URL 모양을 제공합니다. 프로젝트 스코프 도구 설정에는 거의 항상 bundle URL 이 맞습니다 — 캔버스 분석을 같이 가져가니까요.
           </p>
           <div
             style={{
@@ -374,7 +374,7 @@ Bundle: https://memory.wiki/b/<bundle-id>
               maxWidth: 680,
             }}
           >
-            패턴: 도구별 override 는 각 도구의 파일 (<InlineCode>{".cursor/rules/"}</InlineCode>, <InlineCode>{"GEMINI.md"}</InlineCode>, <InlineCode>{".windsurfrules"}</InlineCode>) 에 두고, mdfy URL 만 <InlineCode>{"AGENTS.md"}</InlineCode> 에. URL 이 portable 한 부분, 도구별 nuance 는 도구별 위치.
+            패턴: 도구별 override 는 각 도구의 파일 (<InlineCode>{".cursor/rules/"}</InlineCode>, <InlineCode>{"GEMINI.md"}</InlineCode>, <InlineCode>{".windsurfrules"}</InlineCode>) 에 두고, memory.wiki URL 만 <InlineCode>{"AGENTS.md"}</InlineCode> 에. URL 이 portable 한 부분, 도구별 nuance 는 도구별 위치.
           </p>
 
           {/* ─── Per-tool blocks ─── */}
@@ -384,7 +384,7 @@ Bundle: https://memory.wiki/b/<bundle-id>
             name="Claude Code"
             filePath="CLAUDE.md (project root) — and AGENTS.md"
             tagline="Claude Code 는 프로젝트 루트와 부모 디렉터리 모두에서 CLAUDE.md 를 auto-load 합니다 (AGENTS.md 도 함께). 둘 다 동작; CLAUDE.md 는 Claude 전용 override 의 적절한 위치."
-            snippet={`## Project context (from mdfy)
+            snippet={`## Project context (from memory.wiki)
 
 Bundle: https://memory.wiki/b/<bundle-id>
 
@@ -403,9 +403,9 @@ cross-doc 컨텍스트가 필요할 때마다 다시 읽음.`}
             id="cursor-tool"
             name="Cursor"
             filePath=".cursor/rules/mdfy.mdc"
-            tagline="Cursor 의 신규 multi-rule 포맷. frontmatter 가 룰 적용 범위 스코프, body 가 mdfy URL 보관. 번들마다 한 파일로 깨끗하게 분리."
+            tagline="Cursor 의 신규 multi-rule 포맷. frontmatter 가 룰 적용 범위 스코프, body 가 memory.wiki URL 보관. 번들마다 한 파일로 깨끗하게 분리."
             snippet={`---
-description: Project context from mdfy
+description: Project context from memory.wiki
 alwaysApply: true
 ---
 

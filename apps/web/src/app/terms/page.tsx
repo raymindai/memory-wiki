@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service — memory.wiki",
-  description: "Terms of Service for memory.wiki, the mdfy Chrome Extension, VS Code Extension, and mdfy for Mac.",
+  description: "Terms of Service for memory.wiki, the memory.wiki Chrome Extension, VS Code Extension, and memory.wiki for Mac.",
   openGraph: {
     title: "Terms of Service — memory.wiki",
     url: "https://memory.wiki/terms",
@@ -32,7 +32,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>1. Acceptance</h2>
           <p>
-            By using memory.wiki, the mdfy Chrome Extension, VS Code Extension, mdfy for Mac, or the mdfy MCP server
+            By using memory.wiki, the memory.wiki Chrome Extension, VS Code Extension, memory.wiki for Mac, or the memory.wiki MCP server
             (collectively, &ldquo;the Service&rdquo;), you agree to these terms. The Service is operated by Raymind AI.
           </p>
         </section>

@@ -38,7 +38,7 @@ import { embedText, prepareEmbeddingInput, vectorToSql } from "@/lib/embeddings"
  * to /api/bundles to actually persist.
  */
 
-const SYSTEM_PROMPT = `You are mdfy's bundle curator. The user asked you to assemble a "bundle" — a themed collection of their existing documents — from their personal knowledge hub.
+const SYSTEM_PROMPT = `You are memory.wiki's bundle curator. The user asked you to assemble a "bundle" — a themed collection of their existing documents — from their personal knowledge hub.
 
 You will receive:
 - The user's natural-language request

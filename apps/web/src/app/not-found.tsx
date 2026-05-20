@@ -20,10 +20,10 @@ export default function GlobalNotFound() {
             Page not found
           </div>
           <p className="text-body leading-relaxed mb-6" style={{ color: "var(--text-secondary)" }}>
-            That URL doesn&apos;t exist on mdfy. Maybe it was renamed, or the link is wrong.
+            That URL doesn&apos;t exist on memory.wiki. Maybe it was renamed, or the link is wrong.
           </p>
           <p className="text-caption leading-relaxed mb-8" style={{ color: "var(--text-faint)" }}>
-            mdfy URLs look like <code>memory.wiki/&lt;id&gt;</code>, <code>memory.wiki/b/&lt;id&gt;</code>, or <code>memory.wiki/hub/&lt;slug&gt;</code>.
+            memory.wiki URLs look like <code>memory.wiki/&lt;id&gt;</code>, <code>memory.wiki/b/&lt;id&gt;</code>, or <code>memory.wiki/hub/&lt;slug&gt;</code>.
           </p>
           <div className="flex gap-3 justify-center">
             <Link
@@ -38,7 +38,7 @@ export default function GlobalNotFound() {
               className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-body font-semibold transition-colors"
               style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
             >
-              What is mdfy?
+              What is memory.wiki?
             </Link>
           </div>
         </div>

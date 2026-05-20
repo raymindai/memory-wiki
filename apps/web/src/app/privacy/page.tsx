@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — memory.wiki",
-  description: "Privacy Policy for memory.wiki and the mdfy Chrome Extension.",
+  description: "Privacy Policy for memory.wiki and the memory.wiki Chrome Extension.",
   openGraph: {
     title: "Privacy Policy — memory.wiki",
     url: "https://memory.wiki/privacy",
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           <p>
             memory.wiki is a document publishing service operated by Raymind AI.
             We respect your privacy and are committed to protecting your data.
-            This policy covers the memory.wiki website, the mdfy Chrome Extension, and the mdfy VS Code Extension.
+            This policy covers the memory.wiki website, the memory.wiki Chrome Extension, and the memory.wiki VS Code Extension.
           </p>
         </section>
 
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             <li><strong>No telemetry:</strong> We do not collect usage telemetry from the VS Code extension.</li>
           </ul>
 
-          <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>mdfy for Mac</h3>
+          <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>memory.wiki for Mac</h3>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Local files:</strong> The desktop app reads files you open via Finder or Cmd+O. Files are edited through memory.wiki and auto-saved locally.</li>
             <li><strong>No phone-home:</strong> The app does not send data to any server unless you explicitly publish or sync a document.</li>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>MCP Server (mdfy-mcp)</h3>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Document operations:</strong> The MCP server creates, reads, and manages documents on memory.wiki via its API. Documents are stored on memory.wiki servers.</li>
-            <li><strong>Local tokens:</strong> Edit tokens are stored locally at <code style={{ fontSize: "0.85em" }}>~/.mdfy/tokens.json</code> with owner-only permissions (0600).</li>
+            <li><strong>Local tokens:</strong> Edit tokens are stored locally at <code style={{ fontSize: "0.85em" }}>~/.memory.wiki/tokens.json</code> with owner-only permissions (0600).</li>
             <li><strong>Email:</strong> Your email (MDFY_EMAIL) is sent to the API for document ownership. It is not shared with third parties.</li>
           </ul>
         </section>

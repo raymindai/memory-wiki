@@ -3,9 +3,9 @@ import Link from "next/link";
 import MdfyLogo from "@/components/MdfyLogo";
 
 export const metadata: Metadata = {
-  title: "mdfy — Your AI memory, owned by you",
+  title: "memory.wiki — Your AI memory, owned by you",
   description:
-    "Two doors into mdfy: a personal AI memory every LLM user can own, and an LLM-maintained personal wiki for power users. Same hub, two ways in.",
+    "Two doors into memory.wiki: a personal AI memory every LLM user can own, and an LLM-maintained personal wiki for power users. Same hub, two ways in.",
   robots: { index: false, follow: false },
 };
 
@@ -22,9 +22,9 @@ const wikiDoorPoints = [
 ];
 
 const sharedActions = [
-  { label: "/mdfy capture", body: "Save the conversation segment as a public mdfy URL." },
-  { label: "/mdfy bundle", body: "Group related docs into a curated bundle." },
-  { label: "/mdfy hub", body: "Print your hub URL. Paste anywhere, any AI reads it." },
+  { label: "/memory.wiki capture", body: "Save the conversation segment as a public memory.wiki URL." },
+  { label: "/memory.wiki bundle", body: "Group related docs into a curated bundle." },
+  { label: "/memory.wiki hub", body: "Print your hub URL. Paste anywhere, any AI reads it." },
 ];
 
 export default function V6LandingDraft() {
@@ -87,7 +87,7 @@ export default function V6LandingDraft() {
             className="mb-5"
             style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}
           >
-            ChatGPT, Claude, and Gemini all forget you between sessions. mdfy is a one-click capture for the answers worth keeping — yours, on a URL you control.
+            ChatGPT, Claude, and Gemini all forget you between sessions. memory.wiki is a one-click capture for the answers worth keeping — yours, on a URL you control.
           </p>
           <ul className="space-y-2 mb-6 flex-1" style={{ color: "var(--text-secondary)" }}>
             {memoryDoorPoints.map(point => (
@@ -126,7 +126,7 @@ export default function V6LandingDraft() {
             className="mb-5"
             style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}
           >
-            Karpathy hand-curates a personal LLM wiki because nothing does it for him. mdfy does it for you — auto-synthesis, semantic bundles, and a hub-wide lint pass that flags what to reconcile.
+            Karpathy hand-curates a personal LLM wiki because nothing does it for him. memory.wiki does it for you — auto-synthesis, semantic bundles, and a hub-wide lint pass that flags what to reconcile.
           </p>
           <ul className="space-y-2 mb-6 flex-1" style={{ color: "var(--text-secondary)" }}>
             {wikiDoorPoints.map(point => (
@@ -144,7 +144,7 @@ export default function V6LandingDraft() {
               color: "var(--accent)",
             }}
           >
-            Install /mdfy in your AI tool
+            Install /memory.wiki in your AI tool
           </Link>
         </article>
       </section>
@@ -190,7 +190,7 @@ export default function V6LandingDraft() {
         <p
           style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}
         >
-          AI vendors are racing to be your memory layer — and your memory will live inside their walls. mdfy is the opposite bet: a public URL is the universal context format, and the hub that owns it should be yours, not a vendor&apos;s.
+          AI vendors are racing to be your memory layer — and your memory will live inside their walls. memory.wiki is the opposite bet: a public URL is the universal context format, and the hub that owns it should be yours, not a vendor&apos;s.
         </p>
       </section>
 

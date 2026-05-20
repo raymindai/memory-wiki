@@ -2,10 +2,10 @@
 
 // Hub Galaxy — pure SVG cosmos.
 //
-// Chrome (header / sidebar / detail panel / scrubber) uses mdfy CSS vars
+// Chrome (header / sidebar / detail panel / scrubber) uses memory.wiki CSS vars
 // (--background, --surface, --border, --text-*, --accent), forced to
 // dark theme. Canvas uses hand-picked hex (SVG gradient stops need
-// explicit colours) inside mdfy's warm zinc + orange family.
+// explicit colours) inside memory.wiki's warm zinc + orange family.
 //
 // API:  GET /api/user/hub/constellation  (owner-only)
 

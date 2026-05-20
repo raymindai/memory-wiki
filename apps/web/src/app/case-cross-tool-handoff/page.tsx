@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "Build the project hub once",
-      detail: "Capture the spec, recent decisions, customer feedback, design constraints into mdfy docs. Group them into a Bundle named after the project. That bundle has a permanent URL.",
+      detail: "Capture the spec, recent decisions, customer feedback, design constraints into memory.wiki docs. Group them into a Bundle named after the project. That bundle has a permanent URL.",
     },
     {
       step: "Paste the bundle URL when priming",
@@ -27,7 +27,7 @@ const data: CaseData = {
     },
     {
       step: "Keep the hub current",
-      detail: "When a new decision lands, save it to mdfy (Hub Chat's Save-as-doc, or the editor). Next time you paste the URL, both AIs see the updated state. No re-priming.",
+      detail: "When a new decision lands, save it to memory.wiki (Hub Chat's Save-as-doc, or the editor). Next time you paste the URL, both AIs see the updated state. No re-priming.",
     },
   ],
   result: [

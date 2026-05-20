@@ -191,7 +191,7 @@ export async function importFromYouTube(
     //   2. youtube.com itself shows a "transcript" panel under the
     //      video they can copy from.
     // We point at both and clearly mark this as a known limitation,
-    // not a mdfy bug, so support questions land softly.
+    // not a memory.wiki bug, so support questions land softly.
     const transcriptHelperUrl = `https://youtubetranscript.com/?server_vid2=${videoId}`;
     const why = transcriptBlockReason === "login_required"
       ? "YouTube now blocks server-side transcript fetches from datacenter IPs (it asks for a sign-in to prove the request isn't a bot)."

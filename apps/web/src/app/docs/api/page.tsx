@@ -780,7 +780,7 @@ url = res.json()["url"]`}</CodeBlock>
               maxWidth: 640,
             }}
           >
-            Every public mdfy URL also exposes a clean-markdown variant for AI agents.
+            Every public memory.wiki URL also exposes a clean-markdown variant for AI agents.
             Append <InlineCode>{"?compact"}</InlineCode> or <InlineCode>{"?digest"}</InlineCode> to cut tokens — the answer is the same; the bill is smaller.
           </p>
           <div
@@ -955,7 +955,7 @@ source: "memory.wiki"
               maxWidth: 640,
             }}
           >
-            mdfy ships two distinct ontology layers, and each lives on its own URL:
+            memory.wiki ships two distinct ontology layers, and each lives on its own URL:
           </p>
           <ul
             style={{
@@ -1041,7 +1041,7 @@ source: "memory.wiki"
               },
               {
                 title: "MCP / CLI auth",
-                desc: "Both MCP server and CLI use JWT from mdfy login. Run: npm install -g mdfy-cli && mdfy login",
+                desc: "Both MCP server and CLI use JWT from memory.wiki login. Run: npm install -g mdfy-cli && memory.wiki login",
               },
             ].map((item) => (
               <div

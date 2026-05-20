@@ -11,7 +11,7 @@ memory.wiki uses progressive authentication:
 - No auth required for basic publish and read
 - Edit tokens for updates/deletes (returned at creation)
 - User identity via x-user-id or Authorization: Bearer JWT headers
-- MCP and CLI use JWT from \`mdfy login\` (stored in ~/.mdfy/config.json)
+- MCP and CLI use JWT from \`memory.wiki login\` (stored in ~/.memory.wiki/config.json)
 
 ## Endpoints
 
@@ -280,7 +280,7 @@ Response 200:
 
 ## Raw + /llms.txt (token-economy URLs for AI agents)
 
-Every public mdfy URL also exposes a clean-markdown variant. Append ?compact or ?digest to cut tokens.
+Every public memory.wiki URL also exposes a clean-markdown variant. Append ?compact or ?digest to cut tokens.
 
 - GET /raw/{id} — plain markdown for a single document
 - GET /raw/b/{bundleId} — concatenated markdown for a bundle
@@ -312,22 +312,22 @@ Error response format:
 Install: npm install -g mdfy-cli
 
 Commands:
-- mdfy publish <file>: Publish a file or stdin
-- mdfy update <id> <file>: Update existing document
-- mdfy pull <id>: Download document content
-- mdfy delete <id>: Soft-delete a document
-- mdfy list: List your documents
-- mdfy open <id>: Open in browser
-- mdfy capture: Capture tmux pane and publish
-- mdfy login: Authenticate
-- mdfy logout: Clear credentials
-- mdfy whoami: Show current user
+- memory.wiki publish <file>: Publish a file or stdin
+- memory.wiki update <id> <file>: Update existing document
+- memory.wiki pull <id>: Download document content
+- memory.wiki delete <id>: Soft-delete a document
+- memory.wiki list: List your documents
+- memory.wiki open <id>: Open in browser
+- memory.wiki capture: Capture tmux pane and publish
+- memory.wiki login: Authenticate
+- memory.wiki logout: Clear credentials
+- memory.wiki whoami: Show current user
 
 Pipe examples:
-- echo "# Hello" | mdfy publish
-- pbpaste | mdfy publish
-- cat file.md | mdfy publish
-- tmux capture-pane -p | mdfy publish
+- echo "# Hello" | memory.wiki publish
+- pbpaste | memory.wiki publish
+- cat file.md | memory.wiki publish
+- tmux capture-pane -p | memory.wiki publish
 
 ## HTTP API
 
@@ -368,13 +368,13 @@ In Cursor: Settings → MCP → Add server with { "url": "https://memory.wiki/ap
 
 ### Option B: Local stdio MCP (Claude Desktop, Claude Code)
 
-Prerequisites: npm install -g mdfy-cli && mdfy login
+Prerequisites: npm install -g mdfy-cli && memory.wiki login
 
 Config (.mcp.json or claude_desktop_config.json):
 \`\`\`json
 {
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["mdfy-mcp"]
     }

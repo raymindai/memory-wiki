@@ -154,7 +154,7 @@ export default function AdminPage() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: "#fafafa", margin: 0 }}>
-            <span style={{ color: "#fb923c" }}>mdfy</span> Admin
+            <span style={{ color: "#fb923c" }}>memory.wiki</span> Admin
           </h1>
           <p style={{ fontSize: 12, color: "#52525b", marginTop: 4 }}>{email}</p>
         </div>

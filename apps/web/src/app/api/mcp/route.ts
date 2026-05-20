@@ -86,7 +86,7 @@ function findSection(markdown: string, heading: string): Section | null {
 // ─── MCP Server ───
 
 function createMcpServer(userId?: string) {
-  const server = new McpServer({ name: "mdfy", version: "1.4.0" });
+  const server = new McpServer({ name: "memory.wiki", version: "1.4.0" });
   const supabase = getSupabaseClient();
   const requireDb = () => supabase ?? null;
 

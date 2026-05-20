@@ -308,7 +308,7 @@ export default function BundleOverview({
             exactly what to do. Mirrors HubEmbed: URL tools (chat
             AIs + Generic) show variant chip + URL row + Copy;
             snippet tools show their save-to-file snippet. Flat
-            tab row, no "via mdfy:" grouping. */}
+            tab row, no "via memory.wiki:" grouping. */}
         {(() => {
           const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
           const digestTokens = 50 + documents.length * 35;
@@ -318,36 +318,36 @@ export default function BundleOverview({
 
           const projCtx = `# Project context
 
-mdfy bundle: ${bundleUrl}
+memory.wiki bundle: ${bundleUrl}
 
 Fetch this URL on every session. The response carries the bundle's
 markdown payload — title, annotations, links + concept analysis —
 ready to paste as project context.`;
           const cursorRule = `---
-description: mdfy bundle context
+description: memory.wiki bundle context
 alwaysApply: true
 ---
-mdfy bundle: ${bundleUrl}
+memory.wiki bundle: ${bundleUrl}
 
 Fetch this URL on every session for project-scoped context.`;
           const mcpConfig = `{
   "mcpServers": {
-    "mdfy": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["-y", "mdfy-mcp"]
     }
   }
 }`;
           const skillUse = `# Install once
-claude skill install mdfy
+claude skill install memory.wiki
 
 # Inside any Claude Code session
-/mdfy bundle ${bundleId}
-/mdfy search "topic"`;
+/memory.wiki bundle ${bundleId}
+/memory.wiki search "topic"`;
           const cliUse = `npm install -g mdfy-cli
 
-mdfy bundle ${bundleId}
-mdfy search "topic"`;
+memory.wiki bundle ${bundleId}
+memory.wiki search "topic"`;
 
           type Tool = {
             id: string;
@@ -366,8 +366,8 @@ mdfy search "topic"`;
             { id: "cursor", label: "Cursor", hint: "Save as .cursor/rules/mdfy.mdc", savePath: ".cursor/rules/mdfy.mdc", snippet: cursorRule, explanation: "Cursor's Rules feature reads .mdc files from .cursor/rules/. alwaysApply: true keeps the bundle URL in context on every chat, including ad-hoc questions.", docHref: "/docs/integrate#cursor" },
             { id: "generic", label: "Generic", hint: "Paste the URL into any AI that can fetch a webpage", snippet: bundleUrl, explanation: "Any LLM with web-fetch (or a configured browser tool) works. Append ?full=1 for every doc inline, or use /b/<id>.md for the raw markdown payload.", docHref: "/docs/integrate" },
             { id: "mcp", label: "MCP", hint: "Add mdfy-mcp to your MCP host config", snippet: mcpConfig, explanation: "Compatible with Claude Desktop, Cursor, Cline, Windsurf, and any MCP-capable host. Exposes 26 tools across capture / bundle / search / share / version history.", docHref: "/docs/mcp" },
-            { id: "skill", label: "Skill", hint: "Use /mdfy slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install mdfy`. Then inside any Claude Code session, run /mdfy bundle <id> or /mdfy search to pull this bundle in.", docHref: "/docs/integrate" },
-            { id: "cli", label: "CLI", hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run mdfy bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
+            { id: "skill", label: "Skill", hint: "Use /memory.wiki slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install memory.wiki`. Then inside any Claude Code session, run /memory.wiki bundle <id> or /memory.wiki search to pull this bundle in.", docHref: "/docs/integrate" },
+            { id: "cli", label: "CLI", hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run memory.wiki bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
           ];
           const active = TOOLS.find((t) => t.id === activeTool) || TOOLS[0];
           const URL_TOOL_IDS = new Set(["claude", "chatgpt", "gemini", "generic"]);

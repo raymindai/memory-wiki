@@ -591,7 +591,7 @@ export function SiteFooter({ lang = "en" }: { lang?: "en" | "ko" } = {}) {
 
 const docsNav = [
   { label: "Overview", href: "/docs" },
-  // Integrate sits second — it's the "how do I wire mdfy into my AI
+  // Integrate sits second — it's the "how do I wire memory.wiki into my AI
   // tools" page most users land on after Overview. Developer-platform
   // entries (REST API, CLI, SDK, MCP) follow.
   { label: "Integrate", href: "/docs/integrate" },

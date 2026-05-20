@@ -15,11 +15,11 @@ const data: CaseData = {
   action: [
     {
       step: "Import the docs that matter",
-      detail: "GitHub repos of .md files (one URL, mdfy walks every .md). Notion pages (paste the URL + integration token). Obsidian vaults (drop a .zip). URL pages (any public docs page). Drag-and-drop files from your machine.",
+      detail: "GitHub repos of .md files (one URL, memory.wiki walks every .md). Notion pages (paste the URL + integration token). Obsidian vaults (drop a .zip). URL pages (any public docs page). Drag-and-drop files from your machine.",
     },
     {
       step: "Make the hub public",
-      detail: "Settings → toggle Hub public. mdfy auto-publishes index.md / SCHEMA.md / log.md / llms.txt at the hub root — every AI agent's protocol of choice.",
+      detail: "Settings → toggle Hub public. memory.wiki auto-publishes index.md / SCHEMA.md / log.md / llms.txt at the hub root — every AI agent's protocol of choice.",
     },
     {
       step: "Share the one URL",

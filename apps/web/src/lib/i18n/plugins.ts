@@ -11,7 +11,7 @@ const texts = {
     hero: {
       label: "Plugins & Extensions",
       h1_prefix: "Bring ",
-      h1_accent: "mdfy",
+      h1_accent: "memory.wiki",
       h1_suffix: " everywhere.",
       sub: "Six surfaces, one hub. Capture from any AI, edit anywhere, deploy the same URL to Claude, ChatGPT, Cursor, and Codex. Every plugin writes into the same hub \u2014 your AI memory stays portable across every tool.",
     },
@@ -26,7 +26,7 @@ const texts = {
         },
         {
           scenario: "Capture \u2192 Publish \u2192 Share in 3 seconds",
-          steps: "See a great AI response \u2192 Click mdfy button \u2192 Beautiful URL auto-generated \u2192 Send to anyone",
+          steps: "See a great AI response \u2192 Click memory.wiki button \u2192 Beautiful URL auto-generated \u2192 Send to anyone",
           why: "Recipient sees a polished document, not a raw chat screenshot. No app needed to view it.",
         },
         {
@@ -37,7 +37,7 @@ const texts = {
         {
           scenario: "Preview any .md file in Finder",
           steps: "Select file \u2192 Press Space \u2192 Full rendering with code, math, diagrams \u2192 Click \"Open in memory.wiki\" to edit",
-          why: "macOS QuickLook shows raw Markdown by default. mdfy QuickLook shows it beautifully rendered.",
+          why: "macOS QuickLook shows raw Markdown by default. memory.wiki QuickLook shows it beautifully rendered.",
         },
         {
           scenario: "Publish from your editor",
@@ -93,7 +93,7 @@ const texts = {
         "Unzip the downloaded file",
         "Open chrome://extensions and enable Developer Mode (top right toggle)",
         "Click \"Load unpacked\" and select the unzipped folder",
-        "Visit ChatGPT, Claude, or Gemini \u2014 the mdfy button appears",
+        "Visit ChatGPT, Claude, or Gemini \u2014 the memory.wiki button appears",
       ],
       downloadLabel: "Download v2.0.0",
       downloadSize: "42 KB",
@@ -108,7 +108,7 @@ const texts = {
       terminal: {
         title: "Claude Code",
         lines: [
-          { type: "prompt", label: "You: ", text: "Publish my meeting notes to mdfy" },
+          { type: "prompt", label: "You: ", text: "Publish my meeting notes to memory.wiki" },
           { type: "output", label: "Claude: ", text: "I'll create the document now." },
           { type: "comment", text: '  mdfy_create({ markdown: "# Meeting Notes..." })' },
           { type: "success", text: "Document created:" },
@@ -207,14 +207,14 @@ const texts = {
     },
 
     desktop: {
-      title: "mdfy for Mac",
+      title: "memory.wiki for Mac",
       subtitle: "Desktop app \u2014 Electron",
-      desc: "Native macOS desktop app with full memory.wiki editing, local file support, and drag-and-drop import for PDF, Word, PowerPoint, Excel, and 10+ formats. Double-click any .md file to open it in mdfy.",
+      desc: "Native macOS desktop app with full memory.wiki editing, local file support, and drag-and-drop import for PDF, Word, PowerPoint, Excel, and 10+ formats. Double-click any .md file to open it in memory.wiki.",
       ctaLabel: "Download for Mac",
       features: [
         {
           title: "Native File Integration",
-          items: ["Double-click .md to open in mdfy", "Drag & drop any supported format", "Save back to local file (Cmd+Shift+S)", "Recent files dashboard"],
+          items: ["Double-click .md to open in memory.wiki", "Drag & drop any supported format", "Save back to local file (Cmd+Shift+S)", "Recent files dashboard"],
         },
         {
           title: "Multi-Format Import",
@@ -232,8 +232,8 @@ const texts = {
       installHeading: "Install",
       installSteps: [
         "Download the DMG file below",
-        "Open the DMG and drag mdfy to Applications",
-        "Launch mdfy from Applications",
+        "Open the DMG and drag memory.wiki to Applications",
+        "Launch memory.wiki from Applications",
       ],
       downloadLabel: "Download for Mac",
       downloadSize: "97 MB (Apple Silicon)",
@@ -243,16 +243,16 @@ const texts = {
 
     cli: {
       title: "CLI Tool",
-      subtitle: "mdfy \u2014 npm package",
+      subtitle: "memory.wiki \u2014 npm package",
       desc: "Publish Markdown from your terminal. Pipe from any command \u2014 tmux, AI assistants, git log, clipboard. Every output becomes a shareable URL.",
       installCmd: "npm install -g mdfy-cli",
       examples: [
-        { cmd: "mdfy publish README.md", desc: "Publish a file and get a URL" },
-        { cmd: 'echo "# Hello" | mdfy publish', desc: "Publish from stdin (pipe)" },
-        { cmd: "tmux capture-pane -p | mdfy publish", desc: "Capture tmux pane" },
-        { cmd: "pbpaste | mdfy publish", desc: "Publish clipboard contents" },
-        { cmd: "mdfy pull abc123 -o doc.md", desc: "Download a document" },
-        { cmd: "mdfy list", desc: "List your published documents" },
+        { cmd: "memory.wiki publish README.md", desc: "Publish a file and get a URL" },
+        { cmd: 'echo "# Hello" | memory.wiki publish', desc: "Publish from stdin (pipe)" },
+        { cmd: "tmux capture-pane -p | memory.wiki publish", desc: "Capture tmux pane" },
+        { cmd: "pbpaste | memory.wiki publish", desc: "Publish clipboard contents" },
+        { cmd: "memory.wiki pull abc123 -o doc.md", desc: "Download a document" },
+        { cmd: "memory.wiki list", desc: "List your published documents" },
       ],
       guideLabel: "Quick Start Guide",
       npmLabel: "View on npm",
@@ -261,8 +261,8 @@ const texts = {
     quicklook: {
       title: "macOS QuickLook",
       subtitle: "Preview .md files in Finder",
-      desc: "Press Space on any .md file in Finder to see it beautifully rendered \u2014 GFM tables, syntax highlighting, math, and Mermaid diagrams. Click \u201cOpen in mdfy\u201d to edit in the desktop app or web editor. Bundled with mdfy for Mac; auto-installs to ~/Applications on first Desktop launch.",
-      ctaLabel: "Get mdfy for Mac",
+      desc: "Press Space on any .md file in Finder to see it beautifully rendered \u2014 GFM tables, syntax highlighting, math, and Mermaid diagrams. Click \u201cOpen in memory.wiki\u201d to edit in the desktop app or web editor. Bundled with memory.wiki for Mac; auto-installs to ~/Applications on first Desktop launch.",
+      ctaLabel: "Get memory.wiki for Mac",
       features: [
         {
           title: "Full Rendering",
@@ -274,7 +274,7 @@ const texts = {
         },
         {
           title: "Native Integration",
-          items: ["Matches macOS dark/light appearance", "\"Open in mdfy\" button (desktop app or web)", "Code copy buttons", "Theme toggle in preview"],
+          items: ["Matches macOS dark/light appearance", "\"Open in memory.wiki\" button (desktop app or web)", "Code copy buttons", "Theme toggle in preview"],
         },
         {
           title: "Zero Config",
@@ -283,12 +283,12 @@ const texts = {
       ],
       installHeading: "Install",
       installSteps: [
-        "Install mdfy for Mac (DMG link above) — QuickLook ships with it",
+        "Install memory.wiki for Mac (DMG link above) — QuickLook ships with it",
         "Open memory.wiki once — it copies MdfyQuickLook.app to ~/Applications automatically",
-        "Go to System Settings > General > Login Items & Extensions > Quick Look, and enable mdfy",
+        "Go to System Settings > General > Login Items & Extensions > Quick Look, and enable memory.wiki",
         "Select any .md file in Finder and press Space",
       ],
-      downloadLabel: "Get mdfy for Mac",
+      downloadLabel: "Get memory.wiki for Mac",
       downloadSize: "Bundled with Desktop DMG",
       includedLabel: "Included with Mac App",
       guideLabel: "Quick Start Guide",
@@ -316,7 +316,7 @@ const texts = {
     hero: {
       label: "Plugins & Extensions",
       h1_prefix: "",
-      h1_accent: "mdfy",
+      h1_accent: "memory.wiki",
       h1_suffix: "를 어디서든.",
       sub: "6개 surface, 하나의 허브. 어떤 AI에서든 캡처하고, 어디서든 편집하고, 같은 URL을 Claude·ChatGPT·Cursor·Codex에 deploy 하세요. 모든 플러그인이 같은 허브로 쌓이며 \u2014 AI 메모리가 도구를 갈아끼워도 그대로 유지됩니다.",
     },
@@ -331,7 +331,7 @@ const texts = {
         },
         {
           scenario: "캡처 \u2192 퍼블리시 \u2192 공유까지 3초",
-          steps: "좋은 AI 응답 발견 \u2192 mdfy 버튼 클릭 \u2192 깔끔한 URL 자동 생성 \u2192 누구에게든 전송",
+          steps: "좋은 AI 응답 발견 \u2192 memory.wiki 버튼 클릭 \u2192 깔끔한 URL 자동 생성 \u2192 누구에게든 전송",
           why: "받는 사람은 채팅 스크린샷이 아닌 깔끔한 문서를 봅니다. 보기 위해 앱이 필요 없습니다.",
         },
         {
@@ -342,7 +342,7 @@ const texts = {
         {
           scenario: "Finder에서 .md 파일 미리보기",
           steps: "파일 선택 \u2192 Space 누르기 \u2192 코드, 수식, 다이어그램까지 완전 렌더링 \u2192 \"Open in memory.wiki\" 클릭으로 편집",
-          why: "macOS QuickLook은 기본적으로 원시 Markdown을 보여줍니다. mdfy QuickLook은 아름답게 렌더링합니다.",
+          why: "macOS QuickLook은 기본적으로 원시 Markdown을 보여줍니다. memory.wiki QuickLook은 아름답게 렌더링합니다.",
         },
         {
           scenario: "에디터에서 바로 퍼블리시",
@@ -398,7 +398,7 @@ const texts = {
         "다운로드한 파일의 압축을 해제하세요",
         "chrome://extensions를 열고 개발자 모드를 활성화하세요 (우측 상단 토글)",
         "\"압축 해제된 확장 프로그램을 로드합니다\"를 클릭하고 압축 해제된 폴더를 선택하세요",
-        "ChatGPT, Claude, 또는 Gemini를 방문하면 mdfy 버튼이 나타납니다",
+        "ChatGPT, Claude, 또는 Gemini를 방문하면 memory.wiki 버튼이 나타납니다",
       ],
       downloadLabel: "Download v2.0.0",
       downloadSize: "42 KB",
@@ -413,7 +413,7 @@ const texts = {
       terminal: {
         title: "Claude Code",
         lines: [
-          { type: "prompt", label: "You: ", text: "내 회의 노트를 mdfy에 퍼블리시해줘" },
+          { type: "prompt", label: "You: ", text: "내 회의 노트를 memory.wiki에 퍼블리시해줘" },
           { type: "output", label: "Claude: ", text: "지금 문서를 생성하겠습니다." },
           { type: "comment", text: '  mdfy_create({ markdown: "# Meeting Notes..." })' },
           { type: "success", text: "문서 생성 완료:" },
@@ -512,14 +512,14 @@ const texts = {
     },
 
     desktop: {
-      title: "mdfy for Mac",
+      title: "memory.wiki for Mac",
       subtitle: "Desktop app \u2014 Electron",
-      desc: "memory.wiki의 모든 편집 기능을 갖춘 네이티브 macOS 데스크톱 앱. 로컬 파일 지원, PDF, Word, PowerPoint, Excel 등 10개 이상의 포맷을 드래그 앤 드롭으로 임포트. .md 파일을 더블클릭하면 mdfy에서 열립니다.",
+      desc: "memory.wiki의 모든 편집 기능을 갖춘 네이티브 macOS 데스크톱 앱. 로컬 파일 지원, PDF, Word, PowerPoint, Excel 등 10개 이상의 포맷을 드래그 앤 드롭으로 임포트. .md 파일을 더블클릭하면 memory.wiki에서 열립니다.",
       ctaLabel: "Download for Mac",
       features: [
         {
           title: "네이티브 파일 통합",
-          items: [".md 더블클릭으로 mdfy에서 열기", "지원하는 모든 포맷 드래그 & 드롭", "로컬 파일로 저장 (Cmd+Shift+S)", "최근 파일 대시보드"],
+          items: [".md 더블클릭으로 memory.wiki에서 열기", "지원하는 모든 포맷 드래그 & 드롭", "로컬 파일로 저장 (Cmd+Shift+S)", "최근 파일 대시보드"],
         },
         {
           title: "다중 포맷 임포트",
@@ -537,8 +537,8 @@ const texts = {
       installHeading: "설치",
       installSteps: [
         "아래에서 DMG 파일을 다운로드하세요",
-        "DMG를 열고 mdfy를 Applications로 드래그하세요",
-        "Applications에서 mdfy를 실행하세요",
+        "DMG를 열고 memory.wiki를 Applications로 드래그하세요",
+        "Applications에서 memory.wiki를 실행하세요",
       ],
       downloadLabel: "Download for Mac",
       downloadSize: "97 MB (Apple Silicon)",
@@ -548,16 +548,16 @@ const texts = {
 
     cli: {
       title: "CLI Tool",
-      subtitle: "mdfy \u2014 npm package",
+      subtitle: "memory.wiki \u2014 npm package",
       desc: "터미널에서 Markdown을 퍼블리시하세요. tmux, AI 어시스턴트, git log, 클립보드 등 어떤 명령이든 파이프하세요. 모든 출력이 공유 가능한 URL이 됩니다.",
       installCmd: "npm install -g mdfy-cli",
       examples: [
-        { cmd: "mdfy publish README.md", desc: "파일을 퍼블리시하고 URL 받기" },
-        { cmd: 'echo "# Hello" | mdfy publish', desc: "stdin에서 퍼블리시 (파이프)" },
-        { cmd: "tmux capture-pane -p | mdfy publish", desc: "tmux 패인 캡처" },
-        { cmd: "pbpaste | mdfy publish", desc: "클립보드 내용 퍼블리시" },
-        { cmd: "mdfy pull abc123 -o doc.md", desc: "문서 다운로드" },
-        { cmd: "mdfy list", desc: "퍼블리시한 문서 목록 보기" },
+        { cmd: "memory.wiki publish README.md", desc: "파일을 퍼블리시하고 URL 받기" },
+        { cmd: 'echo "# Hello" | memory.wiki publish', desc: "stdin에서 퍼블리시 (파이프)" },
+        { cmd: "tmux capture-pane -p | memory.wiki publish", desc: "tmux 패인 캡처" },
+        { cmd: "pbpaste | memory.wiki publish", desc: "클립보드 내용 퍼블리시" },
+        { cmd: "memory.wiki pull abc123 -o doc.md", desc: "문서 다운로드" },
+        { cmd: "memory.wiki list", desc: "퍼블리시한 문서 목록 보기" },
       ],
       guideLabel: "Quick Start Guide",
       npmLabel: "View on npm",
@@ -566,7 +566,7 @@ const texts = {
     quicklook: {
       title: "macOS QuickLook",
       subtitle: "Finder에서 .md 파일 미리보기",
-      desc: "Finder에서 아무 .md 파일에 Space를 눌러 아름답게 렌더링된 결과를 보세요 \u2014 GFM 테이블, 구문 강조, 수식, Mermaid 다이어그램. \u201cOpen in mdfy\u201d를 클릭해 데스크톱 앱이나 웹 에디터에서 편집하세요.",
+      desc: "Finder에서 아무 .md 파일에 Space를 눌러 아름답게 렌더링된 결과를 보세요 \u2014 GFM 테이블, 구문 강조, 수식, Mermaid 다이어그램. \u201cOpen in memory.wiki\u201d를 클릭해 데스크톱 앱이나 웹 에디터에서 편집하세요.",
       ctaLabel: "Download QuickLook",
       features: [
         {
@@ -579,7 +579,7 @@ const texts = {
         },
         {
           title: "네이티브 통합",
-          items: ["macOS 다크/라이트 모드 자동 매칭", "\"Open in mdfy\" 버튼 (데스크톱 앱 또는 웹)", "코드 복사 버튼", "미리보기 내 테마 토글"],
+          items: ["macOS 다크/라이트 모드 자동 매칭", "\"Open in memory.wiki\" 버튼 (데스크톱 앱 또는 웹)", "코드 복사 버튼", "미리보기 내 테마 토글"],
         },
         {
           title: "설정 불필요",
@@ -588,12 +588,12 @@ const texts = {
       ],
       installHeading: "설치",
       installSteps: [
-        "mdfy for Mac (위 DMG 링크) 설치 — QuickLook이 함께 들어있음",
+        "memory.wiki for Mac (위 DMG 링크) 설치 — QuickLook이 함께 들어있음",
         "memory.wiki을 한 번 실행 — MdfyQuickLook.app을 ~/Applications에 자동 복사",
-        "시스템 설정 > 일반 > 로그인 항목 및 확장 > Quick Look에서 mdfy를 활성화하세요",
+        "시스템 설정 > 일반 > 로그인 항목 및 확장 > Quick Look에서 memory.wiki를 활성화하세요",
         "Finder에서 아무 .md 파일을 선택하고 Space를 누르세요",
       ],
-      downloadLabel: "mdfy for Mac 받기",
+      downloadLabel: "memory.wiki for Mac 받기",
       downloadSize: "Desktop DMG에 번들",
       includedLabel: "Included with Mac App",
       guideLabel: "Quick Start Guide",
