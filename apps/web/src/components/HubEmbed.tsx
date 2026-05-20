@@ -14,24 +14,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import {
   Layers, Copy, Check, ExternalLink, Globe, Eye, Cloud, Users,
   ShieldAlert, Sparkles, ArrowUpRight, Lightbulb, FileWarning,
-  Network, Clock, FolderClosed, X,
+  Network, Clock, FolderClosed, Atom,
 } from "lucide-react";
 import DocStatusIcon from "@/components/DocStatusIcon";
 import MdfyLogo from "@/components/MdfyLogo";
-import { useAuth } from "@/lib/useAuth";
-import { buildAuthHeaders } from "@/lib/auth-fetch";
-
-// Galaxy is lazy — xyflow + elkjs are heavy. Only loads when the user
-// actually opens the overlay; the standalone /galaxy route still uses
-// its own dynamic import via GalaxyClient.
-const HubGalaxy = dynamic(() => import("@/components/HubGalaxy"), {
-  ssr: false,
-  loading: () => null,
-});
 
 interface DocCard {
   id: string;
@@ -157,6 +146,11 @@ interface HubEmbedProps {
   /** True while a reanalyze pass is in flight; disables the button +
    *  flips the label to "Re-analyzing…". */
   reanalyzing?: boolean;
+  /** Switch to the in-editor Galaxy overlay. When provided, the hero's
+   *  Galaxy CTA fires this instead of opening /galaxy in a new tab —
+   *  so the cosmos lands in the same window the user is reading the
+   *  hub in, matching the Galaxy pill in the editor toolbar. */
+  onOpenGalaxy?: () => void;
 }
 
 // Module-level cache. The hub tab unmounts whenever the user switches
@@ -239,6 +233,7 @@ export default function HubEmbed({
   freshness,
   onReanalyze,
   reanalyzing,
+  onOpenGalaxy,
 }: HubEmbedProps) {
   // Needs Review + Suggestions default to COLLAPSED when auto-
   // management is on — the assumption is mdfy is handling them
@@ -279,21 +274,6 @@ export default function HubEmbed({
   const [suggestions, setSuggestions] = useState<HubSuggestions | null>(null);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
   const [busySuggestionId, setBusySuggestionId] = useState<string | null>(null);
-  // Galaxy overlay — owner-only constellation rendered in-place instead
-  // of forcing a new tab. Esc / backdrop click / explicit X all dismiss.
-  const [galaxyOpen, setGalaxyOpen] = useState(false);
-  const { user, accessToken } = useAuth();
-  useEffect(() => {
-    if (!galaxyOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setGalaxyOpen(false); };
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [galaxyOpen]);
   // Ontology build state — surfaced only to the owner when concept_index
   // is empty. The "Build ontology now" CTA fires the bulk extractor and
   // shows live progress so the user knows the LLM is working.
@@ -584,38 +564,48 @@ export default function HubEmbed({
                     Updated {relativeTime(latest)}
                   </span>
                 )}
-                <div className="inline-flex items-center gap-1">
-                  <button
-                    onClick={() => setGalaxyOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded-l transition-colors hover:bg-[var(--accent-dim)]"
-                    style={{
-                      color: "var(--accent)",
-                      background: "var(--accent-dim)",
-                      border: "1px solid var(--accent-dim)",
-                      letterSpacing: 0.3,
-                    }}
-                    title="Open your hub as a constellation (overlay)"
-                  >
-                    <Network width={11} height={11} />
-                    <span>Galaxy</span>
-                  </button>
-                  <Link
-                    href="/galaxy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-caption font-mono px-1.5 py-1 rounded-r transition-colors hover:bg-[var(--accent-dim)]"
-                    style={{
-                      color: "var(--accent)",
-                      background: "var(--accent-dim)",
-                      border: "1px solid var(--accent-dim)",
-                      textDecoration: "none",
-                    }}
-                    title="Open standalone in a new tab"
-                    aria-label="Open Galaxy in a new tab"
-                  >
-                    <ArrowUpRight width={11} height={11} />
-                  </Link>
-                </div>
+                {(() => {
+                  const galaxyClass = "inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]";
+                  const galaxyStyle = {
+                    color: "var(--accent)",
+                    background: "var(--accent-dim)",
+                    border: "1px solid var(--accent-dim)",
+                    textDecoration: "none",
+                    letterSpacing: 0.3,
+                  } as const;
+                  const galaxyTitle = "Open your hub as a constellation";
+                  // Embedded into the editor → fire the in-window Galaxy
+                  // overlay (same surface the toolbar's Atom pill opens),
+                  // no new tab.
+                  if (onOpenGalaxy) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => onOpenGalaxy()}
+                        className={galaxyClass}
+                        style={galaxyStyle}
+                        title={galaxyTitle}
+                      >
+                        <Atom width={11} height={11} />
+                        <span>Galaxy</span>
+                      </button>
+                    );
+                  }
+                  return (
+                    <Link
+                      href="/galaxy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={galaxyClass}
+                      style={galaxyStyle}
+                      title={galaxyTitle}
+                    >
+                      <Atom width={11} height={11} />
+                      <span>Galaxy</span>
+                      <ArrowUpRight width={11} height={11} />
+                    </Link>
+                  );
+                })()}
               </div>
             );
           })()}
@@ -2019,46 +2009,6 @@ mdfy hub`;
           </div>
         )}
       </div>
-
-      {/* Galaxy overlay — near-fullscreen constellation that lives in
-          this surface instead of a new tab. Backdrop click and Esc
-          dismiss; an explicit X sits at the top-right above the
-          galaxy chrome. HubGalaxy already roots itself at 100vh so
-          the fixed container just needs inset-0. */}
-      {galaxyOpen && (
-        <div
-          className="fixed inset-0 z-50"
-          style={{ background: "rgba(0,0,0,0.78)", backdropFilter: "blur(4px)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setGalaxyOpen(false); }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Galaxy"
-        >
-          <button
-            onClick={() => setGalaxyOpen(false)}
-            className="absolute z-10 p-2 rounded-md transition-colors hover:bg-[var(--toggle-bg)]"
-            style={{
-              top: 16,
-              right: 16,
-              background: "var(--surface)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border)",
-            }}
-            title="Close (Esc)"
-            aria-label="Close galaxy"
-          >
-            <X width={16} height={16} />
-          </button>
-          <HubGalaxy
-            authHeaders={buildAuthHeaders({
-              accessToken,
-              userId: user?.id,
-              userEmail: user?.email,
-            })}
-            userEmail={user?.email ?? null}
-          />
-        </div>
-      )}
     </div>
   );
 }

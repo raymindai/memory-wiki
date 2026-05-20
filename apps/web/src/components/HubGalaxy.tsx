@@ -1284,7 +1284,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
       <div data-theme="dark" style={{ ...cosmosWrap, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <GalaxyKeyframes />
         <span className="text-caption font-mono uppercase" style={{ letterSpacing: 1.5, color: "var(--text-muted)" }}>
-          Locating galaxy…
+          Locating your galaxy…
         </span>
       </div>
     );

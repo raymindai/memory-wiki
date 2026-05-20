@@ -14342,6 +14342,19 @@ ${clone.innerHTML}
                     freshness={hubFreshness}
                     onReanalyze={handleHubReanalyze}
                     reanalyzing={hubReanalyzing}
+                    onOpenGalaxy={() => {
+                      // Same recipe as the Atom pill in the toolbar:
+                      // hand the canvas the full editor slot and open
+                      // the embedded Galaxy overlay.
+                      setShowOnboarding(false);
+                      setShowSettings(false);
+                      setShowHub(false);
+                      setShowSidebar(false);
+                      setShowAIPanel(false);
+                      setShowImagePanel(false);
+                      setShowOutlinePanel(false);
+                      setShowGalaxy(true);
+                    }}
                   />
                 </div>
               </div>
