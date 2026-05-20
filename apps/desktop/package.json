@@ -72,9 +72,7 @@
       ],
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "notarize": {
-        "teamId": "W7NL89YGSD"
-      }
+      "notarize": true
     },
     "mas": {
       "entitlements": "build/entitlements.mas.plist",
