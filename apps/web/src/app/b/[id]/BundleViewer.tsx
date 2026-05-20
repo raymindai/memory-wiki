@@ -472,6 +472,13 @@ export default function BundleViewer({
   // Compact pill style every action button shares — matches the doc viewer.
   const actionBtn = "h-7 px-2.5 rounded-md text-caption font-medium flex items-center gap-1.5 transition-colors";
 
+  // 2-3 sentence digest of the bundle, surfaced inline so a visitor can
+  // grasp what the bundle is about before deciding to engage with the
+  // canvas. Falls back to a short placeholder while analysis is running;
+  // hidden entirely on bundles with fewer than 2 docs (no graph_data).
+  const summaryText = aiGraph?.summary?.trim();
+  const showSummaryBand = documents.length >= 2 && (summaryText || isAnalyzing);
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
       <ViewerHeader
@@ -520,11 +527,46 @@ export default function BundleViewer({
         }
       />
 
-      {/* Canvas + Document Reader split. Height locks to one viewport
-          minus the header so the canvas always opens fully visible;
-          scrolling the page reveals the promo strip and shared footer
-          underneath, matching the doc/hub viewer chrome. */}
-      <div className="flex shrink-0" style={{ height: "calc(100vh - 53px)" }}>
+      {/* Summary band — surfaces the bundle's executive summary (from
+          graph_data) under the header so visitors see the gist before
+          touching the canvas. Two-line clamp keeps the band a fixed
+          predictable height across bundles. */}
+      {showSummaryBand && (
+        <div
+          className="shrink-0 flex items-center px-6"
+          style={{
+            height: "4.5rem",
+            borderBottom: "1px solid var(--border-dim)",
+            background: "var(--surface)",
+          }}
+        >
+          {summaryText ? (
+            <p
+              className="text-sm leading-relaxed mx-auto w-full"
+              style={{
+                color: "var(--text-secondary)",
+                maxWidth: "72rem",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {summaryText}
+            </p>
+          ) : (
+            <p className="text-sm mx-auto w-full" style={{ color: "var(--text-faint)", maxWidth: "72rem" }}>
+              Analyzing this bundle…
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Canvas + Document Reader split. The chrome (header + summary +
+          this split) is locked to one viewport so the canvas always
+          opens fully visible; scrolling the page reveals the promo
+          strip and shared footer underneath, matching the doc viewer. */}
+      <div className="flex shrink-0" style={{ height: showSummaryBand ? "calc(100vh - 53px - 4.5rem)" : "calc(100vh - 53px)" }}>
         {/* Canvas */}
         <div className="relative" style={{ flex: 1, height: "100%", borderRight: selectedDocId ? "1px solid var(--border)" : "none" }}>
           {documents.length > 0 ? (
