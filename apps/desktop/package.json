@@ -1,6 +1,6 @@
 {
   "name": "memory-wiki-desktop",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Memory.Wiki for Mac — Markdown publishing with sidebar, sync, and local rendering",
   "main": "main.js",
   "scripts": {

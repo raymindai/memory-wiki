@@ -1484,7 +1484,12 @@ body {
   cursor: pointer;
 }
 .sidebar-logo img {
-  height: 18px;
+  /* Memory.Wiki wordmark viewBox is 135.5×20.81 (wider aspect than
+     the prior mdfy.app at 119.33×26.53). At the old 18px height the
+     wordmark renders ~117px wide and pushes the action icons off
+     the right side of the sidebar header. 12px brings the rendered
+     width back to ~78px — same footprint as mdfy.app at 18px. */
+  height: 12px;
   width: auto;
   opacity: 0.8;
   transition: opacity 0.15s;

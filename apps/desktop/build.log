@@ -1,0 +1,16 @@
+
+> memory-wiki-desktop@2.3.3 build:dmg
+> electron-builder --mac dmg
+
+  • electron-builder  version=25.1.8 os=25.4.0
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=/Users/hyunsangcho/Desktop/Projects/mdcore/apps/desktop/package.json
+  • executing @electron/rebuild  electronVersion=33.4.11 arch=arm64 buildFromSource=false appDir=./
+  • installing native dependencies  arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=33.4.11 appOutDir=dist/mac-arm64
+  • signing         file=dist/mac-arm64/Memory.Wiki.app platform=darwin type=distribution identity=F3DF6441709EA64FB93A718F3347ECDDAA08AE42 provisioningProfile=none
+  • notarization successful
+  • building        target=DMG arch=arm64 file=dist/Memory.Wiki-2.3.3-arm64.dmg
+  • Detected arm64 process, HFS+ is unavailable. Creating dmg with APFS - supports Mac OSX 10.12+
+  • building block map  blockMapFile=dist/Memory.Wiki-2.3.3-arm64.dmg.blockmap
