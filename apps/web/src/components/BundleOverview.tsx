@@ -16,7 +16,7 @@
 //   - Suggestions (TODO once we have a /api/bundles/[id]/suggestions surface)
 
 import { useEffect, useState, useMemo } from "react";
-import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, Network, ArrowUpRight } from "lucide-react";
+import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, Network, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 
 interface BundleDoc {
   id: string;
@@ -236,10 +236,15 @@ export default function BundleOverview({
                 {isLong && (
                   <button
                     onClick={() => setSummaryExpanded((v) => !v)}
-                    className="mt-1.5 mx-auto block text-caption font-medium rounded transition-colors hover:bg-[var(--toggle-bg)] px-2 py-0.5"
-                    style={{ color: "var(--text-faint)" }}
+                    className="mt-2.5 mx-auto flex w-fit items-center gap-1 text-caption font-medium rounded-md transition-colors hover:bg-[var(--toggle-bg)] px-2.5 py-1"
+                    style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
                   >
-                    {summaryExpanded ? "Less" : "More"}
+                    {summaryExpanded ? (
+                      <ChevronUp width={12} height={12} />
+                    ) : (
+                      <ChevronDown width={12} height={12} />
+                    )}
+                    <span>{summaryExpanded ? "Less" : "More"}</span>
                   </button>
                 )}
               </div>
