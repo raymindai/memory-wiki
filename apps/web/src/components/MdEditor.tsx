@@ -10050,6 +10050,10 @@ ${clone.innerHTML}
                               }).catch(() => {});
                             }
                             if (!n.documentId) return;
+                            // Notification clicks should also leave the
+                            // Start surface (we're navigating into a doc).
+                            setShowOnboarding(false);
+                            try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
                             // Check if already open as a tab
                             const existing = tabs.find(t => !t.deleted && t.cloudId === n.documentId);
                             if (existing) {
@@ -10079,7 +10083,19 @@ ${clone.innerHTML}
                                 const saved = prev.map(t => t.id !== activeTabIdRef.current || t.readonly ? t : { ...t, markdown: markdownRef.current });
                                 return [...saved, newTab];
                               });
+                              // Activate the new tab — same bug as the
+                              // Shared-with-me click handler: adding to
+                              // tabs without setActiveTabId left the canvas
+                              // showing the previous selection.
+                              activeTabIdRef.current = newTab.id;
+                              setActiveTabId(newTab.id);
                               loadTab(newTab);
+                              setDocId(n.documentId);
+                              setDocEditMode(d.editMode || "token");
+                              setIsOwner(perm === "mine");
+                              setIsSharedDoc(perm !== "mine");
+                              setIsEditor(perm === "editable");
+                              setTitle(d.title || n.documentTitle || "Untitled");
                             } catch {
                               window.location.href = `/?from=${n.documentId}`;
                             }
@@ -11886,6 +11902,11 @@ ${clone.innerHTML}
                           style={{ color: "var(--text-secondary)" }}
                           onClick={async (e) => {
                             e.stopPropagation();
+                            // Clicking a Shared-with-me entry should always
+                            // leave the Start surface — even if the doc is
+                            // already open, we're trying to view it now.
+                            setShowOnboarding(false);
+                            try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
                             const existing = tabs.find(t => !t.deleted && t.cloudId === doc.id);
                             if (existing) { switchTab(existing.id); return; }
                             try {
@@ -11915,11 +11936,21 @@ ${clone.innerHTML}
                                 const saved = prev.map(t => t.id !== activeTabIdRef.current || t.readonly ? t : { ...t, markdown: markdownRef.current });
                                 return [...saved, newTab];
                               });
+                              // Activate the new tab BEFORE loading. Without
+                              // these two lines, the first click only added
+                              // the tab to state but left activeTabId on the
+                              // previous selection — so the editor canvas
+                              // kept rendering the old doc and the user had
+                              // to click a second time (which hit the
+                              // "existing" branch and switched correctly).
+                              activeTabIdRef.current = newTab.id;
+                              setActiveTabId(newTab.id);
                               loadTab(newTab);
                               setDocId(doc.id);
                               setDocEditMode(d.editMode || "token");
-                              setIsOwner(false);
-                              setIsSharedDoc(true);
+                              setIsOwner(perm === "mine");
+                              setIsSharedDoc(perm !== "mine");
+                              setIsEditor(perm === "editable");
                               setTitle(d.title || "Untitled");
                             } catch { window.location.href = `/?from=${doc.id}`; }
                           }}
