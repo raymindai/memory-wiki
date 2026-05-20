@@ -158,7 +158,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           <InstallSteps steps={t.chrome.installSteps} />
           <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
             <a
-              href="/downloads/mw-chrome-extension-v2.2.0.zip"
+              href="/downloads/mw-chrome-extension-v2.2.2.zip"
               download
               style={{
                 display: "inline-flex",
@@ -191,7 +191,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             {t.chrome.ctaLabel}
           </a>
           <a
-            href="/downloads/mw-chrome-extension-v2.2.0.zip"
+            href="/downloads/mw-chrome-extension-v2.2.2.zip"
             download
             style={{
               display: "inline-flex", alignItems: "center", gap: 8,
