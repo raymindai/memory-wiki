@@ -74,7 +74,7 @@ export default function Home() {
     <>
       <noscript>
         <div style={{ padding: "60px 24px", maxWidth: 800, margin: "0 auto", fontFamily: "system-ui, sans-serif", color: "#fafafa", background: "#09090b" }}>
-          <h1>Memory.Wiki — Your Markdown, Beautifully Published</h1>
+          <h1>Memory.Wiki — Your AI memory, deployable to any AI</h1>
           <p>Create, edit, and share beautiful documents instantly. WYSIWYG Markdown editor with AI conversation capture, cross-platform sync, and a developer-friendly API. No login required — paste or type, get a permanent URL in seconds.</p>
           <h2>Features</h2>
           <ul>

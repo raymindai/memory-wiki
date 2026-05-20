@@ -47,7 +47,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       readingTime: "12 min read",
       title: "Why I\u2019m building Memory.Wiki",
       intro: [
-        "I built Memory.Wiki in one month while doing other work. Now I\u2019m going full-time.",
+        "I started Memory.Wiki as a side project in early 2026. I went full-time on it in April. Six months in, it\u2019s a memory layer that any AI can read \u2014 not just a publishing tool.",
         "This is why.",
       ],
 
@@ -82,7 +82,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
           heading: "What Memory.Wiki is today",
           paragraphs: [
             "If you visited Memory.Wiki right now, you\u2019d see what looks like a markdown publishing tool \u2014 and it is.",
-            'You can capture markdown from anywhere: ChatGPT, Claude, Gemini (via Chrome extension), GitHub repos, Notion pages, Obsidian vaults, any web URL, your terminal (<code class="manifesto-code">cat README.md | Memory.Wiki</code>), VS Code, your Mac clipboard. You can edit it in a beautiful WYSIWYG editor \u2014 no syntax friction, no install required. You can share it with a permanent URL that anyone can read in the browser, that any AI can fetch as context.',
+            'You can capture markdown from anywhere: ChatGPT, Claude, Gemini (via Chrome extension), GitHub repos, Notion pages, Obsidian vaults, any web URL, your terminal (<code class="manifesto-code">cat README.md | mw publish</code>), VS Code, your Mac clipboard. You can edit it in a beautiful WYSIWYG editor \u2014 no syntax friction, no install required. You can share it with a permanent URL that anyone can read in the browser, that any AI can fetch as context.',
             "It\u2019s a publishing tool. It works. People can use it today.",
             "And it\u2019s grown past the publishing layer. Every saved doc folds into a personal hub that auto-publishes a wiki manifest (index.md, SCHEMA.md, log.md), maintains a concept index across your library, and exposes a recall API any AI can query. The role-split is the load-bearing idea: you set the direction, Memory.Wiki structures the URL, any AI reads it.",
             "Shipped so far:",
@@ -164,40 +164,41 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
 
       whyNowHeading: "Why now",
       whyNow: [
-        "For the past two years, the industry has been building closed AI memory systems \u2014 OpenAI Memory inside ChatGPT, Google\u2019s Memory Bank inside Gemini. Each one is trying to own your memory inside their walls.",
-        "In another two years, either the closed systems will have won, or an open standard will have emerged. I\u2019m betting on the second outcome. I\u2019m betting that markdown URLs become the open standard for AI memory the way HTTP became the open standard for documents.",
+        "Through 2024 and 2025 the industry shipped closed AI memory \u2014 OpenAI Memory inside ChatGPT, Google\u2019s Memory Bank inside Gemini, Anthropic\u2019s context window inside Claude. Each one is trying to own your memory inside its own walls.",
+        "Cross-AI memory is structurally impossible for any of them to build. OpenAI won\u2019t ship a memory layer that serves Claude. Anthropic won\u2019t ship one that serves ChatGPT. It has to come from outside.",
+        "By 2027 either the closed systems will have entrenched, or an open standard will have taken hold. I\u2019m betting on the second outcome. I\u2019m betting that markdown URLs become to AI memory what HTTP became to documents.",
         "Memory.Wiki exists to make that outcome more likely.",
       ],
 
       roadmapHeading: "The roadmap",
       roadmap: [
         {
-          phase: "Phase 1 \u2014 now",
+          phase: "Phase 1 \u2014 shipped",
           badge: "live",
           badgeLabel: "LIVE",
           items:
-            "Markdown publishing tool. Capture from any AI, edit in WYSIWYG, share with permanent URLs. Free during beta.",
+            "Document / Bundle / Hub URLs, multi-surface capture (Web, Chrome, VS Code, Desktop, CLI, MCP), AI-built concept index, WYSIWYG editor, free during beta.",
         },
         {
-          phase: "Phase 2 \u2014 next 8 weeks",
+          phase: "Phase 2 \u2014 v7 launch (summer 2026)",
           badge: "coming-soon",
           badgeLabel: "COMING SOON",
           items:
-            "Memory Bundle, Semantic Search, Bundle Versioning. The transition from publishing tool to memory layer.",
+            "iOS Share Sheet, AI-generated bundles, embedded chat with hub context, Bundle Spec v1.0 RFC. The cross-AI delivery thesis goes public.",
         },
         {
           phase: "Phase 3 \u2014 Year 1",
           badge: "vision",
           badgeLabel: "VISION",
           items:
-            "MCP write access for AI agents. Team workspaces. Open Bundle Spec v1.0.",
+            "First LLM-platform partnership. Public hub sharing + following feed. Voice capture from mobile. Team workspaces.",
         },
         {
           phase: "Phase 4 \u2014 Year 2-3",
           badge: "vision",
           badgeLabel: "VISION",
           items:
-            "Bundle marketplace. Enterprise self-host. Standard-setting consortium.",
+            "Bundle marketplace. Enterprise self-host. Standard-setting consortium around the URL-as-API primitive.",
         },
       ],
 
@@ -243,7 +244,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       readingTime: "12\uBD84",
       title: "\uB0B4\uAC00 Memory.Wiki\uB97C \uB9CC\uB4DC\uB294 \uC774\uC720",
       intro: [
-        "\uB2E4\uB978 \uC77C\uC744 \uD558\uBA74\uC11C \uD55C \uB2EC \uB9CC\uC5D0 Memory.Wiki\uB97C \uB9CC\uB4E4\uC5C8\uC2B5\uB2C8\uB2E4. \uC774\uC81C \uD480\uD0C0\uC784\uC73C\uB85C \uC804\uD658\uD569\uB2C8\uB2E4.",
+        "2026\uB144 \uCD08 \uC0AC\uC774\uB4DC\uD504\uB85C\uC81D\uD2B8\uB85C Memory.Wiki\uB97C \uC2DC\uC791\uD588\uC2B5\uB2C8\uB2E4. 4\uC6D4\uC5D0 \uD480\uD0C0\uC784\uC73C\uB85C \uC804\uD658\uD588\uACE0, 6\uAC1C\uC6D4 \uCC28 \u2014 \uC774\uC81C \uB2E8\uC21C \uD37C\uBE14\uB9AC\uC2F1 \uB3C4\uAD6C\uAC00 \uC544\uB2C8\uB77C \uC5B4\uB5A4 AI\uB4E0 \uC77D\uC744 \uC218 \uC788\uB294 memory layer\uAC00 \uB410\uC2B5\uB2C8\uB2E4.",
         "\uC774\uAC8C \uADF8 \uC774\uC720\uC785\uB2C8\uB2E4.",
       ],
 
@@ -329,39 +330,41 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
       ],
       beliefsHeading: "\uC77C\uACF1 \uAC00\uC9C0 belief",
 
-      whyNowHeading: "\uC99D \uC9C0\uAE08\uC778\uAC00",
+      whyNowHeading: "\uC65C \uC9C0\uAE08\uC778\uAC00",
       whyNow: [
-        "AI \uCC44\uD305\uC774 \uD3ED\uBC1C\uC801\uC73C\uB85C \uB298\uC5B4\uB098\uB294 \uC9C0\uAE08, \uADF8 \uCD9C\uB825\uBB3C\uC744 \uAD00\uB9AC\uD558\uB294 \uB808\uC774\uC5B4\uB294 \uC544\uC9C1 \uC5C6\uC2B5\uB2C8\uB2E4. Notion\uC740 \uBB34\uAC81\uACE0, Google Docs\uB294 \uB9C8\uD06C\uB2E4\uC6B4\uC744 \uBAA8\uB974\uACE0, GitHub Gist\uB294 \uAC1C\uBC1C\uC790 \uC804\uC6A9\uC785\uB2C8\uB2E4.",
-        "\uC9C0\uAE08\uC774 \uC544\uB2C8\uBA74 \uC774 \uC790\uB9AC\uB294 \uB2E4\uB978 \uB204\uAD70\uAC00\uAC00 \uCC28\uC9C0\uD569\uB2C8\uB2E4. \uC9C0\uAE08\uC774 \uC815\uD655\uD788 \uB9DE\uB294 \uD0C0\uC774\uBC0D\uC785\uB2C8\uB2E4.",
+        "2024~2025\uB144, \uC5C5\uACC4\uB294 \uB2EB\uD78C AI \uBA54\uBAA8\uB9AC\uB97C \uCD9C\uC2DC\uD588\uC2B5\uB2C8\uB2E4 \u2014 ChatGPT \uC548\uC758 OpenAI Memory, Gemini \uC548\uC758 Google Memory Bank, Claude\uC758 \uCEE8\uD14D\uC2A4\uD2B8 \uC708\uB3C4\uC6B0. \uAC01\uC790 \uC790\uAE30 \uBCBD \uC548\uC5D0\uC11C \uB2F9\uC2E0\uC758 \uBA54\uBAA8\uB9AC\uB97C \uCC28\uC9C0\uD558\uB824 \uD569\uB2C8\uB2E4.",
+        "Cross-AI \uBA54\uBAA8\uB9AC\uB294 \uC5B4\uB290 \uD55C \uD68C\uC0AC\uAC00 \uAD6C\uC870\uC801\uC73C\uB85C \uB9CC\uB4E4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. OpenAI\uB294 Claude\uB97C \uC704\uD55C memory layer\uB97C \uCD9C\uC2DC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4. Anthropic\uC740 ChatGPT\uB97C \uC704\uD55C \uAC78 \uCD9C\uC2DC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4. \uC678\uBD80\uC5D0\uC11C \uC640\uC57C \uD569\uB2C8\uB2E4.",
+        "2027\uB144\uC774\uBA74 \uB2EB\uD78C \uC2DC\uC2A4\uD15C\uC774 \uAD73\uAC70\uB098, \uC5F4\uB9B0 \uD45C\uC900\uC774 \uC790\uB9AC\uB97C \uC7A1\uAC70\uB098 \uB458 \uC911 \uD558\uB098\uC785\uB2C8\uB2E4. \uC800\uB294 \uD6C4\uC790\uC5D0 \uBCA0\uD305\uD569\uB2C8\uB2E4. HTTP\uAC00 \uBB38\uC11C\uC758 \uC5F4\uB9B0 \uD45C\uC900\uC774 \uB41C \uAC83\uCC98\uB7FC, \uB9C8\uD06C\uB2E4\uC6B4 URL\uC774 AI \uBA54\uBAA8\uB9AC\uC758 \uC5F4\uB9B0 \uD45C\uC900\uC774 \uB41C\uB2E4\uB294 \uBCA0\uD305.",
+        "Memory.Wiki\uB294 \uADF8 \uACB0\uACFC\uB97C \uB354 \uAC00\uB2A5\uD558\uAC8C \uB9CC\uB4E4\uAE30 \uC704\uD574 \uC874\uC7AC\uD569\uB2C8\uB2E4.",
       ],
 
-      whyMdfyHeading: "\uC99D Memory.Wiki\uC778\uAC00",
+      whyMdfyHeading: "\uC65C Memory.Wiki\uC778\uAC00",
       whyMdfy: [
-        "Memory.Wiki\uB294 \u201Cmodify\u201D\uC5D0\uC11C \uC654\uC2B5\uB2C8\uB2E4. \uB9C8\uD06C\uB2E4\uC6B4\uC744 \uC218\uC815\uD558\uACE0(modify), \uC544\uB984\uB2F5\uAC8C \uB9CC\uB4E4\uACE0(beautify), \uD37C\uBE14\uB9AC\uC2DC\uD558\uB294(publish) \uB3C4\uAD6C. md + fy = \uB9C8\uD06C\uB2E4\uC6B4\uC744 ~\uD558\uAC8C \uB9CC\uB4E4\uB2E4.",
+        "Memory.Wiki\uB294 \uB450 \uAC00\uC9C0\uB97C \uACB0\uD569\uD569\uB2C8\uB2E4 \u2014 \"Memory\"\uB294 \uB2F9\uC2E0\uC774 \uBCF4\uC874\uD558\uACE0 \uC2F6\uC740 \uC0AC\uACE0, \".Wiki\"\uB294 \uADF8 \uC0AC\uACE0\uAC00 \uC0B4\uC544\uAC08 \uD615\uD0DC(\uC5F0\uACB0\uB41C \uBB38\uC11C \uADF8\uB798\uD504). \uBAA8\uB4E0 URL\uC740 \uC5B4\uB5A4 AI\uB4E0 \uAC00\uC838\uAC08 \uC218 \uC788\uB294 markdown\uC73C\uB85C \uC751\uB2F5\uD569\uB2C8\uB2E4.",
       ],
 
       roadmapHeading: "\uB85C\uB4DC\uB9F5",
       roadmap: [
         {
-          phase: "Phase 1 (\uD604\uC7AC)",
+          phase: "Phase 1 \u2014 \uCD9C\uC2DC\uB428",
           badge: "live",
           badgeLabel: "LIVE",
           items:
-            "\uB2E8\uC77C markdown-it \uD30C\uC774\uD504\uB77C\uC778, WYSIWYG, \uC601\uAD6C URL, Chrome/VS Code/Mac \uC571, AI \uCEA1\uCC98",
+            "Document / Bundle / Hub URL, multi-surface capture (Web, Chrome, VS Code, Desktop, CLI, MCP), AI \uCEE8\uC149 \uC778\uB371\uC2A4, WYSIWYG \uC5D0\uB514\uD130. \uBCA0\uD0C0 \uAE30\uAC04 \uBB34\uB8CC.",
         },
         {
-          phase: "Phase 2 (Q2 2026)",
+          phase: "Phase 2 \u2014 v7 \uB7F0\uCE58 (2026\uB144 \uC5EC\uB984)",
           badge: "coming-soon",
           badgeLabel: "COMING SOON",
           items:
-            "Bundle as context, MCP & API, Pro \uD50C\uB79C, \uCEE4\uC2A4\uD140 \uB3C4\uBA54\uC778, \uC870\uD68C \uBD84\uC11D",
+            "iOS Share Sheet, AI \uC790\uB3D9 \uBC88\uB4E4 \uC0DD\uC131, Hub \uCEE8\uD14D\uC2A4\uD2B8\uAC00 \uB4E4\uC5B4\uAC04 embedded chat, Bundle Spec v1.0 RFC. Cross-AI delivery \uD14C\uC81C\uAC00 \uACF5\uC2DD\uC801\uC73C\uB85C \uB370\uBDD4\uD569\uB2C8\uB2E4.",
         },
         {
-          phase: "Phase 3+",
+          phase: "Phase 3 \u2014 Year 1",
           badge: "vision",
           badgeLabel: "VISION",
           items:
-            "Hub recall + reranker \uC77C\uBC18\uD654, mditor Writer, \uB354 \uB9CE\uC740 import surfaces, AI \uD611\uC5C5 \uB3C4\uAD6C",
+            "\uCCAB LLM \uD50C\uB7AB\uD3FC \uD30C\uD2B8\uB108\uC2ED. \uACF5\uAC1C Hub sharing + following feed. \uBAA8\uBC14\uC77C voice capture. Team workspaces.",
         },
       ],
 

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const mono =
   "var(--font-geist-mono), 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace";
@@ -245,6 +246,7 @@ export function DocsNav({ active = "docs", lang = "en" }: { active?: "about" | "
           </a>
         </div>
         <div className="site-nav-right">
+          <ThemeToggle />
           <details className="lang-dropdown">
             <summary className="lang-dropdown-toggle">
               {lang === "en" ? "EN" : "KO"}
@@ -392,7 +394,7 @@ export function SiteFooter({ lang = "en" }: { lang?: "en" | "ko" } = {}) {
         privacy: "개인정보 처리방침",
       }
     : {
-        tagline: "Your Markdown, Beautifully Published.",
+        tagline: "Your AI memory, deployable to any AI.",
         product: "Product",
         developers: "Developers",
         company: "Company",

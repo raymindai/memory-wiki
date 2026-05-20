@@ -14109,8 +14109,11 @@ ${clone.innerHTML}
               </div>
             </div>
             {/* WYSIWYG Formatting Toolbar */}
-            {/* Formatting toolbar — LIVE view only */}
-            {showToolbar && canEdit && !editorPlaceholder && (
+            {/* Formatting toolbar — LIVE view only. Hidden while any
+                full-surface overlay (Galaxy / Hub / Start / Settings)
+                is showing so the cosmos / hub view owns the whole
+                content slot, not a doc-specific bar floating on top. */}
+            {showToolbar && canEdit && !editorPlaceholder && !showGalaxy && !showHub && !showOnboarding && !showSettings && (
               <WysiwygToolbar
                 onInsert={handleInsertBlock}
                 onInsertTable={handleInsertTable}
