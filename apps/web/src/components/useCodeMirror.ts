@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback } from "react";
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, keymap, placeholder as cmPlaceholder, drawSelection } from "@codemirror/view";
+import { remoteCursorsExtension, applyRemoteCursors, type RemoteCursorMark } from "./cm-remote-cursors";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 // language-data removed — dynamic chunk loading fails in Next.js
 import { defaultKeymap, indentWithTab } from "@codemirror/commands";
@@ -104,7 +105,7 @@ const lightColorTheme = EditorView.theme({
 export interface UseCodeMirrorOptions {
   initialDoc: string;
   onChange: (value: string) => void;
-  onCursorActivity?: (line: number) => void;
+  onCursorActivity?: (line: number, col: number) => void;
   onPaste?: (text: string, html: string) => string | null;
   onPasteImage?: (file: File, cursorOffset: number) => void;
   theme: "dark" | "light";
@@ -123,6 +124,9 @@ export interface UseCodeMirrorReturn {
   refresh: () => void;
   wrapSelection: (prefix: string, suffix?: string) => void;
   insertAtCursor: (text: string) => void;
+  /** Update remote-collaborator cursor decorations. Called from
+   *  the React side whenever useCursorPresence emits a new list. */
+  setRemoteCursors: (cursors: RemoteCursorMark[]) => void;
 }
 
 export function useCodeMirror({
@@ -167,6 +171,7 @@ export function useCodeMirror({
         highlightSelectionMatches(),
         EditorView.lineWrapping,
         cmPlaceholder(placeholder || ""),
+        remoteCursorsExtension(),
         keymap.of([
           ...defaultKeymap,
           ...searchKeymap,
@@ -178,8 +183,11 @@ export function useCodeMirror({
           }
           // Fire cursor activity on selection changes (not during external updates)
           if (update.selectionSet && !isExternalUpdate.current && onCursorRef.current) {
-            const line = update.state.doc.lineAt(update.state.selection.main.head).number;
-            onCursorRef.current(line);
+            const head = update.state.selection.main.head;
+            const lineInfo = update.state.doc.lineAt(head);
+            const lineNumber = lineInfo.number;
+            const col = head - lineInfo.from;
+            onCursorRef.current(lineNumber, col);
           }
         }),
         // Paste handler
@@ -254,9 +262,48 @@ export function useCodeMirror({
     if (!view) return;
     const currentDoc = view.state.doc.toString();
     if (currentDoc === text) return; // no-op if same
+    // Cursor preservation across remote / Tiptap-driven doc swaps.
+    // Replacing the entire doc with a single change collapses the
+    // selection to position 0 — which means a user editing in the
+    // Source pane while their collaborator (or the Live tab) types
+    // sees their caret yanked to the top on every remote keystroke.
+    //
+    // Strategy: try to anchor the caret to a stable point in the
+    // text. Compare current vs new, find the longest common prefix
+    // and suffix; the cursor maps cleanly into the unchanged region
+    // when it sits inside one of them. Otherwise we keep the cursor
+    // offset but clamp to the new doc length so it can't land past
+    // the end. The single `selection` field on dispatch tells CM6
+    // exactly where to place the caret post-update.
+    const prevSelMain = view.state.selection.main;
+    const prevAnchor = prevSelMain.anchor;
+    const prevHead = prevSelMain.head;
+    const prevLen = currentDoc.length;
+
+    // Common prefix
+    let prefixLen = 0;
+    const minLen = Math.min(prevLen, text.length);
+    while (prefixLen < minLen && currentDoc[prefixLen] === text[prefixLen]) prefixLen++;
+    // Common suffix (non-overlapping with prefix)
+    let suffixLen = 0;
+    const maxSuf = Math.min(prevLen - prefixLen, text.length - prefixLen);
+    while (suffixLen < maxSuf && currentDoc[prevLen - 1 - suffixLen] === text[text.length - 1 - suffixLen]) suffixLen++;
+
+    const remapOffset = (offset: number): number => {
+      if (offset <= prefixLen) return offset;
+      const distanceFromEnd = prevLen - offset;
+      if (distanceFromEnd <= suffixLen) return text.length - distanceFromEnd;
+      // Inside the changed middle — clamp to the new middle's boundary
+      // so the caret lands at the end of the edit instead of position 0.
+      return Math.min(text.length - suffixLen, Math.max(prefixLen, offset));
+    };
+
+    const newAnchor = remapOffset(prevAnchor);
+    const newHead = remapOffset(prevHead);
     isExternalUpdate.current = true;
     view.dispatch({
-      changes: { from: 0, to: currentDoc.length, insert: text },
+      changes: { from: 0, to: prevLen, insert: text },
+      selection: { anchor: newAnchor, head: newHead },
     });
     isExternalUpdate.current = false;
   }, []);
@@ -321,6 +368,10 @@ export function useCodeMirror({
     view.focus();
   }, []);
 
+  const setRemoteCursors = useCallback((cursors: RemoteCursorMark[]) => {
+    applyRemoteCursors(viewRef.current, cursors);
+  }, []);
+
   return {
     containerRef,
     view: viewRef.current,
@@ -333,5 +384,6 @@ export function useCodeMirror({
     refresh,
     wrapSelection,
     insertAtCursor,
+    setRemoteCursors,
   };
 }

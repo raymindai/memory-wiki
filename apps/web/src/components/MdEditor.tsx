@@ -5,6 +5,8 @@ import { flushSync, createPortal } from "react-dom";
 // Aliased because lucide-react also exports a `Link` icon used
 // elsewhere in this file. NextLink is the routing component.
 import NextLink from "next/link";
+import { userColor } from "@/lib/user-color";
+import { useCursorPresence } from "@/lib/useCursorPresence";
 import { render } from "@/lib/render";
 import katex from "katex";
 import { htmlToMarkdown, isHtmlContent } from "@/lib/html-to-md";
@@ -4800,16 +4802,33 @@ export default function MdEditor() {
     refresh: cmRefresh,
     wrapSelection: cmWrapSelection,
     insertAtCursor: cmInsertAtCursor,
+    setRemoteCursors: cmSetRemoteCursors,
   } = useCodeMirror({
     initialDoc: markdown,
     onChange: (value: string) => handleChangeRef.current(value),
-    onCursorActivity: (line: number) => onCursorActivityRef.current?.(line),
+    onCursorActivity: (line: number, col: number) => onCursorActivityRef.current?.(line, col),
     onPaste: handlePasteForCM,
     onPasteImage: handlePasteImageForCM,
     theme,
     placeholder: "Paste any Markdown here — GFM, Obsidian, MDX, Pandoc, anything...",
   });
   cmSetDocRef.current = cmSetDoc;
+  // Remote-cursor wiring. broadcastCursor is called from CM6's
+  // selection-change listener and from Tiptap focus events;
+  // remoteCursors flows back into CM6 via cmSetRemoteCursors so
+  // the visible bars track other collaborators in real time.
+  const { remoteCursors, broadcastCursor } = useCursorPresence(docId, presenceUser);
+  useEffect(() => {
+    cmSetRemoteCursors(remoteCursors.map((c) => ({
+      userId: c.userId,
+      line: c.line,
+      col: c.col,
+      name: c.name,
+      color: c.color,
+    })));
+  }, [remoteCursors, cmSetRemoteCursors]);
+  const broadcastCursorRef = useRef(broadcastCursor);
+  broadcastCursorRef.current = broadcastCursor;
 
   // Source → Preview sync: highlight corresponding preview element when cursor moves in CM
   const prevHighlightRef = useRef<HTMLElement | null>(null);
@@ -4826,11 +4845,16 @@ export default function MdEditor() {
   }, []);
 
   const lastCursorPosRef = useRef(0);
-  const onCursorActivityRef = useRef<((line: number) => void) | null>(null);
-  onCursorActivityRef.current = (line: number) => {
+  const onCursorActivityRef = useRef<((line: number, col: number) => void) | null>(null);
+  onCursorActivityRef.current = (line: number, col: number) => {
     // Save cursor position for image insert etc.
     const pos = cmGetCursorPos();
     if (pos > 0) lastCursorPosRef.current = pos;
+    // Broadcast for remote-cursor presence — useCursorPresence
+    // throttles internally so we don't need to debounce here. Line
+    // arrives 1-indexed from CM6; the broadcast schema uses
+    // 0-indexed for portability across editors.
+    broadcastCursorRef.current?.(line - 1, col);
     // Debounce to avoid scroll jank during selection drag
     if (cursorSyncTimer.current) clearTimeout(cursorSyncTimer.current);
     cursorSyncTimer.current = setTimeout(() => {
@@ -9915,24 +9939,31 @@ ${clone.innerHTML}
           {/* Bundle Chat button removed — unified into the right-side Assistant
               panel (activated via the AI button). */}
 
-          {/* Presence indicators — other editors on this document (docs only) */}
+          {/* Presence indicators — other editors on this document (docs only).
+              Each avatar wears its owner's stable user color as an
+              outer ring so collaborators are recognizable across
+              both avatars and (eventually) remote cursors. The same
+              color comes from lib/user-color so the OAuth-photo
+              avatars and fallback letter circles share identity. */}
           {activeTab?.kind !== "bundle" && otherEditors.length > 0 && (
             <div className="flex items-center -space-x-1.5 mr-1">
-              {otherEditors.slice(0, 5).map((editor) => (
+              {otherEditors.slice(0, 5).map((editor) => {
+                const color = userColor(editor.userId);
+                return (
                 <div key={editor.userId} className="relative group/presence">
                   {editor.avatarUrl ? (
                     <img
                       src={editor.avatarUrl}
                       alt={editor.displayName || editor.email}
                       className="w-5 h-5 rounded-full shrink-0 object-cover"
-                      style={{ outline: "2px solid var(--background)" }}
+                      style={{ outline: `2px solid ${color}`, outlineOffset: "-1px", boxShadow: "0 0 0 1px var(--background)" }}
                       title={editor.displayName || editor.email}
                       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }}
                     />
                   ) : null}
                   <div
                     className={`w-5 h-5 rounded-full flex items-center justify-center text-caption font-bold shrink-0${editor.avatarUrl ? " hidden" : ""}`}
-                    style={{ background: `hsl(${editor.email.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % 360}, 60%, 50%)`, color: "#fff", outline: "2px solid var(--background)" }}
+                    style={{ background: color, color: "#000", outline: "2px solid var(--background)" }}
                     title={editor.displayName || editor.email}
                   >
                     {(editor.displayName || editor.email || "?")[0].toUpperCase()}
@@ -9941,10 +9972,10 @@ ${clone.innerHTML}
                     style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
                     <div className="font-medium" style={{ color: "var(--text-primary)" }}>{editor.displayName || "Unknown"}</div>
                     <div style={{ color: "var(--text-muted)" }}>{editor.email}</div>
-                    <div style={{ color: "var(--accent)" }}>Editing now</div>
+                    <div style={{ color }}>Editing now</div>
                   </div>
                 </div>
-              ))}
+              );})}
               {otherEditors.length > 5 && (
                 <div className="w-5 h-5 rounded-full flex items-center justify-center text-caption font-bold shrink-0"
                   style={{ background: "var(--toggle-bg)", color: "var(--text-muted)", outline: "2px solid var(--background)" }}>
