@@ -85,7 +85,7 @@ interface BundleEmbedProps {
   // x-anonymous-id + x-user-id + x-user-email. When provided, BundleEmbed
   // uses these for ALL API calls instead of best-effort localStorage probing,
   // which fails for signed-in users (Supabase stores tokens in cookies, not
-  // localStorage, so reading "mdfy-user-id" gives null → 403 Unauthorized).
+  // localStorage, so reading "mw-user-id" gives null → 403 Unauthorized).
   authHeaders?: Record<string, string>;
   // Conversational-query → canvas filter. When the user clicks
   // "Show on canvas" in BundleChat, the parent (MdEditor) stores
@@ -108,7 +108,7 @@ function SkeletonBar({ width, height }: { width: number | string; height: number
         height,
         borderRadius: 6,
         background: "var(--toggle-bg)",
-        animation: "mdfySkelPulse 1.4s ease-in-out infinite",
+        animation: "mwSkelPulse 1.4s ease-in-out infinite",
       }}
     />
   );
@@ -201,9 +201,9 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     if (parentAuthHeaders) {
       headers = { ...parentAuthHeaders };
     } else {
-      const anonId = localStorage.getItem("mdfy-anonymous-id");
+      const anonId = localStorage.getItem("mw-anonymous-id");
       if (anonId) headers["x-anonymous-id"] = anonId;
-      const userId = localStorage.getItem("mdfy-user-id");
+      const userId = localStorage.getItem("mw-user-id");
       if (userId) headers["x-user-id"] = userId;
     }
 
@@ -302,8 +302,8 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         })
         .catch(() => {});
     };
-    window.addEventListener("mdfy-bundle-doc-added", handler as EventListener);
-    return () => window.removeEventListener("mdfy-bundle-doc-added", handler as EventListener);
+    window.addEventListener("mw-bundle-doc-added", handler as EventListener);
+    return () => window.removeEventListener("mw-bundle-doc-added", handler as EventListener);
   }, [bundleId, parentAuthHeaders]);
 
   const handleRegenerate = useCallback(async () => {
@@ -311,7 +311,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     setIsAnalyzing(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json", ...(parentAuthHeaders || {}) };
-      const anonId = localStorage.getItem("mdfy-anonymous-id");
+      const anonId = localStorage.getItem("mw-anonymous-id");
       if (anonId && !headers["x-anonymous-id"]) headers["x-anonymous-id"] = anonId;
       const res = await fetch(`/api/bundles/${bundleId}/graph`, {
         method: "POST", headers,
@@ -337,7 +337,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     setIsEmbedding(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json", ...(parentAuthHeaders || {}) };
-      const anonId = localStorage.getItem("mdfy-anonymous-id");
+      const anonId = localStorage.getItem("mw-anonymous-id");
       if (anonId && !headers["x-anonymous-id"]) headers["x-anonymous-id"] = anonId;
       const res = await fetch(`/api/embed/bundle/${bundleId}`, { method: "POST", headers });
       const data = await res.json().catch(() => ({} as Record<string, unknown>));
@@ -398,11 +398,11 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
       return headers;
     }
     try {
-      const anonId = localStorage.getItem("mdfy-anonymous-id");
+      const anonId = localStorage.getItem("mw-anonymous-id");
       if (anonId) headers["x-anonymous-id"] = anonId;
-      const userId = localStorage.getItem("mdfy-user-id");
+      const userId = localStorage.getItem("mw-user-id");
       if (userId) headers["x-user-id"] = userId;
-      const userEmail = localStorage.getItem("mdfy-user-email");
+      const userEmail = localStorage.getItem("mw-user-email");
       if (userEmail) headers["x-user-email"] = userEmail;
     } catch { /* ignore */ }
     return headers;
@@ -512,8 +512,8 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
   // the source has drifted (compiled_at < MAX(source.updated_at)).
   const saveSynthesisAsDoc = useCallback(async (kind: string, markdown: string) => {
     const headers = buildPatchHeaders();
-    const userId = (() => { try { return localStorage.getItem("mdfy-user-id") || undefined; } catch { return undefined; } })();
-    const anonymousId = (() => { try { return localStorage.getItem("mdfy-anonymous-id") || undefined; } catch { return undefined; } })();
+    const userId = (() => { try { return localStorage.getItem("mw-user-id") || undefined; } catch { return undefined; } })();
+    const anonymousId = (() => { try { return localStorage.getItem("mw-anonymous-id") || undefined; } catch { return undefined; } })();
     const titles: Record<string, string> = { memo: "Memo", faq: "FAQ", brief: "Brief" };
     const title = `${titles[kind] || "Synthesis"} — ${new Date().toLocaleDateString()}`;
     try {
@@ -692,11 +692,11 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       try {
-        const anonId = localStorage.getItem("mdfy-anonymous-id");
+        const anonId = localStorage.getItem("mw-anonymous-id");
         if (anonId) headers["x-anonymous-id"] = anonId;
-        const userId = localStorage.getItem("mdfy-user-id");
+        const userId = localStorage.getItem("mw-user-id");
         if (userId) headers["x-user-id"] = userId;
-        const userEmail = localStorage.getItem("mdfy-user-email");
+        const userEmail = localStorage.getItem("mw-user-email");
         if (userEmail) headers["x-user-email"] = userEmail;
       } catch { /* ignore */ }
       await fetch(`/api/docs/${docId}`, {
@@ -906,8 +906,8 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     const headers = buildPatchHeaders();
     let createdDocId: string | null = null;
     try {
-      const userId = (() => { try { return localStorage.getItem("mdfy-user-id") || undefined; } catch { return undefined; } })();
-      const anonymousId = (() => { try { return localStorage.getItem("mdfy-anonymous-id") || undefined; } catch { return undefined; } })();
+      const userId = (() => { try { return localStorage.getItem("mw-user-id") || undefined; } catch { return undefined; } })();
+      const anonymousId = (() => { try { return localStorage.getItem("mw-anonymous-id") || undefined; } catch { return undefined; } })();
       const res = await fetch("/api/docs", {
         method: "POST",
         headers,
@@ -2431,11 +2431,11 @@ function AddDocsPicker({ existingIds, onClose, onAdd, authHeaders }: { existingI
       headers = { ...authHeaders };
     } else {
       try {
-        const anonId = localStorage.getItem("mdfy-anonymous-id");
+        const anonId = localStorage.getItem("mw-anonymous-id");
         if (anonId) headers["x-anonymous-id"] = anonId;
-        const userId = localStorage.getItem("mdfy-user-id");
+        const userId = localStorage.getItem("mw-user-id");
         if (userId) headers["x-user-id"] = userId;
-        const userEmail = localStorage.getItem("mdfy-user-email");
+        const userEmail = localStorage.getItem("mw-user-email");
         if (userEmail) headers["x-user-email"] = userEmail;
       } catch { /* ignore */ }
     }
@@ -2566,7 +2566,7 @@ function NodeInfoPanel({ info, onClose, onOpenDoc, decomposeBridge }: {
   const [width, setWidth] = useState<number>(() => {
     if (typeof window === "undefined") return 420;
     try {
-      const saved = localStorage.getItem("mdfy-bundle-info-panel-width");
+      const saved = localStorage.getItem("mw-bundle-info-panel-width");
       if (saved) return Math.max(280, Math.min(720, parseInt(saved) || 420));
     } catch { /* ignore */ }
     return 420;
@@ -2583,7 +2583,7 @@ function NodeInfoPanel({ info, onClose, onOpenDoc, decomposeBridge }: {
       isDraggingRef.current = false;
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
-      try { localStorage.setItem("mdfy-bundle-info-panel-width", String(width)); } catch { /* ignore */ }
+      try { localStorage.setItem("mw-bundle-info-panel-width", String(width)); } catch { /* ignore */ }
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -3205,7 +3205,7 @@ function DecomposeExplainerBanner() {
   const [dismissed, setDismissed] = useState(true);
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const seen = localStorage.getItem("mdfy-decompose-explainer-seen");
+    const seen = localStorage.getItem("mw-decompose-explainer-seen");
     if (!seen) setDismissed(false);
   }, []);
   if (dismissed) return null;
@@ -3226,7 +3226,7 @@ function DecomposeExplainerBanner() {
       <button
         onClick={() => {
           setDismissed(true);
-          try { localStorage.setItem("mdfy-decompose-explainer-seen", "1"); } catch {}
+          try { localStorage.setItem("mw-decompose-explainer-seen", "1"); } catch {}
         }}
         className="shrink-0 p-0.5 rounded transition-colors hover:bg-[var(--menu-hover)]"
         style={{ color: "var(--text-faint)" }}
@@ -3480,11 +3480,11 @@ function BundleListView({
   // preference sticks for this surface.
   const [contentsCollapsed, setContentsCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("mdfy-bundle-contents-collapsed") === "1";
+    return window.localStorage.getItem("mw-bundle-contents-collapsed") === "1";
   });
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem("mdfy-bundle-contents-collapsed", contentsCollapsed ? "1" : "0");
+    window.localStorage.setItem("mw-bundle-contents-collapsed", contentsCollapsed ? "1" : "0");
   }, [contentsCollapsed]);
   // Per-doc copy-state — used to flash the inline Copy URL button.
   const [copiedDocId, setCopiedDocId] = useState<string | null>(null);

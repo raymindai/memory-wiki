@@ -1344,18 +1344,18 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
     let docIds: string[] = [];
     try {
       // Primary: the explicit doc-ids MIME we set on dragstart
-      const raw = e.dataTransfer.getData("application/x-mdfy-doc-ids");
+      const raw = e.dataTransfer.getData("application/x-memorywiki-doc-ids");
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           docIds = parsed.filter((x): x is string => typeof x === "string" && x.length > 0);
         }
       }
-      // Fallback: text/plain "mdfy-doc:<id>" form (used when custom MIMEs are
+      // Fallback: text/plain "mw-doc:<id>" form (used when custom MIMEs are
       // hidden by Chrome's protected drag mode)
       if (docIds.length === 0) {
         const text = e.dataTransfer.getData("text/plain") || "";
-        const m = text.match(/^mdfy-doc:([\w-]+)$/);
+        const m = text.match(/^mw-doc:([\w-]+)$/);
         if (m) docIds = [m[1]];
       }
     } catch { /* malformed payload */ }
@@ -1862,7 +1862,7 @@ function CanvasMoreMenu({
               The slider's filled-track + thumb position tell you
               where you are; the centered label below names what
               you're looking at. */}
-          <div className="flex flex-col mdfy-detail-slider" style={{ padding: "var(--space-2) var(--space-3)", gap: "var(--space-2)" }}>
+          <div className="flex flex-col mw-detail-slider" style={{ padding: "var(--space-2) var(--space-3)", gap: "var(--space-2)" }}>
             <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 0.5, color: "var(--text-faint)" }}>
               Detail level
             </span>
@@ -1877,10 +1877,10 @@ function CanvasMoreMenu({
               style={{
                 width: "100%",
                 // CSS var feeds the webkit track gradient — see globals.css
-                // .mdfy-detail-slider ::-webkit-slider-runnable-track.
+                // .mw-detail-slider ::-webkit-slider-runnable-track.
                 // Firefox uses ::-moz-range-progress which is value-aware
                 // natively, so the var is ignored there.
-                ["--mdfy-detail-progress" as string]: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) 100%)`,
+                ["--mw-detail-progress" as string]: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) 100%)`,
               } as React.CSSProperties}
             />
             <span

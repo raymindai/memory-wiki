@@ -41,7 +41,7 @@ export default function DiscoverPage() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    const saved = localStorage.getItem("mdfy-theme") as "dark" | "light" | null;
+    const saved = localStorage.getItem("mw-theme") as "dark" | "light" | null;
     const t = saved || "dark";
     setTheme(t);
     document.documentElement.setAttribute("data-theme", t);

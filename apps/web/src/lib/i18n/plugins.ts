@@ -102,7 +102,7 @@ const texts = {
 
     mcp: {
       title: "MCP Server",
-      subtitle: "mdfy-mcp on npm",
+      subtitle: "memory-wiki-mcp on npm",
       desc: "Connect any AI tool to Memory.Wiki. Create, read, update, and manage documents programmatically.",
       ctaLabel: "Add to Claude",
       terminal: {
@@ -110,12 +110,12 @@ const texts = {
         lines: [
           { type: "prompt", label: "You: ", text: "Publish my meeting notes to Memory.Wiki" },
           { type: "output", label: "Claude: ", text: "I'll create the document now." },
-          { type: "comment", text: '  mdfy_create({ markdown: "# Meeting Notes..." })' },
+          { type: "comment", text: '  mw_create({ markdown: "# Meeting Notes..." })' },
           { type: "success", text: "Document created:" },
           { type: "output", text: "  URL: ", url: "https://memory.wiki/abc123" },
           { type: "output", text: "  Status: publicly accessible" },
           { type: "prompt", label: "You: ", text: "Make it private" },
-          { type: "comment", text: '  mdfy_publish({ id: "abc123", published: false })' },
+          { type: "comment", text: '  mw_publish({ id: "abc123", published: false })' },
           { type: "success", text: "Document is now private (draft)." },
         ],
       },
@@ -142,7 +142,7 @@ const texts = {
         },
         {
           title: "Developer Experience",
-          items: ["Auto-managed edit tokens", "Zero config -- just npx mdfy-mcp", "JSON in, JSON out", "Full REST API fallback"],
+          items: ["Auto-managed edit tokens", "Zero config -- just npx memory-wiki-mcp", "JSON in, JSON out", "Full REST API fallback"],
         },
       ],
       installHeading: "Install",
@@ -188,7 +188,7 @@ const texts = {
           items: [
             "Status bar: \u2713 synced / \u2191 pushing / \u2193 pulling",
             "OAuth login via browser redirect",
-            ".mdfy.json sidecar for sync metadata",
+            ".memorywiki.json sidecar for sync metadata",
             "Publish from command palette",
             "Sidebar with local/synced/cloud document bridge",
             "CodeMirror source view with GFM syntax highlighting",
@@ -245,12 +245,12 @@ const texts = {
       title: "CLI Tool",
       subtitle: "Memory.Wiki \u2014 npm package",
       desc: "Publish Markdown from your terminal. Pipe from any command \u2014 tmux, AI assistants, git log, clipboard. Every output becomes a shareable URL.",
-      installCmd: "npm install -g mdfy-cli",
+      installCmd: "npm install -g memory-wiki-cli",
       examples: [
-        { cmd: "mdfy publish README.md", desc: "Publish a file and get a URL" },
-        { cmd: 'echo "# Hello" | mdfy publish', desc: "Publish from stdin (pipe)" },
-        { cmd: "tmux capture-pane -p | mdfy publish", desc: "Capture tmux pane" },
-        { cmd: "pbpaste | mdfy publish", desc: "Publish clipboard contents" },
+        { cmd: "mw publish README.md", desc: "Publish a file and get a URL" },
+        { cmd: 'echo "# Hello" | mw publish', desc: "Publish from stdin (pipe)" },
+        { cmd: "tmux capture-pane -p | mw publish", desc: "Capture tmux pane" },
+        { cmd: "pbpaste | mw publish", desc: "Publish clipboard contents" },
         { cmd: "Memory.Wiki pull abc123 -o doc.md", desc: "Download a document" },
         { cmd: "Memory.Wiki list", desc: "List your published documents" },
       ],
@@ -407,7 +407,7 @@ const texts = {
 
     mcp: {
       title: "MCP Server",
-      subtitle: "mdfy-mcp on npm",
+      subtitle: "memory-wiki-mcp on npm",
       desc: "어떤 AI 도구든 Memory.Wiki에 연결하세요. 문서를 프로그래밍 방식으로 생성, 읽기, 수정, 관리합니다.",
       ctaLabel: "Add to Claude",
       terminal: {
@@ -415,12 +415,12 @@ const texts = {
         lines: [
           { type: "prompt", label: "You: ", text: "내 회의 노트를 Memory.Wiki에 퍼블리시해줘" },
           { type: "output", label: "Claude: ", text: "지금 문서를 생성하겠습니다." },
-          { type: "comment", text: '  mdfy_create({ markdown: "# Meeting Notes..." })' },
+          { type: "comment", text: '  mw_create({ markdown: "# Meeting Notes..." })' },
           { type: "success", text: "문서 생성 완료:" },
           { type: "output", text: "  URL: ", url: "https://memory.wiki/abc123" },
           { type: "output", text: "  Status: publicly accessible" },
           { type: "prompt", label: "You: ", text: "비공개로 바꿔줘" },
-          { type: "comment", text: '  mdfy_publish({ id: "abc123", published: false })' },
+          { type: "comment", text: '  mw_publish({ id: "abc123", published: false })' },
           { type: "success", text: "문서가 비공개(draft)로 변경되었습니다." },
         ],
       },
@@ -447,7 +447,7 @@ const texts = {
         },
         {
           title: "개발자 경험",
-          items: ["자동 관리되는 edit token", "설정 불필요 -- npx mdfy-mcp만 실행", "JSON 입력, JSON 출력", "전체 REST API 폴백"],
+          items: ["자동 관리되는 edit token", "설정 불필요 -- npx memory-wiki-mcp만 실행", "JSON 입력, JSON 출력", "전체 REST API 폴백"],
         },
       ],
       installHeading: "설치",
@@ -493,7 +493,7 @@ const texts = {
           items: [
             "상태 바: \u2713 synced / \u2191 pushing / \u2193 pulling",
             "브라우저 리디렉트를 통한 OAuth 로그인",
-            ".mdfy.json 사이드카 파일로 싱크 메타데이터",
+            ".memorywiki.json 사이드카 파일로 싱크 메타데이터",
             "커맨드 팔레트에서 퍼블리시",
             "로컬/싱크/클라우드 문서 브릿지 사이드바",
             "GFM 구문 강조가 있는 CodeMirror 소스 뷰",
@@ -550,12 +550,12 @@ const texts = {
       title: "CLI Tool",
       subtitle: "Memory.Wiki \u2014 npm package",
       desc: "터미널에서 Markdown을 퍼블리시하세요. tmux, AI 어시스턴트, git log, 클립보드 등 어떤 명령이든 파이프하세요. 모든 출력이 공유 가능한 URL이 됩니다.",
-      installCmd: "npm install -g mdfy-cli",
+      installCmd: "npm install -g memory-wiki-cli",
       examples: [
-        { cmd: "mdfy publish README.md", desc: "파일을 퍼블리시하고 URL 받기" },
-        { cmd: 'echo "# Hello" | mdfy publish', desc: "stdin에서 퍼블리시 (파이프)" },
-        { cmd: "tmux capture-pane -p | mdfy publish", desc: "tmux 패인 캡처" },
-        { cmd: "pbpaste | mdfy publish", desc: "클립보드 내용 퍼블리시" },
+        { cmd: "mw publish README.md", desc: "파일을 퍼블리시하고 URL 받기" },
+        { cmd: 'echo "# Hello" | mw publish', desc: "stdin에서 퍼블리시 (파이프)" },
+        { cmd: "tmux capture-pane -p | mw publish", desc: "tmux 패인 캡처" },
+        { cmd: "pbpaste | mw publish", desc: "클립보드 내용 퍼블리시" },
         { cmd: "Memory.Wiki pull abc123 -o doc.md", desc: "문서 다운로드" },
         { cmd: "Memory.Wiki list", desc: "퍼블리시한 문서 목록 보기" },
       ],

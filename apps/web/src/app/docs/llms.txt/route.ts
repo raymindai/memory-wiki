@@ -309,10 +309,10 @@ Error response format:
 
 ## CLI
 
-Install: npm install -g mdfy-cli
+Install: npm install -g memory-wiki-cli
 
 Commands:
-- mdfy publish <file>: Publish a file or stdin
+- mw publish <file>: Publish a file or stdin
 - Memory.Wiki update <id> <file>: Update existing document
 - Memory.Wiki pull <id>: Download document content
 - Memory.Wiki delete <id>: Soft-delete a document
@@ -324,10 +324,10 @@ Commands:
 - Memory.Wiki whoami: Show current user
 
 Pipe examples:
-- echo "# Hello" | mdfy publish
-- pbpaste | mdfy publish
-- cat file.md | mdfy publish
-- tmux capture-pane -p | mdfy publish
+- echo "# Hello" | mw publish
+- pbpaste | mw publish
+- cat file.md | mw publish
+- tmux capture-pane -p | mw publish
 
 ## HTTP API
 
@@ -368,7 +368,7 @@ In Cursor: Settings → MCP → Add server with { "url": "https://memory.wiki/ap
 
 ### Option B: Local stdio MCP (Claude Desktop, Claude Code)
 
-Prerequisites: npm install -g mdfy-cli && Memory.Wiki login
+Prerequisites: npm install -g memory-wiki-cli && Memory.Wiki login
 
 Config (.mcp.json or claude_desktop_config.json):
 \`\`\`json
@@ -376,7 +376,7 @@ Config (.mcp.json or claude_desktop_config.json):
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }
@@ -385,50 +385,50 @@ Config (.mcp.json or claude_desktop_config.json):
 ### Tools (hosted HTTP MCP exposes 25)
 
 Core CRUD:
-- mdfy_create(markdown, title?, draft?): Create document, returns url/id
-- mdfy_read(id): Read document content
-- mdfy_update(id, markdown, title?): Update document
-- mdfy_delete(id): Delete document
-- mdfy_list(): List user's documents (auth)
-- mdfy_search(query): Full-text search (auth)
+- mw_create(markdown, title?, draft?): Create document, returns url/id
+- mw_read(id): Read document content
+- mw_update(id, markdown, title?): Update document
+- mw_delete(id): Delete document
+- mw_list(): List user's documents (auth)
+- mw_search(query): Full-text search (auth)
 
 Append/Prepend:
-- mdfy_append(id, content, separator?): Append content
-- mdfy_prepend(id, content): Prepend content
+- mw_append(id, content, separator?): Append content
+- mw_prepend(id, content): Prepend content
 
 Sections:
-- mdfy_outline(id): Get heading-based outline / TOC
-- mdfy_extract_section(id, heading): Extract content of a section
-- mdfy_replace_section(id, heading, newContent): Replace a section
+- mw_outline(id): Get heading-based outline / TOC
+- mw_extract_section(id, heading): Extract content of a section
+- mw_replace_section(id, heading, newContent): Replace a section
 
 Duplicate/Import:
-- mdfy_duplicate(id, title?): Duplicate as new document
-- mdfy_import_url(url, title?): Fetch URL → markdown → save
+- mw_duplicate(id, title?): Duplicate as new document
+- mw_import_url(url, title?): Fetch URL → markdown → save
 
 Sharing:
-- mdfy_publish(id, published): Toggle public/private
-- mdfy_set_allowed_emails(id, emails): Restrict to email allowlist
-- mdfy_get_share_url(id): Get URL + access metadata
+- mw_publish(id, published): Toggle public/private
+- mw_set_allowed_emails(id, emails): Restrict to email allowlist
+- mw_get_share_url(id): Get URL + access metadata
 
 Versions:
-- mdfy_versions(id): List version history
-- mdfy_restore_version(id, versionId): Restore previous version
-- mdfy_diff(id, fromVersionId, toVersionId): Line-level diff
+- mw_versions(id): List version history
+- mw_restore_version(id, versionId): Restore previous version
+- mw_diff(id, fromVersionId, toVersionId): Line-level diff
 
 Stats/Folders:
-- mdfy_stats(id): View count, dates, status
-- mdfy_recent(): Recently visited (auth)
-- mdfy_folder_list(): List folders (auth)
-- mdfy_folder_create(name, parentId?): Create folder (auth)
-- mdfy_move_to_folder(documentId, folderId): Move doc to folder
+- mw_stats(id): View count, dates, status
+- mw_recent(): Recently visited (auth)
+- mw_folder_list(): List folders (auth)
+- mw_folder_create(name, parentId?): Create folder (auth)
+- mw_move_to_folder(documentId, folderId): Move doc to folder
 
-The local stdio package (mdfy-mcp v1.3.x) currently exposes the 6 core tools.
+The local stdio package (memory-wiki-mcp v1.3.x) currently exposes the 6 core tools.
 For the full 25, use the hosted HTTP endpoint.
 
 ## npm Packages
 
-- mdfy-mcp: MCP server for AI tools (hosted + stdio)
-- mdfy-cli: command-line publisher
+- memory-wiki-mcp: MCP server for AI tools (hosted + stdio)
+- memory-wiki-cli: command-line publisher
 `;
 
 export function GET() {

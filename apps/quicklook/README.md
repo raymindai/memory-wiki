@@ -31,13 +31,13 @@ chmod +x install.sh
 
 ```bash
 # Print rendered HTML to stdout
-mdfy-quicklook README.md
+memory-wiki-quicklook README.md
 
 # Open preview in your default browser
-mdfy-quicklook README.md --open
+memory-wiki-quicklook README.md --open
 
 # Save to a file
-mdfy-quicklook README.md -o preview.html
+memory-wiki-quicklook README.md -o preview.html
 ```
 
 ### Requirements
@@ -83,7 +83,7 @@ Create a Finder Quick Action that previews Markdown files:
 3. Add a **Run Shell Script** action:
    ```bash
    for f in "$@"; do
-       mdfy-quicklook "$f" --open
+       memory-wiki-quicklook "$f" --open
    done
    ```
 4. Save as "Preview with Memory.Wiki"
@@ -110,7 +110,7 @@ The rendering pipeline matches Memory.Wiki exactly because it uses the same clie
 
 ```
 apps/quicklook/
-├── mdfy-quicklook/
+├── memory-wiki-quicklook/
 │   ├── Package.swift              # Swift package manifest
 │   ├── Sources/
 │   │   └── PreviewExtension/
@@ -145,7 +145,7 @@ The HTML template at `Sources/PreviewExtension/template.html` includes:
 ### Test Locally
 
 ```bash
-cd apps/quicklook/mdfy-quicklook
+cd apps/quicklook/memory-wiki-quicklook
 swift build
-.build/debug/mdfy-quicklook ../../docs/MANIFESTO.md --open
+.build/debug/memory-wiki-quicklook ../../docs/MANIFESTO.md --open
 ```

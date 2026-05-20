@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       {
         headers: {
           Accept: "application/vnd.github.v3+json",
-          "User-Agent": "mdfy-cc-discover",
+          "User-Agent": "mw-cc-discover",
           ...(process.env.GITHUB_TOKEN ? { Authorization: `token ${process.env.GITHUB_TOKEN}` } : {}),
         },
       }

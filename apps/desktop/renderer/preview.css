@@ -1230,7 +1230,7 @@ pre.ascii-original.hidden {
    PUBLISHED BADGE
    ========================================================= */
 
-#mdfy-badge {
+#mw-badge {
   position: fixed;
   bottom: 28px;
   left: 0;
@@ -1246,17 +1246,17 @@ pre.ascii-original.hidden {
   z-index: 99;
 }
 
-#mdfy-badge.hidden {
+#mw-badge.hidden {
   display: none;
 }
 
-#mdfy-badge a {
+#mw-badge a {
   color: var(--fg-muted);
   text-decoration: none;
   transition: color 0.15s;
 }
 
-#mdfy-badge a:hover {
+#mw-badge a:hover {
   color: var(--fg);
 }
 
@@ -1348,7 +1348,7 @@ pre.ascii-original.hidden {
    CUSTOM TOOLTIPS
    ========================================================= */
 
-.mdfy-tooltip {
+.mw-tooltip {
   position: fixed;
   z-index: 9999;
   padding: 4px 10px;
@@ -1366,7 +1366,7 @@ pre.ascii-original.hidden {
   transition: opacity 0.12s, transform 0.12s;
 }
 
-.mdfy-tooltip.visible {
+.mw-tooltip.visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -1955,7 +1955,7 @@ body {
 }
 
 /* Custom instant tooltip */
-.mdfy-tip {
+.mw-tip {
   position: fixed;
   z-index: 9999;
   padding: 6px 10px;
@@ -1972,12 +1972,12 @@ body {
   transition: opacity 0.08s;
   max-width: 480px;
 }
-.mdfy-tip.show { opacity: 1; }
-.mdfy-tip .tip-label {
+.mw-tip.show { opacity: 1; }
+.mw-tip .tip-label {
   font-size: 10px;
   color: var(--fg-muted);
 }
-.mdfy-tip .tip-preview {
+.mw-tip .tip-preview {
   margin-top: 4px;
   padding-top: 4px;
   border-top: 1px solid var(--border);

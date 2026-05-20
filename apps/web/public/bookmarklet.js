@@ -1,5 +1,5 @@
 /**
- * mdfy bookmarklet — capture any AI conversation to your hub.
+ * Memory.Wiki bookmarklet — capture any AI conversation to your hub.
  *
  * Loaded by a small javascript: stub on the user's bookmarks bar.
  * Runs in the user's browser, so it sees the rendered DOM and is not
@@ -16,12 +16,12 @@
 
   // Re-entrancy guard. If the user clicks the bookmarklet twice we don't
   // want two overlays.
-  if (window.__mdfyBookmarkletActive) return;
-  window.__mdfyBookmarkletActive = true;
+  if (window.__mwBookmarkletActive) return;
+  window.__mwBookmarkletActive = true;
 
   // Where to send captured docs. The bookmarklet stub sets this so we can
   // run against staging during dev.
-  var BASE = (window.__mdfyHost || "https://memory.wiki").replace(/\/$/, "");
+  var BASE = (window.__mwHost || "https://memory.wiki").replace(/\/$/, "");
 
   function detectProvider() {
     var h = location.hostname.toLowerCase();
@@ -246,7 +246,7 @@
 
   function mountOverlay() {
     var overlay = document.createElement("div");
-    overlay.id = "mdfy-bookmarklet-overlay";
+    overlay.id = "mw-bookmarklet-overlay";
     overlay.style.cssText = [
       "position:fixed", "top:24px", "right:24px", "z-index:2147483647",
       "background:#0a0a0a", "color:#fafafa", "border:1px solid #fb923c",
@@ -264,7 +264,7 @@
   function teardown(overlay, delayMs) {
     setTimeout(function () {
       try { overlay.remove(); } catch (e) { /* ignore */ }
-      window.__mdfyBookmarkletActive = false;
+      window.__mwBookmarkletActive = false;
     }, delayMs || 0);
   }
 
@@ -275,7 +275,7 @@
 
   if (!provider) {
     setStatus(overlay,
-      "<strong>mdfy</strong><br>This page isn't a supported AI conversation. " +
+      "<strong>Memory.Wiki</strong><br>This page isn't a supported AI conversation. " +
       "Try the bookmarklet on chatgpt.com, claude.ai, or gemini.google.com."
     );
     teardown(overlay, 5000);
@@ -283,7 +283,7 @@
   }
 
   setStatus(overlay,
-    "<strong>mdfy</strong><br>Capturing " + providerLabel(provider) + " conversation…"
+    "<strong>Memory.Wiki</strong><br>Capturing " + providerLabel(provider) + " conversation…"
   );
 
   // Defer extraction one frame to let any pending render complete.
@@ -292,9 +292,9 @@
     try {
       messages = extractMessages(provider);
     } catch (err) {
-      console.error("[mdfy] extraction failed:", err);
+      console.error("[Memory.Wiki] extraction failed:", err);
       setStatus(overlay,
-        "<strong>mdfy</strong><br>Couldn't read this " + providerLabel(provider) + " conversation. " +
+        "<strong>Memory.Wiki</strong><br>Couldn't read this " + providerLabel(provider) + " conversation. " +
         "Try refreshing the page."
       );
       teardown(overlay, 5000);
@@ -303,7 +303,7 @@
 
     if (!messages.length) {
       setStatus(overlay,
-        "<strong>mdfy</strong><br>No conversation found on this page. Open a chat first, then click the bookmarklet."
+        "<strong>Memory.Wiki</strong><br>No conversation found on this page. Open a chat first, then click the bookmarklet."
       );
       teardown(overlay, 5000);
       return;
@@ -312,13 +312,13 @@
     var built = buildMarkdown(provider, messages);
 
     setStatus(overlay,
-      "<strong>mdfy</strong><br>Saving " + messages.length + " message" + (messages.length === 1 ? "" : "s") + "…"
+      "<strong>Memory.Wiki</strong><br>Saving " + messages.length + " message" + (messages.length === 1 ? "" : "s") + "…"
     );
 
     fetch(BASE + "/api/docs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // include lets us send and receive the mdfy_anon cookie so this
+      // include lets us send and receive the mw_anon cookie so this
       // capture is grouped with the user's other anonymous docs.
       credentials: "include",
       body: JSON.stringify({
@@ -336,16 +336,16 @@
         if (!data.id) throw new Error("no id in response");
         var url = BASE + "/" + data.id;
         setStatus(overlay,
-          "<strong>mdfy</strong><br>Saved! Opening your doc…<br>" +
+          "<strong>Memory.Wiki</strong><br>Saved! Opening your doc…<br>" +
           "<a href=\"" + url + "\" target=\"_blank\" rel=\"noopener\" style=\"color:#fb923c;text-decoration:underline\">" + url + "</a>"
         );
         try { window.open(url, "_blank", "noopener"); } catch (e) { /* popup blocked */ }
         teardown(overlay, 4000);
       })
       .catch(function (err) {
-        console.error("[mdfy] save failed:", err);
+        console.error("[Memory.Wiki] save failed:", err);
         setStatus(overlay,
-          "<strong>mdfy</strong><br>Couldn't save. " + (err && err.message ? err.message : "Try again.") +
+          "<strong>Memory.Wiki</strong><br>Couldn't save. " + (err && err.message ? err.message : "Try again.") +
           "<br><span style=\"color:#a1a1aa;font-size:12px\">If this keeps happening, check your network or try Memory.Wiki directly.</span>"
         );
         teardown(overlay, 6000);

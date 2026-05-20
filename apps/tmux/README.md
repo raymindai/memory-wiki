@@ -15,20 +15,20 @@ cp -r apps/tmux/* ~/.tmux/plugins/mdfy/
 
 Add to `~/.tmux.conf`:
 ```bash
-run-shell ~/.tmux/plugins/mdfy/mdfy.tmux
+run-shell ~/.tmux/plugins/mdfy/memorywiki.tmux
 ```
 
 ### Option 2: TPM (Tmux Plugin Manager)
 
 Add to `~/.tmux.conf`:
 ```bash
-set -g @plugin 'raymindai/mdfy-tmux'
+set -g @plugin 'raymindai/mw-tmux'
 ```
 
 ### Prerequisite
 
 ```bash
-npm install -g mdfy-cli
+npm install -g memory-wiki-cli
 ```
 
 ## Usage
@@ -55,14 +55,14 @@ MDFY_KEY="m"  # lowercase m instead of M
 
 ## CLI capture command
 
-The tmux plugin uses `mdfy capture` under the hood. You can also use it directly:
+The tmux plugin uses `mw capture` under the hood. You can also use it directly:
 
 ```bash
 # Auto-detect: tmux pane if in tmux, clipboard otherwise
-mdfy capture
+mw capture
 
 # Explicit sources
-mdfy capture tmux       # Capture current tmux pane
-mdfy capture clipboard  # Capture system clipboard
-mdfy capture last       # Pipe: some-cmd | mdfy capture last
+mw capture tmux       # Capture current tmux pane
+mw capture clipboard  # Capture system clipboard
+mw capture last       # Pipe: some-cmd | mw capture last
 ```

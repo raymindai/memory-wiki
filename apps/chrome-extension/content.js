@@ -10,8 +10,8 @@
   "use strict";
 
   // Prevent double-injection
-  if (document.documentElement.dataset.mdfyInjected) return;
-  document.documentElement.dataset.mdfyInjected = "1";
+  if (document.documentElement.dataset.mwInjected) return;
+  document.documentElement.dataset.mwInjected = "1";
 
   const MDFY_URL = "https://memory.wiki";
   const MAX_URL_BYTES = 8000; // ~8KB limit for URL hash
@@ -81,20 +81,20 @@
   // ─── Toast Notification ───
 
   function showToast(message, duration = 3000) {
-    const existing = document.getElementById("mdfy-toast");
+    const existing = document.getElementById("mw-toast");
     if (existing) existing.remove();
 
     const toast = document.createElement("div");
-    toast.id = "mdfy-toast";
+    toast.id = "mw-toast";
     toast.textContent = message;
     document.body.appendChild(toast);
 
     requestAnimationFrame(() => {
-      toast.classList.add("mdfy-toast-visible");
+      toast.classList.add("mw-toast-visible");
     });
 
     setTimeout(() => {
-      toast.classList.remove("mdfy-toast-visible");
+      toast.classList.remove("mw-toast-visible");
       setTimeout(() => toast.remove(), 300);
     }, duration);
   }
@@ -150,7 +150,7 @@
 
     // ── Step 0b: Remove injected UI (but NOT aria-hidden yet — math needs it) ──
     clone.querySelectorAll(
-      ".mdfy-mini-btn, .mdfy-float-btn, #mdfy-float-btn, [class*='Memory.Wiki'], " +
+      ".mw-mini-btn, .mw-float-btn, #mw-float-btn, [class*='Memory.Wiki'], " +
       "button[class*='copy'], button[class*='Copy'], button[class*='group/status'], " +
       "style, script, noscript, " +
       "button[class*='skill'], button[class*='status'], " +
@@ -1025,7 +1025,7 @@
           }
           const { id, editToken } = parsed;
           const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
-          window.open(MDFY_URL + "/?from=" + id + tokenParam, "mdfy_" + Date.now());
+          window.open(MDFY_URL + "/?from=" + id + tokenParam, "memorywiki_" + Date.now());
           return;
         }
         // Check for auth failure
@@ -1042,7 +1042,7 @@
     const url = MDFY_URL + "/#md=" + compressed;
 
     if (url.length <= MAX_URL_BYTES) {
-      window.open(url, "mdfy_" + Date.now());
+      window.open(url, "memorywiki_" + Date.now());
     } else {
       try {
         await navigator.clipboard.writeText(markdown);
@@ -1056,7 +1056,7 @@
         document.execCommand("copy");
         document.body.removeChild(textarea);
       }
-      window.open(MDFY_URL, "mdfy_" + Date.now());
+      window.open(MDFY_URL, "memorywiki_" + Date.now());
     }
   }
 
@@ -1064,25 +1064,25 @@
 
   function createFloatingButton() {
     const container = document.createElement("div");
-    container.id = "mdfy-float-container";
+    container.id = "mw-float-container";
 
     const btn = document.createElement("button");
-    btn.id = "mdfy-float-btn";
-    btn.innerHTML = '<span class="mdfy-btn-logo"><span class="mdfy-logo-md">md</span><span class="mdfy-logo-fy">fy</span></span><span class="mdfy-btn-label">All</span>';
+    btn.id = "mw-float-btn";
+    btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">md</span><span class="mw-logo-fy">fy</span></span><span class="mw-btn-label">All</span>';
     btn.title = "Capture entire conversation and publish on Memory.Wiki";
 
     const toggle = document.createElement("button");
-    toggle.id = "mdfy-float-toggle";
+    toggle.id = "mw-float-toggle";
     toggle.innerHTML = "&#9662;";
     toggle.title = "Choose range";
 
     const menu = document.createElement("div");
-    menu.id = "mdfy-float-menu";
+    menu.id = "mw-float-menu";
     menu.innerHTML = [
-      '<div class="mdfy-menu-item" data-range="0"><span class="mdfy-menu-accent">All</span> messages</div>',
-      '<div class="mdfy-menu-item" data-range="3">Last <span class="mdfy-menu-accent">3</span> exchanges</div>',
-      '<div class="mdfy-menu-item" data-range="5">Last <span class="mdfy-menu-accent">5</span> exchanges</div>',
-      '<div class="mdfy-menu-item" data-range="10">Last <span class="mdfy-menu-accent">10</span> exchanges</div>',
+      '<div class="mw-menu-item" data-range="0"><span class="mw-menu-accent">All</span> messages</div>',
+      '<div class="mw-menu-item" data-range="3">Last <span class="mw-menu-accent">3</span> exchanges</div>',
+      '<div class="mw-menu-item" data-range="5">Last <span class="mw-menu-accent">5</span> exchanges</div>',
+      '<div class="mw-menu-item" data-range="10">Last <span class="mw-menu-accent">10</span> exchanges</div>',
     ].join("");
 
     container.appendChild(btn);
@@ -1091,18 +1091,18 @@
     document.body.appendChild(container);
 
     const setFloatStatus = (status, state) => {
-      const logo = '<span class="mdfy-btn-logo"><span class="mdfy-logo-md">md</span><span class="mdfy-logo-fy">fy</span></span>';
-      const stateClass = state === "done" ? " mdfy-btn-status-done" : state === "error" ? " mdfy-btn-status-error" : "";
-      btn.innerHTML = logo + '<span class="mdfy-btn-label' + stateClass + '">' + status + '</span>';
+      const logo = '<span class="mw-btn-logo"><span class="mw-logo-md">md</span><span class="mw-logo-fy">fy</span></span>';
+      const stateClass = state === "done" ? " mw-btn-status-done" : state === "error" ? " mw-btn-status-error" : "";
+      btn.innerHTML = logo + '<span class="mw-btn-label' + stateClass + '">' + status + '</span>';
     };
     const resetFloat = () => {
-      btn.innerHTML = '<span class="mdfy-btn-logo"><span class="mdfy-logo-md">md</span><span class="mdfy-logo-fy">fy</span></span><span class="mdfy-btn-label">All</span>';
+      btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">md</span><span class="mw-logo-fy">fy</span></span><span class="mw-btn-label">All</span>';
     };
 
     async function captureAndSend(lastN) {
-      menu.classList.remove("mdfy-menu-visible");
-      container.classList.remove("mdfy-done", "mdfy-error");
-      container.classList.add("mdfy-loading");
+      menu.classList.remove("mw-menu-visible");
+      container.classList.remove("mw-done", "mw-error");
+      container.classList.add("mw-loading");
       setFloatStatus("Capturing...");
       try {
         await preProcessArtifactIframes();
@@ -1112,16 +1112,16 @@
         const markdown = formatConversation(messages);
         setFloatStatus("Publishing...");
         await sendToMdfy(markdown);
-        container.classList.remove("mdfy-loading");
-        container.classList.add("mdfy-done");
+        container.classList.remove("mw-loading");
+        container.classList.add("mw-done");
         setFloatStatus("Published ✓", "done");
-        setTimeout(() => { container.classList.remove("mdfy-done"); resetFloat(); }, 3000);
+        setTimeout(() => { container.classList.remove("mw-done"); resetFloat(); }, 3000);
       } catch (err) {
         console.error("[Memory.Wiki] capture failed:", err);
-        container.classList.remove("mdfy-loading");
-        container.classList.add("mdfy-error");
+        container.classList.remove("mw-loading");
+        container.classList.add("mw-error");
         setFloatStatus("Failed", "error");
-        setTimeout(() => { container.classList.remove("mdfy-error"); resetFloat(); }, 3000);
+        setTimeout(() => { container.classList.remove("mw-error"); resetFloat(); }, 3000);
       }
     }
 
@@ -1129,10 +1129,10 @@
 
     toggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      menu.classList.toggle("mdfy-menu-visible");
+      menu.classList.toggle("mw-menu-visible");
     });
 
-    menu.querySelectorAll(".mdfy-menu-item").forEach((item) => {
+    menu.querySelectorAll(".mw-menu-item").forEach((item) => {
       item.addEventListener("click", () => {
         captureAndSend(parseInt(item.dataset.range));
       });
@@ -1140,7 +1140,7 @@
 
     document.addEventListener("click", (e) => {
       if (!container.contains(e.target)) {
-        menu.classList.remove("mdfy-menu-visible");
+        menu.classList.remove("mw-menu-visible");
       }
     });
   }
@@ -1225,30 +1225,30 @@
     const userSelector = getUserMessageSelector();
 
     function attachMiniButton(msg, role) {
-      if (msg.querySelector(".mdfy-mini-btn")) return;
+      if (msg.querySelector(".mw-mini-btn")) return;
 
       const computedPos = window.getComputedStyle(msg).position;
       if (computedPos === "static") msg.style.position = "relative";
 
       const miniBtn = document.createElement("button");
-      miniBtn.className = "mdfy-mini-btn";
-      miniBtn.innerHTML = '<span class="mdfy-mini-logo"><span class="mdfy-mini-md">md</span><span class="mdfy-mini-fy">fy</span></span><span class="mdfy-mini-label">this</span>';
+      miniBtn.className = "mw-mini-btn";
+      miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">md</span><span class="mw-mini-fy">fy</span></span><span class="mw-mini-label">this</span>';
       miniBtn.title = "Send this Q&A to Memory.Wiki";
 
       const resetMini = () => {
-        miniBtn.innerHTML = '<span class="mdfy-mini-logo"><span class="mdfy-mini-md">md</span><span class="mdfy-mini-fy">fy</span></span><span class="mdfy-mini-label">this</span>';
+        miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">md</span><span class="mw-mini-fy">fy</span></span><span class="mw-mini-label">this</span>';
       };
       const setMiniStatus = (status, state) => {
-        const logo = '<span class="mdfy-mini-logo"><span class="mdfy-mini-md">md</span><span class="mdfy-mini-fy">fy</span></span>';
-        const stateClass = state === "done" ? " mdfy-mini-status-done" : state === "error" ? " mdfy-mini-status-error" : "";
-        miniBtn.innerHTML = logo + '<span class="mdfy-mini-status' + stateClass + '">' + status + '</span>';
+        const logo = '<span class="mw-mini-logo"><span class="mw-mini-md">md</span><span class="mw-mini-fy">fy</span></span>';
+        const stateClass = state === "done" ? " mw-mini-status-done" : state === "error" ? " mw-mini-status-error" : "";
+        miniBtn.innerHTML = logo + '<span class="mw-mini-status' + stateClass + '">' + status + '</span>';
       };
 
       miniBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
         e.preventDefault();
-        miniBtn.classList.remove("mdfy-done", "mdfy-error");
-        miniBtn.classList.add("mdfy-loading");
+        miniBtn.classList.remove("mw-done", "mw-error");
+        miniBtn.classList.add("mw-loading");
         setMiniStatus("Capturing...");
         try {
           await preProcessArtifactIframes();
@@ -1257,16 +1257,16 @@
           const markdown = formatQAPair(userEl, assistantEl);
           setMiniStatus("Publishing...");
           await sendToMdfy(markdown);
-          miniBtn.classList.remove("mdfy-loading");
-          miniBtn.classList.add("mdfy-done");
+          miniBtn.classList.remove("mw-loading");
+          miniBtn.classList.add("mw-done");
           setMiniStatus("Published ✓", "done");
-          setTimeout(() => { miniBtn.classList.remove("mdfy-done"); resetMini(); }, 3000);
+          setTimeout(() => { miniBtn.classList.remove("mw-done"); resetMini(); }, 3000);
         } catch (err) {
           console.error("[Memory.Wiki] capture failed:", err);
-          miniBtn.classList.remove("mdfy-loading");
-          miniBtn.classList.add("mdfy-error");
+          miniBtn.classList.remove("mw-loading");
+          miniBtn.classList.add("mw-error");
           setMiniStatus("Failed", "error");
-          setTimeout(() => { miniBtn.classList.remove("mdfy-error"); resetMini(); }, 3000);
+          setTimeout(() => { miniBtn.classList.remove("mw-error"); resetMini(); }, 3000);
         }
       });
 
@@ -1312,7 +1312,7 @@
     }
 
     if (request.action === "toggle-float-button") {
-      const existing = document.getElementById("mdfy-float-container");
+      const existing = document.getElementById("mw-float-container");
       if (request.show && !existing) {
         createFloatingButton();
       } else if (!request.show && existing) {
@@ -1346,8 +1346,8 @@
     gemini: { headerH: 8, inputH: 180 },
   };
   const layout = layoutConfig[platform] || { headerH: 48, inputH: 100 };
-  document.documentElement.style.setProperty("--mdfy-header-h", layout.headerH + "px");
-  document.documentElement.style.setProperty("--mdfy-input-h", layout.inputH + "px");
+  document.documentElement.style.setProperty("--mw-header-h", layout.headerH + "px");
+  document.documentElement.style.setProperty("--mw-input-h", layout.inputH + "px");
 
   // Align Memory.Wiki All to the right edge of the message content area
   function measureContentRight() {
@@ -1359,7 +1359,7 @@
     const msg = document.querySelector(msgSelectors[platform] || "main");
     if (msg) {
       const right = window.innerWidth - msg.getBoundingClientRect().right;
-      document.documentElement.style.setProperty("--mdfy-content-right", Math.max(8, right) + "px");
+      document.documentElement.style.setProperty("--mw-content-right", Math.max(8, right) + "px");
     }
   }
   measureContentRight();

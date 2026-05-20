@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 
-const STORAGE_KEY = "mdfy-welcome-seen";
+const STORAGE_KEY = "mw-welcome-seen";
 
 // v6 welcome flow. Five slides, each with one role and one CTA:
 //   intro — hook on the v6 thesis (knowledge hub for the AI era)

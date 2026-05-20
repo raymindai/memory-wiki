@@ -375,13 +375,13 @@ export default function ManifestoContent({ locale }: ManifestoContentProps) {
           </>
         )}
 
-        {/* How-mdfy-works deep dive — outside the EN/KO style ternary
+        {/* How-Memory.Wiki-works deep dive — outside the EN/KO style ternary
             so both locales render it. EN page goes through the first
             branch (audience cards); without this hoist, the link only
             showed up on KO. */}
         <div style={{ marginTop: 20 }}>
           <Link
-            href="/how-mdfy-works"
+            href="/how-memorywiki-works"
             style={{
               display: "inline-flex",
               alignItems: "center",

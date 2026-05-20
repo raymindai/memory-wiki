@@ -402,7 +402,7 @@ Re-read it whenever you need cross-doc context.`}
           <ToolBlock
             id="cursor-tool"
             name="Cursor"
-            filePath=".cursor/rules/mdfy.mdc"
+            filePath=".cursor/rules/memorywiki.mdc"
             tagline="Cursor's newer multi-rule format. Frontmatter scopes when the rule applies; body holds the Memory.Wiki URL. Use one file per bundle for clean separation."
             snippet={`---
 description: Project context from Memory.Wiki
@@ -511,11 +511,11 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
               On GitHub: <em>Settings → Secrets and variables → Actions → New repository secret</em>. Add both <InlineCode>{"MDFY_DOC_ID"}</InlineCode> and <InlineCode>{"MDFY_EDIT_TOKEN"}</InlineCode>.
             </li>
             <li style={{ marginBottom: 8 }}>
-              Drop the workflow file below at <InlineCode>{".github/workflows/sync-mdfy.yml"}</InlineCode> and push. Run it once via <em>Actions → Sync repo docs → Memory.Wiki → Run workflow</em> to verify.
+              Drop the workflow file below at <InlineCode>{".github/workflows/sync-memorywiki.yml"}</InlineCode> and push. Run it once via <em>Actions → Sync repo docs → Memory.Wiki → Run workflow</em> to verify.
             </li>
           </ol>
           <p style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 4, marginBottom: 6, fontFamily: mono }}>
-            .github/workflows/sync-mdfy.yml
+            .github/workflows/sync-memorywiki.yml
           </p>
           <CodeBlock lang="yaml">{`name: Sync repo docs → Memory.Wiki
 
@@ -526,7 +526,7 @@ on:
       - 'CLAUDE.md'
       - 'AGENTS.md'
       - 'docs/**.md'
-      - '.github/workflows/sync-mdfy.yml'
+      - '.github/workflows/sync-memorywiki.yml'
   workflow_dispatch: {}
 
 jobs:
@@ -543,7 +543,7 @@ jobs:
           {
             echo "# Repo working knowledge (synced from \${GITHUB_REPOSITORY}@\${GITHUB_SHA:0:7})"
             echo
-            echo "> Auto-updated by .github/workflows/sync-mdfy.yml on push to main."
+            echo "> Auto-updated by .github/workflows/sync-memorywiki.yml on push to main."
             echo "> Source: https://github.com/\${GITHUB_REPOSITORY}/commit/\${GITHUB_SHA}"
             echo
             for f in CLAUDE.md AGENTS.md; do

@@ -21,7 +21,7 @@ Powered by a Rust + WASM rendering engine with GFM, KaTeX math, Mermaid diagrams
 - [AI Tools](#ai-tools)
 - [How Sync Works](#how-sync-works)
 - [Use Cases](#use-cases)
-- [Memory.Wiki Ecosystem](#mdfy-ecosystem)
+- [Memory.Wiki Ecosystem](#mw-ecosystem)
 - [FAQ](#faq)
 
 ---
@@ -189,11 +189,11 @@ Configure via VS Code Settings (Cmd+,) under "Memory.Wiki":
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `mdfy.theme` | `auto` | Preview theme. `auto` follows VS Code's color theme. Options: `auto`, `dark`, `light` |
-| `mdfy.autoSync` | `false` | Automatically push changes on file save |
-| `mdfy.autoPreview` | `true` | Automatically open Memory.Wiki preview when opening a .md file |
-| `mdfy.syncInterval` | `30` | Polling interval for remote changes (seconds, 10-300) |
-| `mdfy.apiBaseUrl` | `https://memory.wiki` | API endpoint (for self-hosted instances) |
+| `memorywiki.theme` | `auto` | Preview theme. `auto` follows VS Code's color theme. Options: `auto`, `dark`, `light` |
+| `memorywiki.autoSync` | `false` | Automatically push changes on file save |
+| `memorywiki.autoPreview` | `true` | Automatically open Memory.Wiki preview when opening a .md file |
+| `memorywiki.syncInterval` | `30` | Polling interval for remote changes (seconds, 10-300) |
+| `memorywiki.apiBaseUrl` | `https://memory.wiki` | API endpoint (for self-hosted instances) |
 
 ---
 
@@ -249,9 +249,9 @@ The AI modifies your document based on the instruction. The change is applied di
 
 ## How Sync Works
 
-### The .mdfy.json sidecar
+### The .memorywiki.json sidecar
 
-When you publish a file, a `.mdfy.json` is created next to your `.md` file:
+When you publish a file, a `.memorywiki.json` is created next to your `.md` file:
 
 ```json
 {
@@ -298,11 +298,11 @@ Use the [Chrome extension](https://memory.wiki/plugins) to capture an AI convers
 
 ### Publish from CI/CD
 
-Use the [CLI](https://www.npmjs.com/package/mdfy-cli) in your pipeline to auto-publish documentation on every commit. Edit locally in VS Code when needed.
+Use the [CLI](https://www.npmjs.com/package/memory-wiki-cli) in your pipeline to auto-publish documentation on every commit. Edit locally in VS Code when needed.
 
 ### Cross-AI knowledge base
 
-Publish a document from VS Code. Paste the URL into any AI conversation. Claude, ChatGPT, and Gemini can all read Memory.Wiki URLs. For programmatic access from Claude Web, Cursor, or Windsurf, point them at the [hosted MCP](https://memory.wiki/docs/mcp) at `https://memory.wiki/api/mcp` — or install the [local stdio MCP](https://www.npmjs.com/package/mdfy-mcp) for Claude Desktop.
+Publish a document from VS Code. Paste the URL into any AI conversation. Claude, ChatGPT, and Gemini can all read Memory.Wiki URLs. For programmatic access from Claude Web, Cursor, or Windsurf, point them at the [hosted MCP](https://memory.wiki/docs/mcp) at `https://memory.wiki/api/mcp` — or install the [local stdio MCP](https://www.npmjs.com/package/memory-wiki-mcp) for Claude Desktop.
 
 ### Meeting notes to shareable document
 
@@ -320,9 +320,9 @@ Memory.Wiki is a cross-platform document publishing system. All platforms share 
 | **VS Code** | Preview, publish, sync from your editor | You are here |
 | **[Mac Desktop](https://memory.wiki/plugins)** | Native app with sidebar, file import (PDF, DOCX, PPTX) | [Download DMG](https://github.com/raymindai/mdcore/releases) |
 | **[Chrome Extension](https://memory.wiki/plugins)** | Capture from ChatGPT, Claude, Gemini, GitHub | [Download](https://memory.wiki/plugins) |
-| **[CLI](https://www.npmjs.com/package/mdfy-cli)** | `Memory.Wiki publish`, pipe support, tmux capture | `npm i -g mdfy-cli` |
+| **[CLI](https://www.npmjs.com/package/memory-wiki-cli)** | `Memory.Wiki publish`, pipe support, tmux capture | `npm i -g memory-wiki-cli` |
 | **[Hosted MCP](https://memory.wiki/docs/mcp)** | AI agents (Claude Web, Cursor) — 25 tools | URL: `https://memory.wiki/api/mcp` |
-| **[Local MCP](https://www.npmjs.com/package/mdfy-mcp)** | AI agents (Claude Desktop, Code) — 6 core tools | `npx mdfy-mcp` |
+| **[Local MCP](https://www.npmjs.com/package/memory-wiki-mcp)** | AI agents (Claude Desktop, Code) — 6 core tools | `npx memory-wiki-mcp` |
 | **[QuickLook](https://memory.wiki/plugins)** | Press Space on .md in Finder for rendered preview | [Download](https://github.com/raymindai/mdcore/releases) |
 | **tmux** | Capture pane output and publish | [Install guide](https://github.com/raymindai/mdcore/tree/main/apps/tmux) |
 
@@ -349,7 +349,7 @@ A: Rendering happens entirely in your browser via WASM. When you publish, the Ma
 A: Yes. Published documents are public by default but can be made private (draft) from the web editor. Documents can also be password-protected or restricted to specific email addresses.
 
 **Q: What happens if I uninstall the extension?**
-A: Your local `.md` files are unchanged. Published documents remain on Memory.Wiki. The `.mdfy.json` sidecar files can be deleted.
+A: Your local `.md` files are unchanged. Published documents remain on Memory.Wiki. The `.memorywiki.json` sidecar files can be deleted.
 
 **Q: Does it work with existing Markdown extensions?**
 A: Yes. Memory.Wiki adds its own preview panel and does not interfere with the built-in Markdown preview or other extensions.

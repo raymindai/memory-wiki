@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 function BundleLoading({ title }: { title: string | null }) {
   return (
@@ -9,7 +9,7 @@ function BundleLoading({ title }: { title: string | null }) {
       className="flex flex-col items-center justify-center h-screen gap-6"
       style={{ background: "var(--background)" }}
     >
-      <MdfyLogo size={30} />
+      <MemoryWikiLogo size={30} />
       {title && (
         <h1 className="text-sm font-medium px-4 text-center" style={{ color: "var(--text-secondary)" }}>
           {title}

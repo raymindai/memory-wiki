@@ -11,7 +11,7 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
  * What an AI gets when the user pastes memory.wiki/hub/<slug>:
  *
  *   ---
- *   mdfy_bundle: 1
+ *   mw_bundle: 1
  *   type: hub
  *   slug: <slug>
  *   author: "..."
@@ -160,7 +160,7 @@ export async function GET(
 
   const frontmatter = [
     "---",
-    "mdfy_bundle: 1",
+    "mw_bundle: 1",
     "type: hub",
     `slug: ${slug}`,
     `author: "${author}"`,
@@ -389,7 +389,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
 
   const frontmatter = [
     "---",
-    "mdfy_bundle: 1",
+    "mw_bundle: 1",
     "type: hub_digest",
     `slug: ${slug}`,
     `author: "${author}"`,

@@ -484,7 +484,7 @@ function SimpleUrlForm({
                   width: "30%",
                   background: "var(--accent)",
                   borderRadius: 2,
-                  animation: "mdfyBootBar 1.1s ease-in-out infinite",
+                  animation: "mwBootBar 1.1s ease-in-out infinite",
                 }}
               />
             )}

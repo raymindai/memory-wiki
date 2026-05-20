@@ -23,11 +23,11 @@ export interface TiptapRemoteCursor {
   color: string;
 }
 
-export const remoteCursorsPluginKey = new PluginKey<DecorationSet>("mdfyRemoteCursors");
+export const remoteCursorsPluginKey = new PluginKey<DecorationSet>("mwRemoteCursors");
 
 function buildCaret(cursor: TiptapRemoteCursor): HTMLElement {
   const wrap = document.createElement("span");
-  wrap.className = "mdfy-remote-caret";
+  wrap.className = "mw-remote-caret";
   wrap.style.cssText = [
     "position: relative",
     "display: inline-block",
@@ -47,7 +47,7 @@ function buildCaret(cursor: TiptapRemoteCursor): HTMLElement {
     "width: 2px",
     `background: ${cursor.color}`,
     "border-radius: 1px",
-    "animation: mdfyRemoteCaretBlink 1100ms steps(2, end) infinite",
+    "animation: mwRemoteCaretBlink 1100ms steps(2, end) infinite",
   ].join(";");
 
   const label = document.createElement("span");

@@ -83,7 +83,7 @@ files for transparency.
 Anonymous-first capture path is preserved. The skill uses
 `Authorization: Bearer <token>` if the user has signed in, but
 falls back to anonymous capture (which the cookie path from W3a
-groups under the user's `mdfy_anon` cookie) if they haven't. On
+groups under the user's `mw_anon` cookie) if they haven't. On
 sign-in the existing `/api/user/migrate` flow claims everything.
 
 ### Verified

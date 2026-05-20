@@ -344,12 +344,12 @@ function ShareModal({
                   height: i === 0 ? 40 : 32,
                   background: "linear-gradient(90deg, var(--surface) 0%, var(--toggle-bg) 50%, var(--surface) 100%)",
                   backgroundSize: "200% 100%",
-                  animation: "mdfy-skeleton 1.4s ease-in-out infinite",
+                  animation: "mw-skeleton 1.4s ease-in-out infinite",
                   opacity: 0.7,
                 }}
               />
             ))}
-            <style>{`@keyframes mdfy-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
+            <style>{`@keyframes mw-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
           </div>
         )}
 

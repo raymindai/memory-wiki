@@ -71,7 +71,7 @@ function setStatus(text, type = "") {
 
 // ─── Send to Memory.Wiki ───
 
-async function openInMdfy(markdown) {
+async function openInMemoryWiki(markdown) {
   if (!markdown || markdown.trim().length === 0) {
     setStatus("No content found", "error");
     return;
@@ -101,7 +101,7 @@ async function openInMdfy(markdown) {
       // Check for auth failure
       if (res.status === 401 || res.status === 403) {
         setStatus("Session expired. Log in at Memory.Wiki to sync.", "error");
-        chrome.storage.local.remove("mdfy-was-logged-in");
+        chrome.storage.local.remove("mw-was-logged-in");
       }
     } catch (err) {
       console.warn("[Memory.Wiki] Authenticated share failed, falling back to hash URL:", err);
@@ -260,7 +260,7 @@ btnCapture.addEventListener("click", async () => {
         },
       });
       if (result?.result) {
-        await openInMdfy(result.result);
+        await openInMemoryWiki(result.result);
       } else {
         setStatus("No content found", "error");
       }
@@ -271,7 +271,7 @@ btnCapture.addEventListener("click", async () => {
       });
 
       if (response && response.markdown) {
-        await openInMdfy(response.markdown);
+        await openInMemoryWiki(response.markdown);
       } else {
         setStatus("No conversation found", "error");
       }
@@ -290,7 +290,7 @@ btnCapture.addEventListener("click", async () => {
         lastN,
       });
       if (response && response.markdown) {
-        await openInMdfy(response.markdown);
+        await openInMemoryWiki(response.markdown);
       } else {
         setStatus("No conversation found", "error");
       }
@@ -331,7 +331,7 @@ btnSelection.addEventListener("click", async () => {
       return;
     }
 
-    await openInMdfy(markdown);
+    await openInMemoryWiki(markdown);
   } catch (err) {
     setStatus("Failed: " + err.message, "error");
   }
@@ -375,13 +375,13 @@ chkFloat.addEventListener("change", () => {
 (async function checkAuthState() {
   const userId = await getUserId();
   // Check if user was previously logged in
-  chrome.storage.local.get(["mdfy-was-logged-in"], (data) => {
-    if (!userId && data["mdfy-was-logged-in"]) {
+  chrome.storage.local.get(["mw-was-logged-in"], (data) => {
+    if (!userId && data["mw-was-logged-in"]) {
       // User was logged in before but no longer — session expired
       setStatus("Session expired. Log in at Memory.Wiki to sync.", "error");
-      chrome.storage.local.remove("mdfy-was-logged-in");
+      chrome.storage.local.remove("mw-was-logged-in");
     } else if (userId) {
-      chrome.storage.local.set({ "mdfy-was-logged-in": "1" });
+      chrome.storage.local.set({ "mw-was-logged-in": "1" });
     }
   });
 })();

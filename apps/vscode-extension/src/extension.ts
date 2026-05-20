@@ -117,7 +117,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Refresh sidebar
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.sidebar.refresh", () => {
+    vscode.commands.registerCommand("memorywiki.sidebar.refresh", () => {
       sidebarProvider?.refresh();
     })
   );
@@ -143,7 +143,7 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
-  // Handle file renames — move .mdfy.json sidecar alongside renamed file
+  // Handle file renames — move .memorywiki.json sidecar alongside renamed file
   context.subscriptions.push(
     vscode.workspace.onDidRenameFiles(async (e) => {
       for (const { oldUri, newUri } of e.files) {
@@ -168,7 +168,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Preview (WYSIWYG)
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.preview", async () => {
+    vscode.commands.registerCommand("memorywiki.preview", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "markdown") {
         vscode.window.showWarningMessage("Open a Markdown file first.");
@@ -192,7 +192,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Publish (one-click: publish or push + auto-copy URL)
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.publish", async () => {
+    vscode.commands.registerCommand("memorywiki.publish", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "markdown") {
         vscode.window.showWarningMessage("Open a Markdown file first.");
@@ -205,7 +205,7 @@ export function activate(context: vscode.ExtensionContext): void {
           "Sign in to Memory.Wiki to publish documents.",
           "Sign In"
         );
-        if (choice === "Sign In") { vscode.commands.executeCommand("mdfy.login"); }
+        if (choice === "Sign In") { vscode.commands.executeCommand("memorywiki.login"); }
         return;
       }
 
@@ -284,7 +284,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Update (Push)
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.update", async () => {
+    vscode.commands.registerCommand("memorywiki.update", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "markdown") {
         vscode.window.showWarningMessage("Open a Markdown file first.");
@@ -303,7 +303,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Pull
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.pull", async () => {
+    vscode.commands.registerCommand("memorywiki.pull", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "markdown") {
         vscode.window.showWarningMessage("Open a Markdown file first.");
@@ -322,21 +322,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Copy URL (from status bar click)
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.copyUrl", async () => {
+    vscode.commands.registerCommand("memorywiki.copyUrl", async () => {
       const url = statusBar?.getPublishedUrl();
       if (url) {
         await vscode.env.clipboard.writeText(url);
         vscode.window.showInformationMessage(`URL copied: ${url}`);
       } else {
         // Fall back to sync menu
-        vscode.commands.executeCommand("mdfy.sync");
+        vscode.commands.executeCommand("memorywiki.sync");
       }
     })
   );
 
   // Command: Login
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.login", async () => {
+    vscode.commands.registerCommand("memorywiki.login", async () => {
       await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: "memory.wiki: Opening browser for login...", cancellable: false },
         async () => {
@@ -348,7 +348,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Export
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.export", async () => {
+    vscode.commands.registerCommand("memorywiki.export", async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor || editor.document.languageId !== "markdown") {
         vscode.window.showWarningMessage("Open a Markdown file first.");
@@ -412,7 +412,7 @@ export function activate(context: vscode.ExtensionContext): void {
         "Sign in to use AI features.",
         "Sign In"
       );
-      if (choice === "Sign In") { vscode.commands.executeCommand("mdfy.login"); }
+      if (choice === "Sign In") { vscode.commands.executeCommand("memorywiki.login"); }
       return;
     }
 
@@ -481,16 +481,16 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.aiPolish", () => runAiAction("polish"))
+    vscode.commands.registerCommand("memorywiki.aiPolish", () => runAiAction("polish"))
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.aiSummary", () => runAiAction("summary"))
+    vscode.commands.registerCommand("memorywiki.aiSummary", () => runAiAction("summary"))
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.aiTldr", () => runAiAction("tldr"))
+    vscode.commands.registerCommand("memorywiki.aiTldr", () => runAiAction("tldr"))
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.aiTranslate", async () => {
+    vscode.commands.registerCommand("memorywiki.aiTranslate", async () => {
       const languages = [
         { label: "English", code: "en" },
         { label: "Korean", code: "ko" },
@@ -512,7 +512,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.aiChat", async () => {
+    vscode.commands.registerCommand("memorywiki.aiChat", async () => {
       const instruction = await vscode.window.showInputBox({
         prompt: "Ask AI to edit your document...",
         placeHolder: "e.g. Make the intro shorter",
@@ -524,7 +524,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Command: Sync Status
   context.subscriptions.push(
-    vscode.commands.registerCommand("mdfy.sync", async () => {
+    vscode.commands.registerCommand("memorywiki.sync", async () => {
       const items: vscode.QuickPickItem[] = [
         { label: "$(cloud-upload) Publish", description: "Publish current file to Memory.Wiki" },
         { label: "$(arrow-up) Push", description: "Push local changes to Memory.Wiki" },
@@ -538,22 +538,22 @@ export function activate(context: vscode.ExtensionContext): void {
 
       if (!selected) {return;}
       if (selected.label.includes("Publish")) {
-        vscode.commands.executeCommand("mdfy.publish");
+        vscode.commands.executeCommand("memorywiki.publish");
       } else if (selected.label.includes("Push")) {
-        vscode.commands.executeCommand("mdfy.update");
+        vscode.commands.executeCommand("memorywiki.update");
       } else if (selected.label.includes("Pull")) {
-        vscode.commands.executeCommand("mdfy.pull");
+        vscode.commands.executeCommand("memorywiki.pull");
       } else if (selected.label.includes("Login")) {
-        vscode.commands.executeCommand("mdfy.login");
+        vscode.commands.executeCommand("memorywiki.login");
       }
     })
   );
 
-  // Auto-sync on save — always sync published files (has .mdfy.json)
+  // Auto-sync on save — always sync published files (has .memorywiki.json)
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument(async (doc) => {
       if (doc.languageId !== "markdown") { return; }
-      // Always push on save if the file is published (has .mdfy.json sidecar)
+      // Always push on save if the file is published (has .memorywiki.json sidecar)
       // Skip if the user is not the owner
       if (nonOwnerDocs.has(doc.uri.toString())) { return; }
       const config = await loadMdfyConfig(doc.uri.fsPath);
@@ -792,9 +792,9 @@ export function getMdfyConfigPath(mdFilePath: string): string {
   const fs = require("fs");
   const dir = path.dirname(mdFilePath);
   const base = path.basename(mdFilePath, path.extname(mdFilePath));
-  const newPath = path.join(dir, `.${base}.mdfy.json`);
+  const newPath = path.join(dir, `.${base}.memorywiki.json`);
   // Migrate old visible sidecar to hidden
-  const oldPath = path.join(dir, `${base}.mdfy.json`);
+  const oldPath = path.join(dir, `${base}.memorywiki.json`);
   try {
     if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
       fs.renameSync(oldPath, newPath);

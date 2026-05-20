@@ -30,11 +30,11 @@ test.describe("Bare root URL → Home", () => {
     // bug: activeTabId restored from localStorage on bare root → empty
     // editor. Fix: ignore localStorage active id when on bare root.
     await page.addInitScript(() => {
-      localStorage.setItem("mdfy-onboarded", "1");
-      localStorage.setItem("mdfy-welcome-seen", "1");
-      localStorage.setItem("mdfy-tabs-version", "10");
-      localStorage.setItem("mdfy-active-tab", "stale-deleted-doc-id");
-      localStorage.setItem("mdfy-tabs", JSON.stringify([
+      localStorage.setItem("mw-onboarded", "1");
+      localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-tabs-version", "10");
+      localStorage.setItem("mw-active-tab", "stale-deleted-doc-id");
+      localStorage.setItem("mw-tabs", JSON.stringify([
         { id: "stale-deleted-doc-id", title: "Stale doc", markdown: "", cloudId: "stale-deleted-doc-id" },
       ]));
     });
@@ -59,9 +59,9 @@ test.describe("Bare root URL → Home", () => {
 test.describe.skip("Sign-In modal", () => {
   async function openSignInModal(page: Page) {
     await page.addInitScript(() => {
-      localStorage.setItem("mdfy-onboarded", "1");
-      localStorage.setItem("mdfy-welcome-seen", "1");
-      localStorage.setItem("mdfy-tabs-version", "10");
+      localStorage.setItem("mw-onboarded", "1");
+      localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-tabs-version", "10");
     });
     // Bypass bare-root → Home logic (which would overlay Start above
     // the sidebar and steal focus from our Sign-In button click) by
@@ -129,9 +129,9 @@ test.describe.skip("Modal stopPropagation invariant", () => {
   test("Sign-In modal backdrop dismisses, inner content keeps modal open", async ({ page }) => {
     // Sign-in modal is the easiest one to drive without real auth.
     await page.addInitScript(() => {
-      localStorage.setItem("mdfy-onboarded", "1");
-      localStorage.setItem("mdfy-welcome-seen", "1");
-      localStorage.setItem("mdfy-tabs-version", "10");
+      localStorage.setItem("mw-onboarded", "1");
+      localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-tabs-version", "10");
     });
     await page.goto("/?e2e=1");
     const trigger = page.locator('button', { hasText: "Sign In" }).first();

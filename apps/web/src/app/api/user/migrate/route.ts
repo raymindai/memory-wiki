@@ -11,7 +11,7 @@ import { readAnonymousCookie } from "@/lib/anonymous-cookie";
  * Accepts the anonymousId from:
  *   1. body.anonymousId (legacy localStorage path)
  *   2. body.cookieAnonymousId (current cross-origin cookie path)
- *   3. mdfy_anon cookie on the request itself (fallback)
+ *   3. mw_anon cookie on the request itself (fallback)
  *
  * The client may pass both legacy and cookie ids if it has them, and
  * we'll run the migrate for each.

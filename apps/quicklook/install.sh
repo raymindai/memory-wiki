@@ -5,7 +5,7 @@ set -euo pipefail
 # Memory.Wiki QuickLook — Build & Install Script
 # ================================================================
 #
-# Builds the mdfy-quicklook CLI tool and installs it to /usr/local/bin.
+# Builds the memory-wiki-quicklook CLI tool and installs it to /usr/local/bin.
 # The CLI can generate HTML previews of Markdown files.
 #
 # For the full QuickLook Extension (.appex), use Xcode.
@@ -13,10 +13,10 @@ set -euo pipefail
 # ================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$SCRIPT_DIR/mdfy-quicklook"
+PROJECT_DIR="$SCRIPT_DIR/memory-wiki-quicklook"
 BUILD_DIR="$PROJECT_DIR/.build/release"
 INSTALL_DIR="/usr/local/bin"
-TOOL_NAME="mdfy-quicklook"
+TOOL_NAME="memory-wiki-quicklook"
 
 echo ""
 echo "  Memory.Wiki QuickLook — Build & Install"

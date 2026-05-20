@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 //
 // AI clients (Claude, ChatGPT, Cursor, Codex, Aider) hit /raw/* expecting
 // a markdown body. When access is denied we still return markdown, with:
-//   - A frontmatter block so the AI can parse `mdfy_permission` and
+//   - A frontmatter block so the AI can parse `mw_permission` and
 //     `reason` programmatically.
 //   - Headers (X-Mdfy-Permission, X-Mdfy-Required) so a smart client can
 //     automate recovery without scraping the body.
@@ -96,8 +96,8 @@ export function permissionResponse(opts: PermissionResponseOptions): NextRespons
 
   const frontmatter = [
     "---",
-    "mdfy_error: 1",
-    `mdfy_permission: ${reason}`,
+    "mw_error: 1",
+    `mw_permission: ${reason}`,
     `kind: ${resourceKind}`,
     resourceId ? `id: ${resourceId}` : null,
     `url: ${canonicalUrl}`,

@@ -65,7 +65,7 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
   // Load chat history from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`mdfy-chat-${bundleId}`);
+      const saved = localStorage.getItem(`mw-chat-${bundleId}`);
       if (saved) setMessages(JSON.parse(saved));
     } catch { /* ignore */ }
   }, [bundleId]);
@@ -73,7 +73,7 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
   // Save chat history
   useEffect(() => {
     if (messages.length > 0) {
-      try { localStorage.setItem(`mdfy-chat-${bundleId}`, JSON.stringify(messages)); } catch { /* ignore */ }
+      try { localStorage.setItem(`mw-chat-${bundleId}`, JSON.stringify(messages)); } catch { /* ignore */ }
     }
   }, [messages, bundleId]);
 
@@ -172,7 +172,7 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
     setMessages([]);
     setError(null);
     setInput("");
-    try { localStorage.removeItem(`mdfy-chat-${bundleId}`); } catch { /* ignore */ }
+    try { localStorage.removeItem(`mw-chat-${bundleId}`); } catch { /* ignore */ }
   }, [bundleId]);
 
   // Listen for the global "new chat" event fired by the panel header
@@ -182,8 +182,8 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
       if (messages.length === 0) return;
       clearChat();
     };
-    window.addEventListener("mdfy-newchat-bundle", handler);
-    return () => window.removeEventListener("mdfy-newchat-bundle", handler);
+    window.addEventListener("mw-newchat-bundle", handler);
+    return () => window.removeEventListener("mw-newchat-bundle", handler);
   }, [clearChat, messages.length]);
 
   return (

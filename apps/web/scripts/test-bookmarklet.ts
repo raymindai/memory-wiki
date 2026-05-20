@@ -210,11 +210,11 @@ async function main() {
 <div data-message-author-role="user"><div class="whitespace-pre-wrap">First</div></div>
 <div data-message-author-role="assistant"><div class="markdown"><p>Reply</p></div></div>
 </body></html>`;
-    // Seed window.__mdfyBookmarkletActive before running
+    // Seed window.__mwBookmarkletActive before running
     const here = dirname(fileURLToPath(import.meta.url));
     const code = await fs.readFile(resolve(here, "../public/bookmarklet.js"), "utf8");
     const { document, window } = parseHTML(html);
-    (window as unknown as { __mdfyBookmarkletActive: boolean }).__mdfyBookmarkletActive = true;
+    (window as unknown as { __mwBookmarkletActive: boolean }).__mwBookmarkletActive = true;
     let called = false;
     const runner = new Function("window", "document", "fetch", "requestAnimationFrame", "setTimeout", "location", code);
     runner(

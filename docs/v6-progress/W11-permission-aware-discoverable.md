@@ -10,7 +10,7 @@
 every "you can't read this" case on the AI fetch path, replacing the
 old plain-text `Not found` / `password-protected` strings:
 
-- Frontmatter block (`mdfy_error: 1`, `mdfy_permission: <reason>`,
+- Frontmatter block (`mw_error: 1`, `mw_permission: <reason>`,
   `kind`, `id`, `url`) so an AI client can parse the cause without
   scraping the body.
 - Markdown body with a short instructions block — for `email_restricted`

@@ -8,8 +8,8 @@
 (function () {
   "use strict";
 
-  if (document.documentElement.dataset.mdfyGithub) return;
-  document.documentElement.dataset.mdfyGithub = "1";
+  if (document.documentElement.dataset.mwGithub) return;
+  document.documentElement.dataset.mwGithub = "1";
 
   const MDFY_URL = "https://memory.wiki";
 
@@ -35,21 +35,21 @@
 
   function createButton() {
     // Prevent duplicates — remove ALL existing Memory.Wiki buttons first
-    document.querySelectorAll("#mdfy-github-btn, .mdfy-github-btn").forEach(el => el.remove());
+    document.querySelectorAll("#mw-github-btn, .mw-github-btn").forEach(el => el.remove());
     if (!isMarkdownPage()) return;
 
     const btn = document.createElement("button");
-    btn.id = "mdfy-github-btn";
-    btn.className = "mdfy-github-btn";
-    btn.innerHTML = '<span class="mdfy-gh-label">Open in Memory.Wiki</span>';
+    btn.id = "mw-github-btn";
+    btn.className = "mw-github-btn";
+    btn.innerHTML = '<span class="mw-gh-label">Open in Memory.Wiki</span>';
     btn.title = "Open this Markdown file in Memory.Wiki for beautiful rendering and editing";
 
     btn.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      btn.classList.add("mdfy-gh-loading");
-      btn.querySelector(".mdfy-gh-label").textContent = "Loading...";
+      btn.classList.add("mw-gh-loading");
+      btn.querySelector(".mw-gh-label").textContent = "Loading...";
 
       try {
         const rawUrl = getRawUrl();
@@ -58,7 +58,7 @@
         const markdown = await res.text();
 
         if (!markdown.trim()) {
-          btn.querySelector(".mdfy-gh-label").textContent = "Empty file";
+          btn.querySelector(".mw-gh-label").textContent = "Empty file";
           setTimeout(() => resetButton(btn), 2000);
           return;
         }
@@ -95,9 +95,9 @@
               const { id, editToken } = parsed;
               const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
               window.open(MDFY_URL + "/?from=" + id + tokenParam, "_blank");
-              btn.classList.remove("mdfy-gh-loading");
-              btn.classList.add("mdfy-gh-done");
-              btn.querySelector(".mdfy-gh-label").textContent = "Opened!";
+              btn.classList.remove("mw-gh-loading");
+              btn.classList.add("mw-gh-done");
+              btn.querySelector(".mw-gh-label").textContent = "Opened!";
               setTimeout(() => resetButton(btn), 3000);
               return;
             }
@@ -118,15 +118,15 @@
           window.open(MDFY_URL, "_blank");
         }
 
-        btn.classList.remove("mdfy-gh-loading");
-        btn.classList.add("mdfy-gh-done");
-        btn.querySelector(".mdfy-gh-label").textContent = "Opened!";
+        btn.classList.remove("mw-gh-loading");
+        btn.classList.add("mw-gh-done");
+        btn.querySelector(".mw-gh-label").textContent = "Opened!";
         setTimeout(() => resetButton(btn), 3000);
       } catch (err) {
         console.error("[Memory.Wiki] GitHub integration error:", err);
-        btn.classList.remove("mdfy-gh-loading");
-        btn.classList.add("mdfy-gh-error");
-        btn.querySelector(".mdfy-gh-label").textContent = "Failed";
+        btn.classList.remove("mw-gh-loading");
+        btn.classList.add("mw-gh-error");
+        btn.querySelector(".mw-gh-label").textContent = "Failed";
         setTimeout(() => resetButton(btn), 3000);
       }
     });
@@ -175,7 +175,7 @@
       const label = (b.getAttribute('aria-label') || '').toLowerCase();
       if (text === 'raw' || label.includes('raw') || label.includes('copy raw')) {
         const parent = b.closest('.d-flex, [class*="actions"], [class*="header"]') || b.parentElement;
-        if (parent && !parent.querySelector('#mdfy-github-btn')) {
+        if (parent && !parent.querySelector('#mw-github-btn')) {
           parent.insertBefore(btn, parent.firstChild);
           return true;
         }
@@ -213,8 +213,8 @@
   }
 
   function resetButton(btn) {
-    btn.classList.remove("mdfy-gh-loading", "mdfy-gh-done", "mdfy-gh-error");
-    btn.innerHTML = '<span class="mdfy-gh-label">Open in Memory.Wiki</span>';
+    btn.classList.remove("mw-gh-loading", "mw-gh-done", "mw-gh-error");
+    btn.innerHTML = '<span class="mw-gh-label">Open in Memory.Wiki</span>';
   }
 
   // Compression (same as content.js)
@@ -259,7 +259,7 @@
     if (location.href !== lastUrl) {
       lastUrl = location.href;
       // Remove old button
-      const old = document.getElementById("mdfy-github-btn");
+      const old = document.getElementById("mw-github-btn");
       if (old) old.remove();
       // Check new page
       setTimeout(init, 500);

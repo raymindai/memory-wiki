@@ -68,7 +68,7 @@ export default function PrivacyPage() {
             <li><strong>No phone-home:</strong> The app does not send data to any server unless you explicitly publish or sync a document.</li>
           </ul>
 
-          <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>MCP Server (mdfy-mcp)</h3>
+          <h3 className="font-medium mt-4" style={{ color: "var(--text-primary)" }}>MCP Server (memory-wiki-mcp)</h3>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Document operations:</strong> The MCP server creates, reads, and manages documents on Memory.Wiki via its API. Documents are stored on Memory.Wiki servers.</li>
             <li><strong>Local tokens:</strong> Edit tokens are stored locally at <code style={{ fontSize: "0.85em" }}>~/.memory.wiki/tokens.json</code> with owner-only permissions (0600).</li>

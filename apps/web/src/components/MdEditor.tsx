@@ -32,7 +32,7 @@ import BundleChat from "@/components/BundleChat";
 import HubChat from "@/components/HubChat";
 import SidebarFolderTree from "@/components/SidebarFolder";
 import FolderEmojiPicker from "@/components/FolderEmojiPicker";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import MathEditor from "@/components/MathEditor";
 import Tooltip from "@/components/Tooltip";
 import SynthesisDiff from "@/components/SynthesisDiff";
@@ -46,7 +46,7 @@ import { useCodeMirror } from "@/components/useCodeMirror";
 import ShareModal from "@/components/ShareModal";
 import ToastContainer, { showToast } from "@/components/Toast";
 import { FEATURES } from "@/lib/feature-flags";
-import { importFile, getSupportedAcceptString, mdfyText } from "@/lib/file-import";
+import { importFile, getSupportedAcceptString, mwText } from "@/lib/file-import";
 import { isCliOutput, cliToMarkdown } from "@/lib/cli-to-md";
 import {
   Undo2, Redo2, List, ListOrdered, Indent, Outdent, Quote, Minus, Link,
@@ -124,9 +124,9 @@ const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
 | Channel | How |
 |---------|-----|
 | Web | You are here — [Memory.Wiki](https://memory.wiki) |
-| VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode) — Cmd+Shift+M to preview |
+| VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) — Cmd+Shift+M to preview |
 | Mac App | Native desktop with sidebar and sync |
-| CLI | \`npm install -g mdfy-cli\` — pipe anything to a URL |
+| CLI | \`npm install -g memory-wiki-cli\` — pipe anything to a URL |
 | Chrome | [Extension](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) — capture AI conversations |
 | MCP | Connect Claude, Cursor, or any AI tool |
 | QuickLook | Press Space on .md files in Finder |
@@ -528,8 +528,8 @@ After importing, you'll see **"Structure this document?"** — click **Structure
 
 \`\`\`bash
 # Pipe any file content
-cat report.md | mdfy publish
-pbpaste | mdfy publish
+cat report.md | mw publish
+pbpaste | mw publish
 \`\`\`
 
 ### Import from GitHub
@@ -672,11 +672,11 @@ Your documents sync across all 7 Memory.Wiki channels:
 | Channel | Install | What it does |
 |---------|---------|-------------|
 | Web | [Memory.Wiki](https://memory.wiki) | Full editor with AI tools |
-| VS Code | \`ext install raymindai.mdfy-vscode\` | WYSIWYG preview + sync |
+| VS Code | \`ext install raymindai.memory-wiki-vscode\` | WYSIWYG preview + sync |
 | Mac App | [Download DMG](https://memory.wiki/plugins) | Native sidebar + offline |
-| CLI | \`npm install -g mdfy-cli\` | Pipe anything to a URL |
+| CLI | \`npm install -g memory-wiki-cli\` | Pipe anything to a URL |
 | Chrome | [Chrome Web Store](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) | Capture AI conversations |
-| MCP | \`npx mdfy-mcp\` or hosted at memory.wiki/api/mcp | AI tools integration |
+| MCP | \`npx memory-wiki-mcp\` or hosted at memory.wiki/api/mcp | AI tools integration |
 | QuickLook | Bundled with Mac app | Space to preview in Finder |
 
 Same URL, same content, everywhere.
@@ -1124,7 +1124,7 @@ const SAMPLE_VSCODE_EXT = `# VS Code Extension
 ## Install
 
 \`\`\`bash
-ext install raymindai.mdfy-vscode
+ext install raymindai.memory-wiki-vscode
 \`\`\`
 
 Or search "Memory.Wiki" in VS Code Extensions.
@@ -1158,10 +1158,10 @@ Or search "Memory.Wiki" in VS Code Extensions.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| \`mdfy.theme\` | \`auto\` | Follows your VS Code theme |
-| \`mdfy.autoSync\` | \`false\` | Auto-push on save |
-| \`mdfy.autoPreview\` | \`true\` | Auto-open preview for .md files |
-| \`mdfy.syncInterval\` | \`30\` | Polling interval (seconds) |
+| \`memorywiki.theme\` | \`auto\` | Follows your VS Code theme |
+| \`memorywiki.autoSync\` | \`false\` | Auto-push on save |
+| \`memorywiki.autoPreview\` | \`true\` | Auto-open preview for .md files |
+| \`memorywiki.syncInterval\` | \`30\` | Polling interval (seconds) |
 `;
 
 const SAMPLE_DESKTOP = `# Memory.Wiki for Mac
@@ -1212,30 +1212,30 @@ const SAMPLE_CLI = `# Memory.Wiki CLI
 ## Install
 
 \`\`\`bash
-npm install -g mdfy-cli
+npm install -g memory-wiki-cli
 \`\`\`
 
 ## Publish
 
 \`\`\`bash
 # Publish a file
-mdfy publish README.md
+mw publish README.md
 # → https://memory.wiki/abc123  (copied to clipboard)
 
 # Publish from pipe
-echo "# Hello World" | mdfy publish
+echo "# Hello World" | mw publish
 
 # Publish clipboard
-pbpaste | mdfy publish
+pbpaste | mw publish
 \`\`\`
 
 ## Pipe Anything
 
 \`\`\`bash
-claude "explain React hooks" | mdfy publish
-git log --oneline -20 | mdfy publish
-man grep | mdfy publish
-curl -s https://api.example.com/status | mdfy publish
+claude "explain React hooks" | mw publish
+git log --oneline -20 | mw publish
+man grep | mw publish
+curl -s https://api.example.com/status | mw publish
 \`\`\`
 
 ## Read in Terminal
@@ -1260,7 +1260,7 @@ Memory.Wiki open abc123                # Open in browser
 Add to \`~/.tmux.conf\`:
 
 \`\`\`bash
-bind-key M run-shell "tmux capture-pane -p -S -1000 | mdfy publish"
+bind-key M run-shell "tmux capture-pane -p -S -1000 | mw publish"
 \`\`\`
 
 ## Short Aliases
@@ -1296,7 +1296,7 @@ For **Claude Web**, **Cursor**, **Windsurf**:
 For **Claude Code** and **Claude Desktop**:
 
 \`\`\`bash
-npx mdfy-cli login
+npx memory-wiki-cli login
 \`\`\`
 
 Add to \`.mcp.json\`:
@@ -1306,7 +1306,7 @@ Add to \`.mcp.json\`:
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }
@@ -1316,28 +1316,28 @@ Add to \`.mcp.json\`:
 
 \`\`\`
 You: "Publish my meeting notes to Memory.Wiki"
-Claude: → mdfy_create → https://memory.wiki/abc123
+Claude: → mw_create → https://memory.wiki/abc123
 
 You: "Show me my documents"
-Claude: → mdfy_list → 8 documents found
+Claude: → mw_list → 8 documents found
 
 You: "Make that document private"
-Claude: → mdfy_publish(published: false) → Now private
+Claude: → mw_publish(published: false) → Now private
 
 You: "Update it with this new section"
-Claude: → mdfy_update → Document updated, same URL
+Claude: → mw_update → Document updated, same URL
 \`\`\`
 
 ## Available Tools
 
 | Tool | Description |
 |------|-------------|
-| \`mdfy_create\` | Create document, get URL |
-| \`mdfy_read\` | Read document content |
-| \`mdfy_update\` | Update document |
-| \`mdfy_list\` | List your documents |
-| \`mdfy_publish\` | Toggle public/private |
-| \`mdfy_delete\` | Delete document |
+| \`mw_create\` | Create document, get URL |
+| \`mw_read\` | Read document content |
+| \`mw_update\` | Update document |
+| \`mw_list\` | List your documents |
+| \`mw_publish\` | Toggle public/private |
+| \`mw_delete\` | Delete document |
 
 The hosted HTTP MCP exposes 25 tools including append, sections, versions, folders, and more.
 `;
@@ -1556,12 +1556,12 @@ The bundle is no longer a folder. It's a thinking partner that reads what you've
 
 // Server-seeded "Sample Bundle: Tour of Memory.Wiki". The bundle row and its
 // 3 member docs are inserted by supabase/migrations/033_example_bundle.sql
-// with fixed ids (mdfy-ex-bundle / mdfy-ex-fmt / mdfy-ex-diag / mdfy-ex-feat),
+// with fixed ids (mw-ex-bundle / mw-ex-fmt / mw-ex-diag / mw-ex-feat),
 // so this id can be hardcoded on the client. Listed in EXAMPLE_TABS as a
 // kind="bundle" entry so first-time visitors can click it in
 // Guides & Examples and immediately see an interactive bundle —
 // canvas analysis, member-doc list, the full bundle viewer flow.
-const EXAMPLE_BUNDLE_ID = "mdfy-ex-bundle";
+const EXAMPLE_BUNDLE_ID = "mw-ex-bundle";
 
 const SAMPLE_AI_CAPTURE = `# Capture AI conversations
 
@@ -1657,17 +1657,17 @@ function useIsMobile() {
 function useTheme() {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem("mdfy-theme") as Theme) || "dark";
+    return (localStorage.getItem("mw-theme") as Theme) || "dark";
   });
 
   const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
     if (typeof window === "undefined") return "orange";
-    return (localStorage.getItem("mdfy-accent") as AccentColor) || "orange";
+    return (localStorage.getItem("mw-accent") as AccentColor) || "orange";
   });
 
   const [colorScheme, setColorSchemeState] = useState<ColorScheme>(() => {
     if (typeof window === "undefined") return "default";
-    return (localStorage.getItem("mdfy-scheme") as ColorScheme) || "default";
+    return (localStorage.getItem("mw-scheme") as ColorScheme) || "default";
   });
 
   useEffect(() => {
@@ -1692,7 +1692,7 @@ function useTheme() {
 
   // Cross-component sync — when SettingsEmbed (or any future caller)
   // changes the saved theme/accent/scheme without going through this
-  // hook's setters, it dispatches "mdfy-theme-changed" so the values
+  // hook's setters, it dispatches "mw-theme-changed" so the values
   // re-hydrate from localStorage here. Without this, the profile
   // menu's FlyoutMenu (which reads colorScheme/accentColor from
   // useTheme) shows the OLD selection after the user picked a new
@@ -1701,22 +1701,22 @@ function useTheme() {
     if (typeof window === "undefined") return;
     const onSync = () => {
       try {
-        const nextTheme = (localStorage.getItem("mdfy-theme") as Theme) || "dark";
-        const nextAccent = (localStorage.getItem("mdfy-accent") as AccentColor) || "orange";
-        const nextScheme = (localStorage.getItem("mdfy-scheme") as ColorScheme) || "default";
+        const nextTheme = (localStorage.getItem("mw-theme") as Theme) || "dark";
+        const nextAccent = (localStorage.getItem("mw-accent") as AccentColor) || "orange";
+        const nextScheme = (localStorage.getItem("mw-scheme") as ColorScheme) || "default";
         setThemeState(nextTheme);
         setAccentColorState(nextAccent);
         setColorSchemeState(nextScheme);
       } catch { /* ignore */ }
     };
-    window.addEventListener("mdfy-theme-changed", onSync);
-    return () => window.removeEventListener("mdfy-theme-changed", onSync);
+    window.addEventListener("mw-theme-changed", onSync);
+    return () => window.removeEventListener("mw-theme-changed", onSync);
   }, []);
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
     document.documentElement.setAttribute("data-theme", t);
-    try { localStorage.setItem("mdfy-theme", t); } catch { /* quota exceeded */ }
+    try { localStorage.setItem("mw-theme", t); } catch { /* quota exceeded */ }
   }, []);
 
   const toggleTheme = useCallback(() => {
@@ -1730,7 +1730,7 @@ function useTheme() {
     } else {
       document.documentElement.setAttribute("data-accent", a);
     }
-    try { localStorage.setItem("mdfy-accent", a); } catch { /* quota exceeded */ }
+    try { localStorage.setItem("mw-accent", a); } catch { /* quota exceeded */ }
   }, []);
 
   const setColorScheme = useCallback((s: ColorScheme) => {
@@ -1740,7 +1740,7 @@ function useTheme() {
     } else {
       document.documentElement.setAttribute("data-scheme", s);
     }
-    try { localStorage.setItem("mdfy-scheme", s); } catch { /* quota exceeded */ }
+    try { localStorage.setItem("mw-scheme", s); } catch { /* quota exceeded */ }
     // Skin and key color are independent — user can combine any skin with any key color
   }, []);
 
@@ -3240,7 +3240,7 @@ export default function MdEditor() {
   const [authEmailSent, setAuthEmailSent] = useState(false);
   const [folders, setFolders] = useState<Folder[]>(() => {
     if (typeof window === "undefined") return INITIAL_FOLDERS;
-    try { const s = localStorage.getItem("mdfy-folders"); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length > 0) return p; } } catch { /* */ }
+    try { const s = localStorage.getItem("mw-folders"); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length > 0) return p; } } catch { /* */ }
     return INITIAL_FOLDERS;
   });
   const [showMyDocs, setShowMyDocs] = useState(true);
@@ -3256,11 +3256,11 @@ export default function MdEditor() {
   const [activeBundleDocIds, setActiveBundleDocIds] = useState<Set<string>>(new Set());
   const [showSharedDocs, setShowSharedDocs] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("mdfy-show-shared") === "true";
+    return localStorage.getItem("mw-show-shared") === "true";
   });
   const [showTrash, setShowTrash] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("mdfy-show-trash") === "true";
+    return localStorage.getItem("mw-show-trash") === "true";
   });
   // Hub lint surface (Hermes Step 4: Review/Lint). Findings are
   // computed server-side from concept_index + bundle_documents +
@@ -3283,7 +3283,7 @@ export default function MdEditor() {
   const [refreshSpinning, setRefreshSpinning] = useState(false);
   const [showLint, setShowLint] = useState(() => {
     if (typeof window === "undefined") return true;
-    const saved = localStorage.getItem("mdfy-show-lint");
+    const saved = localStorage.getItem("mw-show-lint");
     return saved === null ? true : saved === "true";
   });
   const [lintReport, setLintReport] = useState<{
@@ -3317,8 +3317,8 @@ export default function MdEditor() {
       const detail = (e as CustomEvent<CuratorSettings>).detail;
       if (detail) setCuratorSettings(detail);
     };
-    window.addEventListener("mdfy-curator-settings-changed", onChange as EventListener);
-    return () => window.removeEventListener("mdfy-curator-settings-changed", onChange as EventListener);
+    window.addEventListener("mw-curator-settings-changed", onChange as EventListener);
+    return () => window.removeEventListener("mw-curator-settings-changed", onChange as EventListener);
   }, []);
   // Auto-resolve any "safe" curator findings — currently just
   // orphans, which trigger a non-destructive refresh-concepts
@@ -3456,7 +3456,7 @@ export default function MdEditor() {
   const [bundles, setBundles] = useState<Array<{ id: string; title: string; description: string | null; documentCount: number; updated_at: string; is_draft: boolean; has_password?: boolean; allowed_emails_count?: number; folder_id?: string | null }>>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const raw = localStorage.getItem("mdfy-bundles");
+      const raw = localStorage.getItem("mw-bundles");
       if (!raw) return [];
       const parsed = JSON.parse(raw);
       return Array.isArray(parsed) ? parsed : [];
@@ -3477,14 +3477,14 @@ export default function MdEditor() {
   const [notifications, setNotifications] = useState<{ id: number; type: string; documentId: string; documentTitle: string; fromUserName: string; message: string; read: boolean; createdAt: string }[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [mdfyPrompt, setMdfyPrompt] = useState<{ text: string; filename: string; tabId: string } | null>(null);
-  const [mdfyLoading, setMdfyLoading] = useState(false);
-  const [mdfyElapsed, setMdfyElapsed] = useState(0);
+  const [mwPrompt, setMdfyPrompt] = useState<{ text: string; filename: string; tabId: string } | null>(null);
+  const [mwLoading, setMdfyLoading] = useState(false);
+  const [mwElapsed, setMdfyElapsed] = useState(0);
   const [showFlavorMenu, setShowFlavorMenu] = useState(false);
 
   // Tick elapsed time while AI processing
   useEffect(() => {
-    if (!mdfyLoading) {
+    if (!mwLoading) {
       setMdfyElapsed(0);
       return;
     }
@@ -3493,7 +3493,7 @@ export default function MdEditor() {
       setMdfyElapsed(Math.floor((Date.now() - start) / 1000));
     }, 1000);
     return () => clearInterval(interval);
-  }, [mdfyLoading]);
+  }, [mwLoading]);
 
   // Diagram rendering mode removed — ASCII diagrams use "Convert to Mermaid" button per diagram
 
@@ -3502,9 +3502,9 @@ export default function MdEditor() {
   const [tabs, setTabs] = useState<Tab[]>(() => {
     if (typeof window === "undefined") return INITIAL_TABS;
     try {
-      const ver = localStorage.getItem("mdfy-tabs-version");
+      const ver = localStorage.getItem("mw-tabs-version");
       if (ver === TABS_VERSION) {
-        const saved = localStorage.getItem("mdfy-tabs");
+        const saved = localStorage.getItem("mw-tabs");
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -3563,14 +3563,14 @@ export default function MdEditor() {
         }
       } else {
         // New version — only merge missing EXAMPLE_TABS into the user's
-        // saved list instead of nuking mdfy-tabs (the old reset wiped
+        // saved list instead of nuking mw-tabs (the old reset wiped
         // every cloud-tied user doc from the sidebar Recent state and
         // made it look like docs had been deleted). The example pool
         // refresh is the only thing version bumps need to do; everything
         // else can survive across versions.
-        localStorage.setItem("mdfy-tabs-version", TABS_VERSION);
+        localStorage.setItem("mw-tabs-version", TABS_VERSION);
         try {
-          const saved = localStorage.getItem("mdfy-tabs");
+          const saved = localStorage.getItem("mw-tabs");
           if (saved) {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
@@ -3578,7 +3578,7 @@ export default function MdEditor() {
               const missing = EXAMPLE_TABS.filter(e => !existingIds.has(e.id));
               if (missing.length > 0) {
                 const merged = [...parsed, ...missing];
-                localStorage.setItem("mdfy-tabs", JSON.stringify(merged));
+                localStorage.setItem("mw-tabs", JSON.stringify(merged));
                 return merged;
               }
               return parsed;
@@ -3604,7 +3604,7 @@ export default function MdEditor() {
     const hash = window.location.hash;
     const isBareRoot = path === "/" && !search && !hash;
     if (isBareRoot) return "";
-    const saved = localStorage.getItem("mdfy-active-tab");
+    const saved = localStorage.getItem("mw-active-tab");
     if (!saved) return "";
     // Stale localStorage from older sessions can pin us on either
     //   1) `tab-welcome` (or any example tutorial tab), or
@@ -3665,7 +3665,7 @@ export default function MdEditor() {
   // Persist bundles to localStorage so the sidebar section is hydrated instantly on next load
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try { localStorage.setItem("mdfy-bundles", JSON.stringify(bundles)); } catch { /* quota */ }
+    try { localStorage.setItem("mw-bundles", JSON.stringify(bundles)); } catch { /* quota */ }
   }, [bundles]);
 
 
@@ -3756,11 +3756,11 @@ export default function MdEditor() {
           if (t.ownerEmail === EXAMPLE_OWNER && !_canonicalIds.has(t.id)) return false;
           return true;
         });
-        localStorage.setItem("mdfy-tabs", JSON.stringify(cleanTabs));
-        localStorage.setItem("mdfy-active-tab", activeTabId);
-        localStorage.setItem("mdfy-folders", JSON.stringify(folders));
-        localStorage.setItem("mdfy-hidden-examples", JSON.stringify([...hiddenExampleIds]));
-        localStorage.setItem("mdfy-show-examples", JSON.stringify(showExamples));
+        localStorage.setItem("mw-tabs", JSON.stringify(cleanTabs));
+        localStorage.setItem("mw-active-tab", activeTabId);
+        localStorage.setItem("mw-folders", JSON.stringify(folders));
+        localStorage.setItem("mw-hidden-examples", JSON.stringify([...hiddenExampleIds]));
+        localStorage.setItem("mw-show-examples", JSON.stringify(showExamples));
       } catch {
         // Quota exceeded — try saving without markdown bodies for cloud-synced tabs
         try {
@@ -3771,9 +3771,9 @@ export default function MdEditor() {
             }
             return t.id === activeTabId ? { ...t, markdown } : t;
           });
-          localStorage.setItem("mdfy-tabs", JSON.stringify(lightTabs));
-          localStorage.setItem("mdfy-active-tab", activeTabId);
-          localStorage.setItem("mdfy-folders", JSON.stringify(folders));
+          localStorage.setItem("mw-tabs", JSON.stringify(lightTabs));
+          localStorage.setItem("mw-active-tab", activeTabId);
+          localStorage.setItem("mw-folders", JSON.stringify(folders));
         } catch { /* truly out of space */ }
       }
     }, 500);
@@ -3954,13 +3954,13 @@ export default function MdEditor() {
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window === "undefined") return "preview";
     try {
-      const saved = localStorage.getItem("mdfy-view-mode");
+      const saved = localStorage.getItem("mw-view-mode");
       if (saved === "preview" || saved === "split" || saved === "editor") return saved;
     } catch { /* localStorage unavailable */ }
     return "preview";
   });
   useEffect(() => {
-    try { localStorage.setItem("mdfy-view-mode", viewMode); } catch { /* ignore */ }
+    try { localStorage.setItem("mw-view-mode", viewMode); } catch { /* ignore */ }
   }, [viewMode]);
   // Sync editors on view switch
   const prevViewModeRef = useRef<ViewMode>("preview");
@@ -3990,37 +3990,37 @@ export default function MdEditor() {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("mdfy-panel-ai") === "true";
+    return localStorage.getItem("mw-panel-ai") === "true";
   });
   // AI panel mode override. "auto" resolves from activeTab.kind (doc/bundle).
   // "hub" forces the hub-wide assistant — surfaced only when the user has a
   // hub_slug. Persisted so the mode survives reloads.
   const [aiPanelMode, setAiPanelMode] = useState<"auto" | "hub">(() => {
     if (typeof window === "undefined") return "auto";
-    return (localStorage.getItem("mdfy-ai-panel-mode") as "auto" | "hub") || "auto";
+    return (localStorage.getItem("mw-ai-panel-mode") as "auto" | "hub") || "auto";
   });
-  useEffect(() => { try { localStorage.setItem("mdfy-ai-panel-mode", aiPanelMode); } catch {} }, [aiPanelMode]);
+  useEffect(() => { try { localStorage.setItem("mw-ai-panel-mode", aiPanelMode); } catch {} }, [aiPanelMode]);
   // Concept count for the hub — surfaced in HubChat's empty state.
   const [hubConceptCount, setHubConceptCount] = useState<number>(0);
   const [showOutlinePanel, setShowOutlinePanel] = useState(() => {
     if (typeof window === "undefined") return true;
-    const saved = localStorage.getItem("mdfy-panel-outline");
+    const saved = localStorage.getItem("mw-panel-outline");
     return saved === null ? true : saved === "true";
   });
   const [showImagePanel, setShowImagePanel] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("mdfy-panel-image") === "true";
+    return localStorage.getItem("mw-panel-image") === "true";
   });
   // Persist right panel state
-  useEffect(() => { try { localStorage.setItem("mdfy-panel-ai", String(showAIPanel)); localStorage.setItem("mdfy-panel-outline", String(showOutlinePanel)); localStorage.setItem("mdfy-panel-image", String(showImagePanel)); } catch {} }, [showAIPanel, showOutlinePanel, showImagePanel]);
+  useEffect(() => { try { localStorage.setItem("mw-panel-ai", String(showAIPanel)); localStorage.setItem("mw-panel-outline", String(showOutlinePanel)); localStorage.setItem("mw-panel-image", String(showImagePanel)); } catch {} }, [showAIPanel, showOutlinePanel, showImagePanel]);
   // Resizable Assistant (right) panel width — persisted, drag handle on left edge.
   const [aiPanelWidth, setAiPanelWidth] = useState<number>(() => {
     if (typeof window === "undefined") return 360;
-    const saved = parseInt(localStorage.getItem("mdfy-ai-panel-width") || "");
+    const saved = parseInt(localStorage.getItem("mw-ai-panel-width") || "");
     return Number.isFinite(saved) && saved >= 280 && saved <= 720 ? saved : 360;
   });
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("mdfy-ai-panel-width", String(aiPanelWidth));
+    if (typeof window !== "undefined") localStorage.setItem("mw-ai-panel-width", String(aiPanelWidth));
   }, [aiPanelWidth]);
   // Load concept count for the user's hub once we know the slug. Used by
   // HubChat's empty state ("78 concepts indexed — ask anything"). The count
@@ -4154,11 +4154,11 @@ export default function MdEditor() {
   const [deletedDocId, setDeletedDocId] = useState<string | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     if (typeof window === "undefined") return 240;
-    const saved = parseInt(localStorage.getItem("mdfy-sidebar-width") || "");
+    const saved = parseInt(localStorage.getItem("mw-sidebar-width") || "");
     return Number.isFinite(saved) && saved >= 240 && saved <= 600 ? saved : 240;
   });
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("mdfy-sidebar-width", String(sidebarWidth));
+    if (typeof window !== "undefined") localStorage.setItem("mw-sidebar-width", String(sidebarWidth));
   }, [sidebarWidth]);
   const isDraggingSidebar = useRef(false);
   const sidebarResizePendingWidthRef = useRef<number | null>(null);
@@ -4228,11 +4228,11 @@ export default function MdEditor() {
   // button). Kept as a fallback / "set both at once" affordance.
   const [sortMode, _setSortMode] = useState<"az" | "za" | "custom">(() => {
     if (typeof window === "undefined") return "az";
-    const saved = localStorage.getItem("mdfy-sort-mode");
+    const saved = localStorage.getItem("mw-sort-mode");
     return (saved === "az" || saved === "za" || saved === "custom") ? saved : "az";
   });
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("mdfy-sort-mode", sortMode);
+    if (typeof window !== "undefined") localStorage.setItem("mw-sort-mode", sortMode);
   }, [sortMode]);
   // Per-section sort modes. The user wanted MD Bundles and MDs to
   // sort independently — e.g. bundles by date, docs alphabetical.
@@ -4248,16 +4248,16 @@ export default function MdEditor() {
   ];
   const [mdsSortMode, setMdsSortMode] = useState<SectionSortMode>(() => {
     if (typeof window === "undefined") return "newest";
-    const s = localStorage.getItem("mdfy-mds-sort");
+    const s = localStorage.getItem("mw-mds-sort");
     return (s && SECTION_SORT_OPTIONS.find((o) => o.value === s)) ? (s as SectionSortMode) : "newest";
   });
   const [bundlesSortMode, setBundlesSortMode] = useState<SectionSortMode>(() => {
     if (typeof window === "undefined") return "newest";
-    const s = localStorage.getItem("mdfy-bundles-sort");
+    const s = localStorage.getItem("mw-bundles-sort");
     return (s && SECTION_SORT_OPTIONS.find((o) => o.value === s)) ? (s as SectionSortMode) : "newest";
   });
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mdfy-mds-sort", mdsSortMode); }, [mdsSortMode]);
-  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mdfy-bundles-sort", bundlesSortMode); }, [bundlesSortMode]);
+  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mw-mds-sort", mdsSortMode); }, [mdsSortMode]);
+  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mw-bundles-sort", bundlesSortMode); }, [bundlesSortMode]);
   // Which section's sort menu is currently open (null = none).
   const [openSortMenu, setOpenSortMenu] = useState<"mds" | "bundles" | null>(null);
   // Recently visited tabs (max 7, most-recent-first). Stored separately from
@@ -4265,7 +4265,7 @@ export default function MdEditor() {
   const [recentTabIds, setRecentTabIds] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const saved = localStorage.getItem("mdfy-recent-tabs");
+      const saved = localStorage.getItem("mw-recent-tabs");
       if (saved) {
         const arr = JSON.parse(saved);
         // Strip any leftover hub tab ids from older sessions — the
@@ -4278,7 +4278,7 @@ export default function MdEditor() {
   });
   useEffect(() => {
     if (typeof window !== "undefined") {
-      try { localStorage.setItem("mdfy-recent-tabs", JSON.stringify(recentTabIds)); } catch { /* quota */ }
+      try { localStorage.setItem("mw-recent-tabs", JSON.stringify(recentTabIds)); } catch { /* quota */ }
     }
   }, [recentTabIds]);
   // Always reflect the active tab at the top of Recent — including on initial
@@ -4296,16 +4296,16 @@ export default function MdEditor() {
   }, [activeTabId]);
   const [showRecent, setShowRecent] = useState(() => {
     if (typeof window === "undefined") return true;
-    return localStorage.getItem("mdfy-show-recent") !== "false";
+    return localStorage.getItem("mw-show-recent") !== "false";
   });
   useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("mdfy-show-recent", String(showRecent));
+    if (typeof window !== "undefined") localStorage.setItem("mw-show-recent", String(showRecent));
   }, [showRecent]);
   const [_showSortMenu, _setShowSortMenu] = useState(false);
   const [_sharedSortMode, _setSharedSortMode] = useState<"newest" | "oldest" | "az" | "za">("newest");
   const [docFilter, setDocFilter] = useState<"all" | "private" | "shared" | "synced">(() => {
     if (typeof window === "undefined") return "all";
-    return (localStorage.getItem("mdfy-doc-filter") as "all" | "private" | "shared" | "synced") || "all";
+    return (localStorage.getItem("mw-doc-filter") as "all" | "private" | "shared" | "synced") || "all";
   });
   const [sidebarSearch, setSidebarSearch] = useState("");
   const sidebarSearchInputRef = useRef<HTMLInputElement>(null);
@@ -4457,14 +4457,14 @@ export default function MdEditor() {
   const [showSharedOwner, _setShowSharedOwner] = useState(false);
   const [sidebarMode, setSidebarModeRaw] = useState<"simple" | "detailed">(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("mdfy-sidebar-mode") as "simple" | "detailed") || "simple";
+      return (localStorage.getItem("mw-sidebar-mode") as "simple" | "detailed") || "simple";
     }
     return "detailed";
   });
   const setSidebarMode = useCallback((updater: "simple" | "detailed" | ((prev: "simple" | "detailed") => "simple" | "detailed")) => {
     setSidebarModeRaw(prev => {
       const next = typeof updater === "function" ? updater(prev) : updater;
-      try { localStorage.setItem("mdfy-sidebar-mode", next); } catch { /* quota exceeded */ }
+      try { localStorage.setItem("mw-sidebar-mode", next); } catch { /* quota exceeded */ }
       return next;
     });
   }, []);
@@ -4483,7 +4483,7 @@ export default function MdEditor() {
     const isDeepLink = path !== "/" || !!search || !!hash;
     if (isDeepLink) return false;
     // First visit — always show
-    if (!localStorage.getItem("mdfy-onboarded")) return true;
+    if (!localStorage.getItem("mw-onboarded")) return true;
     // Bare root URL (memory.wiki/ with no query / hash / doc path)
     // means the user wants the Home landing, not a restored doc.
     // Pair with the activeTabId useState which already clears in
@@ -4491,7 +4491,7 @@ export default function MdEditor() {
     if (path === "/" && !search && !hash) return true;
     // Return visit — show if user has no own documents (only examples)
     try {
-      const saved = localStorage.getItem("mdfy-tabs");
+      const saved = localStorage.getItem("mw-tabs");
       if (saved) {
         const parsed = JSON.parse(saved);
         const hasOwnDocs = Array.isArray(parsed) && parsed.some((t: { ownerEmail?: string; deleted?: boolean }) => !t.deleted && t.ownerEmail !== "master@mdfy.app");
@@ -4525,7 +4525,7 @@ export default function MdEditor() {
   const [startSections, setStartSections] = useState<Record<StartSectionKey, boolean>>(() => {
     if (typeof window === "undefined") return START_SECTION_DEFAULTS;
     try {
-      const raw = localStorage.getItem("mdfy-start-sections");
+      const raw = localStorage.getItem("mw-start-sections");
       if (!raw) return START_SECTION_DEFAULTS;
       const parsed = JSON.parse(raw);
       return { ...START_SECTION_DEFAULTS, ...parsed };
@@ -4534,7 +4534,7 @@ export default function MdEditor() {
   const toggleStartSection = useCallback((k: StartSectionKey) => {
     setStartSections(prev => {
       const next = { ...prev, [k]: !prev[k] };
-      try { localStorage.setItem("mdfy-start-sections", JSON.stringify(next)); } catch {}
+      try { localStorage.setItem("mw-start-sections", JSON.stringify(next)); } catch {}
       return next;
     });
   }, []);
@@ -4592,7 +4592,7 @@ export default function MdEditor() {
   }, [hubReanalyzing, authHeaders, showToast]);
   // Open an explainer / case-study doc as an in-app tab instead of
   // a new browser window. The slug IS the document id (see the
-  // next.config rewrites — each /case-* or /how-mdfy-* path maps to
+  // next.config rewrites — each /case-* or /how-memorywiki-* path maps to
   // /d/<same-slug>). Falls back to opening the public URL in a new
   // tab if the API call fails, so the link is never a dead-end.
   // switchTab is declared later in this component, so we route the
@@ -4600,7 +4600,7 @@ export default function MdEditor() {
   const switchTabRef = useRef<((id: string) => void) | null>(null);
   const openDocBySlug = useCallback(async (slug: string, fallbackUrl?: string) => {
     setShowOnboarding(false);
-    try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+    try { localStorage.setItem("mw-onboarded", "1"); } catch {}
     const existing = tabs.find(t => t.cloudId === slug);
     if (existing) { switchTabRef.current?.(existing.id); return; }
     try {
@@ -4663,7 +4663,7 @@ export default function MdEditor() {
   // overlay opens on that tab instead of the user's last-active
   // one. Cleared the next time Settings closes.
   const [settingsInitialSection, setSettingsInitialSection] = useState<string | undefined>(undefined);
-  const [toolbarHintDismissed, setToolbarHintDismissed] = useState(() => typeof window !== "undefined" ? !!localStorage.getItem("mdfy-toolbar-hint-dismissed") : true);
+  const [toolbarHintDismissed, setToolbarHintDismissed] = useState(() => typeof window !== "undefined" ? !!localStorage.getItem("mw-toolbar-hint-dismissed") : true);
   // Document view count (owner only)
   const [viewCount, setViewCount] = useState(0);
   // Command palette (Cmd+K)
@@ -4679,11 +4679,11 @@ export default function MdEditor() {
   useEffect(() => { setCmdSelectedIdx(0); }, [cmdSearch, cmdSearchResults]);
   const [showExamples, setShowExamples] = useState(() => {
     if (typeof window === "undefined") return true;
-    return localStorage.getItem("mdfy-show-examples") !== "false";
+    return localStorage.getItem("mw-show-examples") !== "false";
   });
   const [examplesCollapsed, setExamplesCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
-    const saved = localStorage.getItem("mdfy-examples-collapsed");
+    const saved = localStorage.getItem("mw-examples-collapsed");
     // First visit: no saved state → open (false)
     return saved === "true";
   });
@@ -4691,7 +4691,7 @@ export default function MdEditor() {
   const [hiddenExampleIds, setHiddenExampleIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     try {
-      const saved = localStorage.getItem("mdfy-hidden-examples");
+      const saved = localStorage.getItem("mw-hidden-examples");
       return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch { return new Set(); }
   });
@@ -5385,7 +5385,7 @@ export default function MdEditor() {
                 : guideSlug
                   ? `/?guide=${guideSlug}`
                   : "/";
-            window.history.pushState({ mdfyTabId: target.id, mdfyDocId: target.cloudId || null, mdfyBundleId: target.bundleId || null }, "", url);
+            window.history.pushState({ mwTabId: target.id, mwDocId: target.cloudId || null, mwBundleId: target.bundleId || null }, "", url);
           }
         });
       }
@@ -6215,17 +6215,17 @@ export default function MdEditor() {
   // purge cached server data so a signed-out user doesn't see another account's
   // cloud docs / bundles / folders / recent list.
   //
-  // Purge ONLY when transitioning from signed-in (mdfy-was-logged-in) to
+  // Purge ONLY when transitioning from signed-in (mw-was-logged-in) to
   // signed-out. Pure anonymous sessions (never signed in) must keep their
   // bundles + recent list — those are tied to anonymous_id on the server, not
   // to a user account, and would otherwise vanish on every refresh.
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated && user === null) {
-      const wasLoggedIn = localStorage.getItem("mdfy-was-logged-in");
+      const wasLoggedIn = localStorage.getItem("mw-was-logged-in");
       if (wasLoggedIn) {
         showToast("You've been signed out. Sign in again to sync.", "info");
-        localStorage.removeItem("mdfy-was-logged-in");
+        localStorage.removeItem("mw-was-logged-in");
         setTabs(prev => prev.some(t => t.cloudId || t.kind === "bundle")
           ? prev.filter(t => !t.cloudId && t.kind !== "bundle")
           : prev);
@@ -6238,13 +6238,13 @@ export default function MdEditor() {
         // when I was logged in are still there after sign-out").
         setFolders(prev => {
           const filtered = prev.filter(f => f.id === EXAMPLES_FOLDER_ID);
-          try { localStorage.setItem("mdfy-folders", JSON.stringify(filtered)); } catch { /* quota */ }
+          try { localStorage.setItem("mw-folders", JSON.stringify(filtered)); } catch { /* quota */ }
           return filtered.length === prev.length ? prev : filtered;
         });
         // Same race applies to the bundles cache; clear it directly
         // so a refresh-during-sign-out doesn't repaint the previous
         // owner's bundles in the sidebar.
-        try { localStorage.removeItem("mdfy-bundles"); } catch { /* quota */ }
+        try { localStorage.removeItem("mw-bundles"); } catch { /* quota */ }
         // Keep recentTabIds + bundles localStorage cache so re-login restores
         // Recent immediately. The bundle/cloud tabs themselves are wiped above
         // for privacy, but Recent IDs alone don't reveal sensitive data and
@@ -6258,7 +6258,7 @@ export default function MdEditor() {
       }
     }
     if (isAuthenticated && user) {
-      localStorage.setItem("mdfy-was-logged-in", "1");
+      localStorage.setItem("mw-was-logged-in", "1");
     }
   }, [isAuthenticated, user, authLoading]);
 
@@ -6267,8 +6267,8 @@ export default function MdEditor() {
     const handler = () => {
       showToast("Session expired. Please sign in again.", "info");
     };
-    window.addEventListener("mdfy-session-expired", handler);
-    return () => window.removeEventListener("mdfy-session-expired", handler);
+    window.addEventListener("mw-session-expired", handler);
+    return () => window.removeEventListener("mw-session-expired", handler);
   }, []);
 
   // Hub auto-creation notice — fires the first time useAuth gets
@@ -6284,8 +6284,8 @@ export default function MdEditor() {
         "success",
       );
     };
-    window.addEventListener("mdfy-hub-auto-created", handler as EventListener);
-    return () => window.removeEventListener("mdfy-hub-auto-created", handler as EventListener);
+    window.addEventListener("mw-hub-auto-created", handler as EventListener);
+    return () => window.removeEventListener("mw-hub-auto-created", handler as EventListener);
   }, []);
 
   // Anonymous-to-account claim notice. Fired by useAuth's
@@ -6317,8 +6317,8 @@ export default function MdEditor() {
         .then((data) => { if (data?.documents) setServerDocs(data.documents); })
         .catch(() => {});
     };
-    window.addEventListener("mdfy-anon-claimed", handler as EventListener);
-    return () => window.removeEventListener("mdfy-anon-claimed", handler as EventListener);
+    window.addEventListener("mw-anon-claimed", handler as EventListener);
+    return () => window.removeEventListener("mw-anon-claimed", handler as EventListener);
   }, []);
 
   // Load shared content from URL — wait for auth to resolve first
@@ -6485,7 +6485,7 @@ export default function MdEditor() {
               return [...prev, newTab];
             });
             setShowOnboarding(false);
-            // The doc-editor loading overlay (MdfyLogo at z-10) starts as true
+            // The doc-editor loading overlay (MemoryWikiLogo at z-10) starts as true
             // and is cleared by doRender(). The bundle handler doesn't render
             // any markdown, so without this clear the overlay would sit on
             // top of BundleEmbed (same z-index, later DOM sibling) until the
@@ -6512,10 +6512,10 @@ export default function MdEditor() {
           const headers: Record<string, string> = { ...authHeaders };
           // Check for password from viewer (stored in sessionStorage)
           try {
-            const savedPw = sessionStorage.getItem(`mdfy-pw-${fromId}`);
+            const savedPw = sessionStorage.getItem(`mw-pw-${fromId}`);
             if (savedPw) {
               headers["x-document-password"] = savedPw;
-              sessionStorage.removeItem(`mdfy-pw-${fromId}`); // One-time use
+              sessionStorage.removeItem(`mw-pw-${fromId}`); // One-time use
             }
           } catch { /* sessionStorage unavailable */ }
           const res = await fetch(`/api/docs/${fromId}`, { headers });
@@ -6550,7 +6550,7 @@ export default function MdEditor() {
             // link). Force-flip it off so the doc body actually
             // shows once the load resolves.
             setShowOnboarding(false);
-            try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+            try { localStorage.setItem("mw-onboarded", "1"); } catch {}
             setMarkdownRaw(doc.markdown);
             if (doc.title) setTitle(doc.title);
             setDocId(fromId);
@@ -6680,7 +6680,7 @@ export default function MdEditor() {
 
     // Only migrate on actual sign-in transition: was anonymous → now logged in
     // Read anonymousId directly from localStorage because the reactive `anonymousId` is already "" when user signs in
-    const savedAnonId = typeof window !== "undefined" ? localStorage.getItem("mdfy-anon-id") || "" : "";
+    const savedAnonId = typeof window !== "undefined" ? localStorage.getItem("mw-anon-id") || "" : "";
     if (currentId && prevId === "" && savedAnonId) {
       fetch("/api/user/migrate", {
         method: "POST",
@@ -9113,7 +9113,7 @@ ${html}
     const handleDesktopSave = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "s" && !e.shiftKey) {
         e.preventDefault();
-        window.postMessage({ type: "mdfy-desktop-save", markdown, title }, "*");
+        window.postMessage({ type: "memory-wiki-desktop-save", markdown, title }, "*");
       }
     };
     window.addEventListener("keydown", handleDesktopSave);
@@ -9125,7 +9125,7 @@ ${html}
       const urlPath = window.location.pathname;
       const match = urlPath.match(/^\/([a-zA-Z0-9_-]{6,12})$/);
       if (match && docId) {
-        window.postMessage({ type: "mdfy-desktop-published", docId, editToken: w.__MDFY_EDIT_TOKEN__ as string }, "*");
+        window.postMessage({ type: "memory-wiki-desktop-published", docId, editToken: w.__MDFY_EDIT_TOKEN__ as string }, "*");
       }
     };
     const wrappedPush = (...args: Parameters<typeof history.pushState>) => { origPushState(...args); checkUrl(); };
@@ -9656,7 +9656,7 @@ ${clone.innerHTML}
             onClick={() => window.open("/about", "_blank")}
             title="Memory.Wiki — About"
           >
-            <MdfyLogo size={isMobile ? 14 : 18} />
+            <MemoryWikiLogo size={isMobile ? 14 : 18} />
           </h1>
           {/* Document / Bundle / Hub URL chip — refined chip group.
               For doc tabs: shows /{cloudId} → memory.wiki/{cloudId}.
@@ -10143,7 +10143,7 @@ ${clone.innerHTML}
                             // Notification clicks should also leave the
                             // Start surface (we're navigating into a doc).
                             setShowOnboarding(false);
-                            try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+                            try { localStorage.setItem("mw-onboarded", "1"); } catch {}
                             // Check if already open as a tab
                             const existing = tabs.find(t => !t.deleted && t.cloudId === n.documentId);
                             if (existing) {
@@ -10988,7 +10988,7 @@ ${clone.innerHTML}
                                   if (el) recentRowRefs.current.set(entry.id, el);
                                   else recentRowRefs.current.delete(entry.id);
                                 }}
-                                className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(entry.id) ? " mdfy-recent-enter" : ""}`}
+                                className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(entry.id) ? " mw-recent-enter" : ""}`}
                                 style={{ paddingLeft: 6, paddingRight: 6, color: "var(--text-secondary)" }}
                                 onClick={() => {
                                   // If already at the top of Recent, plain switch.
@@ -11028,7 +11028,7 @@ ${clone.innerHTML}
                                 if (el) recentRowRefs.current.set(tab.id, el);
                                 else recentRowRefs.current.delete(tab.id);
                               }}
-                              className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(tab.id) ? " mdfy-recent-enter" : ""}`}
+                              className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(tab.id) ? " mw-recent-enter" : ""}`}
                               style={{ paddingLeft: 6, paddingRight: 6, color: "var(--text-secondary)" }}
                               onClick={(e) => handleDocClick(tab.id, e)}
                               title={displayTitle}
@@ -11299,17 +11299,17 @@ ${clone.innerHTML}
                             // pushState → /b/X and the user then refreshes, the
                             // browser reloads /b/[id] which never mounts MdEditor
                             // and never gets a chance to flush. Without this eager
-                            // save, the bundle tab is missing from mdfy-tabs and
-                            // the corresponding entry in mdfy-recent-tabs would
+                            // save, the bundle tab is missing from mw-tabs and
+                            // the corresponding entry in mw-recent-tabs would
                             // resolve to a missing tab → Recent appears empty.
                             try {
-                              const saved = localStorage.getItem("mdfy-tabs");
+                              const saved = localStorage.getItem("mw-tabs");
                               const arr = saved ? JSON.parse(saved) : [];
                               if (Array.isArray(arr) && !arr.some((t: { id: string }) => t.id === newTab.id)) {
                                 arr.push(newTab);
-                                localStorage.setItem("mdfy-tabs", JSON.stringify(arr));
+                                localStorage.setItem("mw-tabs", JSON.stringify(arr));
                               }
-                              localStorage.setItem("mdfy-active-tab", openedTabId);
+                              localStorage.setItem("mw-active-tab", openedTabId);
                             } catch { /* quota / parse — fallback to debounced save */ }
                           }
                           // Push to Recent (shared with sidebar Recent + Home Recent).
@@ -11317,7 +11317,7 @@ ${clone.innerHTML}
                           if (!isDraggingSidebarRef.current) {
                             setRecentTabIds(prev => {
                               const next = [openedTabId, ...prev.filter(id => id !== openedTabId)].slice(0, 7);
-                              try { localStorage.setItem("mdfy-recent-tabs", JSON.stringify(next)); } catch { /* ignore */ }
+                              try { localStorage.setItem("mw-recent-tabs", JSON.stringify(next)); } catch { /* ignore */ }
                               return next;
                             });
                           }
@@ -11503,7 +11503,7 @@ ${clone.innerHTML}
                           return (
                             <button
                               key={f}
-                              onClick={() => { setDocFilter(f); localStorage.setItem("mdfy-doc-filter", f); }}
+                              onClick={() => { setDocFilter(f); localStorage.setItem("mw-doc-filter", f); }}
                               title={tips[f]}
                               className="flex-1 text-caption py-1 rounded transition-colors"
                               style={{
@@ -11876,7 +11876,7 @@ ${clone.innerHTML}
                     data-section-id="shared"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
                     style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showSharedDocs ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
-                    onClick={() => { const next = !showSharedDocs; setShowSharedDocs(next); localStorage.setItem("mdfy-show-shared", String(next)); }}
+                    onClick={() => { const next = !showSharedDocs; setShowSharedDocs(next); localStorage.setItem("mw-show-shared", String(next)); }}
                   >
                     <ChevronDown
                       width={10} height={10}
@@ -11996,7 +11996,7 @@ ${clone.innerHTML}
                             // leave the Start surface — even if the doc is
                             // already open, we're trying to view it now.
                             setShowOnboarding(false);
-                            try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+                            try { localStorage.setItem("mw-onboarded", "1"); } catch {}
                             const existing = tabs.find(t => !t.deleted && t.cloudId === doc.id);
                             if (existing) { switchTab(existing.id); return; }
                             try {
@@ -12104,7 +12104,7 @@ ${clone.innerHTML}
                     borderBottom: showLint ? "1px solid var(--border)" : "1px solid transparent",
                     position: "sticky", top: 0, zIndex: 10,
                   }}
-                  onClick={() => { const next = !showLint; setShowLint(next); try { localStorage.setItem("mdfy-show-lint", String(next)); } catch {} }}
+                  onClick={() => { const next = !showLint; setShowLint(next); try { localStorage.setItem("mw-show-lint", String(next)); } catch {} }}
                 >
                   <ChevronDown
                     width={10} height={10}
@@ -12402,7 +12402,7 @@ ${clone.innerHTML}
                     data-section-id="guides"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
                     style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: !examplesCollapsed ? "1px solid var(--border)" : "none", position: "sticky", top: 0, zIndex: 10 }}
-                    onClick={() => { const next = !examplesCollapsed; setExamplesCollapsed(next); localStorage.setItem("mdfy-examples-collapsed", String(next)); }}
+                    onClick={() => { const next = !examplesCollapsed; setExamplesCollapsed(next); localStorage.setItem("mw-examples-collapsed", String(next)); }}
                   >
                     <ChevronDown
                       width={10} height={10}
@@ -12445,7 +12445,7 @@ ${clone.innerHTML}
                     data-section-id="trash"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
                     style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showTrash ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
-                    onClick={() => { const next = !showTrash; setShowTrash(next); localStorage.setItem("mdfy-show-trash", String(next)); }}
+                    onClick={() => { const next = !showTrash; setShowTrash(next); localStorage.setItem("mw-show-trash", String(next)); }}
                   >
                     <ChevronDown
                       width={10} height={10}
@@ -12583,7 +12583,7 @@ ${clone.innerHTML}
 
           {/* Multi-select action bar */}
           {selectedTabIds.size > 0 && (
-            <div className="shrink-0 px-3 py-2.5 mdfy-multiselect-bar" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
+            <div className="shrink-0 px-3 py-2.5 mw-multiselect-bar" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
               {/* Header: count + clear */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-caption font-semibold" style={{ color: "var(--accent)" }}>{selectedTabIds.size} document{selectedTabIds.size > 1 ? "s" : ""} selected</span>
@@ -12596,7 +12596,7 @@ ${clone.innerHTML}
                 {(folders.filter(f => !f.section || f.section === "my").length > 0 || !!user?.id) && (
                   <div className="relative group/move flex-1">
                     <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]" style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }} title="Move to folder">
-                      <Folder width={11} height={11} /><span className="mdfy-collapse-label">Move</span><ChevronDown width={8} height={8} />
+                      <Folder width={11} height={11} /><span className="mw-collapse-label">Move</span><ChevronDown width={8} height={8} />
                     </button>
                     <div
                       className="absolute bottom-full left-0 mb-1 rounded-lg py-1 hidden group-hover/move:block"
@@ -12699,7 +12699,7 @@ ${clone.innerHTML}
                       title={`Bundle ${bundleable.length} selected docs`}
                     >
                       <Layers width={11} height={11} />
-                      <span className="mdfy-collapse-label">Bundle</span>
+                      <span className="mw-collapse-label">Bundle</span>
                     </button>
                   );
                 })()}
@@ -12957,11 +12957,11 @@ ${clone.innerHTML}
                             doRender(INITIAL_TABS[0].markdown);
                             window.history.replaceState(null, "", "/");
                             try {
-                              localStorage.removeItem("mdfy-tabs");
-                              localStorage.removeItem("mdfy-folders");
-                              localStorage.removeItem("mdfy-active-tab");
-                              localStorage.removeItem("mdfy-bundles");
-                              localStorage.removeItem("mdfy-was-logged-in");
+                              localStorage.removeItem("mw-tabs");
+                              localStorage.removeItem("mw-folders");
+                              localStorage.removeItem("mw-active-tab");
+                              localStorage.removeItem("mw-bundles");
+                              localStorage.removeItem("mw-was-logged-in");
                             } catch {}
                           }}
                           className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--menu-hover)] flex items-center gap-2"
@@ -13423,7 +13423,7 @@ ${clone.innerHTML}
                     const b = bundles.find(x => x.id === bundleId);
                     if (!b) return;
                     setShowOnboarding(false);
-                    try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+                    try { localStorage.setItem("mw-onboarded", "1"); } catch {}
                     const existing = tabs.find(t => t.kind === "bundle" && t.bundleId === b.id);
                     if (existing) { switchTab(existing.id); return; }
                     const newId = `bundle-${b.id}-${Date.now()}`;
@@ -13485,7 +13485,7 @@ ${clone.innerHTML}
                           const tsIso = bundleUpdated
                             || (t.lastOpenedAt ? new Date(t.lastOpenedAt).toISOString() : null);
                           return (
-                            <button key={t.id} onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} switchTab(t.id); }}
+                            <button key={t.id} onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} switchTab(t.id); }}
                               className="w-full flex items-center gap-3 px-4 py-3 text-body text-left cursor-pointer"
                               style={{ color: "var(--text-secondary)", background: "var(--surface)", transition: "all 0.12s", borderTop: i > 0 ? "1px solid var(--border-dim)" : "none" }}
                               onMouseEnter={(e) => { e.currentTarget.style.background = "var(--menu-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
@@ -13517,7 +13517,7 @@ ${clone.innerHTML}
                   {startSections.create && (<>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     {[
-                      { label: "New Document", desc: "Blank page", kbd: "", color: "#fb923c", icon: <Plus width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} addTab(); } },
+                      { label: "New Document", desc: "Blank page", kbd: "", color: "#fb923c", icon: <Plus width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} addTab(); } },
                       { label: "New Bundle", desc: "Group docs into a thinking surface", kbd: "", color: "#a78bfa", icon: <Layers width={16} height={16} />, fn: () => {
                         // Open the BundleCreator modal with an empty
                         // doc list. The user picks docs (or starts
@@ -13526,13 +13526,13 @@ ${clone.innerHTML}
                         // shortcut, so no second code path to
                         // maintain.
                         setShowOnboarding(false);
-                        try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+                        try { localStorage.setItem("mw-onboarded", "1"); } catch {}
                         setBundleCreatorDocs([]);
                         setShowMyBundles(true);
                         setShowBundleCreator(true);
                       } },
-                      { label: "Paste", desc: "Text or AI share URL", kbd: "", color: "#4ade80", icon: <FileText width={16} height={16} />, fn: async () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} try { const text = await navigator.clipboard.readText(); if (text) { addTab(); setTimeout(() => { setMarkdown(text); doRender(text); cmSetDocRef.current?.(text); }, 100); } } catch { /* clipboard permission denied — user can Cmd+V manually */ } } },
-                      { label: "Import", desc: "PDF, Word, Excel...", kbd: "", color: "#60a5fa", icon: <Upload width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} imageFileRef.current?.click(); } },
+                      { label: "Paste", desc: "Text or AI share URL", kbd: "", color: "#4ade80", icon: <FileText width={16} height={16} />, fn: async () => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} try { const text = await navigator.clipboard.readText(); if (text) { addTab(); setTimeout(() => { setMarkdown(text); doRender(text); cmSetDocRef.current?.(text); }, 100); } } catch { /* clipboard permission denied — user can Cmd+V manually */ } } },
+                      { label: "Import", desc: "PDF, Word, Excel...", kbd: "", color: "#60a5fa", icon: <Upload width={16} height={16} />, fn: () => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} imageFileRef.current?.click(); } },
                     ].map((item) => (
                       <button key={item.label} onClick={item.fn}
                         className="flex flex-col items-start px-4 py-3.5 rounded-xl text-left cursor-pointer overflow-hidden relative"
@@ -13557,8 +13557,8 @@ ${clone.innerHTML}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
                     onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = "var(--accent-dim)"; }}
                     onDragLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.background = "var(--surface)"; }}
-                    onDrop={(e) => { e.preventDefault(); setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} }}
-                    onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} imageFileRef.current?.click(); }}>
+                    onDrop={(e) => { e.preventDefault(); setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} }}
+                    onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} imageFileRef.current?.click(); }}>
                     <p className="text-body font-medium">Drop files here to open</p>
                     <p className="text-caption mt-1" style={{ opacity: 0.5 }}>MD, PDF, DOCX, PPTX, XLSX, HTML, CSV</p>
                   </div>
@@ -13604,7 +13604,7 @@ ${clone.innerHTML}
                           : { label: "Sign in to get your hub", desc: "Every signed-in user gets a personal hub URL", url: "/", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
                         { label: "Install /memory.wiki", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
-                        { label: "How Memory.Wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-mdfy-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
+                        { label: "How Memory.Wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-memorywiki-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
                       ];
                       return cards.map((item) => {
                         const sharedProps = {
@@ -13734,7 +13734,7 @@ ${clone.innerHTML}
                   {startSections.guides && (
                   <div className="grid grid-cols-2 gap-1.5">
                     {EXAMPLE_TABS.filter(ex => !["tab-chrome-ext", "tab-vscode-ext", "tab-desktop", "tab-cli", "tab-mcp", "tab-quicklook"].includes(ex.id)).map((ex) => (
-                      <button key={ex.id} onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} switchTab(ex.id); }}
+                      <button key={ex.id} onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} switchTab(ex.id); }}
                         title={ex.title}
                         className="flex items-center gap-2 min-w-0 px-3 py-2 rounded-lg text-body text-left cursor-pointer"
                         style={{ background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border-dim)", transition: "all 0.12s" }}
@@ -13789,7 +13789,7 @@ ${clone.innerHTML}
                 {/* Replay welcome */}
                 <div className="text-center mt-2 mb-4">
                   <button
-                    onClick={() => { localStorage.removeItem("mdfy-welcome-seen"); window.location.reload(); }}
+                    onClick={() => { localStorage.removeItem("mw-welcome-seen"); window.location.reload(); }}
                     className="text-caption cursor-pointer"
                     style={{ color: "var(--text-faint)", background: "none", border: "none", padding: "4px 8px", opacity: 0.6 }}
                   >
@@ -13909,7 +13909,7 @@ ${clone.innerHTML}
                 {/* Toolbar toggle — icon with hint popover for new users */}
                 {canEdit && <div className="relative group">
                   <button
-                    onClick={() => { setShowToolbar(!showToolbar); if (!showToolbar && !toolbarHintDismissed) { setToolbarHintDismissed(true); try { localStorage.setItem("mdfy-toolbar-hint-dismissed", "1"); } catch {} } }}
+                    onClick={() => { setShowToolbar(!showToolbar); if (!showToolbar && !toolbarHintDismissed) { setToolbarHintDismissed(true); try { localStorage.setItem("mw-toolbar-hint-dismissed", "1"); } catch {} } }}
                     className={`flex items-center justify-center h-6 w-6 rounded-md transition-colors ${!showToolbar && !toolbarHintDismissed ? "ring-1 ring-[var(--accent)]" : ""}`}
                     style={{ background: showToolbar ? "var(--accent-dim)" : "transparent", color: showToolbar ? "var(--accent)" : "var(--text-faint)" }}
                     title={`Formatting toolbar ${showToolbar ? "ON" : "OFF"}`}
@@ -13923,7 +13923,7 @@ ${clone.innerHTML}
                       <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 3 }}>Formatting Tools</p>
                       <p style={{ color: "var(--text-muted)", marginBottom: 6 }}>Click to enable bold, headings, lists, and more.</p>
                       <button
-                        onClick={(e) => { e.stopPropagation(); setToolbarHintDismissed(true); try { localStorage.setItem("mdfy-toolbar-hint-dismissed", "1"); } catch {} }}
+                        onClick={(e) => { e.stopPropagation(); setToolbarHintDismissed(true); try { localStorage.setItem("mw-toolbar-hint-dismissed", "1"); } catch {} }}
                         className="text-caption" style={{ color: "var(--text-faint)" }}>Dismiss</button>
                     </div>
                   )}
@@ -14470,7 +14470,7 @@ ${clone.innerHTML}
                     // its document list so the new member appears
                     // without a manual reload.
                     try {
-                      window.dispatchEvent(new CustomEvent("mdfy-bundle-doc-added", {
+                      window.dispatchEvent(new CustomEvent("mw-bundle-doc-added", {
                         detail: { bundleId, docIds: [draggedTab.cloudId] },
                       }));
                     } catch { /* ignore */ }
@@ -14581,15 +14581,15 @@ ${clone.innerHTML}
                 // to re-trigger on the takeover, which is what the
                 // founder saw as a second logo appearing.
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-10" style={{ background: "var(--background)", gap: 14 }}>
-                  <MdfyLogo size={26} />
+                  <MemoryWikiLogo size={26} />
                   <div style={{ width: 96, height: 2, background: "var(--border-dim)", borderRadius: 1, overflow: "hidden", position: "relative" }}>
-                    <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "var(--accent)", borderRadius: 1, animation: "mdfyLoaderBar 1.1s ease-in-out infinite" }} />
+                    <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "var(--accent)", borderRadius: 1, animation: "mwLoaderBar 1.1s ease-in-out infinite" }} />
                   </div>
                   <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
                     Loading
                   </span>
                   <style>{`
-                    @keyframes mdfyLoaderBar {
+                    @keyframes mwLoaderBar {
                       0%   { left: -40%; }
                       100% { left: 100%; }
                     }
@@ -14837,9 +14837,9 @@ ${clone.innerHTML}
                       <button
                         onClick={() => {
                           if (isHubMode) {
-                            window.dispatchEvent(new CustomEvent("mdfy-newchat-hub"));
+                            window.dispatchEvent(new CustomEvent("mw-newchat-hub"));
                           } else if (isBundleMode) {
-                            window.dispatchEvent(new CustomEvent("mdfy-newchat-bundle"));
+                            window.dispatchEvent(new CustomEvent("mw-newchat-bundle"));
                           } else {
                             if (aiChatHistory.length > 0 && !confirm("Start a new chat? Current conversation will be cleared.")) return;
                             setAiChatHistory([]);
@@ -16291,13 +16291,13 @@ ${clone.innerHTML}
         </div>
       )}
 
-      {mdfyPrompt && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => !mdfyLoading && setMdfyPrompt(null)}>
+      {mwPrompt && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => !mwLoading && setMdfyPrompt(null)}>
           <div className="rounded-xl p-5 w-80" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--accent)" }}>Memory.Wiki</span> this document?</span>
               <span className="text-caption font-mono" style={{ color: "var(--text-muted)" }}>
-                {(mdfyPrompt.text.length / 1024).toFixed(0)} KB
+                {(mwPrompt.text.length / 1024).toFixed(0)} KB
               </span>
             </div>
             <p className="text-caption mb-2" style={{ color: "var(--text-muted)" }}>
@@ -16305,13 +16305,13 @@ ${clone.innerHTML}
             </p>
             <p className="text-caption mb-4" style={{ color: "var(--text-muted)" }}>
               <strong style={{ color: "var(--accent)" }}>Memory.Wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
-              {mdfyPrompt.text.length > 200_000 && (
+              {mwPrompt.text.length > 200_000 && (
                 <span style={{ color: "var(--text-faint)" }}> Large documents may take 30–60 seconds.</span>
               )}
             </p>
             <div className="flex gap-2">
               <button
-                disabled={mdfyLoading}
+                disabled={mwLoading}
                 onClick={() => setMdfyPrompt(null)}
                 className="flex-1 px-3 py-2 rounded-md text-caption font-medium transition-colors"
                 style={{ background: "var(--toggle-bg)", color: "var(--text-muted)" }}
@@ -16319,14 +16319,14 @@ ${clone.innerHTML}
                 Keep Raw
               </button>
               <button
-                disabled={mdfyLoading}
+                disabled={mwLoading}
                 onClick={async () => {
                   setMdfyLoading(true);
                   try {
-                    const result = await mdfyText(mdfyPrompt.text, mdfyPrompt.filename);
+                    const result = await mwText(mwPrompt.text, mwPrompt.filename);
                     // Update the tab with structured markdown.
-                    setTabs(prev => prev.map(t => t.id === mdfyPrompt.tabId ? { ...t, markdown: result.markdown } : t));
-                    if (mdfyPrompt.tabId === activeTabId) {
+                    setTabs(prev => prev.map(t => t.id === mwPrompt.tabId ? { ...t, markdown: result.markdown } : t));
+                    if (mwPrompt.tabId === activeTabId) {
                       setMarkdown(result.markdown);
                       doRender(result.markdown);
                       cmSetDocRef.current?.(result.markdown);
@@ -16354,10 +16354,10 @@ ${clone.innerHTML}
                 className="flex-1 px-3 py-2 rounded-md text-caption font-medium transition-colors flex items-center justify-center gap-1.5"
                 style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
               >
-                {mdfyLoading ? (
+                {mwLoading ? (
                   <>
                     <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
-                    Processing{mdfyElapsed > 0 ? ` ${mdfyElapsed}s` : "..."}
+                    Processing{mwElapsed > 0 ? ` ${mwElapsed}s` : "..."}
                   </>
                 ) : (
                   <>Structure it</>
@@ -17451,7 +17451,7 @@ ${clone.innerHTML}
           <div className="hidden">
             {/* Logo */}
             <div className="mb-6">
-              <MdfyLogo size={32} />
+              <MemoryWikiLogo size={32} />
             </div>
             <p className="text-body mb-8" style={{ color: "var(--text-muted)" }}>
               The Markdown Hub
@@ -17460,9 +17460,9 @@ ${clone.innerHTML}
             {/* Quick actions */}
             <div className="space-y-1.5 mb-8">
               {[
-                { label: "New Document", shortcut: isMobile ? "" : (typeof navigator !== "undefined" && /Mac/.test(navigator.platform) ? "\u2318N" : "Ctrl+N"), action: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} addTab(); } },
-                { label: "Paste from Clipboard", shortcut: isMobile ? "" : (typeof navigator !== "undefined" && /Mac/.test(navigator.platform) ? "\u2318V" : "Ctrl+V"), action: async () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} try { const text = await navigator.clipboard.readText(); if (text) { addTab(); setTimeout(() => { setMarkdown(text); doRender(text); cmSetDocRef.current?.(text); }, 100); } } catch {} } },
-                { label: "Import File", shortcut: "", action: () => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} imageFileRef.current?.click(); } },
+                { label: "New Document", shortcut: isMobile ? "" : (typeof navigator !== "undefined" && /Mac/.test(navigator.platform) ? "\u2318N" : "Ctrl+N"), action: () => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} addTab(); } },
+                { label: "Paste from Clipboard", shortcut: isMobile ? "" : (typeof navigator !== "undefined" && /Mac/.test(navigator.platform) ? "\u2318V" : "Ctrl+V"), action: async () => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} try { const text = await navigator.clipboard.readText(); if (text) { addTab(); setTimeout(() => { setMarkdown(text); doRender(text); cmSetDocRef.current?.(text); }, 100); } } catch {} } },
+                { label: "Import File", shortcut: "", action: () => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} imageFileRef.current?.click(); } },
               ].map((item) => (
                 <button
                   key={item.label}
@@ -17484,7 +17484,7 @@ ${clone.innerHTML}
               onDragLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
               onDrop={(e) => {
                 e.preventDefault();
-                setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {}
+                setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {}
                 // Let the main drop handler in MdEditor handle the file
               }}
             >
@@ -17504,7 +17504,7 @@ ${clone.innerHTML}
 
             {/* Skip */}
             <button
-              onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mdfy-onboarded", "1"); } catch {} }}
+              onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} }}
               className="text-caption transition-colors"
               style={{ color: "var(--text-faint)" }}
             >

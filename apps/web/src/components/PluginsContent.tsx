@@ -158,7 +158,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           <InstallSteps steps={t.chrome.installSteps} />
           <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
             <a
-              href="/downloads/mdfy-chrome-extension-v2.2.0.zip"
+              href="/downloads/mw-chrome-extension-v2.2.0.zip"
               download
               style={{
                 display: "inline-flex",
@@ -191,7 +191,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             {t.chrome.ctaLabel}
           </a>
           <a
-            href="/downloads/mdfy-chrome-extension-v2.2.0.zip"
+            href="/downloads/mw-chrome-extension-v2.2.0.zip"
             download
             style={{
               display: "inline-flex", alignItems: "center", gap: 8,
@@ -335,7 +335,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }`}</code>
@@ -351,7 +351,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             {t.mcp.footerLinks.setupGuideLabel}
           </Link>
           <a
-            href="https://www.npmjs.com/package/mdfy-mcp"
+            href="https://www.npmjs.com/package/memory-wiki-mcp"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -386,7 +386,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           subtitle={t.vscode.subtitle}
           desc={t.vscode.desc}
           ctaLabel={t.vscode.ctaLabel}
-          ctaHref="https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode"
+          ctaHref="https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode"
         />
 
         {/* Screenshot */}
@@ -413,7 +413,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
         {/* Footer actions */}
         <div style={{ padding: "20px 32px", borderTop: "1px solid var(--border-dim)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <a
-            href="https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode"
+            href="https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode"
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent)", color: "#000", padding: "10px 24px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}
@@ -537,12 +537,12 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               </div>
               <div className="terminal-mock-body">
                 <span className="line comment">{"# Publish a file"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">mdfy publish README.md</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">mw publish README.md</span></span>
                 <span className="line"><span className="url">https://memory.wiki/abc123</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
                 <span className="line comment">{"# Pipe anything"}</span>
-                <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | mdfy publish"}</span></span>
+                <span className="line"><span className="prompt">$ </span><span className="cmd">{"echo \"# Hello World\" | mw publish"}</span></span>
                 <span className="line"><span className="url">https://memory.wiki/def456</span></span>
                 <span className="line"><span className="success">  URL copied to clipboard</span></span>
                 <span className="line-gap" />
@@ -571,7 +571,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
               {t.cli.installCmd}
             </code>
             <a
-              href="https://www.npmjs.com/package/mdfy-cli"
+              href="https://www.npmjs.com/package/memory-wiki-cli"
               target="_blank"
               rel="noopener noreferrer"
               style={{

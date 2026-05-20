@@ -56,13 +56,13 @@ export default function HubChat({ slug, hubName, conceptCount, accent, accentDim
   // Persist chat history per hub so reloading keeps the conversation.
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`mdfy-hub-chat-${slug}`);
+      const saved = localStorage.getItem(`mw-hub-chat-${slug}`);
       if (saved) setMessages(JSON.parse(saved));
     } catch { /* ignore */ }
   }, [slug]);
   useEffect(() => {
     if (messages.length > 0) {
-      try { localStorage.setItem(`mdfy-hub-chat-${slug}`, JSON.stringify(messages)); } catch { /* ignore */ }
+      try { localStorage.setItem(`mw-hub-chat-${slug}`, JSON.stringify(messages)); } catch { /* ignore */ }
     }
   }, [messages, slug]);
 
@@ -123,7 +123,7 @@ export default function HubChat({ slug, hubName, conceptCount, accent, accentDim
     setMessages([]);
     setError(null);
     setInput("");
-    try { localStorage.removeItem(`mdfy-hub-chat-${slug}`); } catch { /* ignore */ }
+    try { localStorage.removeItem(`mw-hub-chat-${slug}`); } catch { /* ignore */ }
   }, [slug]);
 
   // Per-message save state — a Set of indices already saved this
@@ -186,8 +186,8 @@ export default function HubChat({ slug, hubName, conceptCount, accent, accentDim
       if (messages.length === 0) return;
       clearChat();
     };
-    window.addEventListener("mdfy-newchat-hub", handler);
-    return () => window.removeEventListener("mdfy-newchat-hub", handler);
+    window.addEventListener("mw-newchat-hub", handler);
+    return () => window.removeEventListener("mw-newchat-hub", handler);
   }, [clearChat, messages.length]);
 
   return (

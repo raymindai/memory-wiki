@@ -532,7 +532,7 @@ Your documents sync across all Memory.Wiki channels:
 - **Web** — Memory.Wiki
 - **VS Code** — Extension with WYSIWYG preview
 - **Mac Desktop** — Native app with sidebar
-- **CLI** — \`npm install -g mdfy-cli\`
+- **CLI** — \`npm install -g memory-wiki-cli\`
 - **Chrome Extension** — Capture from ChatGPT, Claude, Gemini
 - **MCP Server** — AI agents create/read/update documents`,
 

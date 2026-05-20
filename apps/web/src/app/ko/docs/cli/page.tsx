@@ -87,7 +87,7 @@ export default function CliDocsPageKo() {
           {/* 설치 */}
           <SectionHeading id="installation">설치</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g memory-wiki-cli`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
               Node.js 18 이상이 필요합니다. 설치 후 <InlineCode>{"Memory.Wiki"}</InlineCode> 명령어를 사용할 수 있습니다.
             </p>
@@ -96,7 +96,7 @@ export default function CliDocsPageKo() {
           {/* 명령어 개요 */}
           <SectionHeading id="commands">명령어</SectionHeading>
           <Card>
-            <CommandRow cmd="mdfy publish <file>" desc="Markdown 파일 또는 stdin을 Memory.Wiki에 게시합니다." />
+            <CommandRow cmd="mw publish <file>" desc="Markdown 파일 또는 stdin을 Memory.Wiki에 게시합니다." />
             <CommandRow cmd="Memory.Wiki update <id> <file>" desc="기존 문서를 새 내용으로 업데이트합니다." />
             <CommandRow cmd="Memory.Wiki pull <id>" desc="문서의 Markdown 내용을 다운로드합니다." />
             <CommandRow cmd="Memory.Wiki delete <id>" desc="문서를 소프트 삭제합니다." />
@@ -115,22 +115,22 @@ export default function CliDocsPageKo() {
           </p>
           <Card>
             <CodeBlock lang="bash">{`# 파일 게시
-mdfy publish README.md
+mw publish README.md
 
 # stdin에서 게시
-echo "# Hello World" | mdfy publish
+echo "# Hello World" | mw publish
 
 # 임시 저장으로 게시
-mdfy publish README.md --draft
+mw publish README.md --draft
 
 # 제목 지정
-mdfy publish README.md --title "My Document"
+mw publish README.md --title "My Document"
 
 # 비밀번호 설정
-mdfy publish README.md --password "secret"
+mw publish README.md --password "secret"
 
 # 만료 시간 설정
-mdfy publish README.md --expires 7d`}</CodeBlock>
+mw publish README.md --expires 7d`}</CodeBlock>
             <SubLabel>옵션</SubLabel>
             <CommandRow cmd="--draft, -d" desc="임시 저장으로 게시합니다 (본인만 볼 수 있음)." />
             <CommandRow cmd="--title, -t" desc="문서 제목을 설정합니다." />
@@ -149,7 +149,7 @@ mdfy publish README.md --expires 7d`}</CodeBlock>
 Memory.Wiki update abc123 README.md
 
 # stdin으로 업데이트
-echo "# Updated" | mdfy update abc123
+echo "# Updated" | mw update abc123
 
 # 버전 노트와 함께 업데이트
 Memory.Wiki update abc123 README.md --message "Fixed typos"`}</CodeBlock>
@@ -236,42 +236,42 @@ Memory.Wiki whoami
           <SectionHeading id="pipes">파이프 예시</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# 클립보드를 Memory.Wiki로
-pbpaste | mdfy publish
+pbpaste | mw publish
 
 # 명령어 출력
-ls -la | mdfy publish
+ls -la | mw publish
 
 # 파일 내용
-cat report.md | mdfy publish
+cat report.md | mw publish
 
 # AI로 생성 후 바로 게시
-claude "Write a guide to Rust" | mdfy publish
+claude "Write a guide to Rust" | mw publish
 
 # Git diff
-git diff | mdfy publish --title "Changes"
+git diff | mw publish --title "Changes"
 
 # Docker 로그
-docker logs my-app 2>&1 | mdfy publish
+docker logs my-app 2>&1 | mw publish
 
 # 여러 명령어 파이프
-curl -s https://api.example.com/data | jq . | mdfy publish`}</CodeBlock>
+curl -s https://api.example.com/data | jq . | mw publish`}</CodeBlock>
           </Card>
 
           {/* tmux */}
           <SectionHeading id="tmux">tmux 연동</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# 현재 패널 캡처
-tmux capture-pane -p | mdfy publish
+tmux capture-pane -p | mw publish
 
 # 단축키로 캡처 및 공유
 # ~/.tmux.conf에 추가:
-bind-key M run-shell "tmux capture-pane -p | mdfy publish"
+bind-key M run-shell "tmux capture-pane -p | mw publish"
 
 # 특정 패널 캡처
-tmux capture-pane -t %3 -p | mdfy publish
+tmux capture-pane -t %3 -p | mw publish
 
 # 전체 스크롤백 캡처
-tmux capture-pane -p -S - | mdfy publish`}</CodeBlock>
+tmux capture-pane -p -S - | mw publish`}</CodeBlock>
           </Card>
 
           {/* Aliases */}
@@ -283,13 +283,13 @@ tmux capture-pane -p -S - | mdfy publish`}</CodeBlock>
 alias mp="Memory.Wiki publish"
 
 # 클립보드 게시
-alias mpc="pbpaste | mdfy publish"
+alias mpc="pbpaste | mw publish"
 
 # 게시 후 브라우저 열기
-alias mpo="mdfy publish --open"
+alias mpo="mw publish --open"
 
 # tmux 캡처
-alias mtx="tmux capture-pane -p | mdfy publish"`}</CodeBlock>
+alias mtx="tmux capture-pane -p | mw publish"`}</CodeBlock>
           </Card>
 
           {/* 설정 */}

@@ -35,7 +35,7 @@ Generate each with `openssl rand -hex 32`.
 
 | Field | Value |
 |---|---|
-| Name | `mdfy-doc-created` |
+| Name | `mw-doc-created` |
 | Table | `public.documents` |
 | Events | ✓ Insert (only) |
 | Type | HTTP Request |
@@ -52,7 +52,7 @@ Generate each with `openssl rand -hex 32`.
 
 | Field | Value |
 |---|---|
-| Name | `mdfy-bundle-created` |
+| Name | `mw-bundle-created` |
 | Table | `public.bundles` |
 | Events | ✓ Insert (only) |
 | Method | POST |
@@ -65,7 +65,7 @@ Generate each with `openssl rand -hex 32`.
 
 | Field | Value |
 |---|---|
-| Name | `mdfy-bundle-membership-changed` |
+| Name | `mw-bundle-membership-changed` |
 | Table | `public.bundle_documents` |
 | Events | ✓ Insert, ✓ Delete |
 | Method | POST |

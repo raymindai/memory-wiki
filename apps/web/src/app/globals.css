@@ -2547,18 +2547,18 @@ textarea::selection {
    globals.css means any future surface that wants the same loading
    feel can opt in by reusing the class names without reshipping the
    keyframes inside its own <style> block. */
-@keyframes mdfyLoaderBar {
+@keyframes mwLoaderBar {
   0%   { left: -40%; }
   100% { left: 100%; }
 }
 /* Skeleton placeholder pulse — used by BundleEmbed's layout-aware
    loading state. Subtle opacity oscillation that reads as "data is
    on its way" without competing visually with the surrounding chrome. */
-@keyframes mdfySkelPulse {
+@keyframes mwSkelPulse {
   0%, 100% { opacity: 0.55; }
   50%      { opacity: 0.9; }
 }
-@keyframes mdfyLoaderEnter {
+@keyframes mwLoaderEnter {
   from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }
 }
@@ -2570,16 +2570,16 @@ textarea::selection {
    row paints once at full opacity before the animation starts,
    producing a visible flash → opacity 0 → fade in. With
    backwards the `from` state applies immediately on mount. */
-@keyframes mdfyRecentEnter {
+@keyframes mwRecentEnter {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.mdfy-recent-enter {
-  animation: mdfyRecentEnter 320ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+.mw-recent-enter {
+  animation: mwRecentEnter 320ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
 /* ── Bundle Canvas Detail Level slider ──
-   Native <input type="range"> styled to match the mdfy palette.
+   Native <input type="range"> styled to match the Memory.Wiki palette.
    Track is rendered via the inline `background: linear-gradient`
    on the input (so the filled portion follows the value). Thumb
    is a draggable accent circle.
@@ -2590,9 +2590,9 @@ textarea::selection {
 /* Slim-track pattern: track lives ONLY in the track pseudo-elements
    (NOT on the input itself), so the thumb sits on a clean 4px line
    instead of floating above a 14px bar. The progress fill comes from
-   --mdfy-detail-progress, a CSS var the component sets inline based
+   --mw-detail-progress, a CSS var the component sets inline based
    on `(value - min) / (max - min)`. */
-.mdfy-detail-slider input[type="range"] {
+.mw-detail-slider input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -2603,25 +2603,25 @@ textarea::selection {
   padding: 0;
   margin: 0;
 }
-.mdfy-detail-slider input[type="range"]:active { cursor: grabbing; }
-.mdfy-detail-slider input[type="range"]:focus-visible::-webkit-slider-thumb {
+.mw-detail-slider input[type="range"]:active { cursor: grabbing; }
+.mw-detail-slider input[type="range"]:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 3px var(--background), 0 0 0 5px var(--accent-dim);
 }
-.mdfy-detail-slider input[type="range"]:focus-visible::-moz-range-thumb {
+.mw-detail-slider input[type="range"]:focus-visible::-moz-range-thumb {
   box-shadow: 0 0 0 3px var(--background), 0 0 0 5px var(--accent-dim);
 }
 
 /* Webkit track */
-.mdfy-detail-slider input[type="range"]::-webkit-slider-runnable-track {
+.mw-detail-slider input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
-  background: var(--mdfy-detail-progress, var(--toggle-bg));
+  background: var(--mw-detail-progress, var(--toggle-bg));
 }
 /* Webkit thumb — 14px circle, vertically centered on the 4px track
    via negative margin (the standard CSS hack). The 3px background-
    coloured outer ring isolates the thumb visually from the track
    so the orange dot reads as a control, not a blob. */
-.mdfy-detail-slider input[type="range"]::-webkit-slider-thumb {
+.mw-detail-slider input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
@@ -2634,27 +2634,27 @@ textarea::selection {
   cursor: grab;
   transition: transform 120ms ease-out, box-shadow 120ms ease-out;
 }
-.mdfy-detail-slider input[type="range"]::-webkit-slider-thumb:hover {
+.mw-detail-slider input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.12);
 }
-.mdfy-detail-slider input[type="range"]:active::-webkit-slider-thumb {
+.mw-detail-slider input[type="range"]:active::-webkit-slider-thumb {
   cursor: grabbing;
   transform: scale(1.15);
 }
 
 /* Firefox track + thumb — Firefox positions the thumb on the track
    without the margin-top hack, so we drop it. */
-.mdfy-detail-slider input[type="range"]::-moz-range-track {
+.mw-detail-slider input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 2px;
   background: var(--toggle-bg);
 }
-.mdfy-detail-slider input[type="range"]::-moz-range-progress {
+.mw-detail-slider input[type="range"]::-moz-range-progress {
   height: 4px;
   border-radius: 2px;
   background: var(--accent);
 }
-.mdfy-detail-slider input[type="range"]::-moz-range-thumb {
+.mw-detail-slider input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -2664,32 +2664,32 @@ textarea::selection {
   cursor: grab;
   transition: transform 120ms ease-out, box-shadow 120ms ease-out;
 }
-.mdfy-detail-slider input[type="range"]::-moz-range-thumb:hover {
+.mw-detail-slider input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.12);
 }
-.mdfy-detail-slider input[type="range"]:active::-moz-range-thumb {
+.mw-detail-slider input[type="range"]:active::-moz-range-thumb {
   cursor: grabbing;
   transform: scale(1.15);
 }
-.mdfy-loader-enter {
-  animation: mdfyLoaderEnter 480ms ease-out both;
+.mw-loader-enter {
+  animation: mwLoaderEnter 480ms ease-out both;
 }
 
 /* Sidebar multi-select toolbar — labels collapse to icon-only when
    the container gets narrow. The wrapper sets container-type:
    inline-size so children can query its width. */
-.mdfy-multiselect-bar {
+.mw-multiselect-bar {
   container-type: inline-size;
 }
 @container (max-width: 240px) {
-  .mdfy-collapse-label { display: none; }
+  .mw-collapse-label { display: none; }
 }
 
 /* Remote-cursor caret blink for Live (Tiptap) collab — see
    components/tiptap-remote-cursors.ts. Steps blinker keeps the
    eye honest about presence without the distraction of a smooth
    fade. */
-@keyframes mdfyRemoteCaretBlink {
+@keyframes mwRemoteCaretBlink {
   0%, 50% { opacity: 1; }
   50.01%, 100% { opacity: 0.35; }
 }

@@ -9,14 +9,14 @@ if args.count < 2 {
     Memory.Wiki QuickLook Preview Generator
 
     Usage:
-      mdfy-quicklook <markdown-file>           Print rendered HTML to stdout
-      mdfy-quicklook <markdown-file> -o <out>  Write rendered HTML to file
-      mdfy-quicklook <markdown-file> --open     Render and open in browser
+      memory-wiki-quicklook <markdown-file>           Print rendered HTML to stdout
+      memory-wiki-quicklook <markdown-file> -o <out>  Write rendered HTML to file
+      memory-wiki-quicklook <markdown-file> --open     Render and open in browser
 
     Examples:
-      mdfy-quicklook README.md
-      mdfy-quicklook README.md -o preview.html
-      mdfy-quicklook README.md --open
+      memory-wiki-quicklook README.md
+      memory-wiki-quicklook README.md -o preview.html
+      memory-wiki-quicklook README.md --open
     """)
     exit(1)
 }
@@ -39,7 +39,7 @@ guard let html = generatePreviewHTML(markdownPath: absolutePath) else {
 
 if args.contains("--open") {
     let tempDir = FileManager.default.temporaryDirectory
-    let tempFile = tempDir.appendingPathComponent("mdfy-preview-\(UUID().uuidString).html")
+    let tempFile = tempDir.appendingPathComponent("mw-preview-\(UUID().uuidString).html")
     do {
         try html.write(to: tempFile, atomically: true, encoding: String.Encoding.utf8)
         let process = Process()

@@ -21,8 +21,8 @@ func loadTemplate() -> String? {
 
     // ~/.memory.wiki/quicklook/
     let homeDir = FileManager.default.homeDirectoryForCurrentUser
-    let mdfyDir = homeDir.appendingPathComponent(".memory.wiki/quicklook/template.html")
-    if let content = try? String(contentsOf: mdfyDir, encoding: .utf8) { return content }
+    let mwDir = homeDir.appendingPathComponent(".memory.wiki/quicklook/template.html")
+    if let content = try? String(contentsOf: mwDir, encoding: .utf8) { return content }
 
     // Relative to source tree (development)
     let sourceDir = executableURL
@@ -39,8 +39,8 @@ func loadCSS() -> String? {
     if let content = try? String(contentsOf: sameDir, encoding: .utf8) { return content }
 
     let homeDir = FileManager.default.homeDirectoryForCurrentUser
-    let mdfyDir = homeDir.appendingPathComponent(".memory.wiki/quicklook/preview.css")
-    if let content = try? String(contentsOf: mdfyDir, encoding: .utf8) { return content }
+    let mwDir = homeDir.appendingPathComponent(".memory.wiki/quicklook/preview.css")
+    if let content = try? String(contentsOf: mwDir, encoding: .utf8) { return content }
 
     let resourceDir = executableURL
         .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()

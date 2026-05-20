@@ -402,7 +402,7 @@ cross-doc 컨텍스트가 필요할 때마다 다시 읽음.`}
           <ToolBlock
             id="cursor-tool"
             name="Cursor"
-            filePath=".cursor/rules/mdfy.mdc"
+            filePath=".cursor/rules/memorywiki.mdc"
             tagline="Cursor 의 신규 multi-rule 포맷. frontmatter 가 룰 적용 범위 스코프, body 가 Memory.Wiki URL 보관. 번들마다 한 파일로 깨끗하게 분리."
             snippet={`---
 description: Project context from Memory.Wiki

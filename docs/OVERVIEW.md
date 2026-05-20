@@ -89,11 +89,11 @@ Auxiliary surfaces:
 | Channel                     | Status                                  |
 | --------------------------- | --------------------------------------- |
 | `Memory.Wiki` web              | Live on Vercel                          |
-| VS Code (mdfy-vscode)       | Marketplace v1.4.0                      |
+| VS Code (memory-wiki-vscode)       | Marketplace v1.4.0                      |
 | Desktop (DMG)               | v2.2.0, Developer ID signed + notarized |
 | Chrome Web Store            | v2.x                                    |
-| CLI (mdfy-cli)              | npm v1.3.x                              |
-| MCP server (mdfy-mcp)       | npm v1.3.x                              |
+| CLI (memory-wiki-cli)              | npm v1.3.x                              |
+| MCP server (memory-wiki-mcp)       | npm v1.3.x                              |
 | macOS QuickLook plugin      | Bundled inside Desktop DMG              |
 
 ### Misc UX
@@ -152,7 +152,7 @@ Auxiliary surfaces:
 ### Hosting & CI
 - **Vercel** — `git push origin main` → Actions CI → auto-deploy Memory.Wiki.
 - **GitHub Actions** (`.github/workflows/ci.yml`) — build-web + e2e-test.
-- Domains: **Memory.Wiki** primary; mdfy.online redirects in; mdcore.ai / .org / .md parked (historical, sunset planned).
+- Domains: **Memory.Wiki** primary; memorywiki.online redirects in; mdcore.ai / .org / .md parked (historical, sunset planned).
 
 ### One renderer everywhere
 Every non-edit surface — web viewer, embed, bundle, hub, VS Code preview, Desktop preview, Chrome extension popup, raw payload — runs the **same `lib/render.ts`** (vendored to each channel). That's why "looks different in viewer than in editor" can't structurally happen.
@@ -165,13 +165,13 @@ Every non-edit surface — web viewer, embed, bundle, hub, VS Code preview, Desk
 mdcore/                          # repo name is historical — product is "Memory.Wiki"
 ├── apps/
 │   ├── web/                     # Next.js 15 web app → Memory.Wiki (the main product)
-│   ├── vscode-extension/        # mdfy-vscode (Marketplace)
+│   ├── vscode-extension/        # memory-wiki-vscode (Marketplace)
 │   ├── desktop/                 # Memory.Wiki Desktop (Electron DMG)
 │   ├── chrome-extension/        # Memory.Wiki Chrome (Web Store)
-│   ├── cli/                     # mdfy-cli (npm)
+│   ├── cli/                     # memory-wiki-cli (npm)
 │   └── quicklook/               # macOS QuickLook
 ├── packages/
-│   └── mcp/                     # mdfy-mcp (npm, MCP server)
+│   └── mcp/                     # memory-wiki-mcp (npm, MCP server)
 ├── docs/                        # strategy notes, gap analyses, this file
 ├── .github/workflows/ci.yml
 └── vercel.json

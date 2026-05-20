@@ -32,11 +32,11 @@ export class SyncEngine {
   constructor(authManager: AuthManager, statusBar: StatusBarManager, private context: vscode.ExtensionContext) {
     this.authManager = authManager;
     this.statusBar = statusBar;
-    this.offlineQueue = this.context.globalState.get<typeof this.offlineQueue>("mdfy.offlineQueue") || [];
+    this.offlineQueue = this.context.globalState.get<typeof this.offlineQueue>("memorywiki.offlineQueue") || [];
   }
 
   private async persistQueue(): Promise<void> {
-    await this.context.globalState.update("mdfy.offlineQueue", this.offlineQueue);
+    await this.context.globalState.update("memorywiki.offlineQueue", this.offlineQueue);
   }
 
   /**
@@ -299,21 +299,21 @@ export class SyncEngine {
 
   /**
    * Poll all tracked (published) markdown files for server changes.
-   * Scans workspace for .mdfy.json sidecar files, not just open documents.
+   * Scans workspace for .memorywiki.json sidecar files, not just open documents.
    */
   private async pollAllTrackedFiles(): Promise<void> {
     await this.flushOfflineQueue();
 
-    // Scan workspace for hidden .mdfy.json sidecar files
+    // Scan workspace for hidden .memorywiki.json sidecar files
     const sidecarFiles = await vscode.workspace.findFiles(
-      "**/.*.mdfy.json",
+      "**/.*.memorywiki.json",
       "{**/node_modules/**,**/dist/**,**/.git/**}",
       50 // limit to prevent overload
     );
 
     for (const sidecarUri of sidecarFiles) {
       const sidecarPath = sidecarUri.fsPath;
-      // Derive the .md file path: .foo.mdfy.json → foo.md
+      // Derive the .md file path: .foo.memorywiki.json → foo.md
       const dir = sidecarPath.substring(0, sidecarPath.lastIndexOf("/") + 1);
       const sidecarName = sidecarPath.substring(sidecarPath.lastIndexOf("/") + 1);
       const mdName = sidecarName.replace(/^\./, "").replace(/\.memory.wiki\.json$/, ".md");

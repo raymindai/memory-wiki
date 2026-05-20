@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function VSCodeAuthPage() {
@@ -37,7 +37,7 @@ export default function VSCodeAuthPage() {
       // We have a token — redirect to VS Code URI handler
       const token = session.access_token;
       const refreshToken = (session as { refresh_token?: string }).refresh_token;
-      let vscodeUri = `vscode://raymindai.mdfy-vscode/auth?token=${encodeURIComponent(token)}`;
+      let vscodeUri = `vscode://raymindai.memory-wiki-vscode/auth?token=${encodeURIComponent(token)}`;
       if (refreshToken) {
         vscodeUri += `&refresh_token=${encodeURIComponent(refreshToken)}`;
       }
@@ -48,7 +48,7 @@ export default function VSCodeAuthPage() {
 
       // Also try the insiders variant after a delay
       setTimeout(() => {
-        let insidersUri = `vscode-insiders://raymindai.mdfy-vscode/auth?token=${encodeURIComponent(token)}`;
+        let insidersUri = `vscode-insiders://raymindai.memory-wiki-vscode/auth?token=${encodeURIComponent(token)}`;
         if (refreshToken) {
           insidersUri += `&refresh_token=${encodeURIComponent(refreshToken)}`;
         }
@@ -76,7 +76,7 @@ export default function VSCodeAuthPage() {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      <MdfyLogo size={32} />
+      <MemoryWikiLogo size={32} />
 
       {status === "loading" && (
         <>

@@ -1,5 +1,5 @@
 // Memory.Wiki Service Worker — Offline caching + Share Target
-const CACHE_NAME = "mdfy-v1";
+const CACHE_NAME = "mw-v1";
 const STATIC_ASSETS = ["/", "/manifest.json"];
 
 // Install: cache app shell

@@ -58,19 +58,19 @@ const sidebarItems = [
   { id: "claude-desktop", label: "Claude Desktop Setup" },
   { id: "cursor", label: "Cursor / Windsurf" },
   { id: "tools", label: "All 25 Tools" },
-  { id: "mdfy-create", label: "mdfy_create" },
-  { id: "mdfy-read", label: "mdfy_read" },
-  { id: "mdfy-update", label: "mdfy_update" },
-  { id: "mdfy-list", label: "mdfy_list" },
-  { id: "mdfy-publish", label: "mdfy_publish" },
-  { id: "mdfy-delete", label: "mdfy_delete" },
+  { id: "mw-create", label: "mw_create" },
+  { id: "mw-read", label: "mw_read" },
+  { id: "mw-update", label: "mw_update" },
+  { id: "mw-list", label: "mw_list" },
+  { id: "mw-publish", label: "mw_publish" },
+  { id: "mw-delete", label: "mw_delete" },
   { id: "examples", label: "Usage Examples" },
 ];
 
 const tools = [
   {
-    id: "mdfy-create",
-    name: "mdfy_create",
+    id: "mw-create",
+    name: "mw_create",
     desc: "Create a new document from Markdown content. Returns the document URL, ID, and edit token.",
     params: [
       { name: "markdown", type: "string", required: true, desc: "The Markdown content." },
@@ -80,7 +80,7 @@ const tools = [
     example: `// In Claude Code:
 "Publish this analysis as a document on Memory.Wiki"
 
-// Claude calls mdfy_create:
+// Claude calls mw_create:
 {
   "markdown": "# Performance Analysis\\n...",
   "title": "Performance Analysis",
@@ -95,22 +95,22 @@ const tools = [
 }`,
   },
   {
-    id: "mdfy-read",
-    name: "mdfy_read",
+    id: "mw-read",
+    name: "mw_read",
     desc: "Fetch a document's content and metadata by ID.",
     params: [
       { name: "id", type: "string", required: true, desc: "Document ID." },
     ],
     example: `// "Read the document at memory.wiki/abc123"
 
-// Claude calls mdfy_read:
+// Claude calls mw_read:
 { "id": "abc123" }
 
 // Returns full markdown content and metadata`,
   },
   {
-    id: "mdfy-update",
-    name: "mdfy_update",
+    id: "mw-update",
+    name: "mw_update",
     desc: "Update an existing document's content or title.",
     params: [
       { name: "id", type: "string", required: true, desc: "Document ID." },
@@ -120,7 +120,7 @@ const tools = [
     ],
     example: `// "Update the document with the revised version"
 
-// Claude calls mdfy_update:
+// Claude calls mw_update:
 {
   "id": "abc123",
   "markdown": "# Revised Analysis\\n...",
@@ -128,18 +128,18 @@ const tools = [
 }`,
   },
   {
-    id: "mdfy-list",
-    name: "mdfy_list",
+    id: "mw-list",
+    name: "mw_list",
     desc: "List all documents owned by the authenticated user.",
     params: [],
     example: `// "Show me my published documents"
 
-// Claude calls mdfy_list (no parameters)
+// Claude calls mw_list (no parameters)
 // Returns array of documents with id, title, status`,
   },
   {
-    id: "mdfy-publish",
-    name: "mdfy_publish",
+    id: "mw-publish",
+    name: "mw_publish",
     desc: "Toggle a document between draft (private) and published (shared) state.",
     params: [
       { name: "id", type: "string", required: true, desc: "Document ID." },
@@ -147,19 +147,19 @@ const tools = [
     ],
     example: `// "Make document abc123 public"
 
-// Claude calls mdfy_publish:
+// Claude calls mw_publish:
 { "id": "abc123", "isDraft": false }`,
   },
   {
-    id: "mdfy-delete",
-    name: "mdfy_delete",
+    id: "mw-delete",
+    name: "mw_delete",
     desc: "Soft-delete a document. Can be restored by owner.",
     params: [
       { name: "id", type: "string", required: true, desc: "Document ID." },
     ],
     example: `// "Delete the old draft"
 
-// Claude calls mdfy_delete:
+// Claude calls mw_delete:
 { "id": "abc123" }`,
   },
 ];
@@ -252,7 +252,7 @@ export default function McpDocsPage() {
             For local stdio-based clients (Claude Desktop, Claude Code, Cursor stdio mode), install the npm package:
           </p>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli && Memory.Wiki login`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g memory-wiki-cli && Memory.Wiki login`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0, lineHeight: 1.7 }}>
               The MCP server uses JWT authentication from <InlineCode>{"Memory.Wiki login"}</InlineCode>. No environment variables needed.
             </p>
@@ -268,7 +268,7 @@ export default function McpDocsPage() {
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }`}</CodeBlock>
@@ -292,7 +292,7 @@ export default function McpDocsPage() {
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }`}</CodeBlock>
@@ -322,14 +322,14 @@ export default function McpDocsPage() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: 8, marginBottom: 24 }}>
             {[
-              { cat: "Core CRUD", tools: ["mdfy_create", "mdfy_read", "mdfy_update", "mdfy_delete", "mdfy_list", "mdfy_search"] },
-              { cat: "Append/Prepend", tools: ["mdfy_append", "mdfy_prepend"] },
-              { cat: "Sections", tools: ["mdfy_outline", "mdfy_extract_section", "mdfy_replace_section"] },
-              { cat: "Duplicate/Import", tools: ["mdfy_duplicate", "mdfy_import_url"] },
-              { cat: "Sharing", tools: ["mdfy_publish", "mdfy_set_allowed_emails", "mdfy_get_share_url"] },
-              { cat: "Versions", tools: ["mdfy_versions", "mdfy_restore_version", "mdfy_diff"] },
-              { cat: "Stats/Folders", tools: ["mdfy_stats", "mdfy_recent", "mdfy_folder_list", "mdfy_folder_create", "mdfy_move_to_folder"] },
-              { cat: "Render", tools: ["mdfy_render_preview"] },
+              { cat: "Core CRUD", tools: ["mw_create", "mw_read", "mw_update", "mw_delete", "mw_list", "mw_search"] },
+              { cat: "Append/Prepend", tools: ["mw_append", "mw_prepend"] },
+              { cat: "Sections", tools: ["mw_outline", "mw_extract_section", "mw_replace_section"] },
+              { cat: "Duplicate/Import", tools: ["mw_duplicate", "mw_import_url"] },
+              { cat: "Sharing", tools: ["mw_publish", "mw_set_allowed_emails", "mw_get_share_url"] },
+              { cat: "Versions", tools: ["mw_versions", "mw_restore_version", "mw_diff"] },
+              { cat: "Stats/Folders", tools: ["mw_stats", "mw_recent", "mw_folder_list", "mw_folder_create", "mw_move_to_folder"] },
+              { cat: "Render", tools: ["mw_render_preview"] },
             ].map((g) => (
               <div key={g.cat} style={{ background: "var(--surface)", padding: "12px 14px", borderRadius: 8 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>{g.cat}</div>
@@ -407,7 +407,7 @@ export default function McpDocsPage() {
 
 Claude: I'll write the blog post and publish it for you.
 
-[Claude writes the content, then calls mdfy_create]
+[Claude writes the content, then calls mw_create]
 
 Done! Your blog post is live at https://memory.wiki/abc123`}</CodeBlock>
             </Card>
@@ -418,7 +418,7 @@ Done! Your blog post is live at https://memory.wiki/abc123`}</CodeBlock>
 
 Claude: I'll read the current document and add the benchmarks section.
 
-[Claude calls mdfy_read, then mdfy_update with new content]
+[Claude calls mw_read, then mw_update with new content]
 
 Updated! The document now includes the benchmarks section.`}</CodeBlock>
             </Card>
@@ -429,7 +429,7 @@ Updated! The document now includes the benchmarks section.`}</CodeBlock>
 
 Claude: Let me list your documents.
 
-[Claude calls mdfy_list]
+[Claude calls mw_list]
 
 You have 5 documents:
 1. "API Guide" (published) - updated 2h ago
@@ -440,7 +440,7 @@ Should I delete the old drafts (#2 and #3)?
 
 You: "Yes"
 
-[Claude calls mdfy_delete for each]
+[Claude calls mw_delete for each]
 
 Done! Deleted 2 documents.`}</CodeBlock>
             </Card>

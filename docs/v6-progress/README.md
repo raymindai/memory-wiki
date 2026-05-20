@@ -30,5 +30,5 @@ commits, verified scenarios, and any deferred work.
 
 ## Reference
 
-- Strategy memo: `~/.claude/projects/-Users-hyunsangcho-Desktop-Projects-mdcore/memory/mdfy_wiki_layer_2026_05.md`
+- Strategy memo: `~/.claude/projects/-Users-hyunsangcho-Desktop-Projects-mdcore/memory/mw_wiki_layer_2026_05.md`
 - Earlier launch artifacts: `docs/launch/`

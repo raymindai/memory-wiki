@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   // mutate the body during creation. The only exception is a fresh
   // capture (POST) that passes a `title` hint with a body that
   // genuinely lacks an H1 — this is import-time explicit intent so
-  // we prepend once, mirroring mdfy_create / PDF import. After that
+  // we prepend once, mirroring mw_create / PDF import. After that
   // first write, no save ever rewrites the body.
   const incomingMd = typeof body.markdown === "string" ? body.markdown : "";
   const incomingHint = typeof body.title === "string" ? body.title.trim() : "";
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Cookie fallback: when neither body, header, nor user is provided, group
-  // this capture under the browser's mdfy_anon cookie so the user can claim
+  // this capture under the browser's mw_anon cookie so the user can claim
   // every captured doc on sign-in.
   if (!userId && !anonymousId) {
     anonymousId = readAnonymousCookie(req) || undefined;
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
   // up in a user's library because nothing on the server prevents the same
   // content from being POSTed twice in quick succession. Likely sources:
   //   • two browser tabs both running the local-tab → cloud-doc migration
-  //     against the same `mdfy-tabs` localStorage state at boot
+  //     against the same `mw-tabs` localStorage state at boot
   //   • a Chrome-extension/bookmarklet capture retrying after a transient
   //     network failure
   //   • React 18 dev StrictMode double-invoking an effect that creates

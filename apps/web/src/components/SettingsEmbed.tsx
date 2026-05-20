@@ -88,7 +88,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
   const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
     if (initialSection) return initialSection;
     if (typeof window === "undefined") return "profile";
-    return (localStorage.getItem("mdfy-settings-section") as SettingsSection) || "profile";
+    return (localStorage.getItem("mw-settings-section") as SettingsSection) || "profile";
   });
   // If parent passes a fresh initialSection mid-mount (e.g. Hub's
   // "Settings" deep-link reopens the same overlay with a different
@@ -97,7 +97,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
     if (initialSection) setActiveSection(initialSection);
   }, [initialSection]);
   useEffect(() => {
-    try { localStorage.setItem("mdfy-settings-section", activeSection); } catch {}
+    try { localStorage.setItem("mw-settings-section", activeSection); } catch {}
   }, [activeSection]);
 
   const [displayName, setDisplayName] = useState("");
@@ -124,8 +124,8 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
     const p = profile as { color_scheme?: string | null; accent_color?: string | null } | null;
     const serverScheme = (p?.color_scheme as ColorScheme | null) || null;
     const serverAccent = (p?.accent_color as AccentColor | null) || null;
-    const s = serverScheme || (localStorage.getItem("mdfy-scheme") as ColorScheme) || "default";
-    const a = serverAccent || (localStorage.getItem("mdfy-accent") as AccentColor) || "orange";
+    const s = serverScheme || (localStorage.getItem("mw-scheme") as ColorScheme) || "default";
+    const a = serverAccent || (localStorage.getItem("mw-accent") as AccentColor) || "orange";
     setSkinScheme(s);
     setKeyColor(a);
     // Re-apply to DOM in case the server value differed from the
@@ -160,19 +160,19 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
   // accent because we update DOM + localStorage but not useTheme's
   // React state.
   const broadcastThemeChange = () => {
-    try { window.dispatchEvent(new CustomEvent("mdfy-theme-changed")); } catch { /* ignore */ }
+    try { window.dispatchEvent(new CustomEvent("mw-theme-changed")); } catch { /* ignore */ }
   };
   const selectScheme = (s: ColorScheme) => {
     setSkinScheme(s);
     applyScheme(s);
-    try { localStorage.setItem("mdfy-scheme", s); } catch {}
+    try { localStorage.setItem("mw-scheme", s); } catch {}
     syncPrefToProfile("color_scheme", s);
     broadcastThemeChange();
   };
   const selectAccent = (a: AccentColor) => {
     setKeyColor(a);
     applyAccent(a);
-    try { localStorage.setItem("mdfy-accent", a); } catch {}
+    try { localStorage.setItem("mw-accent", a); } catch {}
     syncPrefToProfile("accent_color", a);
     broadcastThemeChange();
   };
@@ -194,7 +194,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
     setCuratorSettings((prev) => {
       const updated = { ...prev, [id]: next } as CuratorSettings;
       saveCuratorSettings(updated);
-      try { window.dispatchEvent(new CustomEvent("mdfy-curator-settings-changed", { detail: updated })); } catch { /* ignore */ }
+      try { window.dispatchEvent(new CustomEvent("mw-curator-settings-changed", { detail: updated })); } catch { /* ignore */ }
       // Fire-and-forget profile sync. Best-effort — localStorage
       // still has the canonical value if the server write fails.
       if (user) {
@@ -272,7 +272,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
   }, [user, hubSlug, hubPublic, hubDescription]);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("mdfy-theme") : null;
+    const stored = typeof window !== "undefined" ? localStorage.getItem("mw-theme") : null;
     setTheme((stored as "dark" | "light") || "dark");
   }, []);
 
@@ -316,7 +316,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
   // Export all user data as a JSON file. Single round-trip; the
   // server assembles the payload and returns it with a
   // Content-Disposition header so the browser downloads as
-  // mdfy-export-YYYY-MM-DD.json.
+  // mw-export-YYYY-MM-DD.json.
   const [exporting, setExporting] = useState(false);
   const handleExportData = useCallback(async () => {
     if (!accessToken || exporting) return;
@@ -335,7 +335,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
       const a = document.createElement("a");
       a.href = url;
       const date = new Date().toISOString().slice(0, 10);
-      a.download = `mdfy-export-${date}.json`;
+      a.download = `mw-export-${date}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -350,8 +350,8 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
   const handleThemeChange = (newTheme: "dark" | "light") => {
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-    try { localStorage.setItem("mdfy-theme", newTheme); } catch {}
-    try { window.dispatchEvent(new CustomEvent("mdfy-theme-changed")); } catch { /* ignore */ }
+    try { localStorage.setItem("mw-theme", newTheme); } catch {}
+    try { window.dispatchEvent(new CustomEvent("mw-theme-changed")); } catch { /* ignore */ }
   };
   // Hover-preview helpers for Theme — applies the candidate to the
   // <html> attribute without flipping React state. Leave restores

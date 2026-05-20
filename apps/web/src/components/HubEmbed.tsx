@@ -20,7 +20,7 @@ import {
   Network, Clock, FolderClosed, Atom,
 } from "lucide-react";
 import DocStatusIcon from "@/components/DocStatusIcon";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 interface DocCard {
   id: string;
@@ -168,7 +168,7 @@ interface HubEmbedProps {
 // background refresh doesn't fire on every casual reopen.
 const hubDataCache = new Map<string, { data: HubData; ts: number }>();
 const HUB_CACHE_TTL_MS = 5 * 60_000;
-const HUB_CACHE_KEY = "mdfy-hub-data-cache-v1";
+const HUB_CACHE_KEY = "mw-hub-data-cache-v1";
 
 if (typeof window !== "undefined" && hubDataCache.size === 0) {
   try {
@@ -460,11 +460,11 @@ export default function HubEmbed({
     // like a half-built screen while the API request is in flight.
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: "var(--background)", gap: 14 }}>
-        <div className="mdfy-loader-enter">
-          <MdfyLogo size={26} />
+        <div className="mw-loader-enter">
+          <MemoryWikiLogo size={26} />
         </div>
         <div style={{ width: 96, height: 2, background: "var(--border-dim)", borderRadius: 1, overflow: "hidden", position: "relative" }}>
-          <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "var(--accent)", borderRadius: 1, animation: "mdfyLoaderBar 1.1s ease-in-out infinite" }} />
+          <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "var(--accent)", borderRadius: 1, animation: "mwLoaderBar 1.1s ease-in-out infinite" }} />
         </div>
         <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
           Loading hub
@@ -669,7 +669,7 @@ Fetch this URL on every session for the user's knowledge graph
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["-y", "mdfy-mcp"]
+      "args": ["-y", "memory-wiki-mcp"]
     }
   }
 }`;
@@ -680,7 +680,7 @@ claude skill install Memory.Wiki
 /memory.wiki capture "your idea"
 /memory.wiki search "topic"
 /memory.wiki hub`;
-            const cliUse = `npm install -g mdfy-cli
+            const cliUse = `npm install -g memory-wiki-cli
 
 Memory.Wiki capture "your idea"
 Memory.Wiki search "topic"
@@ -742,9 +742,9 @@ Memory.Wiki hub`;
                 id: "cursor",
                 label: "Cursor",
                 group: "user",
-                hint: "Save as .cursor/rules/mdfy.mdc in your project root",
+                hint: "Save as .cursor/rules/memorywiki.mdc in your project root",
                 snippet: cursorRule,
-                savePath: ".cursor/rules/mdfy.mdc",
+                savePath: ".cursor/rules/memorywiki.mdc",
                 explanation:
                   "Cursor's Rules feature reads .mdc files from .cursor/rules/. The alwaysApply: true frontmatter keeps your hub URL in context on every chat in the repo, including ad-hoc questions.",
                 docHref: "/docs/integrate#cursor",
@@ -763,7 +763,7 @@ Memory.Wiki hub`;
                 id: "mcp",
                 label: "MCP",
                 group: "native",
-                hint: "Add mdfy-mcp to your MCP host config",
+                hint: "Add memory-wiki-mcp to your MCP host config",
                 snippet: mcpConfig,
                 explanation:
                   "Compatible with Claude Desktop, Cursor, Cline, Windsurf, and any MCP-capable host. Exposes 26 tools across capture / bundle / search / share / version history — so the AI can write into your hub, not just read it.",
@@ -1233,7 +1233,7 @@ Memory.Wiki hub`;
                 needs a refresh. Only the changed docs are re-extracted.
                 {" "}
                 <Link
-                  href="/how-mdfy-stays-fresh"
+                  href="/how-memorywiki-stays-fresh"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: "#f59e0b", textDecoration: "underline" }}

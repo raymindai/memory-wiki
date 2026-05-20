@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 // Shared header for the public viewers (/d/<id>, /b/<id>, /hub/<slug>).
 // Single source of truth for the chrome each viewer wears at the top:
@@ -45,7 +45,7 @@ export default function ViewerHeader({ title, subtitle, breadcrumb, actions }: V
       }}
     >
       <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="Memory.Wiki home">
-        <MdfyLogo size={18} />
+        <MemoryWikiLogo size={18} />
       </Link>
 
       <div

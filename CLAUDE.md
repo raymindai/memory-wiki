@@ -22,7 +22,7 @@ AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이
 ## 도메인
 
 - **Memory.Wiki** — 핵심 제품, 라이브, Vercel 자동 배포
-- **mdfy.online** — Memory.Wiki로 리다이렉트 (보조)
+- **memory.wiki.online** — Memory.Wiki로 리다이렉트 (보조)
 - **mdcore.ai / mdcore.org / mdcore.md** — 과거 "Rust 엔진을 제품화" 전략의 잔재. 현재는
   파킹/리다이렉트 상태. 차후 일몰 예정 (Memory.Wiki으로 통합).
 
@@ -39,7 +39,7 @@ AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이
 ```text
 mdcore/
 ├── packages/
-│   └── mcp/                 # mdfy-mcp — MCP server (npm 출시됨, v1.3.x)
+│   └── mcp/                 # memory-wiki-mcp — MCP server (npm 출시됨, v1.3.x)
 ├── apps/
 │   ├── web/                 # Next.js 15 웹앱 (Memory.Wiki) — 메인 제품
 │   │   ├── src/
@@ -67,10 +67,10 @@ mdcore/
 │   │   │       ├── supabase.ts
 │   │   │       └── ...
 │   │   └── package.json
-│   ├── vscode-extension/    # mdfy-vscode — Marketplace 출시 (v1.4.0+)
+│   ├── vscode-extension/    # memory-wiki-vscode — Marketplace 출시 (v1.4.0+)
 │   ├── desktop/             # Memory.Wiki Desktop — DMG (v2.2.0+, Developer ID 사인+notarize)
 │   ├── chrome-extension/    # Memory.Wiki Chrome — Web Store 출시 (v2.x)
-│   ├── cli/                 # mdfy-cli — npm 출시 (v1.3.x)
+│   ├── cli/                 # memory-wiki-cli — npm 출시 (v1.3.x)
 │   └── quicklook/           # macOS QuickLook 플러그인
 ├── docs/
 │   ├── ROADMAP.md
@@ -134,12 +134,12 @@ Live 탭(편집)은 TipTap이 같은 markdown-it 인스턴스로 ProseMirror 트
 | 디렉토리 | 출시 채널 | 상태 |
 | --- | --- | --- |
 | `apps/web` | Memory.Wiki (Vercel) | 라이브 |
-| `apps/vscode-extension` | VS Code Marketplace (mdfy-vscode) | v1.4.0 |
+| `apps/vscode-extension` | VS Code Marketplace (memory-wiki-vscode) | v1.4.0 |
 | `apps/desktop` | DMG 다운로드 | v2.2.0 (Developer ID 사인+notarize) |
 | `apps/chrome-extension` | Chrome Web Store | v2.x |
-| `apps/cli` | npm (mdfy-cli) | v1.3.x |
+| `apps/cli` | npm (memory-wiki-cli) | v1.3.x |
 | `apps/quicklook` | macOS QuickLook 플러그인 | Desktop DMG에 번들 |
-| `packages/mcp` | npm (mdfy-mcp) | v1.3.x |
+| `packages/mcp` | npm (memory-wiki-mcp) | v1.3.x |
 
 각 채널은 독립적으로 빌드/배포되지만 렌더 로직은 동일 `render.ts` (vendored copy).
 

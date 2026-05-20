@@ -4,7 +4,7 @@
  * On sign-up, documents with this ID migrate to the user account.
  */
 
-const STORAGE_KEY = "mdfy-anon-id";
+const STORAGE_KEY = "mw-anon-id";
 
 /**
  * Returns the anonymous ID if one exists, or creates one.

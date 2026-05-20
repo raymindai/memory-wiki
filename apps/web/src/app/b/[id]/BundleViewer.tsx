@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { File as FileIcon, Sparkles, BookOpen, Tag, Box, Hash, ArrowRight, ArrowLeftRight, AlertTriangle } from "lucide-react";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
@@ -133,7 +133,7 @@ export default function BundleViewer({
 
   // Theme
   useEffect(() => {
-    const saved = localStorage.getItem("mdfy-theme");
+    const saved = localStorage.getItem("mw-theme");
     if (saved === "dark" || saved === "light") {
       setThemeState(saved);
       document.documentElement.setAttribute("data-theme", saved);
@@ -144,7 +144,7 @@ export default function BundleViewer({
     const next = theme === "dark" ? "light" : "dark";
     setThemeState(next);
     document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("mdfy-theme", next);
+    localStorage.setItem("mw-theme", next);
   };
 
   // Fetch bundle data
@@ -156,11 +156,11 @@ export default function BundleViewer({
         const headers: Record<string, string> = {};
 
         // Build headers from localStorage (non-blocking)
-        const anonId = localStorage.getItem("mdfy-anonymous-id");
+        const anonId = localStorage.getItem("mw-anonymous-id");
         if (anonId) headers["x-anonymous-id"] = anonId;
-        const storedUserId = localStorage.getItem("mdfy-user-id");
+        const storedUserId = localStorage.getItem("mw-user-id");
         if (storedUserId) headers["x-user-id"] = storedUserId;
-        const storedEmail = localStorage.getItem("mdfy-user-email");
+        const storedEmail = localStorage.getItem("mw-user-email");
         if (storedEmail) headers["x-user-email"] = storedEmail;
 
         const res = await fetch(`/api/bundles/${id}`, { headers });
@@ -241,7 +241,7 @@ export default function BundleViewer({
   // Copy as Context — fetch the Bundle Spec v1.0 conformant payload from
   // /raw/bundle/[id] so the user pastes the same structured markdown that
   // AI fetchers receive when they hit the bundle URL directly. Includes
-  // frontmatter (mdfy_bundle: 1, id, title, url, document_count, updated)
+  // frontmatter (mw_bundle: 1, id, title, url, document_count, updated)
   // + per-doc URLs + annotations. Falls back to a local concat if the
   // raw endpoint isn't reachable (shouldn't happen on staging/prod, but
   // belt-and-suspenders for local dev where Supabase may be offline).
@@ -282,7 +282,7 @@ export default function BundleViewer({
     setIsAnalyzing(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const anonId = localStorage.getItem("mdfy-anonymous-id");
+      const anonId = localStorage.getItem("mw-anonymous-id");
       if (anonId) headers["x-anonymous-id"] = anonId;
       const graphRes = await fetch(`/api/bundles/${id}/graph`, {
         method: "POST",
@@ -431,7 +431,7 @@ export default function BundleViewer({
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}>
         <div className="w-full max-w-sm mx-4">
           <div className="text-center mb-6">
-            <MdfyLogo />
+            <MemoryWikiLogo />
             <h1 className="text-lg font-semibold mt-4" style={{ color: "var(--text-primary)" }}>Protected Bundle</h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>{documentCount} documents</p>
           </div>

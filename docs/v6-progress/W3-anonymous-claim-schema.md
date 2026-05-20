@@ -19,10 +19,10 @@ config to follow.
 Memory.Wiki is unreachable from those origins, so anonymous captures had
 no way to be grouped together for later claiming.
 
-**Fix.** Server issues an `mdfy_anon` cookie:
+**Fix.** Server issues an `mw_anon` cookie:
 
 ```
-mdfy_anon=<uuid>; Max-Age=31536000; Path=/; SameSite=None; Secure
+mw_anon=<uuid>; Max-Age=31536000; Path=/; SameSite=None; Secure
 ```
 
 `SameSite=None; Secure` is required so the bookmarklet's cross-origin
@@ -55,14 +55,14 @@ flips to `credentials: "include"` so the cookie round-trips.
 
 **Behavior.** When a user signs in, `useAuth.ts` fires a best-effort
 `POST /api/user/migrate` with whatever anonymous ids the browser has
-(legacy localStorage `mdfy-anon-id` plus the new `mdfy_anon` cookie).
+(legacy localStorage `mw-anon-id` plus the new `mw_anon` cookie).
 Idempotent. Running it twice is harmless.
 
 `/api/user/migrate` now claims **bundles** as well as documents. The
 endpoint reads the cookie itself as a final fallback.
 
 After a successful claim, both ids are cleared client-side and a
-`mdfy-anon-claimed` event is dispatched with `{documents, bundles}`
+`mw-anon-claimed` event is dispatched with `{documents, bundles}`
 counts so future UI can show a toast.
 
 **Files.**

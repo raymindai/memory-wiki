@@ -5,9 +5,9 @@
 **Markdown URLs that humans write and AI reads.** Capture from any AI tool. Share anywhere with a permanent short URL.
 
 [![Live](https://img.shields.io/badge/memory.wiki-live-orange)](https://memory.wiki)
-[![VS Code](https://img.shields.io/badge/VS%20Code-Marketplace-blue)](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode)
-[![MCP](https://img.shields.io/badge/MCP-npm-red)](https://www.npmjs.com/package/mdfy-mcp)
-[![CLI](https://img.shields.io/badge/CLI-npm-green)](https://www.npmjs.com/package/mdfy-cli)
+[![VS Code](https://img.shields.io/badge/VS%20Code-Marketplace-blue)](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode)
+[![MCP](https://img.shields.io/badge/MCP-npm-red)](https://www.npmjs.com/package/memory-wiki-mcp)
+[![CLI](https://img.shields.io/badge/CLI-npm-green)](https://www.npmjs.com/package/memory-wiki-cli)
 
 ---
 
@@ -22,10 +22,10 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 | Channel | Status | Install |
 |---------|--------|---------|
 | [**Web**](https://memory.wiki) | Live | Just open Memory.Wiki |
-| [**VS Code**](https://marketplace.visualstudio.com/items?itemName=raymindai.mdfy-vscode) | v1.4.0 | Marketplace |
+| [**VS Code**](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) | v1.4.0 | Marketplace |
 | **Desktop (Mac)** | v2.2.0 | DMG from releases |
-| [**CLI**](https://www.npmjs.com/package/mdfy-cli) | v1.3.x | `npm install -g mdfy-cli` |
-| [**MCP Server**](https://www.npmjs.com/package/mdfy-mcp) | v1.3.x | `npx mdfy-mcp` or hosted `memory.wiki/api/mcp` |
+| [**CLI**](https://www.npmjs.com/package/memory-wiki-cli) | v1.3.x | `npm install -g memory-wiki-cli` |
+| [**MCP Server**](https://www.npmjs.com/package/memory-wiki-mcp) | v1.3.x | `npx memory-wiki-mcp` or hosted `memory.wiki/api/mcp` |
 | **Chrome Extension** | v2.x | Web Store |
 | **QuickLook (Mac)** | Bundled with Desktop DMG | — |
 | **API** | Live | `https://memory.wiki/api/docs` |
@@ -98,7 +98,7 @@ Connect any AI tool to memory.wiki:
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }
@@ -152,10 +152,10 @@ mdcore/
 │   ├── desktop/              # Electron Mac app
 │   ├── vscode-extension/     # VS Code extension
 │   ├── chrome-extension/     # Chrome extension
-│   ├── cli/                  # mdfy-cli (npm)
+│   ├── cli/                  # memory-wiki-cli (npm)
 │   └── quicklook/            # macOS QuickLook
 ├── packages/
-│   └── mcp/                  # mdfy-mcp (npm)
+│   └── mcp/                  # memory-wiki-mcp (npm)
 ├── docs/                     # Architecture, roadmap, manifesto
 └── .github/workflows/        # CI/CD
 ```

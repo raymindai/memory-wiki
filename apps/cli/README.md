@@ -7,7 +7,7 @@ Part of the [Memory.Wiki](https://memory.wiki) ecosystem.
 ## Install
 
 ```bash
-npm install -g mdfy-cli
+npm install -g memory-wiki-cli
 ```
 
 ## Quick Start
@@ -146,7 +146,7 @@ Credentials stored in `~/.memory.wiki/config.json`. Edit tokens in `~/.memory.wi
 |---------|---------|
 | [Web Editor](https://memory.wiki) | Just open the URL |
 | [Hosted MCP (Claude Web, Cursor, etc.)](https://memory.wiki/docs/mcp) | URL: `https://memory.wiki/api/mcp` |
-| [Local MCP (Claude Desktop, Claude Code)](https://www.npmjs.com/package/mdfy-mcp) | `npx mdfy-mcp` |
+| [Local MCP (Claude Desktop, Claude Code)](https://www.npmjs.com/package/memory-wiki-mcp) | `npx memory-wiki-mcp` |
 | [VS Code Extension](https://memory.wiki/plugins) | Download from Plugins page |
 | [Chrome Extension](https://memory.wiki/plugins) | Download from Plugins page |
 | [Mac Desktop App](https://memory.wiki/plugins) | Download from Plugins page |

@@ -293,7 +293,7 @@ export interface MdfyResult {
  * Send raw text to AI for markdown structuring.
  * Returns structured markdown (+ metadata) or throws on failure.
  */
-export async function mdfyText(text: string, filename?: string): Promise<MdfyResult> {
+export async function mwText(text: string, filename?: string): Promise<MdfyResult> {
   // Unified with the doc-level Auto-Format quick action — both routes
   // used to live separately (/api/import/memory.wiki vs /api/ai action=format)
   // with subtly different prompts, so importing + "Structure it" produced a

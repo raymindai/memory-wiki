@@ -314,7 +314,7 @@
         break;
 
       case "publishedState": {
-        var badge = document.getElementById('mdfy-badge');
+        var badge = document.getElementById('mw-badge');
         var viewLink = document.getElementById('badge-view-link');
         if (badge) {
           if (message.docId && message.url) {
@@ -2172,7 +2172,7 @@
   function createTooltip() {
     if (tooltipEl) return;
     tooltipEl = document.createElement('div');
-    tooltipEl.className = 'mdfy-tooltip';
+    tooltipEl.className = 'mw-tooltip';
     document.body.appendChild(tooltipEl);
   }
 

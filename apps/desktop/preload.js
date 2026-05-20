@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld("mdfyDesktop", {
+contextBridge.exposeInMainWorld("mwDesktop", {
   isDesktop: true,
 
   // ─── File Operations ───

@@ -131,7 +131,7 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
             {t.hero.cta_secondary}
           </a>
           <Link
-            href="/how-mdfy-works"
+            href="/how-memorywiki-works"
             style={{
               display: "inline-flex",
               alignItems: "center",

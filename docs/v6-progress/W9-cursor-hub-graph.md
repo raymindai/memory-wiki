@@ -16,7 +16,7 @@ model only acts when the user actually wants it.
 
 `install.sh` gained a `--target` flag. Default installs the Claude
 Code skill at `~/.claude/skills/memory.wiki/`. `--target=cursor` drops
-`mdfy.mdc` into `~/.cursor/rules/` (Cursor's global rules
+`memorywiki.mdc` into `~/.cursor/rules/` (Cursor's global rules
 directory). Both targets share the same fetch helper, error path,
 and post-install hint.
 
@@ -27,9 +27,9 @@ each with its own one-line installer.
 
 - `/skills/memory.wiki/cursor-rule.mdc` served. 2781 bytes, HTTP 200.
 - `install.sh --target=cursor` branch reachable in the shipped
-  script. Lands the rule at `~/.cursor/rules/mdfy.mdc`.
+  script. Lands the rule at `~/.cursor/rules/memorywiki.mdc`.
 - `/install` page renders both sections; "Cursor" appears 14
-  times, "Claude Code" 12 times, `mdfy.mdc` 2 times.
+  times, "Claude Code" 12 times, `memorywiki.mdc` 2 times.
 
 ### Files
 

@@ -1,4 +1,4 @@
-# mdfy-mcp
+# memory-wiki-mcp
 
 MCP server for [Memory.Wiki](https://memory.wiki) — let any AI tool create, read, update, and manage Markdown documents with permanent shareable URLs.
 
@@ -14,7 +14,7 @@ Works with **Claude Code**, **Claude Desktop**, **Cursor**, and any [Model Conte
 ### 1. Login (one-time)
 
 ```bash
-npx mdfy-cli login
+npx memory-wiki-cli login
 ```
 
 Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/`.
@@ -28,7 +28,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }
@@ -41,7 +41,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }
@@ -53,33 +53,33 @@ No API keys or environment variables needed. Authentication is handled via `Memo
 
 | Tool | Description | Auth |
 |------|-------------|------|
-| `mdfy_create` | Create a new document and get a shareable URL | Optional |
-| `mdfy_read` | Fetch document content by ID or URL | No |
-| `mdfy_update` | Update an existing document's content | Edit token (auto-managed) |
-| `mdfy_list` | List all your documents with metadata | Yes |
-| `mdfy_publish` | Toggle a document between public and private | Edit token (auto-managed) |
-| `mdfy_delete` | Soft-delete or permanently delete a document | Edit token (auto-managed) |
+| `mw_create` | Create a new document and get a shareable URL | Optional |
+| `mw_read` | Fetch document content by ID or URL | No |
+| `mw_update` | Update an existing document's content | Edit token (auto-managed) |
+| `mw_list` | List all your documents with metadata | Yes |
+| `mw_publish` | Toggle a document between public and private | Edit token (auto-managed) |
+| `mw_delete` | Soft-delete or permanently delete a document | Edit token (auto-managed) |
 
 ## What You Can Do
 
 ```
 You: "Create a document with my meeting notes"
-AI:  mdfy_create → https://memory.wiki/abc123 (URL copied!)
+AI:  mw_create → https://memory.wiki/abc123 (URL copied!)
 
 You: "List my documents"
-AI:  mdfy_list → 8 documents found
+AI:  mw_list → 8 documents found
 
 You: "Read the system design doc"
-AI:  mdfy_read → (full markdown content)
+AI:  mw_read → (full markdown content)
 
 You: "Update it with the new architecture section"
-AI:  mdfy_update → Document updated
+AI:  mw_update → Document updated
 
 You: "Make it private"
-AI:  mdfy_publish (published: false) → Now private
+AI:  mw_publish (published: false) → Now private
 
 You: "Delete the draft"
-AI:  mdfy_delete → Moved to trash
+AI:  mw_delete → Moved to trash
 ```
 
 ### Cross-AI Workflow
@@ -88,13 +88,13 @@ Memory.Wiki URLs work as context across AI conversations:
 
 ```
 You (in Claude): "Summarize the research at memory.wiki/abc123"
-AI:  mdfy_read → reads the document → provides summary
+AI:  mw_read → reads the document → provides summary
 
 You (in ChatGPT): "Read memory.wiki/abc123 and suggest improvements"
 ChatGPT: fetches the URL → gives feedback
 
 You (in Claude): "Update memory.wiki/abc123 with the improvements"
-AI:  mdfy_update → document updated, same URL
+AI:  mw_update → document updated, same URL
 ```
 
 ## How Authentication Works
@@ -113,10 +113,10 @@ No email spoofing possible — all requests are authenticated via JWT.
 
 - **Permanent URLs** — every document gets a short URL (`memory.wiki/...`) that never expires
 - **Auto-managed edit tokens** — create a doc, get edit access automatically
-- **Public or private** — toggle visibility with `mdfy_publish`
+- **Public or private** — toggle visibility with `mw_publish`
 - **Markdown rendering** — documents render with syntax highlighting, KaTeX math, Mermaid diagrams
 - **Version history** — all edits are tracked
-- **Zero config** — just `npx mdfy-mcp`, no API keys needed
+- **Zero config** — just `npx memory-wiki-mcp`, no API keys needed
 
 ## Other Channels
 
@@ -125,7 +125,7 @@ Memory.Wiki is available everywhere:
 | Channel | Install |
 |---------|---------|
 | [Web Editor](https://memory.wiki) | Just open the URL |
-| [CLI](https://www.npmjs.com/package/mdfy-cli) | `npm install -g mdfy-cli` |
+| [CLI](https://www.npmjs.com/package/memory-wiki-cli) | `npm install -g memory-wiki-cli` |
 | [VS Code Extension](https://memory.wiki/plugins) | Download .vsix from Plugins page |
 | [Chrome Extension](https://memory.wiki/plugins) | Download from Plugins page |
 | [Mac Desktop App](https://memory.wiki/plugins) | Download .dmg from Plugins page |

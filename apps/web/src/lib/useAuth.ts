@@ -54,8 +54,8 @@ function ensureHubSlug(
 ) {
   if (typeof window === "undefined") return;
   try {
-    if (sessionStorage.getItem("mdfy-hub-ensure-attempted") === "1") return;
-    sessionStorage.setItem("mdfy-hub-ensure-attempted", "1");
+    if (sessionStorage.getItem("mw-hub-ensure-attempted") === "1") return;
+    sessionStorage.setItem("mw-hub-ensure-attempted", "1");
   } catch { /* ignore */ }
   fetch("/api/user/hub/ensure", {
     method: "POST",
@@ -82,7 +82,7 @@ function ensureHubSlug(
         // Surface a one-shot notice so the user knows where to
         // customize. Components subscribe via the event listener.
         try {
-          window.dispatchEvent(new CustomEvent("mdfy-hub-auto-created", { detail: { slug: data.slug } }));
+          window.dispatchEvent(new CustomEvent("mw-hub-auto-created", { detail: { slug: data.slug } }));
         } catch { /* ignore */ }
       }
     })
@@ -107,8 +107,8 @@ function tryClaimAnonymousContent(accessToken: string | null) {
   // A real new sign-in flow resets the tab (OAuth redirect) so this
   // doesn't block legitimate re-attempts.
   try {
-    if (sessionStorage.getItem("mdfy-claim-attempted") === "1") return;
-    sessionStorage.setItem("mdfy-claim-attempted", "1");
+    if (sessionStorage.getItem("mw-claim-attempted") === "1") return;
+    sessionStorage.setItem("mw-claim-attempted", "1");
   } catch { /* private mode etc. — fall through, still safe */ }
 
   fetch("/api/user/migrate", {
@@ -131,7 +131,7 @@ function tryClaimAnonymousContent(accessToken: string | null) {
         if (localAnon) clearAnonymousId();
         if (cookieAnon) clearMdfyAnonCookie();
         window.dispatchEvent(
-          new CustomEvent("mdfy-anon-claimed", {
+          new CustomEvent("mw-anon-claimed", {
             detail: {
               documents: data.documentsMigrated || 0,
               bundles: data.bundlesMigrated || 0,
@@ -186,7 +186,7 @@ export function useAuth() {
           if (event === "SIGNED_IN") {
             // Fresh sign-in: reset the per-tab guard so the migrate fires
             // even if a previous page load already attempted it.
-            try { sessionStorage.removeItem("mdfy-claim-attempted"); } catch { /* ignore */ }
+            try { sessionStorage.removeItem("mw-claim-attempted"); } catch { /* ignore */ }
             tryClaimAnonymousContent(session.access_token || null);
           }
         } else {
@@ -195,14 +195,14 @@ export function useAuth() {
 
         // Detect session expiry: SIGNED_OUT event or TOKEN_REFRESHED failure
         if (event === "SIGNED_OUT" && !session) {
-          const wasLoggedIn = typeof window !== "undefined" && localStorage.getItem("mdfy-was-logged-in");
+          const wasLoggedIn = typeof window !== "undefined" && localStorage.getItem("mw-was-logged-in");
           if (wasLoggedIn) {
             // Dispatch a custom event so components can show a notification
-            window.dispatchEvent(new CustomEvent("mdfy-session-expired"));
+            window.dispatchEvent(new CustomEvent("mw-session-expired"));
           }
         }
         if (event === "TOKEN_REFRESHED" && !session) {
-          window.dispatchEvent(new CustomEvent("mdfy-session-expired"));
+          window.dispatchEvent(new CustomEvent("mw-session-expired"));
         }
       }
     );

@@ -80,7 +80,7 @@ export default function InstallPage() {
             className="text-xs mt-2"
             style={{ color: "var(--text-faint)" }}
           >
-            Drops <code>mdfy.mdc</code> into <code>~/.cursor/rules/</code>. Cursor picks it up on next launch (or after toggling rules in Settings). Then say things like &quot;save this to Memory.Wiki as &lt;title&gt;&quot; in any chat.
+            Drops <code>memorywiki.mdc</code> into <code>~/.cursor/rules/</code>. Cursor picks it up on next launch (or after toggling rules in Settings). Then say things like &quot;save this to Memory.Wiki as &lt;title&gt;&quot; in any chat.
           </p>
         </section>
 

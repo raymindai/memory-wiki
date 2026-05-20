@@ -174,16 +174,16 @@
   </div>
 
   <script>
-    // mdfyDesktop exposed by preload.js via contextBridge
+    // mwDesktop exposed by preload.js via contextBridge
 
     // Retry connection
     document.getElementById("btn-retry").addEventListener("click", () => {
-      window.mdfyDesktop.openEditor();
+      window.mwDesktop.openEditor();
     });
 
     // Open local file
     document.getElementById("btn-open").addEventListener("click", () => {
-      window.mdfyDesktop.openFile();
+      window.mwDesktop.openFile();
     });
 
     // Poll connectivity status

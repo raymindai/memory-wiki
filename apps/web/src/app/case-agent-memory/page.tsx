@@ -19,7 +19,7 @@ const data: CaseData = {
     },
     {
       step: "Wire the MCP server",
-      detail: "Drop `mdfy-mcp` into the agent's MCP config (Claude Code's .mcp.json, Cursor's settings, etc.). The agent now has 26 tools — read, write, search, append, version — pointed at its hub.",
+      detail: "Drop `memory-wiki-mcp` into the agent's MCP config (Claude Code's .mcp.json, Cursor's settings, etc.). The agent now has 26 tools — read, write, search, append, version — pointed at its hub.",
     },
     {
       step: "Pre-run: pull the hub URL as context",
@@ -27,7 +27,7 @@ const data: CaseData = {
     },
     {
       step: "Post-run: write decisions back",
-      detail: "When the agent finishes, it calls `Memory.Wiki capture` (or `mdfy_create` MCP tool) with a structured summary: decision, rationale, files touched, follow-ups. Next run reads these alongside everything older.",
+      detail: "When the agent finishes, it calls `Memory.Wiki capture` (or `mw_create` MCP tool) with a structured summary: decision, rationale, files touched, follow-ups. Next run reads these alongside everything older.",
     },
   ],
   result: [

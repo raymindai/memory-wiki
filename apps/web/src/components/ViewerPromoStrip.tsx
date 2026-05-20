@@ -118,14 +118,14 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
         </div>
         <div className="mt-4 flex items-center gap-4 flex-wrap">
           <Link
-            href="/how-mdfy-works"
+            href="/how-memorywiki-works"
             className="text-caption"
             style={{ color: "var(--text-faint)" }}
           >
             How Memory.Wiki works &rarr;
           </Link>
           <Link
-            href="/mdfy-memory"
+            href="/mw-memory"
             className="text-caption"
             style={{ color: "var(--text-faint)" }}
           >

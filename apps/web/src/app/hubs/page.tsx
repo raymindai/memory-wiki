@@ -3,7 +3,7 @@ import Link from "next/link";
 import { File as FileIcon, Layers } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 import { extractCrossRefs, rankCitations } from "@/lib/cross-refs";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 export const revalidate = 300;
 
@@ -246,7 +246,7 @@ export default async function HubsPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
       <header className="px-6 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-        <Link href="/" className="shrink-0"><MdfyLogo size={18} /></Link>
+        <Link href="/" className="shrink-0"><MemoryWikiLogo size={18} /></Link>
         <nav className="flex items-center gap-3 text-caption" style={{ color: "var(--text-muted)" }}>
           <Link href="/about" className="transition-colors hover:text-[var(--text-primary)]">About</Link>
           <Link href="/manifesto" className="transition-colors hover:text-[var(--text-primary)]">Manifesto</Link>

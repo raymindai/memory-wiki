@@ -16,7 +16,7 @@ All documents are automatically saved to Supabase. No manual "save" step. Every 
 
 ### Anonymous ID Lifecycle
 1. User creates first document without login → `ensureAnonymousId()` generates UUID
-2. UUID stored in localStorage as `mdfy-anon-id`
+2. UUID stored in localStorage as `mw-anon-id`
 3. All documents created with this UUID in `documents.anonymous_id`
 4. On sign-up → `/api/user/migrate` sets `user_id` and clears `anonymous_id`
 5. `clearAnonymousId()` removes from localStorage

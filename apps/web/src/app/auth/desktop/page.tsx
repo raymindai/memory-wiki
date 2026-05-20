@@ -21,7 +21,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function DesktopAuthPage() {
@@ -76,7 +76,7 @@ export default function DesktopAuthPage() {
         gap: 24,
       }}
     >
-      <MdfyLogo size={32} />
+      <MemoryWikiLogo size={32} />
 
       {status === "loading" && (
         <>

@@ -4,10 +4,10 @@
 # Defaults to Claude Code. Pass --target=cursor for the Cursor rule.
 #
 # Claude Code:
-#   curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh
+#   curl -fsSL https://staging.memory.wiki/skills/memorywiki/install.sh | sh
 #
 # Cursor:
-#   curl -fsSL https://staging.memory.wiki/skills/mdfy/install.sh | sh -s -- --target=cursor
+#   curl -fsSL https://staging.memory.wiki/skills/memorywiki/install.sh | sh -s -- --target=cursor
 #
 # Idempotent and safe to rerun.
 
@@ -36,9 +36,9 @@ fetch() {
 
 case "$TARGET" in
   claude|claude-code)
-    SKILL_DIR="${HOME}/.claude/skills/mdfy"
+    SKILL_DIR="${HOME}/.claude/skills/memorywiki"
     mkdir -p "$SKILL_DIR"
-    fetch "$BASE_URL/skills/mdfy/SKILL.md" "$SKILL_DIR/SKILL.md"
+    fetch "$BASE_URL/skills/memorywiki/SKILL.md" "$SKILL_DIR/SKILL.md"
     cat <<EOF
 mdfy skill installed at: $SKILL_DIR/SKILL.md
 
@@ -58,7 +58,7 @@ EOF
     # user's mdfy actions are available in every Cursor project.
     RULES_DIR="${HOME}/.cursor/rules"
     mkdir -p "$RULES_DIR"
-    fetch "$BASE_URL/skills/mdfy/cursor-rule.mdc" "$RULES_DIR/mdfy.mdc"
+    fetch "$BASE_URL/skills/memorywiki/cursor-rule.mdc" "$RULES_DIR/mdfy.mdc"
     cat <<EOF
 mdfy rule installed at: $RULES_DIR/mdfy.mdc
 
@@ -81,7 +81,7 @@ EOF
     AGENTS_FILE="$AGENTS_DIR/AGENTS.md"
     mkdir -p "$AGENTS_DIR"
     TMP_FILE=$(mktemp)
-    fetch "$BASE_URL/skills/mdfy/agent-prompt.md" "$TMP_FILE"
+    fetch "$BASE_URL/skills/memorywiki/agent-prompt.md" "$TMP_FILE"
     if [ -f "$AGENTS_FILE" ] && grep -q "mdfy actions" "$AGENTS_FILE"; then
       # Already installed; replace the mdfy block in place.
       python3 -c "
@@ -120,7 +120,7 @@ EOF
     AIDER_DIR="${HOME}/.aider"
     AIDER_FILE="$AIDER_DIR/conventions.md"
     mkdir -p "$AIDER_DIR"
-    fetch "$BASE_URL/skills/mdfy/agent-prompt.md" "$AIDER_FILE"
+    fetch "$BASE_URL/skills/memorywiki/agent-prompt.md" "$AIDER_FILE"
     cat <<EOF
 mdfy conventions installed at: $AIDER_FILE
 

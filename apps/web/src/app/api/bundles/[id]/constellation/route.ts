@@ -18,7 +18,7 @@ export const runtime = "nodejs";
 //     permission shape of /raw/bundle/[id]
 //
 // Used by the bundle Canvas view (future viz) and MCP's
-// `mdfy_bundle_constellation` tool.
+// `mw_bundle_constellation` tool.
 
 type RouteParams = { params: Promise<{ id: string }> };
 

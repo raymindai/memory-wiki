@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import WelcomeOverlay from "@/components/WelcomeOverlay";
 
 const MdEditor = dynamic(() => import("@/components/MdEditor"), {
@@ -23,8 +23,8 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
       className="flex flex-col items-center justify-center h-screen"
       style={{ background: "var(--background)", gap: 14 }}
     >
-      <div style={{ animation: "mdfyBootEnter 520ms ease-out both" }}>
-        <MdfyLogo size={26} />
+      <div style={{ animation: "mwBootEnter 520ms ease-out both" }}>
+        <MemoryWikiLogo size={26} />
       </div>
       <div
         style={{
@@ -44,7 +44,7 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
             width: "40%",
             background: "var(--accent)",
             borderRadius: 1,
-            animation: "mdfyBootBar 1.1s ease-in-out infinite",
+            animation: "mwBootBar 1.1s ease-in-out infinite",
           }}
         />
       </div>
@@ -56,11 +56,11 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
       </span>
 
       <style>{`
-        @keyframes mdfyBootBar {
+        @keyframes mwBootBar {
           0%   { left: -40%; }
           100% { left: 100%; }
         }
-        @keyframes mdfyBootEnter {
+        @keyframes mwBootEnter {
           from { opacity: 0; transform: scale(0.92); }
           to   { opacity: 1; transform: scale(1); }
         }

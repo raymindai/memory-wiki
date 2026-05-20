@@ -13,7 +13,7 @@ BUILD_DIR="${SCRIPT_DIR}/build"
 DERIVED_DATA="${BUILD_DIR}/DerivedData"
 TEAM_ID="W7NL89YGSD"
 SIGN_IDENTITY="Developer ID Application: Hyunsang Cho (${TEAM_ID})"
-BUNDLE_ID="cc.mdfy.quicklook"
+BUNDLE_ID="cc.memorywiki.quicklook"
 
 echo ""
 echo "  Memory.Wiki QuickLook Extension — Build + Notarize"

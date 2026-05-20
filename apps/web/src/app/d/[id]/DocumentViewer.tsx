@@ -124,16 +124,16 @@ export default function DocumentViewer({
 
   // Theme
   useEffect(() => {
-    const saved = localStorage.getItem("mdfy-theme") as Theme | null;
+    const saved = localStorage.getItem("mw-theme") as Theme | null;
     const initial = saved || "dark";
     setThemeState(initial);
     document.documentElement.setAttribute("data-theme", initial);
     // Restore accent and scheme
-    const accent = localStorage.getItem("mdfy-accent");
+    const accent = localStorage.getItem("mw-accent");
     if (accent && accent !== "orange") {
       document.documentElement.setAttribute("data-accent", accent);
     }
-    const scheme = localStorage.getItem("mdfy-scheme");
+    const scheme = localStorage.getItem("mw-scheme");
     if (scheme && scheme !== "default") {
       document.documentElement.setAttribute("data-scheme", scheme);
     }
@@ -143,7 +143,7 @@ export default function DocumentViewer({
     const next = theme === "dark" ? "light" : "dark";
     setThemeState(next);
     document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("mdfy-theme", next);
+    localStorage.setItem("mw-theme", next);
   }, [theme]);
 
   // Copy link

@@ -396,19 +396,19 @@
   </div>
 
   <script>
-    document.getElementById("btn-new").addEventListener("click", function() { window.mdfyDesktop.openEditor(); });
-    document.getElementById("btn-open").addEventListener("click", function() { window.mdfyDesktop.openFile(); });
+    document.getElementById("btn-new").addEventListener("click", function() { window.mwDesktop.openEditor(); });
+    document.getElementById("btn-open").addEventListener("click", function() { window.mwDesktop.openFile(); });
     document.getElementById("btn-paste").addEventListener("click", function() {
-      window.mdfyDesktop.readClipboard().then(function(text) {
+      window.mwDesktop.readClipboard().then(function(text) {
         if (text && text.trim()) {
-          window.mdfyDesktop.openEditorWithContent(text, "Pasted.md");
+          window.mwDesktop.openEditorWithContent(text, "Pasted.md");
         } else {
-          window.mdfyDesktop.openEditor();
+          window.mwDesktop.openEditor();
         }
       });
     });
     document.getElementById("btn-signin").addEventListener("click", function() {
-      window.mdfyDesktop.signIn();
+      window.mwDesktop.signIn();
     });
 
     var EXAMPLES = {
@@ -428,7 +428,7 @@
     document.querySelectorAll(".example-card").forEach(function(btn) {
       btn.addEventListener("click", function() {
         var key = btn.dataset.example;
-        if (EXAMPLES[key]) window.mdfyDesktop.openEditorWithContent(EXAMPLES[key], key + ".md");
+        if (EXAMPLES[key]) window.mwDesktop.openEditorWithContent(EXAMPLES[key], key + ".md");
       });
     });
 
@@ -441,10 +441,10 @@
       var files = Array.from(e.dataTransfer.files).filter(function(f) {
         var d = f.name.lastIndexOf("."); return d >= 0 && SUPPORTED_EXTS.indexOf(f.name.substring(d).toLowerCase()) !== -1;
       });
-      if (files.length > 0) window.mdfyDesktop.openFilePath(files[0].path);
+      if (files.length > 0) window.mwDesktop.openFilePath(files[0].path);
     });
 
-    window.mdfyDesktop.getRecentFiles().then(function(files) {
+    window.mwDesktop.getRecentFiles().then(function(files) {
       if (!files || files.length === 0) return;
       var list = document.getElementById("recent-list");
       list.innerHTML = "";
@@ -459,7 +459,7 @@
           '<span class="recent-time">' + timeAgo(file.openedAt) + '</span>';
         item.addEventListener("click", function() {
           console.log("[dashboard] opening recent:", file.path);
-          window.mdfyDesktop.openFilePath(file.path).then(function() {
+          window.mwDesktop.openFilePath(file.path).then(function() {
             console.log("[dashboard] openFilePath resolved");
           }).catch(function(err) {
             console.error("[dashboard] openFilePath error:", err);
@@ -477,7 +477,7 @@
       return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     }
 
-    window.mdfyDesktop.getVersion().then(function(v) { document.getElementById("version-text").textContent = "v" + v; }).catch(function(){});
+    window.mwDesktop.getVersion().then(function(v) { document.getElementById("version-text").textContent = "v" + v; }).catch(function(){});
 
     // ─── Cloud documents ───
 
@@ -491,19 +491,19 @@
         '<div class="recent-info"><div class="recent-name">' + title + '</div><div class="recent-dir">memory.wiki/' + doc.id + '</div></div>' +
         '<span class="recent-time">' + date + '</span>';
       item.addEventListener("click", function() {
-        window.mdfyDesktop.openCloudDocument(doc.id);
+        window.mwDesktop.openCloudDocument(doc.id);
       });
       return item;
     }
 
-    window.mdfyDesktop.getUser().then(function(user) {
+    window.mwDesktop.getUser().then(function(user) {
       if (!user) return;
 
       // Update sign-in button to show user
       var signBtn = document.getElementById("btn-signin");
       signBtn.textContent = user.email || "Signed in";
       signBtn.onclick = function() {
-        window.mdfyDesktop.signOut();
+        window.mwDesktop.signOut();
         signBtn.textContent = "Sign in";
         document.getElementById("cloud-section").style.display = "none";
         document.getElementById("recent-label").textContent = "Recent";
@@ -513,7 +513,7 @@
       document.getElementById("recent-label").textContent = "Local Files";
 
       // Fetch cloud documents
-      window.mdfyDesktop.getCloudDocuments().then(function(data) {
+      window.mwDesktop.getCloudDocuments().then(function(data) {
         var docs = data.documents || [];
         var cloudSection = document.getElementById("cloud-section");
         var cloudList = document.getElementById("cloud-list");

@@ -7,7 +7,7 @@ import { render as renderMarkdown } from "./render";
 
 export class PreviewPanel {
   private static panels: Map<string, PreviewPanel> = new Map();
-  private static readonly viewType = "mdfyPreview";
+  private static readonly viewType = "mwPreview";
   private static authManagerRef: AuthManager | undefined;
 
   private readonly panel: vscode.WebviewPanel;
@@ -311,7 +311,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
             break;
           }
           case "login": {
-            vscode.commands.executeCommand("mdfy.login");
+            vscode.commands.executeCommand("memorywiki.login");
             break;
           }
           case "uploadImage": {
@@ -373,7 +373,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
               const match = [...PreviewPanel.panels.entries()].find(([, p]) => p === this);
               const docId = match?.[0]?.replace("cloud:", "") || "";
               if (docId) {
-                vscode.commands.executeCommand("mdfy.sidebar.refresh");
+                vscode.commands.executeCommand("memorywiki.sidebar.refresh");
                 // Pull via sidebar handler — post a message to sidebar
                 vscode.window.showInformationMessage(
                   `To sync "${this.cloudTitle}" to local, click the download icon next to it in the sidebar.`,
@@ -543,7 +543,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
         "Sign in"
       );
       if (action === "Sign in") {
-        vscode.commands.executeCommand("mdfy.login");
+        vscode.commands.executeCommand("memorywiki.login");
       }
       return;
     }
@@ -794,7 +794,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
         "Sign in"
       );
       if (choice === "Sign in") {
-        vscode.commands.executeCommand("mdfy.login");
+        vscode.commands.executeCommand("memorywiki.login");
       }
       return;
     }
@@ -913,7 +913,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
 
       // Build multipart/form-data manually
       const boundary =
-        "----mdfyUpload" + Math.random().toString(36).substring(2);
+        "----memorywikiUpload" + Math.random().toString(36).substring(2);
       const parts: Buffer[] = [];
 
       // File part

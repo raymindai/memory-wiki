@@ -26,7 +26,7 @@ export const runtime = "nodejs";
  *    user drops a PDF onto the editor.
  *
  * The save mode honors the same auth ladder as /api/docs: JWT, x-user-id,
- * x-user-email, anonymous body field, x-anonymous-id header, mdfy_anon
+ * x-user-email, anonymous body field, x-anonymous-id header, mw_anon
  * cookie. Anonymous PDFs get the cookie issued so they can be claimed
  * along with the rest of the user's anonymous captures.
  */

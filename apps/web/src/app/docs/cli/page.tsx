@@ -87,7 +87,7 @@ export default function CliDocsPage() {
           {/* Installation */}
           <SectionHeading id="installation">Installation</SectionHeading>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g memory-wiki-cli`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
               Requires Node.js 18+. After install, use the <InlineCode>{"Memory.Wiki"}</InlineCode> command.
             </p>
@@ -96,7 +96,7 @@ export default function CliDocsPage() {
           {/* Commands Overview */}
           <SectionHeading id="commands">Commands</SectionHeading>
           <Card>
-            <CommandRow cmd="mdfy publish <file>" desc="Publish a Markdown file or stdin to Memory.Wiki." />
+            <CommandRow cmd="mw publish <file>" desc="Publish a Markdown file or stdin to Memory.Wiki." />
             <CommandRow cmd="Memory.Wiki update <id> <file>" desc="Update an existing document with new content." />
             <CommandRow cmd="Memory.Wiki pull <id>" desc="Download a document's Markdown content." />
             <CommandRow cmd="Memory.Wiki delete <id>" desc="Soft-delete a document." />
@@ -115,22 +115,22 @@ export default function CliDocsPage() {
           </p>
           <Card>
             <CodeBlock lang="bash">{`# Publish a file
-mdfy publish README.md
+mw publish README.md
 
 # Publish from stdin
-echo "# Hello World" | mdfy publish
+echo "# Hello World" | mw publish
 
 # Publish as draft
-mdfy publish README.md --draft
+mw publish README.md --draft
 
 # Publish with title
-mdfy publish README.md --title "My Document"
+mw publish README.md --title "My Document"
 
 # Place in a specific folder
-mdfy publish README.md --folder "folder-uuid"
+mw publish README.md --folder "folder-uuid"
 
 # Open in browser after publishing
-mdfy publish README.md --open`}</CodeBlock>
+mw publish README.md --open`}</CodeBlock>
             <SubLabel>Options</SubLabel>
             <CommandRow cmd="--draft, -d" desc="Publish as draft (only visible to you)." />
             <CommandRow cmd="--title, -t" desc="Set document title." />
@@ -148,7 +148,7 @@ mdfy publish README.md --open`}</CodeBlock>
 Memory.Wiki update abc123 README.md
 
 # Update from stdin
-echo "# Updated" | mdfy update abc123
+echo "# Updated" | mw update abc123
 
 # Update with version note
 Memory.Wiki update abc123 README.md --message "Fixed typos"`}</CodeBlock>
@@ -232,42 +232,42 @@ Memory.Wiki whoami
           <SectionHeading id="pipes">Pipe Examples</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# Clipboard to Memory.Wiki
-pbpaste | mdfy publish
+pbpaste | mw publish
 
 # Command output
-ls -la | mdfy publish
+ls -la | mw publish
 
 # Cat a file
-cat report.md | mdfy publish
+cat report.md | mw publish
 
 # Generate with AI, publish directly
-claude "Write a guide to Rust" | mdfy publish
+claude "Write a guide to Rust" | mw publish
 
 # Git diff
-git diff | mdfy publish --title "Changes"
+git diff | mw publish --title "Changes"
 
 # Docker logs
-docker logs my-app 2>&1 | mdfy publish
+docker logs my-app 2>&1 | mw publish
 
 # Pipe through multiple commands
-curl -s https://api.example.com/data | jq . | mdfy publish`}</CodeBlock>
+curl -s https://api.example.com/data | jq . | mw publish`}</CodeBlock>
           </Card>
 
           {/* tmux */}
           <SectionHeading id="tmux">tmux Integration</SectionHeading>
           <Card>
             <CodeBlock lang="bash">{`# Capture current pane
-tmux capture-pane -p | mdfy publish
+tmux capture-pane -p | mw publish
 
 # Capture and share with one keybinding
 # Add to ~/.tmux.conf:
-bind-key M run-shell "tmux capture-pane -p | mdfy publish"
+bind-key M run-shell "tmux capture-pane -p | mw publish"
 
 # Capture specific pane
-tmux capture-pane -t %3 -p | mdfy publish
+tmux capture-pane -t %3 -p | mw publish
 
 # Capture full scrollback
-tmux capture-pane -p -S - | mdfy publish`}</CodeBlock>
+tmux capture-pane -p -S - | mw publish`}</CodeBlock>
           </Card>
 
           {/* Aliases */}
@@ -279,13 +279,13 @@ tmux capture-pane -p -S - | mdfy publish`}</CodeBlock>
 alias mp="Memory.Wiki publish"
 
 # Publish clipboard
-alias mpc="pbpaste | mdfy publish"
+alias mpc="pbpaste | mw publish"
 
 # Publish and open
-alias mpo="mdfy publish --open"
+alias mpo="mw publish --open"
 
 # Capture tmux
-alias mtx="tmux capture-pane -p | mdfy publish"`}</CodeBlock>
+alias mtx="tmux capture-pane -p | mw publish"`}</CodeBlock>
           </Card>
 
           {/* Configuration */}

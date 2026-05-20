@@ -14,39 +14,38 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/import/pdf": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
   },
-  // Long-slug explainer docs (mdfy.app/how-mdfy-works, etc.) live in the
-  // documents table the same as any other doc, but their ids exceed the
-  // 12-char nanoid pattern Vercel's top-level rewrite assumes. Map each
-  // human-readable slug explicitly to /d/<id> so the public viewer
-  // renders. Each slug here MUST match a documents.id in the founder hub.
+  // Long-slug explainer docs live in the documents table the same as
+  // any other doc, but their ids exceed the 12-char nanoid pattern
+  // Vercel's top-level rewrite assumes. Map each human-readable slug
+  // explicitly to /d/<id> so the public viewer renders. Each slug
+  // here MUST match a documents.id in the founder hub.
   async rewrites() {
-    // Long-slug content lives in the documents/bundles tables but the
-    // top-level Vercel rewrite expects 6-12-char nanoids. Each branded
-    // slug needs an explicit rewrite to /d/<id> or /b/<id> so the
-    // public viewer renders. New mdfy explainer/foundation content all
-    // ships with long slugs; add new entries here as they are published.
     return [
       // Architecture explainers
-      { source: "/how-mdfy-works", destination: "/d/how-mdfy-works" },
-      { source: "/mdfy-memory", destination: "/d/mdfy-memory" },
-      // Freshness explainer — destination is a regular nanoid since the
-      // doc was created via MCP (no custom-slug path on that surface).
-      { source: "/how-mdfy-stays-fresh", destination: "/d/RUMdz2fQ" },
+      { source: "/how-memorywiki-works", destination: "/d/how-mdfy-works" },
+      { source: "/mw-memory", destination: "/d/mw-memory" },
+      // Freshness explainer
+      { source: "/how-memorywiki-stays-fresh", destination: "/d/RUMdz2fQ" },
       // Legacy alias (now a redirect stub doc)
-      { source: "/how-mdfy-rag-works", destination: "/d/how-mdfy-rag-works" },
-      // mdfy-about-mdfy content set
-      { source: "/what-is-mdfy", destination: "/d/what-is-mdfy" },
-      { source: "/mdfy-three-primitives", destination: "/d/mdfy-three-primitives" },
-      { source: "/mdfy-vs-vendor-memory", destination: "/d/mdfy-vs-vendor-memory" },
-      { source: "/mdfy-skills-overview", destination: "/d/mdfy-skills-overview" },
-      { source: "/mdfy-bundle-spec", destination: "/d/mdfy-bundle-spec" },
-      { source: "/mdfy-faq", destination: "/d/mdfy-faq" },
-      { source: "/mdfy-roadmap-2026", destination: "/d/mdfy-roadmap-2026" },
+      { source: "/how-memorywiki-rag-works", destination: "/d/how-mdfy-rag-works" },
+      // About content set
+      { source: "/what-is-memorywiki", destination: "/d/what-is-mdfy" },
+      { source: "/mw-three-primitives", destination: "/d/mw-three-primitives" },
+      { source: "/mw-vs-vendor-memory", destination: "/d/mw-vs-vendor-memory" },
+      { source: "/mw-skills-overview", destination: "/d/mw-skills-overview" },
+      { source: "/mw-bundle-spec", destination: "/d/mw-bundle-spec" },
+      { source: "/mw-faq", destination: "/d/mw-faq" },
+      { source: "/mw-roadmap-2026", destination: "/d/mw-roadmap-2026" },
       // Case studies — short Pain → Action → Result stories
       { source: "/case-cross-tool-handoff", destination: "/d/case-cross-tool-handoff" },
       { source: "/case-claude-md-personal-context", destination: "/d/case-claude-md-personal-context" },
       { source: "/case-share-with-team", destination: "/d/case-share-with-team" },
       { source: "/case-personal-llm-wiki", destination: "/d/case-personal-llm-wiki" },
+      // Legacy mdfy-* slugs still redirect during transition
+      { source: "/how-mdfy-works", destination: "/d/how-mdfy-works" },
+      { source: "/how-mdfy-stays-fresh", destination: "/d/RUMdz2fQ" },
+      { source: "/how-mdfy-rag-works", destination: "/d/how-mdfy-rag-works" },
+      { source: "/what-is-mdfy", destination: "/d/what-is-mdfy" },
     ];
   },
   webpack(config) {

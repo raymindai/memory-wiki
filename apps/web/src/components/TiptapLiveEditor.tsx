@@ -594,9 +594,9 @@ function buildCodeBlockNodeView({ node, HTMLAttributes, getPos, editor }: any) {
 // the docChange that produced the math text. Dispatching a
 // transaction with `forceMath: true` after mount guarantees one
 // more build pass.
-const MDFY_MATH_FORCE_META = "mdfyMathForceRebuild";
+const MDFY_MATH_FORCE_META = "mwMathForceRebuild";
 function createMathPlugin() {
-  const key = new PluginKey("mdfy-math");
+  const key = new PluginKey("mw-math");
   const buildDecorations = (doc: any) => {
     const decos: any[] = [];
     doc.descendants((node: any, pos: number) => {
@@ -654,7 +654,7 @@ function createMathPlugin() {
 }
 
 const MathExtension = Extension.create({
-  name: "mdfyMath",
+  name: "mwMath",
   addProseMirrorPlugins() { return [createMathPlugin()]; },
 });
 
@@ -1265,7 +1265,7 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
           // plugin so they share the editor's transaction lifecycle
           // (decorations re-map automatically across local edits).
           Extension.create({
-            name: "mdfyRemoteCursors",
+            name: "mwRemoteCursors",
             addProseMirrorPlugins() { return [remoteCursorsPlugin()]; },
           }),
         ],

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { getApiBaseUrl } from "./extension";
 
-const TOKEN_KEY = "mdfy.authToken";
-const USER_ID_KEY = "mdfy.userId";
+const TOKEN_KEY = "memorywiki.authToken";
+const USER_ID_KEY = "memorywiki.userId";
 
 export class AuthManager {
   private context: vscode.ExtensionContext;
@@ -27,7 +27,7 @@ export class AuthManager {
 
     // The callback URI for this extension
     const callbackUri = await vscode.env.asExternalUri(
-      vscode.Uri.parse("vscode://raymindai.mdfy-vscode/auth")
+      vscode.Uri.parse("vscode://raymindai.memory-wiki-vscode/auth")
     );
 
     const authUrl = `${baseUrl}/auth/vscode?redirect=${encodeURIComponent(
@@ -73,14 +73,14 @@ export class AuthManager {
 
     if (token && this.pendingAuthResolve) {
       if (refreshToken) {
-        this.context.secrets.store("mdfy.refreshToken", refreshToken);
+        this.context.secrets.store("memorywiki.refreshToken", refreshToken);
       }
       this.pendingAuthResolve(token);
       this.pendingAuthResolve = undefined;
     } else if (token) {
       // Callback received without pending login (e.g., direct URI open)
       if (refreshToken) {
-        this.context.secrets.store("mdfy.refreshToken", refreshToken);
+        this.context.secrets.store("memorywiki.refreshToken", refreshToken);
       }
       this.storeToken(token).then(() => {
         this._onDidLogin.fire();
@@ -108,7 +108,7 @@ export class AuthManager {
       const payload = decodeJwtPayload(token);
       if (payload.exp && Date.now() > Number(payload.exp) * 1000) {
         // Try refresh before logging out
-        const refreshToken = await this.context.secrets.get("mdfy.refreshToken");
+        const refreshToken = await this.context.secrets.get("memorywiki.refreshToken");
         if (refreshToken) {
           try {
             const response = await fetch(`${getApiBaseUrl()}/api/auth/refresh`, {
@@ -121,7 +121,7 @@ export class AuthManager {
               if (data.access_token) {
                 await this.storeToken(data.access_token);
                 if (data.refresh_token) {
-                  await this.context.secrets.store("mdfy.refreshToken", data.refresh_token);
+                  await this.context.secrets.store("memorywiki.refreshToken", data.refresh_token);
                 }
                 return data.access_token;
               }
@@ -133,7 +133,7 @@ export class AuthManager {
           "memory.wiki: Session expired. Sign in again to continue syncing.",
           "Sign In"
         ).then(choice => {
-          if (choice === "Sign In") {vscode.commands.executeCommand("mdfy.login");}
+          if (choice === "Sign In") {vscode.commands.executeCommand("memorywiki.login");}
         });
         return undefined;
       }
@@ -144,7 +144,7 @@ export class AuthManager {
         "memory.wiki: Session expired. Sign in again to continue syncing.",
         "Sign In"
       ).then(choice => {
-        if (choice === "Sign In") {vscode.commands.executeCommand("mdfy.login");}
+        if (choice === "Sign In") {vscode.commands.executeCommand("memorywiki.login");}
       });
       return undefined;
     }
@@ -221,7 +221,7 @@ export class AuthManager {
    */
   async logout(): Promise<void> {
     await this.context.secrets.delete(TOKEN_KEY);
-    await this.context.secrets.delete("mdfy.refreshToken");
+    await this.context.secrets.delete("memorywiki.refreshToken");
     await this.context.globalState.update(USER_ID_KEY, undefined);
     this._onDidLogout.fire();
   }

@@ -33,7 +33,7 @@ interface CloudFolder {
 }
 
 export class MdfySidebarProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = "mdfyDocuments";
+  public static readonly viewType = "mwDocuments";
   private _view?: vscode.WebviewView;
   private _extensionUri: vscode.Uri;
   private _authManager: AuthManager;
@@ -131,7 +131,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "login":
-          vscode.commands.executeCommand("mdfy.login");
+          vscode.commands.executeCommand("memorywiki.login");
           break;
         case "logout":
           await this._authManager.logout();
@@ -190,7 +190,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     const uri = vscode.Uri.file(filePath);
     const doc = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(doc);
-    vscode.commands.executeCommand("mdfy.publish");
+    vscode.commands.executeCommand("memorywiki.publish");
   }
 
   private async unsyncDocument(filePath: string): Promise<void> {
@@ -205,7 +205,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     // Read config to get docId before deleting
     const ext = path.extname(filePath);
     const base = path.basename(filePath, ext);
-    const configPath = path.join(path.dirname(filePath), `.${base}.mdfy.json`);
+    const configPath = path.join(path.dirname(filePath), `.${base}.memorywiki.json`);
     try {
       // Clear source on server so Memory.Wiki no longer shows it as synced
       const configBytes = await vscode.workspace.fs.readFile(vscode.Uri.file(configPath));
@@ -256,7 +256,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
       // Remove sidecar
       const ext = path.extname(filePath);
       const base = path.basename(filePath, ext);
-      const configPath = path.join(path.dirname(filePath), `.${base}.mdfy.json`);
+      const configPath = path.join(path.dirname(filePath), `.${base}.memorywiki.json`);
       try { await vscode.workspace.fs.delete(vscode.Uri.file(configPath)); } catch {}
     }
     this.refresh();
@@ -341,7 +341,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
       // Write .md file
       await vscode.workspace.fs.writeFile(saveUri, Buffer.from(remote.markdown, "utf-8"));
 
-      // Write .mdfy.json sidecar
+      // Write .memorywiki.json sidecar
       await saveMdfyConfig(saveUri.fsPath, {
         docId,
         editToken: remote.editToken || "pulled",

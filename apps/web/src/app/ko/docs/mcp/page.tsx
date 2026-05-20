@@ -58,19 +58,19 @@ const sidebarItems = [
   { id: "claude-desktop", label: "Claude Desktop 설정" },
   { id: "cursor", label: "Cursor / Windsurf" },
   { id: "tools", label: "전체 25개 도구" },
-  { id: "mdfy-create", label: "mdfy_create" },
-  { id: "mdfy-read", label: "mdfy_read" },
-  { id: "mdfy-update", label: "mdfy_update" },
-  { id: "mdfy-list", label: "mdfy_list" },
-  { id: "mdfy-publish", label: "mdfy_publish" },
-  { id: "mdfy-delete", label: "mdfy_delete" },
+  { id: "mw-create", label: "mw_create" },
+  { id: "mw-read", label: "mw_read" },
+  { id: "mw-update", label: "mw_update" },
+  { id: "mw-list", label: "mw_list" },
+  { id: "mw-publish", label: "mw_publish" },
+  { id: "mw-delete", label: "mw_delete" },
   { id: "examples", label: "사용 예시" },
 ];
 
 const tools = [
   {
-    id: "mdfy-create",
-    name: "mdfy_create",
+    id: "mw-create",
+    name: "mw_create",
     desc: "Markdown 내용으로 새 문서를 생성합니다. 문서 URL, ID, edit token을 반환합니다.",
     params: [
       { name: "markdown", type: "string", required: true, desc: "Markdown 내용." },
@@ -80,7 +80,7 @@ const tools = [
     example: `// Claude Code에서:
 "이 분석 내용을 Memory.Wiki에 문서로 게시해줘"
 
-// Claude가 mdfy_create를 호출:
+// Claude가 mw_create를 호출:
 {
   "markdown": "# Performance Analysis\\n...",
   "title": "Performance Analysis",
@@ -95,22 +95,22 @@ const tools = [
 }`,
   },
   {
-    id: "mdfy-read",
-    name: "mdfy_read",
+    id: "mw-read",
+    name: "mw_read",
     desc: "ID로 문서의 내용과 메타데이터를 조회합니다.",
     params: [
       { name: "id", type: "string", required: true, desc: "문서 ID." },
     ],
     example: `// "memory.wiki/abc123 문서를 읽어줘"
 
-// Claude가 mdfy_read를 호출:
+// Claude가 mw_read를 호출:
 { "id": "abc123" }
 
 // 전체 markdown 내용과 메타데이터를 반환`,
   },
   {
-    id: "mdfy-update",
-    name: "mdfy_update",
+    id: "mw-update",
+    name: "mw_update",
     desc: "기존 문서의 내용이나 제목을 수정합니다.",
     params: [
       { name: "id", type: "string", required: true, desc: "문서 ID." },
@@ -120,7 +120,7 @@ const tools = [
     ],
     example: `// "수정된 버전으로 문서를 업데이트해줘"
 
-// Claude가 mdfy_update를 호출:
+// Claude가 mw_update를 호출:
 {
   "id": "abc123",
   "markdown": "# Revised Analysis\\n...",
@@ -128,18 +128,18 @@ const tools = [
 }`,
   },
   {
-    id: "mdfy-list",
-    name: "mdfy_list",
+    id: "mw-list",
+    name: "mw_list",
     desc: "인증된 사용자의 모든 문서를 조회합니다.",
     params: [],
     example: `// "내가 게시한 문서들을 보여줘"
 
-// Claude가 mdfy_list를 호출 (매개변수 없음)
+// Claude가 mw_list를 호출 (매개변수 없음)
 // id, title, status가 포함된 문서 배열을 반환`,
   },
   {
-    id: "mdfy-publish",
-    name: "mdfy_publish",
+    id: "mw-publish",
+    name: "mw_publish",
     desc: "문서를 임시 저장(비공개)과 게시(공개) 상태 간에 전환합니다.",
     params: [
       { name: "id", type: "string", required: true, desc: "문서 ID." },
@@ -147,19 +147,19 @@ const tools = [
     ],
     example: `// "abc123 문서를 공개해줘"
 
-// Claude가 mdfy_publish를 호출:
+// Claude가 mw_publish를 호출:
 { "id": "abc123", "isDraft": false }`,
   },
   {
-    id: "mdfy-delete",
-    name: "mdfy_delete",
+    id: "mw-delete",
+    name: "mw_delete",
     desc: "문서를 소프트 삭제합니다. 소유자가 복원할 수 있습니다.",
     params: [
       { name: "id", type: "string", required: true, desc: "문서 ID." },
     ],
     example: `// "오래된 임시 저장을 삭제해줘"
 
-// Claude가 mdfy_delete를 호출:
+// Claude가 mw_delete를 호출:
 { "id": "abc123" }`,
   },
 ];
@@ -252,7 +252,7 @@ export default function McpDocsPageKo() {
             로컬 stdio 기반 클라이언트(Claude Desktop, Claude Code, Cursor stdio 모드)의 경우, npm 패키지를 설치합니다:
           </p>
           <Card>
-            <CodeBlock lang="bash">{`npm install -g mdfy-cli && Memory.Wiki login`}</CodeBlock>
+            <CodeBlock lang="bash">{`npm install -g memory-wiki-cli && Memory.Wiki login`}</CodeBlock>
             <p style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 12, marginBottom: 0, lineHeight: 1.7 }}>
               MCP 서버는 <InlineCode>{"Memory.Wiki login"}</InlineCode>의 JWT 인증을 사용합니다. 환경 변수 설정이 필요 없습니다.
             </p>
@@ -268,7 +268,7 @@ export default function McpDocsPageKo() {
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }`}</CodeBlock>
@@ -292,7 +292,7 @@ export default function McpDocsPageKo() {
   "mcpServers": {
     "Memory.Wiki": {
       "command": "npx",
-      "args": ["mdfy-mcp"]
+      "args": ["memory-wiki-mcp"]
     }
   }
 }`}</CodeBlock>
@@ -322,13 +322,13 @@ export default function McpDocsPageKo() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: 8, marginBottom: 24 }}>
             {[
-              { cat: "핵심 CRUD", tools: ["mdfy_create", "mdfy_read", "mdfy_update", "mdfy_delete", "mdfy_list", "mdfy_search"] },
-              { cat: "Append/Prepend", tools: ["mdfy_append", "mdfy_prepend"] },
-              { cat: "섹션", tools: ["mdfy_outline", "mdfy_extract_section", "mdfy_replace_section"] },
-              { cat: "복제/가져오기", tools: ["mdfy_duplicate", "mdfy_import_url"] },
-              { cat: "공유", tools: ["mdfy_publish", "mdfy_set_password", "mdfy_set_expiry", "mdfy_set_allowed_emails", "mdfy_get_share_url"] },
-              { cat: "버전", tools: ["mdfy_versions", "mdfy_restore_version", "mdfy_diff"] },
-              { cat: "통계/폴더", tools: ["mdfy_stats", "mdfy_recent", "mdfy_folder_list", "mdfy_folder_create", "mdfy_move_to_folder"] },
+              { cat: "핵심 CRUD", tools: ["mw_create", "mw_read", "mw_update", "mw_delete", "mw_list", "mw_search"] },
+              { cat: "Append/Prepend", tools: ["mw_append", "mw_prepend"] },
+              { cat: "섹션", tools: ["mw_outline", "mw_extract_section", "mw_replace_section"] },
+              { cat: "복제/가져오기", tools: ["mw_duplicate", "mw_import_url"] },
+              { cat: "공유", tools: ["mw_publish", "mw_set_password", "mw_set_expiry", "mw_set_allowed_emails", "mw_get_share_url"] },
+              { cat: "버전", tools: ["mw_versions", "mw_restore_version", "mw_diff"] },
+              { cat: "통계/폴더", tools: ["mw_stats", "mw_recent", "mw_folder_list", "mw_folder_create", "mw_move_to_folder"] },
             ].map((g) => (
               <div key={g.cat} style={{ background: "var(--surface)", padding: "12px 14px", borderRadius: 8 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>{g.cat}</div>
@@ -406,7 +406,7 @@ export default function McpDocsPageKo() {
 
 Claude: 블로그 글을 작성하고 게시하겠습니다.
 
-[Claude가 내용을 작성한 후 mdfy_create를 호출]
+[Claude가 내용을 작성한 후 mw_create를 호출]
 
 완료! 블로그 글이 https://memory.wiki/abc123 에 게시되었습니다.`}</CodeBlock>
             </Card>
@@ -417,7 +417,7 @@ Claude: 블로그 글을 작성하고 게시하겠습니다.
 
 Claude: 현재 문서를 읽고 벤치마크 섹션을 추가하겠습니다.
 
-[Claude가 mdfy_read를 호출한 후 mdfy_update로 새 내용을 반영]
+[Claude가 mw_read를 호출한 후 mw_update로 새 내용을 반영]
 
 업데이트 완료! 문서에 벤치마크 섹션이 추가되었습니다.`}</CodeBlock>
             </Card>
@@ -428,7 +428,7 @@ Claude: 현재 문서를 읽고 벤치마크 섹션을 추가하겠습니다.
 
 Claude: 문서 목록을 확인하겠습니다.
 
-[Claude가 mdfy_list를 호출]
+[Claude가 mw_list를 호출]
 
 5개의 문서가 있습니다:
 1. "API Guide" (게시됨) - 2시간 전 수정
@@ -439,7 +439,7 @@ Claude: 문서 목록을 확인하겠습니다.
 
 You: "네"
 
-[Claude가 각각에 대해 mdfy_delete를 호출]
+[Claude가 각각에 대해 mw_delete를 호출]
 
 완료! 2개의 문서가 삭제되었습니다.`}</CodeBlock>
             </Card>

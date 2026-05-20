@@ -49,8 +49,8 @@
   // ─── Theme ───
 
   (function initTheme() {
-    if (window.mdfyDesktop) {
-      window.mdfyDesktop.getTheme().then(function(theme) {
+    if (window.mwDesktop) {
+      window.mwDesktop.getTheme().then(function(theme) {
         document.documentElement.setAttribute("data-theme", theme);
       });
     }
@@ -63,8 +63,8 @@
     }
   })();
 
-  if (window.mdfyDesktop && window.mdfyDesktop.onThemeChanged) {
-    window.mdfyDesktop.onThemeChanged(function(theme) {
+  if (window.mwDesktop && window.mwDesktop.onThemeChanged) {
+    window.mwDesktop.onThemeChanged(function(theme) {
       document.documentElement.setAttribute("data-theme", theme);
     });
   }
@@ -96,13 +96,13 @@
     var welcomeFolder = document.getElementById("welcome-folder");
     var welcomePaste = document.getElementById("welcome-paste");
 
-    if (welcomeNew) welcomeNew.addEventListener("click", function() { window.mdfyDesktop.newDocument(); });
-    if (welcomeOpen) welcomeOpen.addEventListener("click", function() { window.mdfyDesktop.openFile(); });
+    if (welcomeNew) welcomeNew.addEventListener("click", function() { window.mwDesktop.newDocument(); });
+    if (welcomeOpen) welcomeOpen.addEventListener("click", function() { window.mwDesktop.openFile(); });
     if (welcomeFolder) welcomeFolder.addEventListener("click", function() {
-      window.mdfyDesktop.openFolder().then(function() { refreshSidebarData().then(renderSidebar); });
+      window.mwDesktop.openFolder().then(function() { refreshSidebarData().then(renderSidebar); });
     });
     if (welcomePaste) welcomePaste.addEventListener("click", function() {
-      window.mdfyDesktop.readClipboard().then(function(text) {
+      window.mwDesktop.readClipboard().then(function(text) {
         if (text && text.trim()) {
           loadDocumentContent(text, null);
         }
@@ -114,15 +114,15 @@
     var homePaste = document.getElementById("home-paste");
     var homeImport = document.getElementById("home-import");
 
-    if (homeNew) homeNew.addEventListener("click", function() { window.mdfyDesktop.newDocument(); });
+    if (homeNew) homeNew.addEventListener("click", function() { window.mwDesktop.newDocument(); });
     if (homePaste) homePaste.addEventListener("click", function() {
-      window.mdfyDesktop.readClipboard().then(function(text) {
+      window.mwDesktop.readClipboard().then(function(text) {
         if (text && text.trim()) {
           loadDocumentContent(text, null);
         }
       });
     });
-    if (homeImport) homeImport.addEventListener("click", function() { window.mdfyDesktop.openFile(); });
+    if (homeImport) homeImport.addEventListener("click", function() { window.mwDesktop.openFile(); });
 
     // Sidebar logo → back to home
     var sidebarLogo = document.querySelector(".sidebar-logo");
@@ -130,9 +130,9 @@
       sidebarLogo.style.cursor = "pointer";
       sidebarLogo.title = "Home";
       sidebarLogo.addEventListener("click", function() {
-        if (isDirty && currentFilePath && window.mdfyDesktop) {
+        if (isDirty && currentFilePath && window.mwDesktop) {
           var md = htmlToMarkdown(content);
-          window.mdfyDesktop.autoSave(md);
+          window.mwDesktop.autoSave(md);
         }
         isDirty = false;
         currentFilePath = null;
@@ -144,11 +144,11 @@
     // QuickLook button — hide if already installed
     var welcomeQL = document.getElementById("welcome-quicklook");
     if (welcomeQL) {
-      window.mdfyDesktop.isQuickLookInstalled().then(function(installed) {
+      window.mwDesktop.isQuickLookInstalled().then(function(installed) {
         if (installed) welcomeQL.style.display = "none";
       });
       welcomeQL.addEventListener("click", function() {
-        window.mdfyDesktop.openQuickLookSettings();
+        window.mwDesktop.openQuickLookSettings();
         welcomeQL.style.display = "none";
       });
     }
@@ -167,7 +167,7 @@
         if (dropzone) dropzone.classList.remove("active");
         var files = Array.from(e.dataTransfer.files);
         if (files.length > 0 && files[0].path) {
-          window.mdfyDesktop.openFilePath(files[0].path);
+          window.mwDesktop.openFilePath(files[0].path);
         }
       });
     }
@@ -181,12 +181,12 @@
   }
 
   async function refreshSidebarData() {
-    if (!window.mdfyDesktop) return;
+    if (!window.mwDesktop) return;
 
     var results = await Promise.all([
-      window.mdfyDesktop.getWorkspaceTree().catch(function() { return { files: [], folders: [] }; }),
-      window.mdfyDesktop.getRecentFiles().catch(function() { return []; }),
-      window.mdfyDesktop.getAuthState().catch(function() { return { loggedIn: false }; }),
+      window.mwDesktop.getWorkspaceTree().catch(function() { return { files: [], folders: [] }; }),
+      window.mwDesktop.getRecentFiles().catch(function() { return []; }),
+      window.mwDesktop.getAuthState().catch(function() { return { loggedIn: false }; }),
     ]);
 
     var tree = results[0] || {};
@@ -197,8 +197,8 @@
 
     if (sidebarState.authState.loggedIn) {
       var cloudResults = await Promise.all([
-        window.mdfyDesktop.getCloudDocuments().catch(function() { return []; }),
-        window.mdfyDesktop.getCloudFolders().catch(function() { return []; }),
+        window.mwDesktop.getCloudDocuments().catch(function() { return []; }),
+        window.mwDesktop.getCloudFolders().catch(function() { return []; }),
       ]);
       sidebarState.cloudDocs = cloudResults[0] || [];
       sidebarState.cloudFolders = cloudResults[1] || [];
@@ -335,7 +335,7 @@
       }
     } else if (currentFilter === "synced") {
       if (!sidebarState.authState.loggedIn) {
-        html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to Memory.Wiki to sync them across devices</p><button class="login-prompt-btn" onclick="window.mdfyDesktop.login()">Sign in</button></div>';
+        html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to Memory.Wiki to sync them across devices</p><button class="login-prompt-btn" onclick="window.mwDesktop.login()">Sign in</button></div>';
       } else if (synced.length > 0) {
         html += secHeader("synced", "Synced", synced.length);
         for (var s = 0; s < synced.length; s++) html += renderSyncedItem(synced[s]);
@@ -360,7 +360,7 @@
     } else if (currentFilter === "cloud") {
       // CLOUD: synced (exists on cloud) + cloud-only
       if (!sidebarState.authState.loggedIn) {
-        html += '<div class="sidebar-empty"><p>Sign in to access cloud documents</p><p class="sidebar-empty-hint">Sync, publish, and access documents from anywhere</p><button class="login-prompt-btn" onclick="window.mdfyDesktop.login()">Sign in</button></div>';
+        html += '<div class="sidebar-empty"><p>Sign in to access cloud documents</p><p class="sidebar-empty-hint">Sync, publish, and access documents from anywhere</p><button class="login-prompt-btn" onclick="window.mwDesktop.login()">Sign in</button></div>';
       } else {
         if (synced.length > 0) {
           html += secHeader("synced", "Synced", synced.length);
@@ -426,7 +426,7 @@
     if (secNew) {
       secNew.addEventListener("click", function(e) {
         e.stopPropagation();
-        window.mdfyDesktop.newDocument();
+        window.mwDesktop.newDocument();
       });
     }
 
@@ -463,7 +463,7 @@
         e.preventDefault();
         e.stopPropagation();
         var folderRel = el.getAttribute("data-toggle-folder");
-        window.mdfyDesktop.getWorkspaceFolder().then(function(wsFolder) {
+        window.mwDesktop.getWorkspaceFolder().then(function(wsFolder) {
           if (!wsFolder) return;
           var fullPath = wsFolder + "/" + folderRel;
           hideFileContextMenu();
@@ -475,9 +475,9 @@
               var fp = fullPath + "/" + name;
               var counter = 1;
               // Can't check existence from renderer, just create
-              window.mdfyDesktop.saveFileAs("", name, [{ name: "Markdown", extensions: ["md"] }]);
+              window.mwDesktop.saveFileAs("", name, [{ name: "Markdown", extensions: ["md"] }]);
             }},
-            { label: "Reveal in Finder", action: function() { window.mdfyDesktop.revealInFinder(fullPath); } },
+            { label: "Reveal in Finder", action: function() { window.mwDesktop.revealInFinder(fullPath); } },
           ];
           renderContextMenu(menu, items, e.clientX, e.clientY);
         });
@@ -509,10 +509,10 @@
         var fromPath = e.dataTransfer.getData("text/plain");
         if (!fromPath || !folderItem) return;
         var folderRel = folderItem.getAttribute("data-folder");
-        window.mdfyDesktop.getWorkspaceFolder().then(function(wsFolder) {
+        window.mwDesktop.getWorkspaceFolder().then(function(wsFolder) {
           if (!wsFolder) return;
           var toFolder = wsFolder + "/" + folderRel;
-          window.mdfyDesktop.moveFile(fromPath, toFolder).then(function(result) {
+          window.mwDesktop.moveFile(fromPath, toFolder).then(function(result) {
             if (result.ok) { refreshSidebarData().then(renderSidebar); showToast("Moved to " + folderRel); }
             else if (result.error) { showToast("Move failed: " + result.error); }
           });
@@ -545,7 +545,7 @@
         var docId = item.getAttribute("data-cloud-id");
 
         if (fp) {
-          window.mdfyDesktop.openFilePath(fp);
+          window.mwDesktop.openFilePath(fp);
         } else if (docId) {
           var docTitle = item.querySelector(".file-name");
           var t = docTitle ? docTitle.textContent : docId;
@@ -554,7 +554,7 @@
           content.innerHTML = '<div class="cloud-loading"><div class="cloud-loading-spinner"></div><p>Loading ' + esc(t) + '...</p></div>';
           content.setAttribute("contenteditable", "false");
           if (headerTitle) headerTitle.textContent = t + " (Cloud)";
-          window.mdfyDesktop.previewCloudDoc(docId, t);
+          window.mwDesktop.previewCloudDoc(docId, t);
         }
       });
     });
@@ -729,9 +729,9 @@
 
   async function loadImages() {
     if (!sidebarState.authState.loggedIn) return;
-    if (!window.mdfyDesktop) return;
+    if (!window.mwDesktop) return;
     try {
-      var data = await window.mdfyDesktop.getImages();
+      var data = await window.mwDesktop.getImages();
       if (data && !data.error && data.images) {
         cachedImages = data;
         renderImageSection(data.images, data.quota);
@@ -795,7 +795,7 @@
         '</div>';
 
       document.getElementById("btn-signout").addEventListener("click", function() {
-        window.mdfyDesktop.logout();
+        window.mwDesktop.logout();
         sidebarState.authState = { loggedIn: false };
         sidebarState.cloudDocs = [];
         sidebarState.cloudFolders = [];
@@ -812,7 +812,7 @@
         '</div>';
 
       document.getElementById("btn-signin").addEventListener("click", function() {
-        window.mdfyDesktop.login();
+        window.mwDesktop.login();
       });
     }
   }
@@ -824,41 +824,41 @@
       case "copy-url": {
         var config = findConfigByPath(pathOrId);
         if (config) {
-          window.mdfyDesktop.writeClipboard("https://memory.wiki/" + config.docId);
+          window.mwDesktop.writeClipboard("https://memory.wiki/" + config.docId);
           showToast("URL copied");
         }
         break;
       }
       case "open-browser": {
         var config2 = findConfigByPath(pathOrId);
-        if (config2) window.mdfyDesktop.openInBrowser("https://memory.wiki/" +config2.docId);
+        if (config2) window.mwDesktop.openInBrowser("https://memory.wiki/" +config2.docId);
         break;
       }
       case "unlink":
-        await window.mdfyDesktop.syncUnlink(pathOrId);
+        await window.mwDesktop.syncUnlink(pathOrId);
         await refreshSidebarData();
         renderSidebar();
         break;
       case "publish":
-        window.mdfyDesktop.openFilePath(pathOrId);
+        window.mwDesktop.openFilePath(pathOrId);
         // After file loads, trigger publish
         setTimeout(function() {
           document.getElementById("btn-publish").click();
         }, 500);
         break;
       case "pull-cloud":
-        var result = await window.mdfyDesktop.syncPullCloud(pathOrId, title);
+        var result = await window.mwDesktop.syncPullCloud(pathOrId, title);
         if (result && result.ok) {
           await refreshSidebarData();
           renderSidebar();
         }
         break;
       case "open-cloud-browser":
-        window.mdfyDesktop.openInBrowser("https://memory.wiki/" +pathOrId);
+        window.mwDesktop.openInBrowser("https://memory.wiki/" +pathOrId);
         break;
       case "delete-synced":
         if (confirm("Delete this document from Memory.Wiki? The local file will remain.")) {
-          await window.mdfyDesktop.syncDelete(pathOrId);
+          await window.mwDesktop.syncDelete(pathOrId);
           await refreshSidebarData();
           renderSidebar();
           showToast("Deleted from cloud");
@@ -866,7 +866,7 @@
         break;
       case "delete-cloud":
         if (confirm("Delete this document from Memory.Wiki?")) {
-          await window.mdfyDesktop.deleteCloudDoc(pathOrId);
+          await window.mwDesktop.deleteCloudDoc(pathOrId);
           await refreshSidebarData();
           renderSidebar();
           showToast("Deleted from cloud");
@@ -886,7 +886,7 @@
   // ─── Sidebar: Buttons ───
 
   var btnNewDoc = document.getElementById("btn-new-doc");
-  if (btnNewDoc) btnNewDoc.addEventListener("click", function() { window.mdfyDesktop.newDocument(); });
+  if (btnNewDoc) btnNewDoc.addEventListener("click", function() { window.mwDesktop.newDocument(); });
 
   document.getElementById("btn-search-toggle").addEventListener("click", function() {
     var box = document.getElementById("search-box");
@@ -906,10 +906,10 @@
 
     // Cloud search with debounce (3+ chars)
     if (cloudSearchTimer) clearTimeout(cloudSearchTimer);
-    if (searchQuery.length >= 3 && sidebarState.authState.loggedIn && window.mdfyDesktop.searchDocs) {
+    if (searchQuery.length >= 3 && sidebarState.authState.loggedIn && window.mwDesktop.searchDocs) {
       isCloudSearching = true;
       cloudSearchTimer = setTimeout(function() {
-        window.mdfyDesktop.searchDocs(searchQuery).then(function(data) {
+        window.mwDesktop.searchDocs(searchQuery).then(function(data) {
           cloudSearchResults = (data && data.results) || [];
           isCloudSearching = false;
           renderFileList();
@@ -1003,7 +1003,7 @@
 
     if (!sidebarState.authState.loggedIn) {
       body.innerHTML = '<div class="image-panel-signin"><p>Sign in to manage images</p>' +
-        '<button onclick="window.mdfyDesktop.login()">Sign in</button></div>';
+        '<button onclick="window.mwDesktop.login()">Sign in</button></div>';
       return;
     }
 
@@ -1014,7 +1014,7 @@
       return;
     }
 
-    window.mdfyDesktop.getImages().then(function(data) {
+    window.mwDesktop.getImages().then(function(data) {
       if (data && !data.error && data.images) {
         cachedImages = data;
         renderImagePanel(data.images, data.quota);
@@ -1170,13 +1170,13 @@
 
   // ─── Sidebar: Events from main ───
 
-  if (window.mdfyDesktop) {
-    window.mdfyDesktop.onAuthChanged(function(data) {
+  if (window.mwDesktop) {
+    window.mwDesktop.onAuthChanged(function(data) {
       sidebarState.authState = data;
       if (data.loggedIn) {
         Promise.all([
-          window.mdfyDesktop.getCloudDocuments().catch(function() { return []; }),
-          window.mdfyDesktop.getCloudFolders().catch(function() { return []; }),
+          window.mwDesktop.getCloudDocuments().catch(function() { return []; }),
+          window.mwDesktop.getCloudFolders().catch(function() { return []; }),
         ]).then(function(results) {
           sidebarState.cloudDocs = results[0] || [];
           sidebarState.cloudFolders = results[1] || [];
@@ -1196,20 +1196,20 @@
       }
     });
 
-    window.mdfyDesktop.onAuthExpired(function() {
+    window.mwDesktop.onAuthExpired(function() {
       showToast("Session expired. Sign in again to continue syncing.");
     });
 
-    window.mdfyDesktop.onWorkspaceChanged(function() {
+    window.mwDesktop.onWorkspaceChanged(function() {
       refreshSidebarData().then(renderSidebar);
     });
 
-    window.mdfyDesktop.onSyncStatus(function(data) {
+    window.mwDesktop.onSyncStatus(function(data) {
       updateSyncStatusUI(data.status);
       refreshSidebarData().then(renderSidebar);
     });
 
-    window.mdfyDesktop.onSyncConflict(function(data) {
+    window.mwDesktop.onSyncConflict(function(data) {
       showConflictDialog(data);
     });
   }
@@ -1361,7 +1361,7 @@
       recentList.onclick = function(e) {
         var item = e.target.closest(".home-recent-item");
         if (item && item.dataset.filepath) {
-          window.mdfyDesktop.openFilePath(item.dataset.filepath);
+          window.mwDesktop.openFilePath(item.dataset.filepath);
         }
       };
     }
@@ -1376,7 +1376,7 @@
         dropzone.classList.remove("active");
         var files = Array.from(e.dataTransfer.files);
         if (files.length > 0 && files[0].path) {
-          window.mdfyDesktop.openFilePath(files[0].path);
+          window.mwDesktop.openFilePath(files[0].path);
         }
       };
     }
@@ -1400,7 +1400,7 @@
     content.setAttribute("contenteditable", "true");
     updateViewCount(null);
 
-    window.mdfyDesktop.renderMarkdown(currentMarkdown).then(function(result) {
+    window.mwDesktop.renderMarkdown(currentMarkdown).then(function(result) {
       if (result && result.html !== undefined) {
         content.innerHTML = result.html;
         postProcessAll(content);
@@ -1415,12 +1415,12 @@
     });
   }
 
-  if (window.mdfyDesktop) {
-    window.mdfyDesktop.onLoadDocument(function(data) {
+  if (window.mwDesktop) {
+    window.mwDesktop.onLoadDocument(function(data) {
       // Save previous file before switching (if dirty)
-      if (isDirty && currentFilePath && window.mdfyDesktop) {
+      if (isDirty && currentFilePath && window.mwDesktop) {
         var prevMarkdown = htmlToMarkdown(content);
-        window.mdfyDesktop.autoSave(prevMarkdown);
+        window.mwDesktop.autoSave(prevMarkdown);
       }
       isDirty = false; // Reset BEFORE changing currentFilePath
 
@@ -1471,20 +1471,20 @@
         if (paneContent) paneContent.insertBefore(banner, content);
 
         document.getElementById("cloud-sync-local").addEventListener("click", function() {
-          window.mdfyDesktop.syncPullCloud(currentCloudDoc.docId, currentCloudDoc.title).then(function(r) {
+          window.mwDesktop.syncPullCloud(currentCloudDoc.docId, currentCloudDoc.title).then(function(r) {
             if (r && r.ok) { refreshSidebarData().then(renderSidebar); }
           });
         });
         var openBrowserBtn = document.getElementById("cloud-open-browser");
         if (openBrowserBtn) {
           openBrowserBtn.addEventListener("click", function() {
-            window.mdfyDesktop.openInBrowser("https://memory.wiki/" +currentCloudDoc.docId);
+            window.mwDesktop.openInBrowser("https://memory.wiki/" +currentCloudDoc.docId);
           });
         }
         var duplicateBtn = document.getElementById("cloud-duplicate-edit");
         if (duplicateBtn) {
           duplicateBtn.addEventListener("click", function() {
-            window.mdfyDesktop.duplicateCloud(currentCloudDoc.docId, currentCloudDoc.title).then(function(r) {
+            window.mwDesktop.duplicateCloud(currentCloudDoc.docId, currentCloudDoc.title).then(function(r) {
               if (r && r.ok) { refreshSidebarData().then(renderSidebar); }
             });
           });
@@ -1524,13 +1524,13 @@
 
       // Start/stop collaboration based on whether doc is published
       if (currentConfig && currentConfig.docId && !isReadOnly) {
-        window.mdfyDesktop.collabStart(currentConfig.docId, currentMarkdown);
+        window.mwDesktop.collabStart(currentConfig.docId, currentMarkdown);
       } else {
-        window.mdfyDesktop.collabStop();
+        window.mwDesktop.collabStop();
       }
     });
 
-    window.mdfyDesktop.onFileChanged(function(data) {
+    window.mwDesktop.onFileChanged(function(data) {
       // Only apply external changes if document is NOT being edited
       if (isDirty) return; // User is editing, ignore external changes
       if (data.markdown !== undefined && data.markdown !== currentMarkdown) {
@@ -1546,11 +1546,11 @@
     });
 
     // Menu triggers
-    window.mdfyDesktop.onTriggerSave(function() {
+    window.mwDesktop.onTriggerSave(function() {
       if (isReadOnly) return;
       currentMarkdown = htmlToMarkdown(content);
       if (currentMarkdown) {
-        window.mdfyDesktop.saveFile(currentMarkdown).then(function(p) {
+        window.mwDesktop.saveFile(currentMarkdown).then(function(p) {
           if (p) {
             currentFilePath = p;
             isDirty = false;
@@ -1562,18 +1562,18 @@
       }
     });
 
-    window.mdfyDesktop.onTriggerPublish(function() {
+    window.mwDesktop.onTriggerPublish(function() {
       doPublish();
     });
 
     // ─── Collaboration event listeners ───
 
-    window.mdfyDesktop.onCollabRemoteChange(function(data) {
+    window.mwDesktop.onCollabRemoteChange(function(data) {
       if (!data || !data.markdown || isApplyingRemoteCollab) return;
       isApplyingRemoteCollab = true;
       currentMarkdown = data.markdown;
       // Re-render the WYSIWYG content pane
-      window.mdfyDesktop.renderMarkdown(currentMarkdown).then(function(result) {
+      window.mwDesktop.renderMarkdown(currentMarkdown).then(function(result) {
         if (result && result.html !== undefined) {
           // Preserve scroll position
           var scrollTop = content.scrollTop;
@@ -1594,12 +1594,12 @@
       });
     });
 
-    window.mdfyDesktop.onCollabStatus(function(data) {
+    window.mwDesktop.onCollabStatus(function(data) {
       isCollaborating = data && data.active;
       updateCollabIndicator();
     });
 
-    window.mdfyDesktop.onCollabPeers(function(data) {
+    window.mwDesktop.onCollabPeers(function(data) {
       collabPeerCount = data ? data.count : 0;
       updateCollabIndicator();
     });
@@ -1646,10 +1646,10 @@
     }
     if (!currentMarkdown) return;
 
-    var authState = await window.mdfyDesktop.getAuthState();
+    var authState = await window.mwDesktop.getAuthState();
     if (!authState.loggedIn) {
       if (confirm("Sign in required to publish.\n\nYour document will be published as a shareable URL on Memory.Wiki.\n\nSign in now?")) {
-        window.mdfyDesktop.login();
+        window.mwDesktop.login();
       }
       return;
     }
@@ -1662,7 +1662,7 @@
 
     // Save first if needed
     if (!currentFilePath) {
-      var savedPath = await window.mdfyDesktop.saveFile(currentMarkdown);
+      var savedPath = await window.mwDesktop.saveFile(currentMarkdown);
       if (!savedPath) return;
       currentFilePath = savedPath;
     }
@@ -1670,7 +1670,7 @@
     updateSyncStatusUI("syncing");
 
     try {
-      var result = await window.mdfyDesktop.publish(currentMarkdown);
+      var result = await window.mwDesktop.publish(currentMarkdown);
       if (result.error) {
         updateSyncStatusUI("error");
         showToast("Sync failed: " + result.error);
@@ -1678,7 +1678,7 @@
       }
 
       if (result.url) {
-        window.mdfyDesktop.writeClipboard(result.url);
+        window.mwDesktop.writeClipboard(result.url);
         updateSyncStatusUI("synced");
         showToast("Published! URL copied.");
         currentConfig = { docId: result.docId, editToken: result.editToken };
@@ -1687,7 +1687,7 @@
         renderSidebar();
         // Start collaboration for newly published doc
         if (currentConfig.docId) {
-          window.mdfyDesktop.collabStart(currentConfig.docId, currentMarkdown);
+          window.mwDesktop.collabStart(currentConfig.docId, currentMarkdown);
         }
       }
     } catch (err) {
@@ -1719,12 +1719,12 @@
 
   document.getElementById("conflict-push").addEventListener("click", function() {
     document.getElementById("conflict-dialog").classList.add("hidden");
-    window.mdfyDesktop.resolveConflict("push", conflictFilePath);
+    window.mwDesktop.resolveConflict("push", conflictFilePath);
   });
 
   document.getElementById("conflict-pull").addEventListener("click", function() {
     document.getElementById("conflict-dialog").classList.add("hidden");
-    window.mdfyDesktop.resolveConflict("pull", conflictFilePath);
+    window.mwDesktop.resolveConflict("pull", conflictFilePath);
   });
 
   document.getElementById("conflict-dismiss").addEventListener("click", function() {
@@ -1736,7 +1736,7 @@
   if (conflictDiffBtn) {
     conflictDiffBtn.addEventListener("click", async function() {
       document.getElementById("conflict-dialog").classList.add("hidden");
-      var result = await window.mdfyDesktop.getServerVersion(conflictFilePath);
+      var result = await window.mwDesktop.getServerVersion(conflictFilePath);
       if (result.error) { showToast("Failed to load server version: " + result.error); return; }
       showDiffView(result.localMarkdown, result.serverMarkdown);
     });
@@ -1773,12 +1773,12 @@
 
     document.getElementById("diff-use-local").addEventListener("click", function() {
       overlay.remove();
-      window.mdfyDesktop.resolveConflict("push", conflictFilePath);
+      window.mwDesktop.resolveConflict("push", conflictFilePath);
       showToast("Pushed local version");
     });
     document.getElementById("diff-use-server").addEventListener("click", function() {
       overlay.remove();
-      window.mdfyDesktop.resolveConflict("pull", conflictFilePath);
+      window.mwDesktop.resolveConflict("pull", conflictFilePath);
       showToast("Pulled server version");
     });
     document.getElementById("diff-close").addEventListener("click", function() { overlay.remove(); });
@@ -1885,11 +1885,11 @@
   }
 
   async function reRenderMarkdown(markdown) {
-    if (isRendering || !window.mdfyDesktop) return;
+    if (isRendering || !window.mwDesktop) return;
     isRendering = true;
     var t0 = performance.now();
     try {
-      var result = await window.mdfyDesktop.renderMarkdown(markdown);
+      var result = await window.mwDesktop.renderMarkdown(markdown);
       if (result && result.html !== undefined) {
         var caretOffset = getCaretCharacterOffset(content);
         content.innerHTML = result.html;
@@ -1934,9 +1934,9 @@
 
   // Save on blur (focus lost) to prevent data loss
   content.addEventListener("blur", function() {
-    if (isDirty && hasDocument && currentFilePath && window.mdfyDesktop && !isReadOnly) {
+    if (isDirty && hasDocument && currentFilePath && window.mwDesktop && !isReadOnly) {
       currentMarkdown = htmlToMarkdown(content);
-      window.mdfyDesktop.autoSave(currentMarkdown);
+      window.mwDesktop.autoSave(currentMarkdown);
       isDirty = false;
     }
   });
@@ -1961,8 +1961,8 @@
         cmChanging = false;
       }
       // Broadcast to collaboration peers
-      if (isCollaborating && !isApplyingRemoteCollab && window.mdfyDesktop) {
-        window.mdfyDesktop.collabLocalChange(currentMarkdown);
+      if (isCollaborating && !isApplyingRemoteCollab && window.mwDesktop) {
+        window.mwDesktop.collabLocalChange(currentMarkdown);
       }
     }, 400);
   });
@@ -1975,12 +1975,12 @@
         case "k": e.preventDefault(); insertLink(); break;
         case "s":
           e.preventDefault();
-          if (window.mdfyDesktop && !isReadOnly) {
+          if (window.mwDesktop && !isReadOnly) {
             currentMarkdown = htmlToMarkdown(content);
             updateDocStats(currentMarkdown);
             if (!currentFilePath) {
               // New file — trigger save dialog
-              window.mdfyDesktop.saveFile(currentMarkdown).then(function(p) {
+              window.mwDesktop.saveFile(currentMarkdown).then(function(p) {
                 if (p) {
                   currentFilePath = p;
                   isDirty = false;
@@ -1990,7 +1990,7 @@
                 }
               });
             } else {
-              window.mdfyDesktop.autoSave(currentMarkdown);
+              window.mwDesktop.autoSave(currentMarkdown);
               isDirty = false;
               updateSyncStatusUI("synced");
             }
@@ -2003,10 +2003,10 @@
   // Auto-save every 3 seconds
   // Auto-save: extract markdown from DOM only at save time, not during typing.
   setInterval(function() {
-    if (isDirty && hasDocument && window.mdfyDesktop && !isReadOnly && currentFilePath) {
+    if (isDirty && hasDocument && window.mwDesktop && !isReadOnly && currentFilePath) {
       currentMarkdown = htmlToMarkdown(content);
       updateDocStats(currentMarkdown);
-      window.mdfyDesktop.autoSave(currentMarkdown);
+      window.mwDesktop.autoSave(currentMarkdown);
       isDirty = false;
       updateSyncStatusUI("synced");
       // Sync source editor if visible (with loop guard)
@@ -2107,11 +2107,11 @@
       extraKeys: {
         Tab: function(cm) { cm.replaceSelection("  ", "end"); },
         "Cmd-S": function(cm) {
-          if (window.mdfyDesktop && !isReadOnly) {
+          if (window.mwDesktop && !isReadOnly) {
             currentMarkdown = cm.getValue();
             updateDocStats(currentMarkdown);
             if (!currentFilePath) {
-              window.mdfyDesktop.saveFile(currentMarkdown).then(function(p) {
+              window.mwDesktop.saveFile(currentMarkdown).then(function(p) {
                 if (p) {
                   currentFilePath = p;
                   isDirty = false;
@@ -2121,7 +2121,7 @@
                 }
               });
             } else {
-              window.mdfyDesktop.autoSave(currentMarkdown);
+              window.mwDesktop.autoSave(currentMarkdown);
               isDirty = false;
               updateSyncStatusUI("synced");
             }
@@ -2140,8 +2140,8 @@
         reRenderMarkdown(currentMarkdown);
         updateDocStats(currentMarkdown);
         // Broadcast to collaboration peers
-        if (isCollaborating && !isApplyingRemoteCollab && window.mdfyDesktop) {
-          window.mdfyDesktop.collabLocalChange(currentMarkdown);
+        if (isCollaborating && !isApplyingRemoteCollab && window.mwDesktop) {
+          window.mwDesktop.collabLocalChange(currentMarkdown);
         }
       }, 250);
     });
@@ -2472,7 +2472,7 @@
             var mime = dataUrl.split(":")[1].split(";")[0];
             // Upload to API
             showToast("Uploading image...");
-            window.mdfyDesktop.uploadImage(base64, mime, "pasted-image.png").then(function(result) {
+            window.mwDesktop.uploadImage(base64, mime, "pasted-image.png").then(function(result) {
               if (result.url) {
                 insertImageElement(result.url, "image");
                 showToast("Image uploaded");
@@ -2503,7 +2503,7 @@
         // Convert to markdown then re-render to get clean Memory.Wiki HTML
         var pastedMd = htmlToMarkdown(temp).trim();
         if (pastedMd) {
-          window.mdfyDesktop.renderMarkdown(pastedMd).then(function(r) {
+          window.mwDesktop.renderMarkdown(pastedMd).then(function(r) {
             if (r && r.html) {
               document.execCommand("insertHTML", false, r.html);
             } else {
@@ -3095,7 +3095,7 @@
     }
     if (!text) return;
 
-    if (!tipEl) { tipEl = document.createElement("div"); tipEl.className = "mdfy-tip"; document.body.appendChild(tipEl); }
+    if (!tipEl) { tipEl = document.createElement("div"); tipEl.className = "mw-tip"; document.body.appendChild(tipEl); }
 
     var preview = target.getAttribute("data-preview");
     if (preview) {
@@ -3197,41 +3197,41 @@
     var baseName = currentFilePath ? currentFilePath.split("/").pop().replace(/\.md$/, "") : "untitled";
     switch (action) {
       case "md":
-        window.mdfyDesktop.saveFileAs(currentMarkdown, baseName + ".md", [{ name: "Markdown", extensions: ["md"] }]).then(function(p) {
+        window.mwDesktop.saveFileAs(currentMarkdown, baseName + ".md", [{ name: "Markdown", extensions: ["md"] }]).then(function(p) {
           if (p) showToast("Saved: " + p.split("/").pop());
         });
         break;
       case "html":
-        window.mdfyDesktop.renderMarkdown(currentMarkdown).then(function(r) {
+        window.mwDesktop.renderMarkdown(currentMarkdown).then(function(r) {
           var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + baseName + '</title><style>body{font-family:-apple-system,sans-serif;max-width:768px;margin:40px auto;padding:0 20px;line-height:1.7;color:#222}pre{background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto}code{font-size:0.85em}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}img{max-width:100%}</style></head><body>' + r.html + '</body></html>';
-          window.mdfyDesktop.saveFileAs(html, baseName + ".html", [{ name: "HTML", extensions: ["html"] }]).then(function(p) {
+          window.mwDesktop.saveFileAs(html, baseName + ".html", [{ name: "HTML", extensions: ["html"] }]).then(function(p) {
             if (p) showToast("Saved: " + p.split("/").pop());
           });
         });
         break;
       case "txt":
-        window.mdfyDesktop.saveFileAs(currentMarkdown, baseName + ".txt", [{ name: "Text", extensions: ["txt"] }]).then(function(p) {
+        window.mwDesktop.saveFileAs(currentMarkdown, baseName + ".txt", [{ name: "Text", extensions: ["txt"] }]).then(function(p) {
           if (p) showToast("Saved: " + p.split("/").pop());
         });
         break;
       case "copy-html":
-        window.mdfyDesktop.renderMarkdown(currentMarkdown).then(function(r) {
-          window.mdfyDesktop.writeClipboard(r.html);
+        window.mwDesktop.renderMarkdown(currentMarkdown).then(function(r) {
+          window.mwDesktop.writeClipboard(r.html);
           showToast("HTML copied");
         });
         break;
       case "copy-rich":
-        window.mdfyDesktop.renderMarkdown(currentMarkdown).then(function(r) {
-          window.mdfyDesktop.writeClipboardHtml(r.html);
+        window.mwDesktop.renderMarkdown(currentMarkdown).then(function(r) {
+          window.mwDesktop.writeClipboardHtml(r.html);
           showToast("Rich text copied — paste into Docs or Email");
         });
         break;
       case "copy-plain":
-        window.mdfyDesktop.writeClipboard(currentMarkdown);
+        window.mwDesktop.writeClipboard(currentMarkdown);
         showToast("Plain text copied");
         break;
       case "copy-slack":
-        window.mdfyDesktop.writeClipboard(markdownToSlack(currentMarkdown));
+        window.mwDesktop.writeClipboard(markdownToSlack(currentMarkdown));
         showToast("Slack mrkdwn copied");
         break;
     }
@@ -3243,7 +3243,7 @@
   if (copyMdBtn) {
     copyMdBtn.addEventListener("click", function() {
       if (currentMarkdown) {
-        window.mdfyDesktop.writeClipboard(currentMarkdown);
+        window.mwDesktop.writeClipboard(currentMarkdown);
         showToast("Markdown copied");
       }
     });
@@ -3253,7 +3253,7 @@
   if (downloadMdBtn) {
     downloadMdBtn.addEventListener("click", function() {
       if (currentMarkdown) {
-        window.mdfyDesktop.saveFile(currentMarkdown);
+        window.mwDesktop.saveFile(currentMarkdown);
       }
     });
   }
@@ -3298,40 +3298,40 @@
     menu.className = "file-ctx-menu";
 
     var items = [];
-    items.push({ label: "Open", action: function() { window.mdfyDesktop.openFilePath(filePath); } });
-    items.push({ label: "Reveal in Finder", action: function() { window.mdfyDesktop.revealInFinder(filePath); } });
+    items.push({ label: "Open", action: function() { window.mwDesktop.openFilePath(filePath); } });
+    items.push({ label: "Reveal in Finder", action: function() { window.mwDesktop.revealInFinder(filePath); } });
     items.push({ divider: true });
 
     if (config && config.docId) {
       items.push({ label: "Copy URL", action: function() {
-        window.mdfyDesktop.writeClipboard("https://memory.wiki/" + config.docId);
+        window.mwDesktop.writeClipboard("https://memory.wiki/" + config.docId);
         showToast("URL copied");
       }});
       items.push({ label: "Open in Browser", action: function() {
-        window.mdfyDesktop.openInBrowser("https://memory.wiki/" +config.docId);
+        window.mwDesktop.openInBrowser("https://memory.wiki/" +config.docId);
       }});
       items.push({ divider: true });
       items.push({ label: "Unsync", action: async function() {
-        await window.mdfyDesktop.syncUnlink(filePath);
+        await window.mwDesktop.syncUnlink(filePath);
         await refreshSidebarData(); renderSidebar();
       }});
       items.push({ label: "Delete from Cloud", danger: true, action: async function() {
         if (confirm("Delete from Memory.Wiki? Local file stays.")) {
-          await window.mdfyDesktop.syncDelete(filePath);
+          await window.mwDesktop.syncDelete(filePath);
           await refreshSidebarData(); renderSidebar();
           showToast("Deleted from cloud");
         }
       }});
     } else {
       items.push({ label: "Publish to Memory.Wiki", action: function() {
-        window.mdfyDesktop.openFilePath(filePath);
+        window.mwDesktop.openFilePath(filePath);
         setTimeout(function() { doPublish(); }, 500);
       }});
     }
 
     items.push({ divider: true });
     items.push({ label: "Copy Path", action: function() {
-      window.mdfyDesktop.writeClipboard(filePath);
+      window.mwDesktop.writeClipboard(filePath);
       showToast("Path copied");
     }});
 
@@ -3344,15 +3344,15 @@
     menu.className = "file-ctx-menu";
 
     var items = [
-      { label: "Preview", action: function() { window.mdfyDesktop.previewCloudDoc(docId, title); } },
+      { label: "Preview", action: function() { window.mwDesktop.previewCloudDoc(docId, title); } },
       { label: "Sync to Local", action: async function() {
-        var r = await window.mdfyDesktop.syncPullCloud(docId, title);
+        var r = await window.mwDesktop.syncPullCloud(docId, title);
         if (r && r.ok) { await refreshSidebarData(); renderSidebar(); }
       }},
-      { label: "Open in Browser", action: function() { window.mdfyDesktop.openInBrowser("https://memory.wiki/" +docId); } },
+      { label: "Open in Browser", action: function() { window.mwDesktop.openInBrowser("https://memory.wiki/" +docId); } },
       { divider: true },
       { label: "Copy URL", action: function() {
-        window.mdfyDesktop.writeClipboard("https://memory.wiki/" + docId);
+        window.mwDesktop.writeClipboard("https://memory.wiki/" + docId);
         showToast("URL copied");
       }},
     ];
@@ -3362,14 +3362,14 @@
       var folderItems = sidebarState.cloudFolders.map(function(f) {
         return { label: f.name, action: async function() {
           try {
-            await window.mdfyDesktop.moveToFolder(docId, f.id);
+            await window.mwDesktop.moveToFolder(docId, f.id);
             await refreshSidebarData(); renderSidebar();
           } catch(e) { console.error(e); }
         }};
       });
       folderItems.push({ label: "Root (no folder)", action: async function() {
         try {
-          await window.mdfyDesktop.moveToFolder(docId, null);
+          await window.mwDesktop.moveToFolder(docId, null);
           await refreshSidebarData(); renderSidebar();
         } catch(e) { console.error(e); }
       }});
@@ -3379,7 +3379,7 @@
     items.push({ divider: true });
     items.push({ label: "Delete from Cloud", danger: true, action: async function() {
       if (confirm("Delete from Memory.Wiki?")) {
-        await window.mdfyDesktop.deleteCloudDoc(docId);
+        await window.mwDesktop.deleteCloudDoc(docId);
         await refreshSidebarData(); renderSidebar();
         showToast("Deleted");
       }
@@ -3471,7 +3471,7 @@
     headerUrlBtn.addEventListener("click", function() {
       var url = headerUrlBtn.getAttribute("data-url");
       if (url) {
-        window.mdfyDesktop.writeClipboard(url);
+        window.mwDesktop.writeClipboard(url);
         showToast("URL copied: " + url);
       }
     });
@@ -3741,7 +3741,7 @@
   }
 
   async function runAISidePanelAction(action, languageOrInstruction) {
-    if (!window.mdfyDesktop) { showAiSideLoading(false); return; }
+    if (!window.mwDesktop) { showAiSideLoading(false); return; }
 
     if (!sidebarState.authState.loggedIn) {
       showAiSideLoading(false);
@@ -3759,7 +3759,7 @@
     var prevMd = currentMarkdown;
 
     try {
-      var result = await window.mdfyDesktop.aiAction(action, md, languageOrInstruction || undefined);
+      var result = await window.mwDesktop.aiAction(action, md, languageOrInstruction || undefined);
       showAiSideLoading(false);
 
       if (result.error) {
@@ -3886,7 +3886,7 @@
   }
 
   async function runAIAction(action, languageOrInstruction) {
-    if (!window.mdfyDesktop) return;
+    if (!window.mwDesktop) return;
 
     // Check auth state
     if (!sidebarState.authState.loggedIn) {
@@ -3901,7 +3901,7 @@
     showToast("AI processing...");
 
     try {
-      var result = await window.mdfyDesktop.aiAction(action, md, languageOrInstruction || undefined);
+      var result = await window.mwDesktop.aiAction(action, md, languageOrInstruction || undefined);
       if (result.error) {
         showToast("AI failed: " + result.error);
         return;

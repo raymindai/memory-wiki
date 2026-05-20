@@ -18,7 +18,7 @@ function textResult(text: string) {
   return { content: [{ type: "text" as const, text }] };
 }
 
-// sha256Base64 helper removed alongside mdfy_set_password — no other
+// sha256Base64 helper removed alongside mw_set_password — no other
 // callers needed it.
 
 // Strip HTML tags + decode entities → plaintext markdown-ish
@@ -93,7 +93,7 @@ function createMcpServer(userId?: string) {
   // ─── Core CRUD ───
 
   server.tool(
-    "mdfy_create",
+    "mw_create",
     "Create a new Markdown document on Memory.Wiki and get a shareable URL",
     {
       markdown: z.string().describe("Markdown content"),
@@ -103,7 +103,7 @@ function createMcpServer(userId?: string) {
     async ({ markdown, title, draft }) => {
       if (!supabase) return errorResult("Storage not configured");
       const isDraft = draft ?? true;
-      // mdfy_create is an import-time write, so body mutation here is
+      // mw_create is an import-time write, so body mutation here is
       // explicit (not a silent autosave side-effect): if the body has
       // no H1 and the caller supplied a title, prepend it as H1 so
       // the new doc has a proper heading. Otherwise the body is
@@ -116,7 +116,7 @@ function createMcpServer(userId?: string) {
       }
       const storedTitle: string = extractTitleFromMd(storedMarkdown);
       // 30s same-content dedup so an MCP client that retries on transient
-      // error (or an LLM that calls mdfy_create twice for the same output)
+      // error (or an LLM that calls mw_create twice for the same output)
       // doesn't pile up a sibling row.
       const dupHit = await findRecentDuplicateDoc(
         supabase,
@@ -173,7 +173,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_read",
+    "mw_read",
     "Fetch a document's markdown content",
     { id: z.string().describe("Document ID") },
     async ({ id }) => {
@@ -185,7 +185,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_update",
+    "mw_update",
     "Update an existing document's content or title",
     {
       id: z.string().describe("Document ID"),
@@ -194,7 +194,7 @@ function createMcpServer(userId?: string) {
     },
     async ({ id, markdown, title }) => {
       if (!supabase) return errorResult("Storage not configured");
-      // mdfy_update is a content replacement — we do NOT silently
+      // mw_update is a content replacement — we do NOT silently
       // mutate the body. If the caller passes a body without H1 plus
       // an explicit `title` argument, treat that as intent to set a
       // heading and prepend it once. Otherwise the body wins.
@@ -237,7 +237,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_delete",
+    "mw_delete",
     "Delete a document",
     { id: z.string().describe("Document ID") },
     async ({ id }) => {
@@ -249,7 +249,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_list",
+    "mw_list",
     "List documents owned by current user",
     {},
     async () => {
@@ -270,7 +270,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_search",
+    "mw_search",
     "Full-text search through your documents",
     { query: z.string().describe("Search query") },
     async ({ query }) => {
@@ -295,7 +295,7 @@ function createMcpServer(userId?: string) {
   // ─── Append / Prepend ───
 
   server.tool(
-    "mdfy_append",
+    "mw_append",
     "Append content to the end of an existing document",
     {
       id: z.string().describe("Document ID"),
@@ -323,7 +323,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_prepend",
+    "mw_prepend",
     "Prepend content to the beginning of a document",
     { id: z.string(), content: z.string() },
     async ({ id, content }) => {
@@ -348,7 +348,7 @@ function createMcpServer(userId?: string) {
   // ─── Outline / Sections ───
 
   server.tool(
-    "mdfy_outline",
+    "mw_outline",
     "Get the heading-based outline (table of contents) of a document",
     { id: z.string().describe("Document ID") },
     async ({ id }) => {
@@ -363,7 +363,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_extract_section",
+    "mw_extract_section",
     "Extract a specific section by heading text",
     {
       id: z.string(),
@@ -381,7 +381,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_replace_section",
+    "mw_replace_section",
     "Replace the content of a section identified by heading",
     {
       id: z.string(),
@@ -413,7 +413,7 @@ function createMcpServer(userId?: string) {
   // ─── Duplicate / Import ───
 
   server.tool(
-    "mdfy_duplicate",
+    "mw_duplicate",
     "Duplicate an existing document under a new ID",
     {
       id: z.string().describe("Source document ID"),
@@ -444,7 +444,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_import_url",
+    "mw_import_url",
     "Fetch a webpage and import it as a new Memory.Wiki document",
     {
       url: z.string().describe("URL to fetch"),
@@ -453,7 +453,7 @@ function createMcpServer(userId?: string) {
     async ({ url, title }) => {
       if (!supabase) return errorResult("Storage not configured");
       try {
-        const res = await fetch(url, { headers: { "User-Agent": "mdfy-mcp/1.4.0" } });
+        const res = await fetch(url, { headers: { "User-Agent": "memory-wiki-mcp/1.4.0" } });
         if (!res.ok) return errorResult(`HTTP ${res.status} fetching ${url}`);
         const html = await res.text();
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -505,12 +505,12 @@ function createMcpServer(userId?: string) {
 
   // ─── Sharing controls ───
 
-  // mdfy_set_password removed — password gating is no longer a
+  // mw_set_password removed — password gating is no longer a
   // supported access mode. The three real states are Private /
   // Specific people only / Anyone with the link.
 
   server.tool(
-    "mdfy_set_expiry",
+    "mw_set_expiry",
     "Set or clear expiration time on a document",
     {
       id: z.string(),
@@ -528,7 +528,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_set_allowed_emails",
+    "mw_set_allowed_emails",
     "Restrict access to specific emails (allowlist)",
     {
       id: z.string(),
@@ -544,7 +544,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_get_share_url",
+    "mw_get_share_url",
     "Get the share URL and access metadata for a document",
     { id: z.string() },
     async ({ id }) => {
@@ -567,7 +567,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_publish",
+    "mw_publish",
     "Toggle a document between published (shared) and draft (private)",
     { id: z.string(), published: z.boolean() },
     async ({ id, published }) => {
@@ -581,7 +581,7 @@ function createMcpServer(userId?: string) {
   // ─── Versions ───
 
   server.tool(
-    "mdfy_versions",
+    "mw_versions",
     "List version history of a document",
     { id: z.string() },
     async ({ id }) => {
@@ -600,7 +600,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_restore_version",
+    "mw_restore_version",
     "Restore a document to a previous version",
     { id: z.string(), versionId: z.string() },
     async ({ id, versionId }) => {
@@ -622,7 +622,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_diff",
+    "mw_diff",
     "Show diff between two versions of a document (line-level)",
     { id: z.string(), fromVersionId: z.string(), toVersionId: z.string() },
     async ({ id, fromVersionId, toVersionId }) => {
@@ -650,7 +650,7 @@ function createMcpServer(userId?: string) {
   // ─── Stats / Recent ───
 
   server.tool(
-    "mdfy_stats",
+    "mw_stats",
     "Get view stats and metadata for a document",
     { id: z.string() },
     async ({ id }) => {
@@ -671,7 +671,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_recent",
+    "mw_recent",
     "List recently visited documents",
     {},
     async () => {
@@ -694,7 +694,7 @@ function createMcpServer(userId?: string) {
   // ─── Folders ───
 
   server.tool(
-    "mdfy_folder_list",
+    "mw_folder_list",
     "List your folders",
     {},
     async () => {
@@ -714,7 +714,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_folder_create",
+    "mw_folder_create",
     "Create a new folder",
     {
       name: z.string().describe("Folder name"),
@@ -734,7 +734,7 @@ function createMcpServer(userId?: string) {
   );
 
   server.tool(
-    "mdfy_move_to_folder",
+    "mw_move_to_folder",
     "Move a document into a folder",
     { documentId: z.string(), folderId: z.string().nullable().describe("null to remove from folder") },
     async ({ documentId, folderId }) => {
@@ -748,14 +748,14 @@ function createMcpServer(userId?: string) {
   // ─── Render preview ───
 
   server.tool(
-    "mdfy_render_preview",
+    "mw_render_preview",
     "Get the public render URL for previewing markdown without saving",
     { markdown: z.string().describe("Markdown to preview") },
     async ({ markdown }) => {
       // For now just return the hash-share URL (Memory.Wiki supports it via /#md=...)
       // True render would need WASM access; this gives users a quick preview link.
       void markdown;
-      return textResult(`To preview: paste markdown into ${BASE_URL} (it renders live in browser).\nFor a permanent preview, use mdfy_create with draft=true.`);
+      return textResult(`To preview: paste markdown into ${BASE_URL} (it renders live in browser).\nFor a permanent preview, use mw_create with draft=true.`);
     }
   );
 

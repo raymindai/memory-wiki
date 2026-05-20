@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Capture current tmux pane and publish to mdfy.app
-# Called by mdfy.tmux keybinding
+# Called by memorywiki.tmux keybinding
 
 # Check if mdfy CLI is installed
 if ! command -v mdfy &> /dev/null; then
-  tmux display-message "mdfy not found. Install: npm install -g mdfy-cli"
+  tmux display-message "mdfy not found. Install: npm install -g memory-wiki-cli"
   exit 1
 fi
 
@@ -17,7 +17,7 @@ if [ -z "$content" ]; then
 fi
 
 # Publish via mdfy CLI capture command
-url=$(echo "$content" | mdfy capture 2>/dev/null)
+url=$(echo "$content" | mw capture 2>/dev/null)
 
 if [ -n "$url" ]; then
   # Copy URL to tmux buffer and system clipboard

@@ -10,7 +10,7 @@ export class StatusBarManager {
       vscode.StatusBarAlignment.Right,
       100
     );
-    this.item.command = "mdfy.sync";
+    this.item.command = "memorywiki.sync";
     this.setIdle();
   }
 
@@ -64,7 +64,7 @@ export class StatusBarManager {
     this.item.text = "$(link) Memory.Wiki";
     this.item.tooltip = `${url}\nClick to copy URL`;
     this.item.backgroundColor = undefined;
-    this.item.command = "mdfy.copyUrl";
+    this.item.command = "memorywiki.copyUrl";
   }
 
   getPublishedUrl(): string | undefined {

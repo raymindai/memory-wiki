@@ -671,7 +671,7 @@ url = res.json()["url"]`}</CodeBlock>
             응답 형태
           </h3>
           <CodeBlock lang="markdown">{`---
-mdfy_bundle: 1
+mw_bundle: 1
 id: <bundleId>
 title: "..."
 url: https://memory.wiki/b/<id>
@@ -856,7 +856,7 @@ source: "Memory.Wiki"
               },
               {
                 title: "MCP / CLI 인증",
-                desc: "MCP 서버와 CLI 모두 Memory.Wiki login의 JWT를 사용합니다. 실행: npm install -g mdfy-cli && Memory.Wiki login",
+                desc: "MCP 서버와 CLI 모두 Memory.Wiki login의 JWT를 사용합니다. 실행: npm install -g memory-wiki-cli && Memory.Wiki login",
               },
             ].map((item) => (
               <div

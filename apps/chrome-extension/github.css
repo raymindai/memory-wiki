@@ -1,6 +1,6 @@
 /* Memory.Wiki GitHub Integration Styles */
 
-.mdfy-github-btn {
+.mw-github-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -22,63 +22,63 @@
   vertical-align: middle;
 }
 
-.mdfy-github-btn:hover {
+.mw-github-btn:hover {
   background: rgba(251, 146, 60, 0.15);
   border-color: rgba(251, 146, 60, 0.5);
 }
 
-.mdfy-github-btn:active {
+.mw-github-btn:active {
   background: rgba(251, 146, 60, 0.2);
 }
 
-.mdfy-gh-label {
+.mw-gh-label {
   font-weight: 500;
 }
 
 /* Loading state */
-.mdfy-github-btn.mdfy-gh-loading {
+.mw-github-btn.mw-gh-loading {
   opacity: 0.7;
   pointer-events: none;
 }
 
-.mdfy-github-btn.mdfy-gh-loading .mdfy-gh-label {
-  animation: mdfy-gh-pulse 1.5s infinite;
+.mw-github-btn.mw-gh-loading .mw-gh-label {
+  animation: mw-gh-pulse 1.5s infinite;
 }
 
-@keyframes mdfy-gh-pulse {
+@keyframes mw-gh-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
 
 /* Success state */
-.mdfy-github-btn.mdfy-gh-done {
+.mw-github-btn.mw-gh-done {
   border-color: rgba(74, 222, 128, 0.4);
   background: rgba(74, 222, 128, 0.1);
 }
 
-.mdfy-github-btn.mdfy-gh-done .mdfy-gh-label {
+.mw-github-btn.mw-gh-done .mw-gh-label {
   color: #4ade80;
 }
 
 /* Error state */
-.mdfy-github-btn.mdfy-gh-error {
+.mw-github-btn.mw-gh-error {
   border-color: rgba(239, 68, 68, 0.4);
   background: rgba(239, 68, 68, 0.1);
 }
 
-.mdfy-github-btn.mdfy-gh-error .mdfy-gh-label {
+.mw-github-btn.mw-gh-error .mw-gh-label {
   color: #ef4444;
 }
 
 /* Dark mode support (GitHub dark themes) */
 @media (prefers-color-scheme: dark) {
-  .mdfy-gh-fy {
+  .mw-gh-fy {
     color: #a1a1aa;
   }
 }
 
 /* GitHub's dark theme class */
-[data-color-mode="dark"] .mdfy-gh-fy,
-[data-dark-theme] .mdfy-gh-fy {
+[data-color-mode="dark"] .mw-gh-fy,
+[data-dark-theme] .mw-gh-fy {
   color: #a1a1aa;
 }

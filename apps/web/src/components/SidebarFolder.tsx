@@ -284,15 +284,15 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
         if (p.tab.kind !== "bundle") {
           try {
             if (p.tab.cloudId) {
-              e.dataTransfer.setData("application/x-mdfy-doc-ids", JSON.stringify([p.tab.cloudId]));
+              e.dataTransfer.setData("application/x-memorywiki-doc-ids", JSON.stringify([p.tab.cloudId]));
             }
-            e.dataTransfer.setData("application/x-mdfy-tab-ids", JSON.stringify([p.tab.id]));
+            e.dataTransfer.setData("application/x-memorywiki-tab-ids", JSON.stringify([p.tab.id]));
             // text/plain fallback — some browsers (Chrome's "protected drag")
             // hide custom MIMEs from `types` during dragover, but always expose
             // text/* types. This guarantees the dragover handler can match
             // even before the drop fires.
             if (p.tab.cloudId) {
-              e.dataTransfer.setData("text/plain", `mdfy-doc:${p.tab.cloudId}`);
+              e.dataTransfer.setData("text/plain", `mw-doc:${p.tab.cloudId}`);
             }
           } catch { /* ignore */ }
         }

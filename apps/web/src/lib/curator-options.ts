@@ -2,7 +2,7 @@
 // signals that Memory.Wiki runs against the user's hub. Each option owns
 // one rule; the user toggles which ones surface in Needs Review.
 //
-// Storage: localStorage in v1 (key `mdfy-curator-settings`). v2 can
+// Storage: localStorage in v1 (key `mw-curator-settings`). v2 can
 // promote this to a profiles.curator_settings JSONB column for
 // cross-device sync; the shape here is already JSON-serializable so
 // the migration is just "read from profile when present, fall back
@@ -97,7 +97,7 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
   },
 ];
 
-const STORAGE_KEY = "mdfy-curator-settings";
+const STORAGE_KEY = "mw-curator-settings";
 
 // Auto-management trigger — when the system attempts to act on the
 // findings the curator surfaces. The per-signal toggles still govern

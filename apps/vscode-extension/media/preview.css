@@ -1146,7 +1146,7 @@ body.live-mode #source-view { display: none; }
 }
 
 /* === Published Badge === */
-#mdfy-badge {
+#mw-badge {
   position: fixed;
   bottom: 28px;
   left: 0;
@@ -1162,17 +1162,17 @@ body.live-mode #source-view { display: none; }
   z-index: 99;
 }
 
-#mdfy-badge.hidden {
+#mw-badge.hidden {
   display: none;
 }
 
-#mdfy-badge a {
+#mw-badge a {
   color: var(--fg-muted);
   text-decoration: none;
   transition: color 0.15s;
 }
 
-#mdfy-badge a:hover {
+#mw-badge a:hover {
   color: var(--fg);
 }
 
@@ -1251,7 +1251,7 @@ body.live-mode #source-view { display: none; }
 }
 
 /* === Custom Tooltips (instant, no native delay) === */
-.mdfy-tooltip {
+.mw-tooltip {
   position: fixed;
   z-index: 9999;
   padding: 4px 10px;
@@ -1269,7 +1269,7 @@ body.live-mode #source-view { display: none; }
   transition: opacity 0.12s, transform 0.12s;
 }
 
-.mdfy-tooltip.visible {
+.mw-tooltip.visible {
   opacity: 1;
   transform: translateY(0);
 }

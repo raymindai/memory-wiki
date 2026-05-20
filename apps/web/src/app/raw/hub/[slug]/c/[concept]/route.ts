@@ -98,7 +98,7 @@ export async function GET(
 
   const frontmatter = [
     "---",
-    "mdfy_bundle: 1",
+    "mw_bundle: 1",
     "type: hub_concept",
     `slug: ${slug}`,
     `concept: "${conceptRow.label.replace(/"/g, '\\"')}"`,

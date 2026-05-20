@@ -2,10 +2,10 @@
 
 /* ─── Floating Button Container ─── */
 
-#mdfy-float-container {
+#mw-float-container {
   position: fixed;
-  bottom: var(--mdfy-input-h, 100px);
-  right: var(--mdfy-content-right, 24px);
+  bottom: var(--mw-input-h, 100px);
+  right: var(--mw-content-right, 24px);
   z-index: 999999;
   display: flex;
   align-items: stretch;
@@ -15,14 +15,14 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-#mdfy-float-container:hover {
+#mw-float-container:hover {
   opacity: 1;
   transform: translateY(-2px);
 }
 
 /* ─── Floating Button (Main) ─── */
 
-#mdfy-float-btn {
+#mw-float-btn {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -39,17 +39,17 @@
   line-height: 1;
 }
 
-#mdfy-float-btn:hover {
+#mw-float-btn:hover {
   background: #111113;
 }
 
-#mdfy-float-btn:active {
+#mw-float-btn:active {
   transform: scale(0.97);
 }
 
 /* ─── Floating Button Dropdown Toggle ─── */
 
-#mdfy-float-toggle {
+#mw-float-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,45 +67,45 @@
   transition: color 0.15s, background 0.15s;
 }
 
-#mdfy-float-toggle:hover {
+#mw-float-toggle:hover {
   color: #fb923c;
   background: #18181b;
 }
 
 /* ─── Floating Button States ─── */
 
-#mdfy-float-container.mdfy-loading,
-#mdfy-float-container.mdfy-done,
-#mdfy-float-container.mdfy-error {
+#mw-float-container.mw-loading,
+#mw-float-container.mw-done,
+#mw-float-container.mw-error {
   pointer-events: none;
   opacity: 1;
 }
 
-#mdfy-float-container.mdfy-loading .mdfy-btn-label {
-  animation: mdfy-pulse 1.2s ease-in-out infinite;
+#mw-float-container.mw-loading .mw-btn-label {
+  animation: mw-pulse 1.2s ease-in-out infinite;
 }
 
-#mdfy-float-container.mdfy-loading #mdfy-float-btn,
-#mdfy-float-container.mdfy-loading #mdfy-float-toggle {
+#mw-float-container.mw-loading #mw-float-btn,
+#mw-float-container.mw-loading #mw-float-toggle {
   border-color: rgba(251, 146, 60, 0.3);
 }
 
-#mdfy-float-container.mdfy-done #mdfy-float-btn,
-#mdfy-float-container.mdfy-done #mdfy-float-toggle {
+#mw-float-container.mw-done #mw-float-btn,
+#mw-float-container.mw-done #mw-float-toggle {
   border-color: rgba(74, 222, 128, 0.4);
 }
 
-#mdfy-float-container.mdfy-error #mdfy-float-btn,
-#mdfy-float-container.mdfy-error #mdfy-float-toggle {
+#mw-float-container.mw-error #mw-float-btn,
+#mw-float-container.mw-error #mw-float-toggle {
   border-color: rgba(248, 113, 113, 0.4);
 }
 
-.mdfy-btn-status-done { color: #4ade80 !important; }
-.mdfy-btn-status-error { color: #f87171 !important; }
+.mw-btn-status-done { color: #4ade80 !important; }
+.mw-btn-status-error { color: #f87171 !important; }
 
 /* ─── Floating Button Dropdown Menu ─── */
 
-#mdfy-float-menu {
+#mw-float-menu {
   position: absolute;
   bottom: calc(100% + 6px);
   right: 0;
@@ -121,13 +121,13 @@
   transition: opacity 0.15s, transform 0.15s;
 }
 
-#mdfy-float-menu.mdfy-menu-visible {
+#mw-float-menu.mw-menu-visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
-.mdfy-menu-item {
+.mw-menu-item {
   padding: 8px 14px;
   font-size: 12px;
   color: #a1a1aa;
@@ -136,28 +136,28 @@
   white-space: nowrap;
 }
 
-.mdfy-menu-item:hover {
+.mw-menu-item:hover {
   background: #18181b;
   color: #fafafa;
 }
 
-.mdfy-menu-item:first-child { border-radius: 9px 9px 0 0; }
-.mdfy-menu-item:last-child { border-radius: 0 0 9px 9px; }
-.mdfy-menu-accent { color: #fb923c; }
+.mw-menu-item:first-child { border-radius: 9px 9px 0 0; }
+.mw-menu-item:last-child { border-radius: 0 0 9px 9px; }
+.mw-menu-accent { color: #fb923c; }
 
 /* ─── Floating Button Logo & Label ─── */
 
-.mdfy-btn-logo {
+.mw-btn-logo {
   font-size: 12px;
   font-weight: 800;
   letter-spacing: -0.5px;
   display: inline-flex;
 }
 
-.mdfy-logo-md { color: #fb923c; }
-.mdfy-logo-fy { color: #fafafa; }
+.mw-logo-md { color: #fb923c; }
+.mw-logo-fy { color: #fafafa; }
 
-.mdfy-btn-label {
+.mw-btn-label {
   font-size: 10px;
   font-weight: 500;
   color: #71717a;
@@ -167,9 +167,9 @@
 
 /* ─── Per-Message Mini Button ─── */
 
-.mdfy-mini-btn {
+.mw-mini-btn {
   position: sticky;
-  top: var(--mdfy-header-h, 8px);
+  top: var(--mw-header-h, 8px);
   float: right;
   margin-right: 8px;
   z-index: 99;
@@ -193,62 +193,62 @@
 }
 
 /* Show on hover of the parent message */
-*:hover > .mdfy-mini-btn,
-.mdfy-mini-btn:hover {
+*:hover > .mw-mini-btn,
+.mw-mini-btn:hover {
   opacity: 1;
   pointer-events: auto;
 }
 
-.mdfy-mini-btn:hover {
+.mw-mini-btn:hover {
   border-color: rgba(251, 146, 60, 0.4);
   transform: scale(1.05);
 }
 
-.mdfy-mini-btn:active {
+.mw-mini-btn:active {
   transform: scale(0.95);
 }
 
-.mdfy-mini-btn.mdfy-loading {
+.mw-mini-btn.mw-loading {
   pointer-events: none;
   opacity: 1;
   border-color: rgba(251, 146, 60, 0.3);
 }
 
-.mdfy-mini-btn.mdfy-done {
+.mw-mini-btn.mw-done {
   pointer-events: none;
   opacity: 1;
   border-color: rgba(74, 222, 128, 0.4);
   background: rgba(74, 222, 128, 0.08);
 }
 
-.mdfy-mini-btn.mdfy-error {
+.mw-mini-btn.mw-error {
   pointer-events: none;
   opacity: 1;
   border-color: rgba(248, 113, 113, 0.4);
   background: rgba(248, 113, 113, 0.08);
 }
 
-.mdfy-mini-logo { display: inline-flex; letter-spacing: -0.5px; }
-.mdfy-mini-md { color: #fb923c; }
-.mdfy-mini-fy { color: #fafafa; }
-.mdfy-mini-label { color: #737373; margin-left: 4px; font-weight: 500; }
-.mdfy-mini-status { color: #a1a1aa; margin-left: 2px; font-weight: 400; font-size: 9px; }
-.mdfy-mini-status-done { color: #4ade80; }
-.mdfy-mini-status-error { color: #f87171; }
+.mw-mini-logo { display: inline-flex; letter-spacing: -0.5px; }
+.mw-mini-md { color: #fb923c; }
+.mw-mini-fy { color: #fafafa; }
+.mw-mini-label { color: #737373; margin-left: 4px; font-weight: 500; }
+.mw-mini-status { color: #a1a1aa; margin-left: 2px; font-weight: 400; font-size: 9px; }
+.mw-mini-status-done { color: #4ade80; }
+.mw-mini-status-error { color: #f87171; }
 
-@keyframes mdfy-pulse {
+@keyframes mw-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
-.mdfy-mini-btn.mdfy-loading .mdfy-mini-status {
-  animation: mdfy-pulse 1.2s ease-in-out infinite;
+.mw-mini-btn.mw-loading .mw-mini-status {
+  animation: mw-pulse 1.2s ease-in-out infinite;
 }
 
 /* ─── Toast Notification ─── */
 
-#mdfy-toast {
+#mw-toast {
   position: fixed;
-  bottom: calc(var(--mdfy-input-h, 100px) + 48px);
+  bottom: calc(var(--mw-input-h, 100px) + 48px);
   right: 24px;
   z-index: 999999;
   display: flex;
@@ -271,12 +271,12 @@
   max-width: 300px;
 }
 
-#mdfy-toast.mdfy-toast-visible {
+#mw-toast.mw-toast-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-.mdfy-toast-icon {
+.mw-toast-icon {
   color: #fb923c;
   flex-shrink: 0;
 }

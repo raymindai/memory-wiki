@@ -1,12 +1,12 @@
 /**
  * Browser-side counterpart to lib/anonymous-cookie.ts.
  *
- * The mdfy_anon cookie is intentionally not HttpOnly — the in-app sign-in
+ * The mw_anon cookie is intentionally not HttpOnly — the in-app sign-in
  * flow needs to read it so it can call /api/user/migrate and claim every
  * doc the browser created anonymously. Server still owns minting/refresh.
  */
 
-const COOKIE_NAME = "mdfy_anon";
+const COOKIE_NAME = "mw_anon";
 
 export function readMdfyAnonCookie(): string | null {
   if (typeof document === "undefined") return null;

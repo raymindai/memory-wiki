@@ -250,21 +250,21 @@ const AuthManager = {
   },
 };
 
-// ─── .mdfy.json Sidecar ───
+// ─── .memorywiki.json Sidecar ───
 
 function getMdfyConfigPath(filePath) {
   const dir = path.dirname(filePath);
   const base = path.basename(filePath, path.extname(filePath));
   // Hidden file (dot prefix) to keep workspace clean
-  return path.join(dir, "." + base + ".mdfy.json");
+  return path.join(dir, "." + base + ".memorywiki.json");
 }
 
 // Migration: rename old visible sidecar to hidden
 function migrateOldSidecar(filePath) {
   const dir = path.dirname(filePath);
   const base = path.basename(filePath, path.extname(filePath));
-  const oldPath = path.join(dir, base + ".mdfy.json");
-  const newPath = path.join(dir, "." + base + ".mdfy.json");
+  const oldPath = path.join(dir, base + ".memorywiki.json");
+  const newPath = path.join(dir, "." + base + ".memorywiki.json");
   try {
     if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
       fs.renameSync(oldPath, newPath);
@@ -283,7 +283,7 @@ function saveMdfyConfig(filePath, config) {
   try {
     fs.writeFileSync(getMdfyConfigPath(filePath), JSON.stringify(config, null, 2));
   } catch (err) {
-    console.error("[config] Failed to save .mdfy.json:", err.message);
+    console.error("[config] Failed to save .memorywiki.json:", err.message);
   }
 }
 
@@ -621,7 +621,7 @@ const SyncEngine = {
 
     if (!AuthManager.isLoggedIn()) return;
 
-    // Find all .mdfy.json files in workspace
+    // Find all .memorywiki.json files in workspace
     const sidecarFiles = this.findSidecars();
 
     for (const sidecarPath of sidecarFiles) {
@@ -684,7 +684,7 @@ const SyncEngine = {
       try {
         const files = fs.readdirSync(dir);
         for (const f of files) {
-          if (f.endsWith(".mdfy.json")) {
+          if (f.endsWith(".memorywiki.json")) {
             results.push(path.join(dir, f));
           }
         }
@@ -977,7 +977,7 @@ function scanWorkspaceFiles(folderPath) {
       for (const entry of entries) {
         if (entry.name.startsWith(".")) continue;
         if (entry.name === "node_modules") continue;
-        if (entry.name.endsWith(".mdfy.json")) continue;
+        if (entry.name.endsWith(".memorywiki.json")) continue;
         const fullPath = path.join(dir, entry.name);
 
         if (entry.isDirectory()) {
@@ -1097,7 +1097,7 @@ function startFolderWatcher(folderPath) {
     folderWatcher = fs.watch(folderPath, { recursive: true }, (eventType, filename) => {
       if (!filename) return;
       // Watch for any .md file changes (create, rename, delete)
-      if (filename.endsWith(".md") || filename.endsWith(".mdfy.json")) {
+      if (filename.endsWith(".md") || filename.endsWith(".memorywiki.json")) {
         if (folderWatcher._debounce) clearTimeout(folderWatcher._debounce);
         folderWatcher._debounce = setTimeout(() => {
           sendToRenderer("workspace-changed");
@@ -1196,9 +1196,9 @@ if (!gotTheLock) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
 
-      const mdfyUrl = argv.find((a) => a.startsWith("memory.wiki://"));
-      if (mdfyUrl) {
-        handleMdfyUrl(mdfyUrl);
+      const mwUrl = argv.find((a) => a.startsWith("memory.wiki://"));
+      if (mwUrl) {
+        handleMdfyUrl(mwUrl);
         return;
       }
 
@@ -1899,7 +1899,7 @@ ipcMain.handle("upload-image", async (event, base64Data, mimeType, fileName) => 
   try {
     const buffer = Buffer.from(base64Data, "base64");
     if (buffer.length > 10 * 1024 * 1024) return { error: "File too large (max 10MB)" };
-    const boundary = "----mdfyUpload" + Date.now();
+    const boundary = "----memorywikiUpload" + Date.now();
     const safeFileName = fileName.replace(/["\r\n\\]/g, "_");
     const body = Buffer.concat([
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${safeFileName}"\r\nContent-Type: ${mimeType}\r\n\r\n`),

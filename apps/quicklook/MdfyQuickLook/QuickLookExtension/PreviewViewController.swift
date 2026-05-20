@@ -373,7 +373,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     body { display: flex; flex-direction: column; }
 
     /* Top bar */
-    .mdfy-topbar {
+    .mw-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -385,9 +385,9 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       flex-wrap: nowrap;
       overflow: hidden;
     }
-    .mdfy-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex-shrink: 1; overflow: hidden; }
-    .mdfy-logo { display: flex; align-items: center; flex-shrink: 0; }
-    .mdfy-filename {
+    .mw-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex-shrink: 1; overflow: hidden; }
+    .mw-logo { display: flex; align-items: center; flex-shrink: 0; }
+    .mw-filename {
       font-size: 11px;
       color: var(--text-muted);
       font-family: var(--font-mono);
@@ -395,14 +395,14 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .mdfy-topbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .mw-topbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     @media (max-width: 480px) {
-      .mdfy-topbar { padding: 6px 10px; }
-      .mdfy-filename { display: none; }
-      .mdfy-btn span { display: none; }
-      .mdfy-btn { padding: 4px 8px; font-size: 11px; }
+      .mw-topbar { padding: 6px 10px; }
+      .mw-filename { display: none; }
+      .mw-btn span { display: none; }
+      .mw-btn { padding: 4px 8px; font-size: 11px; }
     }
-    .mdfy-btn {
+    .mw-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -418,14 +418,14 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .mdfy-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-    .mdfy-btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
-    .mdfy-btn-primary:hover { opacity: 0.9; color: #000; }
+    .mw-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .mw-btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+    .mw-btn-primary:hover { opacity: 0.9; color: #000; }
 
     /* Content */
-    .mdfy-content { flex: 1; overflow-y: auto; padding: 32px 40px 60px; }
-    @media (max-width: 720px) { .mdfy-content { padding: 20px 16px 40px; } }
-    .mdfy-content-inner { max-width: 780px; margin: 0 auto; }
+    .mw-content { flex: 1; overflow-y: auto; padding: 32px 40px 60px; }
+    @media (max-width: 720px) { .mw-content { padding: 20px 16px 40px; } }
+    .mw-content-inner { max-width: 780px; margin: 0 auto; }
 
     /* Injected rendered content styles */
     {{MDFY_CSS}}
@@ -490,7 +490,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     }
 
     /* Loading state */
-    .mdfy-loading {
+    .mw-loading {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -499,7 +499,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       color: var(--text-muted);
       gap: 12px;
     }
-    .mdfy-loading-spinner {
+    .mw-loading-spinner {
       width: 24px;
       height: 24px;
       border: 2px solid var(--border);
@@ -510,7 +510,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Raw markdown fallback styles */
-    .mdfy-raw-fallback {
+    .mw-raw-fallback {
       font-family: var(--font-mono);
       font-size: 0.8125rem;
       line-height: 1.8;
@@ -536,22 +536,22 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     <body>
 
     <!-- Top Bar -->
-    <div class="mdfy-topbar">
-      <div class="mdfy-topbar-left">
-        <div class="mdfy-logo">
+    <div class="mw-topbar">
+      <div class="mw-topbar-left">
+        <div class="mw-logo">
           <span style="font-size:16px;font-weight:800;letter-spacing:-0.5px"><span style="color:var(--accent)">md</span><span style="color:var(--fg)">fy</span><span style="color:var(--muted)">.cc</span></span>
         </div>
-        <span class="mdfy-filename">{{FILE_NAME}}</span>
+        <span class="mw-filename">{{FILE_NAME}}</span>
       </div>
-      <div class="mdfy-topbar-right">
-        <a class="mdfy-btn" id="open-in-mdfy" href="https://memory.wiki" target="_blank" rel="noopener">
+      <div class="mw-topbar-right">
+        <a class="mw-btn" id="open-in-memorywiki" href="https://memory.wiki" target="_blank" rel="noopener">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
             <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M9 1h6m0 0v6m0-6L8 8"
                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Open on Memory.Wiki
         </a>
-        <button class="mdfy-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+        <button class="mw-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
           <svg id="theme-icon-sun" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none">
             <circle cx="8" cy="8" r="3.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 3.4l1-1"/>
           </svg>
@@ -563,11 +563,11 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     </div>
 
     <!-- Content -->
-    <div class="mdfy-content">
-      <div class="mdfy-content-inner">
+    <div class="mw-content">
+      <div class="mw-content-inner">
         <div id="preview" class="mdcore-rendered">
-          <div class="mdfy-loading">
-            <div class="mdfy-loading-spinner"></div>
+          <div class="mw-loading">
+            <div class="mw-loading-spinner"></div>
             <span style="font-size: 13px;">Rendering...</span>
           </div>
         </div>
@@ -577,7 +577,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     <!-- CDN JS libraries, loaded with fallback handling -->
     <script>
     // Track which libraries loaded successfully
-    window.__mdfyLibs = { marked: false, hljs: false, katex: false, mermaid: false };
+    window.__mwLibs = { marked: false, hljs: false, katex: false, mermaid: false };
 
     // Theme toggle
     var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -646,18 +646,18 @@ class PreviewViewController: NSViewController, QLPreviewingController {
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"
-            onload="window.__mdfyLibs.marked=true"
+            onload="window.__mwLibs.marked=true"
             onerror="console.warn('marked.js CDN unavailable')"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"
-            onload="window.__mdfyLibs.hljs=true"
+            onload="window.__mwLibs.hljs=true"
             onerror="console.warn('highlight.js CDN unavailable')"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"
-            onload="window.__mdfyLibs.katex=true"
+            onload="window.__mwLibs.katex=true"
             onerror="console.warn('KaTeX CDN unavailable')"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
             onerror="console.warn('KaTeX auto-render CDN unavailable')"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
-            onload="window.__mdfyLibs.mermaid=true"
+            onload="window.__mwLibs.mermaid=true"
             onerror="console.warn('Mermaid CDN unavailable')"></script>
 
     <script>
@@ -799,14 +799,14 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       // Wait for DOM + scripts to be ready, then render
       // ================================================================
       function render() {
-        if (window.__mdfyLibs.marked && typeof marked !== 'undefined') {
+        if (window.__mwLibs.marked && typeof marked !== 'undefined') {
           renderWithMarked();
         } else {
           // Fallback: basic rendering
           try {
             previewEl.innerHTML = basicMarkdownToHTML(markdownContent);
           } catch (e) {
-            previewEl.innerHTML = '<pre class="mdfy-raw-fallback">'
+            previewEl.innerHTML = '<pre class="mw-raw-fallback">'
               + markdownContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
               + '</pre>';
           }
@@ -856,20 +856,20 @@ class PreviewViewController: NSViewController, QLPreviewingController {
           previewEl.innerHTML = marked.parse(markdownContent);
         } catch (err) {
           previewEl.innerHTML = '<p style="color: var(--text-muted);">Render error: '
-            + err.message + '</p><pre class="mdfy-raw-fallback">'
+            + err.message + '</p><pre class="mw-raw-fallback">'
             + markdownContent.substring(0, 5000) + '</pre>';
           return;
         }
 
         // Syntax highlighting
-        if (window.__mdfyLibs.hljs && typeof hljs !== 'undefined') {
+        if (window.__mwLibs.hljs && typeof hljs !== 'undefined') {
           document.querySelectorAll('pre code').forEach(function(block) {
             try { hljs.highlightElement(block); } catch (e) {}
           });
         }
 
         // KaTeX math
-        if (window.__mdfyLibs.katex && typeof renderMathInElement === 'function') {
+        if (window.__mwLibs.katex && typeof renderMathInElement === 'function') {
           try {
             renderMathInElement(previewEl, {
               delimiters: [
@@ -885,7 +885,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
         }
 
         // Mermaid diagrams
-        if (window.__mdfyLibs.mermaid && typeof mermaid !== 'undefined') {
+        if (window.__mwLibs.mermaid && typeof mermaid !== 'undefined') {
           const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           mermaid.initialize({
             startOnLoad: false,
@@ -954,7 +954,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
 
     // Try opening in the Memory.Wiki desktop app via custom URL scheme.
     // Falls back to https://memory.wiki if the desktop app is not installed.
-    function openInMdfy(event) {
+    function openInMemoryWiki(event) {
       event.preventDefault();
       var fileName = encodeURIComponent('{{FILE_NAME}}');
       var desktopUrl = 'memory.wiki://open?file=' + fileName;

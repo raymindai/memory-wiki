@@ -49,12 +49,12 @@ async function sendToMdfy(text) {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
-      id: "mdfy-send-selection",
+      id: "mw-send-selection",
       title: "Send selection to Memory.Wiki",
       contexts: ["selection"],
     });
     chrome.contextMenus.create({
-      id: "mdfy-capture-page",
+      id: "mw-capture-page",
       title: "Send this page to Memory.Wiki",
       contexts: ["page"],
     });
@@ -62,7 +62,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId === "mdfy-send-selection") {
+  if (info.menuItemId === "mw-send-selection") {
     // Try rich extraction from content script first
     try {
       const response = await chrome.tabs.sendMessage(tab.id, {
@@ -82,7 +82,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
   }
 
-  if (info.menuItemId === "mdfy-capture-page") {
+  if (info.menuItemId === "mw-capture-page") {
     try {
       // Try content script first (for AI pages, gets conversation)
       const response = await chrome.tabs.sendMessage(tab.id, {
@@ -272,7 +272,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  if (request.action === "open-mdfy") {
+  if (request.action === "open-memorywiki") {
     const url = request.url || MDFY_URL;
     chrome.tabs.create({ url });
     sendResponse({ ok: true });

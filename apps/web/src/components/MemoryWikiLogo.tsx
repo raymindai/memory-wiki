@@ -13,7 +13,7 @@
  *   "M"    accent
  *   ".W"   text-primary
  */
-export default function MdfyLogo({
+export default function MemoryWikiLogo({
   size = 22,
   variant = "Memory.Wiki",
   compact = false,

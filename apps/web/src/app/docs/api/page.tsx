@@ -856,7 +856,7 @@ url = res.json()["url"]`}</CodeBlock>
             Response shape
           </h3>
           <CodeBlock lang="markdown">{`---
-mdfy_bundle: 1
+mw_bundle: 1
 id: <bundleId>
 title: "..."
 url: https://memory.wiki/b/<id>
@@ -1041,7 +1041,7 @@ source: "Memory.Wiki"
               },
               {
                 title: "MCP / CLI auth",
-                desc: "Both MCP server and CLI use JWT from Memory.Wiki login. Run: npm install -g mdfy-cli && Memory.Wiki login",
+                desc: "Both MCP server and CLI use JWT from Memory.Wiki login. Run: npm install -g memory-wiki-cli && Memory.Wiki login",
               },
             ].map((item) => (
               <div

@@ -179,7 +179,7 @@ const server = new McpServer({
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_create",
+  "mw_create",
   "Create a new Markdown document on Memory.Wiki and get a shareable URL",
   {
     markdown: z.string().describe("Markdown content for the document"),
@@ -203,7 +203,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_read",
+  "mw_read",
   "Fetch a document's markdown content from Memory.Wiki",
   { id: z.string().describe("Document ID (the short code from the URL)") },
   async ({ id }) => {
@@ -215,7 +215,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_update",
+  "mw_update",
   "Update an existing document's content on Memory.Wiki",
   {
     id: z.string().describe("Document ID"),
@@ -235,7 +235,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_list",
+  "mw_list",
   "List all documents owned by the current user on Memory.Wiki",
   {},
   async () => {
@@ -255,7 +255,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_delete",
+  "mw_delete",
   "Delete a document from Memory.Wiki (moves to trash, can be restored)",
   {
     id: z.string().describe("Document ID to delete"),
@@ -281,7 +281,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_search",
+  "mw_search",
   "Search your documents on Memory.Wiki by keyword (full-text search)",
   { query: z.string().describe("Search query (keywords to find in your documents)") },
   async ({ query }) => {
@@ -301,7 +301,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_hub_constellation",
+  "mw_hub_constellation",
   "Get the user's hub as a structured graph (concept nodes + typed edges + doc clusters). " +
     "Use this when an answer needs to navigate the user's knowledge by relationship — e.g. " +
     "'what depends on X', 'which docs cover X and Y together', 'what's at the center of this hub'. " +
@@ -395,10 +395,10 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_bundle_constellation",
+  "mw_bundle_constellation",
   "Get a single bundle as a structured concept graph (nodes + edges) scoped to " +
     "the concepts whose docs are bundle members. Returns the same shape as " +
-    "mdfy_hub_constellation but bounded to one bundle — use this when an answer " +
+    "mw_hub_constellation but bounded to one bundle — use this when an answer " +
     "needs to reason within a curated set, e.g. 'how do the ideas in this bundle " +
     "connect', 'which concept is central to this bundle'. URL-fetch " +
     "(memory.wiki/b/<id>) gives you the LLM-extracted graph_data narrative; this " +
@@ -444,7 +444,7 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_append",
+  "mw_append",
   "Append content to the end of an existing document",
   {
     id: z.string().describe("Document ID"),
@@ -467,7 +467,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_prepend",
+  "mw_prepend",
   "Prepend content to the beginning of a document",
   {
     id: z.string().describe("Document ID"),
@@ -492,7 +492,7 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_outline",
+  "mw_outline",
   "Get the heading-based outline (table of contents) of a document",
   { id: z.string().describe("Document ID") },
   async ({ id }) => {
@@ -509,7 +509,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_extract_section",
+  "mw_extract_section",
   "Extract a specific section by heading text",
   {
     id: z.string().describe("Document ID"),
@@ -527,7 +527,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_replace_section",
+  "mw_replace_section",
   "Replace the content of a section identified by heading",
   {
     id: z.string().describe("Document ID"),
@@ -557,7 +557,7 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_duplicate",
+  "mw_duplicate",
   "Duplicate an existing document under a new ID",
   {
     id: z.string().describe("Source document ID"),
@@ -578,7 +578,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_import_url",
+  "mw_import_url",
   "Fetch a webpage and import it as a new Memory.Wiki document",
   {
     url: z.string().describe("URL to fetch"),
@@ -586,7 +586,7 @@ server.tool(
   },
   async ({ url, title }) => {
     try {
-      const res = await fetch(url, { headers: { "User-Agent": "mdfy-mcp/1.4.0" } });
+      const res = await fetch(url, { headers: { "User-Agent": "memory-wiki-mcp/1.4.0" } });
       if (!res.ok) return errorResult(`HTTP ${res.status} fetching ${url}`);
       const html = await res.text();
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
@@ -619,7 +619,7 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_publish",
+  "mw_publish",
   "Toggle a document between public (shared) and private (draft) on Memory.Wiki",
   {
     id: z.string().describe("Document ID"),
@@ -642,7 +642,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_set_allowed_emails",
+  "mw_set_allowed_emails",
   "Restrict access to specific emails (allowlist)",
   {
     id: z.string().describe("Document ID"),
@@ -666,7 +666,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_set_expiry",
+  "mw_set_expiry",
   "Set or clear expiration time on a document",
   {
     id: z.string().describe("Document ID"),
@@ -688,7 +688,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_get_share_url",
+  "mw_get_share_url",
   "Get the share URL and access metadata for a document",
   { id: z.string().describe("Document ID") },
   async ({ id }) => {
@@ -721,7 +721,7 @@ interface VersionRow {
 }
 
 server.tool(
-  "mdfy_versions",
+  "mw_versions",
   "List version history of a document",
   { id: z.string().describe("Document ID") },
   async ({ id }) => {
@@ -738,11 +738,11 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_restore_version",
+  "mw_restore_version",
   "Restore a document to a previous version",
   {
     id: z.string().describe("Document ID"),
-    versionId: z.string().describe("Version ID to restore (from mdfy_versions output)"),
+    versionId: z.string().describe("Version ID to restore (from mw_versions output)"),
   },
   async ({ id, versionId }) => {
     try {
@@ -761,7 +761,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_diff",
+  "mw_diff",
   "Show diff between two versions of a document (line-level)",
   {
     id: z.string().describe("Document ID"),
@@ -793,7 +793,7 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_stats",
+  "mw_stats",
   "Get view stats and metadata for a document",
   { id: z.string().describe("Document ID") },
   async ({ id }) => {
@@ -813,7 +813,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_recent",
+  "mw_recent",
   "List recently visited documents (requires login)",
   {},
   async () => {
@@ -838,7 +838,7 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_folder_list",
+  "mw_folder_list",
   "List your folders (requires login)",
   {},
   async () => {
@@ -858,7 +858,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_folder_create",
+  "mw_folder_create",
   "Create a new folder (requires login)",
   {
     name: z.string().describe("Folder name"),
@@ -877,7 +877,7 @@ server.tool(
 );
 
 server.tool(
-  "mdfy_move_to_folder",
+  "mw_move_to_folder",
   "Move a document into a folder (or remove from folder by passing null)",
   {
     documentId: z.string().describe("Document ID to move"),
@@ -903,8 +903,8 @@ server.tool(
 // ──────────────────────────────────────────────────────────────────
 
 server.tool(
-  "mdfy_render_preview",
-  "Get a preview-friendly hint for unsaved markdown. For a permanent rendered URL, use mdfy_create with draft=true instead.",
+  "mw_render_preview",
+  "Get a preview-friendly hint for unsaved markdown. For a permanent rendered URL, use mw_create with draft=true instead.",
   { markdown: z.string().describe("Markdown content (passed for client-side analysis, not sent to Memory.Wiki)") },
   async ({ markdown }) => {
     const wordCount = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
@@ -919,7 +919,7 @@ server.tool(
       `- Math: ${hasMath ? "yes" : "no"}`,
       `- Mermaid diagrams: ${hasMermaid ? "yes" : "no"}`,
       ``,
-      `For a permanent rendered URL, call mdfy_create with draft=true. Paste the URL in any browser or AI tool to view.`,
+      `For a permanent rendered URL, call mw_create with draft=true. Paste the URL in any browser or AI tool to view.`,
     ];
     return textResult(lines.join("\n"));
   }

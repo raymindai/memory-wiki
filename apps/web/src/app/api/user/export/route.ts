@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Content-Disposition": `attachment; filename="mdfy-export-${date}.json"`,
+        "Content-Disposition": `attachment; filename="mw-export-${date}.json"`,
         "Cache-Control": "private, no-store",
       },
     });

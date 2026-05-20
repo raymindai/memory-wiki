@@ -176,7 +176,7 @@ memory.wiki/b/<id>?full=1
 | 도구 | 어디에 |
 |---|---|
 | Claude Code | `CLAUDE.md` (프로젝트 루트) |
-| Cursor | `.cursor/rules/mdfy.mdc` |
+| Cursor | `.cursor/rules/memorywiki.mdc` |
 | Codex CLI | `AGENTS.md` |
 | Aider | `CONVENTIONS.md` |
 | ChatGPT / 웹 AI | URL 직접 붙여넣기 |

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSupabaseClient } from "@/lib/supabase";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 export const metadata: Metadata = {
   title: "Shared bundles — Memory.Wiki",
@@ -95,7 +95,7 @@ export default async function SharedBundlesPage() {
         }}
       >
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <MdfyLogo size={18} />
+          <MemoryWikiLogo size={18} />
         </Link>
         <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
           memory.wiki/<span style={{ color: "var(--accent)" }}>shared</span>

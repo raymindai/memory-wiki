@@ -30,7 +30,7 @@ markdown those URLs return more useful.
 | **The embeddings**   | Vectors. Power semantic recall ("which docs cover X?").             | `documents.embedding`, `bundles.embedding`, `document_chunks.embedding` |
 
 First three end up in the markdown an LLM fetches. Embeddings never
-go to the LLM directly — they back `mdfy_search` via MCP.
+go to the LLM directly — they back `mw_search` via MCP.
 
 ---
 
@@ -125,12 +125,12 @@ Useful extras: `?full=1` for a flat per-doc / per-bundle listing;
 in every AI tool that can hit a webpage — ChatGPT, Claude.ai web,
 Gemini, Perplexity, Cursor, your terminal.
 
-**Push + pull (MCP).** `mdfy-mcp` is a published npm package. Hosts
+**Push + pull (MCP).** `memory-wiki-mcp` is a published npm package. Hosts
 that speak MCP — Claude Desktop, Cursor, Cline, Windsurf — load it
-once and get **26 tools** the LLM can call by itself: `mdfy_create`,
-`mdfy_append`, `mdfy_search`, `mdfy_outline`, `mdfy_versions`,
-`mdfy_publish`, `mdfy_diff`, `mdfy_render_preview`, … This is where
-embeddings earn their keep — `mdfy_search` is vector similarity,
+once and get **26 tools** the LLM can call by itself: `mw_create`,
+`mw_append`, `mw_search`, `mw_outline`, `mw_versions`,
+`mw_publish`, `mw_diff`, `mw_render_preview`, … This is where
+embeddings earn their keep — `mw_search` is vector similarity,
 not keyword match.
 
 So: URL payload is for pasting; MCP is for living inside.
@@ -270,7 +270,7 @@ a script, or an LLM following an inline link.
   I made this") or to a doc-in-bundle ("why this belongs"). Both
   feed the LLM analysis prompt and the rendered digest.
 - **MCP** — Model Context Protocol. The standard hosts use to give
-  LLMs structured tool access. mdfy-mcp ships 26 tools.
+  LLMs structured tool access. memory-wiki-mcp ships 26 tools.
 
 ---
 

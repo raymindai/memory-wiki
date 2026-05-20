@@ -1,11 +1,11 @@
 import Link from "next/link";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 export default function DocNotFound() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
       <header className="px-6 py-3 flex items-center" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-        <Link href="/" className="shrink-0"><MdfyLogo size={18} /></Link>
+        <Link href="/" className="shrink-0"><MemoryWikiLogo size={18} /></Link>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-6">

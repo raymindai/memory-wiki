@@ -18,7 +18,7 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
  * Output (Bundle Spec v1.0 draft):
  *
  *   ---
- *   mdfy_bundle: 1
+ *   mw_bundle: 1
  *   id: <bundleId>
  *   title: "..."
  *   url: https://memory.wiki/b/<id>
@@ -159,7 +159,7 @@ export async function GET(
 
   const frontmatter = [
     "---",
-    "mdfy_bundle: 1",
+    "mw_bundle: 1",
     `id: ${bundle.id}`,
     `title: "${title}"`,
     `url: https://memory.wiki/b/${bundle.id}`,

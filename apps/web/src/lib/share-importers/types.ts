@@ -13,7 +13,7 @@ export interface ShareImportResult {
   provider: ShareProvider;
   /** Original share URL (canonicalized). */
   sourceUrl: string;
-  /** Conversation rendered as mdfy-friendly markdown. */
+  /** Conversation rendered as mw-friendly markdown. */
   markdown: string;
   /** Best-effort title — page title, conversation title, or first message snippet. */
   title: string;

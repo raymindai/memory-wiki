@@ -7,13 +7,13 @@ import { type Page } from "@playwright/test";
  */
 export async function setupEditableTab(page: Page) {
   await page.addInitScript(() => {
-    localStorage.setItem("mdfy-onboarded", "1");
-    localStorage.setItem("mdfy-welcome-seen", "1");
+    localStorage.setItem("mw-onboarded", "1");
+    localStorage.setItem("mw-welcome-seen", "1");
     // Match the live TABS_VERSION constant in MdEditor.tsx so the
     // editor doesn't run the version-mismatch path on every test
-    // boot (which merges every EXAMPLE_TABS row into mdfy-tabs and
+    // boot (which merges every EXAMPLE_TABS row into mw-tabs and
     // wastes setup time / state churn).
-    localStorage.setItem("mdfy-tabs-version", "10");
+    localStorage.setItem("mw-tabs-version", "10");
     // Inject a single editable scratch tab
     const tab = {
       id: "tab-e2e-scratch",
@@ -23,8 +23,8 @@ export async function setupEditableTab(page: Page) {
       permission: "mine",
       isDraft: true,
     };
-    localStorage.setItem("mdfy-tabs", JSON.stringify([tab]));
-    localStorage.setItem("mdfy-active-tab", "tab-e2e-scratch");
+    localStorage.setItem("mw-tabs", JSON.stringify([tab]));
+    localStorage.setItem("mw-active-tab", "tab-e2e-scratch");
   });
   // Append a harmless query so the bare-root → Home logic (added
   // 2026-05-15: path === "/" && !search && !hash forces showOnboarding)

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 export const metadata: Metadata = {
   title: "Memory.Wiki — Your AI memory, owned by you",
@@ -38,7 +38,7 @@ export default function V6LandingDraft() {
         style={{ borderBottom: "1px solid var(--border-dim)" }}
       >
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <MdfyLogo size={20} />
+          <MemoryWikiLogo size={20} />
         </Link>
         <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
           v6-landing draft — noindex

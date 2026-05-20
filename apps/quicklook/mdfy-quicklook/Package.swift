@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "mdfy-quicklook",
+    name: "memory-wiki-quicklook",
     platforms: [
         .macOS(.v13)
     ],
     targets: [
         .executableTarget(
-            name: "mdfy-quicklook",
+            name: "memory-wiki-quicklook",
             dependencies: [],
             path: "Sources/PreviewExtension",
             resources: [

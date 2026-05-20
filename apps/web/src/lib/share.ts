@@ -278,7 +278,7 @@ export async function setAllowedEmails(
 
 // ─── Edit token management (localStorage) ───
 
-const TOKEN_STORAGE_KEY = "mdfy-edit-tokens";
+const TOKEN_STORAGE_KEY = "mw-edit-tokens";
 
 export function saveEditToken(id: string, token: string): void {
   const tokens = getEditTokens();

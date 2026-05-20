@@ -590,7 +590,7 @@ memory.wiki/hub/{slug}      → memory.wiki/{slug}      (hub home as primary pat
 
 ### Memory files (founder context)
 - `direction_v6_2026_05.md` — v6 final positioning
-- `mdfy_wiki_layer_2026_05.md` — two-door product spec
+- `mw_wiki_layer_2026_05.md` — two-door product spec
 - `v6_12week_plan_state.md` — current sprint status
 - `url_deployability_2026_05.md` — invariant (every URL deployable as markdown to any AI)
 

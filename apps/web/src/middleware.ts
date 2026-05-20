@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
     // /{id} is a route handler that serves content + redirects browsers to /d/{id}
 
     // i18n redirects
-    const langCookie = request.cookies.get("mdfy-lang")?.value;
+    const langCookie = request.cookies.get("mw-lang")?.value;
 
     // If user explicitly chose English and is on /ko/ path, redirect to English
     if (pathname.startsWith("/ko/") && langCookie === "en") {

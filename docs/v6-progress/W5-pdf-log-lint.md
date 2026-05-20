@@ -27,7 +27,7 @@ the existing raw mode. The flow:
 3. Persist as a normal `documents` row with `source = "pdf:<filename>"`.
 4. Honor the same auth ladder as `/api/docs` (JWT, x-user-id,
    x-user-email, body anonymousId, x-anonymous-id header,
-   `mdfy_anon` cookie). Issue / refresh the cookie for anonymous
+   `mw_anon` cookie). Issue / refresh the cookie for anonymous
    captures so they can be claimed at sign-in.
 5. Return `{id, editToken, title, pages, cleanedByAi, source}`.
 

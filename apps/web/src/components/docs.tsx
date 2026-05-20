@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import MdfyLogo from "@/components/MdfyLogo";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 const mono =
   "var(--font-geist-mono), 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace";
@@ -222,7 +222,7 @@ export function DocsNav({ active = "docs", lang = "en" }: { active?: "about" | "
         }}
       >
         <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
-          <MdfyLogo size={22} />
+          <MemoryWikiLogo size={22} />
         </Link>
         <div className="site-nav-links" style={{ flex: 1, justifyContent: "center" }}>
           {navItems.map((item) => (
@@ -251,8 +251,8 @@ export function DocsNav({ active = "docs", lang = "en" }: { active?: "about" | "
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 4 5 7 8 4" /></svg>
             </summary>
             <div className="lang-dropdown-menu">
-              <a href={currentPaths.en} className={lang === "en" ? "active" : ""} onClick={() => { document.cookie = "mdfy-lang=en;path=/;max-age=31536000"; }}>English</a>
-              <a href={currentPaths.ko} className={lang === "ko" ? "active" : ""} onClick={() => { document.cookie = "mdfy-lang=;path=/;max-age=0"; }}>한국어</a>
+              <a href={currentPaths.en} className={lang === "en" ? "active" : ""} onClick={() => { document.cookie = "mw-lang=en;path=/;max-age=31536000"; }}>English</a>
+              <a href={currentPaths.ko} className={lang === "ko" ? "active" : ""} onClick={() => { document.cookie = "mw-lang=;path=/;max-age=0"; }}>한국어</a>
             </div>
           </details>
           <Link href="/" className="site-nav-cta">
@@ -279,8 +279,8 @@ export function DocsNav({ active = "docs", lang = "en" }: { active?: "about" | "
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 4 5 7 8 4" /></svg>
               </summary>
               <div className="lang-dropdown-menu">
-                <a href={currentPaths.en} className={lang === "en" ? "active" : ""} onClick={() => { document.cookie = "mdfy-lang=en;path=/;max-age=31536000"; }}>English</a>
-                <a href={currentPaths.ko} className={lang === "ko" ? "active" : ""} onClick={() => { document.cookie = "mdfy-lang=;path=/;max-age=0"; }}>한국어</a>
+                <a href={currentPaths.en} className={lang === "en" ? "active" : ""} onClick={() => { document.cookie = "mw-lang=en;path=/;max-age=31536000"; }}>English</a>
+                <a href={currentPaths.ko} className={lang === "ko" ? "active" : ""} onClick={() => { document.cookie = "mw-lang=;path=/;max-age=0"; }}>한국어</a>
               </div>
             </details>
             <a href="https://github.com/raymindai/mdcore" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -416,7 +416,7 @@ export function SiteFooter({ lang = "en" }: { lang?: "en" | "ko" } = {}) {
         >
           <div>
             <div style={{ marginBottom: 12 }}>
-              <MdfyLogo size={18} />
+              <MemoryWikiLogo size={18} />
             </div>
             <p
               style={{

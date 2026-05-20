@@ -144,7 +144,7 @@ GET /raw/hub/{slug}/c/{concept}`}</Block>
         <Section id="bundle-digest" eyebrow="05" title="Bundle digest 형태">
           <p>Bundle 응답은 캔버스 분석을 인라인으로 ship — 받는 AI 가 이전 AI 의 작업을 무료로 이어받음:</p>
           <Block lang="markdown">{`---
-mdfy_bundle: 1
+mw_bundle: 1
 id: <bundleId>
 title: "..."
 url: https://memory.wiki/b/<id>

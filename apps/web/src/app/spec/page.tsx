@@ -177,7 +177,7 @@ GET /raw/hub/{slug}/c/{concept}`}</Block>
             for free:
           </p>
           <Block lang="markdown">{`---
-mdfy_bundle: 1
+mw_bundle: 1
 id: <bundleId>
 title: "..."
 url: https://memory.wiki/b/<id>

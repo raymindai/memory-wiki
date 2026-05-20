@@ -11,7 +11,7 @@ import type { NextRequest, NextResponse } from "next/server";
  * the lot when they sign in.
  *
  * Cookie shape:
- *   mdfy_anon=<uuid>; Max-Age=31536000; Path=/; SameSite=None; Secure
+ *   mw_anon=<uuid>; Max-Age=31536000; Path=/; SameSite=None; Secure
  *
  * SameSite=None+Secure is required for the bookmarklet's cross-origin
  * fetch (with credentials: "include") to send and receive the cookie.
@@ -19,7 +19,7 @@ import type { NextRequest, NextResponse } from "next/server";
  * can also read it during the in-app capture flow.
  */
 
-const COOKIE_NAME = "mdfy_anon";
+const COOKIE_NAME = "mw_anon";
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
 /** Returns the anonymous id from the request cookie, or null. */

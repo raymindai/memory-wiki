@@ -184,7 +184,7 @@ Per-project context (bundles) maps cleanly onto AGENTS.md / .cursor/rules. The O
 
 - Vercel (web + API)
 - Supabase Storage (assets)
-- npm: `mdfy-mcp`, `mdfy-cli`
+- npm: `memory-wiki-mcp`, `memory-wiki-cli`
 
 </div>
 
@@ -203,8 +203,8 @@ Everything that matters is documented or open source.
 | `/spec` — URL contract, bundle digest, recall API | public spec |
 | `/llms.txt` per hub | shipped, follows the standard |
 | Render pipeline (`apps/web/src/lib/render.ts`) | source on GitHub |
-| `mdfy-mcp` | npm, source on GitHub |
-| `mdfy-cli` | npm, source on GitHub |
+| `memory-wiki-mcp` | npm, source on GitHub |
+| `memory-wiki-cli` | npm, source on GitHub |
 | Chrome extension | source on GitHub |
 | `/docs/integrate` worked examples (incl. GitHub Action) | public |
 

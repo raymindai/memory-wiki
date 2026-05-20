@@ -19,7 +19,7 @@ npm run build
 npm run build:dmg
 ```
 
-Output: `dist/mdfy-{version}-universal.dmg`
+Output: `dist/memory-wiki-{version}-universal.dmg`
 
 ## What It Does
 
@@ -38,7 +38,7 @@ Memory.Wiki for Mac loads the Memory.Wiki web app inside a native Electron shell
 
 ```
 main.js           Electron main process (window, menu, IPC, file I/O)
-preload.js        Context bridge (mdfyDesktop API)
+preload.js        Context bridge (mwDesktop API)
 mime-types.js     MIME type detection for file imports
 renderer/
   dashboard.html  Landing screen (New/Open/Recent/Drop)
