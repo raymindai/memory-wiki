@@ -2,7 +2,7 @@
   "name": "memory-wiki-vscode",
   "displayName": "Memory.Wiki — Markdown Publisher",
   "description": "WYSIWYG preview and publish Markdown documents to Memory.Wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "publisher": "raymindai",
   "license": "MIT",
   "repository": {
@@ -42,14 +42,14 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "Memory.Wiki",
+          "id": "memorywiki",
           "title": "Memory.Wiki",
           "icon": "media/sidebar-icon.svg"
         }
       ]
     },
     "views": {
-      "Memory.Wiki": [
+      "memorywiki": [
         {
           "id": "mwDocuments",
           "name": "Documents",
@@ -139,47 +139,47 @@
         {
           "command": "memorywiki.publish",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@1"
+          "group": "memorywiki@1"
         },
         {
           "command": "memorywiki.update",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@2"
+          "group": "memorywiki@2"
         },
         {
           "command": "memorywiki.pull",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@3"
+          "group": "memorywiki@3"
         },
         {
           "command": "memorywiki.export",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@4"
+          "group": "memorywiki@4"
         },
         {
           "command": "memorywiki.aiPolish",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@5"
+          "group": "memorywiki@5"
         },
         {
           "command": "memorywiki.aiSummary",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@6"
+          "group": "memorywiki@6"
         },
         {
           "command": "memorywiki.aiTldr",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@7"
+          "group": "memorywiki@7"
         },
         {
           "command": "memorywiki.aiTranslate",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@8"
+          "group": "memorywiki@8"
         },
         {
           "command": "memorywiki.aiChat",
           "when": "editorLangId == markdown",
-          "group": "Memory.Wiki@9"
+          "group": "memorywiki@9"
         }
       ]
     },
