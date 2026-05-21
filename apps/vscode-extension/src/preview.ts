@@ -1060,14 +1060,14 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   <!-- Loading state -->
   <div id="loading-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000;transition:opacity 0.3s">
     <div style="text-align:center">
-      <div style="font-size:16px;font-weight:700;margin-bottom:8px"><span style="color:var(--accent)">md</span><span style="color:var(--fg)">fy</span></div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px"><span style="color:var(--accent)">Memory</span><span style="color:var(--fg)">.Wiki</span></div>
       <div style="width:40px;height:2px;background:var(--border);border-radius:1px;margin:0 auto;overflow:hidden"><div style="width:50%;height:100%;background:var(--accent);border-radius:1px;animation:loadbar 1s ease-in-out infinite"></div></div>
     </div>
   </div>
   <style>@keyframes loadbar{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(-100%)}}</style>
   <!-- Global toolbar: logo + view mode only -->
   <div id="toolbar">
-    <a class="toolbar-logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><span style="color:var(--accent)">md</span><span style="color:var(--fg)">fy</span><span style="color:#737373">.app</span></a>
+    <a class="toolbar-logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><span style="color:var(--accent)">Memory</span><span style="color:var(--fg)">.Wiki</span></a>
     <div class="view-switcher" style="margin-left:6px">
       <button class="view-btn active" data-view="live" title="Live preview"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5.5 6l2.5 2-2.5 2"/><line x1="9" y1="10" x2="11.5" y2="10"/></svg> Live</button>
       <button class="view-btn" data-view="split" title="Split view"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="8" y1="2" x2="8" y2="14"/></svg> Split</button>
