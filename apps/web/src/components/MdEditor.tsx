@@ -10638,23 +10638,45 @@ ${clone.innerHTML}
                     // background doesn't rotate along with it.
                     setRefreshSpinning(true);
                     setTimeout(() => setRefreshSpinning(false), 600);
-                    if (user?.id) {
-                      fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
-                        .then(res => res.ok ? res.json() : null)
-                        .then(data => {
-                          if (data?.documents) {
-                            setServerDocs(data.documents);
-                            const sm = new Map(data.documents.map((d: { id: string; source?: string }) => [d.id, d.source]));
-                            setTabs(prev => {
-                              const ids = new Set(prev.filter(t => t.cloudId).map(t => t.cloudId!));
-                              const nw = data.documents.filter((d: { id: string }) => !ids.has(d.id)).map((d: { id: string; title?: string; source?: string; is_draft?: boolean }) => ({
-                                id: `cloud-${d.id}`, title: d.title || "Untitled", markdown: "", cloudId: d.id, isDraft: d.is_draft !== false, source: d.source || undefined, permission: "mine" as const,
-                              }));
-                              return [...prev.map(t => t.cloudId ? { ...t, source: (sm.get(t.cloudId) as string) || undefined } : t), ...nw];
-                            });
-                          }
-                        }).catch(() => {});
-                    }
+                    if (!user?.id) return;
+                    // Refresh everything the sidebar surfaces — docs,
+                    // bundles, folders — in parallel. Previously only
+                    // docs were refetched, so a bundle/folder created
+                    // in another tab needed a full browser reload.
+                    fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
+                      .then(res => res.ok ? res.json() : null)
+                      .then(data => {
+                        if (data?.documents) {
+                          setServerDocs(data.documents);
+                          const sm = new Map(data.documents.map((d: { id: string; source?: string }) => [d.id, d.source]));
+                          setTabs(prev => {
+                            const ids = new Set(prev.filter(t => t.cloudId).map(t => t.cloudId!));
+                            const nw = data.documents.filter((d: { id: string }) => !ids.has(d.id)).map((d: { id: string; title?: string; source?: string; is_draft?: boolean }) => ({
+                              id: `cloud-${d.id}`, title: d.title || "Untitled", markdown: "", cloudId: d.id, isDraft: d.is_draft !== false, source: d.source || undefined, permission: "mine" as const,
+                            }));
+                            return [...prev.map(t => t.cloudId ? { ...t, source: (sm.get(t.cloudId) as string) || undefined } : t), ...nw];
+                          });
+                        }
+                      }).catch(() => {});
+                    fetch("/api/bundles", { headers: authHeaders })
+                      .then(res => res.ok ? res.json() : null)
+                      .then(data => { if (data?.bundles) setBundles(data.bundles); })
+                      .catch(() => {});
+                    fetch("/api/user/folders", { headers: authHeaders })
+                      .then(res => res.ok ? res.json() : null)
+                      .then(data => {
+                        if (!data?.folders) return;
+                        setFolders(data.folders.map((f: { id: string; name: string; collapsed?: boolean; section?: string; parent_id?: string | null; emoji?: string; sort_order?: number }) => ({
+                          id: f.id,
+                          name: f.name,
+                          collapsed: f.collapsed || false,
+                          section: (f.section || "my") as "my" | "shared",
+                          parentId: f.parent_id || null,
+                          emoji: f.emoji || undefined,
+                          sortOrder: f.sort_order ?? 0,
+                        })));
+                      })
+                      .catch(() => {});
                   }}
                   className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
                   style={{ color: "var(--text-faint)" }}
@@ -13786,18 +13808,10 @@ ${clone.innerHTML}
                   )}
                 </div>
 
-                {/* Replay welcome — clear both the current versioned
-                    key AND the legacy unversioned key so users whose
-                    storage was sealed before the v7 bump can also
-                    replay. Keep this list in sync with WelcomeOverlay's
-                    STORAGE_KEY whenever it bumps. */}
+                {/* Replay welcome */}
                 <div className="text-center mt-2 mb-4">
                   <button
-                    onClick={() => {
-                      localStorage.removeItem("mw-welcome-seen-v7");
-                      localStorage.removeItem("mw-welcome-seen");
-                      window.location.reload();
-                    }}
+                    onClick={() => { localStorage.removeItem("mw-welcome-seen"); window.location.reload(); }}
                     className="text-caption cursor-pointer"
                     style={{ color: "var(--text-faint)", background: "none", border: "none", padding: "4px 8px", opacity: 0.6 }}
                   >
