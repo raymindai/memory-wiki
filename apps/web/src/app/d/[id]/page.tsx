@@ -1,8 +1,15 @@
 import { Metadata } from "next";
 import { getSupabaseClient } from "@/lib/supabase";
-import { getServerUserId } from "@/lib/supabase-server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import ClientViewer from "./ClientViewer";
+
+// Force this page to be cached at the edge. Without this, the previous
+// SSR owner-redirect read cookies, which made Next.js auto-emit
+// `cache-control: private, no-store` — and ChatGPT's browse tool
+// treats `private` as "user-specific, refuse to fetch", so pasted
+// memory.wiki short URLs failed safe-URL validation. The owner
+// redirect now happens only client-side in ClientViewer.
+export const revalidate = 60;
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -108,19 +115,10 @@ export default async function DocPage({ params }: Props) {
   const doc = await getDocument(id);
   if (!doc) notFound();
 
-  // SSR-side owner redirect — if the caller is signed in and owns this
-  // doc, send them straight to the editor instead of rendering the
-  // public viewer first. The client-side check in DocumentViewer is
-  // kept as a fallback for browsers without a Supabase session cookie
-  // (e.g. just refreshed from a stale tab), but the server hop here
-  // means the common case (owner with a fresh cookie) never sees the
-  // viewer flash + window.location.replace round trip.
-  if (doc.user_id) {
-    const userId = await getServerUserId();
-    if (userId && userId === doc.user_id) {
-      redirect(`/?from=${id}`);
-    }
-  }
+  // Owner redirect happens client-side in ClientViewer (reads supabase
+  // session from localStorage). The previous SSR cookie check made
+  // this page dynamic, breaking edge caching and tripping ChatGPT's
+  // safe-URL filter.
 
   const isExpired = doc.expires_at && new Date(doc.expires_at) < new Date();
   const isRestricted = (doc.allowed_emails || []).length > 0;
