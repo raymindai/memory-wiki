@@ -1,8 +1,13 @@
 import { Metadata } from "next";
 import { getSupabaseClient } from "@/lib/supabase";
-import { getServerUserId } from "@/lib/supabase-server";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import ClientViewer from "./ClientViewer";
+
+// Cache /b/<id> at the edge — see /d/[id] for context. The SSR
+// cookie read forced `cache-control: private, no-store`, which
+// external fetchers (notably ChatGPT browse) treat as untrusted /
+// user-specific. Owner-redirect now happens client-side only.
+export const revalidate = 60;
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -95,15 +100,8 @@ export default async function BundlePage({ params }: Props) {
   const bundle = await getBundle(id);
   if (!bundle) notFound();
 
-  // SSR-side owner redirect — see /d/[id] for the rationale. Avoids the
-  // double-mount (viewer → window.location.replace → editor) for the
-  // common signed-in-owner case.
-  if (bundle.user_id) {
-    const userId = await getServerUserId();
-    if (userId && userId === bundle.user_id) {
-      redirect(`/?bundle=${id}`);
-    }
-  }
+  // Owner redirect is handled in ClientViewer (client-side). Reading
+  // cookies here would mark this page dynamic and break edge caching.
 
   const isProtected = !!bundle.password_hash;
   const isDraft = !!(bundle as { isDraft?: boolean }).isDraft;

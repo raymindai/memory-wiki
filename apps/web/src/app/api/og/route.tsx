@@ -151,9 +151,8 @@ export async function GET(req: NextRequest) {
           >
             {/* Logo */}
             <div style={{ display: "flex", alignItems: "baseline" }}>
-              <span style={{ color: "#fb923c", fontSize: hasTitle ? "44px" : "80px", fontWeight: 800, letterSpacing: "-1px" }}>md</span>
-              <span style={{ color: "#fafafa", fontSize: hasTitle ? "44px" : "80px", fontWeight: 800, letterSpacing: "-1px" }}>fy</span>
-              <span style={{ color: "#737373", fontSize: hasTitle ? "44px" : "80px", fontWeight: 800, letterSpacing: "-1px" }}>.app</span>
+              <span style={{ color: "#fb923c", fontSize: hasTitle ? "44px" : "80px", fontWeight: 800, letterSpacing: "-1px" }}>Memory</span>
+              <span style={{ color: "#fafafa", fontSize: hasTitle ? "44px" : "80px", fontWeight: 800, letterSpacing: "-1px" }}>.Wiki</span>
             </div>
 
             {hasTitle ? (
@@ -262,9 +261,8 @@ function renderHubCard({ slug, author, docCount, conceptCount, tokenCount }: Hub
 
         <div style={{ display: "flex", flexDirection: "column", width: "1040px", padding: "56px 64px", borderRadius: "28px", border: "1px solid rgba(255,255,255,0.08)", background: "linear-gradient(180deg, rgba(24,24,27,0.95) 0%, rgba(15,15,18,0.98) 100%)", boxShadow: "0 50px 100px rgba(0,0,0,0.6)" }}>
           <div style={{ display: "flex", alignItems: "baseline", marginBottom: "10px" }}>
-            <span style={{ color: "#fb923c", fontSize: "30px", fontWeight: 800, letterSpacing: "-0.5px" }}>md</span>
-            <span style={{ color: "#fafafa", fontSize: "30px", fontWeight: 800, letterSpacing: "-0.5px" }}>fy</span>
-            <span style={{ color: "#52525b", fontSize: "30px", fontWeight: 800, letterSpacing: "-0.5px" }}>.app</span>
+            <span style={{ color: "#fb923c", fontSize: "30px", fontWeight: 800, letterSpacing: "-0.5px" }}>Memory</span>
+            <span style={{ color: "#fafafa", fontSize: "30px", fontWeight: 800, letterSpacing: "-0.5px" }}>.Wiki</span>
             <span style={{ marginLeft: "16px", color: "#fb923c", fontSize: "14px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase" }}>Hub</span>
           </div>
 

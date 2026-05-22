@@ -48,43 +48,73 @@
           "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/b/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/hub/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300, must-revalidate"
+        }
+      ]
     }
   ],
   "redirects": [
     {
       "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.memory.wiki" }],
+      "destination": "https://memory.wiki/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "mdfy.app" }],
+      "destination": "https://memory.wiki/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "www.mdfy.app" }],
-      "destination": "https://mdfy.app/:path*",
+      "destination": "https://memory.wiki/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "mdfy.cc" }],
-      "destination": "https://mdfy.app/:path*",
+      "destination": "https://memory.wiki/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "www.mdfy.cc" }],
-      "destination": "https://mdfy.app/:path*",
+      "destination": "https://memory.wiki/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "mdcore.ai" }],
-      "destination": "https://mdfy.app/:path*",
+      "destination": "https://memory.wiki/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "mdcore.org" }],
-      "destination": "https://mdfy.app/:path*",
+      "destination": "https://memory.wiki/:path*",
       "permanent": true
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "mdcore.md" }],
-      "destination": "https://mdfy.app/:path*",
+      "destination": "https://memory.wiki/:path*",
       "permanent": true
     }
   ],
