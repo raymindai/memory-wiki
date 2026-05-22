@@ -161,12 +161,18 @@ export default async function BundlePage({ params }: Props) {
         />
       )}
       {visibleDocs.length > 0 && (
-        <article
+        <main
           id="memory-wiki-ssr-body"
-          className="mdcore-rendered max-w-3xl mx-auto px-4 sm:px-6 py-8"
+          role="main"
+          itemScope
+          itemType="https://schema.org/Collection"
         >
-          <h1>{bundle.title || "Untitled Bundle"}</h1>
-          {bundle.description && <p>{bundle.description}</p>}
+        <article
+          className="article-body post-content mdcore-rendered max-w-3xl mx-auto px-4 sm:px-6 py-8"
+          itemProp="articleBody"
+        >
+          <h1 itemProp="name">{bundle.title || "Untitled Bundle"}</h1>
+          {bundle.description && <p itemProp="description">{bundle.description}</p>}
           <p>{bundle.documentCount} document{bundle.documentCount === 1 ? "" : "s"} in this bundle.</p>
           <ul>
             {visibleDocs.map((d) => (
@@ -176,6 +182,7 @@ export default async function BundlePage({ params }: Props) {
             ))}
           </ul>
         </article>
+        </main>
       )}
       <ClientViewer
         id={bundle.id}

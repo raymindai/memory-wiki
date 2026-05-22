@@ -171,11 +171,21 @@ export default async function DocPage({ params }: Props) {
         />
       )}
       {ssrHtml && (
-        <article
+        <main
           id="memory-wiki-ssr-body"
-          className="mdcore-rendered max-w-3xl mx-auto px-4 sm:px-6 py-8"
-          dangerouslySetInnerHTML={{ __html: ssrHtml }}
-        />
+          role="main"
+          itemScope
+          itemType="https://schema.org/Article"
+        >
+          <article
+            className="article-body post-content mdcore-rendered max-w-3xl mx-auto px-4 sm:px-6 py-8"
+            itemProp="articleBody"
+            dangerouslySetInnerHTML={{ __html: ssrHtml }}
+          />
+          {doc.title && (
+            <meta itemProp="headline" content={doc.title} />
+          )}
+        </main>
       )}
       <ClientViewer
         id={doc.id}
