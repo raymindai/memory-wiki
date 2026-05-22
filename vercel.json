@@ -148,12 +148,7 @@
     },
     {
       "source": "/:id([A-Za-z0-9_-]{6,12})",
-      "has": [{ "type": "header", "key": "sec-fetch-dest", "value": "document" }],
       "destination": "/d/:id"
-    },
-    {
-      "source": "/:id([A-Za-z0-9_-]{6,12})",
-      "destination": "/raw/:id"
     }
   ]
 }
