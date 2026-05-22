@@ -50,19 +50,6 @@ export function middleware(request: NextRequest) {
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-
-    // Force public cache for public viewer surfaces. Next.js emits
-    // `cache-control: private, no-store` by default for any App Router
-    // page that touches a database (even via the service-role client
-    // here), but ChatGPT's safe-URL filter treats `private` as
-    // "user-specific, refuse to fetch." The viewer is fully public, so
-    // override here.
-    if (pathname.startsWith("/d/") || pathname.startsWith("/b/") || pathname.startsWith("/hub/")) {
-      response.headers.set(
-        "Cache-Control",
-        "public, max-age=0, s-maxage=60, stale-while-revalidate=300, must-revalidate",
-      );
-    }
     return response;
   } catch {
     // Never let middleware throw — pass through to Next.js
@@ -80,9 +67,11 @@ export const config = {
     "/docs",
     "/plugins",
     "/ko/:path*",
-    "/d/:path*",
-    "/b/:path*",
-    "/hub/:path*",
+    // /d/:path*, /b/:path*, /hub/:path* intentionally NOT in middleware:
+    // middleware match forces the page off the static prerender path,
+    // and Vercel then emits `cache-control: private, no-store` — which
+    // ChatGPT's safe-URL filter rejects. Security headers for those
+    // routes come from vercel.json instead.
     "/discover",
     "/settings",
     "/privacy",
