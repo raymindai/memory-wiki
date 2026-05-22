@@ -20,7 +20,7 @@ async function getDocument(id: string) {
 
   const { data } = await supabase
     .from("documents")
-    .select("id, markdown, title, created_at, password_hash, expires_at, user_id, is_draft, edit_mode, allowed_emails")
+    .select("id, markdown, title, created_at, updated_at, password_hash, expires_at, user_id, is_draft, edit_mode, allowed_emails")
     .eq("id", id)
     .single();
 
@@ -131,8 +131,38 @@ export default async function DocPage({ params }: Props) {
   // element once it mounts the interactive TipTap viewer.
   const ssrHtml = visibleMarkdown ? render(visibleMarkdown).html : "";
 
+  // JSON-LD Article markup helps LLM browsers and search engines
+  // understand the page as a discrete document with author, dates,
+  // and canonical URL — the exact signals safe-URL filters use to
+  // build trust for new domains.
+  const jsonLd = visibleMarkdown
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: doc.title || "Untitled",
+        url: `https://memory.wiki/${doc.id}`,
+        datePublished: doc.created_at,
+        dateModified: doc.updated_at || doc.created_at,
+        author: doc.ownerName
+          ? { "@type": "Person", name: doc.ownerName }
+          : { "@type": "Organization", name: "Memory.Wiki" },
+        publisher: {
+          "@type": "Organization",
+          name: "Memory.Wiki",
+          url: "https://memory.wiki",
+        },
+        mainEntityOfPage: `https://memory.wiki/${doc.id}`,
+      }
+    : null;
+
   return (
     <div>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       {ssrHtml && (
         <article
           id="memory-wiki-ssr-body"
