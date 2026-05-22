@@ -1,20 +1,21 @@
 import { Metadata } from "next";
 import { getSupabaseClient } from "@/lib/supabase";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import ClientViewer from "./ClientViewer";
 import { render } from "@/lib/render";
 
-// Force this page to be cached at the edge. Without this, the previous
-// SSR owner-redirect read cookies, which made Next.js auto-emit
-// `cache-control: private, no-store` — and ChatGPT's browse tool
-// treats `private` as "user-specific, refuse to fetch", so pasted
-// memory.wiki short URLs failed safe-URL validation. The owner
-// redirect now happens only client-side in ClientViewer.
+// Force this page to be ISR-cached at the edge. The supabase calls
+// below are wrapped in `unstable_cache` so Next.js can treat them as
+// cacheable data sources; combined with `revalidate = 60` this lets
+// Vercel emit `cache-control: public, s-maxage=60, ...` instead of
+// the dynamic default `private, no-store` that tripped ChatGPT's
+// safe-URL filter.
 export const revalidate = 60;
 
 type Props = { params: Promise<{ id: string }> };
 
-async function getDocument(id: string) {
+const _getDocument = async (id: string) => {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
 
@@ -45,7 +46,13 @@ async function getDocument(id: string) {
   }
 
   return { ...data, ownerPlan, ownerName };
-}
+};
+
+const getDocument = (id: string) =>
+  unstable_cache(_getDocument, ["doc"], {
+    revalidate: 60,
+    tags: [`doc:${id}`],
+  })(id);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;

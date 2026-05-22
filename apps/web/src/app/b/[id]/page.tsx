@@ -1,17 +1,18 @@
 import { Metadata } from "next";
 import { getSupabaseClient } from "@/lib/supabase";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import ClientViewer from "./ClientViewer";
 
-// Cache /b/<id> at the edge — see /d/[id] for context. The SSR
-// cookie read forced `cache-control: private, no-store`, which
-// external fetchers (notably ChatGPT browse) treat as untrusted /
-// user-specific. Owner-redirect now happens client-side only.
+// ISR-cached at the edge. The supabase calls are wrapped in
+// `unstable_cache` so Vercel can emit `cache-control: public,
+// s-maxage=60` instead of the dynamic default `private, no-store`
+// that ChatGPT's safe-URL filter treats as untrusted.
 export const revalidate = 60;
 
 type Props = { params: Promise<{ id: string }> };
 
-async function getBundle(id: string) {
+const _getBundle = async (id: string) => {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
 
@@ -60,7 +61,13 @@ async function getBundle(id: string) {
     .filter((d): d is { id: string; title: string | null } => !!d);
 
   return { ...bundle, documentCount: count || 0, ownerPlan, ownerName, documents };
-}
+};
+
+const getBundle = (id: string) =>
+  unstable_cache(_getBundle, ["bundle"], {
+    revalidate: 60,
+    tags: [`bundle:${id}`],
+  })(id);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
