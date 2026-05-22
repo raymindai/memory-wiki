@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect } from "react";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 function BundleLoading({ title }: { title: string | null }) {
@@ -60,5 +61,12 @@ const BundleViewer = dynamic<ClientViewerProps>(() => import("./BundleViewer"), 
 });
 
 export default function ClientViewer(props: ClientViewerProps) {
+  // Remove the SSR fallback article (rendered in page.tsx for crawlers)
+  // once we're on the client and BundleViewer is mounting.
+  useEffect(() => {
+    const ssr = document.getElementById("memory-wiki-ssr-body");
+    if (ssr) ssr.remove();
+  }, []);
+
   return <BundleViewer {...props} />;
 }

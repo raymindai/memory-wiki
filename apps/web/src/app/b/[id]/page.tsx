@@ -44,10 +44,22 @@ async function getBundle(id: string) {
 
   // Draft bundles: don't expose in SSR
   if (bundle.is_draft) {
-    return { ...bundle, documentCount: count || 0, ownerPlan, ownerName, isDraft: true };
+    return { ...bundle, documentCount: count || 0, ownerPlan, ownerName, isDraft: true, documents: [] as Array<{ id: string; title: string | null }> };
   }
 
-  return { ...bundle, documentCount: count || 0, ownerPlan, ownerName };
+  // Fetch the document list for SSR crawlers — title + id of every
+  // doc in the bundle, in display order. Public bundles are fully
+  // index-friendly, so we want LLM browsers to see what's inside.
+  const { data: docRows } = await supabase
+    .from("bundle_documents")
+    .select("position, documents(id, title)")
+    .eq("bundle_id", id)
+    .order("position", { ascending: true });
+  const documents = (docRows || [])
+    .map((row: { documents: unknown }) => row.documents as { id: string; title: string | null } | null)
+    .filter((d): d is { id: string; title: string | null } => !!d);
+
+  return { ...bundle, documentCount: count || 0, ownerPlan, ownerName, documents };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -105,9 +117,59 @@ export default async function BundlePage({ params }: Props) {
 
   const isProtected = !!bundle.password_hash;
   const isDraft = !!(bundle as { isDraft?: boolean }).isDraft;
+  const visibleDocs = !isProtected && !isDraft ? (bundle.documents || []) : [];
+
+  const jsonLd = !isProtected && !isDraft
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Collection",
+        name: bundle.title || "Untitled Bundle",
+        description: bundle.description || `${bundle.documentCount} documents`,
+        url: `https://memory.wiki/b/${bundle.id}`,
+        dateCreated: bundle.created_at,
+        dateModified: bundle.updated_at || bundle.created_at,
+        author: bundle.ownerName
+          ? { "@type": "Person", name: bundle.ownerName }
+          : { "@type": "Organization", name: "Memory.Wiki" },
+        publisher: {
+          "@type": "Organization",
+          name: "Memory.Wiki",
+          url: "https://memory.wiki",
+        },
+        numberOfItems: bundle.documentCount,
+        hasPart: visibleDocs.slice(0, 50).map((d) => ({
+          "@type": "Article",
+          name: d.title || "Untitled",
+          url: `https://memory.wiki/${d.id}`,
+        })),
+      }
+    : null;
 
   return (
     <div>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {visibleDocs.length > 0 && (
+        <article
+          id="memory-wiki-ssr-body"
+          className="mdcore-rendered max-w-3xl mx-auto px-4 sm:px-6 py-8"
+        >
+          <h1>{bundle.title || "Untitled Bundle"}</h1>
+          {bundle.description && <p>{bundle.description}</p>}
+          <p>{bundle.documentCount} document{bundle.documentCount === 1 ? "" : "s"} in this bundle.</p>
+          <ul>
+            {visibleDocs.map((d) => (
+              <li key={d.id}>
+                <a href={`https://memory.wiki/${d.id}`}>{d.title || "Untitled"}</a>
+              </li>
+            ))}
+          </ul>
+        </article>
+      )}
       <ClientViewer
         id={bundle.id}
         title={isProtected ? "Protected Bundle" : bundle.title}
