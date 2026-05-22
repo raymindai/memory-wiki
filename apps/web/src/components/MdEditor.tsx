@@ -11938,8 +11938,12 @@ ${clone.innerHTML}
                               <span className="truncate block text-caption" style={{ color: "var(--text-faint)" }}>{tab.ownerEmail}</span>
                             )}
                           </div>
-                          {tab.cloudId && unreadDocIds.has(tab.cloudId) && (
-                            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--accent)" }} />
+                          {tab.cloudId && (unreadDocIds.has(tab.cloudId) || tab.unread || !tab.lastOpenedAt) && (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ background: "var(--accent)" }}
+                              title="New — you haven't opened this yet"
+                            />
                           )}
                           <button onClick={(e) => { e.stopPropagation(); const rect = (e.target as HTMLElement).getBoundingClientRect(); setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: tab.id }); }}
                             className="shrink-0 rounded flex items-center justify-center w-0 group-hover:w-[18px] overflow-hidden transition-all duration-150" style={{ color: "var(--text-muted)", padding: "0" }} title="Document options">
