@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getSupabaseClient } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import ClientViewer from "./ClientViewer";
+import { render } from "@/lib/render";
 
 // Force this page to be cached at the edge. Without this, the previous
 // SSR owner-redirect read cookies, which made Next.js auto-emit
@@ -125,10 +126,20 @@ export default async function DocPage({ params }: Props) {
   const isDraft = !!(doc as { isDraft?: boolean }).isDraft;
 
   const visibleMarkdown = isExpired || isRestricted || isDraft ? "" : doc.markdown;
+  // SSR the markdown body so non-JS clients (ChatGPT browse, Google,
+  // Claude, etc.) see the actual content. ClientViewer removes this
+  // element once it mounts the interactive TipTap viewer.
+  const ssrHtml = visibleMarkdown ? render(visibleMarkdown).html : "";
 
   return (
     <div>
-      {/* LLM readability handled by /api/docs/{id} via Vercel rewrite — no SSR raw text needed */}
+      {ssrHtml && (
+        <article
+          id="memory-wiki-ssr-body"
+          className="mdcore-rendered max-w-3xl mx-auto px-4 sm:px-6 py-8"
+          dangerouslySetInnerHTML={{ __html: ssrHtml }}
+        />
+      )}
       <ClientViewer
         id={doc.id}
         markdown={visibleMarkdown}
