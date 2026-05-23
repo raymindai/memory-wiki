@@ -75,6 +75,9 @@ export async function GET(
     `Canonical hub URL: https://memory.wiki/hub/${slug}`
   );
   lines.push(
+    `Agent operating manual: https://memory.wiki/hub/${slug}/AGENTS.md`
+  );
+  lines.push(
     `Wiki manifest (concept-grouped TOC): https://memory.wiki/hub/${slug}/index.md`
   );
   lines.push(

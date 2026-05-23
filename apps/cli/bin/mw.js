@@ -312,7 +312,8 @@ Usage:
   Memory.Wiki publish                 Publish from stdin (pipe support)
   Memory.Wiki search <query>           Search your documents
   Memory.Wiki read <id>               Read a document in terminal
-  Memory.Wiki capture [source]        Capture terminal/AI output and publish
+  Memory.Wiki capture "<text>"        Capture inline text and publish
+  Memory.Wiki capture [source]        Capture from tmux / clipboard / last / file
   Memory.Wiki update <id> <file>      Update an existing document
   Memory.Wiki pull <id>               Download a document to stdout
   Memory.Wiki pull <id> -o <file>     Download and save to file
@@ -447,12 +448,14 @@ async function cmdCapture(args) {
     }
     if (!raw) { console.error("Usage: Memory.Wiki capture [tmux|clipboard|last]"); process.exit(1); }
   } else {
-    // Treat as file
+    // Treat as file if it exists, otherwise treat as inline markdown
+    // text (gbrain-style `mw capture "the thought I want to remember"`).
     if (fs.existsSync(target)) {
       raw = fs.readFileSync(target, "utf8");
     } else {
-      console.error(`Error: Unknown target '${target}'. Use: tmux, clipboard, last, or a file path.`);
-      process.exit(1);
+      // Inline text mode — join remaining args so multi-word captures
+      // work without escaping: `mw capture key insight from dinner`.
+      raw = args.join(" ");
     }
   }
 
