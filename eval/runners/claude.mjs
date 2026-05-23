@@ -1,7 +1,7 @@
 // Claude runner — calls Anthropic Messages API directly via fetch.
 // Anthropic SDK isn't installed; raw HTTP keeps the eval tree dependency-free.
 
-const MODEL = process.env.MWBENCH_CLAUDE_MODEL || "claude-sonnet-4-5";
+const MODEL = process.env.MWBENCH_CLAUDE_MODEL || "claude-opus-4-7";
 const ENDPOINT = "https://api.anthropic.com/v1/messages";
 
 export async function run({ query, context }) {
@@ -19,7 +19,8 @@ export async function run({ query, context }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 1024,
-      temperature: 0.2,
+      // temperature is deprecated for opus-4-7 / sonnet-4-6 reasoning
+      // models — omit it and let the model's default sampling stand.
       system: [
         "You answer questions using ONLY the provided Memory.Wiki hub content.",
         "If the answer is not in the content, say so. Keep answers under 200 words.",

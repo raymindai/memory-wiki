@@ -1,7 +1,7 @@
 // LLM judge — Claude scores each answer for accuracy vs the gold answer.
 // Also runs a cheap substring check for expected_keywords.
 
-const JUDGE_MODEL = process.env.MWBENCH_JUDGE_MODEL || "claude-sonnet-4-5";
+const JUDGE_MODEL = process.env.MWBENCH_JUDGE_MODEL || "claude-sonnet-4-6";
 const ENDPOINT = "https://api.anthropic.com/v1/messages";
 
 /**
@@ -64,7 +64,7 @@ Reply STRICTLY as one JSON object:
       body: JSON.stringify({
         model: JUDGE_MODEL,
         max_tokens: 200,
-        temperature: 0,
+        // temperature deprecated for sonnet-4-6 — model default suffices.
         messages: [{ role: "user", content: prompt }],
       }),
     });

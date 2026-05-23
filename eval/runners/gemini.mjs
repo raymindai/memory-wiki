@@ -1,6 +1,6 @@
 // Gemini runner — calls generativelanguage.googleapis.com via fetch.
 
-const MODEL = process.env.MWBENCH_GEMINI_MODEL || "gemini-2.5-pro";
+const MODEL = process.env.MWBENCH_GEMINI_MODEL || "gemini-3.1-pro-preview";
 
 export async function run({ query, context }) {
   const key = process.env.GEMINI_API_KEY;
@@ -28,10 +28,9 @@ export async function run({ query, context }) {
       ],
       generationConfig: {
         temperature: 0.2,
-        // 2.5-pro burns budget on internal thinking tokens before the
-        // model emits any user-visible text. 1024 was getting fully
-        // consumed by thoughts and returning empty answers. 8192 leaves
-        // enough room for both.
+        // Gemini Pro burns budget on internal thinking tokens before
+        // emitting user-visible text. 1024 max got fully consumed by
+        // thoughts and returned empty answers. 8192 leaves headroom.
         maxOutputTokens: 8192,
         thinkingConfig: { thinkingBudget: 1024 },
       },

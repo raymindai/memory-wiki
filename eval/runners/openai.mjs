@@ -1,6 +1,6 @@
 // OpenAI runner — calls /v1/chat/completions via fetch.
 
-const MODEL = process.env.MWBENCH_OPENAI_MODEL || "gpt-4o";
+const MODEL = process.env.MWBENCH_OPENAI_MODEL || "gpt-5.5";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
 export async function run({ query, context }) {
@@ -16,8 +16,10 @@ export async function run({ query, context }) {
     },
     body: JSON.stringify({
       model: MODEL,
-      temperature: 0.2,
-      max_tokens: 1024,
+      // GPT-5.x reasoning family: uses `max_completion_tokens`, not
+      // the legacy `max_tokens`. Temperature is also not supported on
+      // these models — let the default sampling stand.
+      max_completion_tokens: 1024,
       messages: [
         {
           role: "system",

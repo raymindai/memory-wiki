@@ -45,10 +45,11 @@ Categories:
 → { answer, tokensIn, tokensOut, latencyMs }` function. Provider auth
 via env: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`.
 
-Models (defaults, override via env):
-- Claude: `claude-sonnet-4-6`
-- OpenAI: `gpt-5`
-- Gemini: `gemini-2.5-pro`
+Models (defaults as of 2026-01, override via env):
+- Claude: `claude-opus-4-7`
+- OpenAI: `gpt-5.5`
+- Gemini: `gemini-3.1-pro-preview`
+- Judge: `claude-sonnet-4-6`
 
 ## Judge
 
