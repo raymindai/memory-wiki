@@ -28,7 +28,12 @@ export async function run({ query, context }) {
       ],
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 1024,
+        // 2.5-pro burns budget on internal thinking tokens before the
+        // model emits any user-visible text. 1024 was getting fully
+        // consumed by thoughts and returning empty answers. 8192 leaves
+        // enough room for both.
+        maxOutputTokens: 8192,
+        thinkingConfig: { thinkingBudget: 1024 },
       },
     }),
   });
