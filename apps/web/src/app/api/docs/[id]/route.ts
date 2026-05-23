@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { nanoid } from "nanoid";
 import { getSupabaseClient } from "@/lib/supabase";
+import { syncBacklinks } from "@/lib/backlinks";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { extractTitleFromMd, spliceH1 } from "@/lib/extract-title";
@@ -611,6 +612,13 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const { error } = await supabase.from("documents").update(updates).eq("id", id);
     if (error) return NextResponse.json({ error: "Failed to save" }, { status: 500 });
+
+    // Re-sync backlinks if the body changed (markdown was rewritten).
+    // Title-only updates also splice the body, so updates.markdown is
+    // always set when we got here.
+    if (typeof updates.markdown === "string") {
+      void syncBacklinks(supabase, "document", id, updates.markdown);
+    }
 
     // If the title changed, every bundle that has this doc as a member
     // is now stale on the embedding side — bundle vectors are hashed on

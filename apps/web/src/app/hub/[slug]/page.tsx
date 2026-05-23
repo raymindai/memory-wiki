@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, Sparkles, File as FileIcon, Layers } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
+import { getReferencedBy } from "@/lib/queryBacklinks";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
+import ReferencedBy from "@/components/ReferencedBy";
 import HubCopyUrlButton from "./HubCopyUrlButton";
 
 type Props = {
@@ -189,6 +191,19 @@ export default async function HubPage({ params, searchParams }: Props) {
   const olderDocs = hub.docs.filter(d => !recent.find(r => r.id === d.id));
   const hubUrl = `https://memory.wiki/hub/${slug}`;
   const atLabel = at ? at.toISOString().slice(0, 10) : null;
+
+  // Pull backlinks pointing AT this hub. Best-effort — if the table
+  // hasn't been migrated yet (045 not applied), getReferencedBy returns
+  // the empty shape and ReferencedBy renders nothing.
+  const supabaseForRefs = getSupabaseClient();
+  const referencedBy = supabaseForRefs
+    ? await getReferencedBy(supabaseForRefs, "hub", slug, 20).catch(() => ({
+        documents: [],
+        bundles: [],
+        hubs: [],
+        total: 0,
+      }))
+    : { documents: [], bundles: [], hubs: [], total: 0 };
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
@@ -480,6 +495,9 @@ export default async function HubPage({ params, searchParams }: Props) {
             </p>
           </div>
         )}
+
+        {/* Self-wiring backlinks — docs / bundles / hubs that reference this hub. */}
+        <ReferencedBy data={referencedBy} variant="inline" />
 
       </main>
 

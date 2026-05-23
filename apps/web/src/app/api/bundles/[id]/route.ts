@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
+import { syncBacklinks } from "@/lib/backlinks";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -560,6 +561,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
   const { error } = await supabase.from("bundles").update(updates).eq("id", id);
   if (error) return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+
+  // Re-sync backlinks when the description body changed.
+  if (body.description !== undefined) {
+    void syncBacklinks(supabase, "bundle", id, body.description as string);
+  }
+
   return NextResponse.json({ ok: true });
 }
 
