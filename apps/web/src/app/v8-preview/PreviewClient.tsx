@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { VariantNav } from "./VariantNav";
 import "./preview.css";
 
 export function PreviewClient() {
@@ -25,6 +26,7 @@ export function PreviewClient() {
 
   return (
     <div className="v8-preview" data-font={activeFont}>
+      <VariantNav />
       {/* ─── Sticky font toggle ─── */}
       <div className="font-toggle">
         <button

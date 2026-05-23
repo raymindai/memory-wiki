@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  modularizeImports: {
+    "lucide-react": {
+      transform: "lucide-react/dist/esm/icons/{{kebabCase member}}.mjs",
+      skipDefaultConversion: true,
+    },
+  },
 };
 
 export default nextConfig;
