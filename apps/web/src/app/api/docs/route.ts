@@ -2,6 +2,7 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { nanoid } from "nanoid";
 import { getSupabaseClient } from "@/lib/supabase";
 import { syncBacklinks } from "@/lib/backlinks";
+import { syncDocumentSummary } from "@/lib/document-summary";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { corsHeaders, ensureAnonymousCookie, readAnonymousCookie } from "@/lib/anonymous-cookie";
@@ -273,6 +274,11 @@ export async function POST(req: NextRequest) {
   // /hub/<slug>, and [[<id>]] references from the markdown body and
   // persist them to the `backlinks` table. Best-effort, zero LLM cost.
   void syncBacklinks(supabase, "document", id, markdown);
+
+  // Per-doc summary for the compact hub digest (Phase A.2). Cheap
+  // Haiku call, fire-and-forget — the compact route falls back to the
+  // first-paragraph extractor when summary is still null.
+  void syncDocumentSummary(supabase, id, markdown);
 
   // Best-effort hub log entry. Anonymous docs aren't logged because
   // there's no user to attribute them to until claim time.

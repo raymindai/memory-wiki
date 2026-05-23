@@ -283,6 +283,75 @@ interface DigestArgs {
   since: string | null;
 }
 
+/**
+ * Phase B — pull a curated `## Facts` block out of a doc's markdown
+ * if the owner provided one. Highest-fidelity source for compact mode
+ * since the owner is hand-asserting the load-bearing claims.
+ *
+ * Convention:
+ *   ## Facts
+ *   - product launches 2026-06
+ *   - target customer: AI agent devs
+ *   - moat: cross-AI URL paste
+ *
+ * Returns null when the section doesn't exist or is empty.
+ */
+function extractFacts(md: string): string | null {
+  if (!md) return null;
+  const m = md.match(/^##\s+Facts\s*\n([\s\S]*?)(?=\n##\s|\n#\s|$)/im);
+  if (!m) return null;
+  const body = m[1].trim();
+  if (!body) return null;
+  // Collapse to one line per bullet. Strip markdown list markers.
+  const facts = body
+    .split("\n")
+    .map((l) => l.replace(/^[-*+>\s]+/, "").trim())
+    .filter(Boolean);
+  if (facts.length === 0) return null;
+  const joined = facts.join(" · ");
+  return joined.length > 600 ? joined.slice(0, 580).trimEnd() + "…" : joined;
+}
+
+/**
+ * Phase A.1 — strip the H1, leading frontmatter, blank lines, and bullet
+ * markers from a markdown body to surface the first ~280 chars of
+ * real prose. The result lands under each doc link in the compact
+ * digest when there's no curated Facts block and no LLM summary.
+ *
+ * No LLM cost. Quality depends on the doc's first paragraph being
+ * load-bearing — for the raymindai corpus this is true ~80% of the
+ * time.
+ */
+function firstParagraph(md: string): string {
+  if (!md) return "";
+  // Strip YAML frontmatter
+  let body = md;
+  const fm = body.match(/^---\n[\s\S]*?\n---\n/);
+  if (fm) body = body.slice(fm[0].length);
+  // Drop leading H1 (the title is shown separately) + any blank lines
+  body = body.replace(/^\s*#\s+[^\n]*\n+/, "");
+  // Find first non-empty line, then collect contiguous text lines until
+  // a blank or a heading.
+  const lines = body.split("\n");
+  const collected: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (collected.length > 0) break;
+      continue;
+    }
+    if (/^#{1,6}\s/.test(trimmed)) {
+      if (collected.length > 0) break;
+      continue;
+    }
+    collected.push(trimmed.replace(/^[-*+>]\s+/, ""));
+    if (collected.join(" ").length >= 280) break;
+  }
+  let out = collected.join(" ").replace(/\s+/g, " ").trim();
+  if (out.length > 320) out = out.slice(0, 300).trimEnd() + "…";
+  return out;
+}
+
 async function renderDigest({ supabase, profile, slug, compact, since }: DigestArgs): Promise<string> {
   const author = (profile.display_name || slug).replace(/"/g, '\\"');
   const description = (profile.hub_description || "").trim();
@@ -305,16 +374,35 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
   const docIdSet = new Set<string>();
   for (const c of concepts) for (const id of c.doc_ids || []) docIdSet.add(id);
   let docTitleById = new Map<string, string>();
+  // Per-doc gist for compact digest. Priority:
+  //   1) Phase B  — `## Facts` block from the body (owner-curated)
+  //   2) Phase A.2 — `documents.summary` (LLM-generated, cheap)
+  //   3) Phase A.1 — first paragraph of the body (zero-cost fallback)
+  // The chain degrades gracefully so a hub without LLM summaries or
+  // explicit Facts still gets the first-paragraph extract.
+  let docGistById = new Map<string, string>();
   if (docIdSet.size > 0) {
     const { data: docRows } = await supabase
       .from("documents")
-      .select("id, title, is_draft, password_hash, allowed_emails, deleted_at")
+      .select(
+        "id, title, markdown, summary, is_draft, password_hash, allowed_emails, deleted_at",
+      )
       .in("id", Array.from(docIdSet));
-    docTitleById = new Map(
-      (docRows || [])
-        .filter((d) => !d.is_draft && !d.deleted_at && !d.password_hash &&
-          !(Array.isArray(d.allowed_emails) && d.allowed_emails.length > 0))
-        .map((d) => [d.id, d.title || "Untitled"]),
+    const visible = (docRows || []).filter(
+      (d) =>
+        !d.is_draft &&
+        !d.deleted_at &&
+        !d.password_hash &&
+        !(Array.isArray(d.allowed_emails) && d.allowed_emails.length > 0),
+    );
+    docTitleById = new Map(visible.map((d) => [d.id, d.title || "Untitled"]));
+    docGistById = new Map(
+      visible.map((d) => {
+        const facts = extractFacts(d.markdown || "");
+        if (facts) return [d.id, facts];
+        if (d.summary && d.summary.trim().length > 0) return [d.id, d.summary.trim()];
+        return [d.id, firstParagraph(d.markdown || "")];
+      }),
     );
   }
 
@@ -427,7 +515,16 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
       ].join(" • ");
       sections.push(`### ${c.label}\n*${meta}*`);
       if (c.description) sections.push(`> ${c.description.split("\n")[0]}`);
-      sections.push(visibleDocs.map((id) => `- [${docTitleById.get(id)}](https://memory.wiki/${id})`).join("\n"));
+      sections.push(
+        visibleDocs
+          .map((id) => {
+            const title = docTitleById.get(id);
+            const gist = docGistById.get(id);
+            const head = `- [${title}](https://memory.wiki/${id})`;
+            return gist ? `${head}\n  ${gist}` : head;
+          })
+          .join("\n"),
+      );
 
       // Related concepts inside the top-40 set — gives the AI
       // first-class navigation between ideas without needing to read
