@@ -6,6 +6,7 @@ import Link from "next/link";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import RelatedInHubPanel from "@/components/RelatedInHubPanel";
+import ReferencedBy from "@/components/ReferencedBy";
 import VisitorAskAI from "@/components/VisitorAskAI";
 import ViewerHeader from "@/components/ViewerHeader";
 import type { TiptapLiveEditorHandle } from "@/components/TiptapLiveEditor";
@@ -31,6 +32,7 @@ export default function DocumentViewer({
   isRestricted = false,
   showBadge = true,
   editMode = "token",
+  referencedBy,
 }: {
   id: string;
   markdown: string;
@@ -42,6 +44,10 @@ export default function DocumentViewer({
   isRestricted?: boolean;
   showBadge?: boolean;
   editMode?: string;
+  /** Server-fetched self-wiring backlinks. Renders nothing when empty
+   *  (e.g. migration not applied yet, or no other content references
+   *  this doc). */
+  referencedBy?: import("@/lib/queryBacklinks").ReferencedBy;
 }) {
   const [markdown, setMarkdown] = useState(initialMarkdown);
   const [title, setTitle] = useState(initialTitle);
@@ -486,6 +492,15 @@ export default function DocumentViewer({
           mode is the right default here. */}
       {unlocked && !isExpired && !accessRevoked && (
         <RelatedInHubPanel docId={id} mode="public" />
+      )}
+
+      {/* Explicit backlinks (self-wiring graph). Docs / bundles / hubs
+          whose markdown contains memory.wiki/<id>, [[<id>]], or
+          /hub/<slug> pointing at THIS doc. Renders nothing when empty. */}
+      {unlocked && !isExpired && !accessRevoked && referencedBy && (
+        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
+          <ReferencedBy data={referencedBy} variant="inline" />
+        </div>
       )}
 
       {/* Viewer-wide promote strip — only when the visitor isn't the

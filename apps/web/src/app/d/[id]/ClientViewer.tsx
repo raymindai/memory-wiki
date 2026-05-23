@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
+import type { ReferencedBy as ReferencedByData } from "@/lib/queryBacklinks";
 
 const DocumentViewer = dynamic(() => import("./DocumentViewer"), { ssr: false });
 
@@ -14,6 +15,7 @@ export default function ClientViewer(props: {
   isRestricted?: boolean;
   showBadge?: boolean;
   editMode?: string;
+  referencedBy?: ReferencedByData;
 }) {
   // Strip the SSR fallback article once we're on the client. The page
   // emits a server-rendered <article id="memory-wiki-ssr-body"> for

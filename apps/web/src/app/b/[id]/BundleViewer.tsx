@@ -9,6 +9,7 @@ import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
+import ReferencedBy from "@/components/ReferencedBy";
 import { render } from "@/lib/render";
 
 const BundleCanvas = dynamic(() => import("@/components/BundleCanvas"), { ssr: false });
@@ -45,6 +46,7 @@ export default function BundleViewer({
   isProtected = false,
   documentCount,
   showBadge = true,
+  referencedBy,
 }: {
   id: string;
   title: string | null;
@@ -54,6 +56,7 @@ export default function BundleViewer({
   documentCount: number;
   showBadge?: boolean;
   layout?: string;
+  referencedBy?: import("@/lib/queryBacklinks").ReferencedBy;
 }) {
   const [documents, setDocuments] = useState<BundleDocument[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -943,6 +946,14 @@ export default function BundleViewer({
           </div>
         )}
       </div>
+
+      {/* Self-wiring backlinks — docs / bundles / hubs whose markdown
+          references THIS bundle. Renders nothing when empty. */}
+      {referencedBy && (
+        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
+          <ReferencedBy data={referencedBy} variant="inline" />
+        </div>
+      )}
 
       {/* Promote band — only when the visitor is not the owner. The
           owner-redirect effect at the top of this component sends owners
