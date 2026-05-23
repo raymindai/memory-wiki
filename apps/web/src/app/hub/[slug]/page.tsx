@@ -1,12 +1,10 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, Sparkles, File as FileIcon, Layers } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
-import HubCopyUrlButton from "./HubCopyUrlButton";
+import HubViewerV8 from "./HubViewerV8";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -191,304 +189,22 @@ export default async function HubPage({ params, searchParams }: Props) {
   const atLabel = at ? at.toISOString().slice(0, 10) : null;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
+    <div className="min-h-screen" style={{ background: "#08080a", color: "#fafafa" }}>
       <ViewerHeader
         title={`${author}'s hub`}
         breadcrumb={<>memory.wiki/hub/<span style={{ color: "var(--accent)" }}>{slug}</span></>}
       />
-
-      {atLabel && (
-        <div
-          className="px-6 py-2 text-caption flex items-center justify-center gap-3"
-          style={{ background: "var(--accent-dim)", color: "var(--text-primary)", borderBottom: "1px solid var(--accent)" }}
-        >
-          <Clock width={13} height={13} aria-hidden style={{ color: "var(--accent)" }} />
-          <span>
-            Hub as of <strong>{atLabel}</strong> — {hub.docs.length} {hub.docs.length === 1 ? "doc" : "docs"} and {hub.bundles.length} {hub.bundles.length === 1 ? "bundle" : "bundles"} that existed by then.
-          </span>
-          <Link href={`/hub/${slug}`} className="underline" style={{ color: "var(--accent)" }}>
-            Back to now
-          </Link>
-        </div>
-      )}
-
-      <main className="max-w-3xl mx-auto px-6 py-12 sm:py-16">
-        {/* Hero — avatar + name + description */}
-        <section className="flex flex-col sm:flex-row gap-6 sm:items-center mb-10">
-          {hub.profile.avatar_url && (
-            <img
-              src={hub.profile.avatar_url}
-              alt=""
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full shrink-0"
-              style={{ border: "2px solid var(--border-dim)" }}
-            />
-          )}
-          <div className="min-w-0 flex-1">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
-              {author}&apos;s hub
-            </h1>
-            {hub.profile.hub_description && (
-              <p className="mt-3 text-body leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                {hub.profile.hub_description}
-              </p>
-            )}
-            {/* Search affordance — hybrid semantic + BM25 + Haiku rerank,
-                public to any visitor. Wired to /hub/<slug>/search which
-                in turn calls /api/hub/<slug>/recall. */}
-            <form
-              action={`/hub/${slug}/search`}
-              method="get"
-              className="mt-5 flex items-center gap-2 px-3 py-2 rounded-lg max-w-xl"
-              style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-faint)", flexShrink: 0 }}>
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-              <input
-                type="search"
-                name="q"
-                placeholder={`Search ${author}'s hub...`}
-                maxLength={500}
-                className="flex-1 bg-transparent text-sm"
-                style={{ color: "var(--text-primary)", border: "none", outline: "none" }}
-              />
-              <button
-                type="submit"
-                className="px-3 py-1 rounded-md text-xs font-semibold transition-opacity"
-                style={{ background: "var(--accent)", color: "#000" }}
-              >
-                Search
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {/* Stat strip */}
-        <section className="flex items-center gap-6 mb-8 pb-8" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-          <div className="flex flex-col">
-            <span className="text-display font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{hub.docs.length}</span>
-            <span className="text-caption uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>{hub.docs.length === 1 ? "Document" : "Documents"}</span>
-          </div>
-          <div className="w-px h-10" style={{ background: "var(--border-dim)" }} />
-          <div className="flex flex-col">
-            <span className="text-display font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{hub.bundles.length}</span>
-            <span className="text-caption uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>{hub.bundles.length === 1 ? "Bundle" : "Bundles"}</span>
-          </div>
-          <div className="w-px h-10" style={{ background: "var(--border-dim)" }} />
-          <div className="flex flex-col">
-            <span className="text-display font-bold tabular-nums" style={{ color: "var(--accent)" }}>{recent.length}</span>
-            <span className="text-caption uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>This week</span>
-          </div>
-          {(() => {
-            // Token-economy badge for visitors. Same heuristic the
-            // owner sees inside HubEmbed: ~1.3 tokens / English word
-            // plus ~8 tokens of listing overhead per doc. Visitors
-            // see this so they can decide "is this hub cheap to
-            // cite?" before pasting the URL into an LLM.
-            const totalWords = hub.docs.reduce(
-              (sum, d) => sum + (d.markdown || "").trim().split(/\s+/).filter(Boolean).length,
-              0,
-            );
-            if (totalWords === 0) return null;
-            const indexTokens = Math.round(totalWords * 1.3 + hub.docs.length * 8);
-            const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-            return (
-              <>
-                <div className="w-px h-10" style={{ background: "var(--border-dim)" }} />
-                <div className="flex flex-col" title="Estimated tokens an AI spends fetching this hub's full index. Lower = cheaper to cite.">
-                  <span className="text-display font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>≈ {fmt(indexTokens)}</span>
-                  <span className="text-caption uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>tokens</span>
-                </div>
-              </>
-            );
-          })()}
-        </section>
-
-        {/* Deploy-to-AI panel */}
-        <section className="mb-12 px-5 py-4 rounded-xl" style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)" }}>
-          <div className="flex items-start gap-3">
-            <Sparkles width={18} height={18} className="shrink-0 mt-0.5" style={{ color: "var(--accent)" }} aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className="text-body font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
-                Deploy this hub to any AI
-              </p>
-              <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                Paste the URL into <strong>Claude</strong>, <strong>ChatGPT</strong>, or <strong>Cursor</strong>. The AI fetches a structured index and follows the inline links to read individual docs and bundles as needed.
-              </p>
-              <div className="mt-3 flex items-center gap-2 flex-wrap">
-                <code className="text-caption px-2 py-1 rounded font-mono" style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)" }}>
-                  {hubUrl}
-                </code>
-                <HubCopyUrlButton url={hubUrl} />
-                <Link
-                  href={`/hub/${slug}.md`}
-                  target="_blank"
-                  className="text-caption px-2 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
-                >
-                  View raw .md
-                </Link>
-              </div>
-              {/* Wiki manifest links. Hermes-style triple — schema /
-                  index / log — plus the AI-oriented llms.txt files
-                  underneath them so agents can pick whichever shape
-                  fits their context. */}
-              <div className="mt-3 flex items-center gap-1.5 flex-wrap text-caption" style={{ color: "var(--text-muted)" }}>
-                <span style={{ color: "var(--text-faint)" }}>Wiki:</span>
-                <Link
-                  href={`/hub/${slug}/index.md`}
-                  target="_blank"
-                  className="px-2 py-0.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }}
-                >index.md</Link>
-                <Link
-                  href={`/hub/${slug}/SCHEMA.md`}
-                  target="_blank"
-                  className="px-2 py-0.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }}
-                >SCHEMA.md</Link>
-                <Link
-                  href={`/hub/${slug}/log.md`}
-                  target="_blank"
-                  className="px-2 py-0.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }}
-                >log.md</Link>
-                <span className="mx-1" style={{ color: "var(--border-dim)" }}>·</span>
-                <span style={{ color: "var(--text-faint)" }}>For AI:</span>
-                <Link
-                  href={`/hub/${slug}/llms.txt`}
-                  target="_blank"
-                  className="px-2 py-0.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }}
-                >llms.txt</Link>
-                <Link
-                  href={`/hub/${slug}/llms-full.txt`}
-                  target="_blank"
-                  className="px-2 py-0.5 rounded font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }}
-                >llms-full.txt</Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Recent */}
-        {recent.length > 0 && (
-          <section className="mb-12">
-            <header className="flex items-baseline justify-between mb-4">
-              <h2 className="text-heading" style={{ color: "var(--accent)" }}>Recent</h2>
-              <span className="text-caption" style={{ color: "var(--text-faint)" }}>last 7 days</span>
-            </header>
-            <ul className="space-y-1">
-              {recent.slice(0, 10).map(d => (
-                <li key={d.id}>
-                  <Link
-                    href={`/d/${d.id}`}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors group hover:bg-[var(--toggle-bg)]"
-                  >
-                    <FileIcon width={12} height={12} className="shrink-0" style={{ color: "var(--accent)" }} aria-hidden />
-                    <span className="flex-1 truncate text-body" style={{ color: "var(--text-primary)" }}>
-                      {d.title || "Untitled"}
-                    </span>
-                    <span className="text-caption shrink-0 transition-colors" style={{ color: "var(--text-faint)" }}>
-                      {fmtRelative(d.updated_at, anchor)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Bundles */}
-        {hub.bundles.length > 0 && (
-          <section className="mb-12">
-            <header className="mb-4">
-              <h2 className="text-heading" style={{ color: "var(--accent)" }}>Bundles</h2>
-            </header>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {hub.bundles.map(b => (
-                <Link
-                  key={b.id}
-                  href={`/b/${b.id}`}
-                  className="flex flex-col gap-1.5 p-4 rounded-lg transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
-                >
-                  <div className="flex items-center gap-2">
-                    <Layers width={13} height={13} className="shrink-0" style={{ color: "var(--accent)" }} aria-hidden />
-                    <span className="text-body font-semibold leading-snug" style={{ color: "var(--text-primary)" }}>
-                      {b.title || "Untitled Bundle"}
-                    </span>
-                  </div>
-                  {b.description ? (
-                    <span className="text-caption leading-relaxed line-clamp-2" style={{ color: "var(--text-muted)" }}>
-                      {b.description}
-                    </span>
-                  ) : (
-                    <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-                      No description
-                    </span>
-                  )}
-                  <span className="text-caption mt-1" style={{ color: "var(--text-faint)" }}>
-                    Updated {fmtRelative(b.updated_at, anchor)}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* All documents */}
-        {olderDocs.length > 0 && (
-          <section className="mb-12">
-            <header className="flex items-baseline justify-between mb-4">
-              <h2 className="text-heading" style={{ color: "var(--accent)" }}>
-                {recent.length > 0 ? "Older documents" : "Documents"}
-              </h2>
-              <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-                {olderDocs.length} {olderDocs.length === 1 ? "doc" : "docs"}
-              </span>
-            </header>
-            <ul className="space-y-0.5">
-              {olderDocs.map(d => (
-                <li key={d.id}>
-                  <Link
-                    href={`/d/${d.id}`}
-                    className="flex items-center gap-3 px-3 py-2 rounded-md transition-colors hover:bg-[var(--toggle-bg)]"
-                  >
-                    <FileIcon width={11} height={11} className="shrink-0" style={{ color: "var(--text-faint)" }} aria-hidden />
-                    <span className="flex-1 truncate text-body" style={{ color: "var(--text-secondary)" }}>
-                      {d.title || "Untitled"}
-                    </span>
-                    <span className="text-caption shrink-0 tabular-nums" style={{ color: "var(--text-faint)" }}>
-                      {new Date(d.updated_at).toISOString().slice(0, 10)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {hub.docs.length === 0 && hub.bundles.length === 0 && (
-          <div className="py-16 text-center" style={{ color: "var(--text-faint)" }}>
-            <p>
-              {at
-                ? `No public docs or bundles existed in this hub on ${atLabel}.`
-                : "This hub doesn't have any public documents yet."}
-            </p>
-          </div>
-        )}
-
-      </main>
-
-      {/* Promote band — content-flow promote, then the shared chrome
-          footer. Hub pages are inherently public-facing, so the strip
-          is always shown; the lighter owner variant is gated by the
-          owner toggle but the hub viewer can't reliably know that
-          without a client component, so we show the full pitch and
-          let the viewer self-segment. */}
+      <HubViewerV8
+        slug={slug}
+        profile={hub.profile}
+        docs={hub.docs}
+        bundles={hub.bundles}
+        recent={recent}
+        olderDocs={olderDocs}
+        hubUrl={hubUrl}
+        atLabel={atLabel}
+        anchor={anchor}
+      />
       <ViewerPromoStrip />
       <ViewerFooter
         stats={

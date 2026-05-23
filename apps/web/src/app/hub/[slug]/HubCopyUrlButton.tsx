@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Copy, Check } from "lucide-react";
 
 export default function HubCopyUrlButton({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
@@ -12,15 +13,19 @@ export default function HubCopyUrlButton({ url }: { url: string }) {
           setTimeout(() => setCopied(false), 1500);
         } catch { /* ignore */ }
       }}
-      className="text-caption px-2 py-1 rounded transition-colors"
-      style={{
-        background: copied ? "var(--accent)" : "var(--background)",
-        color: copied ? "#000" : "var(--text-primary)",
-        border: `1px solid ${copied ? "var(--accent)" : "var(--accent)"}`,
-        fontWeight: 600,
-      }}
+      className="hub-copy-btn"
     >
-      {copied ? "Copied" : "Copy URL"}
+      {copied ? (
+        <>
+          <Check size={13} strokeWidth={2} />
+          <span>Copied</span>
+        </>
+      ) : (
+        <>
+          <Copy size={13} strokeWidth={1.75} />
+          <span>Copy URL</span>
+        </>
+      )}
     </button>
   );
 }

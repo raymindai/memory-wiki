@@ -2,6 +2,29 @@
 @import "katex/dist/katex.min.css";
 @import "highlight.js/styles/github-dark.min.css";
 
+/* ──────────────────────────────────────────────────────────────────
+   Typography tokens — registered with Tailwind v4 theme.
+   Defines the two font families used across the UI:
+     --font-sans : Noto Sans + Noto Sans KR (한글 cascade)
+     --font-mono : JetBrains Mono
+
+   Underlying next/font variables (--font-noto, --font-noto-kr,
+   --font-jetbrains-mono) are injected by app/layout.tsx.
+
+   Because these are registered with @theme, Tailwind's preflight
+   applies --font-sans to <body> automatically and the font-sans /
+   font-mono utility classes resolve here too. We also expose a
+   plain .mono class as a non-Tailwind alias.
+   ────────────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: var(--font-noto), var(--font-noto-kr), -apple-system, "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", "Menlo", monospace;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
 /* ========================================
    Typography utility classes
    The new design system caps text sizes at 4 (caption / body / heading /
@@ -1450,7 +1473,7 @@ textarea::selection {
   display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  font-family: var(--font-geist-mono), monospace;
+  font-family: var(--font-mono);
   letter-spacing: 0.5px;
   padding: 3px 10px;
   border-radius: 100px;
@@ -2502,7 +2525,7 @@ textarea::selection {
 
 /* ─── Language Dropdown ─── */
 .lang-dropdown { position: relative; }
-.lang-dropdown summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); font-weight: 600; font-family: var(--font-geist-mono), monospace; }
+.lang-dropdown summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); font-weight: 600; font-family: var(--font-mono); }
 .lang-dropdown summary::-webkit-details-marker { display: none; }
 .lang-dropdown-menu { position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px; min-width: 100px; z-index: 50; }
 .lang-dropdown-menu a { display: block; padding: 6px 12px; font-size: 12px; color: var(--text-muted); text-decoration: none; border-radius: 4px; }

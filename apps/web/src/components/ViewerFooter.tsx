@@ -4,22 +4,18 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 // Shared footer for the public viewers (/d/<id>, /b/<id>, /hub/<slug>).
-// Three slots, left-to-right:
-//   1) minimal nav links (About / Plugins / GitHub)
-//   2) optional stats slot (e.g. word count, doc count) — viewer passes it in
-//   3) "Make your own" CTA — primary, always present, drives the funnel
-//
-// Kept intentionally one row tall on desktop and wraps cleanly on mobile.
-// No engine badges, no five-link clutter — that's the bug the doc viewer
-// had before this consolidation.
+// Quiet chrome row — minimal nav links + optional stats. The marketing
+// CTA ("Make your own", "Install /memory.wiki") lives in ViewerPromoStrip
+// directly above the footer; duplicating them here was confusing visitors.
 
 interface ViewerFooterProps {
   stats?: ReactNode;
-  /** Hide the "Make your own" CTA when the visitor is the owner. */
+  /** Accepted for API compatibility — the CTA was removed from this row
+   *  since the PromoStrip above carries it. */
   hideCta?: boolean;
 }
 
-export default function ViewerFooter({ stats, hideCta = false }: ViewerFooterProps) {
+export default function ViewerFooter({ stats }: ViewerFooterProps) {
   return (
     <footer
       className="shrink-0 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 sm:px-5 py-2 text-caption font-mono"
@@ -43,22 +39,11 @@ export default function ViewerFooter({ stats, hideCta = false }: ViewerFooterPro
         </a>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-        {stats && (
-          <div className="flex items-center gap-3 text-caption" style={{ color: "var(--text-faint)" }}>
-            {stats}
-          </div>
-        )}
-        {!hideCta && (
-          <Link
-            href="/"
-            className="flex items-center px-2.5 h-6 rounded-md font-medium transition-transform hover:scale-[1.02]"
-            style={{ background: "var(--accent)", color: "#000" }}
-          >
-            Make your own
-          </Link>
-        )}
-      </div>
+      {stats && (
+        <div className="flex items-center gap-3 text-caption ml-auto" style={{ color: "var(--text-faint)" }}>
+          {stats}
+        </div>
+      )}
     </footer>
   );
 }

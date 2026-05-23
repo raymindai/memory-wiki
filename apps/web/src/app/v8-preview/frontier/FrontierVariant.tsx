@@ -1015,7 +1015,7 @@ export function FrontierVariant() {
               <li>Permanent URLs</li>
               <li>All 9 capture surfaces</li>
               <li>Manual organize</li>
-              <li>Public hub at /@username</li>
+              <li>Personal hub at memory.wiki/hub/&lt;you&gt;</li>
             </ul>
             <button className="btn-secondary btn-full">Start free</button>
           </article>
