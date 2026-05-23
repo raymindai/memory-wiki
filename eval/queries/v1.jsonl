@@ -1,0 +1,20 @@
+{"id":"q-001","q":"What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?","expected_doc":"SKaY7VJP","expected_keywords":["cross-AI","URL","paste"],"category":"single-doc"}
+{"id":"q-002","q":"Why is the founder Hyunsang Cho building memory.wiki?","expected_doc":"fz45GXXj","expected_keywords":["founder","memory","AI"],"category":"single-doc"}
+{"id":"q-003","q":"What are mdfy's core product features as of 2026-05?","expected_doc":"bmZYfZez","expected_keywords":["mdfy","features","2026"],"category":"single-doc"}
+{"id":"q-004","q":"How does mdfy do RAG / retrieval?","expected_doc":"how-mdfy-rag-works","expected_keywords":["RAG","retrieval"],"category":"single-doc"}
+{"id":"q-005","q":"How does mdfy keep documents, bundles, and hubs fresh over time?","expected_doc":"RUMdz2fQ","expected_keywords":["fresh","update","sync"],"category":"single-doc"}
+{"id":"q-006","q":"What was the Upstage Memory Protocol alliance proposal about?","expected_doc":"yWkfCPhn","expected_keywords":["Upstage","Memory Protocol","alliance"],"category":"single-doc"}
+{"id":"q-007","q":"What's the K-Tech Pioneers presentation evaluation context?","expected_doc":"jRpEdqww","expected_keywords":["K-TECH","Pioneers","평가"],"category":"single-doc"}
+{"id":"q-008","q":"What's in the a16z application?","expected_doc":"wNEDgXMs","expected_keywords":["a16z"],"category":"single-doc"}
+{"id":"q-009","q":"What's in the a16z speedrun pitch deck content?","expected_doc":"gnEMFJgI","expected_keywords":["a16z","speedrun","pitch"],"category":"single-doc"}
+{"id":"q-010","q":"How does memdo (멤도) work?","expected_doc":"QF-bp5G_","expected_keywords":["memdo","멤도"],"category":"single-doc"}
+{"id":"q-011","q":"What is the SNS launch execution plan?","expected_doc":"jryfJV4D","expected_keywords":["SNS","launch","plan"],"category":"single-doc"}
+{"id":"q-012","q":"What's the v8 product idea — the AI-era pivot?","expected_doc":"pCiEhvu2","expected_keywords":["v8","idea"],"category":"single-doc"}
+{"id":"q-013","q":"What's outlined in the Memory.Wiki v8 UI and brand direction document?","expected_doc":"37MqmCM-","expected_keywords":["v8","UI","brand"],"category":"single-doc"}
+{"id":"q-014","q":"What's the Memory.Wiki product specification?","expected_doc":"Tk71NDw0","expected_keywords":["specification","product"],"category":"single-doc"}
+{"id":"q-015","q":"How does mdfy work overall — the architecture and flow?","expected_doc":"KRKz_MD-","expected_keywords":["mdfy","work","flow"],"category":"single-doc"}
+{"id":"q-016","q":"What was the strategic pivot from mdfy to Memory.Wiki?","expected_doc":"4N8X52tq","expected_keywords":["pivot","mdfy","Memory.wiki"],"category":"single-doc"}
+{"id":"q-017","q":"What's Hyunsang Cho's background as an AI product executive?","expected_doc":"ZVfnXzCU","expected_keywords":["Hyunsang","Cho","AI","executive"],"category":"single-doc"}
+{"id":"q-018","q":"What's the mdfy.cc v6 FINAL business plan?","expected_doc":"_4iafQ8K","expected_keywords":["mdfy.cc","v6","사업계획"],"category":"single-doc"}
+{"id":"q-019","q":"What's the difference between v7 and v7-revised business plans?","expected_doc":"nvF3Li2x","expected_keywords":["v7","revised","사업계획"],"category":"cross-doc"}
+{"id":"q-020","q":"Summarize Memory.Wiki's overall product strategy and product evolution.","expected_doc":"KFtUbXkS","expected_keywords":["product","strategy"],"category":"synthesis"}
