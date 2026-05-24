@@ -270,7 +270,7 @@ async function cmdLogin() {
   const readline = require("readline");
   const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
 
-  rl.question("Paste your token: ", (token) => {
+  rl.question("Paste your token: ", async (token) => {
     rl.close();
     if (!token || !token.trim()) { console.error("No token provided."); process.exit(1); }
 
@@ -285,7 +285,63 @@ async function cmdLogin() {
       saveConfig({ token: token.trim() });
       console.log("Token saved.");
     }
+
+    // After login, automatically claim any orphan anonymous docs the
+    // CLI created before login. The edit_tokens stored in
+    // ~/.memory.wiki/tokens.json prove ownership of each doc.
+    const tokens = loadTokens();
+    const ids = Object.keys(tokens);
+    if (ids.length > 0) {
+      process.stderr.write(`Claiming ${ids.length} previously-anonymous doc${ids.length === 1 ? "" : "s"}... `);
+      try {
+        const result = await api("POST", "/api/user/claim-by-edit-token", { tokens });
+        const claimed = result?.claimed ?? 0;
+        if (claimed > 0) {
+          console.log(`claimed ${claimed}.`);
+        } else {
+          console.log("nothing to claim.");
+        }
+      } catch (err) {
+        console.log(`skipped (${err.message}).`);
+      }
+    }
   });
+}
+
+// Manual claim — handy when a doc was created on another machine and
+// the user has the edit token in their local store, or after running
+// `mw login` to retry a claim that the original auto-pass missed.
+async function cmdClaim(args) {
+  const config = loadConfig();
+  if (!config.token && !config.userId) {
+    console.error("Not logged in. Run: mw login");
+    process.exit(1);
+  }
+  const tokens = loadTokens();
+  const ids = args.length > 0 ? args : Object.keys(tokens);
+  if (ids.length === 0) {
+    console.error("No local edit tokens to claim. Run a publish first or pass doc ids you own.");
+    process.exit(1);
+  }
+  const payload = {};
+  for (const id of ids) {
+    if (tokens[id]) payload[id] = tokens[id];
+  }
+  if (Object.keys(payload).length === 0) {
+    console.error("None of the supplied ids have a local edit token. Cannot prove ownership.");
+    process.exit(1);
+  }
+  try {
+    const result = await api("POST", "/api/user/claim-by-edit-token", { tokens: payload });
+    console.log(`Claimed ${result.claimed} of ${result.attempted}.`);
+    for (const item of result.items || []) {
+      if (item.status === "claimed" || item.status === "already-owned") continue;
+      console.log(`  ${item.id}: ${item.status}${item.reason ? ` (${item.reason})` : ""}`);
+    }
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+    process.exit(1);
+  }
 }
 
 function cmdLogout() {
@@ -323,6 +379,7 @@ Usage:
   Memory.Wiki login                   Authenticate with Memory.Wiki
   Memory.Wiki logout                  Clear stored credentials
   Memory.Wiki whoami                  Show current user
+  Memory.Wiki claim [ids...]          Claim anonymous docs by edit token (auto-runs after login)
 
 Examples:
   echo "# Hello World" | Memory.Wiki publish
@@ -663,6 +720,9 @@ async function main() {
       break;
     case "logout":
       cmdLogout();
+      break;
+    case "claim":
+      await cmdClaim(args.slice(1));
       break;
     case "whoami":
       cmdWhoami();
