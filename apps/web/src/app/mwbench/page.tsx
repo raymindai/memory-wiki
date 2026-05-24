@@ -276,13 +276,13 @@ export default function MWBenchPage() {
               <strong style={{ color: "var(--text-primary)" }}>Reproducible.</strong>{" "}
               Harness is at{" "}
               <a
-                href="https://github.com/raymindai/mdcore/tree/main/eval"
+                href="https://github.com/raymindai/memory-wiki/tree/main/eval"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
                 style={{ color: "var(--accent)" }}
               >
-                github.com/raymindai/mdcore /eval
+                github.com/raymindai/memory-wiki /eval
               </a>
               . Re-run any round with <code>node eval/run-bench.mjs</code> or <code>node eval/run-browse-bench.mjs</code>.
             </p>

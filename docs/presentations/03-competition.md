@@ -190,4 +190,4 @@ ChatGPT, Claude, Cursor, Codex, Gemini — 각자 자기만의 메모리 레이�
 
 <br>
 
-<span class="faint">조현상 · hi@raymind.ai · github.com/raymindai/mdcore</span>
+<span class="faint">조현상 · hi@raymind.ai · github.com/raymindai/memory-wiki</span>

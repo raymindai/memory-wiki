@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/raymindai/mdcore"
+    "url": "https://github.com/raymindai/memory-wiki"
   },
   "engines": {
     "node": ">=18"

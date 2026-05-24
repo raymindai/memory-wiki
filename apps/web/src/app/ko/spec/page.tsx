@@ -248,7 +248,7 @@ GET /raw/hub/{slug}/c/{concept}        # 같은 내용, raw 마크다운`}</Bloc
             <li><strong>컨텍스트 파일 reference.</strong> <Code>AGENTS.md</Code> / <Code>CLAUDE.md</Code> / <Code>.cursor/rules</Code> 에 URL 추가. AI 개발 도구가 매 세션 부팅마다 fetch. 도구별 스니펫: <Link href="/ko/docs/integrate" style={{ color: "var(--accent)" }}>/ko/docs/integrate</Link>.</li>
             <li><strong>API 통합.</strong> 정밀 retrieval 을 위해 <Code>POST /api/hub/&#123;slug&#125;/recall</Code> 직접 호출. SDK 불필요 — plain HTTP. Endpoint 는 hub-public, API 키 불필요.</li>
           </ol>
-          <p>레퍼런스 렌더러는 <Code>markdown-it</Code> + footnotes + GFM. TipTap과 동일 config라 작성 측과 뷰어 측이 같은 DOM을 출력. 소스: <Link href="https://github.com/raymindai/mdcore" style={{ color: "var(--accent)" }}>github.com/raymindai/mdcore</Link>.</p>
+          <p>레퍼런스 렌더러는 <Code>markdown-it</Code> + footnotes + GFM. TipTap과 동일 config라 작성 측과 뷰어 측이 같은 DOM을 출력. 소스: <Link href="https://github.com/raymindai/memory-wiki" style={{ color: "var(--accent)" }}>github.com/raymindai/memory-wiki</Link>.</p>
         </Section>
 
         <p style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 64, paddingTop: 24, borderTop: "1px solid var(--border-dim)" }}>

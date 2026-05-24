@@ -24,7 +24,7 @@ const TEST_USER_ID = process.env.MDFY_TEST_USER_ID || "4040031b-9fff-467e-a6ba-6
 // Pick a tiny file from a stable widely-mirrored repo so the test
 // doesn't fail when an upstream README changes shape.
 const TARGET_URL = process.env.MDFY_GITHUB_TEST_URL
-  || "https://github.com/raymindai/mdcore/blob/main/README.md";
+  || "https://github.com/raymindai/memory-wiki/blob/main/README.md";
 
 const supabase = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 

@@ -421,7 +421,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
             {t.vscode.ctaLabel}
           </a>
           <a
-            href="https://github.com/raymindai/mdcore/releases"
+            href="https://github.com/raymindai/memory-wiki/releases"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -453,7 +453,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           subtitle={t.desktop.subtitle}
           desc={t.desktop.desc}
           ctaLabel={t.desktop.ctaLabel}
-          ctaHref="https://github.com/raymindai/mdcore/releases/latest"
+          ctaHref="https://github.com/raymindai/memory-wiki/releases/latest"
         />
 
         {/* Screenshot */}
@@ -480,7 +480,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
         {/* Footer actions */}
         <div style={{ padding: "20px 32px", borderTop: "1px solid var(--border-dim)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <a
-            href="https://github.com/raymindai/mdcore/releases/latest"
+            href="https://github.com/raymindai/memory-wiki/releases/latest"
             style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent)", color: "#000", padding: "10px 24px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -603,7 +603,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
           subtitle={t.quicklook.subtitle}
           desc={t.quicklook.desc}
           ctaLabel={t.quicklook.ctaLabel}
-          ctaHref="https://github.com/raymindai/mdcore/releases/latest"
+          ctaHref="https://github.com/raymindai/memory-wiki/releases/latest"
         />
 
         {/* Screenshot */}
@@ -630,7 +630,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
         {/* Footer actions */}
         <div style={{ padding: "20px 32px", borderTop: "1px solid var(--border-dim)", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <a
-            href="https://github.com/raymindai/mdcore/releases/latest"
+            href="https://github.com/raymindai/memory-wiki/releases/latest"
             style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent)", color: "#000", padding: "10px 24px", borderRadius: 8, fontSize: 14, fontWeight: 700, textDecoration: "none" }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -703,7 +703,7 @@ export default function PluginsContent({ locale }: { locale: "en" | "ko" }) {
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
           <a
-            href="https://github.com/raymindai/mdcore"
+            href="https://github.com/raymindai/memory-wiki"
             target="_blank"
             rel="noopener noreferrer"
             style={{

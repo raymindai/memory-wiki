@@ -25,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/raymindai/mdcore"
+    "url": "https://github.com/raymindai/memory-wiki"
   },
   "author": "Hyunsang Cho <hi@raymind.ai>",
   "homepage": "https://memory.wiki",
   "bugs": {
-    "url": "https://github.com/raymindai/mdcore/issues"
+    "url": "https://github.com/raymindai/memory-wiki/issues"
   },
   "keywords": ["Memory.Wiki", "mcp", "markdown", "ai", "publish", "model-context-protocol"],
   "license": "MIT"

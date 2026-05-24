@@ -183,4 +183,4 @@ MIT
 
 **Memory.Wiki** — *The fastest way from thought to shared document.*
 
-[Memory.Wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/mdcore)
+[Memory.Wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/memory-wiki)

@@ -75,7 +75,7 @@ PRIVACY
 - No data is collected or stored by the extension itself
 - Documents are published to Memory.Wiki servers only when you click publish
 - No tracking, no analytics in the extension
-- Open source: github.com/raymindai/mdcore
+- Open source: github.com/raymindai/memory-wiki
 
 PERMISSIONS EXPLAINED
 

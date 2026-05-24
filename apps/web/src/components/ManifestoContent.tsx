@@ -337,7 +337,7 @@ export default function ManifestoContent({ locale }: ManifestoContentProps) {
                   {t.invitationButtons.start}
                 </Link>
                 <a
-                  href="https://github.com/raymindai/mdcore"
+                  href="https://github.com/raymindai/memory-wiki"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

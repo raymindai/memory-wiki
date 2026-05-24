@@ -43,7 +43,7 @@ expect("rejects bare org",               parseGithubUrl("https://github.com/owne
 expect("rejects empty input",            parseGithubUrl("") === null);
 
 // ── Live smoke against a tiny public repo ──────────────────────────
-const SMOKE_URL = process.env.MDFY_GH_TEST_URL || "https://github.com/raymindai/mdcore/blob/main/README.md";
+const SMOKE_URL = process.env.MDFY_GH_TEST_URL || "https://github.com/raymindai/memory-wiki/blob/main/README.md";
 
 (async () => {
   console.log("\n[live] importFromGithub(", SMOKE_URL, ")");

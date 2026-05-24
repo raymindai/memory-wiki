@@ -231,7 +231,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         line1Html:
           'Memory.Wiki is built by Hyunsang at <a href="https://raymind.ai" class="manifesto-link">Raymind.AI</a>.',
         line2Html:
-          'The codebase is <a href="https://github.com/raymindai/mdcore" target="_blank" rel="noopener noreferrer" class="manifesto-link">open source on GitHub</a>.',
+          'The codebase is <a href="https://github.com/raymindai/memory-wiki" target="_blank" rel="noopener noreferrer" class="manifesto-link">open source on GitHub</a>.',
         line3: "The Bundle spec will be published before Phase 2 ships.",
         line4Html:
           'Reach me at <a href="mailto:hi@raymind.ai" class="manifesto-link">hi@raymind.ai</a>.',
@@ -384,7 +384,7 @@ export function getManifestoTexts(locale: "en" | "ko"): ManifestoTexts {
         line1Html:
           'Memory.Wiki is built by Hyunsang at <a href="https://raymind.ai" class="manifesto-link">Raymind.AI</a>.',
         line2Html:
-          'The codebase is <a href="https://github.com/raymindai/mdcore" target="_blank" rel="noopener noreferrer" class="manifesto-link">open source on GitHub</a>.',
+          'The codebase is <a href="https://github.com/raymindai/memory-wiki" target="_blank" rel="noopener noreferrer" class="manifesto-link">open source on GitHub</a>.',
         line3: "The Bundle spec will be published before Phase 2 ships.",
         line4Html:
           'Reach me at <a href="mailto:hi@raymind.ai" class="manifesto-link">hi@raymind.ai</a>.',

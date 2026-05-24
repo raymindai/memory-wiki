@@ -237,7 +237,7 @@ export function DocsNav({ active = "docs", lang = "en" }: { active?: "about" | "
             </Link>
           ))}
           <a
-            href="https://github.com/raymindai/mdcore"
+            href="https://github.com/raymindai/memory-wiki"
             target="_blank"
             rel="noopener noreferrer"
             className="site-nav-link"
@@ -285,7 +285,7 @@ export function DocsNav({ active = "docs", lang = "en" }: { active?: "about" | "
                 <a href={currentPaths.ko} className={lang === "ko" ? "active" : ""} onClick={() => { document.cookie = "mw-lang=;path=/;max-age=0"; }}>한국어</a>
               </div>
             </details>
-            <a href="https://github.com/raymindai/mdcore" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://github.com/raymindai/memory-wiki" target="_blank" rel="noopener noreferrer">GitHub</a>
             <Link href="/">Open Editor</Link>
           </div>
         </details>
@@ -521,7 +521,7 @@ export function SiteFooter({ lang = "en" }: { lang?: "en" | "ko" } = {}) {
               {t.company}
             </p>
             {[
-              { label: "GitHub", href: "https://github.com/raymindai/mdcore" },
+              { label: "GitHub", href: "https://github.com/raymindai/memory-wiki" },
               { label: "hi@raymind.ai", href: "mailto:hi@raymind.ai" },
               { label: t.privacy, href: "/privacy" },
             ].map((l) => (
