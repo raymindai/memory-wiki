@@ -64,7 +64,7 @@ export interface AICallFailure {
 export type AICallResult = AICallSuccess | AICallFailure;
 
 const ANTHROPIC_MODEL_PRIMARY = "claude-sonnet-4-20250514";
-const ANTHROPIC_MODEL_LITE = "claude-haiku-4-5-20251001";
+const ANTHROPIC_MODEL_LITE = "claude-haiku-4-5";
 const OPENAI_MODEL_PRIMARY = "gpt-4o";
 const OPENAI_MODEL_LITE = "gpt-4o-mini";
 const GEMINI_MODEL_PRIMARY_DEFAULT = "gemini-3-flash-preview";

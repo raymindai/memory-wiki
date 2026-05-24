@@ -78,7 +78,7 @@ export async function rerank<T extends CandidateInput>(
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "claude-haiku-4-5",
         max_tokens: 2048,
         system: "You return ONLY valid JSON matching the requested array shape. No prose, no fences.",
         messages: [{
