@@ -58,3 +58,12 @@ apps/desktop/build.log
 apps/quicklook/MdfyQuickLook/build.log
 apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/project.xcworkspace/xcuserdata/
 apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/xcuserdata/
+
+# macOS noise
+**/.DS_Store
+
+# Adobe Illustrator crash autosave / temp files
+assets/brand/~ai-*.tmp
+
+# Adobe After Effects auto-save crash recovery (regenerated)
+**/Adobe After Effects Auto-Save/

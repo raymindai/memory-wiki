@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<title>mwblob morph preview</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0c0c0d; color: #e7e7ea; font: 13px/1.5 system-ui; }
+  main { display: grid; place-items: center; min-height: 100%; gap: 24px; }
+  .stage { display: grid; grid-template-columns: repeat(3, auto); gap: 24px; align-items: center; }
+  .card { display: grid; place-items: center; gap: 8px; }
+  .card .label { opacity: 0.6; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+  /* same SVG used three ways */
+  .light { background: #0c0c0d; padding: 24px; border-radius: 12px; }
+  .dark  { background: #f6f6f7; padding: 24px; border-radius: 12px; }
+  .accent{ background: #ea580c; padding: 24px; border-radius: 12px; }
+  img { display: block; }
+  /* The CSS variable inside the SVG only applies when inlined, not via <img>.
+     So show one inline copy too. */
+  .inline { width: 220px; height: 200px; }
+  .inline.light  { --mw-blob: #fff; }
+  .inline.dark   { --mw-blob: #18181b; }
+  .inline.accent { --mw-blob: #ffffff; }
+</style>
+</head>
+<body>
+<main>
+  <h1 style="margin:0;font-weight:500;font-size:14px;opacity:0.7">mwblob_morph.svg — live</h1>
+  <div class="stage">
+    <div class="card">
+      <object class="inline light" data="mwblob_morph.svg" type="image/svg+xml"></object>
+      <div class="label">on dark</div>
+    </div>
+    <div class="card">
+      <div class="dark" style="border-radius:12px">
+        <object class="inline" style="--mw-blob:#18181b" data="mwblob_morph.svg" type="image/svg+xml"></object>
+      </div>
+      <div class="label">on light</div>
+    </div>
+    <div class="card">
+      <div class="accent" style="border-radius:12px">
+        <object class="inline" data="mwblob_morph.svg" type="image/svg+xml"></object>
+      </div>
+      <div class="label">on accent</div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
