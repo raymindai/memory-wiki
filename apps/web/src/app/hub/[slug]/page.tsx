@@ -219,15 +219,19 @@ export default async function HubPage({ params, searchParams }: Props) {
     passing_cells: number;
     last_run_at: string | null;
   };
-  const readiness = supabaseForReadiness
-    ? await supabaseForReadiness
+  let readiness: ReadinessRow | null = null;
+  if (supabaseForReadiness) {
+    try {
+      const { data } = await supabaseForReadiness
         .from("hub_readiness")
         .select("round_label, scores, breakdown, headline, total_cells, passing_cells, last_run_at")
         .eq("hub_slug", slug)
-        .single()
-        .then(({ data }) => (data as ReadinessRow | null) || null)
-        .catch(() => null)
-    : null;
+        .single();
+      readiness = (data as ReadinessRow | null) || null;
+    } catch {
+      readiness = null;
+    }
+  }
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
