@@ -28,7 +28,9 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const BASE_URL = process.env.MDFY_URL || "https://memory.wiki";
+// MEMORY_WIKI_URL is the canonical env var; MDFY_URL stays as a
+// deprecated alias so existing user shells keep working.
+const BASE_URL = process.env.MEMORY_WIKI_URL || process.env.MDFY_URL || "https://memory.wiki";
 const CONFIG_DIR = path.join(os.homedir(), ".memory.wiki");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 const TOKENS_FILE = path.join(CONFIG_DIR, "tokens.json");
@@ -390,7 +392,8 @@ Examples:
   Memory.Wiki pull abc123 -o meeting.md
 
 Environment:
-  MDFY_URL    Base URL (default: https://memory.wiki)
+  MEMORY_WIKI_URL    Base URL (default: https://memory.wiki)
+                     MDFY_URL accepted as deprecated alias
 
 Config:  ~/.memory.wiki/config.json
 Tokens:  ~/.memory.wiki/tokens.json
