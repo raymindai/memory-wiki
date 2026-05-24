@@ -4,6 +4,7 @@ import { verifyAuthToken } from "@/lib/verify-auth";
 import { permissionResponse } from "@/lib/permission-response";
 import { compactMarkdown, estimateTokens, isCompactRequested, isFullRequested, tokenEconomyHeaders } from "@/lib/markdown-compact";
 import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
+import { extractFacts, firstParagraph, extractSkeleton } from "@/lib/doc-gist";
 
 /**
  * v6 — Bundle URL → Bundle Spec v1.0 conformant markdown payload.
@@ -91,12 +92,12 @@ export async function GET(
 
   const docIds = (bundleDocs || []).map(d => d.document_id);
 
-  type DocRow = { id: string; title: string | null; markdown: string; updated_at: string; is_draft: boolean | null; deleted_at: string | null; password_hash: string | null; allowed_emails: string[] | null };
+  type DocRow = { id: string; title: string | null; markdown: string; summary: string | null; updated_at: string; is_draft: boolean | null; deleted_at: string | null; password_hash: string | null; allowed_emails: string[] | null };
   let docs: DocRow[] = [];
   if (docIds.length > 0) {
     const res = await supabase
       .from("documents")
-      .select("id, title, markdown, updated_at, is_draft, deleted_at, password_hash, allowed_emails")
+      .select("id, title, markdown, summary, updated_at, is_draft, deleted_at, password_hash, allowed_emails")
       .in("id", docIds);
     docs = (res.data as DocRow[] | null) || [];
   }
@@ -269,6 +270,9 @@ export async function GET(
   const fullMode = isFullRequested(request.url);
 
   let visibleIdx = 0;
+  if (!fullMode && (bundleDocs || []).some(bd => isFetchable(byId.get(bd.document_id)))) {
+    sections.push("## Documents");
+  }
   for (const bd of bundleDocs || []) {
     const d = byId.get(bd.document_id);
     if (!isFetchable(d)) continue;
@@ -283,11 +287,23 @@ export async function GET(
       const docMd = d!.markdown || "";
       sections.push(compact ? compactMarkdown(docMd) : docMd);
     } else {
-      // Digest row — single line per doc with the title as a link
-      // and the annotation (if any) as a continuation. Mirrors the
-      // hub digest's terse shape; AI follows the link for the body.
-      const annotationSuffix = annotation ? ` — ${annotation.replace(/\s+/g, " ")}` : "";
-      sections.push(`${visibleIdx}. [${docTitle}](${docUrl})${annotationSuffix}`);
+      // Digest row enriched analogously to the hub catalog: title +
+      // gist (Facts → summary → firstParagraph) + H2 skeleton, so an
+      // AI seeing the bundle URL can answer about member docs without
+      // having to fetch each body separately.
+      const docMd = d!.markdown || "";
+      const summary = d!.summary || null;
+      const gist =
+        extractFacts(docMd) ||
+        (summary && summary.trim().length > 0 ? summary.trim() : "") ||
+        firstParagraph(docMd);
+      const skeleton = extractSkeleton(docMd);
+      const lines: string[] = [];
+      lines.push(`### ${visibleIdx}. [${docTitle}](${docUrl})`);
+      if (annotation) lines.push(`> ${annotation.replace(/\s+/g, " ")}`);
+      if (gist) lines.push(gist);
+      if (skeleton) lines.push(`*sections:* ${skeleton}`);
+      sections.push(lines.join("\n"));
     }
   }
 

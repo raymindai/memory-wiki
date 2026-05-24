@@ -68,6 +68,99 @@ export async function GET(
   const updated = data.updated_at ? new Date(data.updated_at).toISOString() : "";
   const source = data.source ? String(data.source).replace(/"/g, '\\"') : "Memory.Wiki";
 
+  // ── Knowledge-graph context for this doc ──────────────────────
+  // The hub-level digest carries the full concept graph; for an AI
+  // landing on a single doc URL we surface just the concepts that
+  // touch THIS doc + the relations between them + the bundles that
+  // include it. Lets the AI position the doc inside the larger hub
+  // without an extra round-trip.
+  type ConceptRow = { id: number; label: string; concept_type: string | null; description: string | null; weight: number | null; doc_ids: string[] | null };
+  const { data: conceptRows } = await supabase
+    .from("concept_index")
+    .select("id, label, concept_type, description, weight, doc_ids")
+    .eq("user_id", data.user_id)
+    .contains("doc_ids", [id])
+    .order("weight", { ascending: false })
+    .limit(12);
+  const concepts = (conceptRows as ConceptRow[] | null) || [];
+  const conceptIds = concepts.map((c) => c.id);
+  type RelationRow = { source_concept_id: number; target_concept_id: number; relation_label: string | null };
+  let relations: RelationRow[] = [];
+  if (conceptIds.length > 1) {
+    const { data: relRows } = await supabase
+      .from("concept_relations")
+      .select("source_concept_id, target_concept_id, relation_label")
+      .eq("user_id", data.user_id)
+      .in("source_concept_id", conceptIds)
+      .in("target_concept_id", conceptIds)
+      .limit(20);
+    relations = (relRows as RelationRow[] | null) || [];
+  }
+  const conceptLabelById = new Map(concepts.map((c) => [c.id, c.label]));
+
+  // Bundles that contain this doc. Cheap one-shot join. Filter out
+  // private/draft/restricted bundles so we don't leak metadata.
+  type BundleRow = { id: string; title: string | null; description: string | null; is_draft: boolean | null; password_hash: string | null; allowed_emails: string[] | null };
+  type BundleDocRow = { bundle_id: string };
+  const { data: bdRows } = await supabase
+    .from("bundle_documents")
+    .select("bundle_id")
+    .eq("document_id", id);
+  const bundleIds = Array.from(new Set((bdRows as BundleDocRow[] | null || []).map((r) => r.bundle_id)));
+  let parentBundles: BundleRow[] = [];
+  if (bundleIds.length > 0) {
+    const { data: bundleRows } = await supabase
+      .from("bundles")
+      .select("id, title, description, is_draft, password_hash, allowed_emails")
+      .in("id", bundleIds);
+    parentBundles = ((bundleRows as BundleRow[] | null) || []).filter(
+      (b) => !b.is_draft && !b.password_hash && !(Array.isArray(b.allowed_emails) && b.allowed_emails.length > 0),
+    );
+  }
+
+  // Owner's hub slug — gives the AI the canonical "what hub does this
+  // doc live in" pointer so it can fetch the wider corpus if needed.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("hub_slug, hub_public, display_name")
+    .eq("id", data.user_id)
+    .single();
+  const hubSlug = profile?.hub_public ? profile.hub_slug : null;
+
+  const contextLines: string[] = [];
+  if (concepts.length > 0) {
+    contextLines.push("## Concepts in this document");
+    for (const c of concepts) {
+      const meta = c.concept_type ? ` _(${c.concept_type})_` : "";
+      contextLines.push(`- **${c.label}**${meta}`);
+      if (c.description) contextLines.push(`  ${c.description.split("\n")[0].slice(0, 200)}`);
+    }
+  }
+  if (relations.length > 0) {
+    contextLines.push("");
+    contextLines.push("## Concept relations (within this doc's concepts)");
+    for (const r of relations) {
+      const src = conceptLabelById.get(r.source_concept_id);
+      const tgt = conceptLabelById.get(r.target_concept_id);
+      if (!src || !tgt) continue;
+      contextLines.push(`- **${src}** ${(r.relation_label || "→").trim()} **${tgt}**`);
+    }
+  }
+  if (parentBundles.length > 0) {
+    contextLines.push("");
+    contextLines.push("## Bundles containing this document");
+    for (const b of parentBundles.slice(0, 10)) {
+      const t = (b.title || "Untitled bundle").replace(/[\r\n]+/g, " ");
+      contextLines.push(`- [${t}](https://memory.wiki/b/${b.id})`);
+      if (b.description) contextLines.push(`  > ${b.description.split("\n")[0].slice(0, 200)}`);
+    }
+  }
+  if (hubSlug) {
+    contextLines.push("");
+    contextLines.push(`_Hub canonical:_ https://memory.wiki/hub/${hubSlug} · _Concept digest:_ https://memory.wiki/raw/hub/${hubSlug}?digest=1&compact=1`);
+  }
+  const contextBlock = contextLines.length > 0 ? `\n\n---\n\n${contextLines.join("\n")}\n` : "";
+
   // Frontmatter first, then the raw markdown body. The body usually starts
   // with its own H1; we don't repeat the title to avoid duplicate headings.
   const frontmatter = [
@@ -75,6 +168,9 @@ export async function GET(
     `title: "${title}"`,
     `url: https://memory.wiki/${id}`,
     updated ? `updated: ${updated}` : null,
+    hubSlug ? `hub: https://memory.wiki/hub/${hubSlug}` : null,
+    parentBundles.length > 0 ? `bundle_count: ${parentBundles.length}` : null,
+    concepts.length > 0 ? `concept_count: ${concepts.length}` : null,
     `source: "${source}"`,
     "---",
     "",
@@ -83,7 +179,7 @@ export async function GET(
   const compact = isCompactRequested(request.url);
   const rawMarkdown = data.markdown || "";
   const md = compact ? compactMarkdown(rawMarkdown) : rawMarkdown;
-  const body = `${frontmatter}\n${md}`;
+  const body = `${frontmatter}\n${md}${contextBlock}`;
 
   const sig = extractRequestSignals(request);
   logRawFetch({

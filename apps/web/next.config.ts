@@ -57,6 +57,14 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  // lucide-react 1.x ships ESM under .mjs only. Next.js' default
+  // modularizeImports rule maps to .js → resolve fails. Override.
+  modularizeImports: {
+    "lucide-react": {
+      transform: "lucide-react/dist/esm/icons/{{kebabCase member}}.mjs",
+      skipDefaultConversion: true,
+    },
+  },
 };
 
 export default nextConfig;
