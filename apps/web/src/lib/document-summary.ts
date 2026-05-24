@@ -22,7 +22,9 @@ const ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages";
 const PROMPT = `Summarize the following markdown document in 1-2 short sentences
 that capture the load-bearing claim or fact. Skip metadata (capture date,
 source, author), boilerplate, and table-of-contents lines. Return the
-summary alone — no preface, no markdown, no quotes.
+summary alone, with no preface, no markdown, no quotes.
+
+Do NOT use em-dashes (—), en-dashes (–), middle-dots (·), arrows (→), check marks (✓), or emoji inside the summary. Use comma, colon, slash, parentheses, or a sentence break instead.
 
 DOCUMENT:
 `;

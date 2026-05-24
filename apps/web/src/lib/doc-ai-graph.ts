@@ -29,10 +29,11 @@ Return STRICTLY one JSON object on a single line (no markdown fences):
 {"themes":[<3-5 short theme phrases>],"insights":[<2-4 non-obvious observations>],"keyTakeaways":[<3-6 load-bearing claims the document makes>],"openQuestions":[<1-3 things the document doesn't fully answer>]}
 
 Rules:
-- Every claim in keyTakeaways must be SUPPORTED by the document body — don't extrapolate.
+- Every claim in keyTakeaways must be SUPPORTED by the document body. Do not extrapolate.
 - Themes are short (2-5 words). Insights are full sentences. Takeaways are one-sentence facts.
 - Skip openQuestions if the document is self-contained.
-- Output JSON only; no markdown, no preface.`;
+- Output JSON only, no markdown, no preface.
+- Inside string values, do NOT use em-dashes (—), en-dashes (–), middle-dots (·), arrows (→ ← ↑ ↓), check marks (✓ ✔), or emoji. Use comma, colon, slash, parentheses, or a sentence break instead.`;
 
 export async function generateDocAIGraph(
   markdown: string,
