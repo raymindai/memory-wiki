@@ -71,9 +71,9 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
           {t.hero.sub}
         </p>
 
-        {/* Cross-AI verification badge — small, sits between the
-            subhead and the platform pills. Points to /mwbench so a
-            curious reader (or a Crawler) can audit the claim. */}
+        {/* Cross-AI verification badge. Sits between the subhead
+            and the platform pills. Points to /mwbench so a curious
+            reader (or a crawler) can audit the claim. */}
         <Link
           href="/mwbench"
           style={{
@@ -93,9 +93,16 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
             letterSpacing: "-0.005em",
           }}
         >
-          <span style={{ color: "var(--accent)", fontWeight: 700 }}>✓</span>
-          Cross-AI verified · 100% on unseen content · no hallucination
-          <span style={{ color: "var(--text-faint)", marginLeft: 4 }}>MWBench →</span>
+          <span
+            style={{
+              color: "var(--accent)",
+              fontWeight: 700,
+              fontFamily: "var(--font-geist-mono), monospace",
+            }}
+          >
+            MWBench
+          </span>
+          Cross-AI verified / 100% on unseen content / grounded by quote
         </Link>
 
         <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap", alignItems: "center" }}>

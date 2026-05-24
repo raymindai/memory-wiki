@@ -75,7 +75,7 @@ const quickStartCards = [
   {
     tag: "verified",
     title: "MWBench cross-AI eval",
-    desc: "Open methodology and results. 100% across Claude / OpenAI / Gemini, including on truly unseen content. No hallucination on adversarial queries.",
+    desc: "Open methodology and results. 100% across Claude / OpenAI / Gemini, including on content the AIs have never seen during training. Every claim audited by literal corpus quote.",
     href: "/mwbench",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -4,9 +4,9 @@ import ViewerHeader from "@/components/ViewerHeader";
 import ViewerFooter from "@/components/ViewerFooter";
 
 export const metadata: Metadata = {
-  title: "MWBench — Cross-AI eval: one URL works on Claude, ChatGPT, and Gemini",
+  title: "MWBench: cross-AI eval, one URL works on Claude, ChatGPT, and Gemini",
   description:
-    "Memory.Wiki's open methodology for proving the cross-AI URL delivery model. 100% accuracy across Claude / OpenAI / Gemini, verified on content the AIs have never seen during training. Quote-evidence judge, adversarial subset, reproducible harness. Browse vs paste, familiar vs unseen — four cells, all 100%.",
+    "Memory.Wiki's open methodology for proving the cross-AI URL delivery model. 100% accuracy across Claude / OpenAI / Gemini, verified on content the AIs have never seen during training. Quote-evidence judge (every claim audited against a literal corpus quote), adversarial subset, reproducible harness. Browse vs paste, familiar vs unseen, four cells, all 100%.",
   keywords: [
     "cross-AI",
     "MWBench",
@@ -15,18 +15,18 @@ export const metadata: Metadata = {
     "ChatGPT eval",
     "Gemini eval",
     "LLM benchmark",
-    "no hallucination",
+    "quote evidence judge",
+    "grounded LLM answer",
     "URL delivery model",
     "knowledge graph AI",
     "tool use benchmark",
     "AI verification",
     "RAG eval",
-    "quote evidence judge",
     "unseen content AI",
   ],
   alternates: { canonical: "https://memory.wiki/mwbench" },
   openGraph: {
-    title: "MWBench — Cross-AI eval for Memory.Wiki",
+    title: "MWBench / Cross-AI eval for Memory.Wiki",
     description:
       "100% across Claude / OpenAI / Gemini, including on truly unseen content. Open methodology, reproducible harness.",
     url: "https://memory.wiki/mwbench",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MWBench — Cross-AI eval for Memory.Wiki",
+    title: "MWBench / Cross-AI eval for Memory.Wiki",
     description:
       "100% across Claude / OpenAI / Gemini on truly unseen content. Open methodology, reproducible harness.",
     images: ["/api/og?title=MWBench"],
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 const STRUCTURED_DATA = {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  headline: "MWBench — Cross-AI eval for Memory.Wiki",
+  headline: "MWBench / Cross-AI eval for Memory.Wiki",
   description:
     "Open methodology for verifying that a single URL paste into Claude / OpenAI / Gemini produces 100% correct answers, including on content the AIs have never seen during training.",
   url: "https://memory.wiki/mwbench",
@@ -92,7 +92,7 @@ export default function MWBenchPage() {
             className="text-body leading-relaxed max-w-2xl"
             style={{ color: "var(--text-secondary)" }}
           >
-            Memory.Wiki delivers your knowledge to Claude, ChatGPT, and Gemini through a single URL. MWBench is the open eval that measures whether the wedge actually works — including on content the AI has never seen during training.
+            Memory.Wiki delivers your knowledge to Claude, ChatGPT, and Gemini through a single URL. MWBench is the open eval that measures whether the wedge actually works, including on content the AI has never seen during training.
           </p>
         </section>
 
@@ -120,7 +120,7 @@ export default function MWBenchPage() {
               <tbody>
                 <tr style={{ borderBottom: "1px solid var(--border-dim)" }}>
                   <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
-                    Paste mode — full corpus<br />
+                    Paste mode / full corpus<br />
                     <span className="text-caption" style={{ color: "var(--text-faint)" }}>
                       AI receives every doc body in the prompt
                     </span>
@@ -130,7 +130,7 @@ export default function MWBenchPage() {
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--border-dim)" }}>
                   <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
-                    Paste mode — compact
+                    Paste mode / compact
                     <br />
                     <span className="text-caption" style={{ color: "var(--text-faint)" }}>
                       8–9× smaller payload (concept digest + skeleton)
@@ -141,7 +141,7 @@ export default function MWBenchPage() {
                 </tr>
                 <tr style={{ borderBottom: "1px solid var(--border-dim)" }}>
                   <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
-                    Browse mode — AI fetches the URL
+                    Browse mode (AI fetches the URL)
                     <br />
                     <span className="text-caption" style={{ color: "var(--text-faint)" }}>
                       The real user scenario
@@ -159,7 +159,7 @@ export default function MWBenchPage() {
                     </span>
                   </td>
                   <td className="text-right px-4 py-3 tabular-nums font-medium" style={{ color: "var(--accent)" }}>100%</td>
-                  <td className="text-right px-4 py-3 tabular-nums" style={{ color: "var(--text-faint)" }}>—</td>
+                  <td className="text-right px-4 py-3 tabular-nums" style={{ color: "var(--text-faint)" }}>n/a</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
@@ -176,7 +176,7 @@ export default function MWBenchPage() {
             </table>
           </div>
           <p className="mt-3 text-caption" style={{ color: "var(--text-faint)" }}>
-            Three runners — <code>claude-sonnet-4-6</code>, <code>gpt-5.5</code>, <code>gemini-3.5-flash</code>. Judge: quote-evidence, requires a literal corpus quote per claim.
+            Three runners: <code>claude-sonnet-4-6</code>, <code>gpt-5.5</code>, <code>gemini-3.5-flash</code>. Judge: quote-evidence, requires a literal corpus quote per claim.
           </p>
         </section>
 
@@ -217,7 +217,7 @@ export default function MWBenchPage() {
                 <strong>Familiar</strong> (raymindai): a public hub that may have been crawled by AI training data. Some of the accuracy could be memorization.
               </p>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                <strong>Unseen</strong> (mwbench-zorblax): a synthetic hub seeded for this test. Every fact is fictional — ZorblaxCorp, CipherPlate v3.4.1, Talia Renford — none exist anywhere in AI training data. Only the URL fetch can produce correct answers.
+                <strong>Unseen</strong> (mwbench-zorblax): a synthetic hub seeded for this test. Every fact is fictional (ZorblaxCorp, CipherPlate v3.4.1, Talia Renford), none exist anywhere in AI training data. Only the URL fetch can produce correct answers.
               </p>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function MWBenchPage() {
           >
             <strong style={{ color: "var(--text-primary)" }}>Browse × Unseen</strong>{" "}
             <span style={{ color: "var(--text-secondary)" }}>
-              is the only cell that fully isolates the wedge. AI must fetch (Browse), and memorization is impossible (Unseen). 100% across Claude / OpenAI / Gemini means the cross-AI URL delivery model genuinely works — not just on content the AI happened to memorize.
+              is the only cell that fully isolates the wedge. AI must fetch (Browse), and memorization is impossible (Unseen). 100% across Claude / OpenAI / Gemini means the cross-AI URL delivery model genuinely works, not just on content the AI happened to memorize.
             </span>
           </div>
         </section>
@@ -262,7 +262,7 @@ export default function MWBenchPage() {
             </p>
             <p>
               <strong style={{ color: "var(--text-primary)" }}>Quote-evidence judge.</strong>{" "}
-              The judge model (<code>claude-sonnet-4-6</code>) is given the runner&apos;s full corpus and must produce a literal quote from that corpus for every substantive claim in the answer. Score = supported share of claims. No &ldquo;this sounds like hallucination&rdquo; guesswork — every percentage point is auditable.
+              The judge model (<code>claude-sonnet-4-6</code>) is given the runner&apos;s full corpus and must produce a literal quote from that corpus for every substantive claim in the answer. Score = supported share of claims. No &ldquo;this sounds like hallucination&rdquo; guesswork. Every percentage point is auditable.
             </p>
             <p>
               <strong style={{ color: "var(--text-primary)" }}>Cross-doc synthesis is allowed.</strong>{" "}
@@ -303,10 +303,10 @@ export default function MWBenchPage() {
               style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
             >
               <div className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
-                MWBench v1 — main write-up
+                MWBench v1, main write-up
               </div>
               <div className="text-caption" style={{ color: "var(--text-secondary)" }}>
-                9 rounds, 8 production deploys, ~600 bench cells. Compact 33% → 100%, paste 100%, browse 90-100%, adversarial 100%, tool-use 100%.
+                9 rounds, 8 production deploys, ~600 bench cells. Compact 33% to 100%, paste 100%, browse 90 to 100%, adversarial 100%, tool-use 100%.
               </div>
             </a>
             <a
@@ -317,7 +317,7 @@ export default function MWBenchPage() {
               style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
             >
               <div className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
-                Round 6-7 — browse mode honest measurement
+                Round 6-7: browse mode honest measurement
               </div>
               <div className="text-caption" style={{ color: "var(--text-secondary)" }}>
                 Real-world scenario: AI receives only a URL and a <code>fetch_url</code> tool. Discovers and fetches and answers, all without the corpus in the prompt.
@@ -350,14 +350,14 @@ export default function MWBenchPage() {
               Try it yourself
             </h3>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
-              Sign up at Memory.Wiki, capture five docs from any AI chat, and paste your hub URL into Claude.ai or ChatGPT. The AI will fetch, read, and answer — even on content it has never seen during training.
+              Sign up at Memory.Wiki, capture five docs from any AI chat, and paste your hub URL into Claude.ai or ChatGPT. The AI will fetch, read, and answer, even on content it has never seen during training.
             </p>
             <Link
               href="/auth/signin"
               className="inline-block px-4 py-2 rounded-md text-sm font-semibold transition-opacity"
               style={{ background: "var(--accent)", color: "#000" }}
             >
-              Start free →
+              Start free
             </Link>
           </div>
         </section>
