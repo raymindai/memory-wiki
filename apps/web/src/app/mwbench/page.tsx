@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSupabaseClient } from "@/lib/supabase";
 import ViewerHeader from "@/components/ViewerHeader";
 import ViewerFooter from "@/components/ViewerFooter";
 
 export const metadata: Metadata = {
   title: "MWBench — Memory.Wiki delivers your knowledge to any AI, verified",
   description:
-    "Cross-AI eval for Memory.Wiki. A single URL paste into Claude / OpenAI / Gemini → 100% correct answers, including on content the AI has never seen during training. Methodology, results, and the live readiness badges for every public hub.",
+    "Cross-AI eval for Memory.Wiki. A single URL paste into Claude / OpenAI / Gemini → 100% correct answers, including on content the AI has never seen during training. Methodology, results, and reproducible harness.",
   alternates: { canonical: "https://memory.wiki/mwbench" },
   openGraph: {
     title: "MWBench — Memory.Wiki cross-AI eval",
@@ -18,35 +17,7 @@ export const metadata: Metadata = {
   },
 };
 
-type ReadinessRow = {
-  hub_slug: string;
-  round_label: string | null;
-  headline: string | null;
-  scores: Record<string, Record<string, number>>;
-  total_cells: number;
-  passing_cells: number;
-  last_run_at: string | null;
-};
-
-async function getReadinessSnapshots(): Promise<ReadinessRow[]> {
-  const supabase = getSupabaseClient();
-  if (!supabase) return [];
-  const { data } = await supabase
-    .from("hub_readiness")
-    .select("hub_slug, round_label, headline, scores, total_cells, passing_cells, last_run_at")
-    .order("passing_cells", { ascending: false })
-    .limit(20);
-  return (data as ReadinessRow[] | null) || [];
-}
-
-function pct(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "—";
-  return `${(n * 100).toFixed(1)}%`;
-}
-
-export default async function MWBenchPage() {
-  const rows = await getReadinessSnapshots();
-
+export default function MWBenchPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
       <ViewerHeader title="MWBench" breadcrumb={<>memory.wiki/<span style={{ color: "var(--accent)" }}>mwbench</span></>} />
@@ -206,51 +177,23 @@ export default async function MWBenchPage() {
           </div>
         </section>
 
-        {/* Live readiness leaderboard */}
-        {rows.length > 0 && (
-          <section className="mb-16">
-            <h2 className="text-h2 font-bold mb-2" style={{ color: "var(--text-primary)" }}>
-              Live readiness leaderboard
-            </h2>
-            <p className="text-caption mb-6" style={{ color: "var(--text-faint)" }}>
-              Hubs that have been MWBench-benched. Click through to see the per-runner per-mode breakdown.
+        {/* Why no per-hub measurement */}
+        <section className="mb-16">
+          <div
+            className="p-5 rounded-xl"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+          >
+            <h3 className="text-body font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+              We don&apos;t bench every hub
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              The cross-AI wedge is proven at the <strong>system level</strong>, not per-hub. The unseen-hub result (100% on content the AIs have never seen) means every hub built on Memory.Wiki inherits the same property automatically. Re-running the bench on every customer hub would be repeating a proof we&apos;ve already given.
             </p>
-            <div className="space-y-3">
-              {rows.map((r) => (
-                <Link
-                  key={r.hub_slug}
-                  href={`/hub/${r.hub_slug}`}
-                  className="flex items-center gap-4 p-4 rounded-xl transition-colors hover:opacity-90"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
-                >
-                  <span
-                    className="inline-flex items-center justify-center px-3 py-1 rounded text-sm font-bold tabular-nums shrink-0"
-                    style={{
-                      background:
-                        r.total_cells > 0 && r.passing_cells / r.total_cells >= 0.95
-                          ? "var(--accent)"
-                          : "var(--text-secondary)",
-                      color: "#000",
-                    }}
-                  >
-                    {pct(r.total_cells > 0 ? r.passing_cells / r.total_cells : 0)}
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="text-body font-semibold block" style={{ color: "var(--text-primary)" }}>
-                      memory.wiki/hub/{r.hub_slug}
-                    </span>
-                    <span className="text-caption" style={{ color: "var(--text-secondary)" }}>
-                      {r.headline || `${r.passing_cells} of ${r.total_cells} cells passing`}
-                    </span>
-                  </span>
-                  <span className="text-caption shrink-0" style={{ color: "var(--text-faint)" }}>
-                    {r.round_label || ""}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+            <p className="text-sm leading-relaxed mt-3" style={{ color: "var(--text-secondary)" }}>
+              The harness, the data, and the deeper write-ups are below for anyone who wants to audit the claim or run it themselves.
+            </p>
+          </div>
+        </section>
 
         {/* Methodology summary */}
         <section className="mb-16">
