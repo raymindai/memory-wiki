@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { compactMarkdown, estimateTokens, isCompactRequested, isDigestRequested, isFullRequested, tokenEconomyHeaders } from "@/lib/markdown-compact";
 import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
+import { extractFacts, extractSkeleton, firstParagraph } from "@/lib/doc-gist";
 
 /**
  * v6 — Hub URL raw fetch.
@@ -283,118 +284,12 @@ interface DigestArgs {
   since: string | null;
 }
 
-/**
- * Phase B — pull a curated `## Facts` block out of a doc's markdown
- * if the owner provided one. Highest-fidelity source for compact mode
- * since the owner is hand-asserting the load-bearing claims.
- *
- * Convention:
- *   ## Facts
- *   - product launches 2026-06
- *   - target customer: AI agent devs
- *   - moat: cross-AI URL paste
- *
- * Returns null when the section doesn't exist or is empty.
- */
-function extractFacts(md: string): string | null {
-  if (!md) return null;
-  const m = md.match(/^##\s+Facts\s*\n([\s\S]*?)(?=\n##\s|\n#\s|$)/im);
-  if (!m) return null;
-  const body = m[1].trim();
-  if (!body) return null;
-  // Collapse to one line per bullet. Strip markdown list markers.
-  const facts = body
-    .split("\n")
-    .map((l) => l.replace(/^[-*+>\s]+/, "").trim())
-    .filter(Boolean);
-  if (facts.length === 0) return null;
-  const joined = facts.join(" · ");
-  return joined.length > 600 ? joined.slice(0, 580).trimEnd() + "…" : joined;
-}
-
-/**
- * Pull H2 headings (and the very first sentence under each) as a
- * compact skeleton outline. Lets the AI see a doc's *shape* even when
- * the prose extract only captures the lede. Particularly load-bearing
- * for docs the prose summary can't fully cover (long business plans,
- * pitch decks, application essays).
- *
- * Returns `null` if there are fewer than 2 H2 sections — for short
- * docs the gist alone is enough and the skeleton would be noise.
- */
-function extractSkeleton(md: string, maxLen = 380): string | null {
-  if (!md) return null;
-  const lines = md.split("\n");
-  const sections: { heading: string; first: string }[] = [];
-  let current: { heading: string; first: string } | null = null;
-  for (const raw of lines) {
-    const line = raw.trim();
-    const h2 = line.match(/^##\s+(.+?)\s*$/);
-    if (h2) {
-      if (current) sections.push(current);
-      current = { heading: h2[1].trim(), first: "" };
-      continue;
-    }
-    if (current && !current.first && line && !/^#{1,6}\s/.test(line) && !/^---/.test(line)) {
-      current.first = line.replace(/^[-*+>]\s+/, "").replace(/[*_`]/g, "").slice(0, 100);
-    }
-  }
-  if (current) sections.push(current);
-  if (sections.length < 2) return null;
-
-  const parts: string[] = [];
-  let len = 0;
-  for (const s of sections) {
-    const piece = s.first ? `${s.heading}: ${s.first}` : s.heading;
-    if (len + piece.length + 3 > maxLen) {
-      parts.push("…");
-      break;
-    }
-    parts.push(piece);
-    len += piece.length + 3;
-  }
-  return parts.join(" | ");
-}
-
-/**
- * Phase A.1 — strip the H1, leading frontmatter, blank lines, and bullet
- * markers from a markdown body to surface the first ~280 chars of
- * real prose. The result lands under each doc link in the compact
- * digest when there's no curated Facts block and no LLM summary.
- *
- * No LLM cost. Quality depends on the doc's first paragraph being
- * load-bearing — for the raymindai corpus this is true ~80% of the
- * time.
- */
-function firstParagraph(md: string): string {
-  if (!md) return "";
-  // Strip YAML frontmatter
-  let body = md;
-  const fm = body.match(/^---\n[\s\S]*?\n---\n/);
-  if (fm) body = body.slice(fm[0].length);
-  // Drop leading H1 (the title is shown separately) + any blank lines
-  body = body.replace(/^\s*#\s+[^\n]*\n+/, "");
-  // Find first non-empty line, then collect contiguous text lines until
-  // a blank or a heading.
-  const lines = body.split("\n");
-  const collected: string[] = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      if (collected.length > 0) break;
-      continue;
-    }
-    if (/^#{1,6}\s/.test(trimmed)) {
-      if (collected.length > 0) break;
-      continue;
-    }
-    collected.push(trimmed.replace(/^[-*+>]\s+/, ""));
-    if (collected.join(" ").length >= 280) break;
-  }
-  let out = collected.join(" ").replace(/\s+/g, " ").trim();
-  if (out.length > 320) out = out.slice(0, 300).trimEnd() + "…";
-  return out;
-}
+// extractFacts / extractSkeleton / firstParagraph live in
+// @/lib/doc-gist so hub, bundle, and single-doc routes share the same
+// gist chain. Previously the hub route had its own copies that drifted
+// out of sync with the lib version — the lib version got an
+// extractFacts fix (m-flag regex was capturing only the first bullet),
+// but the hub copy kept the bug.
 
 async function renderDigest({ supabase, profile, slug, compact, since }: DigestArgs): Promise<string> {
   const author = (profile.display_name || slug).replace(/"/g, '\\"');
