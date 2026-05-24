@@ -24,9 +24,23 @@ import { judge } from "./judge.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const MODE_URLS = {
-  full: (base, slug) => `${base}/hub/${slug}/llms-full.txt`,
-  compact: (base, slug) => `${base}/raw/hub/${slug}?digest=1&compact=1`,
+// Per-scope URL builders. Each query carries a `scope` and `scope_id`
+// (default: hub/<args.hub>). Bundle queries hit /raw/bundle/<id>, doc
+// queries hit /raw/<id>. Each scope still has a full vs compact axis
+// for the accuracy/cost tradeoff measurement.
+const SCOPE_URLS = {
+  hub: {
+    full: (base, scopeId) => `${base}/hub/${scopeId}/llms-full.txt`,
+    compact: (base, scopeId) => `${base}/raw/hub/${scopeId}?digest=1&compact=1`,
+  },
+  bundle: {
+    full: (base, scopeId) => `${base}/raw/bundle/${scopeId}?full=1`,
+    compact: (base, scopeId) => `${base}/raw/bundle/${scopeId}?compact=1`,
+  },
+  doc: {
+    full: (base, scopeId) => `${base}/raw/${scopeId}`,
+    compact: (base, scopeId) => `${base}/raw/${scopeId}?compact=1`,
+  },
 };
 
 function parseArgs(argv) {
@@ -35,6 +49,7 @@ function parseArgs(argv) {
     max: Infinity,
     base: process.env.MWBENCH_BASE_URL || "https://memory.wiki",
     modes: ["full", "compact"],
+    queries: "queries/v1.jsonl",
   };
   for (const a of argv.slice(2)) {
     const [k, v] = a.startsWith("--") ? a.slice(2).split("=") : [null, null];
@@ -42,6 +57,7 @@ function parseArgs(argv) {
     else if (k === "max") out.max = parseInt(v || "0", 10) || Infinity;
     else if (k === "base") out.base = v || out.base;
     else if (k === "modes") out.modes = String(v).split(",").map((s) => s.trim()).filter(Boolean);
+    else if (k === "queries") out.queries = v || out.queries;
   }
   return out;
 }
@@ -63,38 +79,46 @@ async function fetchCorpus(url) {
 async function main() {
   const args = parseArgs(process.argv);
 
-  // Fetch every mode's corpus up front so per-query loops don't pay
-  // a network round-trip 20 times.
-  const corpora = {};
-  for (const mode of args.modes) {
-    if (!MODE_URLS[mode]) {
-      console.error(`[mwbench] unknown mode: ${mode}. Valid: ${Object.keys(MODE_URLS).join(", ")}`);
-      process.exit(1);
-    }
-    const url = MODE_URLS[mode](args.base, args.hub);
-    process.stderr.write(`[mwbench] fetching ${mode}: ${url} ... `);
-    try {
-      corpora[mode] = await fetchCorpus(url);
-      process.stderr.write(`${corpora[mode].chars} chars (${corpora[mode].fetch_ms}ms)\n`);
-    } catch (err) {
-      console.error(`FAILED ${err.message}`);
-      process.exit(1);
-    }
-  }
-
-  const queriesPath = path.join(__dirname, "queries", "v1.jsonl");
+  const queriesPath = path.isAbsolute(args.queries)
+    ? args.queries
+    : path.join(__dirname, args.queries);
   const queries = fs
     .readFileSync(queriesPath, "utf8")
     .split("\n")
     .filter((l) => l.trim())
     .map((l) => JSON.parse(l))
+    .map((q) => ({ ...q, scope: q.scope || "hub", scope_id: q.scope_id || args.hub }))
     .slice(0, args.max);
-  console.error(`[mwbench] loaded ${queries.length} queries`);
+  console.error(`[mwbench] loaded ${queries.length} queries from ${queriesPath}`);
+
+  // Per-query corpus fetch (one (scope, scope_id, mode) tuple → one URL).
+  // Cached so the same bundle/doc isn't fetched repeatedly across queries
+  // that target it.
+  const corpusCache = new Map();
+  async function getCorpus(scope, scopeId, mode) {
+    const key = `${scope}|${scopeId}|${mode}`;
+    if (corpusCache.has(key)) return corpusCache.get(key);
+    const builder = SCOPE_URLS[scope]?.[mode];
+    if (!builder) throw new Error(`Unknown scope/mode: ${scope}/${mode}`);
+    const url = builder(args.base, scopeId);
+    process.stderr.write(`[mwbench] fetching ${scope}:${scopeId}:${mode} ... `);
+    try {
+      const c = await fetchCorpus(url);
+      process.stderr.write(`${c.chars} chars (${c.fetch_ms}ms)\n`);
+      corpusCache.set(key, c);
+      return c;
+    } catch (err) {
+      process.stderr.write(`FAILED ${err.message}\n`);
+      const empty = { url, text: "", chars: 0, hash: "ERR", fetch_ms: 0, error: err.message };
+      corpusCache.set(key, empty);
+      return empty;
+    }
+  }
 
   const runners = [
     { name: "claude", fn: runClaude, on: !!process.env.ANTHROPIC_API_KEY },
     { name: "openai", fn: runOpenAI, on: !!process.env.OPENAI_API_KEY },
-    { name: "gemini", fn: runGemini, on: !!process.env.GEMINI_API_KEY },
+    { name: "gemini", fn: runGemini, on: !!(process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY) },
   ].filter((r) => r.on);
   if (runners.length === 0) {
     console.error("[mwbench] no API keys set. Need ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY");
@@ -109,11 +133,14 @@ async function main() {
 
   for (const q of queries) {
     for (const mode of args.modes) {
+      const corpus = await getCorpus(q.scope, q.scope_id, mode);
       for (const r of runners) {
-        process.stderr.write(`[mwbench] ${q.id} × ${r.name} × ${mode} ... `);
+        process.stderr.write(`[mwbench] ${q.id} (${q.scope}:${q.scope_id}) × ${r.name} × ${mode} ... `);
         try {
-          const result = await r.fn({ query: q, context: corpora[mode].text });
+          const result = await r.fn({ query: q, context: corpus.text });
           result.mode = mode;
+          result.scope = q.scope;
+          result.scope_id = q.scope_id;
           runs.push(result);
           process.stderr.write(result.error ? `ERR ${result.error.slice(0, 60)}\n` : `ok ${result.latency_ms}ms\n`);
         } catch (err) {
@@ -121,6 +148,8 @@ async function main() {
             runner: r.name,
             query_id: q.id,
             mode,
+            scope: q.scope,
+            scope_id: q.scope_id,
             answer: "",
             tokens_in: 0,
             tokens_out: 0,
@@ -148,14 +177,17 @@ async function main() {
   }
 
   const finished_at = new Date().toISOString();
+  const corporaSummary = Object.fromEntries(
+    Array.from(corpusCache.entries()).map(([k, v]) => [
+      k,
+      { url: v.url, chars: v.chars, hash: v.hash, error: v.error || null },
+    ]),
+  );
   const bench = {
     bench: "MWBench v1",
-    corpus_url: args.modes.map((m) => `${m}:${corpora[m].url}`).join(" | "),
-    corpus_hash: args.modes.map((m) => `${m}:${corpora[m].hash}`).join(" | "),
-    corpora: Object.fromEntries(
-      args.modes.map((m) => [m, { url: corpora[m].url, chars: corpora[m].chars, hash: corpora[m].hash }]),
-    ),
+    queries_file: args.queries,
     modes: args.modes,
+    corpora: corporaSummary,
     started_at,
     finished_at,
     queries,

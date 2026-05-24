@@ -1,7 +1,7 @@
 // Claude runner — calls Anthropic Messages API directly via fetch.
 // Anthropic SDK isn't installed; raw HTTP keeps the eval tree dependency-free.
 
-const MODEL = process.env.MWBENCH_CLAUDE_MODEL || "claude-opus-4-7";
+const MODEL = process.env.MWBENCH_CLAUDE_MODEL || "claude-sonnet-4-6";
 const ENDPOINT = "https://api.anthropic.com/v1/messages";
 
 export async function run({ query, context }) {

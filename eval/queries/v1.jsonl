@@ -1,7 +1,7 @@
 {"id":"q-001","q":"What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?","expected_doc":"SKaY7VJP","expected_keywords":["cross-AI","URL","paste"],"category":"single-doc"}
 {"id":"q-002","q":"Why is the founder Hyunsang Cho building memory.wiki?","expected_doc":"fz45GXXj","expected_keywords":["founder","memory","AI"],"category":"single-doc"}
 {"id":"q-003","q":"What are mdfy's core product features as of 2026-05?","expected_doc":"bmZYfZez","expected_keywords":["mdfy","features","2026"],"category":"single-doc"}
-{"id":"q-004","q":"How does mdfy do RAG / retrieval?","expected_doc":"how-mdfy-rag-works","expected_keywords":["RAG","retrieval"],"category":"single-doc"}
+{"id":"q-004","q":"How does mdfy do RAG / retrieval?","expected_doc":"mdfy-memory","expected_keywords":["RAG","retrieval"],"category":"single-doc"}
 {"id":"q-005","q":"How does mdfy keep documents, bundles, and hubs fresh over time?","expected_doc":"RUMdz2fQ","expected_keywords":["fresh","update","sync"],"category":"single-doc"}
 {"id":"q-006","q":"What was the Upstage Memory Protocol alliance proposal about?","expected_doc":"yWkfCPhn","expected_keywords":["Upstage","Memory Protocol","alliance"],"category":"single-doc"}
 {"id":"q-007","q":"What's the K-Tech Pioneers presentation evaluation context?","expected_doc":"jRpEdqww","expected_keywords":["K-TECH","Pioneers","평가"],"category":"single-doc"}
