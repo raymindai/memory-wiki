@@ -9,6 +9,7 @@ import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
 import ReferencedBy from "@/components/ReferencedBy";
 import HubCopyUrlButton from "./HubCopyUrlButton";
+import HubReadinessBadge from "@/components/HubReadinessBadge";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -205,6 +206,29 @@ export default async function HubPage({ params, searchParams }: Props) {
       }))
     : { documents: [], bundles: [], hubs: [], total: 0 };
 
+  // Per-hub AI readiness snapshot from the MWBench harness. Optional —
+  // returns null if the row doesn't exist (hub hasn't been benched yet
+  // or the migration hasn't applied).
+  const supabaseForReadiness = getSupabaseClient();
+  type ReadinessRow = {
+    round_label: string | null;
+    scores: Record<string, Record<string, number>>;
+    breakdown: Record<string, Record<string, unknown>>;
+    headline: string | null;
+    total_cells: number;
+    passing_cells: number;
+    last_run_at: string | null;
+  };
+  const readiness = supabaseForReadiness
+    ? await supabaseForReadiness
+        .from("hub_readiness")
+        .select("round_label, scores, breakdown, headline, total_cells, passing_cells, last_run_at")
+        .eq("hub_slug", slug)
+        .single()
+        .then(({ data }) => (data as ReadinessRow | null) || null)
+        .catch(() => null)
+    : null;
+
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
       <ViewerHeader
@@ -319,6 +343,21 @@ export default async function HubPage({ params, searchParams }: Props) {
             );
           })()}
         </section>
+
+        {/* AI-readability badge — MWBench cross-AI score for this hub.
+            Renders nothing when no readiness row exists, so the page
+            stays clean for hubs that haven't been benched. */}
+        {readiness && (
+          <HubReadinessBadge
+            headline={readiness.headline}
+            roundLabel={readiness.round_label}
+            totalCells={readiness.total_cells}
+            passingCells={readiness.passing_cells}
+            scores={readiness.scores as never}
+            breakdown={readiness.breakdown as never}
+            lastRunAt={readiness.last_run_at}
+          />
+        )}
 
         {/* Deploy-to-AI panel */}
         <section className="mb-12 px-5 py-4 rounded-xl" style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)" }}>
