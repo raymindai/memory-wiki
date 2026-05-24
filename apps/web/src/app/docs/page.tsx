@@ -72,6 +72,18 @@ const quickStartCards = [
       </svg>
     ),
   },
+  {
+    tag: "verified",
+    title: "MWBench cross-AI eval",
+    desc: "Open methodology and results. 100% across Claude / OpenAI / Gemini, including on truly unseen content. No hallucination on adversarial queries.",
+    href: "/mwbench",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    ),
+  },
 ];
 
 const exploreCards = [

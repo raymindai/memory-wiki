@@ -4,22 +4,77 @@ import ViewerHeader from "@/components/ViewerHeader";
 import ViewerFooter from "@/components/ViewerFooter";
 
 export const metadata: Metadata = {
-  title: "MWBench — Memory.Wiki delivers your knowledge to any AI, verified",
+  title: "MWBench — Cross-AI eval: one URL works on Claude, ChatGPT, and Gemini",
   description:
-    "Cross-AI eval for Memory.Wiki. A single URL paste into Claude / OpenAI / Gemini → 100% correct answers, including on content the AI has never seen during training. Methodology, results, and reproducible harness.",
+    "Memory.Wiki's open methodology for proving the cross-AI URL delivery model. 100% accuracy across Claude / OpenAI / Gemini, verified on content the AIs have never seen during training. Quote-evidence judge, adversarial subset, reproducible harness. Browse vs paste, familiar vs unseen — four cells, all 100%.",
+  keywords: [
+    "cross-AI",
+    "MWBench",
+    "Memory.Wiki",
+    "Claude eval",
+    "ChatGPT eval",
+    "Gemini eval",
+    "LLM benchmark",
+    "no hallucination",
+    "URL delivery model",
+    "knowledge graph AI",
+    "tool use benchmark",
+    "AI verification",
+    "RAG eval",
+    "quote evidence judge",
+    "unseen content AI",
+  ],
   alternates: { canonical: "https://memory.wiki/mwbench" },
   openGraph: {
-    title: "MWBench — Memory.Wiki cross-AI eval",
+    title: "MWBench — Cross-AI eval for Memory.Wiki",
     description:
-      "100% correct answers across Claude / OpenAI / Gemini, including on truly unseen content. Verified, productised, public.",
+      "100% across Claude / OpenAI / Gemini, including on truly unseen content. Open methodology, reproducible harness.",
     url: "https://memory.wiki/mwbench",
+    siteName: "Memory.Wiki",
+    type: "article",
     images: [{ url: "/api/og?title=MWBench", width: 1200, height: 630 }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "MWBench — Cross-AI eval for Memory.Wiki",
+    description:
+      "100% across Claude / OpenAI / Gemini on truly unseen content. Open methodology, reproducible harness.",
+    images: ["/api/og?title=MWBench"],
+  },
+  robots: { index: true, follow: true },
+};
+
+// JSON-LD structured data for Google understanding + rich result eligibility.
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: "MWBench — Cross-AI eval for Memory.Wiki",
+  description:
+    "Open methodology for verifying that a single URL paste into Claude / OpenAI / Gemini produces 100% correct answers, including on content the AIs have never seen during training.",
+  url: "https://memory.wiki/mwbench",
+  author: { "@type": "Organization", name: "Memory.Wiki" },
+  publisher: { "@type": "Organization", name: "Memory.Wiki", url: "https://memory.wiki" },
+  datePublished: "2026-05-24",
+  dateModified: "2026-05-25",
+  keywords:
+    "cross-AI, LLM benchmark, Claude eval, ChatGPT eval, Gemini eval, no hallucination, URL delivery model, MWBench",
+  about: [
+    { "@type": "Thing", name: "Claude AI" },
+    { "@type": "Thing", name: "ChatGPT" },
+    { "@type": "Thing", name: "Gemini AI" },
+    { "@type": "Thing", name: "Large Language Model evaluation" },
+  ],
+  isAccessibleForFree: true,
+  audience: { "@type": "Audience", audienceType: "AI engineers, LLM developers, knowledge workers" },
 };
 
 export default function MWBenchPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+      />
       <ViewerHeader title="MWBench" breadcrumb={<>memory.wiki/<span style={{ color: "var(--accent)" }}>mwbench</span></>} />
 
       <main className="max-w-4xl mx-auto px-6 py-12 sm:py-16">

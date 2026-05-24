@@ -71,6 +71,33 @@ export default function AboutContent({ locale }: { locale: "en" | "ko" }) {
           {t.hero.sub}
         </p>
 
+        {/* Cross-AI verification badge — small, sits between the
+            subhead and the platform pills. Points to /mwbench so a
+            curious reader (or a Crawler) can audit the claim. */}
+        <Link
+          href="/mwbench"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 20,
+            padding: "6px 12px",
+            borderRadius: 999,
+            background: "var(--surface)",
+            border: "1px solid var(--border-dim)",
+            color: "var(--text-secondary)",
+            fontSize: 12,
+            fontWeight: 500,
+            textDecoration: "none",
+            fontFamily: "var(--font-geist-mono), monospace",
+            letterSpacing: "-0.005em",
+          }}
+        >
+          <span style={{ color: "var(--accent)", fontWeight: 700 }}>✓</span>
+          Cross-AI verified · 100% on unseen content · no hallucination
+          <span style={{ color: "var(--text-faint)", marginLeft: 4 }}>MWBench →</span>
+        </Link>
+
         <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap", alignItems: "center" }}>
           {t.platforms.map((p) => (
             <Link
