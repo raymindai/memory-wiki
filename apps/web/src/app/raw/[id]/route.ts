@@ -199,7 +199,8 @@ export async function GET(
   }
   if (hubSlug) {
     contextLines.push("");
-    contextLines.push(`_Hub canonical:_ https://memory.wiki/hub/${hubSlug} · _Concept digest:_ https://memory.wiki/raw/hub/${hubSlug}?digest=1&compact=1`);
+    contextLines.push(`_Hub canonical:_ https://memory.wiki/hub/${hubSlug}`);
+    contextLines.push(`_Concept digest:_ https://memory.wiki/raw/hub/${hubSlug}?digest=1&compact=1`);
   }
   const contextBlock = contextLines.length > 0 ? `\n\n---\n\n${contextLines.join("\n")}\n` : "";
 
