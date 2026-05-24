@@ -3,7 +3,7 @@
 // generateContent + functionDeclarations.
 
 const MODEL = process.env.MWBENCH_GEMINI_MODEL || "gemini-3.5-flash";
-const MAX_TOOL_TURNS = 4;
+const MAX_TOOL_TURNS = 6;
 const MAX_RETRIES = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -84,16 +84,22 @@ Keep your answer under 200 words.`,
   let lastError = null;
 
   for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+    // Force final answer on last turn — omit `tools` so the model
+    // can only emit text. Without this Gemini loops on functionCall
+    // until turns exhaust, returning empty answer.
+    const isLastTurn = turn === MAX_TOOL_TURNS - 1;
     const body = {
       systemInstruction: {
         parts: [
           {
-            text: "You answer the user's question using Memory.Wiki content fetched via the fetch_url tool. If the URL gives you a hub or bundle, you can follow links inside it to fetch specific docs you need.",
+            text: isLastTurn
+              ? "Final turn — answer from the content already fetched above. No more tool calls."
+              : "You answer the user's question using Memory.Wiki content fetched via the fetch_url tool. If the URL gives you a hub or bundle, you can follow links inside it to fetch specific docs you need. Aim to answer in 2-3 fetches.",
           },
         ],
       },
       contents,
-      tools: TOOL_SPEC,
+      ...(isLastTurn ? {} : { tools: TOOL_SPEC }),
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 4096,
@@ -114,7 +120,7 @@ Keep your answer under 200 words.`,
     const fnCalls = parts.filter((p) => p.functionCall);
     const textParts = parts.filter((p) => p.text);
 
-    if (fnCalls.length === 0) {
+    if (fnCalls.length === 0 || isLastTurn) {
       answer = textParts.map((p) => p.text || "").join("").trim();
       break;
     }

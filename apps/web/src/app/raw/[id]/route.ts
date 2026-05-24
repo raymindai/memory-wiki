@@ -35,7 +35,7 @@ export async function GET(
 
   const { data } = await supabase
     .from("documents")
-    .select("id, markdown, title, is_draft, deleted_at, password_hash, expires_at, allowed_emails, updated_at, source, user_id")
+    .select("id, markdown, title, is_draft, deleted_at, password_hash, expires_at, allowed_emails, updated_at, source, user_id, ai_graph, ai_graph_generated_at, summary")
     .eq("id", id)
     .single();
 
@@ -128,6 +128,48 @@ export async function GET(
   const hubSlug = profile?.hub_public ? profile.hub_slug : null;
 
   const contextLines: string[] = [];
+
+  // AI graph (themes / insights / takeaways / open questions) generated
+  // by Claude Haiku at write time and cached on the row. Same shape as
+  // bundle.graph_data but scoped to a single doc — lets an AI fetching
+  // /raw/<id> see the analytical surface, not just the body. Surfaced
+  // FIRST in the context block so it anchors interpretation.
+  type DocGraph = {
+    themes?: string[];
+    insights?: string[];
+    keyTakeaways?: string[];
+    openQuestions?: string[];
+  };
+  const aiGraph = (data as { ai_graph?: DocGraph | null }).ai_graph;
+  if (aiGraph && typeof aiGraph === "object") {
+    const summary = (data as { summary?: string | null }).summary || null;
+    if (summary && summary.trim().length > 0) {
+      contextLines.push("## Summary");
+      contextLines.push(summary.trim());
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.themes) && aiGraph.themes.length > 0) {
+      contextLines.push("## Themes");
+      contextLines.push(aiGraph.themes.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.keyTakeaways) && aiGraph.keyTakeaways.length > 0) {
+      contextLines.push("## Key takeaways");
+      contextLines.push(aiGraph.keyTakeaways.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.insights) && aiGraph.insights.length > 0) {
+      contextLines.push("## Insights");
+      contextLines.push(aiGraph.insights.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.openQuestions) && aiGraph.openQuestions.length > 0) {
+      contextLines.push("## Open questions / gaps");
+      contextLines.push(aiGraph.openQuestions.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+  }
+
   if (concepts.length > 0) {
     contextLines.push("## Concepts in this document");
     for (const c of concepts) {

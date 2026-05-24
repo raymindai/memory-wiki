@@ -4,7 +4,7 @@
 
 const MODEL = process.env.MWBENCH_OPENAI_MODEL || "gpt-5.5";
 const ENDPOINT = "https://api.openai.com/v1/chat/completions";
-const MAX_TOOL_TURNS = 4;
+const MAX_TOOL_TURNS = 6;
 
 const TOOL_SPEC = [
   {
@@ -64,18 +64,30 @@ Keep your answer under 200 words.`,
   let lastError = null;
 
   for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+    // Force final answer on last turn — drop tools so model has no
+    // choice but to text-respond. Without this OpenAI loops on
+    // tool_calls until turns exhaust, leaving answer empty.
+    const isLastTurn = turn === MAX_TOOL_TURNS - 1;
+    if (isLastTurn) {
+      messages.push({
+        role: "system",
+        content:
+          "Final turn — produce the answer now from the content already fetched. No more tool calls.",
+      });
+    }
+    const requestBody = {
+      model: MODEL,
+      messages,
+      max_completion_tokens: 2048,
+      ...(isLastTurn ? { tool_choice: "none" } : { tools: TOOL_SPEC }),
+    };
     const r = await fetch(ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${key}`,
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages,
-        tools: TOOL_SPEC,
-        max_completion_tokens: 2048,
-      }),
+      body: JSON.stringify(requestBody),
     });
     if (!r.ok) {
       lastError = `HTTP ${r.status}: ${(await r.text()).slice(0, 300)}`;
@@ -92,7 +104,7 @@ Keep your answer under 200 words.`,
     }
 
     const toolCallsArr = msg.tool_calls || [];
-    if (toolCallsArr.length === 0) {
+    if (toolCallsArr.length === 0 || isLastTurn) {
       answer = (msg.content || "").trim();
       break;
     }

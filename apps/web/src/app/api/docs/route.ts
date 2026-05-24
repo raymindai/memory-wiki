@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { getSupabaseClient } from "@/lib/supabase";
 import { syncBacklinks } from "@/lib/backlinks";
 import { syncDocumentSummary } from "@/lib/document-summary";
+import { syncDocAIGraph } from "@/lib/doc-ai-graph";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { corsHeaders, ensureAnonymousCookie, readAnonymousCookie } from "@/lib/anonymous-cookie";
@@ -279,6 +280,11 @@ export async function POST(req: NextRequest) {
   // Haiku call, fire-and-forget — the compact route falls back to the
   // first-paragraph extractor when summary is still null.
   void syncDocumentSummary(supabase, id, markdown);
+
+  // Per-doc AI graph (themes / insights / keyTakeaways / openQuestions).
+  // Same shape as bundle.graph_data, scoped to a single doc — surfaced
+  // in /raw/<id> above the body. Cheap Haiku call, fire-and-forget.
+  void syncDocAIGraph(supabase, id, markdown);
 
   // Best-effort hub log entry. Anonymous docs aren't logged because
   // there's no user to attribute them to until claim time.

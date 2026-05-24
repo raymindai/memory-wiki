@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { getSupabaseClient } from "@/lib/supabase";
 import { syncBacklinks } from "@/lib/backlinks";
 import { syncDocumentSummary } from "@/lib/document-summary";
+import { syncDocAIGraph } from "@/lib/doc-ai-graph";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { extractTitleFromMd, spliceH1 } from "@/lib/extract-title";
@@ -620,6 +621,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (typeof updates.markdown === "string") {
       void syncBacklinks(supabase, "document", id, updates.markdown);
       void syncDocumentSummary(supabase, id, updates.markdown);
+      void syncDocAIGraph(supabase, id, updates.markdown);
     }
 
     // If the title changed, every bundle that has this doc as a member

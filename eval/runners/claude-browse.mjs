@@ -10,7 +10,7 @@
 
 const MODEL = process.env.MWBENCH_CLAUDE_MODEL || "claude-sonnet-4-6";
 const ENDPOINT = "https://api.anthropic.com/v1/messages";
-const MAX_TOOL_TURNS = 4;
+const MAX_TOOL_TURNS = 6;
 
 const TOOL_SPEC = [
   {
@@ -62,6 +62,11 @@ Keep your answer under 200 words.`,
   let lastError = null;
 
   for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+    // Last turn: drop tools so the model is forced to produce a final
+    // text answer instead of issuing yet another tool_use that would
+    // never get serviced. Without this, exhausting MAX_TOOL_TURNS
+    // leaves us with no answer at all.
+    const isLastTurn = turn === MAX_TOOL_TURNS - 1;
     const r = await fetch(ENDPOINT, {
       method: "POST",
       headers: {
@@ -72,9 +77,10 @@ Keep your answer under 200 words.`,
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 2048,
-        system:
-          "You answer the user's question using Memory.Wiki content fetched via the fetch_url tool. If the URL gives you a hub or bundle, you can follow links inside it to fetch specific docs you need.",
-        tools: TOOL_SPEC,
+        system: isLastTurn
+          ? "You answer the user's question using the Memory.Wiki content already fetched in the conversation above. No more tool calls — produce the final answer now."
+          : "You answer the user's question using Memory.Wiki content fetched via the fetch_url tool. If the URL gives you a hub or bundle, you can follow links inside it to fetch specific docs you need. Aim to answer in 2-3 fetches.",
+        ...(isLastTurn ? {} : { tools: TOOL_SPEC }),
         messages,
       }),
     });
@@ -92,6 +98,13 @@ Keep your answer under 200 words.`,
 
     if (toolUses.length === 0) {
       // Pure text response — that's the final answer.
+      answer = textBlocks.map((b) => b.text).join("\n").trim();
+      break;
+    }
+
+    if (isLastTurn) {
+      // Model tried to call a tool on the forced-final turn. Salvage any
+      // accompanying text; otherwise leave answer empty.
       answer = textBlocks.map((b) => b.text).join("\n").trim();
       break;
     }
