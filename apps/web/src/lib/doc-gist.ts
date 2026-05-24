@@ -83,22 +83,46 @@ export function firstParagraph(md: string): string {
  * Returns null if there are fewer than 2 H2 sections — for short docs
  * the gist alone is enough and the skeleton would be noise.
  */
-export function extractSkeleton(md: string, maxLen = 380): string | null {
+export function extractSkeleton(md: string, maxLen = 700): string | null {
   if (!md) return null;
   const lines = md.split("\n");
-  const sections: { heading: string; first: string }[] = [];
-  let current: { heading: string; first: string } | null = null;
+  // For each H2 section, collect EITHER a single paragraph-style first
+  // line OR all bullets (capped). Earlier we kept only the first line
+  // under each heading, which silently dropped load-bearing bullets
+  // (e.g. "## Concrete commitments" with five bullets including
+  // "Latency budget: ≤14 ms p99" — only the first bullet survived,
+  // so the latency commitment never reached compact mode).
+  const sections: { heading: string; lines: string[] }[] = [];
+  let current: { heading: string; lines: string[] } | null = null;
+  let sawBulletInCurrent = false;
   for (const raw of lines) {
     const line = raw.trim();
     const h2 = line.match(/^##\s+(.+?)\s*$/);
     if (h2) {
       if (current) sections.push(current);
-      current = { heading: h2[1].trim(), first: "" };
+      current = { heading: h2[1].trim(), lines: [] };
+      sawBulletInCurrent = false;
       continue;
     }
-    if (current && !current.first && line && !/^#{1,6}\s/.test(line) && !/^---/.test(line)) {
-      current.first = line.replace(/^[-*+>]\s+/, "").replace(/[*_`]/g, "").slice(0, 100);
+    if (!current) continue;
+    if (!line || /^#{1,6}\s/.test(line) || /^---/.test(line)) continue;
+    const isBullet = /^[-*+]\s/.test(line);
+    if (isBullet) {
+      sawBulletInCurrent = true;
+      current.lines.push(
+        line.replace(/^[-*+]\s+/, "").replace(/[*_`]/g, "").slice(0, 160),
+      );
+      if (current.lines.length >= 6) {
+        // cap per section so a huge list doesn't dominate
+        current.lines.push("…");
+        // Skip remaining bullets in this section
+        // (loop's continue handles by ignoring further bullets via the cap test below)
+      }
+    } else if (!sawBulletInCurrent && current.lines.length === 0) {
+      // Pure-prose section: keep only the first paragraph line.
+      current.lines.push(line.replace(/[*_`]/g, "").slice(0, 160));
     }
+    // Else: prose lines after a paragraph or after bullets are dropped.
   }
   if (current) sections.push(current);
   if (sections.length < 2) return null;
@@ -106,7 +130,8 @@ export function extractSkeleton(md: string, maxLen = 380): string | null {
   const parts: string[] = [];
   let len = 0;
   for (const s of sections) {
-    const piece = s.first ? `${s.heading}: ${s.first}` : s.heading;
+    const body = s.lines.length > 0 ? s.lines.join("; ") : "";
+    const piece = body ? `${s.heading}: ${body}` : s.heading;
     if (len + piece.length + 3 > maxLen) {
       parts.push("…");
       break;
