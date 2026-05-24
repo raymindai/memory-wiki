@@ -79,7 +79,8 @@ Keep your answer under 200 words.`,
       model: MODEL,
       messages,
       max_completion_tokens: 2048,
-      ...(isLastTurn ? { tool_choice: "none" } : { tools: TOOL_SPEC }),
+      tools: TOOL_SPEC,
+      ...(isLastTurn ? { tool_choice: "none" } : {}),
     };
     const r = await fetch(ENDPOINT, {
       method: "POST",

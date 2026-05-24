@@ -93,7 +93,7 @@ Keep your answer under 200 words.`,
         parts: [
           {
             text: isLastTurn
-              ? "Final turn — answer from the content already fetched above. No more tool calls."
+              ? "Final turn. The content you need is in the fetched documents above. Produce the final answer NOW — directly, no preamble. Do not call any tools."
               : "You answer the user's question using Memory.Wiki content fetched via the fetch_url tool. If the URL gives you a hub or bundle, you can follow links inside it to fetch specific docs you need. Aim to answer in 2-3 fetches.",
           },
         ],
@@ -102,8 +102,10 @@ Keep your answer under 200 words.`,
       ...(isLastTurn ? {} : { tools: TOOL_SPEC }),
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 4096,
-        thinkingConfig: { thinkingBudget: 1024 },
+        // Last turn skips internal thinking to avoid burning the output
+        // budget on planning when we only need text out.
+        maxOutputTokens: isLastTurn ? 1024 : 4096,
+        thinkingConfig: { thinkingBudget: isLastTurn ? 0 : 1024 },
       },
     };
     const r = await callGemini(endpoint, body);
