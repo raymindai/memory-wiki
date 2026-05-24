@@ -18,9 +18,19 @@
  */
 export function extractFacts(md: string): string | null {
   if (!md) return null;
-  const m = md.match(/^##\s+Facts\s*\n([\s\S]*?)(?=\n##\s|\n#\s|$)/im);
-  if (!m) return null;
-  const body = m[1].trim();
+  // Find the "## Facts" header anchor. `m` flag makes `^` match per-line
+  // so the header can sit anywhere in the doc, not just the top.
+  const header = md.match(/^##\s+Facts\s*$/im);
+  if (!header || header.index == null) return null;
+  // Walk forward from end of the header line. Stop at the next ## or #
+  // heading, or at end of string. Done as plain JS rather than regex
+  // because the earlier `(?=...|$)/m` regex with the multiline flag
+  // ended the lookahead at the next blank line — only the first bullet
+  // got captured.
+  const start = header.index + header[0].length;
+  const rest = md.slice(start);
+  const stopMatch = rest.match(/\n(?:##\s|#\s|---\s*$)/m);
+  const body = (stopMatch ? rest.slice(0, stopMatch.index) : rest).trim();
   if (!body) return null;
   const facts = body
     .split("\n")
