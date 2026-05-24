@@ -30,6 +30,7 @@ function args(argv) {
     else if (a.startsWith("--browse-hub=")) out.files.browseHub = a.slice(13);
     else if (a.startsWith("--browse-bundle=")) out.files.browseBundle = a.slice(16);
     else if (a.startsWith("--browse-doc=")) out.files.browseDoc = a.slice(13);
+    else if (a.startsWith("--adversarial=")) out.files.adversarial = a.slice(14);
   }
   return out;
 }
@@ -102,6 +103,9 @@ async function main() {
       paste_full: aggregateFromFile(f.pasteDoc, "full"),
       paste_compact: aggregateFromFile(f.pasteDoc, "compact"),
       browse: aggregateFromFile(f.browseDoc, "browse"),
+    },
+    adversarial: {
+      browse: aggregateFromFile(f.adversarial, "browse"),
     },
   };
 

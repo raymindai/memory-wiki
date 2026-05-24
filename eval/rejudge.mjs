@@ -45,6 +45,12 @@ async function main() {
     process.stdout.write(`  [${i}/${data.runs.length}] ${run.query_id} ${run.runner} ${mode} ... `);
     const j = await judge({ query: q, run });
     j.mode = mode;
+    // Carry over per-run signals the judge doesn't compute (tool_calls,
+    // scope, scope_id) so downstream aggregators (populate-readiness,
+    // browse-mode tool-use rate) see them after a rejudge pass.
+    if (run.tool_calls != null) j.tool_calls = run.tool_calls;
+    if (run.scope) j.scope = run.scope;
+    if (run.scope_id) j.scope_id = run.scope_id;
     newJudgments.push(j);
     const oldMark = oldJ.accurate ? "OK" : "XX";
     const newMark = j.accurate ? "OK" : "XX";

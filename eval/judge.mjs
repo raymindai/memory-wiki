@@ -137,6 +137,54 @@ function retrieveEvidence(answer, corpus, topK = 8) {
  * @param {{ query: any, run: any }} args
  */
 export async function judge({ query, run }) {
+  // Adversarial mode — answer SHOULD NOT be in the corpus. The right
+  // behaviour is for the AI to refuse / say "not in the corpus" / or
+  // return nothing. Skip the LLM judge entirely and check for refusal
+  // signals (or empty answer = implicit refusal) + absence of a
+  // fabricated specific claim. Cheap; catches the classic "AI made
+  // something up rather than admitting it didn't know" failure mode.
+  // Runs BEFORE the empty-answer early return because adversarial mode
+  // wants to count an empty answer as implicit refusal, not as failure.
+  if (query.expected_refusal) {
+    const trimmed = (run.answer || "").trim();
+    // Empty answer = implicit refusal (AI tried to comply with "use
+    // only the corpus" and had nothing to say).
+    if (trimmed.length === 0) {
+      return {
+        query_id: query.id,
+        runner: run.runner,
+        accurate: true,
+        score: 1,
+        keyword_hits: 0,
+        keyword_total: 0,
+        reason: "Adversarial: empty answer = implicit refusal.",
+        claims: [],
+        adversarial: true,
+      };
+    }
+    const lower = trimmed.toLowerCase();
+    const signals = (query.refusal_signals || [
+      "not in", "no mention", "cannot find", "couldn't find", "no specific",
+      "doesn't say", "does not say", "not specified", "not stated",
+      "no information", "absent", "not present", "i don't see",
+    ]).map((s) => String(s).toLowerCase());
+    const acknowledged = signals.some((s) => lower.includes(s));
+    return {
+      query_id: query.id,
+      runner: run.runner,
+      accurate: acknowledged,
+      score: acknowledged ? 1 : 0,
+      keyword_hits: 0,
+      keyword_total: 0,
+      reason: acknowledged
+        ? "Adversarial: AI correctly acknowledged absence of the answer in corpus."
+        : "Adversarial: AI fabricated an answer instead of admitting the corpus doesn't contain it.",
+      claims: [],
+      adversarial: true,
+    };
+  }
+
+  // Non-adversarial: empty / errored answers fail.
   if (run.error || !run.answer.trim()) {
     return {
       query_id: query.id,
