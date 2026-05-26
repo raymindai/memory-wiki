@@ -76,6 +76,7 @@ export function FrontierVariant() {
       {/* ─── TOP NAV ─── */}
       <header className="topnav">
         <div className="topnav-inner">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a className="brand" href="/v8-preview/frontier">
             <span className="brand-mark brand-mark-blob">
               <img
@@ -1142,6 +1143,7 @@ export function FrontierVariant() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a className="brand" href="/">
               <span className="brand-mark">
                 <span className="brand-mark-inner">M</span>

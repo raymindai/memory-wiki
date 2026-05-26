@@ -13,6 +13,7 @@ export function ModernVariant() {
       {/* ─── TOP NAV ─── */}
       <header className="topnav">
         <div className="topnav-inner">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a className="brand" href="/v8-preview/modern">
             <span className="brand-mark">M</span>
             <span className="brand-word">Memory<span className="brand-dot">.</span>Wiki</span>
@@ -470,6 +471,7 @@ export function ModernVariant() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a className="brand" href="/">
               <span className="brand-mark">M</span>
               <span className="brand-word">

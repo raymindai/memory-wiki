@@ -19,6 +19,11 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       "src/lib/wasm/**",
+      // /v8-preview is a design-variant gallery (prototype mocks).
+      // It intentionally uses raw <a>, "// comment" text inside h2,
+      // hardcoded hex, etc. Don't lint-block the production build
+      // on prototype noise.
+      "src/app/v8-preview/**",
     ],
   },
   {
