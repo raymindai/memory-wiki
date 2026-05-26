@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { File as FileIcon } from "lucide-react";
-import { DocsNav, SiteFooter } from "@/components/docs";
+import { File as FileIcon, ArrowUpRight } from "lucide-react";
+import ViewerHeader from "@/components/ViewerHeader";
+import ViewerFooter from "@/components/ViewerFooter";
+
+// Discover / Trending — public-facing landing showing GitHub trending
+// repos' .md files routed through Memory.Wiki. Pure design pass:
+// canvas bg, Cal Sans hero, JetBrains Mono labels with Title Case,
+// soft segmented chip toggle, micro-color (info/lime) instead of
+// `var(--accent)` for emphasis.
 
 interface TrendingRepo {
   name: string;
@@ -38,12 +44,10 @@ export default function DiscoverPage() {
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [expandedRepo, setExpandedRepo] = useState<string | null>(null);
   const [repoFiles, setRepoFiles] = useState<RepoFiles>({});
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
     const saved = localStorage.getItem("mw-theme") as "dark" | "light" | null;
     const t = saved || "dark";
-    setTheme(t);
     document.documentElement.setAttribute("data-theme", t);
   }, []);
 
@@ -80,7 +84,6 @@ export default function DiscoverPage() {
     writer.write(input); writer.close();
     const reader = cs.readable.getReader();
     const chunks: Uint8Array[] = [];
-    // eslint-disable-next-line no-constant-condition
     while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
     const merged = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
     let off = 0; for (const c of chunks) { merged.set(c, off); off += c.length; }
@@ -98,12 +101,10 @@ export default function DiscoverPage() {
         if (res.ok) { markdown = await res.text(); break; }
       }
       if (!markdown.trim()) throw new Error("Empty");
-      // Add title from filename if markdown has no H1
       if (!/^#\s+/m.test(markdown)) {
         const title = filePath.split("/").pop()?.replace(/\.(md|markdown|mdx)$/i, "") || "Untitled";
         markdown = `# ${title}\n\n${markdown}`;
       }
-      // Add source attribution
       markdown = markdown.trimEnd() + `\n\n---\n\n> Source: [${repoFullName}/${filePath}](https://github.com/${repoFullName}/blob/main/${filePath})\n`;
       const compressed = await compress(markdown);
       const url = `/#md=${compressed}`;
@@ -115,146 +116,248 @@ export default function DiscoverPage() {
   }, [compress]);
 
   return (
-    <div style={{ background: "var(--background)", color: "var(--foreground)", minHeight: "100vh" }}>
-      <DocsNav />
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
+      <ViewerHeader title="Trending" />
 
-      {/* Hero */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 24px 40px" }}>
-        <p style={{ color: "var(--accent)", fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, fontFamily: "var(--font-geist-mono), monospace" }}>
-          Discover Trending Projects
-        </p>
-        <h1 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", color: "var(--text-primary)", maxWidth: 600, margin: "0 0 16px" }}>
-          Trending Project Docs,<br />
-          <span style={{ color: "var(--accent)" }}>beautifully rendered.</span>
-        </h1>
-        <p style={{ fontSize: 15, color: "var(--text-tertiary)", maxWidth: 500, lineHeight: 1.7 }}>
-          Explore documentation from the hottest GitHub projects. Every .md file rendered with Memory.Wiki.
-        </p>
-      </div>
-
-      {/* Period tabs */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px 24px" }}>
-        <div style={{ display: "flex", gap: 4, background: "var(--toggle-bg)", borderRadius: 8, padding: 3, width: "fit-content" }}>
-          {(["daily", "weekly"] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              style={{
-                padding: "6px 16px", borderRadius: 6, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer",
-                background: period === p ? "var(--accent-dim)" : "transparent",
-                color: period === p ? "var(--accent)" : "var(--text-muted)",
-                fontFamily: "var(--font-geist-mono), monospace",
-              }}
-            >
-              {p === "daily" ? "Today" : "This Week"}
-            </button>
-          ))}
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-12 sm:py-16">
+        {/* Hero */}
+        <div
+          className="font-mono mb-3"
+          style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}
+        >
+          Trending public docs
         </div>
-      </div>
+        <h1
+          style={{
+            color: "var(--text-primary)",
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(28px, 4vw, 40px)",
+            fontWeight: 500,
+            letterSpacing: 0,
+            lineHeight: 1.15,
+            margin: "0 0 16px",
+            maxWidth: 600,
+          }}
+        >
+          Trending project docs, beautifully rendered.
+        </h1>
+        <p
+          className="mb-8"
+          style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.6, maxWidth: 560 }}
+        >
+          Explore documentation from the hottest GitHub projects. Every <code className="font-mono" style={{ color: "var(--text-primary)" }}>.md</code> file rendered with Memory.Wiki.
+        </p>
 
-      {/* Repo list */}
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px 80px" }}>
+        {/* Period segmented chip */}
+        <div
+          className="inline-flex p-0.5 rounded-md mb-8"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+          role="tablist"
+          aria-label="Trending window"
+        >
+          {(["daily", "weekly"] as const).map((p) => {
+            const active = period === p;
+            return (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className="px-3 py-1.5 rounded transition-colors inline-flex items-center gap-1.5"
+                style={{
+                  background: active ? "var(--toggle-bg)" : "transparent",
+                  color: active ? "var(--text-primary)" : "var(--text-muted)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{ width: 6, height: 6, borderRadius: "50%", background: active ? "var(--micro-lime)" : "var(--border)" }}
+                />
+                {p === "daily" ? "Today" : "This week"}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Repo list */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "var(--accent)", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 1s linear infinite" }} />
-            <p style={{ fontSize: 13, color: "var(--text-faint)" }}>Fetching trending repos...</p>
+          <div className="py-16 text-center">
+            <div
+              className="mx-auto mb-3"
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                border: "2px solid var(--border)",
+                borderTopColor: "var(--text-primary)",
+                animation: "mw-spin 0.9s linear infinite",
+              }}
+            />
+            <p className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em" }}>
+              Fetching trending repos…
+            </p>
           </div>
         ) : repos.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <p style={{ fontSize: 15, color: "var(--text-faint)" }}>No trending repos found. Try again later.</p>
+          <div className="py-16 text-center">
+            <p style={{ color: "var(--text-faint)", fontSize: 14 }}>No trending repos found. Try again later.</p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 1, background: "var(--border-dim)", borderRadius: 12, overflow: "hidden", border: "1px solid var(--border-dim)" }}>
-            {repos.map((repo, i) => (
-              <div key={repo.fullName} style={{ background: "var(--surface)" }}>
-                {/* Repo row */}
-                <div
-                  style={{ padding: "14px 20px", display: "flex", alignItems: "center", gap: 16, cursor: "pointer", transition: "background 0.1s" }}
-                  onClick={() => toggleRepo(repo.fullName)}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--menu-hover)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                >
-                  <span style={{ fontSize: 14, fontWeight: 700, color: i < 3 ? "var(--accent)" : "var(--text-faint)", fontFamily: "var(--font-geist-mono), monospace", width: 28, textAlign: "right", flexShrink: 0 }}>
-                    {i + 1}
-                  </span>
-                  <span style={{ fontSize: 10, color: "var(--text-faint)", transform: expandedRepo === repo.fullName ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s", flexShrink: 0 }}>▶</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: repo.description ? 3 : 0 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>{repo.name}</span>
-                      <span style={{ fontSize: 11, color: "var(--text-faint)" }}>{repo.fullName.split("/")[0]}</span>
-                    </div>
-                    {repo.description && (
-                      <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0, lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{repo.description}</p>
-                    )}
-                  </div>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--text-faint)", flexShrink: 0 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: LANG_COLORS[repo.language] || "#666" }} />
-                    <span className="hidden sm:inline">{repo.language}</span>
-                  </span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)", fontFamily: "var(--font-geist-mono), monospace", flexShrink: 0 }}>
-                    ★ {formatStars(repo.stars)}
-                  </span>
-                </div>
-                {/* Expanded file list */}
-                {expandedRepo === repo.fullName && (
-                  <div style={{ padding: "0 20px 12px 68px" }}>
-                    {repoFiles[repo.fullName]?.loading ? (
-                      <p style={{ fontSize: 11, color: "var(--text-faint)", margin: "4px 0" }}>Loading files...</p>
-                    ) : (repoFiles[repo.fullName]?.files || []).length === 0 ? (
-                      <p style={{ fontSize: 11, color: "var(--text-faint)", margin: "4px 0" }}>No .md files found</p>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                        {(repoFiles[repo.fullName]?.files || []).map((file) => {
-                          const key = `${repo.fullName}/${file}`;
-                          const isOpening = openingId === key;
-                          return (
-                            <div
-                              key={file}
-                              onClick={(e) => { e.stopPropagation(); openFile(repo.fullName, file); }}
-                              style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 6, cursor: "pointer", transition: "background 0.1s", fontSize: 12 }}
-                              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--toggle-bg)")}
-                              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          <ul className="space-y-1.5">
+            {repos.map((repo, i) => {
+              const isExpanded = expandedRepo === repo.fullName;
+              return (
+                <li key={repo.fullName}>
+                  <div
+                    className="rounded-md overflow-hidden"
+                    style={{ border: "1px solid var(--border-dim)" }}
+                  >
+                    {/* Repo row */}
+                    <button
+                      onClick={() => toggleRepo(repo.fullName)}
+                      className="w-full text-left flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[var(--toggle-bg)]"
+                    >
+                      <span
+                        className="font-mono shrink-0 text-right"
+                        style={{
+                          width: 24,
+                          color: i < 3 ? "var(--micro-info)" : "var(--text-faint)",
+                          fontSize: 12,
+                          letterSpacing: "0.04em",
+                        }}
+                      >
+                        {i + 1}
+                      </span>
+                      <span
+                        aria-hidden
+                        style={{
+                          fontSize: 9,
+                          color: "var(--text-faint)",
+                          transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                          transition: "transform 0.15s",
+                          flexShrink: 0,
+                          display: "inline-block",
+                          width: 8,
+                        }}
+                      >
+                        ▶
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 500 }}>{repo.name}</span>
+                          <span style={{ color: "var(--text-faint)", fontSize: 11 }}>{repo.fullName.split("/")[0]}</span>
+                        </div>
+                        {repo.description && (
+                          <p
+                            className="truncate"
+                            style={{ color: "var(--text-muted)", fontSize: 12, lineHeight: 1.45, margin: "2px 0 0" }}
+                          >
+                            {repo.description}
+                          </p>
+                        )}
+                      </div>
+                      <span
+                        className="hidden sm:inline-flex items-center gap-1.5 shrink-0"
+                        style={{ color: "var(--text-faint)", fontSize: 11 }}
+                      >
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: LANG_COLORS[repo.language] || "var(--border)" }} />
+                        {repo.language}
+                      </span>
+                      <span
+                        className="font-mono shrink-0"
+                        style={{ color: "var(--text-muted)", fontSize: 12, letterSpacing: "0.04em" }}
+                      >
+                        ★ {formatStars(repo.stars)}
+                      </span>
+                    </button>
+
+                    {/* Expanded files */}
+                    {isExpanded && (
+                      <div className="px-3 pb-3" style={{ paddingLeft: 56 }}>
+                        {repoFiles[repo.fullName]?.loading ? (
+                          <p className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", margin: "6px 0" }}>
+                            Loading files…
+                          </p>
+                        ) : (repoFiles[repo.fullName]?.files || []).length === 0 ? (
+                          <p className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", margin: "6px 0" }}>
+                            No .md files found
+                          </p>
+                        ) : (
+                          <div className="flex flex-col gap-0.5 mt-1">
+                            {(repoFiles[repo.fullName]?.files || []).map((file) => {
+                              const key = `${repo.fullName}/${file}`;
+                              const isOpening = openingId === key;
+                              return (
+                                <button
+                                  key={file}
+                                  onClick={(e) => { e.stopPropagation(); openFile(repo.fullName, file); }}
+                                  className="text-left flex items-center gap-2 px-2 py-1.5 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                                >
+                                  <FileIcon width={11} height={11} style={{ color: "var(--text-faint)" }} aria-hidden />
+                                  <span
+                                    className="flex-1 truncate font-mono"
+                                    style={{ color: "var(--text-secondary)", fontSize: 12 }}
+                                  >
+                                    {file}
+                                  </span>
+                                  <span
+                                    className="font-mono"
+                                    style={{
+                                      padding: "2px 8px",
+                                      borderRadius: 999,
+                                      background: isOpening ? "rgba(181,255,26,0.12)" : "var(--toggle-bg)",
+                                      color: isOpening ? "var(--micro-lime)" : "var(--text-muted)",
+                                      fontSize: 10,
+                                      letterSpacing: "0.04em",
+                                    }}
+                                  >
+                                    {isOpening ? "Opening…" : "Open in Memory.Wiki"}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                            <a
+                              href={repo.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 mt-1 transition-colors hover:underline"
+                              style={{ color: "var(--text-muted)", fontSize: 11 }}
                             >
-                              <FileIcon width={11} height={11} style={{ color: "var(--text-faint)" }} aria-hidden />
-                              <span style={{ flex: 1, color: "var(--text-secondary)", fontFamily: "var(--font-geist-mono), monospace", fontSize: 12 }}>{file}</span>
-                              <span style={{
-                                padding: "2px 8px", borderRadius: 4, fontSize: 9, fontWeight: 700,
-                                background: isOpening ? "rgba(74,222,128,0.15)" : "var(--accent-dim)",
-                                color: isOpening ? "#4ade80" : "var(--accent)",
-                              }}>
-                                {isOpening ? "Opening..." : "Memory.Wiki"}
-                              </span>
-                            </div>
-                          );
-                        })}
-                        <a
-                          href={repo.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontSize: 10, color: "var(--text-faint)", padding: "4px 10px", textDecoration: "none" }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          View on GitHub →
-                        </a>
+                              View on GitHub
+                              <ArrowUpRight width={11} height={11} />
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
 
-        {/* Footer note */}
-        <p style={{ fontSize: 11, color: "var(--text-faint)", textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          Data from GitHub API. Click any repo to browse its .md files and open them in Memory.Wiki.
+        {/* Footnote */}
+        <p
+          className="mt-10 font-mono"
+          style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", textAlign: "center", lineHeight: 1.6 }}
+        >
+          Data from the GitHub API. Click any repo to browse its .md files.
           <br />
-          <a href="https://github.com/trending" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>See full GitHub Trending →</a>
+          <a
+            href="https://github.com/trending"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 transition-colors hover:underline"
+            style={{ color: "var(--text-muted)" }}
+          >
+            See full GitHub Trending
+            <ArrowUpRight width={11} height={11} />
+          </a>
         </p>
-      </div>
+      </main>
 
-      <SiteFooter />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <ViewerFooter />
     </div>
   );
 }
