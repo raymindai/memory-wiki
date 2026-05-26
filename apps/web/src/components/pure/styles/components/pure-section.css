@@ -1,0 +1,130 @@
+/* ─── Section wrapper ─── */
+.v8-frontier .pure-section {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 96px 32px;
+}
+.v8-frontier .pure-section-head {
+  max-width: 760px;
+  margin-bottom: 48px;
+}
+.v8-frontier .pure-section-head.is-center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.v8-frontier .pure-section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+.v8-frontier .pure-section-head.is-center .pure-section-eyebrow { justify-content: center; }
+.v8-frontier .pure-section-num {
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: 0.12em;
+}
+.v8-frontier .pure-section-head .eyebrow {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+/* Number sits tight to the blob mark; section name gets more
+   breathing room from the number. */
+.v8-frontier .pure-section-num + .eyebrow {
+  margin-left: 12px;
+}
+.v8-frontier .pure-section-head .display-2 {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(28px, 3.6vw, 44px);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.08;
+  color: var(--ink);
+  margin: 0 0 20px;
+}
+.v8-frontier .pure-section-lede {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+  max-width: 580px;
+  letter-spacing: 0.005em;
+}
+.v8-frontier .pure-section-head.is-center .pure-section-lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── Section eyebrow mark — small blob shape cycling through the
+   11 blob variations in order, colored to match the section
+   number's micro palette. SVG mask + background-color. */
+.v8-frontier .pure-section-mark {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-right: 4px;
+  -webkit-mask: url(/brand/blobs/mwblob_01.svg) center / contain no-repeat;
+  mask: url(/brand/blobs/mwblob_01.svg) center / contain no-repeat;
+  background: var(--micro-lime);
+}
+/* Color cycle — mark blob + section number text rotate through the
+ * 6 micro colors in lockstep, giving a subtle vertical color rhythm
+ * down a page that has many numbered sections. */
+.v8-frontier .pure-section:nth-of-type(6n+1) .pure-section-mark,
+.pure-root   .pure-section:nth-of-type(6n+1) .pure-section-mark { background: var(--micro-lime);   }
+.v8-frontier .pure-section:nth-of-type(6n+2) .pure-section-mark,
+.pure-root   .pure-section:nth-of-type(6n+2) .pure-section-mark { background: var(--micro-info);   }
+.v8-frontier .pure-section:nth-of-type(6n+3) .pure-section-mark,
+.pure-root   .pure-section:nth-of-type(6n+3) .pure-section-mark { background: var(--micro-orange); }
+.v8-frontier .pure-section:nth-of-type(6n+4) .pure-section-mark,
+.pure-root   .pure-section:nth-of-type(6n+4) .pure-section-mark { background: var(--micro-ai);     }
+.v8-frontier .pure-section:nth-of-type(6n+5) .pure-section-mark,
+.pure-root   .pure-section:nth-of-type(6n+5) .pure-section-mark { background: var(--micro-warn);   }
+.v8-frontier .pure-section:nth-of-type(6n)   .pure-section-mark,
+.pure-root   .pure-section:nth-of-type(6n)   .pure-section-mark { background: var(--micro-pink);   }
+
+.v8-frontier .pure-section:nth-of-type(6n+1) .pure-section-num,
+.pure-root   .pure-section:nth-of-type(6n+1) .pure-section-num { color: var(--micro-lime);   }
+.v8-frontier .pure-section:nth-of-type(6n+2) .pure-section-num,
+.pure-root   .pure-section:nth-of-type(6n+2) .pure-section-num { color: var(--micro-info);   }
+.v8-frontier .pure-section:nth-of-type(6n+3) .pure-section-num,
+.pure-root   .pure-section:nth-of-type(6n+3) .pure-section-num { color: var(--micro-orange); }
+.v8-frontier .pure-section:nth-of-type(6n+4) .pure-section-num,
+.pure-root   .pure-section:nth-of-type(6n+4) .pure-section-num { color: var(--micro-ai);     }
+.v8-frontier .pure-section:nth-of-type(6n+5) .pure-section-num,
+.pure-root   .pure-section:nth-of-type(6n+5) .pure-section-num { color: var(--micro-warn);   }
+.v8-frontier .pure-section:nth-of-type(6n)   .pure-section-num,
+.pure-root   .pure-section:nth-of-type(6n)   .pure-section-num { color: var(--micro-pink);   }
+/* Shape cycle — 11 blob variations, one per section in order */
+.v8-frontier .pure-section:nth-of-type(11n+1)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_01.svg); mask-image: url(/brand/blobs/mwblob_01.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+2)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_02.svg); mask-image: url(/brand/blobs/mwblob_02.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+3)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_03.svg); mask-image: url(/brand/blobs/mwblob_03.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+4)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_04.svg); mask-image: url(/brand/blobs/mwblob_04.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+5)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_05.svg); mask-image: url(/brand/blobs/mwblob_05.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+6)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_06.svg); mask-image: url(/brand/blobs/mwblob_06.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+7)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_07.svg); mask-image: url(/brand/blobs/mwblob_07.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+8)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_08.svg); mask-image: url(/brand/blobs/mwblob_08.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+9)  .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_09.svg); mask-image: url(/brand/blobs/mwblob_09.svg); }
+.v8-frontier .pure-section:nth-of-type(11n+10) .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_10.svg); mask-image: url(/brand/blobs/mwblob_10.svg); }
+.v8-frontier .pure-section:nth-of-type(11n)    .pure-section-mark { -webkit-mask-image: url(/brand/blobs/mwblob_11.svg); mask-image: url(/brand/blobs/mwblob_11.svg); }
+
+/* ─── Section number — rotates through micro palette by position ─── */
+.v8-frontier .pure-section:nth-of-type(6n+1) .pure-section-num { color: var(--micro-lime); }
+.v8-frontier .pure-section:nth-of-type(6n+2) .pure-section-num { color: var(--micro-info); }
+.v8-frontier .pure-section:nth-of-type(6n+3) .pure-section-num { color: var(--micro-orange); }
+.v8-frontier .pure-section:nth-of-type(6n+4) .pure-section-num { color: var(--micro-ai); }
+.v8-frontier .pure-section:nth-of-type(6n+5) .pure-section-num { color: var(--micro-warn); }
+.v8-frontier .pure-section:nth-of-type(6n)   .pure-section-num { color: var(--micro-pink); }
+
+/* ─── Section mark blob: slow continuous rotation ── */
+@keyframes pureMarkSpin {
+  to { transform: rotate(360deg); }
+}
+.v8-frontier .pure-section-mark {
+  animation: pureMarkSpin 28s linear infinite;
+  transform-origin: 50% 50%;
+}

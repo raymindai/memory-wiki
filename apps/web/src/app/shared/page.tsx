@@ -95,7 +95,7 @@ export default async function SharedBundlesPage() {
         }}
       >
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <MemoryWikiLogo size={18} />
+          <MemoryWikiLogo size={18} withBlob />
         </Link>
         <span className="text-caption font-mono" style={{ color: "var(--text-faint)" }}>
           memory.wiki/<span style={{ color: "var(--accent)" }}>shared</span>

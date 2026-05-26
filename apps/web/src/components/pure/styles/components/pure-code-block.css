@@ -1,0 +1,81 @@
+/* ─────────────────────────────────────────────────────────────
+   PureCodeBlock — fenced code with copy button + lang label.
+   Token colors come from globals.css (github-dark hljs theme +
+   light-mode overrides). We just neutralize the theme's bg + base
+   color so the block matches Pure's surface style.
+   ───────────────────────────────────────────────────────────── */
+
+.v8-frontier .pure-code-block,
+.pure-root .pure-code-block {
+  position: relative;
+  margin: 14px 0 28px;
+}
+
+/* Language label — sits above the right edge, behind the copy btn. */
+.v8-frontier .pure-code-block-lang,
+.pure-root .pure-code-block-lang {
+  position: absolute;
+  top: 12px;
+  right: 68px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Copy button — top-right pill that brightens on hover/copy. */
+.v8-frontier .pure-code-block-copy,
+.pure-root .pure-code-block-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  z-index: 2;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.v8-frontier .pure-code-block-copy:hover,
+.pure-root .pure-code-block-copy:hover {
+  color: var(--ink);
+  border-color: var(--hair-strong);
+}
+
+/* Pre block — extra top padding so lang/copy don't overlap the code. */
+.v8-frontier .pure-code-block-pre,
+.pure-root .pure-code-block-pre {
+  margin: 0;
+  padding: 36px 18px 16px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.v8-frontier .pure-code-block-pre code,
+.pure-root .pure-code-block-pre code {
+  font-family: var(--font-mono);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  font-size: inherit;
+  white-space: pre;
+}
+
+/* Override github-dark's own bg/base color so the block uses pure tokens.
+ * Per-token colors (kw, str, num, etc.) stay from the theme. */
+.v8-frontier .pure-code-block-pre code.hljs,
+.pure-root .pure-code-block-pre code.hljs {
+  background: transparent;
+  color: var(--ink);
+  padding: 0;
+}

@@ -446,3 +446,19 @@
   .v8-miro .pricing-grid { grid-template-columns: 1fr; }
   .v8-miro .footer-cols { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Blob variant — replaces the yellow square M with the
+   animated MW blob. */
+.v8-miro .brand-square.brand-square-blob {
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.v8-miro .brand-square.brand-square-blob > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

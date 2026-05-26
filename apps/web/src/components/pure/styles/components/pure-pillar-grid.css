@@ -1,0 +1,107 @@
+/* ─── Pillar grid ─── */
+.v8-frontier .pure-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.v8-frontier .pure-pillar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 36px 30px;
+  background: var(--bg-deep);
+  position: relative;
+}
+.v8-frontier .pure-pillar::before { content: none; }
+.v8-frontier .pure-pillar-tag {
+  font-size: 11px;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.v8-frontier .pure-pillar-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0;
+}
+.v8-frontier .pure-pillar-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--body);
+  margin: 0;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-pillar-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v8-frontier .pure-pillar-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--body);
+  text-wrap: pretty;
+}
+.v8-frontier .pure-pillar-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+@media (max-width: 900px) {
+  .v8-frontier .pure-pillar-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Pillar phase / status badge (Roadmap-style) ─── */
+.v8-frontier .pure-pillar-badge {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  margin-left: 10px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Pillar flow variant — separate cards (no shared container),
+   spaced with room for the arrow. Shares the → arrow with
+   PureStepFlow; arrow rules live in pure-step-flow.css and target
+   `.pure-pillar-grid.is-flow .pure-pillar:not(:last-child)`.
+   ───────────────────────────────────────────────────────────── */
+.v8-frontier .pure-pillar-grid.is-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.v8-frontier .pure-pillar-grid.is-flow .pure-pillar {
+  position: relative;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+}
+@media (max-width: 900px) {
+  .v8-frontier .pure-pillar-grid.is-flow {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}

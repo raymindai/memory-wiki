@@ -1,0 +1,68 @@
+/* ─── Compare table ─── */
+.v8-frontier .pure-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  background: var(--bg-deep);
+}
+.v8-frontier .pure-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.v8-frontier .pure-table th,
+.v8-frontier .pure-table td {
+  padding: 14px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-table th {
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.v8-frontier .pure-table .pure-table-feature {
+  text-align: left;
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.v8-frontier .pure-table tr:last-child td { border-bottom: 0; }
+.v8-frontier .pure-table-yes {
+  color: var(--micro-lime);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.v8-frontier .pure-table-no {
+  color: var(--faint);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.v8-frontier .pure-table-partial {
+  color: var(--micro-warn);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.v8-frontier .pure-table-footnote {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 16px 0 0;
+}
+
+/* Glassmorphism overrides for the table header (paired with the
+ * shared card surface in base.css). */
+.v8-frontier .pure-table th {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+.v8-frontier[data-frontier-theme="light"] .pure-table th {
+  background: rgba(0, 0, 0, 0.03) !important;
+}

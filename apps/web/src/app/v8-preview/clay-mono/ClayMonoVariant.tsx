@@ -35,7 +35,9 @@ export function ClayMonoVariant() {
       <header className="topnav">
         <div className="topnav-inner">
           <a href="#" className="brand">
-            <span className="brand-square">M</span>
+            <span className="brand-square brand-square-blob">
+              <img src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"} alt="" aria-hidden />
+            </span>
             <span className="brand-word">Memory.Wiki</span>
           </a>
           <nav className="topnav-links">
@@ -472,7 +474,9 @@ export function ClayMonoVariant() {
           <div className="app-shell">
             <aside className="app-side">
               <div className="app-brand">
-                <span className="brand-square">M</span>
+                <span className="brand-square brand-square-blob">
+                  <img src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"} alt="" aria-hidden />
+                </span>
                 <span className="brand-word">Memory.Wiki</span>
               </div>
               <button className="app-cta">
@@ -744,7 +748,9 @@ export function ClayMonoVariant() {
         <div className="footer-inner">
           <div className="footer-top">
             <div className="brand">
-              <span className="brand-square">M</span>
+              <span className="brand-square brand-square-blob">
+                <img src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"} alt="" aria-hidden />
+              </span>
               <span className="brand-word">Memory.Wiki</span>
             </div>
             <span className="mono caption">v8 / variant I.2 / clay-mono / {theme}</span>

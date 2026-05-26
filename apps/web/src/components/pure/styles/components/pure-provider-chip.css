@@ -1,0 +1,4 @@
+/* PureProviderChip is a composition of PureChip + ProviderIcon.
+ * No additional CSS rules are required — chip styling is inherited
+ * from pure-chip.css. This file exists as a placeholder so each
+ * component file follows the uniform "imports its own CSS" rule. */

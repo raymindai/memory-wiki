@@ -1,0 +1,32 @@
+/* ─── Timeline ─── */
+.v8-frontier .pure-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--hair);
+}
+.v8-frontier .pure-timeline-step {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-timeline-num {
+  font-size: 12px;
+  color: var(--faint);
+  letter-spacing: 0.08em;
+  padding-top: 4px;
+}
+.v8-frontier .pure-timeline-marker {
+  font-size: 11px;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.v8-frontier .pure-timeline-text {
+  font-size: 16px;
+  color: var(--body);
+  line-height: 1.55;
+}

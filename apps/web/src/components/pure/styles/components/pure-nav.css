@@ -1,0 +1,229 @@
+/* ─── Fixed top nav (Pure) — glass with soft-fading bottom edge ─── */
+.v8-frontier .pure-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 56px;
+  background: transparent;
+}
+/* Glass layer lives in ::before so we can mask only the BACKGROUND
+   (not the content). Extends slightly below the nav, then mask-fades
+   to transparent so the bottom edge dissolves into the page. */
+.v8-frontier .pure-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  bottom: -28px;            /* extend below the 56px nav */
+  background: rgba(8, 8, 10, 0.55);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  mask-image: linear-gradient(to bottom, black 58%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.v8-frontier[data-frontier-theme="light"] .pure-nav::before {
+  background: rgba(250, 250, 247, 0.65);
+}
+.v8-frontier .pure-nav-inner { position: relative; z-index: 1; }
+.v8-frontier .pure-nav-inner {
+  max-width: 1320px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+}
+.v8-frontier .pure-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.v8-frontier .pure-nav-mark {
+  width: 38px;
+  height: 38px;
+  display: inline-block;
+}
+.v8-frontier .pure-nav-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.v8-frontier .pure-nav-word {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.v8-frontier .pure-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.v8-frontier .pure-nav-link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+.v8-frontier .pure-nav-link:hover,
+.v8-frontier .pure-nav-link.is-current {
+  color: var(--ink);
+}
+
+/* More dropdown — relative-positioned popover with backdrop */
+.v8-frontier .pure-nav-more {
+  position: relative;
+}
+.v8-frontier .pure-nav-more-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  color: var(--muted);
+  /* font-family / size / weight inherited from .pure-nav-link on same element */
+}
+.v8-frontier .pure-nav-more-menu {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+  z-index: 60;
+}
+.v8-frontier .pure-nav-more-item {
+  display: block;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--body);
+  text-decoration: none;
+  border-radius: var(--r-sm);
+  transition: color 140ms ease, background 140ms ease;
+}
+.v8-frontier .pure-nav-more-item:hover {
+  color: var(--ink);
+  background: var(--bg-deep);
+}
+.v8-frontier .pure-nav-more-item.is-current {
+  color: var(--ink);
+  background: var(--bg-deep);
+  font-weight: 600;
+}
+.v8-frontier .pure-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+.v8-frontier .pure-nav-brand { position: relative; z-index: 2; }
+.v8-frontier .pure-nav-links { z-index: 1; }
+.v8-frontier .pure-nav-theme {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--hair-strong);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+  padding: 0;
+}
+.v8-frontier .pure-nav-theme:hover { color: var(--ink); border-color: var(--ink); }
+.v8-frontier .pure-nav-cta {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: #ffffff;
+  color: #0a0a0c;
+  text-decoration: none;
+  transition: transform 120ms ease;
+}
+.v8-frontier .pure-nav-cta:active { transform: scale(0.97); }
+
+/* Hide links on narrow viewport */
+@media (max-width: 760px) {
+  .v8-frontier .pure-nav-links { display: none; }
+}
+
+/* Cal Sans-styled stacked wordmark */
+.v8-frontier .pure-nav-word {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.92;
+  font-family: "Cal Sans", var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0;
+  font-size: 18px;
+}
+.v8-frontier .pure-nav-word .brand-word-memory,
+.v8-frontier .pure-nav-word .brand-word-wiki {
+  display: block;
+}
+
+/* Lang switch pill in nav — same sans + weight as nav links,
+ * just a slimmer pill chip so it visually pairs with the theme toggle. */
+.v8-frontier .pure-nav-lang {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair-strong);
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.v8-frontier .pure-nav-lang:hover { color: var(--ink); border-color: var(--hair-strong); }
+
+/* CTA primary button: shine sweep on hover */
+.v8-frontier .pure-nav-cta,
+.v8-frontier .btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.v8-frontier .pure-nav-cta::after,
+.v8-frontier .btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.v8-frontier .pure-nav-cta:hover::after,
+.v8-frontier .btn-primary:hover::after {
+  transform: translateX(120%);
+}

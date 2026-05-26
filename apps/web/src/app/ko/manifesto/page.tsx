@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ManifestoContent from "@/components/ManifestoContent";
+import ManifestoPure from "../../manifesto/ManifestoPure";
 
 export const metadata: Metadata = {
   title: "Manifesto — 당신의 AI 메모리, 어떤 AI에도 deploy",
@@ -18,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function KoManifestoPage() {
-  return <ManifestoContent locale="ko" />;
+  return <ManifestoPure locale="ko" />;
 }

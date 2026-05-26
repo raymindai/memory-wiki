@@ -1,0 +1,40 @@
+/* ════════════════════════════════════════════════════════════
+   PureButton — canonical primary CTA. White pill, dark text,
+   multi-color chromatic box-shadow halo (no rotation, no transform).
+   ════════════════════════════════════════════════════════════ */
+
+.v8-frontier .pure-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #0a0a0c;
+  border: 0;
+  border-radius: var(--r-pill);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: box-shadow 280ms ease, opacity 140ms ease;
+  box-shadow:
+    0 -3px 5px 0 rgba(181, 255, 26, 0.1),
+    3px -2px 5px 0 rgba(46, 123, 255, 0.1),
+    3px 2px 5px 0 rgba(139, 92, 246, 0.1),
+    0 3px 5px 0 rgba(255, 42, 125, 0.1),
+    -3px 2px 5px 0 rgba(255, 107, 26, 0.1);
+}
+.v8-frontier .pure-button:hover {
+  box-shadow:
+    0 -7px 9px 0 rgba(181, 255, 26, 0.3),
+    7px -5px 9px 0 rgba(46, 123, 255, 0.3),
+    7px 5px 9px 0 rgba(139, 92, 246, 0.3),
+    0 7px 9px 0 rgba(255, 42, 125, 0.3),
+    -7px 5px 9px 0 rgba(255, 107, 26, 0.3);
+}
+.v8-frontier .pure-button:active { opacity: 0.92; }
+
+/* Size variants */
+.v8-frontier .pure-button-sm { font-size: 13px; padding: 8px 14px; }
+.v8-frontier .pure-button-md { font-size: 14px; padding: 11px 22px; }
+.v8-frontier .pure-button-lg { font-size: 15px; padding: 14px 32px; }

@@ -333,6 +333,21 @@
   box-shadow: 0 6px 20px -6px var(--accent-glow);
   position: relative;
 }
+/* Blob variant — when the brand mark is the animated MW blob,
+   drop the orange square background; the blob IS the mark. */
+.v8-frontier .brand-mark.brand-mark-blob {
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.v8-frontier .brand-blob-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 .v8-frontier .brand-mark.sm {
   width: 22px;
   height: 22px;
@@ -531,6 +546,35 @@
   margin: 0 auto;
   gap: 56px;
   align-items: center;
+}
+.v8-frontier .hero { overflow: hidden; }
+.v8-frontier .hero > .hero-inner,
+.v8-frontier .hero > .hero-card-float { position: relative; z-index: 1; }
+
+/* Big animated MW-blob in the hero — single, large, low-opacity
+   centerpiece. The SVG itself drives the path-morph via SMIL; we add
+   a gentle scale/rotate float on the container for extra life. */
+.v8-frontier .hero-blob-animated {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(520px, 62vw, 880px);
+  height: clamp(520px, 62vw, 880px);
+  transform: translate(-50%, -50%);
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+  animation: v8FrontierHeroBlobFloat 22s ease-in-out infinite;
+  filter: blur(18px);
+}
+.v8-frontier[data-frontier-theme="light"] .hero-blob-animated {
+  opacity: 0.12;
+  filter: blur(16px);
+}
+
+@keyframes v8FrontierHeroBlobFloat {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-3deg) scale(1); }
+  50%      { transform: translate(-50%, -52%) rotate(3deg)  scale(1.04); }
 }
 .v8-frontier .hero-inner {
   max-width: 720px;
@@ -4529,15 +4573,20 @@
   border-color: var(--hair-strong);
 }
 .v8-frontier .vhub-feat-strategy { --feat-tint: rgba(255, 122, 61, 0.22); }
-.v8-frontier .vhub-feat-product { --feat-tint: rgba(126, 231, 255, 0.18); }
+.v8-frontier .vhub-feat-product { --feat-tint: rgba(16, 212, 168, 0.18); }
 .v8-frontier .vhub-feat-writing { --feat-tint: rgba(255, 179, 71, 0.20); }
 .v8-frontier .vhub-feat-cat {
   font-size: 10px;
   color: var(--accent);
   letter-spacing: 0.16em;
 }
-.v8-frontier .vhub-feat-product .vhub-feat-cat { color: #7ee7ff; }
+.v8-frontier .vhub-feat-product .vhub-feat-cat { color: #10D4A8; }
 .v8-frontier .vhub-feat-writing .vhub-feat-cat { color: #ffb347; }
+/* Semantic mode picks up the live mint micro instead of the
+   default hard-coded mint above. */
+.v8-frontier[data-frontier-approach="semantic"] .vhub-feat-product { --feat-tint: rgba(0, 255, 178, 0.16); }
+.v8-frontier[data-frontier-approach="semantic"] .vhub-feat-product .vhub-feat-cat { color: var(--micro-live); }
+.v8-frontier[data-frontier-approach="semantic"] .vhub-feat-writing .vhub-feat-cat { color: var(--micro-warn); }
 .v8-frontier .vhub-feat-title {
   font-size: 16px;
   font-weight: 600;
@@ -5489,3 +5538,1135 @@
 @media (max-width: 720px) {
   .v8-frontier.promo { padding: 56px 24px; }
 }
+
+
+
+/* ═══════════════════════════════════════════════════════════════
+   APPROACH OVERRIDES — Mono+Blob base, four micro-color variants
+   ───────────────────────────────────────────────────────────────
+   All four approaches share the same MONO+BLOB chrome (no chromatic
+   accent in buttons, hero, aurora — that work is done by ink + the
+   morph blob). They differ only in how color is used in small
+   elements: pulse dots, status dots, brand pills, AI tints, tags,
+   lucide icon strokes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Shared Mono+Blob base (applied to all 4 approaches) ─── */
+.v8-frontier[data-frontier-approach="pure"],
+.v8-frontier[data-frontier-approach="semantic"],
+.v8-frontier[data-frontier-approach="pure"],
+.v8-frontier[data-frontier-approach="pastel"] {
+  --accent:        var(--ink);
+  --accent-strong: var(--strong);
+  --accent-soft:   var(--canvas-2);
+  --accent-glow:   transparent;
+  --accent-ink:    var(--bg);
+  --aurora-a:      transparent;
+  --aurora-b:      transparent;
+  --aurora-c:      transparent;
+}
+.v8-frontier[data-frontier-approach="pure"] .hero-blob-animated,
+.v8-frontier[data-frontier-approach="semantic"] .hero-blob-animated,
+.v8-frontier[data-frontier-approach="pure"] .hero-blob-animated,
+.v8-frontier[data-frontier-approach="pastel"] .hero-blob-animated {
+  opacity: 0.42;
+  filter: blur(4px);
+}
+/* Brand dot — plain period character in ink. No blob silhouette. */
+.v8-frontier[data-frontier-approach="pure"] .brand-dot,
+.v8-frontier[data-frontier-approach="pastel"] .brand-dot {
+  color: var(--ink);
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════
+   VARIANT 1: PURE — mono + blob chrome, color ONLY in icons / dots / marks
+   ───────────────────────────────────────────────────────────────
+   Body text, headlines, buttons, kicker text — all ink, no chroma.
+   Color appears strictly inside small visual signal elements:
+   pulse / status dots, AI badge dots, category labels, "now/today"
+   activity tags, hero-card mac dots, vhub feat-cat tags.
+   ═══════════════════════════════════════════════════════════════ */
+
+.v8-frontier[data-frontier-approach="pure"] {
+  --micro-lime:   #B5FF1A;   /* electric lime — pumped, less chartreuse */
+  --micro-info:   #2E7BFF;
+  --micro-orange: #FF6B1A;
+  --micro-warn:   #FFB400;   /* vivid amber — warmer, not pale */
+  --micro-ai:     #8B5CF6;
+  --micro-pink:   #FF2A7D;
+  --ai-tint:      rgba(139, 92, 246, 0.14);
+  --ai-ink:       #8B5CF6;
+}
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] {
+  --micro-lime:   #5BC700;   /* electric leaf — pushed saturation */
+  --micro-info:   #1565FF;   /* brighter blue */
+  --micro-orange: #E84500;   /* vivid pumpkin */
+  --micro-warn:   #E08800;   /* rich golden amber */
+  --micro-ai:     #7C3AFF;   /* electric purple */
+  --micro-pink:   #E5166D;   /* vivid magenta-pink */
+  --ai-tint:      rgba(124, 58, 255, 0.10);
+  --ai-ink:       #7C3AFF;
+}
+
+/* Pulse-dot — lime (연두), animated soft pulse */
+.v8-frontier[data-frontier-approach="pure"] .pulse-dot {
+  background: var(--micro-lime);
+  animation: v8PopPulse 1.8s ease-out infinite;
+}
+@keyframes v8PopPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(196, 245, 66, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(196, 245, 66, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(196, 245, 66, 0); }
+}
+
+/* Provider status dots — each gets its own hue */
+.v8-frontier[data-frontier-approach="pure"] .status-dot.green  { background: var(--micro-lime); }
+.v8-frontier[data-frontier-approach="pure"] .status-dot.blue   { background: var(--micro-info); }
+.v8-frontier[data-frontier-approach="pure"] .status-dot.violet { background: var(--micro-ai); }
+.v8-frontier[data-frontier-approach="pure"] .status-dot.yellow { background: var(--micro-warn); }
+.v8-frontier[data-frontier-approach="pure"] .status-dot.pink   { background: var(--micro-pink); }
+
+/* Hero card mac dots — keep red/yellow defaults; only the live
+   status-dot inside hero-card-status picks up lime. */
+.v8-frontier[data-frontier-approach="pure"] .hero-card-status .status-dot {
+  background: var(--micro-lime);
+}
+
+/* AI elements — text stays ink; only the indicator dot inside the
+   badge carries the AI signal color. Faint violet background tint
+   reads as decoration rather than text-color. */
+.v8-frontier[data-frontier-approach="pure"] .tag-ai {
+  color: var(--ink);
+  background: rgba(139, 92, 246, 0.08);
+  border-color: var(--hair-strong);
+}
+.v8-frontier[data-frontier-approach="pure"] .badge-ai {
+  color: var(--ink);
+  background: rgba(139, 92, 246, 0.08);
+}
+.v8-frontier[data-frontier-approach="pure"] .badge-ai .pulse-dot {
+  background: var(--micro-ai);
+  animation: none;
+  box-shadow: none;
+}
+
+/* Vhub category labels — text stays ink (per "text white" rule).
+   Only the lucide icon inside the card carries the category color
+   (see SVG rules below). */
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-product { --feat-tint: rgba(196, 245, 66, 0.16); }
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-product .vhub-feat-cat,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-writing  .vhub-feat-cat,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-strategy .vhub-feat-cat { color: var(--ink); }
+
+/* "Now / today" markers — text ink, only the small dot before it
+   keeps color (rendered as an inline pseudo-element where present). */
+.v8-frontier[data-frontier-approach="pure"] .real-activity-tag.now,
+.v8-frontier[data-frontier-approach="pure"] .real-activity-tag.today {
+  color: var(--ink);
+  border-color: var(--hair-strong);
+}
+.v8-frontier[data-frontier-approach="pure"] .real-feed-row.is-today {
+  border-left-color: var(--hair-strong);
+}
+.v8-frontier[data-frontier-approach="pure"] .hero-card-status { color: var(--ink); }
+/* price-tag is the "v8 launch" badge sitting at top-right of the
+   Pro pricing card. The base style fills it with var(--accent)
+   (=ink in pure) and uses var(--accent-ink) text — which is what we
+   want (dark text on the ink pill). Do NOT force color: var(--ink)
+   here or the text becomes ink-on-ink (invisible). */
+
+/* Brand-pill "v8" — keep neutral mono on outline (text is white/ink) */
+.v8-frontier[data-frontier-approach="pure"] .brand-pill {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--hair-strong);
+}
+
+/* Kicker text — bright ink so the message reads clearly. Color stays
+   in the pulse-dot beside it (icons-only rule). */
+.v8-frontier[data-frontier-approach="pure"] .kicker {
+  color: var(--ink);
+}
+
+/* Tool chip active — small lime indicator dot, text stays ink */
+.v8-frontier[data-frontier-approach="pure"] .tool-chip.active::before {
+  background: var(--micro-lime);
+}
+
+/* Active state on chips — INVERTED PILL pattern. Ink fills the
+   pill, background-color text reads on top. Maximum legibility
+   with zero chromatic accent. Small lime dot survives inside. */
+.v8-frontier[data-frontier-approach="pure"] .tool-chip.active,
+.v8-frontier[data-frontier-approach="pure"] .seg-btn.active,
+.v8-frontier[data-frontier-approach="pure"] .lib-subtab.active,
+.v8-frontier[data-frontier-approach="pure"] .v2-size.active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.32);
+  font-weight: 600;
+}
+.v8-frontier[data-frontier-approach="pure"] .v2-size.active .mono {
+  color: var(--bg);
+}
+/* Inside an inverted-pill active state the dots can't keep their
+   icon color — bare ones disappear (ink-on-ink) and bright micros
+   (lime/yellow) wash out on the light pill. Flip them to the pill
+   foreground so they stay readable. The colored signal is now
+   carried by the active state itself, not the dot. */
+.v8-frontier[data-frontier-approach="pure"] .tool-chip.active .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .seg-btn.active .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .lib-subtab.active .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .v2-size.active .status-dot {
+  background: var(--bg);
+}
+/* Lib-row / app-tab — list/tab style. Active uses a stronger
+   background fill + bold ink type. No side rail / accent border. */
+.v8-frontier[data-frontier-approach="pure"] .lib-row.active,
+.v8-frontier[data-frontier-approach="pure"] .app-tab.active {
+  color: var(--ink);
+  background: var(--canvas-4);
+  border-color: var(--hair-strong);
+  box-shadow: none;
+  font-weight: 600;
+}
+.v8-frontier[data-frontier-approach="pure"] .lib-row.active .lib-row-icon.globe {
+  color: var(--ink);
+}
+/* Tab-style (underline indicator) — bolder type + thicker bar. */
+.v8-frontier[data-frontier-approach="pure"] .real-tool-tab.active,
+.v8-frontier[data-frontier-approach="pure"] .real-size-tab.active,
+.v8-frontier[data-frontier-approach="pure"] .v2-tool.active {
+  color: var(--ink);
+  font-weight: 700;
+}
+.v8-frontier[data-frontier-approach="pure"] .real-tool-tab.active::after,
+.v8-frontier[data-frontier-approach="pure"] .real-size-tab.active::after,
+.v8-frontier[data-frontier-approach="pure"] .v2-tool.active::after {
+  background: var(--ink);
+  height: 2px;
+}
+
+/* Lucide icons inside vhub feature cards — pick up category color */
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-product svg { color: var(--micro-lime); }
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-writing  svg { color: var(--micro-warn); }
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-strategy svg { color: var(--micro-orange); }
+
+/* ═══════════════════════════════════════════════════════════════
+   VARIANT 3: PASTEL — soft cohesive palette, icon-only too
+   ═══════════════════════════════════════════════════════════════ */
+.v8-frontier[data-frontier-approach="pastel"] {
+  --micro-mint:   #A8E6CF;
+  --micro-blush:  #FFC1D8;
+  --micro-sky:    #C5E1FF;
+  --micro-cream:  #FFE8B0;
+  --micro-lilac:  #D9CFFF;
+  --ai-tint:      rgba(217, 207, 255, 0.18);
+  --ai-ink:       #8B70B5;
+}
+.v8-frontier[data-frontier-approach="pastel"][data-frontier-theme="light"] {
+  /* darker, pastel-but-readable versions for body-text contrast */
+  --micro-mint:   #4FA888;
+  --micro-blush:  #C76A92;
+  --micro-sky:    #5C8FCB;
+  --micro-cream:  #B89047;
+  --micro-lilac:  #8470C2;
+  --ai-tint:      rgba(132, 112, 194, 0.12);
+  --ai-ink:       #6B4F8F;
+}
+.v8-frontier[data-frontier-approach="pastel"] .pulse-dot {
+  background: var(--micro-mint);
+  box-shadow: 0 0 0 0 rgba(168, 230, 207, 0.5);
+}
+.v8-frontier[data-frontier-approach="pastel"] .status-dot.green  { background: var(--micro-mint); }
+.v8-frontier[data-frontier-approach="pastel"] .status-dot.blue   { background: var(--micro-sky); }
+.v8-frontier[data-frontier-approach="pastel"] .status-dot.violet { background: var(--micro-lilac); }
+.v8-frontier[data-frontier-approach="pastel"] .status-dot.yellow { background: var(--micro-cream); }
+.v8-frontier[data-frontier-approach="pastel"] .status-dot.pink   { background: var(--micro-blush); }
+.v8-frontier[data-frontier-approach="pastel"] .brand-pill {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--hair-strong);
+}
+
+/* ─── Approach picker (top nav) ─── */
+.v8-frontier .approach-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--canvas-1);
+  border: 1px solid var(--hair);
+  margin-right: 4px;
+}
+.v8-frontier .approach-chip {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  padding: 4px 9px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+  white-space: nowrap;
+}
+.v8-frontier .approach-chip:hover { color: var(--strong); }
+.v8-frontier .approach-chip.is-active {
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--hair);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BIG NUMBERS — 3 layout variants stacked for side-by-side compare
+   ═══════════════════════════════════════════════════════════════ */
+
+.v8-frontier .big-numbers { padding: 64px 32px; max-width: 1320px; margin: 0 auto; }
+.v8-frontier .bnum-variant-tag {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 18px;
+  display: block;
+}
+
+/* ── Variant A — Sentence form ── */
+.v8-frontier .bnum-variant-a .bnum-sentence {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3.6vw, 48px);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--body);
+  font-weight: 400;
+  max-width: 980px;
+}
+.v8-frontier .bnum-variant-a .bnum-s {
+  color: var(--ink);
+  font-weight: 700;
+  font-family: var(--font-sans);
+  letter-spacing: -0.03em;
+}
+
+/* ── Variant B — Asymmetric, ∞ hero ── */
+.v8-frontier .bnum-variant-b .bnum-asym {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.v8-frontier .bnum-asym-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v8-frontier .bnum-asym-num {
+  font-family: var(--font-sans);
+  font-size: clamp(140px, 18vw, 240px);
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  font-weight: 700;
+  color: var(--ink);
+}
+.v8-frontier .bnum-asym-headline {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-weight: 400;
+}
+.v8-frontier .bnum-asym-headline em {
+  font-style: italic;
+  color: var(--body);
+}
+.v8-frontier .bnum-asym-sub {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.v8-frontier .bnum-asym-row {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  border-left: 1px solid var(--hair);
+  padding-left: 48px;
+}
+.v8-frontier .bnum-asym-mini {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: baseline;
+  gap: 16px;
+}
+.v8-frontier .bnum-asym-mini-num {
+  font-family: var(--font-sans);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.v8-frontier .bnum-asym-unit {
+  font-size: 0.45em;
+  color: var(--muted);
+  margin-left: 2px;
+  font-weight: 500;
+}
+.v8-frontier .bnum-asym-mini-label {
+  font-size: 13px;
+  color: var(--body);
+  letter-spacing: 0.02em;
+}
+@media (max-width: 800px) {
+  .v8-frontier .bnum-variant-b .bnum-asym {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .v8-frontier .bnum-asym-row {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--hair);
+    padding-top: 32px;
+  }
+}
+
+/* ── Variant C — Stat + reason cards ── */
+.v8-frontier .bnum-variant-c .bnum-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.v8-frontier .bnum-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px 24px;
+  background: var(--bg);
+}
+.v8-frontier .bnum-card-num {
+  font-family: var(--font-sans);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.v8-frontier .bnum-card-unit {
+  font-size: 0.42em;
+  color: var(--muted);
+  margin-left: 2px;
+  font-weight: 500;
+}
+.v8-frontier .bnum-card-headline {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--strong);
+  letter-spacing: -0.01em;
+}
+.v8-frontier .bnum-card-detail {
+  font-size: 11.5px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+}
+@media (max-width: 900px) {
+  .v8-frontier .bnum-variant-c .bnum-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Pure — kill colored gradient backdrops on feature/hub cards.
+   The diagonal --feat-tint corner glow violates the "no gradient
+   backgrounds" rule. Categories keep their identity through the
+   icon color only. */
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-product,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-writing,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-strategy {
+  --feat-tint: transparent;
+}
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card::before {
+  background: none;
+}
+
+/* Pure — FLAT GLASSMORPHISM.
+   All card-style surfaces lose their canvas-2 → canvas-1 vertical
+   gradient and use a single translucent canvas fill instead. The
+   `backdrop-filter: blur` already on .glass keeps the glassy feel
+   without painting a gradient. Also strips the accent-soft radial
+   spotlights inside cards. */
+.v8-frontier[data-frontier-approach="pure"] .glass,
+.v8-frontier[data-frontier-approach="pure"] .big-numbers-inner,
+.v8-frontier[data-frontier-approach="pure"] .pillar,
+.v8-frontier[data-frontier-approach="pure"] .vhub-card,
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .glass,
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .pillar {
+  background: var(--canvas-2);
+}
+
+/* Radial accent spotlights inside cards — already neutral via
+   --accent-soft override, but kill the gradient outright so there's
+   no soft fade either. */
+.v8-frontier[data-frontier-approach="pure"] .pillar::before,
+.v8-frontier[data-frontier-approach="pure"] .vhub-card::before,
+.v8-frontier[data-frontier-approach="pure"] .real-hub-id::before,
+.v8-frontier[data-frontier-approach="pure"] .hero-card::before {
+  background: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PURE — kill ALL gradients & glows. Flat glassmorphism only.
+   Translucent fills + 1px hair borders + backdrop-blur. Nothing
+   else paints color depth.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Aurora ambient layers — completely hidden */
+.v8-frontier[data-frontier-approach="pure"] .aurora,
+.v8-frontier[data-frontier-approach="pure"] .aurora-1,
+.v8-frontier[data-frontier-approach="pure"] .aurora-2 {
+  display: none !important;
+}
+
+/* Hero morph blob — hide (it's a soft glow shape, breaks flat rule) */
+.v8-frontier[data-frontier-approach="pure"] .hero-blob-animated {
+  display: none;
+}
+
+/* Topnav — flat translucent fill, not the vertical fade gradient */
+.v8-frontier[data-frontier-approach="pure"] .topnav {
+  background: rgba(8, 8, 10, 0.75);
+}
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .topnav {
+  background: rgba(250, 250, 247, 0.78);
+}
+
+/* Logo-band edge fades — kill */
+.v8-frontier[data-frontier-approach="pure"] .logo-band-viewport::before,
+.v8-frontier[data-frontier-approach="pure"] .logo-band-viewport::after {
+  background: none !important;
+}
+
+/* Pillar / glass / hero-card / vhub-card extra top-edge shine —
+   strip the rgba(255,255,255,X) → transparent gradient highlight */
+.v8-frontier[data-frontier-approach="pure"] .pillar,
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .pillar {
+  background: var(--canvas-2);
+}
+.v8-frontier[data-frontier-approach="pure"] .pillar::after {
+  background: none !important;
+}
+
+/* All accent-glow / shadow-lift / shadow-soft shadows on cards
+   and buttons — flatten. Keep a single 1px hair border only. */
+.v8-frontier[data-frontier-approach="pure"] .glass,
+.v8-frontier[data-frontier-approach="pure"] .pillar,
+.v8-frontier[data-frontier-approach="pure"] .vhub-card,
+.v8-frontier[data-frontier-approach="pure"] .hero-card,
+.v8-frontier[data-frontier-approach="pure"] .picker-paste,
+.v8-frontier[data-frontier-approach="pure"] .real-hub-id,
+.v8-frontier[data-frontier-approach="pure"] .real-screen,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover {
+  box-shadow: none !important;
+}
+
+/* Pre-existing hardcoded orange/accent rings — drop them */
+.v8-frontier[data-frontier-approach="pure"] .pillar {
+  border-color: var(--hair);
+}
+
+/* Text gradients (serif color: transparent → background-clip text) →
+   render as plain ink text. */
+.v8-frontier[data-frontier-approach="pure"] .hero-card-title .serif,
+.v8-frontier[data-frontier-approach="pure"] .pillar-title .serif,
+.v8-frontier[data-frontier-approach="pure"] .app-doc-title .serif,
+.v8-frontier[data-frontier-approach="pure"] .pd-title .serif,
+.v8-frontier[data-frontier-approach="pure"] .hub-name .serif {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--ink) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PURE — DROP glassmorphism entirely. Full flat design.
+   No backdrop-filter, no translucent overlays. Solid surfaces +
+   1px hair border + ink type. That's it.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* (Previously killed every backdrop-filter. Removed so pure-nav and
+   pure cards can opt into glass via their own rules.) */
+
+/* Card surfaces use solid --bg-deep instead of translucent canvas */
+.v8-frontier[data-frontier-approach="pure"] .glass,
+.v8-frontier[data-frontier-approach="pure"] .pillar,
+.v8-frontier[data-frontier-approach="pure"] .vhub-card,
+.v8-frontier[data-frontier-approach="pure"] .hero-card,
+.v8-frontier[data-frontier-approach="pure"] .picker-paste,
+.v8-frontier[data-frontier-approach="pure"] .real-hub-id,
+.v8-frontier[data-frontier-approach="pure"] .real-screen,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card,
+.v8-frontier[data-frontier-approach="pure"] .big-numbers-inner,
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .glass,
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .pillar {
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+}
+
+/* Topnav — solid bg, not translucent rgba */
+.v8-frontier[data-frontier-approach="pure"] .topnav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .topnav {
+  background: var(--bg);
+}
+
+/* Kicker pill, buttons, picker chips — solid canvas, no blur */
+.v8-frontier[data-frontier-approach="pure"] .kicker,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost,
+.v8-frontier[data-frontier-approach="pure"] .tool-chip,
+.v8-frontier[data-frontier-approach="pure"] .seg-btn,
+.v8-frontier[data-frontier-approach="pure"] .brand-pill,
+.v8-frontier[data-frontier-approach="pure"] .approach-picker {
+  background: var(--bg-deep);
+}
+
+/* ─── Pricing checkmarks — color the ✓ icons (icons get color rule) */
+.v8-frontier[data-frontier-approach="pure"] .price-list li::before {
+  border-left-color: var(--micro-lime);
+  border-bottom-color: var(--micro-lime);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PURE — MICRO-INTERACTIONS everywhere possible
+   ───────────────────────────────────────────────────────────────
+   All interactive surfaces get a fast, restrained transition.
+   The vocabulary: small translate, scale, bg/border shift, arrow
+   slide. No glow, no color shift in chrome — just motion.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Buttons — press scale, arrow translateX, bg/border fade */
+.v8-frontier[data-frontier-approach="pure"] .btn-primary,
+.v8-frontier[data-frontier-approach="pure"] .btn-secondary,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark {
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark:hover { transform: translateY(-1px); }
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:active,
+.v8-frontier[data-frontier-approach="pure"] .btn-secondary:active,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost:active,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark:active { transform: scale(0.97); }
+
+.v8-frontier[data-frontier-approach="pure"] .arrow {
+  display: inline-block;
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .btn-secondary:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* Chips — hover lift + bg shift */
+.v8-frontier[data-frontier-approach="pure"] .tool-chip,
+.v8-frontier[data-frontier-approach="pure"] .seg-btn,
+.v8-frontier[data-frontier-approach="pure"] .trust-chip,
+.v8-frontier[data-frontier-approach="pure"] .brand-pill,
+.v8-frontier[data-frontier-approach="pure"] .approach-chip,
+.v8-frontier[data-frontier-approach="pure"] .lib-subtab,
+.v8-frontier[data-frontier-approach="pure"] .real-tool-tab,
+.v8-frontier[data-frontier-approach="pure"] .v2-size,
+.v8-frontier[data-frontier-approach="pure"] .v2-tool {
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 140ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .tool-chip:hover:not(.active),
+.v8-frontier[data-frontier-approach="pure"] .seg-btn:hover:not(.active),
+.v8-frontier[data-frontier-approach="pure"] .trust-chip:hover,
+.v8-frontier[data-frontier-approach="pure"] .lib-subtab:hover:not(.active) {
+  transform: translateY(-1px);
+  border-color: var(--hair-strong);
+}
+.v8-frontier[data-frontier-approach="pure"] .approach-chip:active,
+.v8-frontier[data-frontier-approach="pure"] .tool-chip:active,
+.v8-frontier[data-frontier-approach="pure"] .seg-btn:active { transform: scale(0.97); }
+
+/* Cards — lift on hover */
+.v8-frontier[data-frontier-approach="pure"] .pillar,
+.v8-frontier[data-frontier-approach="pure"] .vhub-card,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card,
+.v8-frontier[data-frontier-approach="pure"] .price-card,
+.v8-frontier[data-frontier-approach="pure"] .bnum-card,
+.v8-frontier[data-frontier-approach="pure"] .real-screen {
+  transition:
+    transform 220ms cubic-bezier(0.2, 0, 0.2, 1),
+    border-color 220ms ease,
+    background 220ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .pillar:hover,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card:hover,
+.v8-frontier[data-frontier-approach="pure"] .bnum-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--hair-strong);
+}
+.v8-frontier[data-frontier-approach="pure"] .price-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--hair-strong);
+}
+
+/* Lib-row / app-tab — hover bg fade */
+.v8-frontier[data-frontier-approach="pure"] .lib-row,
+.v8-frontier[data-frontier-approach="pure"] .app-tab {
+  transition: background 140ms ease, color 140ms ease, font-weight 0s;
+}
+.v8-frontier[data-frontier-approach="pure"] .lib-row:hover:not(.active),
+.v8-frontier[data-frontier-approach="pure"] .app-tab:hover:not(.active) {
+  background: var(--canvas-2);
+  color: var(--ink);
+}
+
+/* Nav links — underline grow from left on hover */
+.v8-frontier[data-frontier-approach="pure"] .topnav-link,
+.v8-frontier[data-frontier-approach="pure"] .footer-link {
+  position: relative;
+  transition: color 160ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .topnav-link::after,
+.v8-frontier[data-frontier-approach="pure"] .footer-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0;
+  height: 1px;
+  background: var(--ink);
+  transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.v8-frontier[data-frontier-approach="pure"] .topnav-link:hover,
+.v8-frontier[data-frontier-approach="pure"] .footer-link:hover {
+  color: var(--ink);
+}
+.v8-frontier[data-frontier-approach="pure"] .topnav-link:hover::after,
+.v8-frontier[data-frontier-approach="pure"] .footer-link:hover::after {
+  width: 100%;
+}
+
+/* Status dots — scale on hover (when inside an interactive parent) */
+.v8-frontier[data-frontier-approach="pure"] .tool-chip:hover .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .trust-chip:hover .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .v2-tool:hover .status-dot {
+  transform: scale(1.25);
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Brand mark — subtle scale on hover (the M.W mark) */
+.v8-frontier[data-frontier-approach="pure"] .brand {
+  transition: opacity 180ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .brand:hover .brand-mark-blob {
+  animation: v8BrandPulse 700ms ease-out;
+}
+@keyframes v8BrandPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.v8-frontier[data-frontier-approach="pure"] .brand-mark-blob {
+  transition: transform 280ms ease;
+  transform-origin: center;
+}
+
+/* Theme toggle — dot slide */
+.v8-frontier[data-frontier-approach="pure"] .theme-toggle {
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .theme-toggle:hover {
+  border-color: var(--hair-strong);
+}
+.v8-frontier[data-frontier-approach="pure"] .theme-toggle-dot {
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1), background 200ms ease;
+}
+.v8-frontier[data-frontier-approach="pure"] .theme-toggle:hover .theme-toggle-dot {
+  transform: scale(1.3);
+}
+
+/* Approach picker chips — smooth indicator */
+.v8-frontier[data-frontier-approach="pure"] .approach-chip {
+  transition: background 200ms cubic-bezier(0.4, 0, 0.2, 1), color 160ms ease, box-shadow 200ms ease;
+}
+
+/* Lucide icons inside hover-able containers — gentle rotate/scale */
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card svg,
+.v8-frontier[data-frontier-approach="pure"] .pillar svg {
+  transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card:hover svg,
+.v8-frontier[data-frontier-approach="pure"] .pillar:hover svg {
+  transform: scale(1.12) rotate(-3deg);
+}
+
+/* Stat numbers (bnum-card-num) — gentle glow-less scale on card hover */
+.v8-frontier[data-frontier-approach="pure"] .bnum-card-num {
+  transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+.v8-frontier[data-frontier-approach="pure"] .bnum-card:hover .bnum-card-num {
+  transform: scale(1.06);
+}
+
+/* Approach chip — smooth slide indicator */
+.v8-frontier[data-frontier-approach="pure"] .approach-chip:active { transform: scale(0.95); }
+
+/* Inputs — focus ring transition (already focus-visible) */
+.v8-frontier[data-frontier-approach="pure"] :where(input, textarea) {
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+/* Promo banner click affordance */
+.v8-frontier[data-frontier-approach="pure"] .topnav-link,
+.v8-frontier[data-frontier-approach="pure"] .footer-link { cursor: pointer; }
+
+/* Drop the old big-numbers Variant B (B was removed from JSX) — its
+   styles never match now but the rule is harmless. Keeping nothing. */
+
+/* ═══════════════════════════════════════════════════════════════
+   ABOUT page — supplementary classes for ecosystem / features /
+   timeline / before-after / comparison table / pricing.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Ecosystem row */
+.v8-frontier .about-eco {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 24px;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 0;
+}
+.v8-frontier .about-eco-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  text-align: center;
+}
+.v8-frontier .about-eco-col-title {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.v8-frontier .about-eco-chiprow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.v8-frontier .about-eco-arrow {
+  font-size: 18px;
+  color: var(--muted);
+}
+.v8-frontier .about-eco-pill {
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair-strong);
+  color: var(--ink);
+  font-size: 13px;
+}
+.v8-frontier .about-eco-foot {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-top: 12px;
+}
+@media (max-width: 800px) {
+  .v8-frontier .about-eco {
+    grid-template-columns: 1fr;
+  }
+  .v8-frontier .about-eco-arrow { transform: rotate(90deg); }
+}
+
+/* Feature grid (8 cards) */
+.v8-frontier .about-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.v8-frontier .about-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px 22px;
+  background: var(--bg);
+}
+.v8-frontier .about-feature-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.v8-frontier .about-feature-body {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.55;
+  margin: 0;
+}
+@media (max-width: 1100px) { .v8-frontier .about-feature-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px)  { .v8-frontier .about-feature-grid { grid-template-columns: 1fr; } }
+
+/* Feature image figures */
+.v8-frontier .about-feature-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.v8-frontier .about-feature-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+.v8-frontier .about-feature-imgwrap {
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+.v8-frontier .about-feature-imgwrap img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.v8-frontier .about-feature-figtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.v8-frontier .about-feature-figsub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+@media (max-width: 800px) {
+  .v8-frontier .about-feature-images { grid-template-columns: 1fr; }
+}
+
+/* Carousel wrap — let HeroCarousel breathe on dark/light */
+.v8-frontier .about-carousel-wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* Timeline (how it works) */
+.v8-frontier .about-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.v8-frontier .about-timeline-step {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 24px;
+  padding: 20px 0;
+  border-top: 1px solid var(--hair);
+}
+.v8-frontier .about-timeline-step:last-child { border-bottom: 1px solid var(--hair); }
+.v8-frontier .about-timeline-num {
+  font-size: 12px;
+  color: var(--faint);
+  letter-spacing: 0.08em;
+  padding-top: 2px;
+}
+.v8-frontier .about-timeline-marker {
+  font-size: 11px;
+  color: var(--ink);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.v8-frontier .about-timeline-text {
+  font-size: 15px;
+  color: var(--body);
+  line-height: 1.5;
+}
+
+/* Before-after */
+.v8-frontier .about-ba {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.v8-frontier .about-ba-col {
+  padding: 24px 28px;
+  background: var(--bg);
+}
+.v8-frontier .about-ba-title {
+  font-size: 11px;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.v8-frontier .about-ba-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v8-frontier .about-ba-list li {
+  font-size: 14px;
+  color: var(--body);
+  line-height: 1.5;
+}
+@media (max-width: 800px) {
+  .v8-frontier .about-ba { grid-template-columns: 1fr; }
+}
+
+/* Comparison table */
+.v8-frontier .about-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  background: var(--bg);
+}
+.v8-frontier .about-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.v8-frontier .about-table th,
+.v8-frontier .about-table td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .about-table th {
+  background: var(--bg-deep);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.v8-frontier .about-table .about-table-feature {
+  text-align: left;
+  color: var(--body);
+  font-weight: 500;
+}
+.v8-frontier .about-table tr:last-child td { border-bottom: 0; }
+.v8-frontier .about-table-yes {
+  color: var(--micro-lime);
+  font-weight: 700;
+  font-size: 14px;
+}
+.v8-frontier .about-table-no {
+  color: var(--faint);
+}
+.v8-frontier .about-table-partial {
+  color: var(--micro-warn);
+  font-weight: 700;
+}
+
+/* Pricing grid */
+.v8-frontier .about-price-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.v8-frontier .about-price {
+  position: relative;
+  padding: 28px 24px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v8-frontier .about-price-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair-strong);
+}
+.v8-frontier .about-price-name {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.v8-frontier .about-price-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+.v8-frontier .about-price-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v8-frontier .about-price-list li {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.5;
+}
+.v8-frontier .about-price-list li.is-dim { color: var(--faint); }
+.v8-frontier .about-price-list li.is-faint { color: var(--muted); font-size: 12px; }
+.v8-frontier .about-price-coming {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--micro-orange);
+  margin-left: 4px;
+}
+@media (max-width: 1000px) { .v8-frontier .about-price-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px)  { .v8-frontier .about-price-grid { grid-template-columns: 1fr; } }

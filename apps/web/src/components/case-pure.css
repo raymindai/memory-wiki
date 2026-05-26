@@ -1,0 +1,236 @@
+/* /case-* — single 720px column, persona-essay shape.
+   Anchors to the same left edge as other Pure essay pages. */
+
+.v8-frontier .pure-case-page,
+.pure-root .pure-case-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 120px 24px 96px;
+}
+
+/* Hero */
+.v8-frontier .pure-case-kicker,
+.pure-root .pure-case-kicker {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-case-title,
+.pure-root .pure-case-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(32px, 4.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-case-title,
+.pure-root[data-locale="ko"] .pure-case-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-case-sub,
+.pure-root .pure-case-sub {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--body);
+  margin: 0 0 56px;
+  text-wrap: pretty;
+}
+
+/* Section heading */
+.v8-frontier .pure-case-section,
+.pure-root .pure-case-section {
+  margin-top: 48px;
+}
+.v8-frontier .pure-case-section-eyebrow,
+.pure-root .pure-case-section-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+/* Plain bullet list (pain, result) */
+.v8-frontier .pure-case-list,
+.pure-root .pure-case-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v8-frontier .pure-case-list li,
+.pure-root .pure-case-list li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--body);
+  text-wrap: pretty;
+}
+.v8-frontier .pure-case-list li::before,
+.pure-root .pure-case-list li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+/* Numbered steps (action) */
+.v8-frontier .pure-case-steps,
+.pure-root .pure-case-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--hair);
+}
+.v8-frontier .pure-case-step,
+.pure-root .pure-case-step {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-case-step-num,
+.pure-root .pure-case-step-num {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--faint);
+  line-height: 1.35;
+}
+.v8-frontier .pure-case-step-title,
+.pure-root .pure-case-step-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+.v8-frontier .pure-case-step-detail,
+.pure-root .pure-case-step-detail {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--body);
+  text-wrap: pretty;
+}
+
+/* Worked example callout */
+.v8-frontier .pure-case-example,
+.pure-root .pure-case-example {
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  padding: 20px 22px;
+}
+.v8-frontier .pure-case-example-title,
+.pure-root .pure-case-example-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.v8-frontier .pure-case-example-body,
+.pure-root .pure-case-example-body {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--body);
+  margin: 0;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-case-example-link,
+.pure-root .pure-case-example-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+.v8-frontier .pure-case-example-link:hover,
+.pure-root .pure-case-example-link:hover {
+  color: var(--ink);
+}
+
+/* CTA — quiet centered call to action at the end */
+.v8-frontier .pure-case-cta,
+.pure-root .pure-case-cta {
+  margin-top: 64px;
+  padding: 36px 28px;
+  text-align: center;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+}
+.v8-frontier .pure-case-cta-line,
+.pure-root .pure-case-cta-line {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 8px;
+  text-wrap: balance;
+}
+.v8-frontier .pure-case-cta-sub,
+.pure-root .pure-case-cta-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+/* Related cases — small link grid */
+.v8-frontier .pure-case-related,
+.pure-root .pure-case-related {
+  margin-top: 56px;
+}
+.v8-frontier .pure-case-related-grid,
+.pure-root .pure-case-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 10px;
+}
+.v8-frontier .pure-case-related-link,
+.pure-root .pure-case-related-link {
+  padding: 14px 16px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  font-size: 14px;
+  color: var(--body);
+  text-decoration: none;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.v8-frontier .pure-case-related-link:hover,
+.pure-root .pure-case-related-link:hover {
+  color: var(--ink);
+  border-color: var(--hair-strong);
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-case-page,
+  .pure-root .pure-case-page {
+    padding: 96px 24px 64px;
+  }
+  .v8-frontier .pure-case-step,
+  .pure-root .pure-case-step {
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+  }
+}

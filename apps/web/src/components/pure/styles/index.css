@@ -1,0 +1,38 @@
+/* ════════════════════════════════════════════════════════════════════
+   Pure design-system — CSS aggregator.
+
+   Imports tokens + base typography + every per-component stylesheet,
+   in the same load order the legacy pure.css had. Component files
+   also import their own CSS, so this file is mainly a convenience
+   entry point (and the import target for pure/index.tsx).
+   ══════════════════════════════════════════════════════════════════ */
+
+@import "./tokens.css";
+@import "./base.css";
+
+@import "./components/pure-shell.css";
+@import "./components/pure-nav.css";
+@import "./components/pure-footer.css";
+@import "./components/pure-hero.css";
+@import "./components/pure-section.css";
+@import "./components/pure-cta-band.css";
+@import "./components/pure-pillar-grid.css";
+@import "./components/pure-feature-grid.css";
+@import "./components/pure-figure-grid.css";
+@import "./components/pure-before-after.css";
+@import "./components/pure-timeline.css";
+@import "./components/pure-gallery.css";
+@import "./components/pure-eco-flow.css";
+@import "./components/pure-compare-table.css";
+@import "./components/pure-pricing-grid.css";
+@import "./components/pure-chip.css";
+@import "./components/pure-provider-chip.css";
+@import "./components/pure-button.css";
+@import "./components/provider-icon.css";
+@import "./components/pure-trust-strip.css";
+@import "./components/pure-faq.css";
+@import "./components/pure-email-signup.css";
+@import "./components/pure-step-flow.css";
+@import "./components/pure-prose.css";
+@import "./components/pure-code-block.css";
+@import "./components/pure-toc.css";

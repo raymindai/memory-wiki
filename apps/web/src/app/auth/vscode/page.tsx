@@ -76,7 +76,7 @@ export default function VSCodeAuthPage() {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      <MemoryWikiLogo size={32} />
+      <MemoryWikiLogo size={32} withBlob />
 
       {status === "loading" && (
         <>

@@ -2716,3 +2716,14 @@ textarea::selection {
   0%, 50% { opacity: 1; }
   50.01%, 100% { opacity: 0.35; }
 }
+
+/* ── MW Blob logo — theme switch ──
+   Both blob SVGs are rendered side-by-side in the same <span>; CSS
+   hides whichever one doesn't match the active theme. Default is
+   dark (white blob shown) because the app's default theme is dark. */
+.mw-logo-blob { position: relative; }
+.mw-logo-blob > img { position: absolute; inset: 0; }
+.mw-logo-blob > .mw-logo-blob-darktheme { display: block; }
+.mw-logo-blob > .mw-logo-blob-lighttheme { display: none; }
+[data-theme="light"] .mw-logo-blob > .mw-logo-blob-darktheme { display: none; }
+[data-theme="light"] .mw-logo-blob > .mw-logo-blob-lighttheme { display: block; }

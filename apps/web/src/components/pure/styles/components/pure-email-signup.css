@@ -1,0 +1,78 @@
+/* ─────────────────────────────────────────────────────────────
+   PureEmailSignup — single-line waitlist form.
+   ───────────────────────────────────────────────────────────── */
+.v8-frontier .pure-email-signup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+.v8-frontier .pure-email-row {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-pill);
+  padding: 6px;
+  transition: border-color 140ms ease;
+}
+.v8-frontier .pure-email-row:focus-within { border-color: var(--hair-strong); }
+.v8-frontier .pure-email-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--ink);
+  font-family: inherit;
+}
+.v8-frontier .pure-email-input::placeholder { color: var(--faint); }
+.v8-frontier .pure-email-submit {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 140ms ease;
+}
+.v8-frontier .pure-email-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.v8-frontier .pure-email-foot {
+  font-size: 11px;
+  text-align: center;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.v8-frontier .pure-email-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 22px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-pill);
+  color: var(--ink);
+}
+.v8-frontier .pure-email-success-mark {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--micro-lime);
+  color: #000;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.v8-frontier .pure-email-success-msg { font-size: 14px; }

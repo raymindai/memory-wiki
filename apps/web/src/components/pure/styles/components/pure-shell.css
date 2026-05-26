@@ -1,0 +1,50 @@
+/* ─── Global shell backdrop — animated chromatic blob behind every
+   Pure surface. Three masked color layers (R/G/B on dark, C/M/Y on
+   light) chase each other with offset animation delays, producing a
+   soft chromatic separation glow that drifts in the background. ─── */
+.v8-frontier .pure-shell-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+/* Single animated morph blob — fixed to viewport, GPU-blurred.
+   No SVG filters, no blend modes (too expensive per-frame).
+   The SMIL morph runs inside the SVG itself. */
+.v8-frontier .pure-shell-backdrop-morph {
+  position: fixed;
+  display: block;
+  top: 50%;
+  left: 50%;
+  width: 75vw;
+  height: 75vw;
+  max-width: 1100px;
+  max-height: 1100px;
+  transform: translate3d(-50%, -50%, 0);
+  pointer-events: none;
+  filter: blur(8px);
+  opacity: 0.45;
+  /* No drift animation — keeps the SMIL inside the SVG as the only
+     motion source, scroll stays smooth. */
+}
+.v8-frontier[data-frontier-theme="light"] .pure-shell-backdrop-morph {
+  opacity: 0.15;
+}
+
+/* Each channel drifts with its own subtle delta — the offsets are
+   small (12-30px) so the layers stay overlapped (= chromatic split,
+   not three separate blobs), but the deltas differ enough that the
+   split moves visibly. */
+@keyframes pureChromaDrift {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  33%      { transform: translate(calc(-50% + 24px), calc(-50% - 18px)) scale(1.06); }
+  66%      { transform: translate(calc(-50% - 18px), calc(-50% + 24px)) scale(1.03); }
+}
+
+/* Content sits above backdrop + pushed below the fixed nav. */
+.v8-frontier .pure-shell-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 56px;
+}

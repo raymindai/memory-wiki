@@ -1,0 +1,63 @@
+/* /404 — global not-found page */
+.v8-frontier .pure-notfound,
+.pure-root .pure-notfound {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px;
+}
+.v8-frontier .pure-notfound-inner,
+.pure-root .pure-notfound-inner {
+  max-width: 560px;
+  text-align: center;
+}
+.v8-frontier .pure-notfound-code,
+.pure-root .pure-notfound-code {
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--faint);
+  margin-bottom: 28px;
+}
+.v8-frontier .pure-notfound-title,
+.pure-root .pure-notfound-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 24px;
+  text-wrap: balance;
+}
+.v8-frontier .pure-notfound-lede,
+.pure-root .pure-notfound-lede {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--body);
+  margin: 0 0 12px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-notfound-hint,
+.pure-root .pure-notfound-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 40px;
+}
+.v8-frontier .pure-notfound-hint code,
+.pure-root .pure-notfound-hint code {
+  font-family: var(--font-mono);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  padding: 2px 6px;
+  font-size: 0.9em;
+  color: var(--ink);
+}
+.v8-frontier .pure-notfound-actions,
+.pure-root .pure-notfound-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}

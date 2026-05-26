@@ -1,0 +1,230 @@
+/* /how — benchmark table tweak so it doesn't overflow the 720 column */
+.v8-frontier .pure-how-benchmark,
+.pure-root .pure-how-benchmark {
+  margin: 24px 0 12px;
+}
+.v8-frontier .pure-how-benchmark .pure-table-wrap,
+.pure-root .pure-how-benchmark .pure-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Inline diagrams. Built from boxes + arrow glyphs so each one
+   is a real DOM tree (theme-aware, no asset to swap), not a flat
+   image. All sized to fit inside the 720px reading column.
+   ───────────────────────────────────────────────────────────── */
+
+.v8-frontier .pure-how-diagram,
+.pure-root .pure-how-diagram {
+  margin: 28px 0 32px;
+  padding: 28px 20px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+}
+.v8-frontier .pure-how-diagram-caption,
+.pure-root .pure-how-diagram-caption {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 18px;
+}
+
+/* Row layout — boxes side by side connected by → */
+.v8-frontier .pure-how-row,
+.pure-root .pure-how-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.v8-frontier .pure-how-arrow,
+.pure-root .pure-how-arrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--hair-strong);
+  font-size: 20px;
+  font-weight: 300;
+  font-family: var(--font-sans);
+  flex-shrink: 0;
+}
+
+/* Node — labelled rectangle. Accent dot pulled from semantic colors. */
+.v8-frontier .pure-how-node,
+.pure-root .pure-how-node {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  text-align: center;
+}
+.v8-frontier .pure-how-node-eyebrow,
+.pure-root .pure-how-node-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.v8-frontier .pure-how-node-label,
+.pure-root .pure-how-node-label {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.v8-frontier .pure-how-node-sub,
+.pure-root .pure-how-node-sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+.v8-frontier .pure-how-node.is-output,
+.pure-root .pure-how-node.is-output {
+  border-color: var(--hair-strong);
+  background: var(--bg-deep);
+}
+
+/* Container box — wraps multiple inner items, used for the Hub anatomy
+ * diagram and Bundle digest summary diagram. */
+.v8-frontier .pure-how-container,
+.pure-root .pure-how-container {
+  border: 1px solid var(--hair-strong);
+  border-radius: var(--r-md);
+  padding: 18px 20px;
+  background: var(--bg);
+  max-width: 480px;
+  margin: 0 auto;
+}
+.v8-frontier .pure-how-container-title,
+.pure-root .pure-how-container-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  margin-bottom: 14px;
+  letter-spacing: 0.02em;
+}
+.v8-frontier .pure-how-container-list,
+.pure-root .pure-how-container-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v8-frontier .pure-how-container-list li,
+.pure-root .pure-how-container-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--body);
+}
+.v8-frontier .pure-how-container-list li::before,
+.pure-root .pure-how-container-list li::before {
+  content: "";
+  flex-shrink: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--faint);
+  transform: translateY(-2px);
+}
+.v8-frontier .pure-how-container-list li code,
+.pure-root .pure-how-container-list li code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+/* Bundle assembly — N stacked source docs collapse into one digest */
+.v8-frontier .pure-how-bundle,
+.pure-root .pure-how-bundle {
+  display: grid;
+  grid-template-columns: 1fr auto 1.5fr;
+  align-items: center;
+  gap: 16px;
+}
+.v8-frontier .pure-how-bundle-stack,
+.pure-root .pure-how-bundle-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Vertical timeline (for update propagation) */
+.v8-frontier .pure-how-timeline,
+.pure-root .pure-how-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.v8-frontier .pure-how-timeline-step,
+.pure-root .pure-how-timeline-step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 10px 0;
+}
+.v8-frontier .pure-how-timeline-num,
+.pure-root .pure-how-timeline-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: 0.1em;
+  padding-top: 1px;
+}
+.v8-frontier .pure-how-timeline-body,
+.pure-root .pure-how-timeline-body {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.6;
+}
+.v8-frontier .pure-how-timeline-body strong,
+.pure-root .pure-how-timeline-body strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.v8-frontier .pure-how-timeline-body code,
+.pure-root .pure-how-timeline-body code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  padding: 1px 5px;
+  border-radius: var(--r-sm);
+}
+
+@media (max-width: 600px) {
+  .v8-frontier .pure-how-row,
+  .pure-root .pure-how-row {
+    flex-direction: column;
+  }
+  .v8-frontier .pure-how-arrow,
+  .pure-root .pure-how-arrow {
+    transform: rotate(90deg);
+  }
+  .v8-frontier .pure-how-bundle,
+  .pure-root .pure-how-bundle {
+    grid-template-columns: 1fr;
+  }
+  .v8-frontier .pure-how-bundle > .pure-how-arrow,
+  .pure-root .pure-how-bundle > .pure-how-arrow {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+}

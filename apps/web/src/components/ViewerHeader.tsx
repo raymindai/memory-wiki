@@ -45,7 +45,7 @@ export default function ViewerHeader({ title, subtitle, breadcrumb, actions }: V
       }}
     >
       <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="Memory.Wiki home">
-        <MemoryWikiLogo size={18} />
+        <MemoryWikiLogo size={18} withBlob />
       </Link>
 
       <div

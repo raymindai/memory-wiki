@@ -1,0 +1,137 @@
+/* /docs/cli — Pure design system body styles. Sits inside PureDocsShell. */
+
+/* ─── Hero ─────────────────────────────────────────────────── */
+.v8-frontier .pure-cli-docs-eyebrow,
+.pure-root   .pure-cli-docs-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-cli-docs-title,
+.pure-root   .pure-cli-docs-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(32px, 4.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-cli-docs-title,
+.pure-root[data-locale="ko"]   .pure-cli-docs-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-cli-docs-intro,
+.pure-root   .pure-cli-docs-intro {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--body);
+  max-width: 640px;
+  margin: 0 0 48px;
+  text-wrap: pretty;
+}
+
+/* ─── Section scaffold ─────────────────────────────────────── */
+.v8-frontier .pure-cli-docs-section,
+.pure-root   .pure-cli-docs-section {
+  margin-bottom: 48px;
+  scroll-margin-top: 96px;
+}
+.v8-frontier .pure-cli-docs-section-title,
+.pure-root   .pure-cli-docs-section-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+.v8-frontier[data-locale="ko"] .pure-cli-docs-section-title,
+.pure-root[data-locale="ko"]   .pure-cli-docs-section-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-cli-docs-body,
+.pure-root   .pure-cli-docs-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--body);
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+
+/* ─── Sub-label inside a callout (UPPERCASE mono) ──────────── */
+.v8-frontier .pure-cli-docs-sublabel,
+.pure-root   .pure-cli-docs-sublabel {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 18px 0 10px;
+}
+.v8-frontier .pure-cli-docs-sublabel:first-child,
+.pure-root   .pure-cli-docs-sublabel:first-child {
+  margin-top: 0;
+}
+
+/* Callout note paragraph (small body inside the callout) */
+.v8-frontier .pure-cli-docs-callout-note,
+.pure-root   .pure-cli-docs-callout-note {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 12px 0 0;
+}
+.v8-frontier .pure-cli-docs-callout-note code,
+.pure-root   .pure-cli-docs-callout-note code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 1px 6px;
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+}
+
+/* ─── Command row (used by Commands + Options grids) ───────── */
+.v8-frontier .pure-cli-docs-cmd-row,
+.pure-root   .pure-cli-docs-cmd-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-cli-docs-cmd-row:last-child,
+.pure-root   .pure-cli-docs-cmd-row:last-child {
+  border-bottom: 0;
+}
+.v8-frontier .pure-cli-docs-cmd-name,
+.pure-root   .pure-cli-docs-cmd-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  word-break: break-all;
+}
+.v8-frontier .pure-cli-docs-cmd-desc,
+.pure-root   .pure-cli-docs-cmd-desc {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-cli-docs-cmd-row,
+  .pure-root   .pure-cli-docs-cmd-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

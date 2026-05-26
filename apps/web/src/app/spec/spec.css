@@ -1,0 +1,186 @@
+/* ─────────────────────────────────────────────────────────────
+   /spec — single 720px reading column. Mirrors /manifesto layout.
+   Hero (eyebrow + title + intro + meta) → TOC → numbered sections.
+   ───────────────────────────────────────────────────────────── */
+
+.v8-frontier .pure-spec-page,
+.pure-root .pure-spec-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 120px 24px 96px;
+}
+
+/* Hero */
+.v8-frontier .pure-spec-eyebrow,
+.pure-root .pure-spec-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-spec-title,
+.pure-root .pure-spec-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 24px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-spec-title,
+.pure-root[data-locale="ko"] .pure-spec-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-spec-intro,
+.pure-root .pure-spec-intro {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--body);
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-spec-meta,
+.pure-root .pure-spec-meta {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0 0 56px;
+}
+.v8-frontier .pure-spec-meta a,
+.pure-root .pure-spec-meta a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--hair-strong);
+  text-underline-offset: 3px;
+}
+
+/* TOC — boxed numbered list */
+.v8-frontier .pure-spec-toc,
+.pure-root .pure-spec-toc {
+  padding: 18px 22px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  margin: 0 0 80px;
+}
+.v8-frontier .pure-spec-toc-heading,
+.pure-root .pure-spec-toc-heading {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+.v8-frontier .pure-spec-toc ol,
+.pure-root .pure-spec-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: pure-spec-toc;
+}
+.v8-frontier .pure-spec-toc li,
+.pure-root .pure-spec-toc li {
+  counter-increment: pure-spec-toc;
+  position: relative;
+  padding-left: 32px;
+  font-size: 14px;
+  line-height: 2;
+}
+.v8-frontier .pure-spec-toc li::before,
+.pure-root .pure-spec-toc li::before {
+  content: counter(pure-spec-toc, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 2;
+}
+.v8-frontier .pure-spec-toc a,
+.pure-root .pure-spec-toc a {
+  color: var(--body);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+.v8-frontier .pure-spec-toc a:hover,
+.pure-root .pure-spec-toc a:hover {
+  color: var(--ink);
+}
+
+/* Section heading (eyebrow num + h2) */
+.v8-frontier .pure-spec-section,
+.pure-root .pure-spec-section {
+  scroll-margin-top: 96px;
+  margin-bottom: 64px;
+}
+.v8-frontier .pure-spec-section-eyebrow,
+.pure-root .pure-spec-section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+/* Color cycle for the spec section number row, matching PureSection's
+ * cycle so any page with numbered sections gets the same vertical
+ * color rhythm. */
+.v8-frontier .pure-spec-section:nth-of-type(6n+1) .pure-spec-section-eyebrow,
+.pure-root   .pure-spec-section:nth-of-type(6n+1) .pure-spec-section-eyebrow { color: var(--micro-lime);   }
+.v8-frontier .pure-spec-section:nth-of-type(6n+2) .pure-spec-section-eyebrow,
+.pure-root   .pure-spec-section:nth-of-type(6n+2) .pure-spec-section-eyebrow { color: var(--micro-info);   }
+.v8-frontier .pure-spec-section:nth-of-type(6n+3) .pure-spec-section-eyebrow,
+.pure-root   .pure-spec-section:nth-of-type(6n+3) .pure-spec-section-eyebrow { color: var(--micro-orange); }
+.v8-frontier .pure-spec-section:nth-of-type(6n+4) .pure-spec-section-eyebrow,
+.pure-root   .pure-spec-section:nth-of-type(6n+4) .pure-spec-section-eyebrow { color: var(--micro-ai);     }
+.v8-frontier .pure-spec-section:nth-of-type(6n+5) .pure-spec-section-eyebrow,
+.pure-root   .pure-spec-section:nth-of-type(6n+5) .pure-spec-section-eyebrow { color: var(--micro-warn);   }
+.v8-frontier .pure-spec-section:nth-of-type(6n)   .pure-spec-section-eyebrow,
+.pure-root   .pure-spec-section:nth-of-type(6n)   .pure-spec-section-eyebrow { color: var(--micro-pink);   }
+.v8-frontier .pure-spec-section-title,
+.pure-root .pure-spec-section-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 16px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-spec-section-title,
+.pure-root[data-locale="ko"] .pure-spec-section-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+
+/* Footnote */
+.v8-frontier .pure-spec-footnote,
+.pure-root .pure-spec-footnote {
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hair);
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-spec-page,
+  .pure-root .pure-spec-page {
+    padding: 96px 24px 64px;
+  }
+  .v8-frontier .pure-spec-toc,
+  .pure-root .pure-spec-toc {
+    margin-bottom: 56px;
+  }
+  .v8-frontier .pure-spec-section,
+  .pure-root .pure-spec-section {
+    margin-bottom: 48px;
+  }
+}

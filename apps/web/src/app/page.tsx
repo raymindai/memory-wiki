@@ -24,7 +24,7 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
       style={{ background: "var(--background)", gap: 14 }}
     >
       <div style={{ animation: "mwBootEnter 520ms ease-out both" }}>
-        <MemoryWikiLogo size={26} />
+        <MemoryWikiLogo size={26} withBlob />
       </div>
       <div
         style={{

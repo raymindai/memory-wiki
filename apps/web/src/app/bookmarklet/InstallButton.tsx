@@ -26,15 +26,25 @@ export default function InstallButton({ href }: Props) {
     <a
       ref={ref}
       draggable
+      // The dragged-to-bookmarks title is taken from the anchor's
+      // accessible name. Setting a `title` attribute makes it
+      // explicit so the saved bookmark reads "Memory.Wiki — Save
+      // this chat" even on browsers that don't carry the page
+      // favicon to `javascript:` URLs (Firefox in particular).
+      title="Memory.Wiki — Save this chat"
       onClick={(e) => {
         e.preventDefault();
         // eslint-disable-next-line no-alert
         alert("Drag this button up to your bookmarks bar instead of clicking it. Then click the bookmark while you're on a chat page.");
       }}
-      className="px-6 py-3 rounded-lg text-base font-medium select-none"
-      style={{ background: "var(--accent)", color: "#000", cursor: "grab" }}
+      className="pure-bookmarklet-button"
     >
-      📎 Save to Memory.Wiki
+      <img
+        src="/brand/mwblob_morph.svg"
+        alt="Memory.Wiki"
+        className="pure-bookmarklet-button-mark"
+      />
+      <span>Save to Memory.Wiki</span>
     </a>
   );
 }

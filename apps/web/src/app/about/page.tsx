@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AboutContent from "@/components/AboutContent";
+import AboutPure from "./AboutPure";
 
 export const metadata: Metadata = {
   title: "About — Memory.Wiki",
@@ -19,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  return <AboutContent locale="en" />;
+  return <AboutPure />;
 }

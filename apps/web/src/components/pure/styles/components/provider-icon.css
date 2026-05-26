@@ -1,0 +1,3 @@
+/* ProviderIcon is purely inline-SVG; sizing and color flow from
+ * the parent chip / row context. No standalone CSS is required.
+ * File kept so each component file imports its own CSS uniformly. */

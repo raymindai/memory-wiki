@@ -76,7 +76,7 @@ export default function DesktopAuthPage() {
         gap: 24,
       }}
     >
-      <MemoryWikiLogo size={32} />
+      <MemoryWikiLogo size={32} withBlob />
 
       {status === "loading" && (
         <>

@@ -1,0 +1,302 @@
+/* ─── Gallery ─── */
+.v8-frontier .pure-gallery {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+/* When a PureSection wraps a gallery, the section's eyebrow sits very
+ * close to the slide — gallery imagery carries the visual weight, so
+ * the eyebrow needs less breathing room than a typical text section. */
+.v8-frontier .pure-section:has(.pure-gallery) .pure-section-head {
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-gallery-track {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 0 16px;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+/* Spacer pseudo-children sit at each end of the track so the first
+ * and last real slides scroll-snap to the visual center, regardless
+ * of container width. Width matches the empty gutter beside a
+ * centered slide. */
+.v8-frontier .pure-gallery-track::before,
+.v8-frontier .pure-gallery-track::after {
+  content: "";
+  flex: 0 0 calc((100% - min(72%, 980px)) / 2 - 16px);
+  pointer-events: none;
+}
+.v8-frontier .pure-gallery-track::-webkit-scrollbar { display: none; }
+
+/* Inactive slides are smaller, dimmed, and pointer-clickable (cursor change) */
+.v8-frontier .pure-gallery-item {
+  flex: 0 0 72%;
+  max-width: 980px;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  cursor: pointer;
+  transform: scale(0.88);
+  transform-origin: center top;
+  transition: opacity 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              filter 420ms ease;
+  opacity: 0.28;
+  filter: saturate(0.4);
+}
+.v8-frontier .pure-gallery-item.is-active {
+  opacity: 1;
+  transform: scale(1);
+  filter: none;
+  cursor: default;
+}
+.v8-frontier .pure-gallery-img {
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--bg-deep);
+  position: relative;
+}
+.v8-frontier .pure-gallery-item.is-active .pure-gallery-img {
+  border-color: var(--hair-strong);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.5);
+}
+.v8-frontier .pure-gallery-img img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.v8-frontier .pure-gallery-meta {
+  padding: 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  align-items: center;
+  transition: opacity 320ms ease;
+}
+.v8-frontier .pure-gallery-meta-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Meta is only meaningful for the active slide — fade out on the
+ * dim previews so they don't crowd the eye with distant title text. */
+.v8-frontier .pure-gallery-item:not(.is-active) .pure-gallery-meta {
+  opacity: 0;
+  pointer-events: none;
+}
+.v8-frontier .pure-gallery-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+.v8-frontier .pure-gallery-desc {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 560px;
+  text-wrap: pretty;
+  text-align: center;
+}
+.v8-frontier .pure-gallery-link {
+  font-size: 12px;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--hair-strong);
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  transition: background 160ms ease, color 160ms ease;
+  white-space: nowrap;
+}
+.v8-frontier .pure-gallery-link:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+/* Pure gallery link — underline only, no arrow glyph */
+.v8-frontier .pure-gallery-link::after { content: none; }
+
+/* Nav arrow buttons (prev / next) */
+.v8-frontier .pure-gallery-nav {
+  position: absolute;
+  top: 36%;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--hair-strong);
+  color: var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+  padding: 0;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+.v8-frontier[data-frontier-theme="light"] .pure-gallery-nav {
+  background: rgba(255, 255, 255, 0.6);
+}
+.v8-frontier .pure-gallery-nav:hover {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+.v8-frontier .pure-gallery-prev { left: 16px; }
+.v8-frontier .pure-gallery-next { right: 16px; }
+
+/* Counter + tick-line indicator.
+ *
+ * v8 discipline: dots are color-only state changes, no width morph.
+ * The whole row reads as one tight progress unit. */
+.v8-frontier .pure-gallery-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 0 0;
+}
+.v8-frontier .pure-gallery-count {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+.v8-frontier .pure-gallery-count-sep {
+  color: var(--faint);
+  margin: 0 2px;
+}
+.v8-frontier .pure-gallery-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Tick lines, not circles — feels like a progress strip. Active state
+ * is color-only so the row's geometry never shifts as it advances. */
+.v8-frontier .pure-gallery-dot {
+  width: 18px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--hair-strong);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+.v8-frontier .pure-gallery-dot:hover { background: var(--muted); }
+.v8-frontier .pure-gallery-dot.is-active { background: var(--ink); }
+@media (max-width: 720px) {
+  .v8-frontier .pure-gallery-item { flex: 0 0 88%; }
+  .v8-frontier .pure-gallery-nav { display: none; }
+}
+
+/* ─── Gallery drag affordance ─── */
+.v8-frontier .pure-gallery-track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+}
+.v8-frontier .pure-gallery-track.is-dragging .pure-gallery-item { transition: none !important; }
+
+/* ─── Lightbox modal ─── */
+.v8-frontier .pure-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 60px;
+  animation: pureLightboxFade 220ms ease-out;
+}
+@keyframes pureLightboxFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.v8-frontier .pure-lightbox-stage {
+  position: relative;
+  max-width: min(1400px, 92vw);
+  max-height: 88vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+.v8-frontier .pure-lightbox-stage img {
+  max-width: 100%;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: var(--r-lg);
+  box-shadow: 0 32px 80px -20px rgba(0, 0, 0, 0.7);
+}
+.v8-frontier .pure-lightbox-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+}
+.v8-frontier .pure-lightbox-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 18px;
+  font-weight: 600;
+}
+.v8-frontier .pure-lightbox-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  text-wrap: pretty;
+}
+.v8-frontier .pure-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.v8-frontier .pure-lightbox-close:hover { background: rgba(255, 255, 255, 0.18); }
+.v8-frontier .pure-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.v8-frontier .pure-lightbox-nav:hover { background: rgba(255, 255, 255, 0.18); }
+.v8-frontier .pure-lightbox-prev { left: 24px; }
+.v8-frontier .pure-lightbox-next { right: 24px; }

@@ -1,0 +1,53 @@
+/* ─── Before / After 2-col ─── */
+.v8-frontier .pure-ba {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--hair);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.v8-frontier .pure-ba-col {
+  padding: 30px 32px;
+  background: var(--bg-deep);
+}
+.v8-frontier .pure-ba-title {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.v8-frontier .pure-ba-col-after .pure-ba-title { color: var(--ink); }
+.v8-frontier .pure-ba-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v8-frontier .pure-ba-list li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--body);
+}
+.v8-frontier .pure-ba-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.v8-frontier .pure-ba-col-after .pure-ba-list li::before {
+  background: var(--micro-lime);
+}
+@media (max-width: 800px) {
+  .v8-frontier .pure-ba { grid-template-columns: 1fr; }
+}

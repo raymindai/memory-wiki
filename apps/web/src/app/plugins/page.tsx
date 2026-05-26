@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PluginsContent from "@/components/PluginsContent";
+import PluginsPure from "./PluginsPure";
 
 export const metadata: Metadata = {
   title: "Plugins and Extensions — Memory.Wiki",
@@ -18,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function PluginsPage() {
-  return <PluginsContent locale="en" />;
+  return <PluginsPure locale="en" />;
 }

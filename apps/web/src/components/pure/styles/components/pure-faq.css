@@ -1,0 +1,47 @@
+/* ─────────────────────────────────────────────────────────────
+   PureFAQ — native <details> accordion.
+   ───────────────────────────────────────────────────────────── */
+.v8-frontier .pure-faq {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--hair);
+}
+.v8-frontier .pure-faq-item {
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 4px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  list-style: none;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-faq-q::-webkit-details-marker { display: none; }
+.v8-frontier .pure-faq-mark {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--muted);
+  transition: transform 160ms ease, color 160ms ease;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.v8-frontier .pure-faq-item[open] .pure-faq-mark {
+  transform: rotate(45deg);
+  color: var(--ink);
+}
+.v8-frontier .pure-faq-a {
+  padding: 0 4px 22px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--body);
+  text-wrap: pretty;
+}
+.v8-frontier .pure-faq-a p { margin: 0 0 10px; }
+.v8-frontier .pure-faq-a p:last-child { margin-bottom: 0; }
+.v8-frontier .pure-faq-a a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }

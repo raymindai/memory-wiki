@@ -1,0 +1,41 @@
+/* ─── PureChip — uses the existing .trust-chip base from frontier.css
+   and layers in Pure-mode overrides (hover scale, "+ more" variant,
+   small dashed trust-chip-more pill). ─── */
+
+/* Trust chip hover: scale + brighten */
+.v8-frontier .trust-chip {
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 200ms ease,
+              color 200ms ease;
+}
+.v8-frontier .trust-chip:hover {
+  transform: translateY(-1px) scale(1.04);
+  border-color: var(--hair-strong);
+  color: var(--ink);
+}
+
+/* Provider icon hover: gentle wobble */
+.v8-frontier .trust-chip svg {
+  transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.v8-frontier .trust-chip:hover svg {
+  transform: rotate(-8deg) scale(1.12);
+}
+
+/* + more chip — neutral, smaller, hints at non-exhaustive list */
+.v8-frontier .trust-chip.pure-eco-more {
+  font-size: 11px;
+  color: var(--muted);
+  border-color: var(--hair);
+  background: transparent;
+}
+
+/* Trust row "+ more" chip — muted, dashed border, signals "and others" */
+.v8-frontier .trust-chip-more {
+  color: var(--muted);
+  border-style: dashed !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+}
+.v8-frontier .trust-chip-more:hover { color: var(--ink); }

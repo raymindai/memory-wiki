@@ -1,0 +1,89 @@
+/* ─── Ecosystem (inline 3-step flow) — columns shrink to content
+   so arrows sit horizontally midway between actual column content
+   (not at large cell edges). Whole row centered on the page. */
+.v8-frontier .pure-eco {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 32px;
+  padding: 24px 0;
+}
+.v8-frontier .pure-eco-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.v8-frontier .pure-eco-col-title {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.v8-frontier .pure-eco-chiprow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.v8-frontier .pure-eco-url {
+  padding: 12px 20px;
+  border-radius: var(--r-pill);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair-strong);
+  color: var(--ink);
+  font-size: 13px;
+}
+.v8-frontier .pure-eco-foot {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .v8-frontier .pure-eco { grid-template-columns: 1fr; }
+}
+
+/* ─── Eco center — big animated brand blob (identity moment) ─── */
+.v8-frontier .pure-eco-center { gap: 18px; }
+.v8-frontier .pure-eco-blob {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.v8-frontier .pure-eco-blob img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Ecosystem flow arrow — inline SVG, vertically centered in its
+   grid cell (= aligned with the center column's blob). */
+.v8-frontier .pure-eco-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  color: var(--muted);
+  font-size: 18px;
+}
+@media (max-width: 900px) {
+  .v8-frontier .pure-eco-arrow svg {
+    transform: rotate(90deg);
+  }
+}
+
+/* Ecosystem arrow: subtle horizontal drift */
+@keyframes pureArrowDrift {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(4px); }
+}
+.v8-frontier .pure-eco-arrow svg {
+  animation: pureArrowDrift 2.6s ease-in-out infinite;
+}

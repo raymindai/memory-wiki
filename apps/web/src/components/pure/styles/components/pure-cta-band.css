@@ -1,0 +1,145 @@
+/* ─── CTA band ─── */
+.v8-frontier .pure-cta-band {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  padding: 96px 48px 88px;
+  text-align: center;
+}
+.v8-frontier .pure-cta-band-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Eyebrow with a live-pulsing lime dot */
+.v8-frontier .pure-cta-band-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.v8-frontier .pure-cta-band-eyedot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--micro-lime);
+  box-shadow: 0 0 0 0 rgba(181, 255, 26, 0.6);
+  animation: ctaPulse 1.8s ease-out infinite;
+}
+@keyframes ctaPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(181, 255, 26, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(181, 255, 26, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(181, 255, 26, 0);    }
+}
+
+/* Big headline — Cal Sans serif-ish display, ink */
+.v8-frontier .pure-cta-band-heading {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--ink);
+  margin: 0;
+}
+
+.v8-frontier .pure-cta-band-lede {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 4px 0 14px;
+  line-height: 1.6;
+  max-width: 540px;
+  text-wrap: pretty;
+}
+
+/* Button with halo glow — pinkish-blue gradient pill, dark text */
+.v8-frontier .pure-cta-band-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 32px;
+  background: #ffffff;
+  color: #0a0a0c;
+  border-radius: var(--r-pill);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  box-shadow:
+    0 -5px 8px 0 rgba(181, 255, 26, 0.1),
+    5px -3px 8px 0 rgba(46, 123, 255, 0.1),
+    5px 3px 8px 0 rgba(139, 92, 246, 0.1),
+    0 5px 8px 0 rgba(255, 42, 125, 0.1),
+    -5px 3px 8px 0 rgba(255, 107, 26, 0.1);
+  transition: box-shadow 280ms ease, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.v8-frontier .pure-cta-band-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 -11px 14px 0 rgba(181, 255, 26, 0.3),
+    11px -8px 14px 0 rgba(46, 123, 255, 0.3),
+    11px 8px 14px 0 rgba(139, 92, 246, 0.3),
+    0 11px 14px 0 rgba(255, 42, 125, 0.3),
+    -11px 8px 14px 0 rgba(255, 107, 26, 0.3);
+}
+/* hide the legacy glow span — box-shadow handles it now */
+.v8-frontier .pure-cta-band-button-glow { display: none; }
+.v8-frontier .pure-cta-band-button:active {
+  transform: scale(0.97);
+}
+.v8-frontier .pure-cta-band-button-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: var(--r-pill);
+  background: conic-gradient(from 0deg,
+    var(--micro-lime),
+    var(--micro-info),
+    var(--micro-ai),
+    var(--micro-pink),
+    var(--micro-orange),
+    var(--micro-lime));
+  filter: blur(14px);
+  opacity: 0.20;
+  z-index: -1;
+  transition: opacity 280ms ease;
+}
+.v8-frontier .pure-cta-band-button:hover .pure-cta-band-button-glow {
+  opacity: 0.75;
+}
+.v8-frontier .pure-cta-band-button-label {
+  position: relative;
+}
+
+/* ─── CTA band animated blob ─── */
+.v8-frontier .pure-cta-band > .pure-cta-band-copy,
+.v8-frontier .pure-cta-band > .btn-primary,
+.v8-frontier .pure-cta-band > a.btn-primary {
+  position: relative;
+  z-index: 1;
+}
+.v8-frontier .pure-cta-band-blob {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  right: -140px;
+  top: 50%;
+  transform: translateY(-50%) rotate(14deg);
+  opacity: 0.05;
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: 0;
+}
+.v8-frontier .pure-cta-band-blob-light { display: none; }
+.v8-frontier[data-frontier-theme="light"] .pure-cta-band-blob-dark { display: none; }
+.v8-frontier[data-frontier-theme="light"] .pure-cta-band-blob-light { display: block; opacity: 0.08; }

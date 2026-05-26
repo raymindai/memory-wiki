@@ -46,14 +46,27 @@ function Sparkline({ pattern, accentAt }: { pattern: number[]; accentAt?: number
   );
 }
 
+/**
+ * All approaches share a Mono+Blob base (no chromatic accent in the
+ * chrome — buttons, hero, aurora are all ink/blob driven). They differ
+ * in HOW color is used in small elements: status dots, pulse, pills,
+ * tags, AI tints, lucide icon strokes.
+ */
+const APPROACHES = [
+  { key: "pure",     label: "Pure",     desc: "Mono + blob, diverse color ONLY in icons / dots / marks" },
+  { key: "pastel",   label: "Pastel",   desc: "Mono + blob + soft pastel micro palette" },
+] as const;
+type ApproachKey = typeof APPROACHES[number]["key"];
+
 export function FrontierVariant() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [tool, setTool] = useState<typeof TOOLS[number]["key"]>("claude");
   const [size, setSize] = useState<"compact" | "full">("compact");
+  const [approach, setApproach] = useState<ApproachKey>("pure");
   const active = TOOLS.find((t) => t.key === tool) ?? TOOLS[0];
 
   return (
-    <div className="v8-frontier" data-frontier-theme={theme}>
+    <div className="v8-frontier" data-frontier-theme={theme} data-frontier-approach={approach}>
       <VariantNav />
       {/* ambient background layers */}
       <div className="aurora aurora-1" aria-hidden />
@@ -64,8 +77,13 @@ export function FrontierVariant() {
       <header className="topnav">
         <div className="topnav-inner">
           <a className="brand" href="/v8-preview/frontier">
-            <span className="brand-mark">
-              <span className="brand-mark-inner">M</span>
+            <span className="brand-mark brand-mark-blob">
+              <img
+                src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"}
+                alt=""
+                aria-hidden
+                className="brand-blob-img"
+              />
             </span>
             <span className="brand-word">
               Memory<span className="brand-dot">.</span>Wiki
@@ -80,6 +98,22 @@ export function FrontierVariant() {
             <a href="#" className="topnav-link">Manifesto</a>
           </nav>
           <div className="topnav-right">
+            {/* Brand approach picker — 4 fundamentally different
+                paradigms (not just hue swaps). Click to live-swap. */}
+            <div className="approach-picker" role="radiogroup" aria-label="Brand approach">
+              {APPROACHES.map((a) => (
+                <button
+                  key={a.key}
+                  type="button"
+                  className={`approach-chip${approach === a.key ? " is-active" : ""}`}
+                  onClick={() => setApproach(a.key)}
+                  aria-pressed={approach === a.key}
+                  title={a.desc}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
             <button
               className="theme-toggle"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -99,6 +133,15 @@ export function FrontierVariant() {
 
       {/* ─── HERO ─── */}
       <section className="hero">
+        {/* Big animated MW-blob — single hero ornament, morphs continuously
+            via SMIL inside the SVG. Sits behind hero copy at z-0. */}
+        <img
+          className="hero-blob-animated"
+          src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"}
+          alt=""
+          aria-hidden
+        />
+
         <div className="hero-inner">
           <div className="kicker">
             <span className="pulse-dot" style={{ width: 8, height: 8, minWidth: 8, minHeight: 8, maxWidth: 8, maxHeight: 8, display: "inline-block", borderRadius: "50%", padding: 0, margin: 0, lineHeight: 0, verticalAlign: "middle" }} />
@@ -404,23 +447,48 @@ export function FrontierVariant() {
       </section>
 
       {/* ─── BIG NUMBERS ─── */}
-      <section className="big-numbers">
-        <div className="big-numbers-inner">
-          <div className="bnum">
-            <div className="bnum-num">3<span className="bnum-unit">s</span></div>
-            <div className="bnum-label mono">from highlight to URL</div>
+      {/* ─── VARIANT A — Sentence form ─── */}
+      <section className="big-numbers bnum-variant-a">
+        <div className="bnum-variant-tag mono">Variant A / Sentence</div>
+        <div className="bnum-sentence">
+          <span className="bnum-s">3s</span> from highlight to URL.{" "}
+          <span className="bnum-s">9</span> capture surfaces shipping.{" "}
+          <span className="bnum-s">5</span> AIs reading natively.{" "}
+          <span className="bnum-s">∞</span> URL lifetime.
+        </div>
+      </section>
+
+      {/* ─── VARIANT C — Stat + reason cards ─── */}
+      <section className="big-numbers bnum-variant-c">
+        <div className="bnum-variant-tag mono">Variant C / Stat + reason</div>
+        <div className="bnum-card-grid">
+          <div className="bnum-card">
+            <div className="bnum-card-num">3<span className="bnum-card-unit">s</span></div>
+            <div className="bnum-card-headline">highlight → URL</div>
+            <div className="bnum-card-detail mono">
+              Chrome ext / MCP server / CLI / share sheet
+            </div>
           </div>
-          <div className="bnum">
-            <div className="bnum-num">9</div>
-            <div className="bnum-label mono">capture surfaces shipping</div>
+          <div className="bnum-card">
+            <div className="bnum-card-num">9</div>
+            <div className="bnum-card-headline">capture surfaces</div>
+            <div className="bnum-card-detail mono">
+              Web / iOS / Android / Chrome / VS Code / MCP / CLI / Desktop / Cursor
+            </div>
           </div>
-          <div className="bnum">
-            <div className="bnum-num">5</div>
-            <div className="bnum-label mono">AIs read natively</div>
+          <div className="bnum-card">
+            <div className="bnum-card-num">5</div>
+            <div className="bnum-card-headline">AIs read natively</div>
+            <div className="bnum-card-detail mono">
+              Claude / ChatGPT / Gemini / Cursor / Copilot
+            </div>
           </div>
-          <div className="bnum">
-            <div className="bnum-num">∞</div>
-            <div className="bnum-label mono">URL lifetime, no expiry ever</div>
+          <div className="bnum-card">
+            <div className="bnum-card-num">∞</div>
+            <div className="bnum-card-headline">URL lifetime</div>
+            <div className="bnum-card-detail mono">
+              Memory.Wiki URLs are permanent by policy. No expiry, ever.
+            </div>
           </div>
         </div>
       </section>
@@ -454,8 +522,13 @@ export function FrontierVariant() {
           {/* App top bar — brand, path chip, nav, tabs, actions */}
           <div className="app-topbar">
             <div className="app-topbar-brand">
-              <span className="brand-mark sm">
-                <span className="brand-mark-inner">M</span>
+              <span className="brand-mark brand-mark-blob sm">
+                <img
+                  src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"}
+                  alt=""
+                  aria-hidden
+                  className="brand-blob-img"
+                />
               </span>
               <span className="brand-word sm">
                 Memory<span className="brand-dot">.</span>Wiki
@@ -510,7 +583,7 @@ export function FrontierVariant() {
                   <span className="lib-cat-count">3</span>
                 </div>
                 <div className="lib-rows">
-                  <button className="lib-row active"><GlobeRowIcon /> Memory.Wiki v8 — UI &amp; Brand Direction</button>
+                  <button className="lib-row active"><GlobeRowIcon /> Memory.Wiki v8 / UI &amp; Brand Direction</button>
                   <button className="lib-row"><GlobeRowIcon /> Memory.Wiki v8 Plan</button>
                   <button className="lib-row"><GlobeRowIcon /> memory.wiki 사업계획 v7-revised</button>
                 </div>
@@ -539,7 +612,7 @@ export function FrontierVariant() {
                 <div className="lib-rows">
                   <button className="lib-row"><GlobeRowIcon /> Memory.Wiki v8 Plan</button>
                   <button className="lib-row"><GlobeRowIcon /> v8 Idea</button>
-                  <button className="lib-row"><LockRowIcon /> v7 rebrand — Remaining tasks</button>
+                  <button className="lib-row"><LockRowIcon /> v7 rebrand / Remaining tasks</button>
                 </div>
               </div>
 
@@ -934,7 +1007,7 @@ export function FrontierVariant() {
                 </a>
                 <a className="vhub-feat-card vhub-feat-product" href="#">
                   <div className="vhub-feat-cat mono">PRODUCT</div>
-                  <div className="vhub-feat-title">v8 launch — capture vs memory</div>
+                  <div className="vhub-feat-title">v8 launch / capture vs memory</div>
                   <div className="vhub-feat-meta mono">
                     <Package size={11} strokeWidth={1.75} /> 9 docs
                   </div>

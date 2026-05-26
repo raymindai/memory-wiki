@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ManifestoContent from "@/components/ManifestoContent";
+import ManifestoPure from "./ManifestoPure";
 
 export const metadata: Metadata = {
   title: "Manifesto — Your AI memory, deployable to any AI",
@@ -18,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function ManifestoPage() {
-  return <ManifestoContent locale="en" />;
+  return <ManifestoPure locale="en" />;
 }

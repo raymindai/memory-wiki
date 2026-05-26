@@ -1,4 +1,5 @@
-import CasePage, { caseMetadata, type CaseData } from "@/components/CasePage";
+import CasePure, { type CaseData } from "@/components/CasePure";
+import { caseMetadata } from "@/components/case-meta";
 
 const data: CaseData = {
   slug: "agent-memory",
@@ -48,4 +49,4 @@ const data: CaseData = {
 };
 
 export const metadata = caseMetadata(data.slug, data.title, data.sub);
-export default function Page() { return <CasePage data={data} />; }
+export default function Page() { return <CasePure data={data} />; }

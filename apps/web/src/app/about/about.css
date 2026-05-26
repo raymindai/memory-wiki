@@ -1,0 +1,96 @@
+/* /about — page-local additions. The big design system pieces live
+   in the Pure kit; this file is for small wiring like the "How it
+   works" summary card that points to /how. */
+
+.v8-frontier .pure-about-how-summary,
+.pure-root .pure-about-how-summary {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 36px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-lg);
+  text-align: left;
+}
+.v8-frontier .pure-about-how-summary-eyebrow,
+.pure-root .pure-about-how-summary-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.v8-frontier .pure-about-how-summary-line,
+.pure-root .pure-about-how-summary-line {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-about-how-summary-line,
+.pure-root[data-locale="ko"] .pure-about-how-summary-line {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-about-how-summary-list,
+.pure-root .pure-about-how-summary-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v8-frontier .pure-about-how-summary-list li,
+.pure-root .pure-about-how-summary-list li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--body);
+  text-wrap: pretty;
+}
+.v8-frontier .pure-about-how-summary-list li::before,
+.pure-root .pure-about-how-summary-list li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.v8-frontier .pure-about-how-summary-cta,
+.pure-root .pure-about-how-summary-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--hair-strong);
+  border-radius: var(--r-pill);
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.v8-frontier .pure-about-how-summary-cta:hover,
+.pure-root .pure-about-how-summary-cta:hover {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+/* CTA row below the inline benchmark table, pointing to the full /benchmark page */
+.v8-frontier .pure-about-benchmark-cta,
+.pure-root .pure-about-benchmark-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}

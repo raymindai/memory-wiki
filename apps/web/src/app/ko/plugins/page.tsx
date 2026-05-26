@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PluginsContent from "@/components/PluginsContent";
+import PluginsPure from "../../plugins/PluginsPure";
 
 export const metadata: Metadata = {
   title: "플러그인 및 확장 프로그램 — Memory.Wiki",
@@ -19,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function KoPluginsPage() {
-  return <PluginsContent locale="ko" />;
+  return <PluginsPure locale="ko" />;
 }

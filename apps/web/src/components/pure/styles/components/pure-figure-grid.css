@@ -1,0 +1,38 @@
+/* ─── Figure grid (image + caption) ─── */
+.v8-frontier .pure-figure-grid {
+  display: grid;
+  gap: 24px;
+  margin-top: 40px;
+}
+.v8-frontier .pure-figure-grid[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
+.v8-frontier .pure-figure-grid[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
+.v8-frontier .pure-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+.v8-frontier .pure-figure-img {
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+.v8-frontier .pure-figure-img img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.v8-frontier .pure-figure-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.v8-frontier .pure-figure-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+@media (max-width: 800px) {
+  .v8-frontier .pure-figure-grid { grid-template-columns: 1fr !important; }
+}

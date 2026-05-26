@@ -1,0 +1,65 @@
+/* /benchmark — headline stat row right under the hero.
+   Minimal typographic grid. No card chrome, no per-stat colors;
+   numbers and labels are ink/muted only. Single hairline dividers
+   between cells. Per the Pure rule: color only when meaningful;
+   the numbers themselves are the message. */
+
+.v8-frontier .pure-benchmark-headline,
+.pure-root .pure-benchmark-headline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 40px 0 56px;
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+
+.v8-frontier .pure-benchmark-stat,
+.pure-root .pure-benchmark-stat {
+  padding: 28px 20px;
+  text-align: left;
+  border-right: 1px solid var(--hair);
+}
+.v8-frontier .pure-benchmark-stat:last-child,
+.pure-root .pure-benchmark-stat:last-child {
+  border-right: none;
+}
+
+.v8-frontier .pure-benchmark-stat-num,
+.pure-root .pure-benchmark-stat-num {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.v8-frontier .pure-benchmark-stat-label,
+.pure-root .pure-benchmark-stat-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-benchmark-headline,
+  .pure-root .pure-benchmark-headline {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .v8-frontier .pure-benchmark-stat,
+  .pure-root .pure-benchmark-stat {
+    border-bottom: 1px solid var(--hair);
+  }
+  .v8-frontier .pure-benchmark-stat:nth-child(2n),
+  .pure-root .pure-benchmark-stat:nth-child(2n) {
+    border-right: none;
+  }
+  .v8-frontier .pure-benchmark-stat:nth-last-child(-n+2),
+  .pure-root .pure-benchmark-stat:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+}

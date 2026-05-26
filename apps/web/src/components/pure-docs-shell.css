@@ -1,0 +1,140 @@
+/* PureDocsShell — sticky sidebar + content layout used by every
+   /docs/* page. Centered at 1280px max width. */
+
+.v8-frontier .pure-docs-shell,
+.pure-root .pure-docs-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 96px 24px 64px;
+  align-items: start;
+  overflow: visible;
+}
+
+/* ─── Sidebar ─── */
+.v8-frontier .pure-docs-sidebar,
+.pure-root .pure-docs-sidebar {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.v8-frontier .pure-docs-sidebar-heading,
+.pure-root .pure-docs-sidebar-heading {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+.v8-frontier .pure-docs-sidebar-nav,
+.pure-root .pure-docs-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.v8-frontier .pure-docs-sidebar-link,
+.pure-root .pure-docs-sidebar-link {
+  display: block;
+  font-size: 13px;
+  color: var(--body);
+  text-decoration: none;
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  transition: color 140ms ease, background 140ms ease;
+}
+.v8-frontier .pure-docs-sidebar-link:hover,
+.pure-root .pure-docs-sidebar-link:hover {
+  color: var(--ink);
+  background: var(--bg-deep);
+}
+.v8-frontier .pure-docs-sidebar-link.is-active,
+.pure-root .pure-docs-sidebar-link.is-active {
+  color: var(--ink);
+  background: var(--bg-deep);
+  font-weight: 600;
+}
+
+/* ─── On-this-page TOC ─── */
+.v8-frontier .pure-docs-sidebar-toc,
+.pure-root .pure-docs-sidebar-toc {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-left: 1px solid var(--hair);
+  padding-left: 12px;
+}
+.v8-frontier .pure-docs-sidebar-toc-link,
+.pure-root .pure-docs-sidebar-toc-link {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 0;
+  line-height: 1.4;
+  transition: color 140ms ease;
+}
+.v8-frontier .pure-docs-sidebar-toc-link:hover,
+.pure-root .pure-docs-sidebar-toc-link:hover {
+  color: var(--ink);
+}
+.v8-frontier .pure-docs-sidebar-toc-link.is-active,
+.pure-root .pure-docs-sidebar-toc-link.is-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ─── Main content area ─── */
+.v8-frontier .pure-docs-main,
+.pure-root .pure-docs-main {
+  min-width: 0;
+}
+
+/* When a page wraps its content in the legacy manifesto-page or
+   plugins-page block, neutralize the wrapper's top/bottom padding
+   (the shell already handles outer padding). Keep max-width so the
+   reading column stays at 720 inside the main area. */
+.v8-frontier .pure-docs-main .pure-manifesto-page,
+.pure-root .pure-docs-main .pure-manifesto-page,
+.v8-frontier .pure-docs-main .pure-plugins-page,
+.pure-root .pure-docs-main .pure-plugins-page,
+.v8-frontier .pure-docs-main .pure-install-page,
+.pure-root .pure-docs-main .pure-install-page,
+.v8-frontier .pure-docs-main .pure-case-page,
+.pure-root .pure-docs-main .pure-case-page,
+.v8-frontier .pure-docs-main .pure-spec-page,
+.pure-root .pure-docs-main .pure-spec-page {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .v8-frontier .pure-docs-shell,
+  .pure-root .pure-docs-shell {
+    grid-template-columns: 1fr;
+    padding: 80px 24px 56px;
+  }
+  .v8-frontier .pure-docs-sidebar,
+  .pure-root .pure-docs-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+    border-bottom: 1px solid var(--hair);
+    padding-bottom: 24px;
+  }
+  .v8-frontier .pure-docs-sidebar-nav,
+  .pure-root .pure-docs-sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .v8-frontier .pure-docs-sidebar-toc,
+  .pure-root .pure-docs-sidebar-toc {
+    display: none;
+  }
+}

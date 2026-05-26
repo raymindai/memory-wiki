@@ -17,7 +17,9 @@ export function MiroVariant() {
       <header className="topnav">
         <div className="topnav-inner">
           <a href="#" className="brand-mark">
-            <span className="brand-square">M</span>
+            <span className="brand-square brand-square-blob">
+              <img src="/brand/mwblob_morph_dark.svg" alt="" aria-hidden />
+            </span>
             <span className="brand-word">Memory.Wiki</span>
           </a>
           <nav className="topnav-links">
@@ -177,7 +179,9 @@ export function MiroVariant() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <span className="brand-square brand-square-dark">M</span>
+            <span className="brand-square brand-square-blob brand-square-dark">
+              <img src="/brand/mwblob_morph.svg" alt="" aria-hidden />
+            </span>
             <span className="brand-word brand-word-dark">Memory.Wiki</span>
           </div>
           <div className="footer-cols">

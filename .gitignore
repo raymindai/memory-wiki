@@ -58,3 +58,6 @@ apps/desktop/build.log
 apps/quicklook/MdfyQuickLook/build.log
 apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/project.xcworkspace/xcuserdata/
 apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/xcuserdata/
+
+# Adobe After Effects auto-save backups
+**/Adobe After Effects Auto-Save/

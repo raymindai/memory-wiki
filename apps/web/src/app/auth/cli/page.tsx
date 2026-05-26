@@ -69,7 +69,7 @@ export default function CliAuthPage() {
         gap: 24,
       }}
     >
-      <MemoryWikiLogo size={32} />
+      <MemoryWikiLogo size={32} withBlob />
 
       {status === "loading" && (
         <>

@@ -1,0 +1,514 @@
+/* ════════════════════════════════════════════════════════════════════
+   Pure design-system — base typography + font loading + low-level
+   utility classes (.mono / .display-hero / .display-md / .eyebrow /
+   .caption / .kicker / .btn-* / .trust-* / .status-dot / .pulse-dot).
+
+   These were originally provided by the legacy frontier.css. They
+   now live here so the Pure kit is self-contained — any page that
+   mounts <PureShell> gets everything it needs without importing
+   the v8-preview/frontier stylesheet.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ─── Base typography utilities ─── */
+.v8-frontier .mono,
+.pure-root .mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.v8-frontier .eyebrow,
+.pure-root .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.v8-frontier .caption,
+.pure-root .caption {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+/* Display headlines — used by hero (display-hero) + cta band (display-md).
+ * Font swap to Cal Sans / Pretendard happens further down. */
+.v8-frontier .display-hero,
+.pure-root .display-hero {
+  font-size: clamp(40px, 5.6vw, 80px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  color: var(--ink);
+  margin: 0 0 24px;
+}
+.v8-frontier .display-md,
+.pure-root .display-md {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  color: var(--ink);
+  margin: 0 0 18px;
+}
+.v8-frontier .display-2,
+.pure-root .display-2 {
+  font-size: clamp(26px, 3vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* ─── Hero accessories — kicker, pulse-dot, status-dot, trust row ─── */
+.v8-frontier .kicker,
+.pure-root .kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 7px 14px 7px 10px;
+  border-radius: var(--r-pill);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  margin-bottom: 28px;
+}
+.v8-frontier .pulse-dot,
+.pure-root .pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--micro-lime);
+  flex-shrink: 0;
+  animation: purePulseDot 2.4s ease-in-out infinite;
+}
+@keyframes purePulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.9); }
+}
+.v8-frontier .status-dot,
+.pure-root .status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--micro-lime);
+}
+.v8-frontier .status-dot.green,  .pure-root .status-dot.green  { background: var(--micro-lime);   }
+.v8-frontier .status-dot.blue,   .pure-root .status-dot.blue   { background: var(--micro-info);   }
+.v8-frontier .status-dot.violet, .pure-root .status-dot.violet { background: var(--micro-ai);     }
+.v8-frontier .status-dot.yellow, .pure-root .status-dot.yellow { background: var(--micro-warn);   }
+.v8-frontier .status-dot.pink,   .pure-root .status-dot.pink   { background: var(--micro-pink);   }
+
+.v8-frontier .trust-label,
+.pure-root .trust-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.v8-frontier .trust-row,
+.pure-root .trust-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.v8-frontier .trust-chip,
+.pure-root .trust-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-deep);
+  color: var(--body);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair);
+  text-decoration: none;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.v8-frontier .trust-chip:hover,
+.pure-root .trust-chip:hover {
+  color: var(--ink);
+  border-color: var(--hair-strong);
+}
+
+/* ─── Base button utilities (.btn-primary / .btn-secondary / .btn-ghost / .btn-lg)
+ *  Pure mode overrides .btn-primary further down (white pill + halo).
+ *  These are the baseline shapes for the secondary/ghost CTAs. */
+.v8-frontier .btn-primary,
+.v8-frontier .btn-secondary,
+.v8-frontier .btn-ghost,
+.v8-frontier .btn-on-dark,
+.pure-root .btn-primary,
+.pure-root .btn-secondary,
+.pure-root .btn-ghost,
+.pure-root .btn-on-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  white-space: nowrap;
+  text-decoration: none;
+  letter-spacing: -0.005em;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.v8-frontier .btn-secondary,
+.v8-frontier .btn-ghost,
+.pure-root .btn-secondary,
+.pure-root .btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--hair);
+}
+.v8-frontier .btn-secondary:hover,
+.v8-frontier .btn-ghost:hover,
+.pure-root .btn-secondary:hover,
+.pure-root .btn-ghost:hover {
+  border-color: var(--hair-strong);
+}
+.v8-frontier .btn-lg,
+.pure-root .btn-lg {
+  height: 52px;
+  padding: 0 22px;
+  font-size: 15px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Original base.css content continues below.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ─── Cal Sans (logo font) — loaded from jsdelivr CDN ─── */
+@font-face {
+  font-family: "Cal Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/calcom/font/fonts/webfonts/CalSans-SemiBold.woff2") format("woff2");
+}
+
+/* ─── Pretendard — Korean (and any CJK) body font.
+ *   Loaded via jsdelivr's variable build; applied only when the shell
+ *   is mounted with locale="ko" so English pages keep their current stack. */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+
+/* ─── English headings only — Cal Sans + pretty word wrap.
+   Descriptions / lede stay in the default body font. */
+.v8-frontier .display-hero,
+.v8-frontier .display-md,
+.v8-frontier .pure-cta-band-heading,
+.v8-frontier .pure-section-head .display-2,
+.v8-frontier .pure-pillar-title,
+.v8-frontier .pure-feature-title {
+  font-family: "Cal Sans", var(--font-sans);
+  text-wrap: pretty;
+  letter-spacing: 0;
+}
+
+/* ─── Cal Sans: ALL letter-spacing 0 (overrides earlier negative tracking).
+ *  Rule of the kit: every Cal Sans surface MUST have letter-spacing 0.
+ *  When adding a new heading class that uses Cal Sans, add it here. */
+.v8-frontier .pure-nav-word,
+.v8-frontier .display-hero,
+.v8-frontier .pure-hero .display-hero,
+.v8-frontier .display-md,
+.v8-frontier .display-2,
+.v8-frontier .pure-cta-band-heading,
+.v8-frontier .pure-section-head .display-2,
+.v8-frontier .pure-pillar-title,
+.v8-frontier .pure-feature-title,
+.v8-frontier .pure-gallery-title,
+.v8-frontier .pure-lightbox-title,
+.v8-frontier .pure-footer-brand-word,
+.v8-frontier .pure-prose h2,
+.v8-frontier .pure-prose h3,
+.v8-frontier .pure-manifesto-title,
+.v8-frontier .pure-manifesto-belief-title,
+.v8-frontier .pure-manifesto-block-title,
+.v8-frontier .pure-manifesto-phase-title,
+.v8-frontier .pure-spec-title,
+.v8-frontier .pure-spec-section-title,
+.v8-frontier .pure-notfound-title,
+.v8-frontier .pure-case-title,
+.v8-frontier .pure-case-cta-line,
+.v8-frontier .pure-plugins-h1,
+.v8-frontier .pure-plugins-block-title,
+.v8-frontier .pure-plugins-sub-h2,
+.v8-frontier .pure-plugins-cta-line,
+.v8-frontier .pure-plugins-use-title,
+.v8-frontier .pure-cases-title,
+.v8-frontier .pure-docs-title,
+.v8-frontier .pure-docs-card-title,
+.v8-frontier .pure-about-how-summary-line,
+.v8-frontier .pure-benchmark-stat-num,
+.v8-frontier .pure-api-docs-title,
+.v8-frontier .pure-api-docs-section-title,
+.v8-frontier .pure-api-docs-subhead,
+.v8-frontier .pure-integrate-docs-title,
+.v8-frontier .pure-integrate-docs-section-title,
+.v8-frontier .pure-integrate-docs-sub-title,
+.v8-frontier .pure-integrate-docs-tool-name,
+.v8-frontier .pure-cli-docs-title,
+.v8-frontier .pure-cli-docs-section-title,
+.v8-frontier .pure-mcp-docs-title,
+.v8-frontier .pure-mcp-docs-section-title,
+.pure-root .pure-nav-word,
+.pure-root .display-hero,
+.pure-root .pure-hero .display-hero,
+.pure-root .display-md,
+.pure-root .display-2,
+.pure-root .pure-cta-band-heading,
+.pure-root .pure-section-head .display-2,
+.pure-root .pure-pillar-title,
+.pure-root .pure-feature-title,
+.pure-root .pure-gallery-title,
+.pure-root .pure-lightbox-title,
+.pure-root .pure-footer-brand-word,
+.pure-root .pure-prose h2,
+.pure-root .pure-prose h3,
+.pure-root .pure-manifesto-title,
+.pure-root .pure-manifesto-belief-title,
+.pure-root .pure-manifesto-block-title,
+.pure-root .pure-manifesto-phase-title,
+.pure-root .pure-spec-title,
+.pure-root .pure-spec-section-title,
+.pure-root .pure-notfound-title,
+.pure-root .pure-case-title,
+.pure-root .pure-case-cta-line,
+.pure-root .pure-plugins-h1,
+.pure-root .pure-plugins-block-title,
+.pure-root .pure-plugins-sub-h2,
+.pure-root .pure-plugins-cta-line,
+.pure-root .pure-plugins-use-title,
+.pure-root .pure-cases-title,
+.pure-root .pure-docs-title,
+.pure-root .pure-docs-card-title,
+.pure-root .pure-about-how-summary-line,
+.pure-root .pure-benchmark-stat-num,
+.pure-root .pure-api-docs-title,
+.pure-root .pure-api-docs-section-title,
+.pure-root .pure-api-docs-subhead,
+.pure-root .pure-integrate-docs-title,
+.pure-root .pure-integrate-docs-section-title,
+.pure-root .pure-integrate-docs-sub-title,
+.pure-root .pure-integrate-docs-tool-name,
+.pure-root .pure-cli-docs-title,
+.pure-root .pure-cli-docs-section-title,
+.pure-root .pure-mcp-docs-title,
+.pure-root .pure-mcp-docs-section-title {
+  letter-spacing: 0 !important;
+}
+
+/* ─── Brand wordmark — all ink (white on dark / near-black on light) ─── */
+.v8-frontier .brand-word-memory,
+.v8-frontier .brand-word-wiki {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ─── Locale: Korean ─── */
+.v8-frontier[data-locale="ko"],
+.v8-frontier[data-locale="ko"] body,
+.v8-frontier[data-locale="ko"] p,
+.v8-frontier[data-locale="ko"] li,
+.v8-frontier[data-locale="ko"] td,
+.v8-frontier[data-locale="ko"] th,
+.v8-frontier[data-locale="ko"] a,
+.v8-frontier[data-locale="ko"] button,
+.v8-frontier[data-locale="ko"] input,
+.v8-frontier[data-locale="ko"] textarea,
+.v8-frontier[data-locale="ko"] select,
+.v8-frontier[data-locale="ko"] .pure-section-eyebrow,
+.v8-frontier[data-locale="ko"] .pure-section-lede,
+.v8-frontier[data-locale="ko"] .pure-pillar-body,
+.v8-frontier[data-locale="ko"] .pure-feature-body,
+.v8-frontier[data-locale="ko"] .pure-hero-lede,
+.v8-frontier[data-locale="ko"] .pure-hero-tertiary,
+.v8-frontier[data-locale="ko"] .pure-cta-band-lede,
+.v8-frontier[data-locale="ko"] .pure-footer,
+.v8-frontier[data-locale="ko"] .pure-chip,
+.v8-frontier[data-locale="ko"] .pure-button {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+}
+
+/* Cal Sans is Latin-only — when the shell is Korean, swap display
+ * headings to Pretendard too so 한글 글자가 끊겨 보이지 않는다. */
+.v8-frontier[data-locale="ko"] .display-hero,
+.v8-frontier[data-locale="ko"] .pure-hero .display-hero,
+.v8-frontier[data-locale="ko"] .display-md,
+.v8-frontier[data-locale="ko"] .pure-cta-band-heading,
+.v8-frontier[data-locale="ko"] .pure-section-head .display-2,
+.v8-frontier[data-locale="ko"] .pure-pillar-title,
+.v8-frontier[data-locale="ko"] .pure-feature-title,
+.v8-frontier[data-locale="ko"] .pure-gallery-title,
+.v8-frontier[data-locale="ko"] .pure-lightbox-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+
+/* CJK word-aware wrapping — break on word boundaries, not mid-word. */
+.v8-frontier[data-locale="ko"] {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+
+/* ─── Respect reduced motion (global animation kill-switch) ─── */
+@media (prefers-reduced-motion: reduce) {
+  .v8-frontier *,
+  .v8-frontier *::before,
+  .v8-frontier *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/* ─── All buttons in Pure mode use the pill shape — unify with PureButton ─── */
+.v8-frontier[data-frontier-approach="pure"] .btn-primary,
+.v8-frontier[data-frontier-approach="pure"] .btn-secondary,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark,
+.v8-frontier .pure-nav-cta,
+.v8-frontier .pure-cta-band-button,
+.v8-frontier .pure-button {
+  border-radius: 9999px !important;
+}
+
+/* ─── Remove all hover-triggered position transforms ─── */
+.v8-frontier .pure-cta-band-button:hover,
+.v8-frontier .trust-chip:hover,
+.v8-frontier .trust-chip:hover svg,
+.v8-frontier .pure-nav-cta:hover,
+.v8-frontier .pure-hero-actions .btn-primary:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-secondary:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .btn-secondary:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .btn-ghost:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .btn-on-dark:hover .arrow,
+.v8-frontier[data-frontier-approach="pure"] .tool-chip:hover,
+.v8-frontier[data-frontier-approach="pure"] .seg-btn:hover,
+.v8-frontier[data-frontier-approach="pure"] .trust-chip:hover,
+.v8-frontier[data-frontier-approach="pure"] .lib-subtab:hover,
+.v8-frontier[data-frontier-approach="pure"] .pillar:hover,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card:hover,
+.v8-frontier[data-frontier-approach="pure"] .bnum-card:hover,
+.v8-frontier[data-frontier-approach="pure"] .price-card:hover,
+.v8-frontier[data-frontier-approach="pure"] .pure-pillar:hover,
+.v8-frontier[data-frontier-approach="pure"] .pure-feature:hover,
+.v8-frontier[data-frontier-approach="pure"] .pure-price:hover,
+.v8-frontier[data-frontier-approach="pure"] .tool-chip:hover .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .trust-chip:hover .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .v2-tool:hover .status-dot,
+.v8-frontier[data-frontier-approach="pure"] .theme-toggle:hover .theme-toggle-dot,
+.v8-frontier[data-frontier-approach="pure"] .pillar:hover svg,
+.v8-frontier[data-frontier-approach="pure"] .vhub-feat-card:hover svg,
+.v8-frontier[data-frontier-approach="pure"] .bnum-card:hover .bnum-card-num {
+  transform: none !important;
+}
+
+/* ─── Unified primary CTA style (legacy btn-primary in pure mode) ─── */
+.v8-frontier[data-frontier-approach="pure"] .btn-primary,
+.v8-frontier .pure-hero-actions .btn-primary,
+.v8-frontier .pure-section .btn-primary {
+  background: #ffffff !important;
+  color: #0a0a0c !important;
+  border: 0 !important;
+  font-weight: 600;
+  opacity: 1 !important;
+}
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover,
+.v8-frontier .pure-hero-actions .btn-primary:hover,
+.v8-frontier .pure-section .btn-primary:hover {
+  background: #ffffff !important;
+  color: #0a0a0c !important;
+  opacity: 1 !important;
+}
+
+/* ─── Conic chromatic glow — reusable across legacy CTAs. ─── */
+.v8-frontier .pure-nav-cta,
+.v8-frontier .pure-hero-actions .btn-primary,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary {
+  position: relative;
+  isolation: isolate;
+}
+.v8-frontier .pure-nav-cta,
+.v8-frontier .pure-hero-actions .btn-primary,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary {
+  box-shadow:
+    0 -3px 5px 0 rgba(181, 255, 26, 0.1),
+    3px -2px 5px 0 rgba(46, 123, 255, 0.1),
+    3px 2px 5px 0 rgba(139, 92, 246, 0.1),
+    0 3px 5px 0 rgba(255, 42, 125, 0.1),
+    -3px 2px 5px 0 rgba(255, 107, 26, 0.1);
+  transition: box-shadow 280ms ease, transform 120ms ease, opacity 140ms ease;
+}
+.v8-frontier .pure-nav-cta:hover,
+.v8-frontier .pure-hero-actions .btn-primary:hover,
+.v8-frontier[data-frontier-approach="pure"] .btn-primary:hover {
+  box-shadow:
+    0 -7px 9px 0 rgba(181, 255, 26, 0.3),
+    7px -5px 9px 0 rgba(46, 123, 255, 0.3),
+    7px 5px 9px 0 rgba(139, 92, 246, 0.3),
+    0 7px 9px 0 rgba(255, 42, 125, 0.3),
+    -7px 5px 9px 0 rgba(255, 107, 26, 0.3);
+}
+
+/* ─── ALL CARDS — glassmorphism (translucent + backdrop blur).
+   Applies a unified card surface to every grid item in Pure mode. */
+.v8-frontier .pure-pillar,
+.v8-frontier .pure-feature,
+.v8-frontier .pure-ba-col,
+.v8-frontier .pure-price,
+.v8-frontier .pure-figure-img,
+.v8-frontier .pure-table-wrap {
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+.v8-frontier[data-frontier-theme="light"] .pure-pillar,
+.v8-frontier[data-frontier-theme="light"] .pure-feature,
+.v8-frontier[data-frontier-theme="light"] .pure-ba-col,
+.v8-frontier[data-frontier-theme="light"] .pure-price,
+.v8-frontier[data-frontier-theme="light"] .pure-figure-img,
+.v8-frontier[data-frontier-theme="light"] .pure-table-wrap {
+  background: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* ─── Shared fade-up keyframe used by hero entrance + scroll-into-view ─── */
+@keyframes pureFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Section scroll-into-view fade up (modern Chrome/Safari) ── */
+@supports (animation-timeline: view()) {
+  .v8-frontier .pure-section-head,
+  .v8-frontier .pure-pillar-grid,
+  .v8-frontier .pure-feature-grid,
+  .v8-frontier .pure-table-wrap,
+  .v8-frontier .pure-price-grid,
+  .v8-frontier .pure-eco,
+  .v8-frontier .pure-cta-band {
+    animation: pureFadeUp linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}

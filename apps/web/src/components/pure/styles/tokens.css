@@ -1,0 +1,89 @@
+/* ════════════════════════════════════════════════════════════════════
+   Pure design-system tokens — single source of truth.
+
+   Every other Pure stylesheet reads from these custom properties.
+   Light/dark are two value sets behind the same names so that
+   component CSS never branches on theme.
+
+   Scope: the .pure-root class (mounted by <PureShell>). The legacy
+   .v8-frontier[data-frontier-approach="pure"] selector is kept as
+   an alias so existing pages keep working during the transition.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pure-root,
+.v8-frontier[data-frontier-approach="pure"] {
+  /* ─── Canvas — page background tones ─── */
+  --bg:        #08080a;   /* page background */
+  --bg-deep:   #04040a;   /* cards, surfaces sitting on --bg */
+
+  /* ─── Hairlines — 1px strokes between sections + on cards ─── */
+  --hair:        rgba(255, 255, 255, 0.08);   /* default border */
+  --hair-strong: rgba(255, 255, 255, 0.14);   /* hover / arrows / focus */
+  --hair-soft:   rgba(255, 255, 255, 0.04);   /* very faint divider */
+
+  /* ─── Text — 5-step ramp, ink at top, faint at bottom ─── */
+  --ink:    #fafafa;   /* H1, primary text, button labels */
+  --strong: #ededed;   /* H2 / strong emphasis */
+  --body:   #c2c2c5;   /* paragraph copy, list items */
+  --muted:  #8a8a92;   /* eyebrow text, captions, footer links */
+  --faint:  #5a5a62;   /* placeholder, disabled, neutral bullets */
+
+  /* ─── Micro colors — small accents only.
+   *  Rule (v8 Pure): body/buttons/chips stay ink; color appears
+   *  only on small visual signals (bullets, status dots, step
+   *  numbers, badges). Each color carries semantic meaning. */
+  --micro-lime:   #B5FF1A;   /* live / shipped / success */
+  --micro-orange: #FF6B1A;   /* beta / pending / next */
+  --micro-ai:     #8B5CF6;   /* AI-generated / vision / future */
+  --micro-info:   #2E7BFF;   /* informational */
+  --micro-warn:   #FFB400;   /* warning / attention */
+  --micro-pink:   #FF2A7D;   /* highlight / urgent */
+
+  /* ─── Radius — three sizes + a pill ─── */
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-pill: 9999px;
+
+  /* ─── Fonts (sans/mono inherit from globals.css :root).
+   *  Cal Sans is loaded in pure/styles/base.css for headlines.
+   *  Pretendard is loaded for [data-locale="ko"] in base.css. */
+  --font-display: "Cal Sans", var(--font-sans);
+
+  /* ─── Body defaults so the wrapper sets the typographic baseline */
+  background: var(--bg);
+  color: var(--body);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  transition: background 240ms ease, color 240ms ease;
+}
+
+/* ═══ LIGHT THEME — same names, light values ═══ */
+.pure-root[data-frontier-theme="light"],
+.v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] {
+  --bg:        #fafaf7;
+  --bg-deep:   #f1f1ec;
+
+  --hair:        rgba(0, 0, 0, 0.07);
+  --hair-strong: rgba(0, 0, 0, 0.12);
+  --hair-soft:   rgba(0, 0, 0, 0.04);
+
+  --ink:    #0c0a08;
+  --strong: #1c1917;
+  --body:   #3a3633;
+  --muted:  #6b655e;
+  --faint:  #aaa39a;
+
+  /* Pumped saturation so micro accents stay visible on light bg */
+  --micro-lime:   #5BC700;
+  --micro-orange: #E84500;
+  --micro-ai:     #7C3AFF;
+  --micro-info:   #1565FF;
+  --micro-warn:   #E08800;
+  --micro-pink:   #E5166D;
+}

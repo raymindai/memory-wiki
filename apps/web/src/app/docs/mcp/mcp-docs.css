@@ -1,0 +1,391 @@
+/* /docs/mcp — Pure design system body styles. Sits inside PureDocsShell. */
+
+/* ─── Hero ─────────────────────────────────────────────────── */
+.v8-frontier .pure-mcp-docs-eyebrow,
+.pure-root   .pure-mcp-docs-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-mcp-docs-title,
+.pure-root   .pure-mcp-docs-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(32px, 4.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-mcp-docs-title,
+.pure-root[data-locale="ko"]   .pure-mcp-docs-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-mcp-docs-intro,
+.pure-root   .pure-mcp-docs-intro {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--body);
+  max-width: 640px;
+  margin: 0 0 32px;
+  text-wrap: pretty;
+}
+
+/* ─── Memory layer intro card (Today / Coming) ─────────────── */
+.v8-frontier .pure-mcp-docs-memory-card,
+.pure-root   .pure-mcp-docs-memory-card {
+  margin: 0 0 48px;
+  padding: 28px 24px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+}
+.v8-frontier .pure-mcp-docs-memory-headline,
+.pure-root   .pure-mcp-docs-memory-headline {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.v8-frontier .pure-mcp-docs-memory-lede,
+.pure-root   .pure-mcp-docs-memory-lede {
+  font-size: 13px;
+  color: var(--body);
+  margin: 0 0 20px;
+  line-height: 1.7;
+}
+.v8-frontier .pure-mcp-docs-memory-grid,
+.pure-root   .pure-mcp-docs-memory-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 700px) {
+  .v8-frontier .pure-mcp-docs-memory-grid,
+  .pure-root   .pure-mcp-docs-memory-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+.v8-frontier .pure-mcp-docs-memory-status,
+.pure-root   .pure-mcp-docs-memory-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+.v8-frontier .pure-mcp-docs-memory-badge,
+.pure-root   .pure-mcp-docs-memory-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair);
+  background: var(--bg);
+}
+.v8-frontier .pure-mcp-docs-memory-badge.is-live,
+.pure-root   .pure-mcp-docs-memory-badge.is-live {
+  color: var(--micro-lime);
+  border-color: var(--hair-strong);
+}
+.v8-frontier .pure-mcp-docs-memory-badge.is-soon,
+.pure-root   .pure-mcp-docs-memory-badge.is-soon {
+  color: var(--micro-info);
+}
+.v8-frontier .pure-mcp-docs-memory-list,
+.pure-root   .pure-mcp-docs-memory-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.7;
+}
+.v8-frontier .pure-mcp-docs-memory-list.is-faint,
+.pure-root   .pure-mcp-docs-memory-list.is-faint {
+  color: var(--muted);
+}
+.v8-frontier .pure-mcp-docs-memory-list li,
+.pure-root   .pure-mcp-docs-memory-list li {
+  padding: 3px 0;
+}
+
+/* ─── Section scaffold ─────────────────────────────────────── */
+.v8-frontier .pure-mcp-docs-section,
+.pure-root   .pure-mcp-docs-section {
+  margin-bottom: 48px;
+  scroll-margin-top: 96px;
+}
+.v8-frontier .pure-mcp-docs-section-title,
+.pure-root   .pure-mcp-docs-section-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+.v8-frontier[data-locale="ko"] .pure-mcp-docs-section-title,
+.pure-root[data-locale="ko"]   .pure-mcp-docs-section-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-mcp-docs-body,
+.pure-root   .pure-mcp-docs-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--body);
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-mcp-docs-body code,
+.pure-root   .pure-mcp-docs-body code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 1px 6px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+}
+.v8-frontier .pure-mcp-docs-callout-body,
+.pure-root   .pure-mcp-docs-callout-body {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--body);
+  margin: 0;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-mcp-docs-callout-body code,
+.pure-root   .pure-mcp-docs-callout-body code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 1px 6px;
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+}
+.v8-frontier .pure-mcp-docs-callout-body strong,
+.pure-root   .pure-mcp-docs-callout-body strong {
+  color: var(--ink);
+}
+
+/* ─── Sub-label inside a callout ───────────────────────────── */
+.v8-frontier .pure-mcp-docs-sublabel,
+.pure-root   .pure-mcp-docs-sublabel {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 18px 0 10px;
+}
+.v8-frontier .pure-mcp-docs-sublabel:first-child,
+.pure-root   .pure-mcp-docs-sublabel:first-child {
+  margin-top: 0;
+}
+
+.v8-frontier .pure-mcp-docs-callout-note,
+.pure-root   .pure-mcp-docs-callout-note {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 12px 0 0;
+}
+.v8-frontier .pure-mcp-docs-callout-note code,
+.pure-root   .pure-mcp-docs-callout-note code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 1px 6px;
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+}
+.v8-frontier .pure-mcp-docs-callout-note strong,
+.pure-root   .pure-mcp-docs-callout-note strong {
+  color: var(--body);
+}
+
+.v8-frontier .pure-mcp-docs-path,
+.pure-root   .pure-mcp-docs-path {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 12px;
+  word-break: break-all;
+}
+
+/* ─── 25-tool group grid ───────────────────────────────────── */
+.v8-frontier .pure-mcp-docs-tool-groups,
+.pure-root   .pure-mcp-docs-tool-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.v8-frontier .pure-mcp-docs-tool-group,
+.pure-root   .pure-mcp-docs-tool-group {
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.v8-frontier .pure-mcp-docs-tool-group-title,
+.pure-root   .pure-mcp-docs-tool-group-title {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+.v8-frontier .pure-mcp-docs-tool-group-tool,
+.pure-root   .pure-mcp-docs-tool-group-tool {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  padding: 2px 0;
+}
+
+.v8-frontier .pure-mcp-docs-tools-note,
+.pure-root   .pure-mcp-docs-tools-note {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+/* ─── Tool card index (links to anchors below) ─────────────── */
+.v8-frontier .pure-mcp-docs-tool-cards,
+.pure-root   .pure-mcp-docs-tool-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-mcp-docs-tool-card,
+.pure-root   .pure-mcp-docs-tool-card {
+  display: block;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
+  text-decoration: none;
+  transition: border-color 160ms ease;
+}
+.v8-frontier .pure-mcp-docs-tool-card:hover,
+.pure-root   .pure-mcp-docs-tool-card:hover {
+  border-color: var(--hair-strong);
+}
+.v8-frontier .pure-mcp-docs-tool-card-name,
+.pure-root   .pure-mcp-docs-tool-card-name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.v8-frontier .pure-mcp-docs-tool-card-desc,
+.pure-root   .pure-mcp-docs-tool-card-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--body);
+  margin: 6px 0 0;
+  text-wrap: pretty;
+}
+
+/* ─── Individual tool section header ───────────────────────── */
+.v8-frontier .pure-mcp-docs-tool-section,
+.pure-root   .pure-mcp-docs-tool-section {
+  margin-top: 32px;
+}
+.v8-frontier .pure-mcp-docs-tool-h3,
+.pure-root   .pure-mcp-docs-tool-h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.v8-frontier .pure-mcp-docs-tool-h3 code,
+.pure-root   .pure-mcp-docs-tool-h3 code {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--ink);
+}
+
+/* ─── Param table inside callout ───────────────────────────── */
+.v8-frontier .pure-mcp-docs-param-table,
+.pure-root   .pure-mcp-docs-param-table {
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-mcp-docs-param-row,
+.pure-root   .pure-mcp-docs-param-row {
+  display: grid;
+  grid-template-columns: 160px 80px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-mcp-docs-param-row:last-child,
+.pure-root   .pure-mcp-docs-param-row:last-child {
+  border-bottom: 0;
+}
+.v8-frontier .pure-mcp-docs-param-name,
+.pure-root   .pure-mcp-docs-param-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  word-break: break-all;
+}
+.v8-frontier .pure-mcp-docs-param-required,
+.pure-root   .pure-mcp-docs-param-required {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--micro-pink);
+  margin-left: 6px;
+  vertical-align: super;
+  letter-spacing: 0.06em;
+}
+.v8-frontier .pure-mcp-docs-param-type,
+.pure-root   .pure-mcp-docs-param-type {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.v8-frontier .pure-mcp-docs-param-desc,
+.pure-root   .pure-mcp-docs-param-desc {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-mcp-docs-param-row,
+  .pure-root   .pure-mcp-docs-param-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* ─── Usage Examples stack ─────────────────────────────────── */
+.v8-frontier .pure-mcp-docs-examples,
+.pure-root   .pure-mcp-docs-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

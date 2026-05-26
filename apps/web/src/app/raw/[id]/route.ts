@@ -68,22 +68,116 @@ export async function GET(
   const updated = data.updated_at ? new Date(data.updated_at).toISOString() : "";
   const source = data.source ? String(data.source).replace(/"/g, '\\"') : "Memory.Wiki";
 
+  // Pull doc-level AI metadata + extracted concepts + within-doc concept
+  // relations. Each query is wrapped so a failure on the side metadata
+  // never blocks the main body response.
+  type RelRow = {
+    relation_label: string;
+    weight: number;
+    source_concept: { label: string } | null;
+    target_concept: { label: string } | null;
+  };
+  type ConceptRow = { id: number; label: string; description: string | null; weight: number };
+  type AiMetaRow = { tags?: string[] | null; ai_summary?: string | null };
+
+  const [aiMeta, conceptsInDoc, relationsInDoc] = await Promise.all([
+    (async (): Promise<AiMetaRow | null> => {
+      try {
+        const { data: m } = await supabase
+          .from("document_ai_metadata")
+          .select("tags, ai_summary")
+          .eq("document_id", id)
+          .maybeSingle();
+        return (m as AiMetaRow | null) ?? null;
+      } catch { return null; }
+    })(),
+    (async (): Promise<ConceptRow[]> => {
+      try {
+        const { data: c } = await supabase
+          .from("concept_index")
+          .select("id, label, description, weight")
+          .eq("user_id", data.user_id)
+          .contains("doc_ids", [id])
+          .order("weight", { ascending: false })
+          .limit(30);
+        return (c as ConceptRow[] | null) ?? [];
+      } catch { return []; }
+    })(),
+    (async (): Promise<RelRow[]> => {
+      try {
+        const { data: r } = await supabase
+          .from("concept_relations")
+          .select("relation_label, weight, source_concept:source_concept_id ( label ), target_concept:target_concept_id ( label )")
+          .eq("user_id", data.user_id)
+          .contains("evidence_doc_ids", [id])
+          .order("weight", { ascending: false })
+          .limit(40);
+        return (r as unknown as RelRow[] | null) ?? [];
+      } catch { return []; }
+    })(),
+  ]);
+
+  const tagList = Array.isArray(aiMeta?.tags) && aiMeta!.tags!.length > 0
+    ? (aiMeta!.tags as string[]).slice(0, 12)
+    : [];
+
   // Frontmatter first, then the raw markdown body. The body usually starts
   // with its own H1; we don't repeat the title to avoid duplicate headings.
   const frontmatter = [
     "---",
+    `mw_doc: 1`,
     `title: "${title}"`,
     `url: https://memory.wiki/${id}`,
     updated ? `updated: ${updated}` : null,
     `source: "${source}"`,
+    tagList.length > 0 ? `tags: [${tagList.map((t) => `"${t.replace(/"/g, '\\"')}"`).join(", ")}]` : null,
+    conceptsInDoc.length > 0 ? `concept_count: ${conceptsInDoc.length}` : null,
+    relationsInDoc.length > 0 ? `relation_count: ${relationsInDoc.length}` : null,
     "---",
     "",
   ].filter(Boolean).join("\n");
 
+  // Build the doc-level KG appendix the AI reader sees AFTER the body.
+  // Kept short on purpose — full concept records live at the hub-wide
+  // /raw/hub/<slug>/c/<concept> endpoint. Here we just expose what's
+  // useful for grounding an answer in this single doc.
+  function buildKgAppendix(): string {
+    if (conceptsInDoc.length === 0 && relationsInDoc.length === 0 && !aiMeta?.ai_summary) {
+      return "";
+    }
+    const parts: string[] = [""];
+    if (aiMeta?.ai_summary) {
+      parts.push("## AI summary", aiMeta.ai_summary.trim(), "");
+    }
+    if (conceptsInDoc.length > 0) {
+      parts.push("## Concepts (this doc)");
+      for (const c of conceptsInDoc) {
+        parts.push(c.description ? `- **${c.label}** — ${c.description}` : `- **${c.label}**`);
+      }
+      parts.push("");
+    }
+    if (relationsInDoc.length > 0) {
+      parts.push("## Concept relations (this doc)");
+      for (const r of relationsInDoc) {
+        const a = r.source_concept?.label;
+        const b = r.target_concept?.label;
+        if (!a || !b) continue;
+        parts.push(`- **${a}** → *${r.relation_label}* → **${b}**`);
+      }
+      parts.push("");
+    }
+    return parts.join("\n");
+  }
+
   const compact = isCompactRequested(request.url);
   const rawMarkdown = data.markdown || "";
   const md = compact ? compactMarkdown(rawMarkdown) : rawMarkdown;
-  const body = `${frontmatter}\n${md}`;
+  // KG appendix is dropped in compact mode (token economy) and on the
+  // unauthed public path when there's nothing to add. Otherwise it
+  // sits below the body so the AI reads the body first, then sees the
+  // structured grounding signal.
+  const kg = compact ? "" : buildKgAppendix();
+  const body = `${frontmatter}\n${md}${kg}`;
 
   const sig = extractRequestSignals(request);
   logRawFetch({

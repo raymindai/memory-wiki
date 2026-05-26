@@ -282,7 +282,7 @@ Response 200:
 
 Every public Memory.Wiki URL also exposes a clean-markdown variant. Append ?compact or ?digest to cut tokens.
 
-- GET /raw/{id} — plain markdown for a single document
+- GET /raw/{id} — plain markdown for a single document, with \`## Concepts (this doc)\` + \`## Concept relations (this doc)\` appended (extracted per-doc by the doc_ontology job). Pass ?compact to drop the appendix.
 - GET /raw/b/{bundleId} — concatenated markdown for a bundle
 - GET /raw/hub/{slug} — whole-hub markdown; ?digest=1 returns a concept-clustered summary
 - GET /raw/hub/{slug}/c/{concept} — per-concept passages across all docs in the hub

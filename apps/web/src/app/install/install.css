@@ -1,0 +1,274 @@
+/* /install — single-column install reference.
+   720px reading column (matches /manifesto, /how, /benchmark, /spec,
+   /privacy, /terms, /case-*). Each channel is a horizontal section
+   divided by a hairline. */
+
+/* ───────── Page ───────── */
+
+.v8-frontier .pure-install-page,
+.pure-root .pure-install-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 96px 24px 64px;
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-install-page,
+  .pure-root .pure-install-page {
+    padding: 64px 20px 48px;
+  }
+}
+
+/* ───────── Hero ───────── */
+
+.v8-frontier .pure-install-hero,
+.pure-root .pure-install-hero {
+  margin-bottom: 56px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-install-eyebrow,
+.pure-root .pure-install-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-install-h1,
+.pure-root .pure-install-h1 {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(32px, 4.5vw, 52px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-install-h1,
+.pure-root[data-locale="ko"] .pure-install-h1 {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-install-lede,
+.pure-root .pure-install-lede {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--body);
+  max-width: 720px;
+  text-wrap: pretty;
+  margin: 0;
+}
+
+/* ───────── Stack of channel sections ───────── */
+
+.v8-frontier .pure-install-stack,
+.pure-root .pure-install-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.v8-frontier .pure-install-section,
+.pure-root .pure-install-section {
+  padding: 40px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-install-section:first-child,
+.pure-root .pure-install-section:first-child {
+  padding-top: 0;
+}
+.v8-frontier .pure-install-section:last-child,
+.pure-root .pure-install-section:last-child {
+  border-bottom: none;
+}
+
+/* Head row: number + icon + title  ──  download CTA */
+.v8-frontier .pure-install-section-head,
+.pure-root .pure-install-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.v8-frontier .pure-install-section-meta,
+.pure-root .pure-install-section-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.v8-frontier .pure-install-section-num,
+.pure-root .pure-install-section-num {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.v8-frontier .pure-install-section-icon,
+.pure-root .pure-install-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.v8-frontier .pure-install-section-icon svg,
+.pure-root .pure-install-section-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.v8-frontier .pure-install-section-title,
+.pure-root .pure-install-section-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+  min-width: 0;
+}
+.v8-frontier[data-locale="ko"] .pure-install-section-title,
+.pure-root[data-locale="ko"] .pure-install-section-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-install-section-download,
+.pure-root .pure-install-section-download {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  padding: 8px 14px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--ink);
+  transition: opacity 140ms ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.v8-frontier .pure-install-section-download:hover,
+.pure-root .pure-install-section-download:hover {
+  opacity: 0.85;
+}
+
+/* Body */
+.v8-frontier .pure-install-section-blurb,
+.pure-root .pure-install-section-blurb {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--body);
+  margin: 0 0 18px;
+  padding-left: 60px;  /* align under title (num 11 + gap 14 + icon 32 + gap 14 ≈ 60) */
+  text-wrap: pretty;
+}
+
+.v8-frontier .pure-install-section-code,
+.pure-root .pure-install-section-code {
+  padding-left: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v8-frontier .pure-install-section-code .pure-code-block,
+.pure-root .pure-install-section-code .pure-code-block {
+  margin: 0;
+}
+
+.v8-frontier .pure-install-section-note,
+.pure-root .pure-install-section-note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 12px 0 0;
+  padding-left: 60px;
+  text-wrap: pretty;
+}
+
+.v8-frontier .pure-install-section-guide,
+.pure-root .pure-install-section-guide {
+  display: inline-block;
+  margin: 18px 0 0 60px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+.v8-frontier .pure-install-section-guide:hover,
+.pure-root .pure-install-section-guide:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  .v8-frontier .pure-install-section-head,
+  .pure-root .pure-install-section-head {
+    flex-wrap: wrap;
+  }
+  .v8-frontier .pure-install-section-blurb,
+  .pure-root .pure-install-section-blurb,
+  .v8-frontier .pure-install-section-code,
+  .pure-root .pure-install-section-code,
+  .v8-frontier .pure-install-section-note,
+  .pure-root .pure-install-section-note,
+  .v8-frontier .pure-install-section-guide,
+  .pure-root .pure-install-section-guide {
+    padding-left: 0;
+    margin-left: 0;
+  }
+}
+
+/* ───────── Hub paste hint ───────── */
+
+.v8-frontier .pure-install-hub,
+.pure-root .pure-install-hub {
+  max-width: 720px;
+  margin: 56px auto 0;
+  padding: 48px 0 0;
+  border-top: 1px solid var(--hair);
+  text-align: center;
+}
+.v8-frontier .pure-install-hub-h2,
+.pure-root .pure-install-hub-h2 {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 16px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-install-hub-h2,
+.pure-root[data-locale="ko"] .pure-install-hub-h2 {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-install-hub-line,
+.pure-root .pure-install-hub-line {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--body);
+  margin: 0 0 18px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-install-hub-foot,
+.pure-root .pure-install-hub-foot {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 16px 0 0;
+}
+.v8-frontier .pure-install-hub-foot a,
+.pure-root .pure-install-hub-foot a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--hair-strong);
+  text-underline-offset: 3px;
+}

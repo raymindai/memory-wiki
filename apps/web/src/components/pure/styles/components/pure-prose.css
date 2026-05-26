@@ -1,0 +1,236 @@
+/* ─────────────────────────────────────────────────────────────
+   PureProse — typography for long-form essays (manifesto, docs).
+   Narrow column, comfortable line-height, pure-token colors.
+   ───────────────────────────────────────────────────────────── */
+.v8-frontier .pure-prose,
+.pure-root .pure-prose {
+  margin: 0 auto;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--body);
+  text-wrap: pretty;
+}
+
+/* Headings inside prose. h1 reserved for the page hero — prose
+ * starts at h2. Spacing rhythm tuned for vertical breathing. */
+.v8-frontier .pure-prose h2,
+.pure-root .pure-prose h2 {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 64px 0 18px;
+  text-wrap: balance;
+}
+.v8-frontier .pure-prose h3,
+.pure-root .pure-prose h3 {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 40px 0 12px;
+  text-wrap: balance;
+}
+
+/* Korean prose uses Pretendard for heads (Cal Sans is Latin-only) */
+.v8-frontier[data-locale="ko"] .pure-prose h2,
+.v8-frontier[data-locale="ko"] .pure-prose h3,
+.pure-root[data-locale="ko"] .pure-prose h2,
+.pure-root[data-locale="ko"] .pure-prose h3 {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+
+/* Paragraphs */
+.v8-frontier .pure-prose p,
+.pure-root .pure-prose p {
+  margin: 0 0 22px;
+  color: var(--body);
+}
+.v8-frontier .pure-prose p:last-child,
+.pure-root .pure-prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* Inline elements */
+.v8-frontier .pure-prose strong,
+.pure-root .pure-prose strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.v8-frontier .pure-prose em,
+.pure-root .pure-prose em {
+  font-style: italic;
+  color: var(--ink);
+}
+.v8-frontier .pure-prose code,
+.pure-root .pure-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+}
+.v8-frontier .pure-prose a,
+.pure-root .pure-prose a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--hair-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 140ms ease;
+}
+.v8-frontier .pure-prose a:hover,
+.pure-root .pure-prose a:hover {
+  text-decoration-color: var(--ink);
+}
+
+/* Lists */
+.v8-frontier .pure-prose ul,
+.v8-frontier .pure-prose ol,
+.pure-root .pure-prose ul,
+.pure-root .pure-prose ol {
+  margin: 0 0 22px;
+  padding-left: 0;
+  list-style: none;
+}
+.v8-frontier .pure-prose li,
+.pure-root .pure-prose li {
+  position: relative;
+  padding-left: 22px;
+  margin-bottom: 10px;
+  color: var(--body);
+}
+.v8-frontier .pure-prose ul > li::before,
+.pure-root .pure-prose ul > li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.7em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.v8-frontier .pure-prose ol,
+.pure-root .pure-prose ol {
+  counter-reset: pure-prose-ol;
+}
+.v8-frontier .pure-prose ol > li,
+.pure-root .pure-prose ol > li {
+  counter-increment: pure-prose-ol;
+  padding-left: 28px;
+}
+.v8-frontier .pure-prose ol > li::before,
+.pure-root .pure-prose ol > li::before {
+  content: counter(pure-prose-ol, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Blockquote — used as a pull-highlight inside the essay */
+.v8-frontier .pure-prose blockquote,
+.pure-root .pure-prose blockquote {
+  margin: 36px 0;
+  padding: 24px 26px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink);
+  font-weight: 500;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-prose blockquote p,
+.pure-root .pure-prose blockquote p {
+  margin: 0;
+  color: var(--ink);
+}
+
+/* Multi-line code block — for spec / docs pages */
+.v8-frontier .pure-prose pre,
+.pure-root .pure-prose pre {
+  margin: 14px 0 28px;
+  padding: 16px 18px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.v8-frontier .pure-prose pre code,
+.pure-root .pure-prose pre code {
+  font-family: var(--font-mono);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  font-size: inherit;
+  white-space: pre;
+}
+.v8-frontier .pure-prose pre[data-lang]::before,
+.pure-root .pure-prose pre[data-lang]::before {
+  content: attr(data-lang);
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+/* Callout box — bordered card with inline paragraphs (rules, list items
+ * with mono code chips). Used by /spec for URL contract, knobs, etc. */
+.v8-frontier .pure-prose-callout,
+.pure-root .pure-prose-callout {
+  margin: 12px 0 24px;
+  padding: 18px 20px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+}
+.v8-frontier .pure-prose-callout p,
+.pure-root .pure-prose-callout p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.v8-frontier .pure-prose-callout p:last-child,
+.pure-root .pure-prose-callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* Horizontal rule — subtle section break */
+.v8-frontier .pure-prose hr,
+.pure-root .pure-prose hr {
+  border: 0;
+  border-top: 1px solid var(--hair);
+  margin: 48px auto;
+  width: 60px;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .v8-frontier .pure-prose,
+  .pure-root .pure-prose {
+    font-size: 16px;
+  }
+  .v8-frontier .pure-prose h2,
+  .pure-root .pure-prose h2 {
+    font-size: 22px;
+    margin-top: 48px;
+  }
+}

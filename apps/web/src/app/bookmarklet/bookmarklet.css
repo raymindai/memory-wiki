@@ -1,0 +1,59 @@
+/* The draggable bookmarklet button itself — Pure pill, blob mark, no emoji.
+   Selector matches .pure-prose a's specificity (0,2,0 > 0,1,1) so the
+   button text + underline aren't overridden by the prose anchor rule
+   when this button lives inside <PureProse>. */
+.v8-frontier .pure-prose a.pure-bookmarklet-button,
+.pure-root   .pure-prose a.pure-bookmarklet-button,
+.v8-frontier .pure-bookmarklet-button,
+.pure-root   .pure-bookmarklet-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px 12px 18px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: var(--r-pill);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: grab;
+  user-select: none;
+  transition: opacity 140ms ease;
+}
+.v8-frontier .pure-bookmarklet-button:active,
+.pure-root .pure-bookmarklet-button:active {
+  cursor: grabbing;
+  opacity: 0.92;
+}
+.v8-frontier .pure-bookmarklet-button-mark,
+.pure-root .pure-bookmarklet-button-mark {
+  width: 20px;
+  height: 20px;
+  filter: invert(1);  /* mw blob is white-on-dark; we want dark-on-light here */
+  display: block;
+  object-fit: contain;
+}
+.v8-frontier[data-frontier-theme="light"] .pure-bookmarklet-button-mark,
+.pure-root[data-frontier-theme="light"] .pure-bookmarklet-button-mark {
+  filter: invert(0);  /* on light theme button is light → keep blob dark */
+}
+
+/* /bookmarklet — drop zone for the drag-to-bookmarks button */
+.v8-frontier .pure-bookmarklet-drop,
+.pure-root .pure-bookmarklet-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px;
+  margin: 14px 0 14px;
+  background: var(--bg-deep);
+  border: 1px dashed var(--hair-strong);
+  border-radius: var(--r-md);
+}
+.v8-frontier .pure-bookmarklet-note,
+.pure-root .pure-bookmarklet-note {
+  font-size: 12px !important;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+}

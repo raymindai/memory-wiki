@@ -1,0 +1,360 @@
+/* /docs/integrate — Pure design system page-local styles.
+   Sits inside <PureDocsShell> main column. Uses Pure tokens only. */
+
+/* ─── Header (eyebrow + h1 + intro) ─── */
+.v8-frontier .pure-integrate-docs-eyebrow,
+.pure-root .pure-integrate-docs-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.v8-frontier .pure-integrate-docs-title,
+.pure-root .pure-integrate-docs-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(32px, 4.4vw, 44px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-integrate-docs-title,
+.pure-root[data-locale="ko"] .pure-integrate-docs-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-integrate-docs-intro,
+.pure-root .pure-integrate-docs-intro {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--body);
+  max-width: 680px;
+  margin: 0 0 18px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-integrate-docs-intro:last-of-type,
+.pure-root .pure-integrate-docs-intro:last-of-type {
+  margin-bottom: 40px;
+}
+
+/* ─── Section titles ─── */
+.v8-frontier .pure-integrate-docs-section,
+.pure-root .pure-integrate-docs-section {
+  scroll-margin-top: 96px;
+  margin-top: 56px;
+}
+.v8-frontier .pure-integrate-docs-section-first,
+.pure-root .pure-integrate-docs-section-first {
+  margin-top: 0;
+}
+.v8-frontier .pure-integrate-docs-section-title,
+.pure-root .pure-integrate-docs-section-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 16px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-integrate-docs-section-title,
+.pure-root[data-locale="ko"] .pure-integrate-docs-section-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+
+/* ─── Body copy ─── */
+.v8-frontier .pure-integrate-docs-body,
+.pure-root .pure-integrate-docs-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--body);
+  max-width: 680px;
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-integrate-docs-body strong,
+.pure-root .pure-integrate-docs-body strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.v8-frontier .pure-integrate-docs-body em,
+.pure-root .pure-integrate-docs-body em {
+  font-style: italic;
+  color: var(--ink);
+}
+.v8-frontier .pure-integrate-docs-body code,
+.pure-root .pure-integrate-docs-body code,
+.v8-frontier .pure-integrate-docs-li code,
+.pure-root .pure-integrate-docs-li code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+}
+
+/* Faint footnote-style body (replaces text-faint paragraphs) */
+.v8-frontier .pure-integrate-docs-body-faint,
+.pure-root .pure-integrate-docs-body-faint {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 680px;
+  margin: 0 0 32px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-integrate-docs-body-faint strong,
+.pure-root .pure-integrate-docs-body-faint strong {
+  color: var(--body);
+  font-weight: 600;
+}
+.v8-frontier .pure-integrate-docs-body-faint code,
+.pure-root .pure-integrate-docs-body-faint code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+}
+
+/* ─── Callout (replaces <Card>) ─── */
+.v8-frontier .pure-integrate-docs-callout,
+.pure-root .pure-integrate-docs-callout {
+  margin: 0 0 24px;
+  padding: 20px 24px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+}
+
+/* ─── Ordered + unordered lists inside body ─── */
+.v8-frontier .pure-integrate-docs-ol,
+.pure-root .pure-integrate-docs-ol {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 14px;
+  color: var(--body);
+  line-height: 1.8;
+}
+.v8-frontier .pure-integrate-docs-ol li,
+.pure-root .pure-integrate-docs-ol li {
+  margin-bottom: 8px;
+}
+.v8-frontier .pure-integrate-docs-ol li strong,
+.pure-root .pure-integrate-docs-ol li strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.v8-frontier .pure-integrate-docs-ol li code,
+.pure-root .pure-integrate-docs-ol li code,
+.v8-frontier .pure-integrate-docs-ul li code,
+.pure-root .pure-integrate-docs-ul li code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+}
+
+.v8-frontier .pure-integrate-docs-ul,
+.pure-root .pure-integrate-docs-ul {
+  margin: 0 0 24px;
+  padding-left: 22px;
+  font-size: 14px;
+  color: var(--body);
+  line-height: 1.7;
+  max-width: 680px;
+}
+.v8-frontier .pure-integrate-docs-ul li,
+.pure-root .pure-integrate-docs-ul li {
+  margin-bottom: 10px;
+}
+.v8-frontier .pure-integrate-docs-ul li strong,
+.pure-root .pure-integrate-docs-ul li strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ─── URL table (Pick the right URL / Permissions table) ─── */
+.v8-frontier .pure-integrate-docs-table,
+.pure-root .pure-integrate-docs-table {
+  margin: 0 0 24px;
+  padding: 8px 24px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+}
+.v8-frontier .pure-integrate-docs-row,
+.pure-root .pure-integrate-docs-row {
+  display: grid;
+  grid-template-columns: 200px 100px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-integrate-docs-row:last-child,
+.pure-root .pure-integrate-docs-row:last-child {
+  border-bottom: 0;
+}
+.v8-frontier .pure-integrate-docs-row-perm,
+.pure-root .pure-integrate-docs-row-perm {
+  grid-template-columns: 160px 1fr;
+}
+.v8-frontier .pure-integrate-docs-row code,
+.pure-root .pure-integrate-docs-row code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.v8-frontier .pure-integrate-docs-row-tag,
+.pure-root .pure-integrate-docs-row-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.v8-frontier .pure-integrate-docs-row-tag.accent,
+.pure-root .pure-integrate-docs-row-tag.accent {
+  color: var(--micro-orange);
+}
+.v8-frontier .pure-integrate-docs-row-desc,
+.pure-root .pure-integrate-docs-row-desc {
+  font-size: 13px;
+  color: var(--body);
+  line-height: 1.6;
+}
+.v8-frontier .pure-integrate-docs-row-desc strong,
+.pure-root .pure-integrate-docs-row-desc strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.v8-frontier .pure-integrate-docs-row-desc code,
+.pure-root .pure-integrate-docs-row-desc code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ─── Sub-heading inside Permissions ─── */
+.v8-frontier .pure-integrate-docs-sub-title,
+.pure-root .pure-integrate-docs-sub-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 24px 0 12px;
+}
+.v8-frontier[data-locale="ko"] .pure-integrate-docs-sub-title,
+.pure-root[data-locale="ko"] .pure-integrate-docs-sub-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+
+/* ─── Tool block ─── */
+.v8-frontier .pure-integrate-docs-tool,
+.pure-root .pure-integrate-docs-tool {
+  margin: 0 0 24px;
+  padding: 28px 24px;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  scroll-margin-top: 96px;
+}
+.v8-frontier .pure-integrate-docs-tool-head,
+.pure-root .pure-integrate-docs-tool-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.v8-frontier .pure-integrate-docs-tool-name,
+.pure-root .pure-integrate-docs-tool-name {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0;
+}
+.v8-frontier[data-locale="ko"] .pure-integrate-docs-tool-name,
+.pure-root[data-locale="ko"] .pure-integrate-docs-tool-name {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-integrate-docs-tool-path,
+.pure-root .pure-integrate-docs-tool-path {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.v8-frontier .pure-integrate-docs-tool-tagline,
+.pure-root .pure-integrate-docs-tool-tagline {
+  font-size: 14px;
+  color: var(--body);
+  line-height: 1.7;
+  margin: 0 0 16px;
+  max-width: 640px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-integrate-docs-tool-notes,
+.pure-root .pure-integrate-docs-tool-notes {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 12px 0 0;
+  max-width: 640px;
+}
+.v8-frontier .pure-integrate-docs-tool-notes code,
+.pure-root .pure-integrate-docs-tool-notes code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  border: 1px solid var(--hair);
+  color: var(--ink);
+}
+
+/* ─── File-path caption above a code block ─── */
+.v8-frontier .pure-integrate-docs-file-caption,
+.pure-root .pure-integrate-docs-file-caption {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin: 4px 0 6px;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 700px) {
+  .v8-frontier .pure-integrate-docs-row,
+  .pure-root .pure-integrate-docs-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .v8-frontier .pure-integrate-docs-row-perm,
+  .pure-root .pure-integrate-docs-row-perm {
+    grid-template-columns: 1fr;
+  }
+}

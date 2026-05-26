@@ -1,0 +1,214 @@
+/* ─────────────────────────────────────────────────────────────
+   /manifesto — single 720px reading column. Everything (hero,
+   essay, beliefs, why-now, roadmap, closing) anchors to the SAME
+   left edge inside this wrapper. Footer stays at the page width.
+   ───────────────────────────────────────────────────────────── */
+
+.v8-frontier .pure-manifesto-page,
+.pure-root .pure-manifesto-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 120px 24px 96px;
+}
+
+/* ─── Hero — just reading time + title + intro paragraphs ─── */
+.v8-frontier .pure-manifesto-readtime,
+.pure-root .pure-manifesto-readtime {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 32px;
+}
+.v8-frontier .pure-manifesto-title,
+.pure-root .pure-manifesto-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 32px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-manifesto-title,
+.pure-root[data-locale="ko"] .pure-manifesto-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-manifesto-intro,
+.pure-root .pure-manifesto-intro {
+  font-size: 19px;
+  line-height: 1.7;
+  color: var(--body);
+  margin: 0 0 18px;
+  text-wrap: pretty;
+}
+.v8-frontier .pure-manifesto-intro:last-child,
+.pure-root .pure-manifesto-intro:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Block heading (used for Beliefs, Roadmap section breaks) ─── */
+.v8-frontier .pure-manifesto-block-eyebrow,
+.pure-root .pure-manifesto-block-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 96px 0 16px;
+}
+.v8-frontier .pure-manifesto-block-title,
+.pure-root .pure-manifesto-block-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink);
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.v8-frontier[data-locale="ko"] .pure-manifesto-block-title,
+.pure-root[data-locale="ko"] .pure-manifesto-block-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-manifesto-block-lede,
+.pure-root .pure-manifesto-block-lede {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0 0 32px;
+  text-wrap: pretty;
+}
+
+/* ─── Seven beliefs — numbered stack ─── */
+.v8-frontier .pure-manifesto-beliefs,
+.pure-root .pure-manifesto-beliefs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--hair);
+}
+.v8-frontier .pure-manifesto-belief,
+.pure-root .pure-manifesto-belief {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-manifesto-belief-num,
+.pure-root .pure-manifesto-belief-num {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--faint);
+  line-height: 1.3;
+  padding-top: 2px;
+}
+.v8-frontier .pure-manifesto-belief-title,
+.pure-root .pure-manifesto-belief-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 6px;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+.v8-frontier[data-locale="ko"] .pure-manifesto-belief-title,
+.pure-root[data-locale="ko"] .pure-manifesto-belief-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-manifesto-belief-text,
+.pure-root .pure-manifesto-belief-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--body);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* ─── Roadmap — vertical phase stack (no horizontal grid) ─── */
+.v8-frontier .pure-manifesto-phases,
+.pure-root .pure-manifesto-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--hair);
+}
+.v8-frontier .pure-manifesto-phase,
+.pure-root .pure-manifesto-phase {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.v8-frontier .pure-manifesto-phase-meta,
+.pure-root .pure-manifesto-phase-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v8-frontier .pure-manifesto-phase-tag,
+.pure-root .pure-manifesto-phase-tag {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.v8-frontier .pure-manifesto-phase-badge,
+.pure-root .pure-manifesto-phase-badge {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+.v8-frontier .pure-manifesto-phase-title,
+.pure-root .pure-manifesto-phase-title {
+  font-family: "Cal Sans", var(--font-sans);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 8px;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+.v8-frontier[data-locale="ko"] .pure-manifesto-phase-title,
+.pure-root[data-locale="ko"] .pure-manifesto-phase-title {
+  font-family: "Pretendard Variable", Pretendard, var(--font-sans);
+  font-weight: 700;
+}
+.v8-frontier .pure-manifesto-phase-body,
+.pure-root .pure-manifesto-phase-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--body);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .v8-frontier .pure-manifesto-page,
+  .pure-root .pure-manifesto-page {
+    padding: 96px 24px 64px;
+  }
+  .v8-frontier .pure-manifesto-block-eyebrow,
+  .pure-root .pure-manifesto-block-eyebrow {
+    margin-top: 72px;
+  }
+  .v8-frontier .pure-manifesto-belief,
+  .pure-root .pure-manifesto-belief {
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+  }
+  .v8-frontier .pure-manifesto-phase,
+  .pure-root .pure-manifesto-phase {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
