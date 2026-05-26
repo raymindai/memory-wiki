@@ -13,6 +13,11 @@ export async function setupEditableTab(page: Page) {
     // see the rebranded tour. E2E must skip the current key too —
     // otherwise the overlay mounts and intercepts every pointer event.
     localStorage.setItem("mw-welcome-seen-v7", "1");
+    // Mark editor as previously opened so the first-visit redirect
+    // in app/page.tsx (virgin visitors go to /about) is skipped.
+    // Without this, tests that hit `/` land on /about and never
+    // find the .ProseMirror selector.
+    localStorage.setItem("mw-editor-opened", "1");
     // Match the live TABS_VERSION constant in MdEditor.tsx so the
     // editor doesn't run the version-mismatch path on every test
     // boot (which merges every EXAMPLE_TABS row into mw-tabs and

@@ -12,16 +12,14 @@ import { setupEditableTab } from "./_helpers";
  *  must be the landing surface. The earlier bug was activeTabId
  *  restoring on bare root → empty editor with "Start writing...". */
 test.describe("Bare root URL → Home", () => {
-  test("first-visit visitor lands on Start, not the empty editor", async ({ page }) => {
+  test("first-visit visitor is redirected to /about", async ({ page }) => {
+    // First-visit redirect added 2026-05-26 in app/page.tsx: a virgin
+    // visitor with no localStorage falls through to /about so they
+    // meet the marketing landing before the editor. Returning visitors
+    // (mw-editor-opened set) skip the redirect — see next test.
     await page.goto("/");
-    // Start screen has the Guides & Examples grid header — use it as a
-    // signature of "Home rendered." The empty editor would instead
-    // show the Tiptap placeholder.
-    await page.waitForSelector("text=Guides & Examples", { timeout: 20000 });
-    // And the empty doc's "Start writing..." prompt should NOT be the
-    // primary surface. (It can still exist hidden behind Start.)
-    const visible = await page.locator("text=Start writing...").isVisible().catch(() => false);
-    expect(visible).toBe(false);
+    await page.waitForURL(/\/about(\?.*)?$/, { timeout: 10000 });
+    expect(page.url()).toContain("/about");
   });
 
   test("return visitor with stale activeTab on /  still gets Home", async ({ page }) => {
@@ -33,6 +31,9 @@ test.describe("Bare root URL → Home", () => {
       localStorage.setItem("mw-onboarded", "1");
       localStorage.setItem("mw-welcome-seen", "1");
       localStorage.setItem("mw-welcome-seen-v7", "1");
+      // Returning visitor — they've opened the editor before, so the
+      // first-visit /about redirect is skipped.
+      localStorage.setItem("mw-editor-opened", "1");
       localStorage.setItem("mw-tabs-version", "10");
       localStorage.setItem("mw-active-tab", "stale-deleted-doc-id");
       localStorage.setItem("mw-tabs", JSON.stringify([

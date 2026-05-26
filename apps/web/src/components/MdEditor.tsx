@@ -11283,7 +11283,12 @@ ${clone.innerHTML}
                 full-surface overlay (Galaxy / Hub / Start / Settings)
                 is showing so the cosmos / hub view owns the whole
                 content slot, not a doc-specific bar floating on top. */}
-            {showToolbar && canEdit && !editorPlaceholder && !showGalaxy && !showHub && !showOnboarding && !showSettings && (
+            {/* Toolbar is doc-specific. Hide it when the active tab is
+                a bundle (canvas / overview / list views) — the
+                formatting controls don't apply to bundle surfaces, and
+                showing them carries over the visual state from the
+                previously-open doc tab. */}
+            {showToolbar && canEdit && !editorPlaceholder && !showGalaxy && !showHub && !showOnboarding && !showSettings && activeTab?.kind !== "bundle" && (
               <WysiwygToolbar
                 onInsert={handleInsertBlock}
                 onInsertTable={handleInsertTable}
