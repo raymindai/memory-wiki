@@ -37,11 +37,13 @@ CREATE TABLE IF NOT EXISTS hub_readiness (
 -- Public can read readiness (it's a public hub feature).
 ALTER TABLE hub_readiness ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "hub_readiness_select_all" ON hub_readiness;
 CREATE POLICY "hub_readiness_select_all"
   ON hub_readiness FOR SELECT
   USING (true);
 
 -- Only service role writes (bench script).
+DROP POLICY IF EXISTS "hub_readiness_service_write" ON hub_readiness;
 CREATE POLICY "hub_readiness_service_write"
   ON hub_readiness FOR ALL
   USING (auth.role() = 'service_role')

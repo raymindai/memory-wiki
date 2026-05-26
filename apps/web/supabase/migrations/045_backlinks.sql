@@ -15,10 +15,14 @@
 -- place and filter at query time. Cheaper than triggers and lets the
 -- backlink auto-reappear if the target gets re-created at the same id.
 
--- Three entity kinds in the Memory.Wiki graph.
-CREATE TYPE backlink_entity_type AS ENUM ('document', 'bundle', 'hub');
+-- Three entity kinds in the Memory.Wiki graph. Idempotent: skip if
+-- the enum already exists (remote may have been created by a prior
+-- ad-hoc apply outside the migration history).
+DO $$ BEGIN
+  CREATE TYPE backlink_entity_type AS ENUM ('document', 'bundle', 'hub');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
-CREATE TABLE backlinks (
+CREATE TABLE IF NOT EXISTS backlinks (
   id BIGSERIAL PRIMARY KEY,
 
   -- The entity whose markdown contains the reference.
@@ -43,10 +47,10 @@ CREATE TABLE backlinks (
 
 -- "Find everything that references me" — the load-bearing query for
 -- viewer "Referenced by" sections.
-CREATE INDEX backlinks_target_idx ON backlinks (target_type, target_id);
+CREATE INDEX IF NOT EXISTS backlinks_target_idx ON backlinks (target_type, target_id);
 
 -- "What does this entity link to" — used by editors and the graph view.
-CREATE INDEX backlinks_source_idx ON backlinks (source_type, source_id);
+CREATE INDEX IF NOT EXISTS backlinks_source_idx ON backlinks (source_type, source_id);
 
 -- Public read: viewer pages need to render the Referenced-by list for
 -- anyone, including unauthenticated visitors. Source/target visibility
@@ -55,6 +59,7 @@ CREATE INDEX backlinks_source_idx ON backlinks (source_type, source_id);
 -- already gated by their own tables' policies.
 ALTER TABLE backlinks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "backlinks_public_read" ON backlinks;
 CREATE POLICY "backlinks_public_read" ON backlinks
   FOR SELECT USING (true);
 
