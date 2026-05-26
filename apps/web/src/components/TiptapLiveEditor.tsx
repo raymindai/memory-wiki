@@ -76,7 +76,7 @@ const CustomCodeBlock = CodeBlockLowlight.extend({
         wrapper.className = "tiptap-codeblock-wrapper";
         wrapper.setAttribute("data-error", String((err as Error).message || err));
         const errLine = document.createElement("div");
-        errLine.style.cssText = "padding:8px 12px;font-size:11px;color:var(--accent);background:var(--accent-dim);border-bottom:1px solid var(--border-dim);";
+        errLine.style.cssText = "padding:8px 12px;font-size:11px;color:var(--text-primary);background:var(--border);border-bottom:1px solid var(--border-dim);";
         errLine.textContent = `Code block render error: ${(err as Error).message || err}`;
         wrapper.appendChild(errLine);
         const pre = document.createElement("pre");
@@ -248,9 +248,9 @@ function buildCodeBlockNodeView({ node, HTMLAttributes, getPos, editor }: any) {
         const t = document.createElement("div");
         t.textContent = text;
         t.style.cssText = `
-          font-family: ui-monospace, monospace;
+          font-family: var(--font-mono);
           font-size: 12px; font-weight: 600;
-          color: ${isError ? "var(--accent)" : "var(--text-primary)"};
+          color: ${isError ? "var(--text-primary)" : "var(--text-primary)"};
           text-align: center; padding: 0 16px;
           max-width: 90%;
         `;
@@ -361,7 +361,7 @@ function buildCodeBlockNodeView({ node, HTMLAttributes, getPos, editor }: any) {
           user-select: none;
         `;
         item.innerHTML = `<span style="font-weight:600;pointer-events:none">${label}</span><span style="color:var(--text-faint);font-size:10px;pointer-events:none">${hint}</span>`;
-        item.addEventListener("mouseenter", () => { item.style.background = "var(--accent-dim)"; });
+        item.addEventListener("mouseenter", () => { item.style.background = "var(--border)"; });
         item.addEventListener("mouseleave", () => { item.style.background = "transparent"; });
         let fired = false;
         const run = (e: Event) => {
@@ -525,7 +525,7 @@ function buildCodeBlockNodeView({ node, HTMLAttributes, getPos, editor }: any) {
               }
               setTimeout(() => tryRender(attempt + 1), 150);
             } else if (mermaidContainer) {
-              mermaidContainer.innerHTML = `<div style="color:var(--accent);font-size:11px;padding:8px;">Mermaid failed to load</div>`;
+              mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;">Mermaid failed to load</div>`;
             }
             return;
           }
@@ -541,10 +541,10 @@ function buildCodeBlockNodeView({ node, HTMLAttributes, getPos, editor }: any) {
               })
               .catch((err: unknown) => {
                 if (myToken !== renderToken) return;
-                if (mermaidContainer) mermaidContainer.innerHTML = `<div style="color:var(--accent);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String((err as Error)?.message || err)}</div>`;
+                if (mermaidContainer) mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String((err as Error)?.message || err)}</div>`;
               });
           } catch (err) {
-            if (mermaidContainer) mermaidContainer.innerHTML = `<div style="color:var(--accent);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String((err as Error)?.message || err)}</div>`;
+            if (mermaidContainer) mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String((err as Error)?.message || err)}</div>`;
           }
         };
         tryRender();
@@ -858,8 +858,8 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
   if (!pos) return null;
 
   const btn = (active: boolean) => ({
-    background: active ? "var(--accent-dim)" : "transparent",
-    color: active ? "var(--accent)" : "var(--text-secondary)",
+    background: active ? "var(--border)" : "transparent",
+    color: active ? "var(--text-primary)" : "var(--text-secondary)",
     border: "none",
     borderRadius: 4,
     padding: "4px 6px",
@@ -896,7 +896,7 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
             style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border)", width: 180 }}
             autoFocus
           />
-          <button onClick={applyLink} style={{ fontSize: 10, padding: "3px 8px", background: "var(--accent)", color: "#000", border: "none", borderRadius: 4, fontWeight: 600, cursor: "pointer" }}>OK</button>
+          <button onClick={applyLink} style={{ fontSize: 10, padding: "3px 8px", background: "var(--text-primary)", color: "var(--background)", border: "none", borderRadius: 4, fontWeight: 600, cursor: "pointer" }}>OK</button>
         </div>
       ) : (
         <>
@@ -952,14 +952,14 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
             <div
               className="px-2 py-1.5 rounded-md mb-1 flex items-start gap-1.5"
               style={{
-                background: "var(--accent-dim)",
+                background: "var(--border)",
                 border: "1px solid var(--border-dim)",
                 fontSize: 11,
                 lineHeight: 1.4,
                 color: "var(--text-secondary)",
               }}
             >
-              <span className="font-mono uppercase tracking-wider shrink-0" style={{ color: "var(--accent)", fontSize: 9, paddingTop: 1 }}>
+              <span className="font-mono uppercase tracking-wider shrink-0" style={{ color: "var(--text-primary)", fontSize: 9, paddingTop: 1 }}>
                 On
               </span>
               <span
@@ -982,7 +982,7 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
                 className="flex items-center gap-1.5 px-1.5 py-1 rounded-md"
                 style={{ background: "var(--background)", border: "1px solid var(--border-dim)" }}
               >
-                <Sparkles size={12} style={{ color: "var(--accent)" }} />
+                <Sparkles size={12} style={{ color: "var(--micro-ai)" }} />
                 <input
                   autoFocus
                   value={aiPrompt}
@@ -1013,7 +1013,7 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
                     }}
                     disabled={!!aiBusy}
                     className="shrink-0 px-1.5 py-0.5 rounded font-medium"
-                    style={{ background: "var(--accent)", color: "#000", fontSize: 11, border: "none", cursor: "pointer" }}
+                    style={{ background: "var(--text-primary)", color: "var(--background)", fontSize: 11, border: "none", cursor: "pointer" }}
                     title="Send (Enter)"
                   >
                     ↵
@@ -1185,7 +1185,7 @@ function TableMenu({ editor }: { editor: Editor }) {
       {sep}
       <button onClick={() => editor.chain().focus().toggleHeaderRow().run()} style={btnStyle} title="Toggle header row">Header</button>
       {sep}
-      <button onClick={() => editor.chain().focus().deleteTable().run()} style={{ ...btnStyle, color: "var(--accent)" }} title="Delete table">
+      <button onClick={() => editor.chain().focus().deleteTable().run()} style={{ ...btnStyle, color: "var(--text-primary)" }} title="Delete table">
         <Trash2 width={12} height={12} />
       </button>
     </div>
@@ -1610,7 +1610,10 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
           startOnLoad: false,
           securityLevel: "loose",
           theme: dark ? "dark" : "default",
-          fontFamily: "system-ui, -apple-system, sans-serif",
+          // Mermaid renders to SVG and sets font-family as a presentation
+          // attribute, so CSS var() doesn't resolve. Use a literal cascade
+          // matching body font (Noto Sans + Pretendard for KR).
+          fontFamily: "'Noto Sans', 'Pretendard Variable', 'Noto Sans KR', system-ui, sans-serif",
           fontSize: 14,
           flowchart: { padding: 16, nodeSpacing: 30, rankSpacing: 40, htmlLabels: true, curve: "basis" },
           themeVariables: dark
@@ -1661,7 +1664,7 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
     }, []);
 
     return (
-      <div className="flex-1 overflow-auto relative" style={{ background: "var(--background)" }}>
+      <div className="flex-1 overflow-auto relative" style={{ background: "var(--canvas)" }}>
         {editor && canEdit && <SelectionToolbar editor={editor} />}
         {editor && canEdit && <TableMenu editor={editor} />}
         <div ref={containerRef} />

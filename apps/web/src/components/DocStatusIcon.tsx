@@ -99,7 +99,7 @@ function DocStatusIcon({ tab, isActive }: {
         {isSynced && (
           <svg className="absolute -bottom-[3px] -right-[3px]" width="11" height="11" viewBox="0 0 12 12">
             <circle cx="6" cy="6" r="5.5" fill="var(--background)" />
-            <circle cx="6" cy="6" r="4.5" fill="var(--accent)" />
+            <circle cx="6" cy="6" r="4.5" fill="var(--text-primary)" />
             <path d="M4 6.2L5.3 7.5L8 4.5" stroke="var(--background)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
           </svg>
         )}

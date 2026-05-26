@@ -28,8 +28,8 @@ const VARIANT: Record<Variant, { active: string; idle: string }> = {
     active: "bg-[var(--toggle-bg)] text-[var(--text-primary)] border border-[var(--border)]",
   },
   accent: {
-    idle:   "bg-transparent text-[var(--text-faint)] border border-[var(--border-dim)] hover:text-[var(--accent)]",
-    active: "bg-[var(--accent-dim)] text-[var(--accent)] border border-[var(--accent)]",
+    idle:   "bg-transparent text-[var(--text-faint)] border border-[var(--border-dim)] hover:text-[var(--text-primary)]",
+    active: "bg-[var(--border)] text-[var(--text-primary)] border border-[var(--text-primary)]",
   },
   cool: {
     idle:   "bg-transparent text-[var(--text-faint)] border border-[var(--border-dim)] hover:text-[var(--color-cool)]",

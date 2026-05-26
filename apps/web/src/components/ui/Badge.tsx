@@ -18,7 +18,7 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const VARIANT: Record<Variant, { bg: string; color: string; border: string }> = {
   default: { bg: "var(--toggle-bg)",            color: "var(--text-faint)",      border: "transparent" },
-  accent:  { bg: "var(--accent-dim)",           color: "var(--accent)",          border: "transparent" },
+  accent:  { bg: "var(--border)",           color: "var(--text-primary)",          border: "transparent" },
   cool:    { bg: "var(--color-cool-dim)",       color: "var(--color-cool)",      border: "transparent" },
   warm:    { bg: "var(--color-warm-dim)",       color: "var(--color-warm)",      border: "transparent" },
   success: { bg: "var(--color-success-dim)",    color: "var(--color-success)",   border: "transparent" },

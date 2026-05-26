@@ -23,30 +23,11 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
       className="flex flex-col items-center justify-center h-screen"
       style={{ background: "var(--background)", gap: 14 }}
     >
+      {/* Symbol-only loader. Removed the wordmark + progress bar —
+          the animated blob carries the brand on its own and the bar
+          was added latency to a state that's already brief. */}
       <div style={{ animation: "mwBootEnter 520ms ease-out both" }}>
-        <MemoryWikiLogo size={26} withBlob />
-      </div>
-      <div
-        style={{
-          width: 96,
-          height: 2,
-          background: "var(--border-dim)",
-          borderRadius: 1,
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            height: "100%",
-            width: "40%",
-            background: "var(--accent)",
-            borderRadius: 1,
-            animation: "mwBootBar 1.1s ease-in-out infinite",
-          }}
-        />
+        <MemoryWikiLogo size={64} variant="icon-only" />
       </div>
       <span
         className="font-mono uppercase"
@@ -56,10 +37,6 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
       </span>
 
       <style>{`
-        @keyframes mwBootBar {
-          0%   { left: -40%; }
-          100% { left: 100%; }
-        }
         @keyframes mwBootEnter {
           from { opacity: 0; transform: scale(0.92); }
           to   { opacity: 1; transform: scale(1); }
@@ -70,6 +47,25 @@ const MdEditor = dynamic(() => import("@/components/MdEditor"), {
 });
 
 export default function Home() {
+  // First-visit redirect — a brand-new visitor (no localStorage flag)
+  // gets routed to /about so the marketing surface answers "what is
+  // this?" before they see the editor. Once they've opened the editor
+  // even once, the flag flips and subsequent visits go straight to
+  // the editor. Lives in a small useEffect so the noscript fallback
+  // (and SEO crawlers reading the noscript) still see the landing
+  // markup. The flag is written by MdEditor on mount so simply
+  // landing on /about doesn't count as "used the editor".
+  if (typeof window !== "undefined") {
+    try {
+      const opened = localStorage.getItem("mw-editor-opened") === "1";
+      const here = window.location.pathname;
+      if (!opened && here === "/") {
+        window.location.replace("/about");
+        // Don't bother rendering — replace() unloads this page.
+        return null;
+      }
+    } catch { /* private mode etc. — fall through to editor */ }
+  }
   return (
     <>
       <noscript>

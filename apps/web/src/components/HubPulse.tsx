@@ -50,11 +50,11 @@ function intensityClass(count: number): string {
 // CSS variables without touching globals.css). Empty cells get a
 // near-background neutral; populated cells climb the accent scale.
 function intensityColor(count: number): string {
-  if (count === 0) return "color-mix(in srgb, var(--accent) 4%, var(--surface) 96%)";
-  if (count === 1) return "color-mix(in srgb, var(--accent) 25%, var(--surface) 75%)";
-  if (count <= 3) return "color-mix(in srgb, var(--accent) 50%, var(--surface) 50%)";
-  if (count <= 6) return "color-mix(in srgb, var(--accent) 75%, var(--surface) 25%)";
-  return "var(--accent)";
+  if (count === 0) return "color-mix(in srgb, var(--text-primary) 4%, var(--surface) 96%)";
+  if (count === 1) return "color-mix(in srgb, var(--text-primary) 25%, var(--surface) 75%)";
+  if (count <= 3) return "color-mix(in srgb, var(--text-primary) 50%, var(--surface) 50%)";
+  if (count <= 6) return "color-mix(in srgb, var(--text-primary) 75%, var(--surface) 25%)";
+  return "var(--text-primary)";
 }
 
 export default function HubPulse({ authHeaders, minDocsToShow = 3 }: Props) {
@@ -143,7 +143,7 @@ export default function HubPulse({ authHeaders, minDocsToShow = 3 }: Props) {
           <span className="text-caption" style={{ color: "var(--text-muted)" }}>
             {data.currentStreak > 0 ? (
               <>
-                <span style={{ color: "var(--accent)", fontWeight: 600 }}>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
                   {data.currentStreak}
                 </span>
                 {" "}day streak
@@ -193,7 +193,7 @@ export default function HubPulse({ authHeaders, minDocsToShow = 3 }: Props) {
             gap: 2,
             fontSize: 9,
             color: "var(--text-faint)",
-            fontFamily: "ui-monospace, monospace",
+            fontFamily: "var(--font-mono)",
             marginLeft: 18, // align with cells (skip the day-row labels gutter)
           }}
         >
@@ -209,7 +209,7 @@ export default function HubPulse({ authHeaders, minDocsToShow = 3 }: Props) {
               gridTemplateRows: "repeat(7, 1fr)",
               fontSize: 8,
               color: "var(--text-faint)",
-              fontFamily: "ui-monospace, monospace",
+              fontFamily: "var(--font-mono)",
               width: 16,
               gap: 2,
             }}

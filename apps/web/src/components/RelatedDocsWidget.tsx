@@ -142,8 +142,8 @@ export default function RelatedDocsWidget({ cloudId, isOwner, onOpenDoc }: Props
                         key={c}
                         className="text-caption font-mono px-1.5 py-0.5 rounded"
                         style={{
-                          background: "var(--accent-dim)",
-                          color: "var(--accent)",
+                          background: "var(--border)",
+                          color: "var(--text-primary)",
                           fontSize: 10,
                         }}
                       >

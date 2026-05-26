@@ -118,7 +118,7 @@ export default function VisitorAskAI({
           }}
         >
           <span className="flex items-center gap-2">
-            <Sparkles width={14} height={14} style={{ color: "var(--accent)" }} />
+            <Sparkles width={14} height={14} style={{ color: "var(--micro-ai)" }} />
             <span className="text-body font-medium" style={{ color: "var(--text-primary)" }}>
               Ask AI about this doc
             </span>
@@ -143,7 +143,7 @@ export default function VisitorAskAI({
           style={{ borderBottom: "1px solid var(--border-dim)" }}
         >
           <div className="flex items-center gap-2">
-            <Sparkles width={14} height={14} style={{ color: "var(--accent)" }} />
+            <Sparkles width={14} height={14} style={{ color: "var(--micro-ai)" }} />
             <span className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
               Ask AI
             </span>
@@ -178,7 +178,7 @@ export default function VisitorAskAI({
                     key={q}
                     onClick={() => send(q)}
                     disabled={busy}
-                    className="text-caption px-2.5 py-1 rounded-full transition-colors hover:bg-[var(--accent-dim)]"
+                    className="text-caption px-2.5 py-1 rounded-full transition-colors hover:bg-[var(--border)]"
                     style={{
                       background: "var(--toggle-bg)",
                       color: "var(--text-secondary)",
@@ -198,8 +198,8 @@ export default function VisitorAskAI({
                   <div
                     className="inline-block max-w-[80%] px-3 py-1.5 rounded-lg text-body"
                     style={{
-                      background: "var(--accent-dim)",
-                      color: "var(--accent)",
+                      background: "var(--border)",
+                      color: "var(--text-primary)",
                     }}
                   >
                     {t.text}
@@ -257,7 +257,7 @@ export default function VisitorAskAI({
             disabled={busy || !input.trim()}
             className="p-1.5 rounded transition-colors"
             style={{
-              background: input.trim() && !busy ? "var(--accent)" : "var(--toggle-bg)",
+              background: input.trim() && !busy ? "var(--text-primary)" : "var(--toggle-bg)",
               color: input.trim() && !busy ? "#000" : "var(--text-faint)",
               cursor: input.trim() && !busy ? "pointer" : "not-allowed",
             }}
@@ -285,7 +285,7 @@ export default function VisitorAskAI({
             <a
               href={`/?fork=${encodeURIComponent(docId)}`}
               className="font-medium transition-colors"
-              style={{ color: "var(--accent)" }}
+              style={{ color: "var(--text-primary)" }}
             >
               Save in Memory.Wiki →
             </a>

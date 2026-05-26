@@ -221,7 +221,7 @@ function InlineRender({ tokens, accent, accentDim, onCitationClick }: { tokens: 
                   borderRadius: 3,
                   fontSize: "0.9em",
                   wordBreak: "break-all",
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  fontFamily: "var(--font-mono)",
                 }}
               >
                 {tok.value}
@@ -345,7 +345,7 @@ export default function ChatMarkdown({ content, accent, accentDim, citationRegex
               >
                 <code
                   style={{
-                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontFamily: "var(--font-mono)",
                     fontSize: 12,
                     lineHeight: 1.5,
                     color: "var(--text-primary)",

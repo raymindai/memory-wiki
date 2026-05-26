@@ -18,7 +18,7 @@ const baseTheme = EditorView.baseTheme({
   "&": {
     height: "100%",
     fontSize: "13px",
-    fontFamily: "ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Menlo, monospace",
+    fontFamily: "var(--font-mono)",
   },
   ".cm-scroller": {
     overflow: "auto",
@@ -26,7 +26,7 @@ const baseTheme = EditorView.baseTheme({
   },
   ".cm-content": {
     padding: "12px 20px",
-    caretColor: "var(--accent)",
+    caretColor: "var(--text-primary)",
   },
   "&.cm-focused": {
     outline: "none",
@@ -38,13 +38,13 @@ const baseTheme = EditorView.baseTheme({
     backgroundColor: "transparent",
   },
   ".cm-selectionBackground": {
-    backgroundColor: "var(--accent-dim) !important",
+    backgroundColor: "var(--border) !important",
   },
   "&.cm-focused .cm-selectionBackground": {
-    backgroundColor: "var(--accent-dim) !important",
+    backgroundColor: "var(--border) !important",
   },
   ".cm-cursor, .cm-dropCursor": {
-    borderLeftColor: "var(--accent)",
+    borderLeftColor: "var(--text-primary)",
     borderLeftWidth: "2px",
   },
   ".cm-placeholder": {
@@ -58,11 +58,11 @@ const baseTheme = EditorView.baseTheme({
   },
   // Search match highlight
   ".cm-searchMatch": {
-    backgroundColor: "var(--accent-dim) !important",
-    outline: "1px solid var(--accent)",
+    backgroundColor: "var(--border) !important",
+    outline: "1px solid var(--text-primary)",
   },
   ".cm-searchMatch.cm-searchMatch-selected": {
-    backgroundColor: "var(--accent-dim) !important",
+    backgroundColor: "var(--border) !important",
   },
 });
 
@@ -77,9 +77,9 @@ const markdownHighlight = HighlightStyle.define([
   { tag: tags.strong, fontWeight: "700" },
   { tag: tags.emphasis, fontStyle: "italic" },
   { tag: tags.strikethrough, textDecoration: "line-through" },
-  { tag: tags.monospace, fontFamily: "inherit", color: "var(--accent)" },
-  { tag: tags.url, color: "var(--accent)", textDecoration: "underline" },
-  { tag: tags.link, color: "var(--accent)" },
+  { tag: tags.monospace, fontFamily: "inherit", color: "var(--text-primary)" },
+  { tag: tags.url, color: "var(--text-primary)", textDecoration: "underline" },
+  { tag: tags.link, color: "var(--text-primary)" },
   { tag: tags.meta, color: "var(--text-faint)" },
   { tag: tags.processingInstruction, color: "var(--text-faint)" }, // markdown markers like ** _ #
   { tag: tags.quote, color: "var(--text-muted)", fontStyle: "italic" },

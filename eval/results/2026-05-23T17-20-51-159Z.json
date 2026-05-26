@@ -1,0 +1,653 @@
+{
+  "bench": "MWBench v1",
+  "corpus_url": "full:https://memory.wiki/hub/raymindai/llms-full.txt | compact:https://memory.wiki/raw/hub/raymindai?digest=1&compact=1",
+  "corpus_hash": "full:394a92c6c7a1e471 | compact:c2618ca85b666cdb",
+  "corpora": {
+    "full": {
+      "url": "https://memory.wiki/hub/raymindai/llms-full.txt",
+      "chars": 315333,
+      "hash": "394a92c6c7a1e471"
+    },
+    "compact": {
+      "url": "https://memory.wiki/raw/hub/raymindai?digest=1&compact=1",
+      "chars": 12136,
+      "hash": "c2618ca85b666cdb"
+    }
+  },
+  "modes": [
+    "full",
+    "compact"
+  ],
+  "started_at": "2026-05-23T17:20:51.159Z",
+  "finished_at": "2026-05-23T17:23:01.140Z",
+  "queries": [
+    {
+      "id": "q-001",
+      "q": "What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?",
+      "expected_doc": "SKaY7VJP",
+      "expected_keywords": [
+        "cross-AI",
+        "URL",
+        "paste"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-002",
+      "q": "Why is the founder Hyunsang Cho building memory.wiki?",
+      "expected_doc": "fz45GXXj",
+      "expected_keywords": [
+        "founder",
+        "memory",
+        "AI"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-003",
+      "q": "What are mdfy's core product features as of 2026-05?",
+      "expected_doc": "bmZYfZez",
+      "expected_keywords": [
+        "mdfy",
+        "features",
+        "2026"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-004",
+      "q": "How does mdfy do RAG / retrieval?",
+      "expected_doc": "how-mdfy-rag-works",
+      "expected_keywords": [
+        "RAG",
+        "retrieval"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-005",
+      "q": "How does mdfy keep documents, bundles, and hubs fresh over time?",
+      "expected_doc": "RUMdz2fQ",
+      "expected_keywords": [
+        "fresh",
+        "update",
+        "sync"
+      ],
+      "category": "single-doc"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 317,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtHjBxqQQJCnEdKmmpJ\"}",
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 814,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's structural wedge is its **cross-AI delivery model**. \n\nGiant AI companies like OpenAI, Anthropic, and Google are structurally incentivized *not* to build memory systems that work across competitors' platforms. For instance, if OpenAI built a cross-AI memory layer, it would help users transition their context to Claude—which would be a \"competitive own-goal.\" As a result, these vendors build closed, single-AI memory silos (like ChatGPT Memory or Claude Projects) that lock users into their specific ecosystems.\n\nThis creates a structural gap that the tech giants cannot cross. Memory.Wiki exploits this gap by acting as an independent, neutral layer. It uses a universal markdown URL as an API, allowing users to capture their knowledge graph once and deploy it across *any* AI tool (ChatGPT, Claude, Cursor, Gemini, etc.). \n\nBecause no single AI company can build a cross-AI memory layer without compromising their own competitive moat, Memory.Wiki's URL-based, multi-AI compatibility becomes its ultimate structural advantage.",
+      "tokens_in": 102543,
+      "tokens_out": 217,
+      "latency_ms": 11167,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 270,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtJdeNGdh5oHg35qss4\"}",
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 212,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "Based on the provided content, the answer is not in the text. The hub content does not mention Memory.Wiki's \"wedge\" or its specific \"structural advantage over single-AI memory systems.\"",
+      "tokens_in": 3466,
+      "tokens_out": 41,
+      "latency_ms": 4938,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 590,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtK2xpJW5HBUkuGZURT\"}",
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 309,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "Based on the provided documents, Hyunsang Cho is building memory.wiki to solve the \"knowledge delivery\" problem across AI tools. \n\nCurrently, users pour their thoughts into AIs like ChatGPT, Claude, or Cursor, but lose that context when they close the tab. This forces them to constantly re-explain their context and projects to every new AI they use. While companies are building AI memory, they are creating closed silos locked within their own platforms. \n\nCho realized that tech giants like OpenAI and Anthropic are structurally incentivized *not* to build a cross-AI memory layer, as doing so would benefit their competitors. Because giants cannot build this, an independent solution is required.\n\nTo fix this, Cho is building memory.wiki as an open, universal memory protocol. His goal is to make a user's knowledge graph live as a single, portable markdown URL that any AI can fetch and read. By turning memory into a URL-based API, users can author their context once, let the system organize it, and deploy it to any AI—eliminating the \"re-explain tax\" and preventing vendor lock-in.",
+      "tokens_in": 102535,
+      "tokens_out": 233,
+      "latency_ms": 13035,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 263,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtL4SPzx86fU9M69V9B\"}",
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 432,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "Based on the provided content, the specific reasons why founder Hyunsang Cho is building memory.wiki are not detailed. While the content lists a document titled \"내가 memory.wiki를 만드는 이유\" (Why I am building memory.wiki), the actual text of that document is not included in the digest. \n\nThe provided text only explains *what* memory.wiki is: a rebranded product (formerly mdfy.app) positioned as an AI-native knowledge graph platform that serves as a memory layer for LLM services.",
+      "tokens_in": 3458,
+      "tokens_out": 108,
+      "latency_ms": 8452,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 391,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtLjiJAZ6RkzGeMhDii\"}",
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 549,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "As of May 2026, mdfy's core product features are built around its three-tier URL architecture (Doc, Bundle, and Hub) and include:\n\n*   **Editing & Rendering:** A split view featuring a Live WYSIWYG editor (Tiptap) and a raw markdown Source pane (CodeMirror 6). It supports GFM, KaTeX, Mermaid, and ASCII diagrams using a single unified renderer across all surfaces.\n*   **AI Integration:** A three-provider failover system (Anthropic, OpenAI, Gemini) powering in-doc actions (polish, shorten, translate), an AI side panel, a visitor \"Ask AI\" feature, automatic concept indexing, and pgvector embeddings for semantic search.\n*   **Real-Time Collaboration:** Yjs CRDT over Supabase Realtime supports remote cursors and live presence for up to 5 collaborators.\n*   **Permissions & Sharing:** Granular roles (owner, editor, readonly), password/sign-in gating, and permanent short URLs that never expire.\n*   **Multi-Channel Surfaces:** The platform is accessible via the Web, a VS Code extension, a Mac Desktop app, a Chrome extension, a CLI, a macOS QuickLook plugin, and an MCP server featuring 26 tools.",
+      "tokens_in": 102543,
+      "tokens_out": 269,
+      "latency_ms": 10674,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 395,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtMbEb8yj3FCMty7nbQ\"}",
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 410,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "Based on the provided content, mdfy (which has rebranded to **memory.wiki**, an AI-native knowledge graph platform) includes the following core components and features:\n\n*   **mdfy Memory:** A retrieval and storage architecture that replaces the traditional RAG (Retrieval-Augmented Generation) framing. It is powered by a core retrieval pipeline that utilizes hybrid retrieval to fetch and serve stored information.\n*   **MCP Server:** A 26-tool integration layer that allows AI agents to query, write, and search within a user's knowledge hub.\n*   **Chrome Extension:** A key capture mechanism used for importing AI responses directly into the platform. \n\n*(Note: The provided text outlines these specific technical components and mechanisms, but does not provide a traditional feature list beyond these concepts.)*",
+      "tokens_in": 3466,
+      "tokens_out": 168,
+      "latency_ms": 10614,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-004",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 488,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtNSEdYAc3bxkYvuBjZ\"}",
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-004",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 320,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-004",
+      "answer": "Based on the provided documents, mdfy frames its RAG (Retrieval-Augmented Generation) pipeline as \"mdfy Memory.\" It utilizes a chunked and hybrid retrieval approach (combining vector and BM25 search) to power semantic recall. \n\nHere is how the retrieval system works:\n\n*   **Embeddings & Storage:** mdfy generates vectors using OpenAI's `text-embedding-3-small` and stores them in a Postgres database using `pgvector`.\n*   **Multi-level Chunking:** Content is embedded at different levels. It embeds the full document (title and body) for global search, and chunks each section/paragraph for finer, more precise recall.\n*   **Efficiency:** The system uses an `embedding_source_hash` to skip re-embedding unchanged content, ensuring you don't pay for no-op updates.\n*   **AI Access:** The embeddings never go directly to the LLM. Instead, they power the `/recall` API and the `mdfy_search` MCP tool. This allows AI agents (like Claude or Cursor) to perform semantic similarity searches across your knowledge hub rather than relying on simple keyword matches. \n\nUltimately, this retrieval system finds the most relevant markdown chunks and delivers them to the AI's context window.",
+      "tokens_in": 102533,
+      "tokens_out": 272,
+      "latency_ms": 12876,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-004",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 275,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtPSbjQwX8exZZGBvQD\"}",
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-004",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 252,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-004",
+      "answer": "Based on the provided content, mdfy handles RAG and retrieval through a core technical system called the **Retrieval pipeline**. This pipeline utilizes **Hybrid retrieval**, a method that combines multiple strategies to fetch and serve stored information to users. \n\nWhile originally framed technically as RAG (Retrieval-Augmented Generation), mdfy has rebranded this retrieval and storage architecture into a product-centric abstraction known as **mdfy Memory**. Despite the rebranding to mdfy Memory, the underlying hybrid retrieval method remains unchanged.",
+      "tokens_in": 3456,
+      "tokens_out": 106,
+      "latency_ms": 7669,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-005",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 363,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtQ3oZMgQy488HF1tmU\"}",
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-005",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 752,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-005",
+      "answer": "Based on the provided content, mdfy maintains freshness across its three layers using a mix of automatic updates and manual controls to balance accuracy and AI costs:\n\n*   **Documents (Body Markdown):** Always fresh. When you save a document, the database updates immediately, and the changes propagate to AI-readable URLs within about 60 seconds. No manual action is required.\n*   **Bundles (AI Graph):** Generated once and reused. If a member document changes, the bundle's AI-generated themes and insights become \"stale.\" To avoid wasting LLM tokens and disrupting your focus during active editing, bundles do not auto-rebuild. You must click a \"Re-analyze with AI\" button to refresh them.\n*   **Hubs (Concept Index):** Automatically updates within seconds of saving a document. However, to control costs, it enforces a 30-minute cooldown per document and requires a minimum 200-character change. If the hub becomes stale during a heavy editing session, a \"Re-analyze\" banner appears. Clicking it bypasses the cooldown and efficiently re-extracts concepts only for the documents that actually changed.",
+      "tokens_in": 102538,
+      "tokens_out": 242,
+      "latency_ms": 11704,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-005",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 338,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtQzUuu77wM8eXTPomg\"}",
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-005",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 226,
+      "error": "HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-005",
+      "answer": "Based on the provided content, there is no information explaining how mdfy keeps documents, bundles, and hubs fresh over time. The text only mentions \"Document, Bundle, Hub\" as a document title under the Knowledge Management section, but does not detail the mechanisms for maintaining or updating them.",
+      "tokens_in": 3461,
+      "tokens_out": 59,
+      "latency_ms": 6530,
+      "error": null,
+      "mode": "compact"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtHjBxqQQJCnEdKmmpJ\"}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies the cross-AI delivery model as the structural wedge, mentions the URL-based mechanism, and explains why single-AI vendors cannot replicate it, matching the expected keywords 'cross-AI' and 'URL'.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtJdeNGdh5oHg35qss4\"}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot find the information and provides no relevant content about Memory.Wiki's wedge or structural advantage, failing to address the question at all.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtK2xpJW5HBUkuGZURT\"}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer accurately describes Cho's motivation for building memory.wiki, covering the core concepts of founder, memory, and AI, including the cross-AI memory problem, closed silos, and the open universal memory protocol solution.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtL4SPzx86fU9M69V9B\"}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot provide the reasons why Hyunsang Cho is building memory.wiki, failing to address the question with content from the expected document.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtLjiJAZ6RkzGeMhDii\"}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer accurately describes mdfy's core product features as of 2026-05, covering the three-tier URL architecture, editing/rendering, AI integration, real-time collaboration, permissions, and multi-channel surfaces, all consistent with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtMbEb8yj3FCMty7nbQ\"}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies mdfy's core product features (Memory, MCP Server, Chrome Extension) that align with what the expected document at memory.wiki/bmZYfZez would contain, and includes the expected keywords mdfy and features.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtNSEdYAc3bxkYvuBjZ\"}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer directly addresses how mdfy does RAG/retrieval, covering hybrid retrieval, chunking, embeddings, and the recall API, all consistent with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtPSbjQwX8exZZGBvQD\"}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer introduces specific claims about 'Hybrid retrieval' and 'mdfy Memory' rebranding that appear to be hallucinated details not verifiable from the expected document reference.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtQ3oZMgQy488HF1tmU\"}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly addresses freshness, updates, and sync mechanisms for all three layers (documents, bundles, hubs) using the key concepts expected from the source document.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CbKtQzUuu77wM8eXTPomg\"}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "runner error: HTTP 400: {\n  \"error\": {\n    \"message\": \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"max_tokens\",\n    \"code\": \"unsupported_parameter\"\n  }\n}",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot find the relevant information and provides no content matching the expected keywords (fresh, update, sync) from the expected document.",
+      "mode": "compact"
+    }
+  ]
+}

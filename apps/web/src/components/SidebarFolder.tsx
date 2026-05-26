@@ -300,7 +300,7 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
         if (ids.length > 1) {
           try {
             const ghost = document.createElement("div");
-            ghost.style.cssText = "position:absolute;top:-9999px;left:-9999px;padding:6px 10px;border-radius:6px;font:600 12px system-ui;background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.4);";
+            ghost.style.cssText = "position:absolute;top:-9999px;left:-9999px;padding:6px 10px;border-radius:6px;font:600 12px system-ui;background:var(--text-primary);color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.4);";
             ghost.textContent = `${ids.length} documents`;
             document.body.appendChild(ghost);
             e.dataTransfer.setDragImage(ghost, 10, 10);
@@ -347,24 +347,24 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
       //      can scan which docs belong to the active bundle without
       //      mistaking them for the focused doc.
       //  - isMultiSelected: 1px outline.
-      className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer group/tab text-xs transition-colors relative ${p.isActive ? "bg-[var(--accent-dim)]" : (p.isSelected && !p.isMultiSelected ? "" : "hover:bg-[var(--toggle-bg)]")}`}
+      className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer group/tab text-xs transition-colors relative ${p.isActive ? "bg-[var(--border)]" : (p.isSelected && !p.isMultiSelected ? "" : "hover:bg-[var(--toggle-bg)]")}`}
       style={{
         paddingLeft: p.paddingLeft,
         paddingRight: p.paddingRight,
         color: p.isActive ? "var(--text-primary)" : "var(--text-secondary)",
         opacity: 1,
-        outline: p.isMultiSelected ? "1px solid var(--accent)" : "none",
+        outline: p.isMultiSelected ? "1px solid var(--text-primary)" : "none",
         outlineOffset: "-1px",
-        background: !p.isActive && p.isSelected && !p.isMultiSelected ? "color-mix(in srgb, var(--accent-dim) 40%, transparent)" : undefined,
+        background: !p.isActive && p.isSelected && !p.isMultiSelected ? "color-mix(in srgb, var(--border) 40%, transparent)" : undefined,
       }}
       onClick={p.onClick}
       onContextMenu={p.onContextMenu}
     >
       {zone === "above" && (
-        <div aria-hidden className="absolute left-1 right-1 -top-px h-0.5 rounded" style={{ background: "var(--accent)" }} />
+        <div aria-hidden className="absolute left-1 right-1 -top-px h-0.5 rounded" style={{ background: "var(--text-primary)" }} />
       )}
       {zone === "below" && (
-        <div aria-hidden className="absolute left-1 right-1 -bottom-px h-0.5 rounded" style={{ background: "var(--accent)" }} />
+        <div aria-hidden className="absolute left-1 right-1 -bottom-px h-0.5 rounded" style={{ background: "var(--text-primary)" }} />
       )}
       {p.indentGuideLeft !== undefined && (
         <div aria-hidden className="absolute top-0 bottom-0" style={{ left: p.indentGuideLeft, width: 1, background: "var(--border-dim)" }} />
@@ -376,7 +376,7 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
       {p.tab.unread && (
         <span aria-label="New" title="New — not yet opened"
           className="sidebar-unread-dot shrink-0 rounded-full"
-          style={{ width: 6, height: 6, background: "var(--accent)" }} />
+          style={{ width: 6, height: 6, background: "var(--text-primary)" }} />
       )}
       {p.renderTabIcon(p.tab, p.isActive)}
       <div className="truncate flex-1 min-w-0">
@@ -502,13 +502,13 @@ function FolderNode(props: FolderNodeProps) {
           requestAnimationFrame(() => setDragFolderId(null));
           setDropZone(null);
         }}
-        className={`flex items-center gap-1 py-1 rounded-md cursor-pointer text-xs font-medium transition-colors group/folder relative ${dropZone === "into" && !wouldCreateCycle ? "bg-[var(--accent-dim)]" : "hover:bg-[var(--toggle-bg)]"}`}
+        className={`flex items-center gap-1 py-1 rounded-md cursor-pointer text-xs font-medium transition-colors group/folder relative ${dropZone === "into" && !wouldCreateCycle ? "bg-[var(--border)]" : "hover:bg-[var(--toggle-bg)]"}`}
         style={{
           paddingLeft: indentLeft + 2,
           paddingRight: 6,
-          color: folderHasBundleDoc ? "var(--accent)" : "var(--text-muted)",
+          color: folderHasBundleDoc ? "var(--text-primary)" : "var(--text-muted)",
           opacity: 1,
-          outline: dropZone === "into" && !wouldCreateCycle ? "1px solid var(--accent)" : "none",
+          outline: dropZone === "into" && !wouldCreateCycle ? "1px solid var(--text-primary)" : "none",
         }}
         onClick={() => handlers.onToggleCollapsed(folder.id)}
         onDoubleClick={(e) => { e.stopPropagation(); handlers.onRename(folder.id, folder.name); }}
@@ -556,10 +556,10 @@ function FolderNode(props: FolderNodeProps) {
       >
         {/* Drop indicator lines */}
         {dropZone === "above" && (
-          <div aria-hidden className="absolute left-1 right-1 -top-px h-0.5 rounded" style={{ background: "var(--accent)" }} />
+          <div aria-hidden className="absolute left-1 right-1 -top-px h-0.5 rounded" style={{ background: "var(--text-primary)" }} />
         )}
         {dropZone === "below" && (
-          <div aria-hidden className="absolute left-1 right-1 -bottom-px h-0.5 rounded" style={{ background: "var(--accent)" }} />
+          <div aria-hidden className="absolute left-1 right-1 -bottom-px h-0.5 rounded" style={{ background: "var(--text-primary)" }} />
         )}
         {/* Indent guide */}
         {depth > 0 && (
@@ -830,9 +830,9 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
         <div
           className="mx-1 mt-2 mb-1 px-3 py-2 rounded-md text-caption text-center select-none"
           style={{
-            border: `1px dashed ${rootHover ? "var(--accent)" : "var(--border)"}`,
-            color: rootHover ? "var(--accent)" : "var(--text-faint)",
-            background: rootHover ? "var(--accent-dim)" : "transparent",
+            border: `1px dashed ${rootHover ? "var(--text-primary)" : "var(--border)"}`,
+            color: rootHover ? "var(--text-primary)" : "var(--text-faint)",
+            background: rootHover ? "var(--border)" : "transparent",
             transition: "background 0.1s, color 0.1s, border-color 0.1s",
           }}
           onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; if (!rootHover) setRootHover(true); }}

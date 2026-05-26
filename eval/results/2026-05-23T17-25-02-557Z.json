@@ -1,0 +1,653 @@
+{
+  "bench": "MWBench v1",
+  "corpus_url": "full:https://memory.wiki/hub/raymindai/llms-full.txt | compact:https://memory.wiki/raw/hub/raymindai?digest=1&compact=1",
+  "corpus_hash": "full:394a92c6c7a1e471 | compact:c2618ca85b666cdb",
+  "corpora": {
+    "full": {
+      "url": "https://memory.wiki/hub/raymindai/llms-full.txt",
+      "chars": 315333,
+      "hash": "394a92c6c7a1e471"
+    },
+    "compact": {
+      "url": "https://memory.wiki/raw/hub/raymindai?digest=1&compact=1",
+      "chars": 12136,
+      "hash": "c2618ca85b666cdb"
+    }
+  },
+  "modes": [
+    "full",
+    "compact"
+  ],
+  "started_at": "2026-05-23T17:25:02.557Z",
+  "finished_at": "2026-05-23T17:30:15.978Z",
+  "queries": [
+    {
+      "id": "q-001",
+      "q": "What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?",
+      "expected_doc": "SKaY7VJP",
+      "expected_keywords": [
+        "cross-AI",
+        "URL",
+        "paste"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-002",
+      "q": "Why is the founder Hyunsang Cho building memory.wiki?",
+      "expected_doc": "fz45GXXj",
+      "expected_keywords": [
+        "founder",
+        "memory",
+        "AI"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-003",
+      "q": "What are mdfy's core product features as of 2026-05?",
+      "expected_doc": "bmZYfZez",
+      "expected_keywords": [
+        "mdfy",
+        "features",
+        "2026"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-004",
+      "q": "How does mdfy do RAG / retrieval?",
+      "expected_doc": "how-mdfy-rag-works",
+      "expected_keywords": [
+        "RAG",
+        "retrieval"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-005",
+      "q": "How does mdfy keep documents, bundles, and hubs fresh over time?",
+      "expected_doc": "RUMdz2fQ",
+      "expected_keywords": [
+        "fresh",
+        "update",
+        "sync"
+      ],
+      "category": "single-doc"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's structural wedge is **cross-AI memory** — a layer that giants (OpenAI, Anthropic, Google) cannot build because of their own competitive incentives.\n\n## The core argument\n\n> \"Any single AI company is structurally incentivized *not* to build this themselves.\"\n\n- OpenAI won't ship memory that's fetchable by Anthropic\n- Anthropic won't ship memory that serves ChatGPT\n- A vendor building cross-AI memory would mean shipping a feature that helps competitors — a competitive own-goal\n\nSo the cross-AI layer can only be built by a neutral independent. That's the gap Memory.Wiki occupies.\n\n## Why this matters\n\nToday's AI users live across 5+ tools (Claude, ChatGPT, Gemini, Cursor, MCP hosts). Each has isolated memory islands. Every tool switch = re-explaining context.\n\nMemory.Wiki's answer: **one URL any AI can fetch**. Knowledge lives outside any single vendor's walls, as markdown over HTTPS — the simplest universal interface.\n\n## Internal vs external framing\n\n- **Internal thesis**: \"Cross-AI is structurally impossible for giants. The graph is the product.\"\n- **External thesis** (user-facing): \"Stop re-explaining your context to every AI.\"\n\nThe wedge is positioning, not headcount — which is why a solo founder can build it in months while giants structurally cannot.",
+      "tokens_in": 163552,
+      "tokens_out": 477,
+      "latency_ms": 11606,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki’s wedge is **cross-AI context portability**.\n\nSingle-AI memory systems — ChatGPT Memory, Claude Projects, Gemini saved context, etc. — are locked inside one vendor. ChatGPT’s memory helps ChatGPT, but not Claude or Cursor. Claude’s memory helps Claude, but not ChatGPT.\n\nMemory.Wiki sits outside those silos:\n\n> **One URL every AI can read.**\n\nIts structural advantage is that OpenAI, Anthropic, Google, and similar vendors are not incentivized to build a neutral memory layer that also helps their competitors. OpenAI will not build memory optimized for Claude; Anthropic will not build memory optimized for ChatGPT. That makes **cross-AI memory structurally hard for giants to ship**, but natural for an independent layer.\n\nMemory.Wiki turns user-authored knowledge into markdown URLs — doc, bundle, or user/hub — that any AI can fetch. The AI receives organized context, not just raw notes.\n\nSo the wedge is:\n\n> **Your context lives outside any one AI, as a URL, portable across ChatGPT, Claude, Cursor, Gemini, and future tools.**\n\nInternally: “The graph is the product.”  \nExternally: “Stop re-explaining your context to every AI.”",
+      "tokens_in": 97709,
+      "tokens_out": 299,
+      "latency_ms": 7397,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's structural wedge is its **cross-AI delivery layer**. \n\nWhile giant AI companies like OpenAI, Anthropic, and Google are building their own memory systems (e.g., ChatGPT Memory, Claude Projects), these are closed systems locked to their specific platforms. \n\nMemory.Wiki's structural advantage is that these tech giants are structurally incentivized *not* to build a cross-AI memory layer. For example, if OpenAI created a memory system that seamlessly delivered context to Claude, it would be helping a direct competitor—a \"competitive own-goal.\" Because AI giants cannot build a memory layer that serves their competitors without undermining their own ecosystems, this cross-AI layer must come from an independent, neutral third party. \n\nBy using a universal markdown URL that any AI (ChatGPT, Claude, Cursor, Gemini) can fetch and read, Memory.Wiki fills this gap. This cross-AI portability allows users to stop re-explaining their context to every new tool, creating a structural moat that single-AI vendors cannot replicate.",
+      "tokens_in": 102543,
+      "tokens_out": 215,
+      "latency_ms": 10689,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "Based on the provided hub content, I cannot find a specific answer to this question. The digest describes memory.wiki as \"an AI-native knowledge graph platform serving as a memory layer for LLM services\" (rebranded from mdfy.app), and mentions related concepts like the MCP server (26-tool integration layer), Chrome Extension for capturing AI responses, and the retrieval pipeline using hybrid retrieval.\n\nHowever, the hub digest does not explicitly articulate Memory.Wiki's \"wedge\" or structural advantage over single-AI memory systems. To find that answer, you would need to fetch the underlying documents directly, such as:\n\n- [내가 memory.wiki를 만드는 이유](https://memory.wiki/fz45GXXj) (Why I'm building memory.wiki)\n- [memory.wiki 사업계획 v7 (FINAL)](https://memory.wiki/xv6A2DKS) (Business plan)\n- [First-principles check: are we drifting?](https://memory.wiki/dEgO6Qml)\n\nThese likely contain the positioning details you're asking about, but the digest itself doesn't surface that specific framing.",
+      "tokens_in": 5273,
+      "tokens_out": 383,
+      "latency_ms": 6930,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki’s wedge is that it acts as an **AI-native knowledge graph / memory layer across LLM services**, rather than memory trapped inside one AI product.\n\nIts structural advantage over single-AI memory systems is:\n\n- **Cross-tool continuity**: knowledge can move between tools like Cursor and Claude instead of staying siloed.\n- **Shared memory layer**: users can query, write, and search a personal knowledge hub through integrations such as the MCP server.\n- **Product-level framing beyond RAG**: it reframes retrieval/storage as “memory,” centered on reusable personal or organizational knowledge.\n- **Knowledge graph architecture**: Memory.Wiki is positioned as a persistent hub for AI-readable context, not just chat history inside one model.\n\nSo the wedge is: **portable, tool-agnostic AI memory that survives across agents, apps, and workflows.**",
+      "tokens_in": 3228,
+      "tokens_out": 269,
+      "latency_ms": 4826,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "Based on the provided content, the answer is not available. The text does not mention Memory.Wiki's \"wedge\" or its specific structural advantage over single-AI memory systems.",
+      "tokens_in": 3466,
+      "tokens_out": 37,
+      "latency_ms": 6457,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "Based on the hub content, Hyunsang Cho is building memory.wiki for several interconnected reasons:\n\n**The core problem he saw:** Every day people pour valuable thinking into ChatGPT, Claude, Gemini, and Cursor — then close the tab and lose it. The next day they re-explain who they are, what they're working on, what they already decided. He calls this \"the most expensive forgetting machine.\"\n\n**The key insight (from his Humain experience):** While leading product at Saudi Arabia's national AI program, he saw that the real question isn't \"is our model good enough?\" but \"what layer can we own that big labs don't?\" He identified that cross-AI memory is structurally impossible for OpenAI or Anthropic to build — they can't ship a memory layer serving their competitors. So it has to come from outside.\n\n**His thesis:** The answer is a URL. Knowledge as a markdown URL any AI can fetch. Layer 3 (memory protocol) sits empty between models and applications — neither model companies nor app companies can fill it without conflicts. A neutral startup must define this standard, similar to how RSS, OAuth, and Open Graph emerged.\n\n**Personal motivation:** He wanted his AI tools to share his knowledge across ChatGPT, Claude, and Cursor. Every existing solution was a closed memory.\n\n**The vision:** A sustainable craftsman SaaS — \"Stop re-explaining your context to every AI. Put your knowledge in one URL they can all read.\" Target: $2-5M ARR in 5 years, 1k-10k users who genuinely love the product.",
+      "tokens_in": 163542,
+      "tokens_out": 522,
+      "latency_ms": 12203,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "Hyunsang Cho is building Memory.Wiki because he believes the real problem is not “AI memory,” but **knowledge delivery**.\n\nPeople pour useful context, decisions, code, and strategy into ChatGPT, Claude, Gemini, and Cursor, then lose functional access to it. The next day they must re-explain who they are, what they’re working on, and what they already decided.\n\nExisting memory systems are closed: ChatGPT Memory helps ChatGPT, Claude Projects help Claude, Notion stays inside Notion, local files stay local. Hyunsang’s thesis is that knowledge should live as a **URL any AI can read**.\n\nSo Memory.Wiki turns user-authored knowledge into markdown URLs:\n\n- one doc: `memory.wiki/<id>`\n- one bundle: `memory.wiki/b/<id>`\n- one identity/context hub: `memory.wiki/@<username>`\n\nHis deeper bet is that **cross-AI memory is structurally hard for giants to build**, because OpenAI will not build memory for Claude, and Anthropic will not build memory for ChatGPT.\n\nExternally, the user-facing reason is simple:\n\n> Stop re-explaining your context to every AI.\n\nInternally, he sees Memory.Wiki as the cross-AI capture/context layer built by Raymind.AI.",
+      "tokens_in": 97702,
+      "tokens_out": 336,
+      "latency_ms": 7044,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "Hyunsang Cho is building memory.wiki to solve a fundamental \"knowledge delivery\" problem in the AI era. Currently, users pour valuable context and insights into AI tools like ChatGPT or Claude, but that knowledge is functionally lost when the tab closes, forcing them to constantly re-explain themselves. \n\nWhile major tech giants are building closed, platform-specific memory silos (like ChatGPT Memory or Google Memory Bank), Cho recognized that users need an open, cross-AI memory layer. He is building memory.wiki so that a user's knowledge can live as a universally readable Markdown URL. By pasting this single URL into any AI, the AI instantly understands the user's context and the relationships between their documents.\n\nCho believes there is a narrow window to establish an open memory protocol before closed systems dominate. Because major AI companies are structurally incentivized *not* to build cross-AI memory (as it would benefit their competitors), Cho saw the opportunity for an independent founder to build this essential, neutral infrastructure. His goal is to make Markdown URLs the universal interface for AI memory.",
+      "tokens_in": 102535,
+      "tokens_out": 218,
+      "latency_ms": 10222,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "Based on the hub content, the specific reasons Hyunsang Cho is building memory.wiki aren't fully detailed in this digest. However, I can share what's available:\n\nThe hub indicates memory.wiki is positioned as **\"an AI-native knowledge graph platform serving as a memory layer for LLM services.\"** It evolved from a previous product called Mdfy (formerly mdfy.app / mdfy.cc).\n\nThere is a document titled **\"내가 memory.wiki를 만드는 이유\"** (\"Why I'm building memory.wiki\") that would directly answer your question, but its contents aren't included in this digest. You can access it at: https://memory.wiki/fz45GXXj\n\nFrom related concepts, the platform appears to address:\n- **Knowledge Management** across AI tools\n- Cross-tool handoff (e.g., Cursor ↔ Claude)\n- Onboarding new Claude Code sessions with personal context\n- Sharing AI conversations like Notion links\n- Building a \"personal LLM wiki\" (à la Karpathy) without manual curation\n- An **MCP server** with 26 tools for agents to query/write to a user's knowledge hub\n\nFor the founder's full motivation, fetch the linked document directly.",
+      "tokens_in": 5263,
+      "tokens_out": 403,
+      "latency_ms": 8175,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "The provided hub digest does not include Hyunsang Cho’s detailed personal motivation.\n\nWhat it does say is that he is building **memory.wiki** as an **AI-native knowledge graph platform** that serves as a **memory layer for LLM services**. It evolved from **Mdfy**, a previous product focused on knowledge management, retrieval, and AI conversation/document memory.\n\nSo, based only on the provided content: Hyunsang Cho is building memory.wiki to help organize, retrieve, and persist knowledge for AI tools and LLM-based services, turning user information into a usable memory layer.",
+      "tokens_in": 3221,
+      "tokens_out": 280,
+      "latency_ms": 5264,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "Based on the provided content, the specific personal reasons why founder Hyunsang Cho is building memory.wiki are not detailed. The text lists a document titled \"내가 memory.wiki를 만드는 이유\" (Why I am building memory.wiki), but its actual contents are not included in the hub digest. \n\nHowever, the provided text does explain the overarching purpose of the product: memory.wiki is being built to serve as an AI-native knowledge graph platform that acts as a \"memory layer for LLM services.\" Evolving from a previous product called Mdfy, it aims to facilitate knowledge management by using tools like an MCP server—a 26-tool integration layer that allows AI agents to query, write, and search within a user's knowledge hub.",
+      "tokens_in": 3458,
+      "tokens_out": 157,
+      "latency_ms": 8281,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "Based on the Memory.Wiki content (specifically the \"mdfy — Product, Features, Technology (2026-05)\" document), mdfy's core product features are:\n\n**Editing & rendering**\n- Tiptap (ProseMirror) Live tab — WYSIWYG editor\n- CodeMirror 6 Source tab — raw markdown\n- Split view (Source ↔ Preview)\n- GFM tables, task lists, footnotes, KaTeX, Mermaid, code highlighting, ASCII diagrams\n\n**AI integration**\n- Three-provider failover (Anthropic → OpenAI → Gemini)\n- In-doc actions: polish / shorten / expand / translate\n- AI side panel (chat about doc/bundle/hub)\n- Visitor \"Ask AI about this doc\"\n- Concept index (ontology extraction)\n- Per-doc + per-chunk pgvector embeddings for semantic search via MCP\n\n**Real-time collaboration**\n- Yjs CRDT over Supabase Realtime\n- Remote cursor presence (Source and Live panes)\n- Up to 5 collaborator avatars with overflow chip\n\n**Permissions & sharing**\n- Three roles: owner/editor/readonly\n- Edit modes: owner/account/token/view/public\n- Short URLs (nanoid), per-user Hub slug\n- Permanent URLs (never expire)\n- \"Published with mdfy.app\" badge on public viewer\n\n**URL architecture (three tiers)**\n- Doc: `mdfy.app/<id>`\n- Bundle: `mdfy.app/b/<id>` (with AI-extracted graph)\n- Hub: `mdfy.app/hub/<slug>` (cross-bundle concept ontology)\n\n**Multi-channel surfaces**\n- Web (mdfy.app), VS Code extension, Desktop DMG, Chrome extension, CLI, MCP server, macOS QuickLook plugin\n\n**Misc UX**\n- Dark/light themes, drag-and-drop import, GitHub repo import, paste-as-markdown, JSON data export, visit log",
+      "tokens_in": 163537,
+      "tokens_out": 701,
+      "latency_ms": 10612,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "As of 2026-05, mdfy’s core product features are:\n\n- **Markdown-to-URL publishing**: turns typed, pasted, AI-generated, or imported markdown into clean public URLs readable by humans and LLMs.\n- **Three URL scopes**:\n  - Doc: `mdfy.app/<id>`\n  - Bundle: `mdfy.app/b/<id>`\n  - Hub: `mdfy.app/hub/<slug>`\n- **LLM-ready raw payloads**: `/raw/...` endpoints return plain markdown for AI tools and scrapers.\n- **Editor + renderer**: Tiptap WYSIWYG, CodeMirror source editor, split view, shared markdown-it renderer, GFM, KaTeX, Mermaid, code highlighting, footnotes, ASCII diagrams.\n- **AI integration**: Anthropic/OpenAI/Gemini failover, in-doc AI actions, AI side panel, visitor “Ask AI,” concept extraction, embeddings, semantic search.\n- **Bundles + graph**: ordered doc sets with AI-extracted themes, insights, edges, and concept graphs.\n- **Hub concept index**: user-level ontology and cross-bundle graph.\n- **Real-time collaboration**: Yjs over Supabase Realtime, remote cursors, presence avatars.\n- **Permissions**: owner/editor/readonly roles, edit modes, restricted docs.\n- **Multi-surface apps**: web, Chrome extension, VS Code extension, desktop app, CLI, MCP server, QuickLook.\n- **Imports/export**: drag-drop, paste, GitHub import, JSON export.",
+      "tokens_in": 97705,
+      "tokens_out": 372,
+      "latency_ms": 5981,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "As of May 2026, mdfy's core product features include:\n\n*   **URL Architecture (3 Tiers):** \n    *   *Doc:* A single markdown document.\n    *   *Bundle:* An ordered set of docs with an AI-extracted graph (themes, edges).\n    *   *Hub:* A user's entire bundle library and cross-bundle concept ontology.\n*   **Editing & Rendering:** Live WYSIWYG editing (Tiptap) and raw markdown editing (CodeMirror 6) with a split view. It supports GFM, KaTeX, Mermaid, and ASCII diagrams.\n*   **AI Integration:** 3-provider failover (Anthropic, OpenAI, Gemini), in-doc actions (polish, shorten, translate), an AI side panel, visitor \"Ask AI,\" concept indexing, and pgvector embeddings for semantic search.\n*   **Real-Time Collaboration:** Yjs CRDT over Supabase Realtime, featuring remote cursors and live presence avatars for up to 5 collaborators.\n*   **Permissions & Sharing:** Owner, editor, and readonly roles, password protection, and permanent, non-expiring short URLs.\n*   **Multi-Channel Surfaces:** Accessible via the web app (mdfy.app), Chrome extension, VS Code extension, Desktop app (macOS/Windows), CLI, macOS QuickLook, and an MCP server featuring 26 tools.",
+      "tokens_in": 102543,
+      "tokens_out": 304,
+      "latency_ms": 10954,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "Based on the hub content provided, I can identify some product features associated with mdfy/memory.wiki, but the digest doesn't give a comprehensive \"core features\" breakdown as of 2026-05. Here's what's mentioned:\n\n- **mdfy Memory** — the retrieval and storage architecture (reframed from RAG), powered by a **Retrieval pipeline** using **Hybrid retrieval**.\n- **MCP server** — a 26-tool integration layer allowing agents to query, write, and search within a user's knowledge hub.\n- **Chrome Extension** — key capture mechanism for importing AI responses into memory.wiki.\n- **Knowledge graph platform** — memory.wiki is positioned as an AI-native knowledge graph serving as a memory layer for LLM services.\n- **Three primitives** — Document, Bundle, Hub (referenced in linked docs).\n- **QuickLook** — referenced via a Quick Start doc.\n\nFor detailed, current feature specifications, you'd need to fetch the underlying documents such as the [memory.wiki Product Specification](https://memory.wiki/Tk71NDw0) or [memory.wiki 사업계획 v7 (FINAL)](https://memory.wiki/xv6A2DKS). The hub digest itself doesn't enumerate a definitive feature list dated to 2026-05.",
+      "tokens_in": 5258,
+      "tokens_out": 451,
+      "latency_ms": 8022,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "As of 2026-05, the provided hub content describes mdfy / memory.wiki’s core product features as:\n\n- **AI-native knowledge graph / memory layer**: memory.wiki is the rebranded product from mdfy, positioned as a memory layer for LLM services.\n- **mdfy Memory**: the main product abstraction replacing “RAG” as the user-facing framing for mdfy’s retrieval and storage architecture.\n- **Retrieval pipeline**: the technical system that fetches and serves stored information to users.\n- **Hybrid retrieval**: the retrieval method used inside the retrieval pipeline.\n- **Knowledge management primitives**: documents, bundles, and hubs are referenced as core organizational concepts.\n- **Chrome Extension capture**: a key mechanism for importing AI responses into memory.wiki.\n- **MCP server**: a 26-tool integration layer allowing agents to query, write, and search within a user’s knowledge hub.\n- **AI conversation sharing**: sharing AI conversations “like a Notion link.”\n- **Cross-tool AI handoff**: keeping tools like Cursor and Claude “on the same page.”\n- **Session onboarding / personal context**: onboarding new Claude Code sessions with personal context.\n- **Personal LLM wiki**: creating an LLM-oriented wiki without manual hand-curation.\n\nThe digest does not provide a complete feature list beyond these concepts.",
+      "tokens_in": 3224,
+      "tokens_out": 544,
+      "latency_ms": 8690,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "Based on the provided document, mdfy (which has rebranded to memory.wiki) includes the following core product and technical components:\n\n*   **mdfy Memory (Retrieval Pipeline):** The primary product abstraction for mdfy's retrieval and storage architecture. It replaces the traditional \"RAG\" framing and uses hybrid retrieval to fetch and serve stored information to users.\n*   **Chrome Extension:** A key capture mechanism designed for importing AI responses directly into the knowledge base.\n*   **MCP Server:** A 26-tool integration layer that allows AI agents to query, write, and search within a user's knowledge hub. \n\n*(Note: The document notes that mdfy is the previous brand name, and the product has evolved into memory.wiki, an AI-native knowledge graph platform.)*",
+      "tokens_in": 3466,
+      "tokens_out": 171,
+      "latency_ms": 10216,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-004",
+      "answer": "Based on the hub content, the document \"How mdfy does RAG → mdfy Memory\" indicates the retrieval pipeline has been reframed and moved:\n\n> \"This page has moved. The retrieval pipeline is now framed around the product (memory) rather than the technique (RAG)... Same architecture, friendlier framing. The HTTP endpoint, the chunked + hybrid retrieval, the idempotent embeddings — all the same. Just under a more honest name.\"\n\nSo mdfy's retrieval uses **chunked + hybrid retrieval with idempotent embeddings** via an HTTP endpoint, now called \"mdfy Memory.\"\n\nAdditional details from other docs:\n- **Embeddings**: OpenAI text-embedding-3-small for doc + chunk vectors, stored in pgvector\n- **Chunking**: Heading-aware chunking (`lib/chunk-doc.ts`) for RAG retrieval\n- **Storage**: Per-doc, per-chunk, per-bundle embeddings in pgvector (`documents.embedding`, `bundles.embedding`, `document_chunks.embedding`)\n- **Access**: Embeddings power `mdfy_search` (semantic similarity) via the MCP server — they don't go directly to the LLM\n- **Hybrid retrieval**: vector + BM25 hybrid, paragraph-level chunks, exposed via `/recall` API\n\nThe full detailed retrieval architecture would be in the linked \"mdfy Memory\" page, which wasn't included in the provided hub content.",
+      "tokens_in": 163535,
+      "tokens_out": 510,
+      "latency_ms": 8844,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-004",
+      "answer": "mdfy’s retrieval is built around its memory graph, not just “RAG UI.”\n\nCore pieces:\n\n- **Markdown is source of truth** in `documents.markdown`.\n- On document save, mdfy creates embeddings for:\n  - the whole document\n  - heading-aware document chunks\n  - bundles\n- Embeddings live in Postgres/pgvector:\n  - `documents.embedding`\n  - `bundles.embedding`\n  - `document_chunks.embedding`\n- Re-embedding is skipped when content has not changed via `embedding_source_hash`.\n\nRetrieval happens mainly through MCP tools such as `mdfy_search` / memory search:\n\n- The AI queries your library by meaning, not just keywords.\n- Search uses vector similarity over docs/chunks/bundles.\n- Some docs describe this as vector + BM25 hybrid recall with paragraph-level chunks.\n\nFor AI consumption, mdfy often avoids raw retrieval entirely: Doc, Bundle, and Hub URLs return pre-organized markdown. Bundle and Hub payloads include AI-generated summaries, concepts, relations, and links, so the receiving AI gets a navigable context map instead of random chunks.\n\nSo: embeddings power semantic recall, while URLs deliver the organized graph as context.",
+      "tokens_in": 97700,
+      "tokens_out": 350,
+      "latency_ms": 6921,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-004",
+      "answer": "Based on the provided content, mdfy frames its RAG (Retrieval-Augmented Generation) pipeline as \"mdfy Memory.\" It utilizes a chunked and hybrid retrieval approach (combining vector similarity and BM25) to power semantic search. \n\nHere is how the retrieval process works:\n\n*   **Embedding & Chunking:** When a document is saved, the `/api/embed/<id>` pipeline automatically embeds the title and full markdown body for global search. It also breaks the document down, chunking each section (or paragraph) individually for finer recall.\n*   **Storage:** The vectors are stored using `pgvector` across specific database tables (`documents.embedding`, `bundles.embedding`, and `document_chunks.embedding`). To optimize costs, an `embedding_source_hash` ensures unchanged content isn't re-embedded.\n*   **Retrieval:** AI models access this data via the `/recall` API or the `mdfy_search` tool within mdfy's MCP server. This allows the AI to perform true semantic recall (e.g., \"which docs cover X?\") based on vector similarity and meaning, rather than relying solely on exact keyword matches.",
+      "tokens_in": 102533,
+      "tokens_out": 251,
+      "latency_ms": 11675,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-004",
+      "answer": "Based on the hub content, here's what's available about mdfy's RAG/retrieval approach:\n\n**mdfy Memory** is the product abstraction that replaces RAG as the primary framing for mdfy's retrieval and storage architecture. It's a rebranding/reframing of the original RAG concept toward more product-centric messaging.\n\n**Retrieval pipeline** is the core technical system mdfy uses to fetch and serve stored information to users. It powers mdfy Memory.\n\n**Hybrid retrieval** is the actual retrieval method — it combines multiple strategies and is a component of the retrieval pipeline. Notably, hybrid retrieval remains unchanged in the reframed architecture (the change was primarily in branding/framing, not the underlying technique).\n\n**Summary of the architecture:**\n- mdfy Memory (product layer) → implements → Retrieval pipeline (technical system) → uses → Hybrid retrieval (method)\n- RAG → reframed as → mdfy Memory\n\nFor full technical details, the supporting document is [\"How mdfy does RAG → mdfy Memory\"](https://memory.wiki/how-mdfy-rag-works). The hub digest doesn't specify which strategies are combined in the hybrid approach — you'd need to fetch that document for specifics.",
+      "tokens_in": 5256,
+      "tokens_out": 428,
+      "latency_ms": 7166,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-004",
+      "answer": "mdfy’s RAG is framed as **mdfy Memory**.\n\nAccording to the hub, mdfy uses a **retrieval pipeline** as the core technical system for fetching and serving stored information to users. This pipeline powers mdfy Memory and uses **hybrid retrieval**, combining multiple retrieval strategies.\n\nThe product direction is to move away from describing this as “RAG” and instead present it as **mdfy Memory**: a product abstraction for storing and retrieving user knowledge as a memory layer.\n\nIn short:\n\n- **RAG** was the original technical framing.\n- It is being **rebranded/reframed as mdfy Memory**.\n- **mdfy Memory** is implemented through a **retrieval pipeline**.\n- The retrieval pipeline uses **hybrid retrieval**.\n- The system fetches and serves stored information to users.\n\nThe hub digest does not provide more detailed implementation specifics beyond this.",
+      "tokens_in": 3219,
+      "tokens_out": 269,
+      "latency_ms": 4330,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-004",
+      "answer": "Based on the provided content, mdfy handles RAG and retrieval through a core technical system known as the **Retrieval pipeline**. This pipeline utilizes **Hybrid retrieval**, a method that combines multiple retrieval strategies to fetch and serve stored information to users. \n\nRecently, mdfy has shifted away from the original technical \"RAG\" terminology toward more product-centric messaging. The entire retrieval and storage architecture has been rebranded and reframed as a product abstraction called **mdfy Memory**. While the framing has changed to mdfy Memory, the underlying hybrid retrieval method remains unchanged.",
+      "tokens_in": 3456,
+      "tokens_out": 118,
+      "latency_ms": 5644,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-005",
+      "answer": "Based on the document \"How mdfy keeps your docs, bundles, and hub fresh,\" mdfy uses three layers with different freshness strategies:\n\n**1. Document body — always fresh (automatic)**\n- New markdown is in Postgres immediately on save\n- AI URLs see updates within ~60 seconds via `/raw/{id}` and `/d/{id}` (read straight from DB)\n- Edge cache uses `stale-while-revalidate=300` but revalidates in background\n- No action needed\n\n**2. Bundle graph — manual re-analyze**\n- AI-generated themes/insights are computed once and stamped with `graph_generated_at`\n- Compared against `embedding_updated_at` of member docs\n- If a member doc changes, bundle becomes stale and shows \"Re-analyze with AI\" button\n- Not auto-rebuilt because LLM calls cost tokens and could disrupt editing\n\n**3. Hub concept index — automatic + manual top-up**\n- Every doc save fires: enqueue ontology job → fast-path LLM extraction (seconds) → cron backstop if instance dies\n- Two guardrails: 30-minute per-doc cooldown and 200-character minimum delta (control costs)\n- A \"Re-analyze (N)\" banner appears when `docs_touched_at > concepts_built_at`\n- Manual click only re-extracts changed docs (capped at 50/click), bypasses cooldown, runs asynchronously\n- Doc-level re-analyze also available via right-click\n\nThe design philosophy: aggressive freshness for body markdown (no click needed), but explicit user control for costly AI-derived metadata.",
+      "tokens_in": 163544,
+      "tokens_out": 541,
+      "latency_ms": 9692,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-005",
+      "answer": "mdfy uses different freshness rules for each layer:\n\n| Layer | Freshness model |\n|---|---|\n| **Document body** | Always fresh. Saves write markdown to Postgres immediately, and AI-facing URLs update within ~60 seconds. No user action needed. |\n| **Bundle graph** | Generated once by AI, then reused. If a member doc changes after `graph_generated_at`, the bundle becomes stale and shows `analysis_stale: true` plus a **“Re-analyze with AI”** option. |\n| **Hub concept index** | Mostly automatic. Each doc save enqueues an ontology refresh job; concepts usually update within seconds, with cron retry if serverless execution fails. |\n\nFor hubs, mdfy has two cost-control guardrails:\n\n- **30-minute cooldown per doc** so active editing doesn’t burn LLM calls.\n- **200-character minimum delta** so typo fixes don’t trigger extraction.\n\nIf the hub detects changed docs after the last concept build, it shows a **“Concepts out of date · Re-analyze (N)”** banner. Clicking it only re-extracts changed docs, caps at 50 docs per click, and bypasses the cooldown.\n\nSo: markdown stays fresh automatically; AI-derived metadata is fast by default, but explicitly refreshable.",
+      "tokens_in": 97705,
+      "tokens_out": 329,
+      "latency_ms": 6706,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-005",
+      "answer": "Based on the provided content, mdfy maintains freshness across its three layers using a mix of automatic updates and manual controls to balance accuracy and AI costs:\n\n*   **Documents (Body):** Always fresh. When you save a document, the new markdown is updated in the database and propagates to AI URLs within approximately 60 seconds. No manual action is required.\n*   **Bundles (AI Graph):** AI-generated themes and insights remain up-to-date until a member document's content changes. When this happens, the bundle is marked as \"stale,\" and a \"Re-analyze with AI\" button appears. Users must manually click this to rebuild the graph, which prevents unwanted token usage and disruptions during active editing.\n*   **Hubs (Concept Index):** Concepts are automatically extracted within seconds of a save, but there is a 30-minute cooldown per document to control costs. If heavy editing causes the hub's concept map to fall out of sync, a yellow \"Re-analyze (N)\" banner appears. Clicking it bypasses the cooldown and only re-extracts the specific documents that changed (capped at 50 per click). \n\nYou can also right-click a single document to force a concept refresh at any time.",
+      "tokens_in": 102538,
+      "tokens_out": 264,
+      "latency_ms": 10385,
+      "error": null,
+      "mode": "full"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-005",
+      "answer": "Based on the provided Memory.Wiki hub content, I cannot answer this question. The hub digest mentions a document titled \"Document, Bundle, Hub\" (https://memory.wiki/mdfy-three-primitives) under the Knowledge Management tag, but the digest itself does not contain details about how mdfy keeps these primitives fresh over time.\n\nTo get that answer, you would need to fetch the supporting document directly (e.g., `https://memory.wiki/raw/mdfy-three-primitives?compact=1` or related docs like \"How mdfy works\").",
+      "tokens_in": 5265,
+      "tokens_out": 187,
+      "latency_ms": 7339,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-005",
+      "answer": "The provided hub digest does not include details on how mdfy keeps documents, bundles, and hubs fresh over time.\n\nIt only says that “Document, Bundle, Hub” is a knowledge-management concept/document in the hub, and that mdfy/memory.wiki is an AI-native knowledge graph platform, but the freshness mechanism itself is not described in the provided content.",
+      "tokens_in": 3224,
+      "tokens_out": 151,
+      "latency_ms": 2888,
+      "error": null,
+      "mode": "compact"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-005",
+      "answer": "Based on the provided content, there is no information explaining how mdfy keeps documents, bundles, and hubs fresh over time. The text only mentions \"Document, Bundle, Hub\" as a document title under the Knowledge Management concept, but it does not provide details on their maintenance or updating mechanisms.",
+      "tokens_in": 3461,
+      "tokens_out": 60,
+      "latency_ms": 4881,
+      "error": null,
+      "mode": "compact"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies the cross-AI wedge, explains the structural incentive argument, and mentions the key concepts of cross-AI memory, URL-based fetching, and the paste/re-explaining problem that align with the expected keywords.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies cross-AI portability as the wedge and references all three expected keywords: cross-AI context, URL-based memory, and the implicit paste/portability mechanism.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies the cross-AI delivery layer as the structural wedge, explains why single-AI vendors cannot replicate it, and mentions the universal markdown URL that any AI can fetch—matching the expected keywords 'cross-AI' and 'URL' (and implicitly 'paste' via the copy-paste URL mechanism).",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "The candidate answer does not mention any of the expected keywords (cross-AI, URL, paste) and explicitly states it cannot find the answer, failing to address Memory.Wiki's wedge advantage.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "The candidate answer misses the core wedge of Memory.Wiki — the URL-based sharing mechanic where users paste a link into any AI — and instead describes generic cross-tool portability concepts not grounded in the expected document's keywords (cross-AI, URL, paste).",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot find the information and provides no content matching the expected keywords (cross-AI, URL, paste).",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer accurately covers the founder's motivations including the memory loss problem with AI tools, the cross-AI memory insight, and the vision of a neutral memory protocol layer, all consistent with what memory.wiki/fz45GXXj would contain, with the expected keywords (founder, memory, AI) clearly present.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies the founder, the core problem (cross-AI memory/knowledge delivery), and the key concepts matching the expected keywords and document content.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer addresses the core motivation of founder Hyunsang Cho building memory.wiki around solving AI memory/knowledge delivery problems, matching the expected keywords of founder, memory, and AI.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot access the document's contents and does not provide the actual reasons Hyunsang Cho is building memory.wiki, instead only offering speculative platform features.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies the key concepts of founder, memory, and AI, describing memory.wiki as an AI-native knowledge graph platform serving as a memory layer for LLM services, which aligns with the expected keywords.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits the actual content of the document is not available and does not provide Hyunsang Cho's personal reasons for building memory.wiki, only general product descriptions.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer comprehensively covers mdfy's core product features as of 2026-05, matching the expected document's content including editing/rendering, AI integration, real-time collaboration, permissions, URL architecture, multi-channel surfaces, and UX features.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer accurately lists mdfy's core product features as of 2026-05, covering all major feature areas (publishing, URL scopes, LLM endpoints, editor, AI integration, bundles, hubs, collaboration, permissions, multi-surface apps, and imports/export) that align with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer accurately covers mdfy's core product features as of May 2026, including URL architecture, editing/rendering, AI integration, real-time collaboration, permissions, and multi-channel surfaces, all of which align with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer addresses mdfy's core product features (MCP server, Chrome Extension, knowledge graph, retrieval pipeline, document primitives) consistent with what memory.wiki/bmZYfZez would supply, and includes the expected keywords.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer covers the core product features of mdfy/memory.wiki as of 2026-05 including the memory layer, MCP server, hybrid retrieval, Chrome extension, and knowledge management primitives, which align with what the expected document would supply.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies core mdfy/memory.wiki product features (retrieval pipeline, Chrome extension, MCP server) that align with what the expected document would supply, and includes the expected keywords.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer correctly addresses RAG/retrieval using the expected keywords and describes the hybrid retrieval architecture (chunked + hybrid retrieval, idempotent embeddings, HTTP endpoint) consistent with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer directly addresses how mdfy does RAG/retrieval using the expected keywords and describes embedding-based semantic search, vector similarity, chunking, and context delivery in a way consistent with what the expected document would cover.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer correctly addresses RAG/retrieval in mdfy with relevant keywords and plausible pipeline details (chunking, hybrid retrieval, vector similarity, BM25, pgvector, /recall API) consistent with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer correctly references the expected document and covers the key concepts (RAG, retrieval pipeline, hybrid retrieval, mdfy Memory) that align with what the expected document would supply.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer introduces specific claims (hybrid retrieval, rebranding as 'mdfy Memory', retrieval pipeline details) that appear to be hallucinated beyond what a simple RAG/retrieval document would contain, and there is no basis to confirm these details match the expected source document.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The candidate answer introduces specific claims about 'Hybrid retrieval' and 'mdfy Memory' rebranding that cannot be verified against the expected document and appear to be hallucinated details.",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer clearly addresses freshness/update/sync mechanisms for documents, bundles, and hubs with detailed layered strategies that align with what the expected document would supply.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer addresses freshness, updates, and sync mechanisms across documents, bundles, and hubs with specific details (cooldowns, deltas, stale flags, re-analyze options) consistent with what the expected document would cover.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly addresses how mdfy keeps documents, bundles, and hubs fresh using automatic updates and manual sync controls, covering the key concepts of freshness, updates, and sync across all three layers.",
+      "mode": "full"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot answer the question and contains none of the expected keywords (fresh, update, sync).",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it cannot provide information about the freshness mechanism and does not mention any of the expected keywords (fresh, update, sync).",
+      "mode": "compact"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer admits it has no relevant information and fails to address how mdfy keeps content fresh using update/sync mechanisms, which the expected document would supply.",
+      "mode": "compact"
+    }
+  ]
+}

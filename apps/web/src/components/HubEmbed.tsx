@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import DocStatusIcon from "@/components/DocStatusIcon";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
+import { ProviderIcon, type ProviderBrand } from "@/components/pure";
 
 interface DocCard {
   id: string;
@@ -128,8 +129,10 @@ interface HubEmbedProps {
   autoLevel?: "off" | "conservative" | "standard" | "aggressive";
   autoTrigger?: "manual" | "on-open" | "interval";
   /** Run the auto-management pass right now. Wired to the panel's
-   *  "Run now" button. */
-  onAutoResolveRun?: () => void;
+   *  "Run now" button. May return a Promise — when it does, the button
+   *  shows a local "Running…" state until it resolves so the click
+   *  has obvious feedback even if the result toast is missed. */
+  onAutoResolveRun?: () => void | Promise<void>;
   /** Deep-link to the auto-management section of Settings. */
   onOpenAutoSettings?: () => void;
   /** Concept-index freshness snapshot. When `isStale` is true the
@@ -243,6 +246,11 @@ export default function HubEmbed({
   // centre. The user can toggle each independently and that
   // override persists for the session via the click state.
   const autoOn = !!autoLevel && autoLevel !== "off";
+  // Visible state for the "Run now" button so a click registers
+  // immediately even before the result toast lands. "idle" → "running"
+  // (while the parent's pass executes) → "done" (briefly flashes a
+  // checkmark) → back to "idle".
+  const [runNowState, setRunNowState] = useState<"idle" | "running" | "done">("idle");
   const [needsReviewCollapsed, setNeedsReviewCollapsed] = useState(autoOn);
   const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(autoOn);
   // Re-evaluate the default whenever the level flips between off
@@ -461,10 +469,7 @@ export default function HubEmbed({
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: "var(--background)", gap: 14 }}>
         <div className="mw-loader-enter">
-          <MemoryWikiLogo size={26} />
-        </div>
-        <div style={{ width: 96, height: 2, background: "var(--border-dim)", borderRadius: 1, overflow: "hidden", position: "relative" }}>
-          <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "var(--accent)", borderRadius: 1, animation: "mwLoaderBar 1.1s ease-in-out infinite" }} />
+          <MemoryWikiLogo size={64} variant="icon-only" />
         </div>
         <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
           Loading hub
@@ -492,7 +497,15 @@ export default function HubEmbed({
     : null;
 
   return (
-    <div className="h-full overflow-auto">
+    <div className="h-full relative overflow-hidden" style={{ background: "var(--canvas)" }}>
+      {/* Animated MW-blob backdrop — lives OUTSIDE the scroll
+          container so the blob stays anchored to the viewport while
+          the user scrolls. */}
+      <div className="mw-start-backdrop" aria-hidden>
+        <img className="mw-start-backdrop-morph mw-logo-darktheme" src="/brand/mwblob_morph.svg" alt="" draggable={false} />
+        <img className="mw-start-backdrop-morph mw-logo-lighttheme" src="/brand/mwblob_morph_dark.svg" alt="" draggable={false} />
+      </div>
+      <div className="h-full overflow-auto relative mw-start-backdrop-content">
       <div className="max-w-3xl mx-auto px-6 py-10">
         {/* ── Identity row. The eyebrow "Public knowledge hub"
               previously sat above this header, but the slug pill
@@ -503,21 +516,58 @@ export default function HubEmbed({
             meta + Galaxy CTA. "Who / what is this" is the first
             impression; deploy URL becomes the second beat. */}
         <header
-          className="mb-6 rounded-xl text-center"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "32px 24px 24px" }}
+          className="mb-8 text-center"
+          style={{ padding: "32px 24px 24px" }}
         >
-          <img
-            src={data.hub.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(slug)}`}
-            alt=""
-            className="rounded-full mx-auto"
-            style={{ width: 80, height: 80, border: "1px solid var(--border-dim)" }}
-          />
+          {/* Avatar + access overlay — mirrors the bundle hero shape:
+              Globe corner badge in the hub's lime ("Public") since
+              the hub being viewable here implies it's publicly listed
+              (private hubs early-return above with a "not public yet"
+              message). The badge background is --canvas so it cuts a
+              clean notch through the avatar edge. */}
+          <div
+            className="relative mx-auto"
+            style={{ width: 80, height: 80 }}
+            title="Public hub"
+          >
+            <img
+              src={data.hub.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(slug)}`}
+              alt=""
+              className="rounded-full"
+              style={{ width: 80, height: 80, border: "1px solid var(--border-dim)" }}
+            />
+            <span
+              aria-hidden
+              className="absolute flex items-center justify-center rounded-full"
+              style={{
+                right: -2, bottom: -2, width: 24, height: 24,
+                background: "var(--canvas)",
+                color: "#4ade80",
+              }}
+            >
+              <Globe width={14} height={14} />
+            </span>
+          </div>
           <h1
-            className="text-display font-bold tracking-tight mt-4"
+            className="text-display tracking-tight mt-4"
             style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
           >
             {data.hub.display_name || slug}
           </h1>
+          {/* Access pill — same shape as bundle hero so the two
+              surfaces share the same visual language. */}
+          <div className="mt-3 flex justify-center">
+            <span
+              className="inline-flex items-center gap-1 text-caption font-mono px-2 py-0.5 rounded-full"
+              style={{
+                color: "#4ade80",
+                background: "rgba(74, 222, 128, 0.12)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              Public
+            </span>
+          </div>
           {/* Slug intentionally NOT shown here — the full URL lives
               in the Deploy card below; printing /hub/<slug> here too
               just duplicates that identifier. */}
@@ -565,11 +615,11 @@ export default function HubEmbed({
                   </span>
                 )}
                 {(() => {
-                  const galaxyClass = "inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]";
+                  const galaxyClass = "inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--border)]";
                   const galaxyStyle = {
-                    color: "var(--accent)",
-                    background: "var(--accent-dim)",
-                    border: "1px solid var(--accent-dim)",
+                    color: "var(--text-primary)",
+                    background: "var(--border)",
+                    border: "1px solid var(--border)",
                     textDecoration: "none",
                     letterSpacing: 0.3,
                   } as const;
@@ -610,6 +660,135 @@ export default function HubEmbed({
             );
           })()}
         </header>
+
+        {/* ─── Stat strip ─── Same typographic-contrast pattern as
+            the bundle viewer: hero number in Cal Sans (display
+            font), label in JetBrains Mono with a touch of letter-
+            spacing, and a quieter context line at the bottom. Three
+            cells map to the hub's signal triplet: documents, bundles,
+            concepts. Updated stays in the hero meta row above. */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-7">
+          {/* Documents */}
+          <div
+            className="rounded-lg px-4 py-4 flex flex-col"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+          >
+            <div
+              className="tabular-nums"
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: 32,
+                lineHeight: 1,
+                letterSpacing: 0,
+              }}
+            >
+              {data.counts.documents ?? 0}
+            </div>
+            <div
+              className="mt-1"
+              style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+            >
+              {(data.counts.documents ?? 0) === 1 ? "Document" : "Documents"}
+            </div>
+            <div
+              className="mt-auto pt-4 flex items-center gap-1.5"
+              style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+            >
+              <FolderClosed width={13} height={13} />
+              <span>In this hub</span>
+            </div>
+          </div>
+
+          {/* Bundles */}
+          <div
+            className="rounded-lg px-4 py-4 flex flex-col"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+          >
+            <div
+              className="tabular-nums"
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: 32,
+                lineHeight: 1,
+                letterSpacing: 0,
+              }}
+            >
+              {data.counts.bundles ?? 0}
+            </div>
+            <div
+              className="mt-1"
+              style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+            >
+              {(data.counts.bundles ?? 0) === 1 ? "Bundle" : "Bundles"}
+            </div>
+            <div
+              className="mt-auto pt-4 flex items-center gap-1.5"
+              style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+            >
+              <Layers width={13} height={13} />
+              <span>Grouped reading</span>
+            </div>
+          </div>
+
+          {/* Concepts */}
+          <div
+            className="rounded-lg px-4 py-4 flex flex-col"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+          >
+            {(data.counts.concepts ?? 0) > 0 ? (
+              <>
+                <div
+                  className="tabular-nums"
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 32,
+                    lineHeight: 1,
+                    letterSpacing: 0,
+                  }}
+                >
+                  {data.counts.concepts}
+                </div>
+                <div
+                  className="mt-1"
+                  style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+                >
+                  {data.counts.concepts === 1 ? "Concept" : "Concepts"}
+                </div>
+              </>
+            ) : (
+              <>
+                <div
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 20,
+                    lineHeight: 1.1,
+                    letterSpacing: 0,
+                    fontWeight: 500,
+                  }}
+                >
+                  Not built
+                </div>
+                <div
+                  className="mt-1"
+                  style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+                >
+                  Build the concept index to enable Compact
+                </div>
+              </>
+            )}
+            <div
+              className="mt-auto pt-4 flex items-center gap-1.5"
+              style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+            >
+              <Sparkles width={13} height={13} />
+              <span>Across all docs</span>
+            </div>
+          </div>
+        </section>
 
         {/* Unified "How to use this hub" — replaces the old
             Deploy + Setup split. One panel: pick the tool, see
@@ -689,6 +868,7 @@ Memory.Wiki hub`;
             type Tool = {
               id: string;
               label: string;
+              brand: ProviderBrand;
               group: "user" | "native";
               hint: string;
               snippet: string;
@@ -700,6 +880,7 @@ Memory.Wiki hub`;
               {
                 id: "claude",
                 label: "Claude",
+                brand: "claude",
                 group: "user",
                 hint: "Drop the URL into a Claude chat",
                 snippet: url,
@@ -710,6 +891,7 @@ Memory.Wiki hub`;
               {
                 id: "chatgpt",
                 label: "ChatGPT",
+                brand: "chatgpt",
                 group: "user",
                 hint: "Drop the URL into a ChatGPT chat",
                 snippet: url,
@@ -720,6 +902,7 @@ Memory.Wiki hub`;
               {
                 id: "gemini",
                 label: "Gemini",
+                brand: "gemini",
                 group: "user",
                 hint: "Drop the URL into Gemini (web or app)",
                 snippet: url,
@@ -730,6 +913,7 @@ Memory.Wiki hub`;
               {
                 id: "claude-code",
                 label: "Claude Code",
+                brand: "claude",
                 group: "user",
                 hint: "Save as CLAUDE.md in your project root",
                 snippet: projCtx,
@@ -741,6 +925,7 @@ Memory.Wiki hub`;
               {
                 id: "cursor",
                 label: "Cursor",
+                brand: "cursor",
                 group: "user",
                 hint: "Save as .cursor/rules/memorywiki.mdc in your project root",
                 snippet: cursorRule,
@@ -752,6 +937,7 @@ Memory.Wiki hub`;
               {
                 id: "generic",
                 label: "Generic",
+                brand: "browser",
                 group: "user",
                 hint: "Paste this URL into any AI that can fetch a webpage",
                 snippet: url,
@@ -762,6 +948,7 @@ Memory.Wiki hub`;
               {
                 id: "mcp",
                 label: "MCP",
+                brand: "mcp",
                 group: "native",
                 hint: "Add memory-wiki-mcp to your MCP host config",
                 snippet: mcpConfig,
@@ -772,6 +959,7 @@ Memory.Wiki hub`;
               {
                 id: "skill",
                 label: "Skill",
+                brand: "claude",
                 group: "native",
                 hint: "Use /memory.wiki slash commands inside Claude Code",
                 snippet: skillUse,
@@ -782,6 +970,7 @@ Memory.Wiki hub`;
               {
                 id: "cli",
                 label: "CLI",
+                brand: "cli",
                 group: "native",
                 hint: "Capture and search from your terminal",
                 snippet: cliUse,
@@ -797,26 +986,29 @@ Memory.Wiki hub`;
             const isUrlTool = URL_TOOL_IDS.has(active.id);
             const activeUrl = urlVariant === "full" ? `${url}?full=1` : url;
 
+            // Bundle-style soft chip tabs — active = toggle-bg fill +
+            // colored brand glyph, inactive = plain text-muted +
+            // faint glyph. Replaces the prior underline-only tabs so
+            // hub + bundle share the same "pick your AI" surface.
             const TabBtn = ({ t }: { t: Tool }) => {
               const isActive = activeTool === t.id;
               return (
                 <button
                   key={t.id}
                   onClick={() => setActiveTool(t.id)}
-                  className="px-3 pt-1.5 pb-2 text-caption font-medium transition-colors relative"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-caption font-medium transition-colors"
                   style={{
-                    color: isActive ? "var(--text-primary)" : "var(--text-faint)",
-                    background: "transparent",
-                    border: "none",
+                    color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                    background: isActive ? "var(--toggle-bg)" : "transparent",
                   }}
                 >
+                  <span
+                    style={{ display: "inline-flex", width: 12, height: 12, color: isActive ? "currentColor" : "var(--text-faint)" }}
+                    aria-hidden
+                  >
+                    <ProviderIcon brand={t.brand} />
+                  </span>
                   {t.label}
-                  {isActive && (
-                    <div
-                      className="absolute left-0 right-0 -bottom-px h-[2px]"
-                      style={{ background: "var(--accent)" }}
-                    />
-                  )}
                 </button>
               );
             };
@@ -828,8 +1020,7 @@ Memory.Wiki hub`;
                     card above so the page reads as a list of real
                     sections, each with its own title. */}
                 <h2
-                  className="text-heading font-semibold"
-                  style={{ color: "var(--text-primary)", margin: 0 }}
+                  style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}
                 >
                   How to use this hub
                 </h2>
@@ -844,82 +1035,95 @@ Memory.Wiki hub`;
                   {TOOLS.map((t) => <TabBtn key={t.id} t={t} />)}
                 </div>
 
-                {/* Active tab card */}
-                <div className="rounded-lg overflow-hidden"
-                  style={{ background: "var(--background)", border: "1px solid var(--border-dim)" }}>
-                  {/* Header: where to put it + tool name */}
-                  <div className="flex items-baseline justify-between px-3 py-2 gap-2"
-                    style={{ borderBottom: "1px solid var(--border-dim)" }}>
-                    {/* Inner sub-context — not uppercase, sentence
-                        case, lower visual weight than the section
-                        title above. */}
-                    <span className="text-caption truncate"
-                      style={{ color: "var(--text-secondary)" }}>
-                      {active.savePath ? (
-                        <>
-                          Save to{" "}
-                          <code className="font-mono" style={{ color: "var(--accent)" }}>{active.savePath}</code>
-                        </>
-                      ) : (
-                        <>{active.hint}</>
-                      )}
-                    </span>
-                    <span className="text-caption shrink-0" style={{ color: "var(--text-faint)" }}>
-                      {active.label}
-                    </span>
-                  </div>
+                {/* Borderless active-tab block — drops the inner card
+                    chrome (which read as a duplicate panel inside
+                    the outer section) and the redundant tool-name
+                    badge in the header strip. */}
+                <div>
+                  {/* One-line hint above the action — no separate
+                      header strip, no redundant tool-name badge. */}
+                  <p className="text-caption mb-3" style={{ color: "var(--text-secondary)" }}>
+                    {active.savePath ? (
+                      <>
+                        Save to{" "}
+                        <code className="font-mono" style={{ color: "var(--text-primary)" }}>{active.savePath}</code>
+                      </>
+                    ) : (
+                      <>{active.hint}</>
+                    )}
+                  </p>
 
                   {/* BODY — URL mode for chat tools, snippet for others. */}
                   {isUrlTool ? (
-                    <div className="px-3 py-3">
-                      <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-                        <div className="flex items-center">
-                          {(["digest", "full"] as const).map((v) => {
-                            const isActive = urlVariant === v;
-                            const isCompact = v === "digest";
-                            const compactMissing = isCompact && !compactAvailable;
-                            // Queue-aware label: building vs failed
-                            // vs the actual token count once it's
-                            // populated. Reflects extraction_jobs
-                            // state surfaced via /api/user/jobs/status.
-                            const queueBuilding = !!jobStatus && (jobStatus.pending + jobStatus.running) > 0;
-                            const queueFailed = !!jobStatus && jobStatus.failed > 0 && !compactAvailable;
-                            const tokenLabel = isCompact
-                              ? (compactAvailable ? `≈ ${fmtTok(compactTokens)} tok`
-                                : queueBuilding ? "building…"
-                                : queueFailed ? "failed"
-                                : "not built")
-                              : `≈ ${fmtTok(fullTokens)} tok`;
-                            return (
-                              <button
-                                key={v}
-                                type="button"
-                                onClick={() => setUrlVariant(v)}
-                                className="px-3 pt-1.5 pb-2 transition-colors relative flex items-center gap-1.5"
-                                style={{
-                                  color: isActive ? "var(--text-primary)" : (compactMissing ? "var(--text-faint)" : "var(--text-faint)"),
-                                  background: "transparent",
-                                  border: "none",
-                                  opacity: compactMissing && !isActive ? 0.6 : 1,
-                                }}
-                              >
-                                <span className="font-medium" style={{ fontSize: 12 }}>
-                                  {isCompact ? "Compact" : "Full"}
+                    <div>
+                      {/* Segmented payload picker — same shape as the
+                          bundle viewer (BundleOverview) so the two
+                          surfaces stay in lockstep. Solid filled active
+                          chip, both token counts visible, comparison
+                          row beneath. */}
+                      {/* Side-by-side option cards — both variants
+                          visible at once, active marked by a lime dot
+                          + soft surface fill (not the prior stark
+                          white ink-fill). */}
+                      <div className="grid grid-cols-2 gap-2 mb-3" role="tablist" aria-label="Payload size">
+                        {(["digest", "full"] as const).map((v) => {
+                          const isActive = urlVariant === v;
+                          const isCompact = v === "digest";
+                          const compactMissing = isCompact && !compactAvailable;
+                          const queueBuilding = !!jobStatus && (jobStatus.pending + jobStatus.running) > 0;
+                          const queueFailed = !!jobStatus && jobStatus.failed > 0 && !compactAvailable;
+                          const tokenLabel = isCompact
+                            ? (compactAvailable ? `≈${fmtTok(compactTokens)} tokens`
+                              : queueBuilding ? "building…"
+                              : queueFailed ? "failed"
+                              : "not built")
+                            : `≈${fmtTok(fullTokens)} tokens`;
+                          const label = isCompact ? "Compact" : "Full";
+                          // Real cheaper-% from the two estimates
+                          // (compactTokens populated only after the
+                          // concept index builds; fall back to a
+                          // generic line until then).
+                          const cheaperPct = compactAvailable && fullTokens > compactTokens
+                            ? Math.round((1 - compactTokens / fullTokens) * 100)
+                            : 0;
+                          const desc = isCompact
+                            ? (cheaperPct > 0 ? `Concept map, ~${cheaperPct}% lighter` : "Concept map")
+                            : "Every doc inlined";
+                          return (
+                            <button
+                              key={v}
+                              type="button"
+                              role="tab"
+                              aria-selected={isActive}
+                              onClick={() => setUrlVariant(v)}
+                              className="text-left rounded-md px-3 py-2 transition-colors"
+                              style={{
+                                background: isActive ? "var(--toggle-bg)" : "transparent",
+                                border: `1px solid ${isActive ? "var(--border)" : "var(--border-dim)"}`,
+                                color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                                opacity: compactMissing && !isActive ? 0.6 : 1,
+                              }}
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  aria-hidden
+                                  style={{
+                                    width: 6, height: 6, borderRadius: "50%",
+                                    background: isActive ? "var(--micro-lime)" : "var(--border)",
+                                    display: "inline-block",
+                                  }}
+                                />
+                                <span className="font-medium" style={{ fontSize: 12 }}>{label}</span>
+                                <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)" }}>
+                                  {tokenLabel}
                                 </span>
-                                <span style={{ fontSize: 10, opacity: compactMissing ? 0.6 : 0.7, fontFamily: "var(--font-mono)" }}>{tokenLabel}</span>
-                                {isActive && (
-                                  <div
-                                    className="absolute left-0 right-0 -bottom-px h-[2px]"
-                                    style={{ background: "var(--accent)" }}
-                                  />
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <span className="text-caption pb-1.5" style={{ color: "var(--text-faint)" }}>
-                          {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
-                        </span>
+                              </div>
+                              <div className="text-caption mt-0.5" style={{ color: "var(--text-faint)" }}>
+                                {desc}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                       {urlVariant === "digest" && !compactAvailable ? (
                         /* Compact isn't built yet — three sub-states:
@@ -930,8 +1134,8 @@ Memory.Wiki hub`;
                         <div
                           className="rounded-lg px-3 py-3"
                           style={{
-                            background: "color-mix(in srgb, var(--accent-dim) 40%, var(--background))",
-                            border: "1px dashed var(--accent)",
+                            background: "color-mix(in srgb, var(--border) 40%, var(--background))",
+                            border: "1px dashed var(--text-primary)",
                           }}
                         >
                           {jobStatus && (jobStatus.pending + jobStatus.running) > 0 ? (
@@ -968,7 +1172,7 @@ Memory.Wiki hub`;
                             disabled={ontologyBuilding}
                             className="inline-flex items-center gap-1.5 text-caption font-mono px-3 py-1.5 rounded transition-colors"
                             style={{
-                              background: ontologyBuilding ? "var(--toggle-bg)" : "var(--accent)",
+                              background: ontologyBuilding ? "var(--toggle-bg)" : "var(--text-primary)",
                               color: ontologyBuilding ? "var(--text-muted)" : "var(--background)",
                               border: "none",
                               cursor: ontologyBuilding ? "not-allowed" : "pointer",
@@ -987,87 +1191,114 @@ Memory.Wiki hub`;
                           )}
                         </div>
                       ) : (
+                        <>
+                          {/* Hero — URL + Copy. Slightly stronger
+                              border + padding than other rows so
+                              this is unambiguously the action. */}
+                          <button
+                            onClick={async () => {
+                              if (typeof navigator === "undefined" || !navigator.clipboard) return;
+                              try {
+                                await navigator.clipboard.writeText(activeUrl);
+                                setCopiedTool(active.id);
+                                setTimeout(() => setCopiedTool(null), 1500);
+                              } catch { /* clipboard blocked */ }
+                            }}
+                            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+                            style={{
+                              fontSize: 13,
+                              background: "var(--background)",
+                              color: copiedTool === active.id ? "var(--micro-lime)" : "var(--text-primary)",
+                              border: `1px solid ${copiedTool === active.id ? "var(--micro-lime)" : "var(--border)"}`,
+                            }}
+                            title="Copy URL"
+                          >
+                            <span className="flex-1 text-left truncate">{activeUrl}</span>
+                            <span
+                              className="flex items-center gap-1.5 shrink-0 pl-3 font-medium font-sans"
+                              style={{
+                                borderLeft: "1px solid var(--border-dim)",
+                                color: copiedTool === active.id ? "var(--micro-lime)" : "var(--text-primary)",
+                              }}
+                            >
+                              {copiedTool === active.id ? <Check width={13} height={13} /> : <Copy width={13} height={13} />}
+                              <span>{copiedTool === active.id ? "Copied" : "Copy URL"}</span>
+                            </span>
+                          </button>
+                          {/* Support row — raw + guide links only.
+                              Variant description lives in the option
+                              cards above. */}
+                          <div className="flex items-center justify-end gap-3 mt-2.5 text-caption" style={{ color: "var(--text-muted)" }}>
+                            <a
+                              href={urlVariant === "full" ? `/@${data?.hub?.slug ?? ""}.md?full=1` : `/@${data?.hub?.slug ?? ""}.md`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 transition-colors hover:underline"
+                              title="Raw .md payload, what the AI actually sees"
+                            >
+                              <ExternalLink width={11} height={11} />
+                              Raw
+                            </a>
+                            <Link
+                              href={active.docHref}
+                              target="_blank"
+                              className="inline-flex items-center gap-1 transition-colors hover:underline"
+                              title="Read the full integration guide"
+                            >
+                              Full guide
+                              <ArrowUpRight width={11} height={11} />
+                            </Link>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <pre
+                        className="px-3 py-2.5 rounded-lg font-mono whitespace-pre-wrap"
+                        style={{
+                          color: "var(--text-primary)",
+                          background: "var(--background)",
+                          border: "1px solid var(--border-dim)",
+                          margin: 0,
+                          fontSize: 11,
+                          lineHeight: 1.6,
+                        }}
+                      >{active.snippet}</pre>
+                      <div className="flex items-center justify-between gap-3 mt-2.5 text-caption" style={{ color: "var(--text-muted)" }}>
                         <button
                           onClick={async () => {
                             if (typeof navigator === "undefined" || !navigator.clipboard) return;
                             try {
-                              await navigator.clipboard.writeText(activeUrl);
+                              await navigator.clipboard.writeText(active.snippet);
                               setCopiedTool(active.id);
                               setTimeout(() => setCopiedTool(null), 1500);
                             } catch { /* clipboard blocked */ }
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
-                          style={{
-                            fontSize: 13,
-                            background: "var(--surface)",
-                            color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
-                            border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-                          }}
-                          title="Copy URL"
+                          className="inline-flex items-center gap-1 transition-colors hover:underline"
+                          style={{ color: copiedTool === active.id ? "var(--micro-lime)" : "var(--text-muted)" }}
+                          title="Copy snippet"
                         >
-                          <span className="flex-1 text-left truncate">{activeUrl}</span>
-                          <span className="flex items-center gap-1 shrink-0" style={{ color: copiedTool === active.id ? "#22c55e" : "var(--text-faint)" }}>
-                            {copiedTool === active.id ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-                            <span className="text-caption">{copiedTool === active.id ? "Copied" : "Copy"}</span>
-                          </span>
+                          {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
+                          {copiedTool === active.id ? "Copied" : "Copy snippet"}
                         </button>
-                      )}
-                    </div>
-                  ) : (
-                    <pre
-                      className="px-3 py-2 text-caption font-mono whitespace-pre-wrap"
-                      style={{ color: "var(--text-primary)", margin: 0, fontSize: 11, lineHeight: 1.6 }}
-                    >{active.snippet}</pre>
+                        <Link
+                          href={active.docHref}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 transition-colors hover:underline"
+                          title="Read the full integration guide"
+                        >
+                          Full guide
+                          <ArrowUpRight width={11} height={11} />
+                        </Link>
+                      </div>
+                    </>
                   )}
-
-
-
-                  {/* Actions — URL tools embed Copy in the URL row,
-                      so the actions row only carries Full guide for
-                      them; snippet tools get a Copy + Full guide. */}
-                  <div className="flex items-center justify-between gap-2 px-3 py-2"
-                    style={{ borderTop: "1px solid var(--border-dim)" }}>
-                    {isUrlTool ? (
-                      <span />
-                    ) : (
-                      <button
-                        onClick={async () => {
-                          if (typeof navigator === "undefined" || !navigator.clipboard) return;
-                          try {
-                            await navigator.clipboard.writeText(active.snippet);
-                            setCopiedTool(active.id);
-                            setTimeout(() => setCopiedTool(null), 1500);
-                          } catch { /* clipboard blocked */ }
-                        }}
-                        className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                        style={{
-                          background: "var(--surface)",
-                          color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
-                          border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
-                        }}
-                        title="Copy snippet"
-                      >
-                        {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
-                        <span>{copiedTool === active.id ? "Copied" : "Copy"}</span>
-                      </button>
-                    )}
-                    <Link
-                      href={active.docHref}
-                      target="_blank"
-                      className="text-caption font-mono"
-                      style={{ color: "var(--accent)" }}
-                    >
-                      Full guide →
-                    </Link>
-                  </div>
                 </div>
-                {/* Explanation — plain text, no separate background,
-                    sits below the inner card so it reads as guidance
-                    about the chip/URL above, not as another panel. */}
                 {active.explanation && (
                   <p
-                    className="text-caption leading-relaxed mt-3"
-                    style={{ color: "var(--text-secondary)", whiteSpace: "pre-wrap", margin: "12px 4px 0" }}
+                    className="leading-relaxed mt-4"
+                    style={{ color: "var(--text-muted)", whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.6 }}
                   >
                     {active.explanation}
                   </p>
@@ -1075,64 +1306,75 @@ Memory.Wiki hub`;
               </div>
             );
           })()}
-          {/* Preview row — what humans see (rendered page) and what
-              AI gets as raw markdown. Labeled so the buttons don't
-              float context-less. Token estimate moved up into the
-              variant chip so this row is purely "preview / inspect". */}
-          <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-dim)" }}>
-            <div className="text-caption font-mono uppercase mb-1.5"
-              style={{ color: "var(--text-faint)", fontSize: 10, letterSpacing: 0.5 }}>
-              Preview
-            </div>
-            <p className="text-caption mb-2" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
-              See this hub the way a visitor renders it in a browser, or peek at the raw markdown payload an AI would receive.
-            </p>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Link
-                href={`/hub/${slug}`}
-                target="_blank"
-                className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
-                title="Rendered HTML — what a human visitor sees"
-              >
-                <Eye width={11} height={11} />
-                View as visitor
-              </Link>
-              <Link
-                href={`/hub/${slug}.md`}
-                target="_blank"
-                className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
-                title="Raw .md payload — exactly what an AI fetching this URL receives"
-              >
-                <ExternalLink width={11} height={11} />
-                Raw .md (what the AI sees)
-              </Link>
-            </div>
+          {/* Preview footer — two plain text-links matching the
+              bundle viewer's support row. No uppercase eyebrow, no
+              outline pills; just the muted action affordances. */}
+          <div
+            className="mt-4 pt-3 flex items-center justify-end gap-3 text-caption"
+            style={{ borderTop: "1px solid var(--border-dim)", color: "var(--text-muted)" }}
+          >
+            <Link
+              href={`/hub/${slug}`}
+              target="_blank"
+              className="inline-flex items-center gap-1 transition-colors hover:underline"
+              title="Rendered HTML, what a human visitor sees"
+            >
+              <Eye width={11} height={11} />
+              View as visitor
+            </Link>
+            <Link
+              href={`/hub/${slug}.md`}
+              target="_blank"
+              className="inline-flex items-center gap-1 transition-colors hover:underline"
+              title="Raw .md payload, exactly what an AI fetching this URL receives"
+            >
+              <ExternalLink width={11} height={11} />
+              Raw .md
+            </Link>
           </div>
         </section>
 
-        {/* ── Stat strip — counts by access tier ──────────────────── */}
+        {/* ── Owner stat strip — counts by access tier. Typography
+            matches the hub's other stat strip + the bundle viewer:
+            Cal Sans number / Mono label (Title Case) / Mono context
+            line. Uppercase eyebrow + bold text was screaming. */}
         {totalCounts && (
-          <section className="grid grid-cols-3 gap-2 mb-8">
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-8">
             {(["public", "shared", "private"] as const).map((tier) => {
               const t = TIERS[tier];
               const Icon = t.icon;
               return (
                 <div
                   key={tier}
-                  className="px-4 py-3 rounded-xl"
+                  className="rounded-lg px-4 py-4 flex flex-col"
                   style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
                 >
-                  <div className="flex items-center gap-1.5 mb-1" style={{ color: t.color }}>
-                    <Icon width={12} height={12} />
-                    <span className="text-caption uppercase tracking-wider font-semibold">{t.label}</span>
-                  </div>
-                  <div className="text-xl font-semibold tabular-nums" style={{ color: "var(--text-primary)" }}>
+                  <div
+                    className="tabular-nums"
+                    style={{
+                      color: "var(--text-primary)",
+                      fontFamily: "var(--font-display)",
+                      fontSize: 32,
+                      lineHeight: 1,
+                      letterSpacing: 0,
+                    }}
+                  >
                     {totalCounts[tier]}
                   </div>
-                  <div className="text-caption mt-0.5" style={{ color: "var(--text-faint)" }}>
-                    {ov ? `${ov.bundles[tier].length} bundle${ov.bundles[tier].length === 1 ? "" : "s"}, ${ov.documents[tier].length} doc${ov.documents[tier].length === 1 ? "" : "s"}` : ""}
+                  <div
+                    className="mt-1"
+                    style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+                  >
+                    {t.label}
+                  </div>
+                  <div
+                    className="mt-auto pt-4 flex items-center gap-1.5"
+                    style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.04em" }}
+                  >
+                    <Icon width={13} height={13} style={{ color: t.color }} />
+                    <span>
+                      {ov ? `${ov.bundles[tier].length} bundle${ov.bundles[tier].length === 1 ? "" : "s"}, ${ov.documents[tier].length} doc${ov.documents[tier].length === 1 ? "" : "s"}` : ""}
+                    </span>
                   </div>
                 </div>
               );
@@ -1154,7 +1396,7 @@ Memory.Wiki hub`;
             >
               <span
                 className="flex items-center justify-center shrink-0 mt-0.5"
-                style={{ width: 28, height: 28, borderRadius: 8, background: "var(--accent-dim)", color: "var(--accent)" }}
+                style={{ width: 28, height: 28, borderRadius: 8, background: "var(--border)", color: "var(--text-primary)" }}
               >
                 <Sparkles width={14} height={14} />
               </span>
@@ -1166,7 +1408,7 @@ Memory.Wiki hub`;
                   Extract concepts across your {data.counts.documents} document{data.counts.documents === 1 ? "" : "s"} so an AI can answer &ldquo;what does this hub know about X?&rdquo; in a single fetch instead of reading every doc. Runs once, refreshes incrementally as you write.
                 </p>
                 {ontologyProgress && (
-                  <p className="text-caption mt-2 font-mono" style={{ color: ontologyError ? "#ef4444" : "var(--accent)" }}>
+                  <p className="text-caption mt-2 font-mono" style={{ color: ontologyError ? "#ef4444" : "var(--text-primary)" }}>
                     {ontologyError
                       ? ontologyError
                       : ontologyBuilding
@@ -1180,7 +1422,7 @@ Memory.Wiki hub`;
                 disabled={ontologyBuilding}
                 className="text-caption px-3 py-1.5 rounded shrink-0 transition-colors"
                 style={{
-                  background: "var(--accent)",
+                  background: "var(--text-primary)",
                   // Matches every other accent-fill button in Settings /
                   // BundleOverview / Hub — black text on the accent
                   // works in both light + dark across the eight schemes.
@@ -1315,11 +1557,43 @@ Memory.Wiki hub`;
                 )}
                 {onAutoResolveRun && autoLevel !== "off" && (
                   <button
-                    onClick={onAutoResolveRun}
-                    className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                    style={{ background: "var(--background)", color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                    onClick={async () => {
+                      if (runNowState !== "idle") return;
+                      setRunNowState("running");
+                      try {
+                        const ret = onAutoResolveRun();
+                        if (ret && typeof (ret as Promise<void>).then === "function") {
+                          await ret;
+                        }
+                        setRunNowState("done");
+                        setTimeout(() => setRunNowState("idle"), 1400);
+                      } catch {
+                        setRunNowState("idle");
+                      }
+                    }}
+                    disabled={runNowState !== "idle"}
+                    className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)] inline-flex items-center gap-1.5"
+                    style={{
+                      background: runNowState === "done" ? "rgba(181, 255, 26, 0.12)" : "var(--background)",
+                      color: runNowState === "done" ? "var(--micro-lime)" : "var(--text-muted)",
+                      border: `1px solid ${runNowState === "done" ? "var(--micro-lime)" : "var(--border-dim)"}`,
+                      cursor: runNowState === "idle" ? "pointer" : "default",
+                    }}
                   >
-                    Run now
+                    {runNowState === "running" && (
+                      <span
+                        aria-hidden
+                        style={{
+                          width: 10, height: 10, borderRadius: "50%",
+                          border: "1.5px solid currentColor",
+                          borderTopColor: "transparent",
+                          display: "inline-block",
+                          animation: "mw-spin 0.7s linear infinite",
+                        }}
+                      />
+                    )}
+                    {runNowState === "done" && <Check width={11} height={11} />}
+                    {runNowState === "running" ? "Running…" : runNowState === "done" ? "Done" : "Run now"}
                   </button>
                 )}
               </div>
@@ -1357,11 +1631,11 @@ Memory.Wiki hub`;
               >
                 <span
                   className="flex items-center justify-center shrink-0"
-                  style={{ width: 22, height: 22, borderRadius: 6, background: "rgba(245,158,11,0.14)", color: "#f59e0b" }}
+                  style={{ width: 22, height: 22, borderRadius: 6, background: "rgba(239, 68, 68, 0.16)", color: "var(--micro-red)" }}
                 >
                   <ShieldAlert width={12} height={12} />
                 </span>
-                <h2 className="text-heading" style={{ color: "var(--text-primary)" }}>Needs review</h2>
+                <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Needs review</h2>
                 <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>
                   {total} finding{total === 1 ? "" : "s"}
                 </span>
@@ -1482,7 +1756,7 @@ Memory.Wiki hub`;
                         </span>
                       </div>
                       <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                        Title doesn&apos;t mention any of this doc&apos;s concepts. Consider renaming to surface <span className="font-mono" style={{ color: "var(--accent)" }}>{m.topConcept}</span>
+                        Title doesn&apos;t mention any of this doc&apos;s concepts. Consider renaming to surface <span className="font-mono" style={{ color: "var(--text-primary)" }}>{m.topConcept}</span>
                         {m.concepts.length > 1 ? ` (or ${m.concepts.slice(1, 3).map((c) => c).join(", ")})` : ""}.
                       </p>
                     </div>
@@ -1572,11 +1846,11 @@ Memory.Wiki hub`;
               >
                 <span
                   className="flex items-center justify-center shrink-0"
-                  style={{ width: 22, height: 22, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
+                  style={{ width: 22, height: 22, borderRadius: 6, background: "var(--border)", color: "var(--text-primary)" }}
                 >
                   <Sparkles width={12} height={12} />
                 </span>
-                <h2 className="text-heading" style={{ color: "var(--accent)" }}>Suggestions</h2>
+                <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Suggestions</h2>
                 <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>
                   {totalSuggestions} item{totalSuggestions === 1 ? "" : "s"}
                 </span>
@@ -1634,7 +1908,7 @@ Memory.Wiki hub`;
                         <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                           Shares concepts with your published docs:{" "}
                           {s.sharedConcepts.slice(0, 3).map((c, i) => (
-                            <span key={i} className="font-mono" style={{ color: "var(--accent)" }}>
+                            <span key={i} className="font-mono" style={{ color: "var(--text-primary)" }}>
                               {i > 0 ? ", " : ""}{c}
                             </span>
                           ))}
@@ -1757,7 +2031,7 @@ Memory.Wiki hub`;
                         <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                           But it&apos;s connected to{" "}
                           {s.neighbors.slice(0, 3).map((n, i) => (
-                            <span key={i} className="font-mono" style={{ color: "var(--accent)" }}>
+                            <span key={i} className="font-mono" style={{ color: "var(--text-primary)" }}>
                               {i > 0 ? ", " : ""}{n}
                             </span>
                           ))}
@@ -1816,7 +2090,7 @@ Memory.Wiki hub`;
               >
                 <Eye width={12} height={12} />
               </span>
-              <h2 className="text-heading" style={{ color: "var(--text-secondary)" }}>Recent activity</h2>
+              <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Recent activity</h2>
               <span className="text-caption ml-auto" style={{ color: "var(--text-faint)" }}>
                 Last {data.recentActivity.length} events
               </span>
@@ -1852,7 +2126,7 @@ Memory.Wiki hub`;
                     >
                       <span
                         className="text-caption font-mono uppercase tracking-wider shrink-0"
-                        style={{ color: "var(--accent)", fontSize: 9, letterSpacing: "0.06em", minWidth: 64 }}
+                        style={{ color: "var(--text-primary)", fontSize: 9, letterSpacing: "0.06em", minWidth: 64 }}
                       >
                         {label}
                       </span>
@@ -1888,7 +2162,7 @@ Memory.Wiki hub`;
                 >
                   <Icon width={12} height={12} />
                 </span>
-                <h2 className="text-heading" style={{ color: t.color }}>{t.label}</h2>
+                <h2 style={{ color: t.color, margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>{t.label}</h2>
                 <span className="text-caption font-mono tabular-nums" style={{ color: "var(--text-faint)" }}>
                   {bundles.length + docs.length}
                 </span>
@@ -1933,33 +2207,43 @@ Memory.Wiki hub`;
                   <div className="text-caption uppercase tracking-wider mb-2" style={{ color: "var(--text-faint)", fontSize: 10 }}>
                     Docs ({docs.length})
                   </div>
-                  <ul className="space-y-0.5">
+                  {/* Same row shape as the bundle Documents list:
+                      icon + title (flex-1) + updated, all vertically
+                      centered so the three atoms align on one
+                      baseline. Bordered card to read as a discrete
+                      entry, not a flat menu row. */}
+                  <ul className="space-y-1.5">
                     {docs.slice(0, 30).map((d) => (
                       <li key={d.id}>
                         <button
                           onClick={() => onOpenDoc?.(d.id)}
-                          className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors hover:bg-[var(--toggle-bg)]"
+                          className="w-full text-left rounded-md transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ border: "1px solid var(--border-dim)" }}
                         >
-                          <DocStatusIcon
-                            tab={{
-                              isDraft: d.isDraft,
-                              editMode: d.editMode || undefined,
-                              cloudId: d.cloudId,
-                              permission: "mine",
-                              hasPassword: d.hasPassword,
-                              sharedWithCount: d.sharedWithCount,
-                            }}
-                            isActive={false}
-                          />
-                          <span className="flex-1 truncate text-body" style={{ color: "var(--text-primary)" }}>{d.title}</span>
-                          <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)" }}>{relativeTime(d.updated_at)}</span>
+                          <div className="flex items-center gap-3 px-3 py-2.5">
+                            <div className="shrink-0">
+                              <DocStatusIcon
+                                tab={{
+                                  isDraft: d.isDraft,
+                                  editMode: d.editMode || undefined,
+                                  cloudId: d.cloudId,
+                                  permission: "mine",
+                                  hasPassword: d.hasPassword,
+                                  sharedWithCount: d.sharedWithCount,
+                                }}
+                                isActive={false}
+                              />
+                            </div>
+                            <span className="flex-1 truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>{d.title}</span>
+                            <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)" }}>{relativeTime(d.updated_at)}</span>
+                          </div>
                         </button>
                       </li>
                     ))}
                   </ul>
                   {docs.length > 30 && (
                     <p className="text-caption mt-2" style={{ color: "var(--text-faint)" }}>
-                      +{docs.length - 30} more — open the sidebar to browse all.
+                      +{docs.length - 30} more, open the sidebar to browse all.
                     </p>
                   )}
                 </div>
@@ -1973,7 +2257,7 @@ Memory.Wiki hub`;
         {!ov && data.documents.length > 0 && (
           <section className="mb-10">
             <header className="flex items-baseline justify-between mb-3">
-              <h2 className="text-heading" style={{ color: "var(--accent)" }}>Public</h2>
+              <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Public</h2>
               <span className="text-caption" style={{ color: "var(--text-faint)" }}>
                 {data.counts.bundles} bundle{data.counts.bundles === 1 ? "" : "s"}, {data.counts.documents} doc{data.counts.documents === 1 ? "" : "s"}
               </span>
@@ -2008,6 +2292,7 @@ Memory.Wiki hub`;
             </p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

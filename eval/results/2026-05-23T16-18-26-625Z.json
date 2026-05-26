@@ -1,0 +1,1247 @@
+{
+  "bench": "MWBench v1",
+  "corpus_url": "https://memory.wiki/hub/raymindai/llms-full.txt",
+  "corpus_hash": "394a92c6c7a1e471",
+  "started_at": "2026-05-23T16:18:26.625Z",
+  "finished_at": "2026-05-23T16:29:35.354Z",
+  "queries": [
+    {
+      "id": "q-001",
+      "q": "What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?",
+      "expected_doc": "SKaY7VJP",
+      "expected_keywords": [
+        "cross-AI",
+        "URL",
+        "paste"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-002",
+      "q": "Why is the founder Hyunsang Cho building memory.wiki?",
+      "expected_doc": "fz45GXXj",
+      "expected_keywords": [
+        "founder",
+        "memory",
+        "AI"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-003",
+      "q": "What are mdfy's core product features as of 2026-05?",
+      "expected_doc": "bmZYfZez",
+      "expected_keywords": [
+        "mdfy",
+        "features",
+        "2026"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-004",
+      "q": "How does mdfy do RAG / retrieval?",
+      "expected_doc": "how-mdfy-rag-works",
+      "expected_keywords": [
+        "RAG",
+        "retrieval"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-005",
+      "q": "How does mdfy keep documents, bundles, and hubs fresh over time?",
+      "expected_doc": "RUMdz2fQ",
+      "expected_keywords": [
+        "fresh",
+        "update",
+        "sync"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-006",
+      "q": "What was the Upstage Memory Protocol alliance proposal about?",
+      "expected_doc": "yWkfCPhn",
+      "expected_keywords": [
+        "Upstage",
+        "Memory Protocol",
+        "alliance"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-007",
+      "q": "What's the K-Tech Pioneers presentation evaluation context?",
+      "expected_doc": "jRpEdqww",
+      "expected_keywords": [
+        "K-TECH",
+        "Pioneers",
+        "평가"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-008",
+      "q": "What's in the a16z application?",
+      "expected_doc": "wNEDgXMs",
+      "expected_keywords": [
+        "a16z"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-009",
+      "q": "What's in the a16z speedrun pitch deck content?",
+      "expected_doc": "gnEMFJgI",
+      "expected_keywords": [
+        "a16z",
+        "speedrun",
+        "pitch"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-010",
+      "q": "How does memdo (멤도) work?",
+      "expected_doc": "QF-bp5G_",
+      "expected_keywords": [
+        "memdo",
+        "멤도"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-011",
+      "q": "What is the SNS launch execution plan?",
+      "expected_doc": "jryfJV4D",
+      "expected_keywords": [
+        "SNS",
+        "launch",
+        "plan"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-012",
+      "q": "What's the v8 product idea — the AI-era pivot?",
+      "expected_doc": "pCiEhvu2",
+      "expected_keywords": [
+        "v8",
+        "idea"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-013",
+      "q": "What's outlined in the Memory.Wiki v8 UI and brand direction document?",
+      "expected_doc": "37MqmCM-",
+      "expected_keywords": [
+        "v8",
+        "UI",
+        "brand"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-014",
+      "q": "What's the Memory.Wiki product specification?",
+      "expected_doc": "Tk71NDw0",
+      "expected_keywords": [
+        "specification",
+        "product"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-015",
+      "q": "How does mdfy work overall — the architecture and flow?",
+      "expected_doc": "KRKz_MD-",
+      "expected_keywords": [
+        "mdfy",
+        "work",
+        "flow"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-016",
+      "q": "What was the strategic pivot from mdfy to Memory.Wiki?",
+      "expected_doc": "4N8X52tq",
+      "expected_keywords": [
+        "pivot",
+        "mdfy",
+        "Memory.wiki"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-017",
+      "q": "What's Hyunsang Cho's background as an AI product executive?",
+      "expected_doc": "ZVfnXzCU",
+      "expected_keywords": [
+        "Hyunsang",
+        "Cho",
+        "AI",
+        "executive"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-018",
+      "q": "What's the mdfy.cc v6 FINAL business plan?",
+      "expected_doc": "_4iafQ8K",
+      "expected_keywords": [
+        "mdfy.cc",
+        "v6",
+        "사업계획"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-019",
+      "q": "What's the difference between v7 and v7-revised business plans?",
+      "expected_doc": "nvF3Li2x",
+      "expected_keywords": [
+        "v7",
+        "revised",
+        "사업계획"
+      ],
+      "category": "cross-doc"
+    },
+    {
+      "id": "q-020",
+      "q": "Summarize Memory.Wiki's overall product strategy and product evolution.",
+      "expected_doc": "KFtUbXkS",
+      "expected_keywords": [
+        "product",
+        "strategy"
+      ],
+      "category": "synthesis"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's wedge is **cross-AI portability through URL-native architecture**. Here's the structural advantage:\n\n## The Core Wedge\n\n**Single URL, every AI reads it** — not \"ChatGPT Memory for ChatGPT\" or \"Claude Projects for Claude,\" but one knowledge graph accessible to any AI tool via standard HTTP.\n\n## Why This is Structural\n\n1. **Vendor lock-in is impossible for OpenAI/Anthropic to solve**\n   - OpenAI shipping \"Claude-readable memory\" would be a competitive own-goal\n   - Anthropic shipping \"ChatGPT-readable memory\" same problem\n   - Each vendor optimizes for their own ecosystem\n   - Memory.Wiki sits in the gap they can't cross\n\n2. **URL = universal interface**\n   - No SDK to integrate\n   - No API keys to manage per-tool\n   - Works in ChatGPT, Claude, Cursor, Gemini, Perplexity — anything that can fetch a URL\n   - Even works in tools that don't exist yet\n\n3. **Graph ships in the response**\n   - Not \"retrieve chunks from a service\"\n   - The URL payload contains pre-built navigation (concepts, relations, themes)\n   - AI inherits the structure, doesn't have to build it\n\n## The Moat Deepens Over Time\n\n- **Network effects**: Each new hub/bundle makes the collective concept graph richer\n- **Distribution**: Every shared URL carries a viral badge → compounds\n- **First-mover on spec**: Bundle Spec v1.0 becomes the de facto standard before vendors ship their own\n\n## What This Enables That Vendor Memory Can't\n\n- Start research in Claude → paste URL into Cursor → continue coding with full context\n- Team member shares their hub URL → entire team's AI tools can read it\n- Switch from ChatGPT to Gemini → your memory comes with you\n\nThe wedge isn't \"better memory extraction\" or \"better search\" — it's **being the only memory layer that works across every AI**, which no single AI company can build without hurting their own moat.",
+      "tokens_in": 128091,
+      "tokens_out": 478,
+      "latency_ms": 17411,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's wedge, or structural advantage, over single-AI memory systems is its cross-AI capability. Unlike single-AI memory systems that are confined to their respective platforms, Memory.Wiki is designed to function as a cross-AI memory protocol layer. This means it can serve as a universal memory layer that any AI can access, regardless of the platform. This cross-AI functionality is something that single-AI systems like OpenAI's ChatGPT Memory or Anthropic's Claude Projects cannot offer, as they are inherently tied to their own ecosystems. Memory.Wiki's approach allows users to deploy their knowledge across multiple AI tools using a single URL, making it a unique and open solution in the AI memory space.",
+      "tokens_in": 97710,
+      "tokens_out": 145,
+      "latency_ms": 4803,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "According to the provided content, Memory.Wiki's structural wedge is that it provides a **cross-AI memory layer**, which large AI companies like OpenAI and Anthropic are structurally incentivized not to build.\n\nThe plans state that a single AI vendor, like OpenAI, will not create a memory system that also benefits its direct competitors, such as Anthropic's Claude. This creates a gap for an independent, neutral layer that can serve all AIs.\n\nMemory.Wiki is positioned as this external layer. Its core idea is that a user's knowledge can live in a single URL that any AI can read, solving the problem of re-explaining context to different AI tools. This cross-AI portability is described as the \"structural wedge giants cannot build.\"",
+      "tokens_in": 102543,
+      "tokens_out": 156,
+      "latency_ms": 10854,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "Based on the hub content, Hyunsang Cho is building memory.wiki (formerly mdfy) to solve a fundamental problem in the AI era: **knowledge delivery, not just memory storage**.\n\n## The Core Problem He Identified\n\nFrom his manifesto, Cho observed that millions of people pour their thinking into ChatGPT, Claude, Gemini, and Cursor daily, getting genuinely useful answers—but then \"close the tab\" and lose that knowledge. The next day, they re-explain the same context, re-paste the same information, and essentially start from zero again.\n\n## His Unique Perspective\n\nCho's background gives him a distinctive vantage point:\n\n1. **National AI Experience**: As Product & Experience Lead at Humain (Saudi Arabia's national AI project), he saw firsthand that the question wasn't just \"is our model good enough?\" but rather \"what layer can we own that the big labs don't?\"\n\n2. **20 Years Across 3 Countries**: His experience spanning the UK, Korea, and Saudi Arabia—across enterprise (Aramco), national (Humain), consumer (Devsisters), and startup scales—showed him the same pattern: **model quality rapidly commoditizes, but the memory/context layer remains unsolved**.\n\n3. **The Structural Gap**: He recognized that AI companies face a fundamental dilemma: they can't build cross-AI memory without helping their competitors. OpenAI won't ship memory that serves Claude; Anthropic won't ship memory that serves ChatGPT. This creates a structural gap that only an independent third party can fill.\n\n## Why Memory.Wiki Specifically\n\nCho is building memory.wiki as:\n\n1. **A Memory Protocol Layer**: Like RSS for feeds or OAuth for authentication, he's creating an open standard for AI-deployable knowledge\n2. **User-Authored, Not Extracted**: Unlike Mem0/Letta which extract memory automatically, memory.wiki lets users author and own their knowledge\n3. **Cross-AI by Design**: One URL works across ChatGPT, Claude, Cursor, Gemini—solving the \"re-explain tax\" users pay when switching tools\n4. **Graph-Native**: The knowledge graph ships inside the URL payload, so any AI inherits the structure, not just raw text\n\n## The Timing\n\nFrom his strategic documents, Cho believes there's a **6-12 month window** where this layer can be defined before the giants lock users into closed systems. He left Humain specifically to build this because he saw the pattern: the cross-AI memory layer is structurally impossible for any single AI company to build, but critical for users who live across multiple AI tools.\n\nIn essence, he's building memory.wiki because his 20 years of experience—culminating in leading Saudi Arabia's national AI project—showed him exactly where the gap is, why it exists, and why now is the only time to fill it.",
+      "tokens_in": 128086,
+      "tokens_out": 647,
+      "latency_ms": 21527,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "Hyunsang Cho is building memory.wiki to address the problem of knowledge delivery rather than AI memory. He observed that while people frequently use AI tools like ChatGPT, Claude, Gemini, and Cursor to generate valuable insights, these insights are often lost because they are not stored or reused effectively. The industry typically focuses on creating memory stores that AI can query, but Cho believes the real issue is that user knowledge lacks a universally accessible format that any AI can read. Memory.wiki aims to provide a solution by allowing knowledge to live as a URL, which any AI can access, update, and use, thus enabling seamless knowledge sharing across different AI platforms. This approach is intended to create an open standard for AI memory, similar to how HTTP became the standard for documents.",
+      "tokens_in": 97703,
+      "tokens_out": 154,
+      "latency_ms": 4167,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "According to the provided content, Hyunsang Cho is building memory.wiki to solve the \"delivery problem\" of knowledge in the AI era.\n\nHe states that millions of people pour their thinking into AIs like ChatGPT and Claude, receive useful answers, and then lose that knowledge by closing the tab. This forces them to constantly re-explain the same context to every AI.\n\nCho believes the real issue is not a lack of memory, but that knowledge is trapped in closed systems (like Notion or a specific AI's memory) that other AIs cannot read. Memory.wiki's purpose is to provide a solution where knowledge lives as a URL. This URL acts as an open API that any AI can fetch, creating a portable, cross-AI memory layer. He is building it now because he sees a narrow window to establish an open standard before closed, proprietary systems win.",
+      "tokens_in": 102535,
+      "tokens_out": 179,
+      "latency_ms": 11157,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "Based on the hub content, mdfy's core product features as of 2026-05 include:\n\n**Multi-Surface Capture**\n- Chrome extension for one-click capture from ChatGPT, Claude, Gemini\n- VS Code extension for direct markdown publishing\n- Mac desktop app with clipboard watch\n- CLI tool (`cat | mdfy`)\n- Drag-and-drop and paste-as-markdown support\n- GitHub repo import\n\n**AI-Powered Organization**\n- Automatic concept extraction from documents\n- Bundle graph analysis (themes, insights, edges)\n- Embeddings for semantic search (doc + chunk level)\n- Cross-bundle concept relations\n- Galaxy visualization of concept index\n- 3-provider AI failover (Anthropic → OpenAI → Gemini)\n\n**Three URL Primitives**\n- **Document URL** (`mdfy.app/<id>`): Single markdown file\n- **Bundle URL** (`mdfy.app/b/<id>`): Curated collection with AI graph\n- **Hub URL** (`mdfy.app/hub/<slug>`): Entire knowledge base\n\n**Deployment & Integration**\n- MCP server (26 tools) for Claude Desktop, Cursor, Cline, Windsurf\n- Compact vs Full URL responses (~95% token savings in Compact mode)\n- Real-time collaboration (Yjs CRDT)\n- Version history\n- Multiple permission roles (owner/editor/readonly)\n\n**Content Processing**\n- WYSIWYG editor (Tiptap) + Source mode (CodeMirror 6)\n- GFM tables, task lists, footnotes\n- KaTeX math, Mermaid diagrams\n- Code highlighting\n- 14+ file format imports\n\n**AI Features**\n- In-doc actions (polish, shorten, expand, translate)\n- AI side panel for chat\n- Visitor \"Ask AI\" on public docs\n- Auto-categorization and tagging\n\nThe system is built on a markdown-native foundation with the core thesis that \"A mdfy URL is an API for any AI\" - enabling cross-AI deployment without vendor lock-in.",
+      "tokens_in": 128086,
+      "tokens_out": 484,
+      "latency_ms": 15190,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "As of May 2026, mdfy's core product features include:\n\n1. **URL Architecture**: mdfy operates on a three-tier URL system with Document, Bundle, and Hub URLs, each serving as a unit of knowledge that can be deployed to any AI.\n\n2. **Multi-Surface Capture**: Users can capture content from various sources including Chrome, VS Code, Mac, CLI, and MCP, turning them into markdown documents with permanent URLs.\n\n3. **AI Integration**: The platform supports AI tools for polishing, summarizing, translating, and chatting about documents. It also features a concept index for ontology extraction and embeddings for semantic search.\n\n4. **Real-Time Collaboration**: Utilizes Yjs CRDT for collaborative editing, allowing multiple users to edit documents simultaneously with presence indicators.\n\n5. **Permissions and Sharing**: Offers role-based permissions (owner, editor, readonly) and supports public and private sharing with permanent URLs.\n\n6. **Bundle and Hub Management**: Users can create bundles of documents, which can be manually or AI-generated, and manage their entire knowledge hub with auto-organization and query capabilities.\n\n7. **Cross-AI Compatibility**: mdfy URLs can be used across different AI platforms, supporting a cross-AI memory protocol layer.\n\n8. **Open Infrastructure**: The platform is built on open standards with a focus on user-authored content rather than AI-extracted memory.\n\nThese features collectively position mdfy as a personal knowledge hub for the AI era, emphasizing cross-platform compatibility and user control over knowledge management.",
+      "tokens_in": 97706,
+      "tokens_out": 317,
+      "latency_ms": 5064,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "Based on the provided content, mdfy's core product features as of May 2026 include:\n\n*   **URL Architecture:** The product is built on a three-tier URL system:\n    *   **Doc URL:** A single markdown document.\n    *   **Bundle URL:** A collection of documents, including an AI-extracted graph of themes and insights.\n    *   **Hub URL:** A user's entire collection of bundles and their cross-bundle concept ontology.\n\n*   **Editing and Rendering:** A WYSIWYG editor (Tiptap) and a source markdown editor (CodeMirror 6) that support GFM tables, KaTeX, Mermaid diagrams, and code highlighting.\n\n*   **AI Integration:**\n    *   Automatic concept indexing and embeddings for semantic search.\n    *   AI-powered in-doc actions like polishing, shortening, and translating text.\n    *   An AI side panel for chatting about the active document.\n    *   Failover support for three AI providers: Anthropic, OpenAI, and Gemini.\n\n*   **Real-time Collaboration:** Live collaborative editing using Yjs CRDT over Supabase Realtime, with remote cursor presence.\n\n*   **Multi-channel Surfaces:** The product is available across a web app, VS Code extension, desktop app (DMG), Chrome extension, CLI, MCP server (with 26 tools), and a macOS QuickLook plugin.",
+      "tokens_in": 102543,
+      "tokens_out": 302,
+      "latency_ms": 12965,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-004",
+      "answer": "mdfy's retrieval system (what we call \"mdfy Memory\") is a **hybrid pipeline** that combines vector similarity with keyword matching, operating at three granularities: document-level, chunk-level, and bundle-level. Here's the architecture:\n\n## Core pipeline\n\n1. **Embedding generation** (on document save):\n   - Full document body → OpenAI `text-embedding-3-small` → stored in `documents.embedding`\n   - Document chunked by heading boundaries → each chunk embedded → stored in `document_chunks.embedding`\n   - Bundle metadata (title + description + member titles) → embedded → stored in `bundles.embedding`\n\n2. **Hybrid retrieval** (on query):\n   - **Vector search**: pgvector cosine similarity against all three embedding tables\n   - **BM25 keyword search**: Postgres full-text search (`to_tsvector` / `to_tsquery`) against markdown bodies\n   - **Weighted fusion**: vector results (70%) + BM25 results (30%) → merged + deduplicated\n\n3. **Chunk-level recall**:\n   - When a document matches, the system returns the **most relevant chunk** (paragraph-level) instead of the full body\n   - Reduces token cost by ~80% vs. returning full documents\n   - Each chunk carries its parent document URL for citation\n\n## Three retrieval scopes\n\n| Scope | What it searches | Use case |\n|---|---|---|\n| **Document recall** | All docs in your hub | \"What did I write about X?\" |\n| **Bundle recall** | Docs within a specific bundle | \"In my project-acme context, what's the auth strategy?\" |\n| **Cross-bundle recall** | All bundles + their member docs | \"Which bundles mention Rust error handling?\" |\n\n## Idempotency + freshness\n\n- **Embedding source hash**: `embedding_source_hash` column stores a hash of the content that was embedded. If the content hasn't changed, re-embedding is skipped (saves API cost + latency).\n- **Stale detection**: When a document's content changes, its `embedding_updated_at` timestamp updates. Bundles that reference that document are marked `analysis_stale: true` until re-analyzed.\n\n## MCP integration\n\nThe retrieval pipeline is exposed via the MCP server's `mdfy_search` tool:\n\n```typescript\nmdfy_search({\n  query: \"cross-AI memory architecture\",\n  scope: \"hub\",        // or \"bundle:<id>\"\n  limit: 5,\n  chunk_level: true    // return chunks, not full docs\n})\n```\n\nThis is what powers the `/recall` command in Claude Code / Cursor — the AI can search your hub mid-conversation without you manually pasting URLs.\n\n## Why this shape\n\nThe hybrid approach (vector + BM25) handles two failure modes:\n\n1. **Pure vector search** misses exact keyword matches (e.g., searching for \"OAuth PKCE\" when the doc uses that exact phrase).\n2. **Pure keyword search** misses semantic similarity (e.g., searching for \"authentication flow\" when the doc says \"login sequence\").\n\nThe 70/30 weighting is empirically tuned — vector search is the primary signal, BM25 is the fallback for precision.\n\n## What's next\n\n- **Cross-hub recall** (search across multiple users' public hubs) — planned for v6.\n- **Temporal recall** (\"what did I write about X in the last 2 weeks?\") — date-range filtering.\n- **Concept-level recall** (search by extracted concepts, not raw text) — uses the `concept_index` table.\n\nFor the full technical spec, see [How mdfy Memory works](/mdfy-memory).",
+      "tokens_in": 128081,
+      "tokens_out": 862,
+      "latency_ms": 23985,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-004",
+      "answer": "The retrieval pipeline for mdfy is now framed around the product, known as \"memory,\" rather than the technique, which was previously referred to as RAG (Retrieval-Augmented Generation). The architecture remains the same, involving an HTTP endpoint, chunked and hybrid retrieval, and idempotent embeddings. However, it is now presented under a more user-friendly name. For more detailed information, you can refer to the updated documentation on how mdfy Memory works.",
+      "tokens_in": 97701,
+      "tokens_out": 95,
+      "latency_ms": 2558,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-004",
+      "answer": "According to the provided content, the concept of RAG (Retrieval-Augmented Generation) is framed as \"mdfy Memory.\" The system uses a retrieval pipeline for semantic recall.\n\nThe process involves:\n*   **Embeddings**: The system creates vector embeddings for each document and its chunks using OpenAI's `text-embedding-3-small` and stores them in `pgvector`. It uses a heading-aware chunking strategy.\n*   **Hybrid Retrieval**: The query API uses a hybrid of vector search and BM25 (a keyword-based search algorithm) to recall paragraph-level chunks.\n*   **MCP Integration**: Retrieval is primarily exposed through the Model Context Protocol (MCP) via tools like `mdfy_search` or a `/recall` API. This allows AI agents to perform vector similarity searches by meaning, not just keywords.\n*   **Freshness**: The system avoids re-embedding unchanged content by checking an `embedding_source_hash`.",
+      "tokens_in": 102533,
+      "tokens_out": 204,
+      "latency_ms": 10116,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-005",
+      "answer": "mdfy maintains freshness through a three-layer system with different update mechanisms:\n\n**Document Body (Always Fresh)**\n- Updates propagate within ~60 seconds of saving\n- Direct database reads ensure immediate freshness\n- Edge cache revalidates in background (stale-while-revalidate=300)\n- No manual action needed\n\n**Bundle Graph (Manual Re-analyze)**\n- AI-generated themes/insights are computed once and reused\n- Becomes \"stale\" when member documents change\n- Shows \"Re-analyze with AI\" button in bundle header when outdated\n- Manual trigger prevents wasting tokens during active editing\n- User decides when re-analysis is worth running\n\n**Hub Concept Index (Automatic + Manual)**\n- Concept extraction runs automatically within seconds of saving\n- Two guardrails prevent excessive LLM calls:\n  - 30-minute per-doc cooldown (prevents token burn during rapid edits)\n  - 200-character minimum delta (skips trivial changes)\n- Shows \"Re-analyze (N)\" banner when concepts lag behind content\n- Manual re-analyze:\n  - Only processes changed documents (not entire hub)\n  - Caps at 50 docs per click\n  - Bypasses cooldown period\n  - Runs asynchronously\n\n**When to Click Re-analyze**\n- Before sharing hub URL with an AI\n- After bulk imports/edits\n- When adding docs on new topics that should surface as \"related\"\n- When yellow staleness banner appears\n\n**When No Action Needed**\n- Just reading existing docs\n- Edited a doc and shared its URL (body updates automatically)\n- Anonymous/non-signed-in usage (no concept index applies)\n\nThe system prioritizes body markdown freshness (always current) while making AI-derived metadata (graphs, concepts) fast-but-not-instant with explicit override available. This balances cost discipline with predictability—users control when expensive LLM operations run rather than having implicit background rebuilds.",
+      "tokens_in": 128087,
+      "tokens_out": 443,
+      "latency_ms": 17158,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-005",
+      "answer": "mdfy ensures that documents, bundles, and hubs remain fresh through a structured approach that involves three layers, each with its own update mechanism:\n\n1. **Document Body**: The markdown content of a document is always kept up-to-date. When a document is saved, the new markdown is immediately stored in the database. Any subsequent AI fetch sees the updated content within approximately 60 seconds. This is achieved by reading directly from the database and using an edge cache that revalidates content in the background when changes occur.\n\n2. **Bundle Graph**: The AI-generated themes and insights within a bundle are updated when necessary. A bundle's graph is generated once and reused until a member document's content changes. If a document within the bundle is updated, the bundle is marked as stale, prompting a \"Re-analyze with AI\" option for the user to refresh the graph. This manual trigger prevents unnecessary token usage and allows users to decide when to update the analysis.\n\n3. **Hub Concept Index**: The concept index, which represents the user's knowledge graph, is refreshed automatically and manually. Every document save triggers an ontology refresh job, typically completing within seconds. However, a 30-minute cooldown per document and a 200-character minimum change threshold prevent excessive token use during active editing. Users can manually re-analyze the hub to ensure the concept map reflects recent changes.\n\nThis approach balances automatic updates with user control, ensuring that the content remains relevant and accurate without unnecessary resource consumption.",
+      "tokens_in": 97706,
+      "tokens_out": 297,
+      "latency_ms": 4909,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-005",
+      "answer": "Based on the provided content, mdfy uses a three-layered approach to keep content fresh, with different rules for each layer.\n\n1.  **Document Body**: The markdown content you write is always fresh. When you save a document, the changes are visible to any AI that fetches the URL within about 60 seconds. No user action is needed.\n\n2.  **Bundle Graph**: The AI-generated analysis of a bundle (themes, insights) is created once. If a document within the bundle is edited, the graph becomes \"stale.\" The user will see a \"Re-analyze with AI\" option in the bundle header to manually update the analysis. This is not automatic to save AI costs and avoid disrupting the user's workflow.\n\n3.  **Hub Concept Index**: The cross-document concept map updates automatically within seconds of a save. However, to manage costs, there are guardrails like a 30-minute cooldown per document for re-analysis. If multiple documents are out of sync, a banner appears prompting the user to \"Re-analyze,\" which updates only the changed documents.",
+      "tokens_in": 102538,
+      "tokens_out": 230,
+      "latency_ms": 13192,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-006",
+      "answer": "The Upstage Memory Protocol alliance proposal was a strategic partnership pitch to Upstage (a Korean AI company) positioning mdfy as a cross-AI memory layer that Upstage Solar (their LLM) could be the first to natively support.\n\n## Core Thesis\n\nThe proposal argued that **Layer 3 (user memory protocol) is structurally empty** because:\n- Model companies (OpenAI, Anthropic) can't build cross-AI memory without helping competitors\n- Application companies can't define standards other apps will adopt\n- This creates a unique opportunity for a neutral third party to define the standard\n\n## Why Solar Specifically\n\nThe pitch identified Solar's unique positioning advantages:\n\n| Position | OpenAI/Anthropic | Solar |\n|---|---|---|\n| Category-leading model | ✅ | ✗ (capital asymmetry) |\n| **Memory-friendly first LLM** | ✗ (likely closed protocol) | **✅ possible** |\n| **Korean stack identity** | ✗ | **✅ already has** |\n| **Startup partnership speed** | △ (slow) | **✅ fast decisions** |\n\nThe argument: This combination of advantages only exists for Solar in a **6-12 month window** before larger players lock in their own closed memory systems.\n\n## Proposed 6-Month Deliverables\n\n1. **Solar adapter for memory.wiki** — First reference implementation showing how an LLM natively recognizes memory.wiki URLs\n2. **Document Parse → Bundle pipeline** — Automatic conversion of Upstage enterprise documents into memory.wiki bundles\n3. **Public spec announcement** — `memory.wiki/spec` page listing \"Recognized by Solar\" as the first partner\n\n## Strategic Value\n\nThe real value wasn't the PoC implementations but **category formation positioning**: Solar would be the \"first memory-friendly LLM\" when the spec goes public in December, giving them a positioning advantage when other LLM tools (Cursor, Anthropic, OpenAI Apps SDK) start adopting the standard.\n\n## Founder Credibility\n\nThe pitch leveraged the founder's background:\n- Just left Humain (Saudi Arabia's national AI project) as Product & Experience Lead\n- Previous roles: Devsisters (Cookie Run VR), Kakao IX UK (regional director), Saudi Aramco (UX lead)\n- Positioned as peer-level conversation, not vendor pitch\n\n## What Made It Strategic vs Tactical\n\nRather than asking \"will you use our API?\", the proposal framed it as:\n> \"The window for defining the memory protocol of the AI era is open now. It closes in 12 months. Let's define it together.\"\n\nThe alliance was about **co-defining a standard** where Solar would be the first mover, not just another integration partner.\n\n## Outcome\n\nThe documents don't indicate whether this proposal was accepted, but it represents mdfy's strategic approach to partnerships: positioning as infrastructure/protocol layer rather than just another tool, and targeting the \"first mover\" advantage in a category-formation window.",
+      "tokens_in": 128083,
+      "tokens_out": 696,
+      "latency_ms": 23235,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-006",
+      "answer": "The Upstage Memory Protocol alliance proposal was a strategic initiative aimed at positioning the collaboration as a \"strategic alliance\" rather than just a vendor contract. The proposal emphasized the opportunity to define a memory protocol for the AI era, highlighting that there is a narrow window of 12 months to establish this standard before it potentially closes. The proposal outlined a 6-month collaboration plan with specific deliverables, including the development of a Solar adapter for memory.wiki, an automatic conversion pipeline for Document Parse to Bundle, and a public release of the memory.wiki/spec with recognition by Solar. The proposal also detailed the mutual benefits and resources each party would bring to the partnership, aiming to leverage Upstage's unique position and capabilities to establish a first-mover advantage in the emerging memory protocol space.",
+      "tokens_in": 97701,
+      "tokens_out": 157,
+      "latency_ms": 4594,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-006",
+      "answer": "Based on the document \"Upstage 발표 — Memory Protocol 동맹 제안,\" the proposal was to position a 6-month K-Tech Pioneers collaboration with Upstage as a strategic alliance rather than a simple vendor contract.\n\nThe core thesis was that the \"Memory Protocol\" layer in the AI stack is currently empty, as large model companies like OpenAI are structurally disincentivized from creating an open, cross-AI memory standard. The proposal argued that Upstage's Solar LLM had a limited window to become the \"first memory-friendly LLM\" by co-defining this open protocol with memory.wiki.\n\nThe proposed 6-month collaboration included building a \"Solar adapter\" for memory.wiki, creating a pipeline to automatically convert documents into memory.wiki bundles using Upstage's Document Parse API, and publicly announcing the partnership. In return for access to Upstage's APIs, Raymind.AI would provide its infrastructure and co-brand the effort.",
+      "tokens_in": 102533,
+      "tokens_out": 199,
+      "latency_ms": 11045,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-007",
+      "answer": "Based on the hub content, K-Tech Pioneers is a Korean government program for tech startups expanding internationally. The evaluation context includes:\n\n**Program Structure:**\n- Regional tracks: ASEAN (Singapore), US East/West\n- Two-stage process: document screening → presentation evaluation\n- 6-month collaboration period with selected Korean companies\n\n**Presentation Requirements:**\n- 40-minute slot (presentation + Q&A)\n- Can be conducted remotely via Zoom or in-person\n- Must address evaluation criteria including:\n  - Team capabilities and track record\n  - Technology/solution differentiation\n  - Market fit and business model\n  - **Collaboration fit with selected Korean companies** (key focus)\n\n**For Hyunsang/Raymind.AI specifically:**\n- Selected companies: **Upstage** and **KT**\n- Presentation date: May 21, 2026, 10:20-11:00 SGT (11:20-12:00 KST)\n- Format: Remote via Zoom\n- Materials due: May 18, 2026, 6:00 PM KST\n\n**Key Evaluation Focus:**\nThe presentation should demonstrate how mdfy/memory.wiki can collaborate with Upstage (AI company with Solar LLM) and KT (major Korean telecom). The collaboration proposal should be specific and demonstrate mutual value, not just generic partnership potential.\n\nThe hub contains a detailed presentation strategy document specifically for the Upstage pitch, positioning it as a \"Memory Protocol alliance\" rather than a vendor relationship.",
+      "tokens_in": 128082,
+      "tokens_out": 351,
+      "latency_ms": 13585,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-007",
+      "answer": "The K-Tech Pioneers presentation evaluation context involves a structured process for assessing presentations from participating teams. The evaluation includes specific guidelines and requirements communicated by regional operators, such as presentation schedules, formats (in-person or virtual), selected topics, and submission instructions for presentation materials. Teams are expected to adhere to these guidelines and submit their materials by the specified deadlines. Additionally, there are FAQs addressing common queries about presentation preparation, such as whether to use provided templates, how to handle multiple selected topics, and the language options for presentations. The evaluation aims to assess the suitability of proposed collaborations with domestic companies, with final selections leading to further discussions and potential partnerships.",
+      "tokens_in": 97701,
+      "tokens_out": 130,
+      "latency_ms": 2809,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-007",
+      "answer": "Based on the provided content, the K-TECH PIONEERS presentation evaluation is for Hyunsang Cho of Raymind.AI. The presentation is scheduled for May 21, 2026, via Zoom for the ASEAN region.\n\nThe evaluation is 40 minutes long, including a Q&A session. The selected topics for Raymind.AI are collaborations with Upstage and KT. Participants were asked to submit their presentation materials and a video consent form by May 18, 2026.\n\nThe presentation should propose a collaboration direction based on an analysis of the target companies (Upstage, KT), leveraging Raymind.AI's solutions. While a template was provided, teams could use their own pitch decks if they covered the required evaluation criteria. The presentation can be in either Korean or English.",
+      "tokens_in": 102534,
+      "tokens_out": 170,
+      "latency_ms": 9528,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-008",
+      "answer": "The a16z application contains several key sections:\n\n**Team Information:**\n- Full-time/part-time status\n- Number of founders and FTE employees\n- Founder details including:\n  - Contact information (name, email, phone)\n  - Relevant professional experience\n  - Education and citizenship\n  - Technical capabilities\n  - LinkedIn, GitHub, X (Twitter), and portfolio URLs\n- Team dynamics and advisors\n\n**Startup Details:**\n- Startup name and one-sentence pitch\n- Problem being solved and solution description\n- Primary and secondary category selection\n- Location and founding date\n- Company website\n- Additional context\n\n**Additional Information (Optional):**\n- Pitch deck (PDF)\n- Traction metrics\n- Funding history\n- Active fundraising round details\n- Referral source\n\nThe application emphasizes understanding the team's background, the startup's core value proposition, and any existing traction or funding. It's designed to be comprehensive while allowing founders to highlight what makes their team and startup unique.",
+      "tokens_in": 128079,
+      "tokens_out": 225,
+      "latency_ms": 9409,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-008",
+      "answer": "The a16z application is a form used to apply for funding or support from Andreessen Horowitz (a16z). It includes sections for team information, startup details, and additional information. Key fields include:\n\n- **Team Information**: Details about the founders, whether they are full-time or part-time, the number of full-time equivalent employees, and relevant experience.\n- **Startup Details**: A description of the startup, the problem it solves, and its solution. It also asks for the primary and secondary categories of the startup, the location where the startup will be built, and the founding date.\n- **Additional Information**: Optional fields for a pitch deck, traction, funding history, and active fundraising round. It also asks how the applicant learned about the speedrun program.\n\nThe application emphasizes the importance of sharing additional information to provide context and improve the strength of the application.",
+      "tokens_in": 97698,
+      "tokens_out": 179,
+      "latency_ms": 2819,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-008",
+      "answer": "Based on the provided content, the a16z application is for the \"speedrun\" program and consists of a detailed application form and a pitch deck.\n\n**Application Form:**\nThe form requests information in three main sections:\n1.  **Team:** Details about the founders, including their full-time status, experience, education, technical ability, and how they know each other.\n2.  **Startup Details:** The startup's name, a one-sentence pitch, a longer description of the problem and solution, its category, and founding date.\n3.  **Additional Information:** Optional sections for a pitch deck, traction, funding history, and referral details.\n\n**Pitch Deck Content:**\nThe planned pitch deck for \"mdfy\" (the former name for Memory.Wiki) includes eight slides:\n*   **Problem:** AI users' memory is fragmented across multiple, siloed tools.\n*   **Solution:** A single mdfy URL makes a user's knowledge deployable to any AI.\n*   **Why Now:** AI vendors are building closed memory systems, creating an opportunity for a cross-AI layer.\n*   **Moat:** The cross-AI delivery model is a structural moat that individual AI companies are not incentivized to build.\n*   **Founder:** Highlights Hyunsang Cho's 15 years of experience, including leading Saudi Arabia's national AI project.\n*   **Traction:** Mentions shipping the full stack in 12 weeks.\n*   **Ask:** A seat in the speedrun program for network access and capital for two hires.",
+      "tokens_in": 102533,
+      "tokens_out": 337,
+      "latency_ms": 11660,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-009",
+      "answer": "The a16z speedrun pitch deck content is a comprehensive 8-slide presentation designed for the a16z speedrun program application. Here are the key elements:\n\n**Slide Structure:**\n1. **Title Slide**: Introduces mdfy as \"The memory layer for the AI era\"\n2. **Problem**: Highlights that AI users work across 5 tools (Claude, ChatGPT, Gemini, Cursor, MCP hosts) but their memory lives nowhere\n3. **Solution**: Presents the core value proposition - \"One URL. Every AI reads it\" with three composable layers (Doc, Bundle, Hub)\n4. **Why Now**: Explains that AI memory is 2026's biggest unsolved problem, with every vendor solving it only for themselves\n5. **Moat**: Argues that cross-AI delivery is structurally impossible for any single AI company to build\n6. **Founder**: Details Hyunsang's 15-year career including roles at Humain (Saudi Arabia's national AI program), Devsisters, Kakao, Aramco, and AKQA\n7. **Traction & Velocity**: Shows 5 live Raymind.AI products and mdfy's full stack shipped in 12 weeks\n8. **Ask**: Requests speedrun seat, distribution muscle, and capital for two post-launch hires\n\n**Key Messaging:**\n- Positions mdfy as infrastructure (like Stripe for payments) rather than another note-taking app\n- Emphasizes the \"cross-AI structural moat\" - no single AI company can build this without helping competitors\n- Demonstrates \"one person + AI co-founder\" velocity with 7 channels shipped in 2 months\n- Frames the opportunity as a 12-month window to define the memory protocol before it closes\n\n**Design System:**\n- Dark mode with warm zinc + orange accent colors\n- Minimal emoji usage, preferring Lucide icons\n- Lots of negative space for quick scanning\n- Mono captions for technical credibility\n\nThe deck is specifically tailored for speedrun's focus on consumer/creator + AI products and emphasizes the founder's unique positioning to execute on this vision.",
+      "tokens_in": 128083,
+      "tokens_out": 486,
+      "latency_ms": 16816,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-009",
+      "answer": "The a16z speedrun pitch deck content for mdfy includes eight slides designed to convey the product's vision and strategic positioning. Here's a summary of each slide:\n\n1. **Title Slide**: Introduces mdfy as \"The memory layer for the AI era,\" with contact information for Hyunsang Cho.\n\n2. **The Problem**: Highlights the issue of AI users having isolated memory across multiple tools, leading to repeated context uploads and explanations.\n\n3. **The Solution**: Describes mdfy as providing a single URL that any AI can read, allowing users to deploy their knowledge like code. It emphasizes the three layers: Doc, Bundle, and Hub.\n\n4. **Why Now**: Discusses the current landscape where AI memory is a significant unsolved problem, with vendors creating locked solutions. It positions mdfy as a cross-AI solution.\n\n5. **Moat**: Explains the competitive advantage of cross-AI delivery, which AI companies are structurally disincentivized to build themselves.\n\n6. **Founder**: Details Hyunsang Cho's extensive experience in AI product leadership across various countries and companies.\n\n7. **Traction & Velocity**: Lists the products live in 2025 and the rapid development of mdfy's full stack in 12 weeks.\n\n8. **Ask**: Outlines the request for a speedrun seat, distribution support, and post-launch hires, with a demo access invitation.\n\nThe deck emphasizes mdfy's unique positioning as a cross-AI memory layer and highlights the founder's credentials and the product's rapid development.",
+      "tokens_in": 97702,
+      "tokens_out": 325,
+      "latency_ms": 4750,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-009",
+      "answer": "Based on the provided content, the a16z speedrun pitch deck for mdfy outlines the following:\n\n*   **Problem:** AI users work across multiple tools (Claude, ChatGPT, Cursor), but their memory is fragmented and doesn't carry over, forcing them to re-explain context.\n*   **Solution:** mdfy provides a single URL for a user's knowledge (Doc, Bundle, or Hub) that any AI can read, making it \"deployable like code.\"\n*   **Moat:** The cross-AI delivery model is a structural moat because individual AI companies are incentivized *not* to build a layer that helps their competitors.\n*   **Founder:** It highlights Hyunsang Cho's 15 years of experience, including leading product for Saudi Arabia's national AI project at Humain.\n*   **Traction:** The deck points to the rapid development of mdfy's full stack (web, MCP, VS Code, etc.) in just 12 weeks as proof of velocity.\n*   **Ask:** The request is for a \"speedrun seat,\" distribution support, and capital for two post-launch hires.",
+      "tokens_in": 102537,
+      "tokens_out": 246,
+      "latency_ms": 12156,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-010",
+      "answer": "Based on the provided context, I can explain how mdfy (멤도) works:\n\n## Core Concept\n\nmdfy operates on a simple principle: **A mdfy URL is an API for any AI**. When you paste a mdfy URL (like `mdfy.app/<id>`, `mdfy.app/b/<id>`, or `mdfy.app/hub/<slug>`) into ChatGPT, Claude, Gemini, or Cursor, the LLM fetches it and receives clean markdown formatted for AI consumption.\n\n## Four Key Components\n\n1. **The Markdown**: Source of truth stored in `documents.markdown`\n2. **The AI Graph**: Per-bundle analysis stored in `bundles.graph_data` (JSON)\n3. **The Concept Index**: Lifelong ontology in `concept_index` + `concept_relations`\n4. **The Embeddings**: Vectors for semantic recall in pgvector\n\n## Three URL Types\n\n### Document URL (`mdfy.app/<id>`)\nReturns a single markdown document with frontmatter wrapper - the atomic unit.\n\n### Bundle URL (`mdfy.app/b/<id>`)\nReturns a compact digest by default:\n- AI-generated summary, themes, and insights\n- Concept subgraph\n- Document index with annotations\n- ~95% fewer tokens than concatenating all docs\n\n### Hub URL (`mdfy.app/hub/<slug>`)\nReturns the shape of someone's thinking:\n- Top-weighted concepts\n- Typed relations between concepts\n- Bundle distribution\n- Allows navigation from concepts to bundles to documents\n\n## Two Integration Methods\n\n1. **Pull (URL fetch)**: Any AI tool that can fetch a webpage can read mdfy URLs\n2. **Push + Pull (MCP)**: The `mdfy-mcp` npm package provides 26 tools for deeper integration with Claude Desktop, Cursor, Cline, and Windsurf\n\n## Workflow\n\n1. **Capture**: Use Chrome extension, VS Code, CLI, or paste to create documents\n2. **Organize**: AI automatically extracts concepts, creates embeddings, and builds graphs\n3. **Deploy**: Share URLs with any AI tool for instant context\n\nThe system maintains freshness through automatic extraction jobs and embedding pipelines, with 30-minute throttling to manage costs.",
+      "tokens_in": 128081,
+      "tokens_out": 520,
+      "latency_ms": 15646,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-010",
+      "answer": "The content provided does not contain specific information about how memdo (멤도) works. If you have any other questions or need information on a different topic, feel free to ask!",
+      "tokens_in": 97701,
+      "tokens_out": 38,
+      "latency_ms": 2495,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-010",
+      "answer": "Based on the document \"How memdo 멤도 works,\" the system operates on a single core idea: **A mdfy URL is an API for any AI.**\n\nWhen a user pastes a mdfy URL (for a document, a \"bundle\" of documents, or their entire \"hub\") into an AI like ChatGPT, Claude, or Cursor, the AI fetches that URL. It receives clean, pre-organized markdown that serves as context for the conversation.\n\nInternally, there are four main components:\n1.  **The markdown:** The user-written source of truth.\n2.  **The AI graph:** AI-extracted themes, insights, and relationships from a bundle of documents.\n3.  **The concept index:** A user's lifelong ontology of concepts pooled across all their content.\n4.  **The embeddings:** Vectors that power semantic search.\n\nThis allows for different levels of context delivery: a single document, a curated bundle with an AI-generated summary, or a user's entire knowledge hub. This \"delivery model\" is its key differentiator, as it provides any AI with a pre-organized knowledge graph via a simple URL.",
+      "tokens_in": 102532,
+      "tokens_out": 243,
+      "latency_ms": 11257,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-011",
+      "answer": "Based on the provided context, I can see there is a document titled \"SNS Launch Execution Plan\" in the hub, but the full content is not included in the current context window. The document appears to be available at https://memory.wiki/jryfJV4D.\n\nTo provide you with the complete SNS launch execution plan details, I would need to fetch that specific document. Would you like me to retrieve it?\n\nFrom what I can see in the available context, there are references to various marketing and launch-related activities across different documents, including:\n\n1. Social media presence across multiple platforms (Instagram, TikTok, X/Twitter, YouTube, Threads)\n2. Content strategy with feature rotation\n3. Community seeding approaches\n4. Influencer outreach plans\n5. Promo code strategies\n\nHowever, for the complete and detailed SNS launch execution plan, I should fetch the specific document. Would you like me to do that?",
+      "tokens_in": 128079,
+      "tokens_out": 209,
+      "latency_ms": 9324,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-011",
+      "answer": "The SNS launch execution plan outlines the strategy for launching on social media platforms. It includes several phases:\n\n1. **Phase 0: Asset Preparation** - Prepare profile images, headers, and content assets like persona images and videos.\n\n2. **Phase 1: Profile Setup** - Set up profiles on Instagram, TikTok, X (Twitter), YouTube, and Threads with specific display names, bios, and links to pastlife.app.\n\n3. **Phase 2: Seed Content Day 1-3** - Post a minimum of 6 pieces of content before opening the prelaunch gate. This includes brand intros, how-to guides, and feature highlights across all platforms.\n\n4. **Phase 3: Gate Open** - Remove the prelaunch gate after initial content is live.\n\n5. **Phase 4: Full Posting Day 4-10** - Rotate features daily, showcasing different aspects of the product like Soul Cinema, past life portraits, and chat features.\n\n6. **Phase 5: Community Seeding** - Engage with communities on platforms like Reddit and Facebook to naturally introduce the product.\n\n7. **Phase 6: Influencer Outreach** - Reach out to influencers in relevant categories to promote the product, offering free experiences and promo codes.\n\nPromo codes are prepared for early adopters, and immediate action items include setting up profiles, uploading initial posts, and notifying the removal of the prelaunch gate.",
+      "tokens_in": 97698,
+      "tokens_out": 287,
+      "latency_ms": 3366,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-011",
+      "answer": "The SNS Launch Execution Plan is a multi-phase strategy focused on character-driven, emotional messaging.\n\nIt begins with Phase 0 and 1, which involve preparing assets and setting up consistent profiles on Instagram, TikTok, X/Twitter, YouTube, and Threads.\n\nPhase 2 is a three-day pre-launch content seeding period, where at least six posts are published to build trust. This content showcases key features like \"Soul Cinema,\" pet past lives, and couple readings.\n\nAfter the pre-launch \"gate opens\" (Phase 3), the plan moves to a full posting schedule (Phase 4), rotating content to highlight different features daily.\n\nFinally, the plan includes community seeding on platforms like Reddit (Phase 5) and influencer outreach to spiritual and pet-focused accounts (Phase 6) to drive organic growth. Promo codes are also prepared for early adopters.",
+      "tokens_in": 102530,
+      "tokens_out": 181,
+      "latency_ms": 9002,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-012",
+      "answer": "The v8 product idea is **Memory.Wiki** — a pivot from mdfy's publishing-focused markdown tool to an AI-native personal knowledge hub. Here's the core concept:\n\n## The Pivot\n\n**From**: \"Publish markdown to URLs\" (mdfy v1-7)  \n**To**: \"Your personal knowledge hub for the AI era\" (Memory.Wiki v8)\n\n## Core Value Proposition\n\nMemory.Wiki positions itself as the **memory layer** between you and every AI tool you use. The tagline is:\n\n> \"Stop re-explaining your context to every AI. Put your knowledge in one URL they can all read.\"\n\n## Three-Tier Architecture\n\nThe product operates on a **Capture → Organize → Use** framework:\n\n### 1. Capture (수집)\n- Multi-surface input: Chrome extension, VS Code, Mac app, CLI, voice (planned)\n- One-click capture from ChatGPT, Claude, Cursor conversations\n- iOS Share Sheet for mobile capture\n\n### 2. Organize (소화)\n- **AI auto-organizes** your captured content into:\n  - Concept index (your personal ontology)\n  - Bundles (themed collections)\n  - Cross-document relationships\n- User reviews and edits AI suggestions\n- Dual-layer storage: original content (immutable) + AI metadata (replaceable)\n\n### 3. Use (활용)\n- **Three URL scopes**:\n  - `memory.wiki/<id>` — single document\n  - `memory.wiki/b/<id>` — bundle (curated collection)\n  - `memory.wiki/@<username>` — entire hub\n- Paste any URL into any AI (ChatGPT, Claude, Cursor, etc.)\n- AI reads your context automatically\n- MCP server for deep tool integration\n\n## Key Differentiators\n\n1. **Cross-AI by design**: One URL works in every AI tool (not locked to ChatGPT or Claude)\n2. **User-authored, AI-organized**: You control what goes in; AI handles the organization\n3. **Graph is the product**: Concept relationships and knowledge structure are first-class\n4. **URL-native**: Everything is addressable, shareable, deployable\n\n## Strategic Positioning\n\nMemory.Wiki positions against:\n- **Mem0/Letta**: They extract memory automatically; Memory.Wiki is user-authored\n- **Notion AI**: Closed workspace; Memory.Wiki is open URLs\n- **LLM Wiki (Karpathy)**: Local compilation; Memory.Wiki is cloud + collaborative\n- **ChatGPT Memory**: Locked to ChatGPT; Memory.Wiki is cross-AI\n\n## Business Model\n\n```\nFree: 3 docs/month, public only\nPro $15/mo: Unlimited docs, private, AI auto-organize, native apps\nTeam $24/seat: Shared workspaces, collaboration\n```\n\n## Launch Timeline\n\n- **20-week build** (now → August 2026)\n- **Launch target**: August 2026\n- **First 100 users**: Existing mdfy.app users (50% lifetime discount)\n- **Distribution**: HN Show HN → Twitter → Product Hunt\n\n## The \"Why Now\" Thesis\n\nThe v8 plan argues this is a **6-12 month window**:\n- AI memory is 2026's biggest unsolved problem\n- Every vendor (OpenAI, Anthropic, Google) is building closed memory\n- The cross-AI layer is structurally impossible for any single vendor to build\n- Memory.Wiki can claim this space before it closes\n\n## Technical Foundation\n\nBuilt on existing mdfy infrastructure:\n- 7+ surfaces already shipped (web, Chrome, VS Code, Mac, CLI, MCP, QuickLook)\n- Real-time collaboration (Yjs CRDT)\n- AI graph analysis (themes, insights, edges)\n- Embeddings + semantic search\n- 3-provider AI failover (Anthropic → OpenAI → Gemini)\n\nThe v8 pivot is essentially: **take mdfy's multi-surface markdown infrastructure and reframe it as the memory layer for the AI era**, with AI auto-organization as the killer feature.",
+      "tokens_in": 128085,
+      "tokens_out": 959,
+      "latency_ms": 27919,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-012",
+      "answer": "The v8 product idea for Memory.Wiki is to serve as a cross-AI capture layer, allowing users to capture anything from anywhere, have AI organize it in the background, and then use a single URL to provide context to any AI tool. This approach aims to eliminate the need for users to repeatedly explain their context to different AI systems, by providing a unified, AI-readable URL that encapsulates their knowledge. The product is designed to be a personal knowledge hub that is AI-native, with a focus on delivering knowledge rather than just retrieving it, and it emphasizes the importance of cross-AI compatibility as a structural advantage that larger AI companies cannot easily replicate.",
+      "tokens_in": 97702,
+      "tokens_out": 132,
+      "latency_ms": 3453,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-012",
+      "answer": "The Memory.Wiki v8 product idea pivots to being a \"cross-AI capture layer.\" The core concept is to stop users from re-explaining their context to every AI they use.\n\nThe external thesis is: \"Stop re-explaining your context to every AI. Put your knowledge in one URL they can all read.\"\n\nThe product follows a three-stage framework:\n1.  **Capture:** Users and AI capture knowledge from anywhere.\n2.  **Organize:** AI automatically organizes the captured information in the background.\n3.  **Use:** The user pastes a single URL into any AI (like ChatGPT, Claude, or Cursor), which then fetches the organized context.\n\nA key technical feature is the dual-response URL architecture. The same URL provides a human-readable HTML page to a browser but delivers a token-budgeted markdown digest to an AI.\n\nThe strategic pivot is based on the internal thesis that large AI companies are structurally unable to build a cross-AI memory layer that serves their competitors, creating a unique market opportunity.",
+      "tokens_in": 102537,
+      "tokens_out": 218,
+      "latency_ms": 11087,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-013",
+      "answer": "The Memory.Wiki v8 UI and brand direction document outlines a comprehensive redesign focused on creating a \"2026 AI-native warm\" aesthetic that differentiates from the current \"2023 Dev Tool\" look. Here are the key elements:\n\n## Core Design Philosophy\nThe design is built around three words: **Warm, Dimensional, AI-native**\n\n### Visual System Changes\n\n**Color Palette:**\n- Shifts from neutral zinc to warm-tinted colors with brown undertones\n- Background: `#0d0b08` (warm-black with brown tint)\n- Introduces AI-specific tint: light purple (`#c4b5fd`) for AI-generated elements\n- Maintains orange accent (`#fb923c`) as brand core\n\n**Typography:**\n- **Display headings**: Serif fonts (Instrument Serif or Editorial New) for character and differentiation\n- **Body/UI**: Keeps Geist sans for readability\n- **Code**: JetBrains Mono or Geist Mono\n\n**Motion & Animation:**\nFive key micro-interactions with specific timing:\n- Page enter: 220ms with cubic-bezier easing\n- Card hover: 120ms lift\n- AI element appearance: 320ms with subtle purple glow\n- Streaming AI text: 18ms per token (typing feel)\n- Save confirmation: 1.4s bounce then fade\n\n### AI vs User Visual Distinction\nA critical feature for the dual-layer philosophy:\n\n**User-written content:**\n- Solid border with standard background\n- User avatar\n- No badge\n- Subtle lift on hover\n\n**AI-generated content:**\n- Border with AI-tint outer glow\n- ✨ Sparkle icon + agent name\n- \"Generated by Memory.Wiki AI\" badge\n- Stronger tint glow on hover\n\n**Edited-by-user (was AI):**\n- Converts to user-area styling\n- Badge: \"🪶 Edited by you · originally AI\"\n\n### Layout & Spacing\n- 4px micro grid + 8px macro grid system\n- Content max-width: 720px (narrower for intimacy)\n- Asymmetric whitespace: 288px left sidebar, generous right reading area\n- Modal/popover: Glass effect with `backdrop-filter: blur(12px)`\n\n## Logo Direction\n\n**Recommended: Option A - Layered M**\n- Two \"M\" letters slightly offset and overlapping (orange + warm white)\n- Represents memory's layered identity\n- Works from 16x16 favicon to 1024px\n- Natural connection to wordmark\n\n**Wordmark Polish:**\n- Evaluating Söhne Buch/Halbfett, Greycliff CF, or JetBrains Display\n- Decision at launch -2 weeks\n\n## Implementation Strategy\n\n**Brand Phase 1 (Week 1-2):**\n- Design tokens file with color system, spacing, typography scales\n- 5 core components (Button, Card, Badge, Modal, TimelineCard)\n- Symbol prototype (Option A)\n- Motion playground for micro-interactions\n- Brand voice doc\n- Type & spacing reference page\n\n**Brand Phase 2 (Week 17):**\n- Marketing assets\n- Landing page final visual\n- Onboarding illustrations (4-5 scenes)\n- App Store/Play Store screenshots\n- Brand guideline PDF\n- Optional: Audio identity\n\n## Anti-patterns (What NOT to Do)\n- Rainbow gradients (AI startup cliché)\n- Purple as primary color\n- 3D illustrations (Spline/Blender abstract)\n- \"AI\" in product name anywhere\n- Dark/light mode toggle as hero CTA\n- Generic empty state SVGs\n- Single-color illustrations pretending to be personal\n\n## Strategic Rationale\n\nThe document diagnoses five reasons the current UI feels \"oldschool\":\n1. Generic \"2023 Dev Tool\" visual language\n2. Motion absence (no streaming, transitions, or tactile feedback)\n3. Uniform typography (all Geist sans)\n4. Honest but flat colors (no gradients, limited palette)\n5. Equal visual treatment for user vs AI content\n\nThe v8 direction addresses each systematically while maintaining the product's core identity around the three-tier architecture (capture/digestion/utilization) and dual-layer philosophy (original sacred, AI assistive).",
+      "tokens_in": 128087,
+      "tokens_out": 1002,
+      "latency_ms": 32840,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-013",
+      "answer": "The Memory.Wiki v8 UI and brand direction document outlines a strategic plan to revamp the user interface and brand identity of Memory.Wiki. It identifies key areas where the current UI feels outdated and proposes a new direction characterized by three main attributes: Warm, Dimensional, and AI-native. The document highlights the need for a more emotionally engaging and visually dynamic interface that reflects the AI-native nature of the product.\n\nKey changes include:\n- A new color system with warm-tinted dark tones and a distinct AI tint for AI-generated elements.\n- A shift to a serif display font for headings to differentiate from other AI/dev tools, while maintaining the current sans-serif for body text.\n- Enhanced motion and animation to create a more dynamic and engaging user experience.\n- A focus on visual distinction between user-generated and AI-generated content.\n- A new logo symbol to complement the existing wordmark, with options like a layered \"M\" or a stylized \"@\" symbol.\n\nThe document also outlines immediate actions for Phase 1, including design token creation, component development, and motion playground setup, with a final polish planned for Phase 2.",
+      "tokens_in": 97705,
+      "tokens_out": 227,
+      "latency_ms": 4443,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-013",
+      "answer": "Based on the provided content, the Memory.Wiki v8 UI and brand direction document outlines a shift to a \"Warm, Dimensional, and AI-native\" visual language.\n\nIt diagnoses the current UI as a generic \"2023 Dev Tool\" and proposes specific changes:\n\n*   **Color System:** Move from neutral dark colors to a warm-tinted palette with brown undertones. A subtle purple tint will be used to distinguish AI-generated elements.\n*   **Typography:** Introduce a serif font for display headings to add character, while keeping Geist sans for body text.\n*   **Layout and Motion:** Incorporate dimensional, glassy backgrounds for modals and define specific, calm animations for interactions.\n*   **AI vs. User Distinction:** A core goal is to visually separate user-written content from AI-generated content using different borders, backgrounds, and badges.\n*   **Logo:** Proposes creating a new symbol, with the recommended direction being a \"Layered M\" to represent Memory.Wiki.\n\nThe plan is divided into two phases, with the initial system setup in the first two weeks and final polishing in week 17.",
+      "tokens_in": 102539,
+      "tokens_out": 238,
+      "latency_ms": 11464,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-014",
+      "answer": "Based on the hub content, Memory.Wiki is a personal knowledge wiki that serves as a deployable memory layer for AI systems. Here are the key specifications:\n\n## Core Promise\n\"You author. AI uses. The wiki maintains itself.\"\n\n## Two-Door Vision\n\n**Memory Door**: \"AI remembers me\"\n- 1-click capture → URL → paste anywhere workflow\n- Cross-AI/cross-tool/cross-session usage\n\n**Wiki Door**: \"My mind gets organized\"  \n- Auto-organized concept index\n- Backlinks panel\n- Hub-wide search\n- LLM-powered maintenance\n\n## Architecture\n\nThe product operates on three URL tiers:\n1. **Document URL** (`memory.wiki/<id>`) - Single markdown document\n2. **Bundle URL** (`memory.wiki/b/<id>`) - Curated collection of documents\n3. **Hub URL** (`memory.wiki/hub/<slug>`) - User's entire knowledge base\n\n## Key Differentiators\n\n**What it IS:**\n- Personal knowledge hub for the AI era\n- URL-native (everything is addressable)\n- AI-augmented authorship (user authors, AI organizes)\n- Open by default (MIT license, self-hostable)\n\n**What it's NOT:**\n- Another note-taking app (not competing with Notion/Obsidian)\n- AI-extracted memory (not like Mem0 - user explicitly authors)\n- Closed workspace (not like Notion)\n- Enterprise wiki (not like Confluence)\n\n## Missing Capabilities vs Current mdfy\n\nThe spec identifies three gaps that need to be filled:\n1. Link graphs (wikilink syntax + auto-resolve)\n2. Semantic search (meaning-based retrieval)\n3. LLM self-organization (automatic maintenance)\n\n## Brand Pillars\n\n1. **URL as API** - Any AI can fetch\n2. **Graph is product** - Concept ontology + relations\n3. **Multi-surface capture** - 7+ surfaces from day one\n4. **AI-augmented authorship** - User authors + AI organizes\n5. **Open Bundle Spec** - Standard formation\n\nThe product aims to be \"the memory layer for the AI era\" - sitting between users and multiple AI tools, making knowledge portable and deployable across any AI system via simple URLs.",
+      "tokens_in": 128079,
+      "tokens_out": 523,
+      "latency_ms": 15907,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-014",
+      "answer": "The Memory.Wiki product specification defines it as a personal knowledge wiki that serves as a deployable memory layer for AI systems. The core promise is \"You author. AI uses. The wiki maintains itself.\" It operates through two main doors: the \"Memory door,\" which promises \"AI remembers me\" through 1-click capture, and the \"Wiki door,\" which promises \"my mind gets organized\" through automatic indexing and LLM maintenance. The product explicitly rejects being \"another note-taking app\" like Notion or Obsidian and emphasizes cross-platform AI compatibility as a core differentiator. The specification also highlights the need for link graphs, semantic search, and LLM self-organization as current gaps compared to existing implementations. The brand pillars include \"One URL deploys everywhere\" for cross-AI/cross-tool/cross-session usage and \"Open spec, not platform lock-in.\"",
+      "tokens_in": 97698,
+      "tokens_out": 177,
+      "latency_ms": 2612,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-014",
+      "answer": "According to the provided content, the Memory.Wiki product specification is built on the vision of a personal wiki that users author, AI uses, and an LLM maintains. Its external thesis is to \"Stop re-explaining your context to every AI.\"\n\nThe product architecture follows a three-stage framework: Capture → Organize → Use.\n\n1.  **Capture**: Users and AI capture knowledge from multiple surfaces.\n2.  **Organize**: AI automatically organizes content in the background, adding metadata like tags and summaries. The system uses a dual-layer storage model, keeping the user's original content immutable while layering replaceable AI metadata on top.\n3.  **Use**: A single URL can be pasted into any AI (like ChatGPT or Claude) to provide context. The same URL serves HTML to browsers and a token-budgeted markdown digest to AIs.\n\nThe URL architecture has three levels for documents (`/<id>`), bundles (`/b/<id>`), and users (`/@<username>`). The product is designed as a \"cross-AI capture layer\" that large vendors are structurally unable to build.",
+      "tokens_in": 102532,
+      "tokens_out": 230,
+      "latency_ms": 11573,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-015",
+      "answer": "mdfy is a personal knowledge hub for the AI era. It operates on a three-layer architecture:\n\n**1. Capture Layer (Multi-surface)**\n- Chrome extension (one-click from ChatGPT/Claude/Gemini)\n- VS Code extension (publish from editor)\n- Mac desktop app (clipboard watch)\n- CLI (`cat file.md | mdfy`)\n- MCP server (26 tools for Claude Desktop/Cursor/Cline)\n- Direct paste/drop on mdfy.app\n\nEvery capture becomes a **Document URL** (`mdfy.app/<id>`) — permanent, editable, versioned.\n\n**2. Organization Layer (AI-assisted)**\n- **Bundles**: Curated collections of docs. Manual selection OR AI-generated (ask \"create a bundle about X\", AI searches your hub, drafts the bundle, you review/edit).\n- **Hub**: Your entire knowledge base at `mdfy.app/hub/<slug>`. Auto-organized by AI (categorization, tagging, concept extraction).\n- **Concept Index**: Cross-doc ontology. LLM extracts concepts from every doc, builds typed relations (depends_on, contradicts, part_of).\n- **Embeddings**: Per-doc + per-chunk vectors (OpenAI text-embedding-3-small) for semantic search.\n\n**3. Deployment Layer (Cross-AI)**\n- **Doc URL**: Single markdown file. Paste into any AI as context.\n- **Bundle URL**: Themed collection. Compact mode (~95% token savings) ships AI-generated graph (themes, insights, edges) + doc links. Full mode inlines all bodies.\n- **Hub URL**: Entire knowledge base. Compact mode ships concept digest (top concepts, typed relations, bundle distribution). Full mode lists all docs/bundles.\n- **MCP integration**: 26 tools (create, read, update, search, outline, versions, diff, etc.) for bidirectional read/write.\n\n**Key Differentiators**\n- **URL-native**: Everything is a URL. No SDK, no format lock-in.\n- **AI collaboration**: User authors, AI organizes. Not extraction (Mem0/Letta) or LLM-only (LLM Wiki).\n- **Cross-AI**: One URL works in ChatGPT, Claude, Gemini, Cursor — any tool that can fetch a URL.\n- **Graph in response**: Bundle/Hub URLs ship pre-built navigation (concept graph, typed edges) so receiving AI inherits structure, not just text.\n\n**Workflow Example**\n1. Capture ChatGPT answer via Chrome ext → Doc URL created\n2. Ask AI \"bundle my LLM memory research\" → AI searches hub, drafts bundle → you review/edit → Bundle URL created\n3. Paste Bundle URL into Cursor → Cursor fetches compact payload (graph + links) → understands context in ~5% of tokens vs full concat\n4. Cursor outputs new code → save back to mdfy via MCP → hub auto-updates\n\n**Technical Stack**\n- Frontend: Next.js 15, Tiptap (WYSIWYG), CodeMirror 6 (source)\n- Backend: Vercel Functions, Supabase (Postgres + Auth + Realtime)\n- AI: 3-provider failover (Anthropic → OpenAI → Gemini)\n- Search: pgvector (embeddings), Postgres full-text\n- Sync: Yjs CRDT over Supabase Realtime (real-time collab)\n- Engine: markdown-it (shared renderer across all surfaces)\n\n**Surfaces (7 channels)**\n- Web (mdfy.app)\n- Chrome extension\n- VS Code extension\n- Mac desktop app\n- CLI\n- MCP server\n- macOS QuickLook\n\nAll surfaces read/write the same underlying graph. One renderer everywhere.\n\n**Current State**\n- Phase 1 (publishing tool) live\n- Phase 2 (Bundle + Hub + AI generation) launching August 2026\n- Bundle Spec v1.0 RFC public release same week\n\n**Strategic Position**\n- Not another note app (Notion/Obsidian)\n- Not auto-extraction (Mem0/Letta)\n- Not LLM-only (LLM Wiki)\n- **The layer in between**: user-authored, AI-organized, URL-delivered, multi-AI compatible.\n\nThe architecture is \"same graph, many readers",
+      "tokens_in": 128082,
+      "tokens_out": 1024,
+      "latency_ms": 30930,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-015",
+      "answer": "mdfy operates as a personal knowledge management system designed to streamline the process of capturing, organizing, and deploying knowledge across various AI platforms. The core idea is that a mdfy URL serves as an API for any AI, allowing users to paste URLs into AI tools like ChatGPT, Claude, Gemini, or Cursor, which then fetch the content as clean markdown.\n\nThe system is structured around four key components:\n\n1. **The Markdown**: This is the source of truth, representing what the user types and is stored in `documents.markdown`.\n\n2. **The AI Graph**: Extracted by an LLM from a bundle, it includes themes, insights, and edges, stored in `bundles.graph_data`.\n\n3. **The Concept Index**: This is the user's lifelong ontology, pooling concepts across every bundle, located in `concept_index` and `concept_relations`.\n\n4. **The Embeddings**: These vectors power semantic recall, stored in `documents.embedding`, `bundles.embedding`, and `document_chunks.embedding`.\n\nThe architecture supports three URL shapes: a single document, a bundle, and a user's entire hub, each designed for specific purposes. The system automates much of the organization and maintenance, reducing the manual effort typically required in personal knowledge management.",
+      "tokens_in": 97703,
+      "tokens_out": 257,
+      "latency_ms": 3809,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-015",
+      "answer": "Based on the provided content, Memory.Wiki operates on a core idea: **a Memory.Wiki URL is an API for any AI.** You can paste a URL into services like ChatGPT, Claude, or Cursor, and the AI will fetch clean, context-rich markdown.\n\nThe architecture follows a three-stage framework:\n\n1.  **Capture (수집):** Users collect knowledge from various sources (called \"surfaces\"), such as a Chrome extension for saving AI chats, a VS Code extension, or native mobile apps. Each piece of captured information becomes a document with a unique URL.\n\n2.  **Organize (소화):** The system uses AI to automatically organize the captured content in the background. It creates a dual-layer storage system: the user's original, immutable content, and a replaceable \"AI Layer\" containing metadata like tags, summaries, and relationships to other documents. AI can also automatically group related documents into \"AI Bundles.\"\n\n3.  **Use (활용):** The organized knowledge is made available through a simple URL. The same URL provides a human-readable HTML page to a web browser and a token-efficient markdown digest to an AI, allowing users to provide context to any AI without re-explaining it.",
+      "tokens_in": 102535,
+      "tokens_out": 260,
+      "latency_ms": 13071,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-016",
+      "answer": "Based on the hub content, there was a significant strategic pivot from \"mdfy\" to \"Memory.Wiki\" that occurred between versions 6 and 7 of the business plan. Here are the key changes:\n\n## Core Positioning Shift\n\n**From (v6):** \"Personal knowledge hub for the AI era\"\n**To (v7):** \"Your knowledge graph as a URL for any AI\"\n\nThe pivot moved from positioning as a personal knowledge management tool to positioning as **AI memory infrastructure** - specifically a cross-AI memory layer that no single AI company can build.\n\n## Strategic Thesis Evolution\n\nThe v7 plan introduced a sharper strategic thesis:\n\n1. **\"Markdown URL = API for any AI\"** - URLs became the central primitive\n2. **\"The graph is the product\"** - Emphasis shifted to the knowledge graph itself\n3. **\"Delivery, not retrieval\"** - Positioned as delivering pre-organized knowledge graphs rather than just retrieving chunks\n\n## Brand Name Change\n\n- **v6:** mdfy.cc (with mori.wiki as a candidate)\n- **v7:** **memory.wiki** (final commit, domain secured)\n\nThe name change reflected the strategic shift from a markdown publishing tool to an AI memory infrastructure layer.\n\n## Architecture Framework\n\nv7 introduced the **3-tier framework** (수집/소화/활용 - Capture/Digestion/Utilization):\n\n```\nCapture → AI organizes → Deploy to any AI\n```\n\nThis replaced v6's \"Three Pillars\" (Capture/Bundle/Deploy) with a more AI-centric flow.\n\n## New Core Features\n\nv7 added two major capabilities not in v6:\n\n1. **AI Bundle Generation** - Users ask AI to create bundles via natural language; AI searches the hub and generates bundle drafts\n2. **Hub URL** - A single URL representing a user's entire knowledge base, auto-organized and queryable\n\n## Competitive Positioning\n\nThe positioning shifted from competing with note-taking apps to occupying a unique layer:\n\n**v6 positioning:** Better than Notion/Obsidian for AI era\n**v7 positioning:** The **cross-AI memory layer** that OpenAI, Anthropic, and Google structurally cannot build (because building it would mean helping competitors)\n\n## Market Position\n\nv7 explicitly positioned Memory.Wiki in a gap that didn't exist in v6's framing:\n\n```\n                Local              Cloud\nLLM-compiled    LLM Wiki          [gap]\nHuman-AI        [gap]             Memory.Wiki ⭐\nAuto-extracted  Mem0 self-host    Mem0/Letta cloud\n```\n\n## Timeline Change\n\n- **v6:** 8-week launch (June 2026)\n- **v7:** 16-week launch (August 2026)\n\nThe longer timeline reflected the more ambitious scope of building both AI bundle generation and Hub URL functionality.\n\n## Key Insight\n\nThe pivot wasn't just a rebrand - it was a fundamental repositioning from **\"better PKM tool\"** to **\"AI memory infrastructure that sits between all AIs.\"** The thesis became: since no single AI company can build cross-AI memory (it would help competitors), an independent third party must define this layer - and that's Memory.Wiki's strategic moat.",
+      "tokens_in": 128083,
+      "tokens_out": 749,
+      "latency_ms": 23483,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-016",
+      "answer": "The strategic pivot from mdfy to Memory.Wiki involved a significant shift in positioning and branding. Initially, mdfy was conceptualized as a personal knowledge management tool, but the pivot redefined it as a \"Memory Protocol Layer\" for AI systems. This transition emphasized infrastructure over competing with existing personal knowledge management (PKM) tools like Notion or Obsidian. The rebranding to Memory.Wiki reflected this new focus on creating a cross-AI memory protocol layer, where the product serves as a deployable memory layer for AI systems. The pivot also involved a shift from being a better PKM tool to positioning as an infrastructure layer, choosing to focus on the protocol aspect rather than direct competition with established PKM tools. This strategic decision aimed to leverage the founder's AI industry credibility and target high-level partnerships, such as the collaboration with Upstage Solar.",
+      "tokens_in": 97704,
+      "tokens_out": 175,
+      "latency_ms": 2948,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-016",
+      "answer": "According to the provided content, the strategic pivot from mdfy to Memory.Wiki involved several key changes between versions v6 and v7, and was further refined in v8.\n\nThe core changes included:\n\n1.  **Branding**: The name was finalized from \"mdfy.app\" to \"memory.wiki\".\n\n2.  **Strategic Thesis**: The positioning sharpened from a \"Personal knowledge hub for the AI era\" to a more technical and infrastructure-focused concept: \"Markdown URL = API for any AI\" and \"The graph is the product.\"\n\n3.  **Category Reframing**: The product category was changed from an \"AI wiki,\" which competes with note-taking apps, to a \"context delivery layer for AI tools\" or \"the cross-AI capture layer.\"\n\n4.  **External Messaging**: The user-facing headline (H1) was changed to focus on the core user pain point: \"Stop re-explaining your context to every AI.\"\n\nThis pivot moved the product away from being just another knowledge tool and repositioned it as a fundamental, cross-platform memory infrastructure that large AI companies are structurally unable to build themselves.",
+      "tokens_in": 102536,
+      "tokens_out": 243,
+      "latency_ms": 10665,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-017",
+      "answer": "Based on the hub content, Hyunsang Cho is an AI product executive with over 15 years of experience across the UK, Korea, and Saudi Arabia. His most recent role was as AI Product & Experience Lead at Humain, where he set up the product and experience organization for Humain OS, Saudi Arabia's national AI project.\n\nHis career includes:\n- **Humain (2025-26, Riyadh)**: Led product and experience for Saudi Arabia's national AI program\n- **Devsisters Group Director (2021-24, Seoul)**: Worked on CookieRun VR and Meta partnerships\n- **Kakao IX UK Regional Director (2018-21, London)**: Opened Kakao's first European office\n- **Saudi Aramco UX Lead (2017-18)**: Established UX standards pre-IPO\n- **AKQA Senior UX Architect (2015-17)**: Worked on projects for Nike, Volvo, Barclays, and Virgin Atlantic\n\nHe holds an MFA from Goldsmiths and a First Class Honours degree from Central Saint Martins. Currently, he operates Raymind.AI, an independent product studio building consumer apps, developer tools, and AI engines, including mdfy.app, pastlife.app, jolong.ai, screenstyler.ai, and ddalggak.ai.\n\nHis work spans enterprise AI platforms, VR, and consumer products, with a focus on AI-native product development and cross-platform experiences.",
+      "tokens_in": 128087,
+      "tokens_out": 344,
+      "latency_ms": 11263,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-017",
+      "answer": "Hyunsang Cho is an AI product and experience executive with over 15 years of experience in building teams, shipping products, and managing organizations across the UK, Korea, and Saudi Arabia. He currently operates Raymind.AI, an independent product studio that develops consumer apps, developer tools, and AI engines, with live products including mdfy.app, pastlife.app, jolong.ai, screenstyler.ai, and ddalggak.ai. At Humain, he set up the product and experience organization for Humain OS, which is Saudi Arabia's national AI project. His work spans diverse domains such as enterprise AI platforms, VR, and consumer products. Cho has transitioned from corporate roles to entrepreneurship, leveraging his extensive leadership experience in both large-scale organizational settings and independent product development.",
+      "tokens_in": 97703,
+      "tokens_out": 159,
+      "latency_ms": 2791,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-017",
+      "answer": "Based on the provided content, Hyunsang Cho is an AI product and experience executive with over 15 years of experience in the UK, Korea, and Saudi Arabia.\n\nHe is the founder of Raymind.AI, an independent product studio that builds consumer apps, developer tools, and AI engines. Products from his studio include mdfy.app, pastlife.app, and jolong.ai.\n\nPreviously, he was the Product & Experience Lead for Humain OS, Saudi Arabia's national AI project. His career also includes roles as Group Director at Devsisters, where he worked on the CookieRun VR project with Meta; Regional Director for Kakao IX UK, where he opened the company's first European office; and UX Lead at Saudi Aramco. He holds an MFA from Goldsmiths and a BA from Central Saint Martins.",
+      "tokens_in": 102538,
+      "tokens_out": 174,
+      "latency_ms": 9487,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-018",
+      "answer": "Based on the provided context, I can see references to business plans and strategic documents, but the specific \"mdfy.cc v6 FINAL business plan\" is not directly included in the available documents. The most recent business-related document I can see is:\n\n- \"mdfy.cc 사업화 방향성 v4 (FINAL)\" (mdfy.cc Business Direction v4 FINAL)\n\nHowever, this appears to be v4, not v6. The documents do contain extensive information about mdfy's product strategy, architecture, and positioning, but I don't have access to a document specifically titled \"v6 FINAL business plan.\"\n\nIf you're looking for the latest business plan, you might want to:\n1. Check if there's a more recent document that hasn't been included in this bundle\n2. Verify if \"v6\" refers to a different naming convention or if v4 is actually the most current version\n3. Look for documents with titles like \"business plan,\" \"사업계획,\" or similar terms that might contain the v6 plan\n\nWould you like me to summarize what I can find about mdfy's business strategy from the available documents, or would you prefer to provide the v6 document directly?",
+      "tokens_in": 128085,
+      "tokens_out": 273,
+      "latency_ms": 10002,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-018",
+      "answer": "The mdfy.cc v6 FINAL business plan outlines the vision of mdfy as a \"Personal Knowledge Hub for the AI Era,\" emphasizing the use of URLs as the fundamental unit for documents, bundles, and hubs. The plan highlights the transition from a complex multi-layered tool to a simplified concept of a personal knowledge hub. Key elements include:\n\n1. **Core Vision**: mdfy is positioned as a personal knowledge hub that captures knowledge from various sources, bundles it by topic, and deploys it to any AI using URLs. The system is designed to be user-owned, editable, and portable.\n\n2. **URL Architecture**: The architecture is based on three scopes—Document URL, Bundle URL, and Hub URL—each serving as a deployable unit to any AI. This structure allows for living, editable, and versioned content that can be shared across platforms.\n\n3. **AI as Collaborator**: AI is integrated as a collaborator rather than just a tool, assisting in organizing knowledge and generating bundles based on user requests.\n\n4. **Product Features**: The plan includes features like multi-surface capture, AI-generated bundles, and a hub URL for comprehensive knowledge management.\n\n5. **Business Model**: The pricing structure includes Free, Pro ($9/month), and Build ($19/month) tiers, with the Pro tier offering features like AI bundle generation and an auto-organized hub.\n\n6. **Launch Strategy**: The plan outlines a phased approach to launch, with a focus on establishing mdfy as a standard-setting movement and leveraging open ecosystems.\n\n7. **Risk Management**: The plan identifies potential risks, such as competition from established players and the challenge of maintaining a unique positioning.\n\nOverall, the v6 plan emphasizes simplicity, user ownership, and the strategic use of AI to enhance knowledge management.",
+      "tokens_in": 97702,
+      "tokens_out": 370,
+      "latency_ms": 5457,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-018",
+      "answer": "The mdfy.cc v6 FINAL business plan positions the product as a \"Personal knowledge hub for the AI era.\"\n\nIts core vision is built on a URL-based architecture with three scopes:\n1.  **Document URL:** A single markdown file.\n2.  **Bundle URL:** A themed collection of documents.\n3.  **Hub URL:** The user's entire knowledge hub.\n\nA key differentiator is the role of AI as a \"collaborator.\" Users can ask the AI in natural language to automatically create \"bundles\" of related documents from their hub, which they can then review and edit. This human-AI collaboration model is central to the user experience.\n\nThe business model includes a tiered pricing structure (Free, Pro $9/mo, Build $19/mo), with the AI bundle generation feature being the primary monetization driver. The plan outlines an 8-week roadmap for a public launch on June 16, 2026.",
+      "tokens_in": 102537,
+      "tokens_out": 203,
+      "latency_ms": 11523,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-019",
+      "answer": "Based on the hub content, I can see references to both v7 and v7-revised business plans for memory.wiki, but the actual v7 plan document is not included in the provided content. However, I can identify what v7-revised changed based on the document titled \"memory.wiki 사업계획 v7-revised\":\n\n**Key Changes in v7-revised:**\n\n1. **Dramatically reduced scope**: Cut from 8 features to 3 features (one per tier)\n2. **Timeline adjustment**: Changed from an 8-week to 16-week launch window\n3. **Feature prioritization**:\n   - Tier 1 (Capture): iOS Share Sheet only\n   - Tier 2 (Digestion): Bundle auto-generation only  \n   - Tier 3 (Utilization): Embedded chat only\n4. **Deferred features**: Moved several features to post-launch phases, including:\n   - Voice capture\n   - AI conversation auto-suggest\n   - Public hub sharing\n   - Custom GPT integration\n5. **Brand migration strategy**: Changed from phased migration to hard cutover on launch day\n6. **Launch timing**: Shifted to either July mid-month or September end (avoiding August collision with Karpathy's LLM Wiki)\n7. **Pricing simplification**: Reduced from 5 tiers to 3 tiers (Free/Pro/Team)\n8. **Bundle Spec RFC**: Moved from launch day to post-launch\n\nThe v7-revised plan explicitly states it maintains the same thesis as v7 but cuts scope by half to make the 16-week deadline achievable. The document notes this was necessary because the original v7 scope of \"6+ features + brand migration + spec RFC\" was too ambitious for the timeline.\n\nWithout access to the original v7 plan document, I cannot provide more specific details about what v7 originally proposed beyond what v7-revised references as changes.",
+      "tokens_in": 128086,
+      "tokens_out": 443,
+      "latency_ms": 15712,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-019",
+      "answer": "The v7 and v7-revised business plans for memory.wiki differ primarily in scope and strategic focus. Here are the key differences:\n\n1. **Launch Features**: The v7 plan initially included 8 features for launch, while the v7-revised plan reduced this to 3 features, each representing one of the three tiers (Capture, Digestion, Utilization). This reduction was made to ensure a more achievable 16-week launch timeline.\n\n2. **Brand Migration**: The v7 plan proposed a phased brand migration over 16 weeks, whereas the v7-revised plan opted for a hard cutover on launch day to avoid brand confusion and SEO issues.\n\n3. **Launch Timing**: The v7 plan aimed for an August launch, while the v7-revised plan considered either a July or September launch to avoid coinciding with other major releases like Karpathy's LLM Wiki.\n\n4. **Pricing Structure**: The v7-revised plan simplified the pricing tiers from 5 to 3, focusing on Free, Pro, and Team tiers, with adjustments to feature availability and pricing to better reflect the product's value.\n\n5. **Strategic Thesis**: The v7-revised plan emphasized the \"Cross-AI is structurally impossible for giants\" thesis more prominently, framing it as a key differentiator and narrative anchor.\n\nOverall, the v7-revised plan aimed for a more focused, achievable launch with a sharper strategic narrative.",
+      "tokens_in": 97704,
+      "tokens_out": 297,
+      "latency_ms": 3603,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-019",
+      "answer": "The v7-revised business plan is a more focused version of the v7 plan, designed to ensure a faster and more achievable launch. The core thesis remains the same, but the scope and strategy were sharpened.\n\nKey differences include:\n\n*   **Reduced Scope**: The number of launch features was cut from eight to three. For example, features like \"AI conversation auto-suggest\" and \"Public hub sharing\" were dropped from the initial launch to focus on core commitments like the iOS Share Sheet and embedded chat.\n*   **Brand Migration**: Instead of a phased 16-week migration, v7-revised proposes a single \"hard cutover\" from mdfy.app to memory.wiki on launch day.\n*   **Go-to-Market Strategy**: The focus shifted from generic channels like Hacker News to first mining the existing user base of the previous app (mdfy.app) for the initial paying customers.\n*   **Pricing**: The model was simplified from five tiers to three (Free, Pro, Team), with the Pro price increasing from $9 to $12/month.\n*   **Founder Narrative**: The story was sharpened from a \"solo founder\" narrative to one focused on building a \"cross-AI layer that giants structurally cannot build.\"",
+      "tokens_in": 102539,
+      "tokens_out": 267,
+      "latency_ms": 12872,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-020",
+      "answer": "",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "latency_ms": 363,
+      "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CbKpLjwDtWFMrM7iqqxud\"}"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-020",
+      "answer": "Memory.Wiki's product strategy and evolution focus on creating a personal knowledge management system that serves as a cross-AI memory protocol layer. The core promise is \"You author. AI uses. The wiki maintains itself,\" emphasizing user-authored content that AI can consume and organize through LLM-powered maintenance. The product operates through two main doors: the Memory door, which allows AI to remember user input via 1-click capture, and the Wiki door, which organizes user knowledge through automatic indexing and LLM maintenance.\n\nThe strategic positioning shifted from being a better PKM tool to a \"Memory Protocol Layer,\" choosing infrastructure over competing with existing PKM tools like Notion or Obsidian. The product's evolution includes transitioning from \"mdfy\" to \"memory.wiki,\" with a focus on protocol-focused positioning and partnerships, such as with Upstage Solar.\n\nKey gaps identified in the current implementation include link graphs, semantic search, and LLM self-organization. The product aims to provide a seamless cross-platform AI compatibility experience, leveraging its open spec and MIT license model to avoid platform lock-in while sustaining development.",
+      "tokens_in": 97704,
+      "tokens_out": 222,
+      "latency_ms": 3399,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-020",
+      "answer": "Based on the provided content, Memory.Wiki's product strategy evolved significantly from a markdown sharing tool (\"mdfy.app\") into a focused \"cross-AI capture layer.\"\n\nThe core strategy is to solve the problem of users repeatedly explaining their context to different AIs. The external thesis is: \"Stop re-explaining your context to every AI. Put your knowledge in one URL they can all read.\" Internally, the strategy relies on the belief that a cross-AI memory layer is a structural advantage that large AI companies cannot easily build.\n\nThe product's evolution shows a pattern of sharp scope reduction for focused execution. The v7 plan was revised to cut launch features from eight to three. The v8 plan further refines this with a 20-week timeline, a \"sacred cows kill list\" of features to avoid (like an embedded chat), and a clear three-stage framework: Capture, Organize, and Use.\n\nThe strategy emphasizes a dual-layer storage system, keeping user-created originals immutable while an AI layer adds replaceable metadata. This ensures user data is sacred. The ultimate goal is to become an indispensable \"context delivery layer for AI tools.\"",
+      "tokens_in": 102536,
+      "tokens_out": 243,
+      "latency_ms": 9946,
+      "error": null
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-004",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-005",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-006",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-006",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-006",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-007",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-007",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-007",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-008",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 1,
+      "keyword_total": 1,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-008",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 1,
+      "keyword_total": 1,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-008",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 1,
+      "keyword_total": 1,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-009",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-009",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-009",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-010",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 1,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-010",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-010",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-011",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-011",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-011",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-012",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-012",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-012",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-013",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-013",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-013",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-014",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-014",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-014",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-015",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-015",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-015",
+      "runner": "gemini",
+      "accurate": false,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-016",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-016",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-016",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-017",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 4,
+      "keyword_total": 4,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-017",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 4,
+      "keyword_total": 4,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-017",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 4,
+      "keyword_total": 4,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-018",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-018",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-018",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-019",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-019",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-019",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-020",
+      "runner": "claude",
+      "accurate": false,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "runner error: HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CbKpLjwDtWFMrM7iqqxud\"}"
+    },
+    {
+      "query_id": "q-020",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    },
+    {
+      "query_id": "q-020",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "judge HTTP 400 — fell back to keyword: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Bi"
+    }
+  ]
+}

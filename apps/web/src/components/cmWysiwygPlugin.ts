@@ -30,7 +30,7 @@ class BulletWidget extends WidgetType {
     const span = document.createElement("span");
     span.className = "cm-md-bullet";
     span.textContent = this.ordered ? `${this.index}.` : "\u2022";
-    span.style.cssText = "color: var(--accent); margin-right: 4px; font-weight: 600;";
+    span.style.cssText = "color: var(--text-primary); margin-right: 4px; font-weight: 600;";
     return span;
   }
   eq(other: BulletWidget) {
@@ -59,7 +59,7 @@ class CheckboxWidget extends WidgetType {
     const span = document.createElement("span");
     span.className = "cm-md-checkbox";
     span.textContent = this.checked ? "\u2611" : "\u2610";
-    span.style.cssText = `color: var(--accent); margin-right: 4px; font-size: 1.1em; cursor: default;`;
+    span.style.cssText = `color: var(--text-primary); margin-right: 4px; font-size: 1.1em; cursor: default;`;
     return span;
   }
   eq(other: CheckboxWidget) {
@@ -360,23 +360,23 @@ export const wysiwygTheme = EditorView.baseTheme({
   },
   ".cm-md-inline-code": {
     fontFamily: "inherit",
-    backgroundColor: "var(--accent-dim)",
-    color: "var(--accent)",
+    backgroundColor: "var(--border)",
+    color: "var(--text-primary)",
     padding: "1px 5px",
     borderRadius: "3px",
     fontSize: "0.9em",
   },
   ".cm-md-link-text": {
-    color: "var(--accent)",
+    color: "var(--text-primary)",
     textDecoration: "underline",
     cursor: "pointer",
   },
   ".cm-md-quote-mark": {
-    color: "var(--accent)",
+    color: "var(--text-primary)",
     opacity: "0.4",
   },
   ".cm-md-blockquote": {
-    borderLeft: "3px solid var(--accent-dim)",
+    borderLeft: "3px solid var(--border)",
     paddingLeft: "12px",
     color: "var(--text-secondary)",
     fontStyle: "italic",

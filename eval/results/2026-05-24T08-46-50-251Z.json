@@ -1,0 +1,3030 @@
+{
+  "bench": "MWBench v1",
+  "queries_file": "queries/docs-v1.jsonl",
+  "modes": [
+    "full",
+    "compact"
+  ],
+  "corpora": {
+    "doc|KRKz_MD-|full": {
+      "url": "http://localhost:3002/raw/KRKz_MD-",
+      "chars": 13975,
+      "hash": "fb2af314982b0ad9",
+      "error": null
+    },
+    "doc|KRKz_MD-|compact": {
+      "url": "http://localhost:3002/raw/KRKz_MD-?compact=1",
+      "chars": 13975,
+      "hash": "fb2af314982b0ad9",
+      "error": null
+    },
+    "doc|mdfy-three-primitives|full": {
+      "url": "http://localhost:3002/raw/mdfy-three-primitives",
+      "chars": 4227,
+      "hash": "af595c1dc8278c61",
+      "error": null
+    },
+    "doc|mdfy-three-primitives|compact": {
+      "url": "http://localhost:3002/raw/mdfy-three-primitives?compact=1",
+      "chars": 4227,
+      "hash": "af595c1dc8278c61",
+      "error": null
+    },
+    "doc|what-is-mdfy|full": {
+      "url": "http://localhost:3002/raw/what-is-mdfy",
+      "chars": 4207,
+      "hash": "a09f2b63d2302260",
+      "error": null
+    },
+    "doc|what-is-mdfy|compact": {
+      "url": "http://localhost:3002/raw/what-is-mdfy?compact=1",
+      "chars": 4207,
+      "hash": "a09f2b63d2302260",
+      "error": null
+    },
+    "doc|case-claude-md-personal-context|full": {
+      "url": "http://localhost:3002/raw/case-claude-md-personal-context",
+      "chars": 4196,
+      "hash": "fa58585a85f06b90",
+      "error": null
+    },
+    "doc|case-claude-md-personal-context|compact": {
+      "url": "http://localhost:3002/raw/case-claude-md-personal-context?compact=1",
+      "chars": 4196,
+      "hash": "fa58585a85f06b90",
+      "error": null
+    },
+    "doc|case-cross-tool-handoff|full": {
+      "url": "http://localhost:3002/raw/case-cross-tool-handoff",
+      "chars": 4017,
+      "hash": "f006e83f0dae93b0",
+      "error": null
+    },
+    "doc|case-cross-tool-handoff|compact": {
+      "url": "http://localhost:3002/raw/case-cross-tool-handoff?compact=1",
+      "chars": 4017,
+      "hash": "f006e83f0dae93b0",
+      "error": null
+    },
+    "doc|ZVfnXzCU|full": {
+      "url": "http://localhost:3002/raw/ZVfnXzCU",
+      "chars": 4618,
+      "hash": "60e5103650c158c5",
+      "error": null
+    },
+    "doc|ZVfnXzCU|compact": {
+      "url": "http://localhost:3002/raw/ZVfnXzCU?compact=1",
+      "chars": 4618,
+      "hash": "60e5103650c158c5",
+      "error": null
+    },
+    "doc|jRpEdqww|full": {
+      "url": "http://localhost:3002/raw/jRpEdqww",
+      "chars": 4771,
+      "hash": "8240d2a9f08ba30b",
+      "error": null
+    },
+    "doc|jRpEdqww|compact": {
+      "url": "http://localhost:3002/raw/jRpEdqww?compact=1",
+      "chars": 4771,
+      "hash": "11485da2ee398aeb",
+      "error": null
+    },
+    "doc|yWkfCPhn|full": {
+      "url": "http://localhost:3002/raw/yWkfCPhn",
+      "chars": 18302,
+      "hash": "028e003c69986323",
+      "error": null
+    },
+    "doc|yWkfCPhn|compact": {
+      "url": "http://localhost:3002/raw/yWkfCPhn?compact=1",
+      "chars": 18302,
+      "hash": "028e003c69986323",
+      "error": null
+    },
+    "doc|gnEMFJgI|full": {
+      "url": "http://localhost:3002/raw/gnEMFJgI",
+      "chars": 14225,
+      "hash": "2aea906f72125d40",
+      "error": null
+    },
+    "doc|gnEMFJgI|compact": {
+      "url": "http://localhost:3002/raw/gnEMFJgI?compact=1",
+      "chars": 14225,
+      "hash": "c60ea14ad533ff2e",
+      "error": null
+    },
+    "doc|qHc1FWxq|full": {
+      "url": "http://localhost:3002/raw/qHc1FWxq",
+      "chars": 39726,
+      "hash": "a0b9deb0773d5bfa",
+      "error": null
+    },
+    "doc|qHc1FWxq|compact": {
+      "url": "http://localhost:3002/raw/qHc1FWxq?compact=1",
+      "chars": 39726,
+      "hash": "a0b9deb0773d5bfa",
+      "error": null
+    }
+  },
+  "started_at": "2026-05-24T08:46:50.251Z",
+  "finished_at": "2026-05-24T08:54:17.297Z",
+  "queries": [
+    {
+      "id": "qd-001",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-",
+      "q": "How many moving parts does mdfy have according to the architecture doc?",
+      "expected_doc": "KRKz_MD-",
+      "expected_keywords": [
+        "four",
+        "moving parts"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-002",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives",
+      "q": "What are mdfy's three URL primitives and their URL shapes?",
+      "expected_doc": "mdfy-three-primitives",
+      "expected_keywords": [
+        "Document",
+        "Bundle",
+        "Hub"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-003",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy",
+      "q": "What's the one-line summary of what mdfy does?",
+      "expected_doc": "what-is-mdfy",
+      "expected_keywords": [
+        "URL",
+        "knowledge",
+        "hub"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-004",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context",
+      "q": "Where in the Claude Code setup do you add the hub snippet?",
+      "expected_doc": "case-claude-md-personal-context",
+      "expected_keywords": [
+        "CLAUDE.md",
+        "~/.claude"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-005",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff",
+      "q": "How long does it take to install the /mdfy skill once?",
+      "expected_doc": "case-cross-tool-handoff",
+      "expected_keywords": [
+        "30",
+        "seconds",
+        "curl"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-006",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU",
+      "q": "What Saudi Arabia national AI project did Hyunsang Cho work on?",
+      "expected_doc": "ZVfnXzCU",
+      "expected_keywords": [
+        "Humain",
+        "Saudi",
+        "national"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-007",
+      "scope": "doc",
+      "scope_id": "jRpEdqww",
+      "q": "Who is the operating contact for the K-Tech Pioneers ASEAN region?",
+      "expected_doc": "jRpEdqww",
+      "expected_keywords": [
+        "LeeKim",
+        "이김",
+        "victoria"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-008",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn",
+      "q": "What collaboration duration does the Upstage Memory Protocol alliance proposal target?",
+      "expected_doc": "yWkfCPhn",
+      "expected_keywords": [
+        "6",
+        "months",
+        "개월"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-009",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI",
+      "q": "How many slides are in the a16z speedrun pitch deck?",
+      "expected_doc": "gnEMFJgI",
+      "expected_keywords": [
+        "8",
+        "slides"
+      ],
+      "category": "doc"
+    },
+    {
+      "id": "qd-010",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq",
+      "q": "What MRR target does memory.wiki v7 project for the 12-month horizon?",
+      "expected_doc": "qHc1FWxq",
+      "expected_keywords": [
+        "MRR",
+        "80",
+        "150"
+      ],
+      "category": "doc"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "qd-001",
+      "answer": "According to the \"How mdfy works\" document, mdfy has **four moving parts**:\n\n1. **The markdown** — source of truth; what the human types\n2. **The AI graph** — what an LLM extracted from a bundle: themes, insights, edges\n3. **The concept index** — the user's lifelong ontology, pooled across every bundle\n4. **The embeddings** — vectors that power semantic recall\n\nThe first three end up in the markdown an LLM fetches, while embeddings never go to the LLM directly — they back `mdfy_search` via MCP.",
+      "tokens_in": 4125,
+      "tokens_out": 139,
+      "latency_ms": 4739,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-001",
+      "answer": "mdfy has **four moving parts**:\n\n1. The markdown  \n2. The AI graph  \n3. The concept index  \n4. The embeddings",
+      "tokens_in": 3621,
+      "tokens_out": 66,
+      "latency_ms": 2177,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-001",
+      "answer": "According to the document, mdfy has **four** moving parts:\n\n1. **The markdown**: The source of truth that the human types.\n2. **The AI graph**: Themes, insights, and edges extracted from a bundle by an LLM.\n3. **The concept index**: The user's lifelong ontology pooled across every bundle.\n4. **The embeddings**: Vectors that power semantic recall.",
+      "tokens_in": 3932,
+      "tokens_out": 86,
+      "latency_ms": 2284,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-001",
+      "answer": "According to the document, mdfy has **four moving parts**:\n\n1. **The markdown** — source of truth; what the human types\n2. **The AI graph** — what an LLM extracted from a bundle (themes, insights, edges)\n3. **The concept index** — the user's lifelong ontology, pooled across every bundle\n4. **The embeddings** — vectors that power semantic recall\n\nThe first three end up in the markdown an LLM fetches, while embeddings never go to the LLM directly — they back `mdfy_search` via MCP.",
+      "tokens_in": 4125,
+      "tokens_out": 134,
+      "latency_ms": 4176,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-001",
+      "answer": "mdfy has **four moving parts**:\n\n1. The markdown  \n2. The AI graph  \n3. The concept index  \n4. The embeddings",
+      "tokens_in": 3621,
+      "tokens_out": 53,
+      "latency_ms": 1570,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-001",
+      "answer": "According to the document, mdfy has **four** moving parts:\n\n1. **The markdown**: The source of truth typed by the human.\n2. **The AI graph**: Themes, insights, and edges extracted from a bundle by an LLM.\n3. **The concept index**: The user's lifelong ontology pooled across every bundle.\n4. **The embeddings**: Vectors that power semantic recall.",
+      "tokens_in": 3932,
+      "tokens_out": 86,
+      "latency_ms": 2531,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "KRKz_MD-"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-002",
+      "answer": "Based on the hub content, mdfy's three URL primitives are:\n\n1. **Document** — `mdfy.app/<id>`\n   A single captured artifact (pasted share URL, dropped PDF, etc.) — one markdown page, one permanent URL.\n\n2. **Bundle** — `mdfy.app/b/<id>`\n   A curated grouping of docs around a topic, deployable as a single URL that loads all member docs in order.\n\n3. **Hub** — `mdfy.app/hub/<you>`\n   Your entire knowledge layer as one URL, listing every public doc and bundle, grouped by recency and topic.\n\nThe key design philosophy is that all three share the same primitive (the URL) at different scopes — the viewer chrome, AI fetch path, and embed pipeline are all shared. As the doc puts it: \"A bundle is a hub of three docs. A hub is a bundle of all your docs. The shape never changes — only the scope does.\"",
+      "tokens_in": 1219,
+      "tokens_out": 217,
+      "latency_ms": 6652,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-002",
+      "answer": "mdfy’s three URL primitives are:\n\n1. **Document** — `mdfy.app/<id>`  \n   A single captured artifact, such as a ChatGPT share URL, PDF, or `/mdfy capture`.\n\n2. **Bundle** — `mdfy.app/b/<id>`  \n   A curated grouping of documents around a topic.\n\n3. **Hub** — `mdfy.app/hub/<you>`  \n   A user’s whole knowledge layer as one URL, listing public docs and bundles.",
+      "tokens_in": 1078,
+      "tokens_out": 120,
+      "latency_ms": 2410,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-002",
+      "answer": "Based on the provided content, mdfy's three URL primitives and their URL shapes are:\n\n*   **Document:** `mdfy.app/<id>` (A single captured artifact, such as a pasted ChatGPT share URL or dropped PDF).\n*   **Bundle:** `mdfy.app/b/<id>` (A curated grouping of documents around a specific topic).\n*   **Hub:** `mdfy.app/hub/<you>` (Your entire knowledge layer represented as a single URL).",
+      "tokens_in": 1160,
+      "tokens_out": 108,
+      "latency_ms": 3155,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-002",
+      "answer": "Based on the hub content, mdfy's three URL primitives are:\n\n1. **Document** — `mdfy.app/<id>`\n   A single captured artifact (pasted URL, dropped PDF, etc.) as one markdown page with a permanent URL.\n\n2. **Bundle** — `mdfy.app/b/<id>`\n   A curated grouping of multiple docs around a topic, deployable as a single URL that loads all member docs in order.\n\n3. **Hub** — `mdfy.app/hub/<you>`\n   Your entire knowledge layer as one URL, listing all your public docs and bundles — fetchable by AI to navigate your whole knowledge graph.\n\nThe key design principle is that all three share the same shape: same viewer chrome, same AI fetch path, and same embed pipeline. As the doc puts it: *\"A bundle is 'a hub of three docs.' A hub is 'a bundle of all your docs.' The shape never changes — only the scope does.\"*",
+      "tokens_in": 1219,
+      "tokens_out": 220,
+      "latency_ms": 4696,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-002",
+      "answer": "mdfy’s three URL primitives are:\n\n1. **Document** — `mdfy.app/<id>`  \n   A single captured artifact, such as a ChatGPT share URL, PDF, or captured markdown page.\n\n2. **Bundle** — `mdfy.app/b/<id>`  \n   A curated grouping of documents around a topic.\n\n3. **Hub** — `mdfy.app/hub/<you>`  \n   A user’s whole knowledge layer as one URL, listing public docs and bundles.",
+      "tokens_in": 1078,
+      "tokens_out": 104,
+      "latency_ms": 1790,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-002",
+      "answer": "Based on the provided content, mdfy's three URL primitives and their URL shapes are:\n\n*   **Document:** `mdfy.app/<id>` (A single captured artifact, such as a pasted ChatGPT share URL or a dropped PDF).\n*   **Bundle:** `mdfy.app/b/<id>` (A curated grouping of documents around a specific topic).\n*   **Hub:** `mdfy.app/hub/<you>` (Your entire knowledge layer represented as a single URL).",
+      "tokens_in": 1160,
+      "tokens_out": 109,
+      "latency_ms": 2710,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "mdfy-three-primitives"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-003",
+      "answer": "Based on the hub content, here's the one-line version:\n\n**\"A captured ChatGPT answer becomes `mdfy.app/<id>`. Forty captures roll up into `mdfy.app/hub/<you>`. You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer. Same URL, every AI.\"**\n\nOr even more succinctly, as stated at the top: mdfy is a **\"single URL that holds everything you've ever asked an AI worth keeping — and that any AI tomorrow can read as your context.\"**",
+      "tokens_in": 1215,
+      "tokens_out": 140,
+      "latency_ms": 2895,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-003",
+      "answer": "A captured ChatGPT answer becomes `mdfy.app/<id>`. Forty captures roll up into `mdfy.app/hub/<you>`. You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer. Same URL, every AI.",
+      "tokens_in": 1077,
+      "tokens_out": 66,
+      "latency_ms": 1498,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-003",
+      "answer": "Based on the provided text, the one-line version of what mdfy does is: \n\nA captured ChatGPT answer becomes `mdfy.app/<id>`, forty captures roll up into `mdfy.app/hub/<you>`, and you paste that hub URL into Claude, ChatGPT, Cursor, or Codex so they can fetch the entire thing as your personal knowledge layer using the same URL for every AI.",
+      "tokens_in": 1168,
+      "tokens_out": 86,
+      "latency_ms": 2590,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-003",
+      "answer": "Based on the hub content, here's the one-line version:\n\n**\"A captured ChatGPT answer becomes `mdfy.app/<id>`. Forty captures roll up into `mdfy.app/hub/<you>`. You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer. Same URL, every AI.\"**\n\nOr even more succinctly, as the content puts it: mdfy is a **\"single URL that holds everything you've ever asked an AI worth keeping — and that any AI tomorrow can read as your context.\"**",
+      "tokens_in": 1215,
+      "tokens_out": 140,
+      "latency_ms": 2753,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-003",
+      "answer": "A captured ChatGPT answer becomes `mdfy.app/<id>`. Forty captures roll up into `mdfy.app/hub/<you>`. You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer. Same URL, every AI.",
+      "tokens_in": 1077,
+      "tokens_out": 66,
+      "latency_ms": 1392,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-003",
+      "answer": "Based on the provided text, the \"one-line version\" of what mdfy does is: \n\nA captured ChatGPT answer becomes `mdfy.app/<id>`, and forty captures roll up into `mdfy.app/hub/<you>`. You paste that hub URL into Claude, ChatGPT, Cursor, or Codex, and they fetch the entire thing as your personal knowledge layer (using the same URL for every AI). \n\nAdditionally, it is described as \"a single URL that holds everything you've ever asked an AI worth keeping — and that any AI tomorrow can read as your context.\"",
+      "tokens_in": 1168,
+      "tokens_out": 126,
+      "latency_ms": 4331,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "what-is-mdfy"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-004",
+      "answer": "Based on the hub content, you append the snippet to **`~/.claude/CLAUDE.md`** — your global Claude configuration file.\n\nFor project-specific context, you can also append a similar block to a **repo's own `CLAUDE.md`**, pointing at a project-specific bundle URL instead of your personal hub.",
+      "tokens_in": 1185,
+      "tokens_out": 74,
+      "latency_ms": 2343,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-004",
+      "answer": "Add the hub snippet to `~/.claude/CLAUDE.md`.\n\nFor project-specific context, add a similar block to that repo’s `CLAUDE.md`, pointing at the project-specific bundle URL.",
+      "tokens_in": 1052,
+      "tokens_out": 46,
+      "latency_ms": 1288,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-004",
+      "answer": "According to the provided content, you add the hub snippet by appending it to **`~/.claude/CLAUDE.md`**. \n\nFor project-specific context, you can append the block to that specific repository's **`CLAUDE.md`** file.",
+      "tokens_in": 1145,
+      "tokens_out": 59,
+      "latency_ms": 2816,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-004",
+      "answer": "Based on the hub content, you append the snippet to **`~/.claude/CLAUDE.md`** — your global Claude configuration file.\n\nFor project-specific context, you can also append a similar block to a **repo's own `CLAUDE.md`** file, pointing at a project-specific bundle URL instead of your personal hub.",
+      "tokens_in": 1185,
+      "tokens_out": 76,
+      "latency_ms": 5413,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-004",
+      "answer": "Add the hub snippet to `~/.claude/CLAUDE.md`.\n\nFor project-specific context, add a similar block to that repo’s `CLAUDE.md`, pointing at the project-specific bundle URL.",
+      "tokens_in": 1052,
+      "tokens_out": 46,
+      "latency_ms": 1869,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-004",
+      "answer": "Based on the provided content, you add the hub snippet by appending it to the **`~/.claude/CLAUDE.md`** file. \n\nFor project-specific context, you can append the snippet to that specific repository's **`CLAUDE.md`** file instead.",
+      "tokens_in": 1145,
+      "tokens_out": 63,
+      "latency_ms": 2498,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "case-claude-md-personal-context"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-005",
+      "answer": "According to the case study, installing `/mdfy` once takes **30 seconds** (via `curl ... | sh`).",
+      "tokens_in": 1101,
+      "tokens_out": 30,
+      "latency_ms": 1446,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-005",
+      "answer": "Installing `/mdfy` once takes **30 seconds** (`curl ... | sh`).",
+      "tokens_in": 975,
+      "tokens_out": 20,
+      "latency_ms": 1162,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-005",
+      "answer": "Based on the provided content, it takes **30 seconds** to install the `/mdfy` skill once (using the command `curl ... | sh`).",
+      "tokens_in": 1063,
+      "tokens_out": 33,
+      "latency_ms": 2025,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-005",
+      "answer": "According to the case study, installing `/mdfy` once takes **30 seconds** (via `curl ... | sh`).",
+      "tokens_in": 1101,
+      "tokens_out": 30,
+      "latency_ms": 1472,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-005",
+      "answer": "Installing `/mdfy` once takes **30 seconds** (`curl ... | sh`).",
+      "tokens_in": 975,
+      "tokens_out": 20,
+      "latency_ms": 1071,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-005",
+      "answer": "Based on the provided content, it takes **30 seconds** to install the `/mdfy` skill once (using the command `curl ... | sh`).",
+      "tokens_in": 1063,
+      "tokens_out": 33,
+      "latency_ms": 2228,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "case-cross-tool-handoff"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-006",
+      "answer": "Based on the hub content, Hyunsang Cho worked on **Humain OS**, Saudi Arabia's national AI project. He did this at a company called **Humain**, where he \"set up the product and experience organization for Humain OS.\" The document notes that specific outcomes or metrics from this role remain an open question, as those details are not provided in the available information.",
+      "tokens_in": 1225,
+      "tokens_out": 86,
+      "latency_ms": 2713,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-006",
+      "answer": "Hyunsang Cho worked on **Humain OS**, described as **Saudi Arabia’s national AI project**, where he set up the product and experience organization.",
+      "tokens_in": 1082,
+      "tokens_out": 34,
+      "latency_ms": 1113,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-006",
+      "answer": "Based on the provided content, Hyunsang Cho worked on **Humain OS**, which is Saudi Arabia's national AI project. In his role at Humain, he set up the product and experience organization for this project.",
+      "tokens_in": 1150,
+      "tokens_out": 46,
+      "latency_ms": 2245,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-006",
+      "answer": "Based on the hub content, Hyunsang Cho worked on **Humain OS**, Saudi Arabia's national AI project. He did this at a company called **Humain**, where he \"set up the product and experience organization for Humain OS.\" However, the document notes that specific outcomes or metrics achieved at Humain OS are not detailed in the available information.",
+      "tokens_in": 1225,
+      "tokens_out": 83,
+      "latency_ms": 2450,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-006",
+      "answer": "Hyunsang Cho worked on **Humain OS**, described as **Saudi Arabia’s national AI project**, where he set up the product and experience organization.",
+      "tokens_in": 1082,
+      "tokens_out": 34,
+      "latency_ms": 2353,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-006",
+      "answer": "Based on the provided content, Hyunsang Cho worked on **Humain OS**, which is Saudi Arabia's national AI project. At Humain, he set up the product and experience organization for this project.",
+      "tokens_in": 1150,
+      "tokens_out": 43,
+      "latency_ms": 2207,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "ZVfnXzCU"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-007",
+      "answer": "Based on the hub content, there is no mention of an **ASEAN region** contact. The regional contacts listed are:\n\n- **Asia (Singapore)**: 이김컨설팅 (Lee Kim Consulting) / victoria@leekim.com\n- **미국 동부/서부 (US East/West)**: 비즈웨어코리아 (Bizware Korea) / kyd@bizw.co.kr\n\nIf you are referring to the **Asia (Singapore)** region, the contact is **Lee Kim Consulting** at **victoria@leekim.com**. However, a specifically designated \"ASEAN region\" is not referenced in the provided content.",
+      "tokens_in": 2523,
+      "tokens_out": 160,
+      "latency_ms": 3954,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "jRpEdqww"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-007",
+      "answer": "The operating contact for the K-TECH PIONEERS ASEAN/Asia region is:\n\n**Lee Kim Consulting (이김컨설팅)**  \nEmail: **victoria@leekim.com**",
+      "tokens_in": 1578,
+      "tokens_out": 74,
+      "latency_ms": 2238,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "jRpEdqww"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-007",
+      "answer": "Based on the provided content, the operating contact for the Asia (Singapore) region is **Lee Kim Consulting (이김컨설팅)**, and the contact email is **victoria@leekim.com**.",
+      "tokens_in": 1614,
+      "tokens_out": 43,
+      "latency_ms": 2490,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "jRpEdqww"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-007",
+      "answer": "Based on the hub content, there is no mention of an **ASEAN region** contact. The document only specifies two regional contacts:\n\n- **Asia (Singapore)**: 이김컨설팅 (Lee Kim Consulting) / victoria@leekim.com\n- **미국 동부/서부 (US East/West)**: 비즈웨어코리아 (Bizware Korea) / kyd@bizw.co.kr\n\nIf you are referring to the **Asia (Singapore)** region, the contact is **Lee Kim Consulting** at victoria@leekim.com. However, a specifically designated \"ASEAN region\" contact is not mentioned in the provided content.",
+      "tokens_in": 2523,
+      "tokens_out": 162,
+      "latency_ms": 3963,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "jRpEdqww"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-007",
+      "answer": "The operating contact for the K-Tech Pioneers ASEAN/Asia (Singapore) region is:\n\n**Lee Kim Consulting**  \n**Email:** victoria@leekim.com",
+      "tokens_in": 1578,
+      "tokens_out": 87,
+      "latency_ms": 2268,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "jRpEdqww"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-007",
+      "answer": "Based on the provided content, the operating contact for the Asia (Singapore) region is **Lee Kim Consulting (이김컨설팅)**, and the contact email is **victoria@leekim.com**.",
+      "tokens_in": 1614,
+      "tokens_out": 43,
+      "latency_ms": 2352,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "jRpEdqww"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-008",
+      "answer": "Based on the hub content, the Upstage Memory Protocol alliance proposal targets a **6-month** collaboration duration.\n\nThe proposal is structured around a 6-month joint build with three key phases:\n- **7-8월 (July-August)**: Joint R&D roadmap definition\n- **9-10월 (September-October)**: Solar adapter v1 development\n- **11-12월 (November-December)**: Enterprise PoC and public spec release\n\nThe three core deliverables by the end of the 6 months are:\n1. Solar adapter for memory.wiki (first reference implementation)\n2. Document Parse → Bundle automatic conversion pipeline\n3. `memory.wiki/spec` public release with \"Recognized by Solar\" designation\n\nThe proposal also emphasizes a **12-month window** as the broader strategic urgency — the timeframe before OpenAI/Anthropic potentially ship closed memory protocol alternatives, closing the opportunity for Solar to claim the \"first memory-friendly LLM\" position.",
+      "tokens_in": 10127,
+      "tokens_out": 228,
+      "latency_ms": 4915,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-008",
+      "answer": "The proposal targets a **6-month collaboration** with Upstage, positioned as a **strategic alliance** rather than a vendor contract.",
+      "tokens_in": 6759,
+      "tokens_out": 30,
+      "latency_ms": 1393,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-008",
+      "answer": "Based on the provided content, the Upstage Memory Protocol alliance proposal targets a **6-month** collaboration duration (specifically referred to as the \"6-month K-Tech Pioneers collaboration\").",
+      "tokens_in": 6896,
+      "tokens_out": 38,
+      "latency_ms": 2816,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-008",
+      "answer": "Based on the hub content, the Upstage Memory Protocol alliance proposal targets a **6-month collaboration** duration.\n\nThe proposal structures this period into three phases:\n- **7-8월 (July-August)**: Joint memory R&D roadmap definition\n- **9-10월 (September-October)**: Solar embeddings-based retrieval and Document Parse → Bundle conversion\n- **11-12월 (November-December)**: Enterprise PoC, demo day, and public spec release with \"Recognized by Solar\" announcement\n\nThe overarching context is a **6-12 month strategic window** before OpenAI/Anthropic potentially ship closed alternatives, making the partnership time-sensitive. As the closing line states: *\"The window for defining the memory protocol of the AI era is open now. It closes in 12 months.\"*",
+      "tokens_in": 10127,
+      "tokens_out": 190,
+      "latency_ms": 5257,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-008",
+      "answer": "The Upstage Memory Protocol alliance proposal targets a **6-month collaboration**.",
+      "tokens_in": 6759,
+      "tokens_out": 18,
+      "latency_ms": 1327,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-008",
+      "answer": "Based on the provided content, the Upstage Memory Protocol alliance proposal targets a **6-month** collaboration duration (specifically referred to as the \"6-month K-Tech Pioneers collaboration\").",
+      "tokens_in": 6896,
+      "tokens_out": 38,
+      "latency_ms": 2736,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "yWkfCPhn"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-009",
+      "answer": "Based on the hub content, the a16z speedrun pitch deck contains **8 slides**, plus optional appendix slides (A, B, and C).",
+      "tokens_in": 4176,
+      "tokens_out": 36,
+      "latency_ms": 1860,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-009",
+      "answer": "The a16z speedrun pitch deck has **8 slides**.",
+      "tokens_in": 3657,
+      "tokens_out": 17,
+      "latency_ms": 1248,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-009",
+      "answer": "Based on the provided content, there are **8 slides** in the a16z speedrun pitch deck.",
+      "tokens_in": 3929,
+      "tokens_out": 23,
+      "latency_ms": 2050,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-009",
+      "answer": "Based on the hub content, the a16z speedrun pitch deck contains **8 slides**, plus optional appendix slides (A, B, and C).",
+      "tokens_in": 4176,
+      "tokens_out": 36,
+      "latency_ms": 1796,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-009",
+      "answer": "8 slides.",
+      "tokens_in": 3657,
+      "tokens_out": 6,
+      "latency_ms": 960,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-009",
+      "answer": "Based on the provided content, there are **8 slides** in the main mdfy a16z speedrun pitch deck (with an additional 3 optional appendix slides).",
+      "tokens_in": 3929,
+      "tokens_out": 36,
+      "latency_ms": 2341,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "gnEMFJgI"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-010",
+      "answer": "Based on the hub content, memory.wiki v7 projects the following **12-month MRR targets**:\n\n- **Conservative**: $33K MRR ($400K ARR) — ~3,000 paid users at $11 ARPU\n- **Realistic**: $88K MRR ($1.0M ARR) — ~8,000 paid users at $11 ARPU\n- **Optimistic**: $216K MRR ($2.5M ARR) — ~18,000 paid users at $12 ARPU\n\nThe 12-Month Outlook section also states a broader range of **$80–150K MRR** as the target, with 10,000–20,000 paying users and a goal of reaching top 5 recognition in the \"AI memory\" category.\n\nAt **public launch** (Week 16 / August 2026), the immediate MRR target is more modest: **$1,500–2,500 MRR** from approximately 100–150 paid users.",
+      "tokens_in": 16307,
+      "tokens_out": 241,
+      "latency_ms": 6450,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-010",
+      "answer": "memory.wiki v7 projects **$80K–$150K MRR** at the 12-month horizon.\n\nThe plan also lists broader Year 1 scenarios:\n\n- **Conservative:** $50K–$100K MRR  \n- **Realistic:** $100K–$200K MRR  \n- **Optimistic:** $250K–$400K MRR",
+      "tokens_in": 12512,
+      "tokens_out": 199,
+      "latency_ms": 3603,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-010",
+      "answer": "Based on the provided document, memory.wiki v7 projects the following MRR (Monthly Recurring Revenue) targets for the 12-month horizon:\n\n* **General Outlook / KPI Target:** $80,000 – $150,000 MRR\n* **Conservative Scenario:** $33,000 MRR\n* **Realistic Scenario:** $88,000 MRR\n* **Optimistic Scenario:** $216,000 MRR",
+      "tokens_in": 13183,
+      "tokens_out": 105,
+      "latency_ms": 3907,
+      "error": null,
+      "mode": "full",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qd-010",
+      "answer": "Based on the hub content, memory.wiki v7 projects the following **12-month MRR targets**:\n\n- **Conservative**: $33K MRR ($400K ARR) — ~3,000 paid users at $11 ARPU\n- **Realistic**: $88K MRR ($1.0M ARR) — ~8,000 paid users at $11 ARPU\n- **Optimistic**: $216K MRR ($2.5M ARR) — ~18,000 paid users at $12 ARPU\n\nThe **12-Month Outlook section** also references a broader range of **$80–150K MRR** as the expected outcome, with 10,000–20,000 paying users and a goal of reaching top 5 recognition in the \"AI memory\" category.",
+      "tokens_in": 16307,
+      "tokens_out": 192,
+      "latency_ms": 5050,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qd-010",
+      "answer": "memory.wiki v7 projects **$80K–$150K MRR** at the 12-month horizon.\n\nThe plan also lists broader Year 1 scenarios:\n\n- **Conservative:** $50K–$100K MRR  \n- **Realistic:** $100K–$200K MRR  \n- **Optimistic:** $250K–$400K MRR",
+      "tokens_in": 12512,
+      "tokens_out": 177,
+      "latency_ms": 4021,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qd-010",
+      "answer": "Based on the memory.wiki v7 business plan, the projected MRR (Monthly Recurring Revenue) targets for the 12-month horizon are outlined across a few scenarios:\n\n* **General 12-Month Target (Executive Summary & KPI Goals):** $80,000 – $150,000 MRR (with 10,000 – 20,000 paying users).\n* **Revenue Projections (Section 10):**\n  * **Conservative:** $33,000 MRR\n  * **Realistic:** $88,000 MRR\n  * **Optimistic:** $216,000 MRR\n* **12-Month Outlook Scenarios (Section 13):**\n  * **Conservative:** $50,000 – $100,000 MRR\n  * **Realistic:** $100,000 – $200,000 MRR\n  * **Optimistic:** $250,000 – $400,000 MRR",
+      "tokens_in": 13183,
+      "tokens_out": 244,
+      "latency_ms": 5080,
+      "error": null,
+      "mode": "compact",
+      "scope": "doc",
+      "scope_id": "qHc1FWxq"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "qd-001",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has four moving parts",
+          "quote": "## The four moving parts",
+          "verdict": "supported"
+        },
+        {
+          "text": "The markdown is the source of truth; what the human types",
+          "quote": "**The markdown** | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The AI graph is what an LLM extracted from a bundle: themes, insights, edges",
+          "quote": "**The AI graph** | What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The concept index is the user's lifelong ontology, pooled across every bundle",
+          "quote": "**The concept index**| User's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The embeddings are vectors that power semantic recall",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\").",
+          "verdict": "supported"
+        },
+        {
+          "text": "The first three end up in the markdown an LLM fetches",
+          "quote": "First three end up in the markdown an LLM fetches.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Embeddings never go to the LLM directly — they back mdfy_search via MCP",
+          "quote": "Embeddings never go to the LLM directly — they back `mdfy_search` via MCP.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-001",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All five claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has four moving parts",
+          "quote": "## The four moving parts",
+          "verdict": "supported"
+        },
+        {
+          "text": "The first moving part is the markdown",
+          "quote": "**The markdown** | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The second moving part is the AI graph",
+          "quote": "**The AI graph** | What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The third moving part is the concept index",
+          "quote": "**The concept index**| User's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The fourth moving part is the embeddings",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\").",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-001",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All five claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has four moving parts",
+          "quote": "## The four moving parts",
+          "verdict": "supported"
+        },
+        {
+          "text": "The markdown is the source of truth that the human types",
+          "quote": "**The markdown** | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The AI graph consists of themes, insights, and edges extracted from a bundle by an LLM",
+          "quote": "**The AI graph** | What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The concept index is the user's lifelong ontology pooled across every bundle",
+          "quote": "**The concept index**| User's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The embeddings are vectors that power semantic recall",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\").",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-001",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Every claim in the candidate answer is directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has four moving parts",
+          "quote": "## The four moving parts",
+          "verdict": "supported"
+        },
+        {
+          "text": "The markdown is the source of truth; what the human types",
+          "quote": "**The markdown** | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The AI graph is what an LLM extracted from a bundle (themes, insights, edges)",
+          "quote": "**The AI graph** | What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The concept index is the user's lifelong ontology, pooled across every bundle",
+          "quote": "**The concept index**| User's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The embeddings are vectors that power semantic recall",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\").",
+          "verdict": "supported"
+        },
+        {
+          "text": "The first three end up in the markdown an LLM fetches",
+          "quote": "First three end up in the markdown an LLM fetches.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Embeddings never go to the LLM directly — they back mdfy_search via MCP",
+          "quote": "Embeddings never go to the LLM directly — they back `mdfy_search` via MCP.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-001",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All five claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has four moving parts",
+          "quote": "## The four moving parts",
+          "verdict": "supported"
+        },
+        {
+          "text": "The first moving part is the markdown",
+          "quote": "**The markdown** | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The second moving part is the AI graph",
+          "quote": "**The AI graph** | What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The third moving part is the concept index",
+          "quote": "**The concept index**| User's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The fourth moving part is the embeddings",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\").",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-001",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All five claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has four moving parts",
+          "quote": "## The four moving parts",
+          "verdict": "supported"
+        },
+        {
+          "text": "The markdown is the source of truth typed by the human",
+          "quote": "**The markdown** | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The AI graph consists of themes, insights, and edges extracted from a bundle by an LLM",
+          "quote": "**The AI graph** | What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The concept index is the user's lifelong ontology pooled across every bundle",
+          "quote": "**The concept index**| User's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The embeddings are vectors that power semantic recall",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\").",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-002",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has three URL primitives: Document, Bundle, and Hub",
+          "quote": "mdfy uses one primitive — the URL — at three nested scopes.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document URL shape is mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "A Document is a single captured artifact (pasted share URL, dropped PDF, etc.) — one markdown page, one permanent URL",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code. One markdown page, one permanent URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle URL shape is mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "A Bundle is a curated grouping of docs around a topic, deployable as a single URL that loads all member docs in order",
+          "quote": "A curated grouping of docs around a topic... The bundle is itself a deployable URL — pasted into any AI, it loads all member docs in order with a brief intro.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub URL shape is mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "A Hub lists every public doc and bundle, grouped by recency and topic",
+          "quote": "The hub page lists every public doc and bundle, grouped by recency and topic.",
+          "verdict": "supported"
+        },
+        {
+          "text": "All three share the same primitive (the URL) at different scopes, with shared viewer chrome, AI fetch path, and embed pipeline; 'A bundle is a hub of three docs. A hub is a bundle of all your docs. The shape never changes — only the scope does.'",
+          "quote": "You don't need to learn three different surfaces. The viewer chrome is shared, the AI fetch path is shared, and the embed pipeline is shared. A bundle is \"a hub of three docs.\" A hub is \"a bundle of all your docs.\" The shape never changes — only the scope does.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-002",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All six atomic claims are directly supported by verbatim or near-verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Document has URL shape mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document is a single captured artifact, such as a ChatGPT share URL, PDF, or /mdfy capture",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle has URL shape mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated grouping of documents around a topic",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub has URL shape mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub is a user's whole knowledge layer as one URL, listing public docs and bundles",
+          "quote": "Your whole knowledge layer as one URL. The hub page lists every public doc and bundle",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-002",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has three URL primitives: Document, Bundle, and Hub",
+          "quote": "mdfy uses one primitive — the URL — at three nested scopes.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Document URL shape is mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document is a single captured artifact such as a pasted ChatGPT share URL or dropped PDF",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle URL shape is mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated grouping of documents around a specific topic",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub URL shape is mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub is your entire knowledge layer represented as a single URL",
+          "quote": "Your whole knowledge layer as one URL.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-002",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has three URL primitives: Document, Bundle, and Hub",
+          "quote": "mdfy uses one primitive — the URL — at three nested scopes.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Document URL shape is mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "A Document is a single captured artifact (pasted URL, dropped PDF, etc.) as one markdown page with a permanent URL",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code. One markdown page, one permanent URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle URL shape is mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "A Bundle is a curated grouping of multiple docs around a topic, deployable as a single URL that loads all member docs in order",
+          "quote": "A curated grouping of docs around a topic... The bundle is itself a deployable URL — pasted into any AI, it loads all member docs in order with a brief intro.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub URL shape is mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Hub lists all your public docs and bundles and is fetchable by AI to navigate your whole knowledge graph",
+          "quote": "The hub page lists every public doc and bundle, grouped by recency and topic. Pasted into Claude / ChatGPT / Cursor, the AI fetches the markdown index and follows links to read individual docs as it needs them.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "All three share the same viewer chrome, AI fetch path, and embed pipeline, and the shape never changes — only the scope does",
+          "quote": "The viewer chrome is shared, the AI fetch path is shared, and the embed pipeline is shared... The shape never changes — only the scope does.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-002",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All six claims are directly supported by verbatim or near-verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Document has URL shape mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document is a single captured artifact, such as a ChatGPT share URL, PDF, or captured markdown page",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code. One markdown page, one permanent URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle has URL shape mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated grouping of documents around a topic",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub has URL shape mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub is a user's whole knowledge layer as one URL, listing public docs and bundles",
+          "quote": "Your whole knowledge layer as one URL. The hub page lists every public doc and bundle",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-002",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "mdfy has three URL primitives: Document, Bundle, and Hub",
+          "quote": "mdfy uses one primitive — the URL — at three nested scopes.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Document URL shape is mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document is a single captured artifact such as a pasted ChatGPT share URL or a dropped PDF",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle URL shape is mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated grouping of documents around a specific topic",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub URL shape is mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub is your entire knowledge layer represented as a single URL",
+          "quote": "Your whole knowledge layer as one URL.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-003",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly quoted verbatim from the corpus with full support.",
+      "claims": [
+        {
+          "text": "A captured ChatGPT answer becomes mdfy.app/<id>",
+          "quote": "A captured ChatGPT answer becomes `mdfy.app/<id>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Forty captures roll up into mdfy.app/hub/<you>",
+          "quote": "Forty captures roll up into `mdfy.app/hub/<you>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Same URL, every AI",
+          "quote": "Same URL, every AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy is a single URL that holds everything you've ever asked an AI worth keeping",
+          "quote": "mdfy is a single URL that holds everything you've ever asked an AI worth keeping",
+          "verdict": "supported"
+        },
+        {
+          "text": "any AI tomorrow can read it as your context",
+          "quote": "any AI tomorrow can read as your context",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-003",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All five atomic claims are directly quoted verbatim from the corpus.",
+      "claims": [
+        {
+          "text": "A captured ChatGPT answer becomes mdfy.app/<id>",
+          "quote": "A captured ChatGPT answer becomes `mdfy.app/<id>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Forty captures roll up into mdfy.app/hub/<you>",
+          "quote": "Forty captures roll up into `mdfy.app/hub/<you>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex",
+          "verdict": "supported"
+        },
+        {
+          "text": "They fetch the whole thing as your personal knowledge layer",
+          "quote": "they fetch the whole thing as your personal knowledge layer",
+          "verdict": "supported"
+        },
+        {
+          "text": "Same URL, every AI",
+          "quote": "Same URL, every AI.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-003",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "A captured ChatGPT answer becomes mdfy.app/<id>",
+          "quote": "A captured ChatGPT answer becomes `mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Forty captures roll up into mdfy.app/hub/<you>",
+          "quote": "Forty captures roll up into `mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex",
+          "verdict": "supported"
+        },
+        {
+          "text": "They fetch the entire thing as your personal knowledge layer",
+          "quote": "they fetch the whole thing as your personal knowledge layer",
+          "verdict": "supported"
+        },
+        {
+          "text": "The same URL works for every AI",
+          "quote": "Same URL, every AI",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-003",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "A captured ChatGPT answer becomes mdfy.app/<id>",
+          "quote": "A captured ChatGPT answer becomes `mdfy.app/<id>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Forty captures roll up into mdfy.app/hub/<you>",
+          "quote": "Forty captures roll up into `mdfy.app/hub/<you>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Same URL, every AI",
+          "quote": "Same URL, every AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy is a single URL that holds everything you've ever asked an AI worth keeping",
+          "quote": "mdfy is a single URL that holds everything you've ever asked an AI worth keeping",
+          "verdict": "supported"
+        },
+        {
+          "text": "any AI tomorrow can read it as your context",
+          "quote": "any AI tomorrow can read as your context",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-003",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All five claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "A captured ChatGPT answer becomes mdfy.app/<id>",
+          "quote": "A captured ChatGPT answer becomes `mdfy.app/<id>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Forty captures roll up into mdfy.app/hub/<you>",
+          "quote": "Forty captures roll up into `mdfy.app/hub/<you>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex",
+          "verdict": "supported"
+        },
+        {
+          "text": "They fetch the whole thing as your personal knowledge layer",
+          "quote": "they fetch the whole thing as your personal knowledge layer",
+          "verdict": "supported"
+        },
+        {
+          "text": "Same URL, every AI",
+          "quote": "Same URL, every AI.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-003",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "A captured ChatGPT answer becomes mdfy.app/<id>",
+          "quote": "A captured ChatGPT answer becomes `mdfy.app/<id>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Forty captures roll up into mdfy.app/hub/<you>",
+          "quote": "Forty captures roll up into `mdfy.app/hub/<you>`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The same URL works for every AI",
+          "quote": "Same URL, every AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy is a single URL that holds everything you've ever asked an AI worth keeping",
+          "quote": "mdfy is a single URL that holds everything you've ever asked an AI worth keeping",
+          "verdict": "supported"
+        },
+        {
+          "text": "Any AI tomorrow can read it as your context",
+          "quote": "any AI tomorrow can read as your context",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-004",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All four substantive claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "You append the snippet to ~/.claude/CLAUDE.md",
+          "quote": "appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "~/.claude/CLAUDE.md is your global Claude configuration file",
+          "quote": "Now every Claude Code session, anywhere on my machine, automatically has my hub URL",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "For project-specific context, you can append a similar block to a repo's own CLAUDE.md",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's CLAUDE.md",
+          "verdict": "supported"
+        },
+        {
+          "text": "The project-specific block points at a project-specific bundle URL instead of your personal hub",
+          "quote": "pointing at a project-specific *bundle* URL instead of my personal hub",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-004",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All three claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "Add the hub snippet to `~/.claude/CLAUDE.md`",
+          "quote": "appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "For project-specific context, add a similar block to that repo's `CLAUDE.md`",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's `CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "The project-specific block points at a project-specific bundle URL",
+          "quote": "pointing at a project-specific *bundle* URL instead of my personal hub",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-004",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Both claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "You add the hub snippet by appending it to ~/.claude/CLAUDE.md",
+          "quote": "appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "For project-specific context, you append the block to that specific repository's CLAUDE.md file",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's CLAUDE.md",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-004",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All four claims are directly supported by verbatim or semantically equivalent passages in the corpus.",
+      "claims": [
+        {
+          "text": "You append the snippet to ~/.claude/CLAUDE.md",
+          "quote": "appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "~/.claude/CLAUDE.md is your global Claude configuration file",
+          "quote": "Now every Claude Code session, anywhere on my machine, automatically has my hub URL",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "For project-specific context, you can append a similar block to a repo's own CLAUDE.md file",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's CLAUDE.md",
+          "verdict": "supported"
+        },
+        {
+          "text": "The project-specific block points at a project-specific bundle URL instead of your personal hub",
+          "quote": "pointing at a project-specific *bundle* URL instead of my personal hub",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-004",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All three claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Add the hub snippet to `~/.claude/CLAUDE.md`",
+          "quote": "appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "For project-specific context, add a similar block to that repo's `CLAUDE.md`",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's `CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "The project-specific block points at a project-specific bundle URL",
+          "quote": "pointing at a project-specific *bundle* URL instead of my personal hub",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-004",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Both claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "You add the hub snippet by appending it to ~/.claude/CLAUDE.md",
+          "quote": "appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "For project-specific context, you append the snippet to that specific repository's CLAUDE.md file",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's `CLAUDE.md`",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-005",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims in the answer are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "Installing /mdfy once takes 30 seconds",
+          "quote": "Install `/mdfy` once: 30 seconds (`curl ... | sh`).",
+          "verdict": "supported"
+        },
+        {
+          "text": "Installation is done via `curl ... | sh`",
+          "quote": "curl ... | sh",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-005",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims in the answer are directly supported by verbatim text in the corpus.",
+      "claims": [
+        {
+          "text": "Installing /mdfy once takes 30 seconds",
+          "quote": "Install `/mdfy` once: 30 seconds (`curl ... | sh`).",
+          "verdict": "supported"
+        },
+        {
+          "text": "The installation command is curl ... | sh",
+          "quote": "`curl ... | sh`",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-005",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "It takes 30 seconds to install the /mdfy skill once",
+          "quote": "Install `/mdfy` once: 30 seconds (`curl ... | sh`).",
+          "verdict": "supported"
+        },
+        {
+          "text": "The installation uses the command curl ... | sh",
+          "quote": "`curl ... | sh`",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-005",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims in the answer are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "Installing /mdfy once takes 30 seconds",
+          "quote": "Install `/mdfy` once: 30 seconds (`curl ... | sh`).",
+          "verdict": "supported"
+        },
+        {
+          "text": "The installation method is via curl command (curl ... | sh)",
+          "quote": "`curl ... | sh`",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-005",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims in the answer are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "Installing /mdfy once takes 30 seconds",
+          "quote": "Install `/mdfy` once: 30 seconds (`curl ... | sh`).",
+          "verdict": "supported"
+        },
+        {
+          "text": "The installation command is curl ... | sh",
+          "quote": "`curl ... | sh`",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-005",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "It takes 30 seconds to install the /mdfy skill once",
+          "quote": "Install `/mdfy` once: 30 seconds (`curl ... | sh`).",
+          "verdict": "supported"
+        },
+        {
+          "text": "The installation uses the command `curl ... | sh`",
+          "quote": "curl ... | sh",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-006",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim or semantically equivalent passages in the corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho worked on Humain OS",
+          "quote": "set up the product and experience organization for Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "Humain OS is Saudi Arabia's national AI project",
+          "quote": "Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "He worked on this at a company called Humain",
+          "quote": "At Humain, he \"set up the product and experience organization for Humain OS, Saudi Arabia's national AI project\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "He set up the product and experience organization for Humain OS",
+          "quote": "set up the product and experience organization for Humain OS",
+          "verdict": "supported"
+        },
+        {
+          "text": "Specific outcomes or metrics from this role are not provided",
+          "quote": "What specific outcomes or metrics were achieved at Humain OS?",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-006",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All three claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho worked on Humain OS",
+          "quote": "At Humain, he \"set up the product and experience organization for Humain OS, Saudi Arabia's national AI project\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Humain OS is described as Saudi Arabia's national AI project",
+          "quote": "Saudi Arabia's national AI project at Humain",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hyunsang Cho set up the product and experience organization for Humain OS",
+          "quote": "set up the product and experience organization for Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-006",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho worked on Humain OS",
+          "quote": "set up the product and experience organization for Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "Humain OS is Saudi Arabia's national AI project",
+          "quote": "Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "Cho's role was at Humain (the organization)",
+          "quote": "At Humain, he \"set up the product and experience organization for Humain OS, Saudi Arabia's national AI project\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "He set up the product and experience organization for this project",
+          "quote": "set up the product and experience organization for Humain OS",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-006",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim or semantically equivalent passages in the corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho worked on Humain OS",
+          "quote": "set up the product and experience organization for Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "Humain OS is Saudi Arabia's national AI project",
+          "quote": "Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "He worked at a company called Humain",
+          "quote": "At Humain, he \"set up the product and experience organization for Humain OS",
+          "verdict": "supported"
+        },
+        {
+          "text": "He set up the product and experience organization for Humain OS",
+          "quote": "set up the product and experience organization for Humain OS",
+          "verdict": "supported"
+        },
+        {
+          "text": "Specific outcomes or metrics achieved at Humain OS are not detailed in the available information",
+          "quote": "What specific outcomes or metrics were achieved at Humain OS?",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-006",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All three claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho worked on Humain OS",
+          "quote": "At Humain, he \"set up the product and experience organization for Humain OS, Saudi Arabia's national AI project\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Humain OS is described as Saudi Arabia's national AI project",
+          "quote": "Saudi Arabia's national AI project at Humain",
+          "verdict": "supported"
+        },
+        {
+          "text": "Cho set up the product and experience organization for Humain OS",
+          "quote": "set up the product and experience organization for Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-006",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho worked on Humain OS",
+          "quote": "set up the product and experience organization for Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "Humain OS is Saudi Arabia's national AI project",
+          "quote": "Humain OS, Saudi Arabia's national AI project",
+          "verdict": "supported"
+        },
+        {
+          "text": "He worked on this project at Humain",
+          "quote": "At Humain, he \"set up the product and experience organization for Humain OS, Saudi Arabia's national AI project\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "He set up the product and experience organization for this project",
+          "quote": "set up the product and experience organization for Humain OS",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-007",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are supported by the corpus; the answer correctly identifies that no ASEAN-specific region exists and accurately reports the Asia (Singapore) and US contacts.",
+      "claims": [
+        {
+          "text": "There is no mention of an ASEAN region contact in the content",
+          "quote": "아시아(싱가포르) : 이김컨설팅 / victoria@leekim.com",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Asia (Singapore) regional contact is Lee Kim Consulting",
+          "quote": "이김컨설팅",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Asia (Singapore) contact email is victoria@leekim.com",
+          "quote": "victoria@leekim.com",
+          "verdict": "supported"
+        },
+        {
+          "text": "The US East/West regional contact is Bizware Korea",
+          "quote": "비즈웨어코리아",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The US East/West contact email is kyd@bizw.co.kr",
+          "quote": "kyd@bizw.co.kr",
+          "verdict": "supported"
+        },
+        {
+          "text": "A specifically designated ASEAN region is not referenced in the provided content",
+          "quote": "아시아(싱가포르) : 이김컨설팅 / victoria@leekim.com",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-007",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims in the candidate answer are directly supported by verbatim corpus quotes identifying Lee Kim Consulting and the email victoria@leekim.com as the Asia/Singapore regional operating contact.",
+      "claims": [
+        {
+          "text": "The operating contact for the K-TECH PIONEERS Asia/ASEAN region is Lee Kim Consulting (이김컨설팅)",
+          "quote": "**아시아(싱가포르)** : 이김컨설팅 / victoria@leekim.com",
+          "verdict": "supported"
+        },
+        {
+          "text": "The email for the Asia region contact is victoria@leekim.com",
+          "quote": "이김컨설팅 / victoria@leekim.com",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-007",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims about the Asia/Singapore regional operating contact name and email are directly supported by verbatim corpus text.",
+      "claims": [
+        {
+          "text": "The operating contact for the Asia (Singapore) region is Lee Kim Consulting (이김컨설팅)",
+          "quote": "**아시아(싱가포르)** : 이김컨설팅 / victoria@leekim.com",
+          "verdict": "supported"
+        },
+        {
+          "text": "The contact email is victoria@leekim.com",
+          "quote": "이김컨설팅 / victoria@leekim.com",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-007",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims made by the candidate are directly supported or paraphrase-supported by the corpus, correctly identifying the two regional contacts and noting the absence of a specific ASEAN designation.",
+      "claims": [
+        {
+          "text": "There is no mention of an ASEAN region contact in the document",
+          "quote": "- **아시아(싱가포르)** : 이김컨설팅 / victoria@leekim.com\n- **미국(동부/서부)** : 비즈웨어코리아 / kyd@bizw.co.kr",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Asia (Singapore) regional contact is Lee Kim Consulting",
+          "quote": "**아시아(싱가포르)** : 이김컨설팅",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The email for the Asia (Singapore) contact is victoria@leekim.com",
+          "quote": "victoria@leekim.com",
+          "verdict": "supported"
+        },
+        {
+          "text": "The US East/West regional contact is Bizware Korea",
+          "quote": "**미국(동부/서부)** : 비즈웨어코리아",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The email for the US East/West contact is kyd@bizw.co.kr",
+          "quote": "kyd@bizw.co.kr",
+          "verdict": "supported"
+        },
+        {
+          "text": "A specifically designated ASEAN region contact is not mentioned in the provided content",
+          "quote": "- **아시아(싱가포르)** : 이김컨설팅 / victoria@leekim.com\n- **미국(동부/서부)** : 비즈웨어코리아 / kyd@bizw.co.kr",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-007",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Both claims are directly supported by the corpus, which lists 이김컨설팅 (Lee Kim Consulting) with email victoria@leekim.com as the Asia (Singapore) regional operator.",
+      "claims": [
+        {
+          "text": "The operating contact for the K-Tech Pioneers Asia (Singapore) region is Lee Kim Consulting",
+          "quote": "**아시아(싱가포르)** : 이김컨설팅 / victoria@leekim.com",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The email for the Asia (Singapore) region contact is victoria@leekim.com",
+          "quote": "victoria@leekim.com",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-007",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims about Lee Kim Consulting and the email address are directly supported by verbatim text in the corpus.",
+      "claims": [
+        {
+          "text": "The operating contact for the Asia (Singapore) region is Lee Kim Consulting (이김컨설팅)",
+          "quote": "**아시아(싱가포르)** : 이김컨설팅 / victoria@leekim.com",
+          "verdict": "supported"
+        },
+        {
+          "text": "The contact email is victoria@leekim.com",
+          "quote": "이김컨설팅 / victoria@leekim.com",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-008",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "The proposal targets a 6-month collaboration duration",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        },
+        {
+          "text": "July-August phase involves joint R&D roadmap definition",
+          "quote": "**7-8월** | 메모리 R&D 로드맵 공동 정의",
+          "verdict": "supported"
+        },
+        {
+          "text": "September-October phase involves Solar adapter v1 development",
+          "quote": "**9-10월** | Solar embeddings 기반 retrieval, Document Parse → Bundle 자동 변환 | Solar adapter v1",
+          "verdict": "supported"
+        },
+        {
+          "text": "November-December phase involves Enterprise PoC and public spec release",
+          "quote": "**11-12월** | Upstage 엔터프라이즈 PoC, 데모데이 | 운영 메트릭 + R&D 후속 + spec v1 공개",
+          "verdict": "supported"
+        },
+        {
+          "text": "One of the core deliverables is a Solar adapter for memory.wiki as first reference implementation",
+          "quote": "**Solar adapter for memory.wiki** — first reference implementation",
+          "verdict": "supported"
+        },
+        {
+          "text": "One of the core deliverables is a Document Parse → Bundle automatic conversion pipeline",
+          "quote": "**Document Parse → Bundle 파이프라인** — 자동 변환",
+          "verdict": "supported"
+        },
+        {
+          "text": "One of the core deliverables is memory.wiki/spec public release with 'Recognized by Solar' designation",
+          "quote": "**`memory.wiki/spec` \"Recognized by Solar\" 표기** — 12월 공식 announce",
+          "verdict": "supported"
+        },
+        {
+          "text": "There is a 12-month window before OpenAI/Anthropic potentially ship closed memory protocol alternatives",
+          "quote": "6-12개월 안에만 — Solar 외에는 가질 수 없습니다",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-008",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "All three atomic claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "The proposal targets a 6-month collaboration",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        },
+        {
+          "text": "The collaboration is with Upstage",
+          "quote": "Upstage 발표 — Memory Protocol 동맹 제안",
+          "verdict": "supported"
+        },
+        {
+          "text": "It is positioned as a strategic alliance rather than a vendor contract",
+          "quote": "벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-008",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "Both claims are directly supported by the corpus, which explicitly states '6개월 K-Tech Pioneers 협업' (6-month K-Tech Pioneers collaboration).",
+      "claims": [
+        {
+          "text": "The collaboration duration targeted is 6 months",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        },
+        {
+          "text": "The proposal is referred to as the '6-month K-Tech Pioneers collaboration'",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-008",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The alliance proposal targets a 6-month collaboration duration",
+          "quote": "오늘 Upstage와 함께 만들고 싶은 6개월은",
+          "verdict": "supported"
+        },
+        {
+          "text": "July-August phase involves joint memory R&D roadmap definition",
+          "quote": "**7-8월** | 메모리 R&D 로드맵 공동 정의",
+          "verdict": "supported"
+        },
+        {
+          "text": "September-October phase involves Solar embeddings-based retrieval and Document Parse → Bundle conversion",
+          "quote": "**9-10월** | Solar embeddings 기반 retrieval, Document Parse → Bundle 자동 변환",
+          "verdict": "supported"
+        },
+        {
+          "text": "November-December phase involves Enterprise PoC, demo day, and public spec release with 'Recognized by Solar' announcement",
+          "quote": "**11-12월** | Upstage 엔터프라이즈 PoC, 데모데이 | 운영 메트릭 + R&D 후속 + spec v1 공개",
+          "verdict": "supported"
+        },
+        {
+          "text": "There is a 6-12 month strategic window before OpenAI/Anthropic potentially ship closed alternatives",
+          "quote": "그 자리는 **6-12개월의 창문**입니다. 그 안에 첫 번째 partner가 되는 LLM이 그 자리를 가집니다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The closing line states the window closes in 12 months",
+          "quote": "The window for defining\nthe memory protocol of the AI era\nis open now.\n\nIt closes in 12 months.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-008",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The corpus explicitly states the proposal targets a 6-month K-Tech Pioneers collaboration positioned as a strategic alliance.",
+      "claims": [
+        {
+          "text": "The Upstage Memory Protocol alliance proposal targets a 6-month collaboration",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-008",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "Both claims in the answer are directly supported verbatim in the corpus.",
+      "claims": [
+        {
+          "text": "The collaboration duration targeted is 6 months",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        },
+        {
+          "text": "The proposal is called the K-Tech Pioneers collaboration",
+          "quote": "6개월 K-Tech Pioneers 협업을 *벤더 계약*이 아니라 *strategic alliance*로 포지셔닝",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-009",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All five claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The a16z speedrun pitch deck contains 8 slides",
+          "quote": "8 slides. Speedrun-fit (consumer/creator + AI, 1-person founder narrative).",
+          "verdict": "supported"
+        },
+        {
+          "text": "There are optional appendix slides",
+          "quote": "## Optional appendix slides",
+          "verdict": "supported"
+        },
+        {
+          "text": "Appendix A covers product screenshots",
+          "quote": "Appendix A — Product screenshots",
+          "verdict": "supported"
+        },
+        {
+          "text": "Appendix B covers the Karpathy LLM Wiki tweet",
+          "quote": "Appendix B — Karpathy \"LLM Wiki\" tweet",
+          "verdict": "supported"
+        },
+        {
+          "text": "Appendix C covers cap table / use of funds",
+          "quote": "Appendix C — Cap table / use of funds",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-009",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The corpus explicitly states '8 slides' matching the candidate answer exactly.",
+      "claims": [
+        {
+          "text": "The a16z speedrun pitch deck has 8 slides",
+          "quote": "8 slides. Speedrun-fit (consumer/creator + AI, 1-person founder narrative).",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-009",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The corpus explicitly states '8 slides' at the top of the document, directly supporting the candidate's answer.",
+      "claims": [
+        {
+          "text": "There are 8 slides in the a16z speedrun pitch deck",
+          "quote": "8 slides. Speedrun-fit (consumer/creator + AI, 1-person founder narrative).",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-009",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The pitch deck contains 8 slides",
+          "quote": "8 slides. Speedrun-fit (consumer/creator + AI, 1-person founder narrative).",
+          "verdict": "supported"
+        },
+        {
+          "text": "There are optional appendix slides",
+          "quote": "Optional appendix slides",
+          "verdict": "supported"
+        },
+        {
+          "text": "Appendix A covers product screenshots",
+          "quote": "Appendix A — Product screenshots",
+          "verdict": "supported"
+        },
+        {
+          "text": "Appendix B covers the Karpathy LLM Wiki tweet",
+          "quote": "Appendix B — Karpathy \"LLM Wiki\" tweet",
+          "verdict": "supported"
+        },
+        {
+          "text": "Appendix C covers cap table / use of funds",
+          "quote": "Appendix C — Cap table / use of funds",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-009",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The corpus explicitly states '8 slides' at the top of the deck description, directly supporting the candidate answer.",
+      "claims": [
+        {
+          "text": "The a16z speedrun pitch deck has 8 slides.",
+          "quote": "8 slides. Speedrun-fit (consumer/creator + AI, 1-person founder narrative).",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-009",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Both claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "There are 8 slides in the main mdfy a16z speedrun pitch deck",
+          "quote": "8 slides. Speedrun-fit (consumer/creator + AI, 1-person founder narrative).",
+          "verdict": "supported"
+        },
+        {
+          "text": "There are 3 optional appendix slides",
+          "quote": "## Optional appendix slides\n\n- **Appendix A — Product screenshots**: Hub view, Bundle canvas with concept graph, raw .md payload showing graph-baked-in, Galaxy constellation\n- **Appendix B — Karpathy \"LLM Wiki\" tweet** as a screenshot + line \"Named the shape. We're shipping it.\"\n- **Appendix C — Cap table / use of funds** (one-page)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-010",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Conservative 12-month MRR target is $33K MRR ($400K ARR) with ~3,000 paid users at $11 ARPU",
+          "quote": "Conservative\n- 3,000 paid users\n- ARPU $11\n- $33K MRR / $400K ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Realistic 12-month MRR target is $88K MRR ($1.0M ARR) with ~8,000 paid users at $11 ARPU",
+          "quote": "Realistic\n- 8,000 paid users\n- ARPU $11\n- $88K MRR / $1.0M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Optimistic 12-month MRR target is $216K MRR ($2.5M ARR) with ~18,000 paid users at $12 ARPU",
+          "quote": "Optimistic\n- 18,000 paid users\n- ARPU $12\n- $216K MRR / $2.5M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-Month Outlook section states a broader range of $80–150K MRR as the target",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-month target includes 10,000–20,000 paying users",
+          "quote": "10,000-20,000 paying users",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-month goal includes reaching top 5 recognition in the 'AI memory' category",
+          "quote": "\"AI memory\" 카테고리 top 5 인지",
+          "verdict": "supported"
+        },
+        {
+          "text": "At public launch (Week 16 / August 2026), the immediate MRR target is $1,500–2,500 MRR from approximately 100–150 paid users",
+          "quote": "$1,500-2,500 MRR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-010",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All four claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "memory.wiki v7 projects $80K–$150K MRR at the 12-month horizon",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Conservative Year 1 scenario: $50K–$100K MRR",
+          "quote": "Conservative\n\n- $50-100K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Realistic Year 1 scenario: $100K–$200K MRR",
+          "quote": "Realistic\n\n- $100-200K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Optimistic Year 1 scenario: $250K–$400K MRR",
+          "quote": "Optimistic\n\n- $250-400K MRR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-010",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All four MRR figures cited in the candidate answer are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "memory.wiki v7 projects $80,000 – $150,000 MRR for the 12-month horizon as a general outlook/KPI target",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The conservative scenario projects $33,000 MRR",
+          "quote": "$33K MRR / $400K ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The realistic scenario projects $88,000 MRR",
+          "quote": "$88K MRR / $1.0M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The optimistic scenario projects $216,000 MRR",
+          "quote": "$216K MRR / $2.5M ARR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "full"
+    },
+    {
+      "query_id": "qd-010",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Conservative 12-month MRR target is $33K MRR ($400K ARR) with ~3,000 paid users at $11 ARPU",
+          "quote": "Conservative\n\n- 3,000 paid users\n- ARPU $11\n- $33K MRR / $400K ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Realistic 12-month MRR target is $88K MRR ($1.0M ARR) with ~8,000 paid users at $11 ARPU",
+          "quote": "Realistic\n\n- 8,000 paid users\n- ARPU $11\n- $88K MRR / $1.0M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Optimistic 12-month MRR target is $216K MRR ($2.5M ARR) with ~18,000 paid users at $12 ARPU",
+          "quote": "Optimistic\n\n- 18,000 paid users\n- ARPU $12\n- $216K MRR / $2.5M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-Month Outlook section references a broader range of $80–150K MRR as the expected outcome",
+          "quote": "$80-150K MRR\n\n- 10,000-20,000 paying users\n- \"AI memory\" 카테고리 top 5 인지",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-month outlook includes 10,000–20,000 paying users",
+          "quote": "10,000-20,000 paying users",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-month goal includes reaching top 5 recognition in the 'AI memory' category",
+          "quote": "\"AI memory\" 카테고리 top 5 인지",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-010",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All four claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "memory.wiki v7 projects $80K–$150K MRR at the 12-month horizon",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Conservative Year 1 scenario is $50K–$100K MRR",
+          "quote": "Conservative\n- $50-100K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Realistic Year 1 scenario is $100K–$200K MRR",
+          "quote": "Realistic\n- $100-200K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Optimistic Year 1 scenario is $250K–$400K MRR",
+          "quote": "Optimistic\n- $250-400K MRR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qd-010",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All eight atomic claims are directly supported by verbatim figures in the corpus.",
+      "claims": [
+        {
+          "text": "The 12-month general target is $80,000 – $150,000 MRR",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-month general target includes 10,000 – 20,000 paying users",
+          "quote": "10,000-20,000 paying users",
+          "verdict": "supported"
+        },
+        {
+          "text": "Conservative revenue projection at 12 months is $33,000 MRR",
+          "quote": "$33K MRR / $400K ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Realistic revenue projection at 12 months is $88,000 MRR",
+          "quote": "$88K MRR / $1.0M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Optimistic revenue projection at 12 months is $216,000 MRR",
+          "quote": "$216K MRR / $2.5M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "12-Month Outlook conservative scenario is $50,000 – $100,000 MRR",
+          "quote": "$50-100K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "12-Month Outlook realistic scenario is $100,000 – $200,000 MRR",
+          "quote": "$100-200K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "12-Month Outlook optimistic scenario is $250,000 – $400,000 MRR",
+          "quote": "$250-400K MRR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    }
+  ]
+}

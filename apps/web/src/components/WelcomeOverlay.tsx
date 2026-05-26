@@ -166,8 +166,8 @@ export default function WelcomeOverlay() {
                 display: "inline-block",
                 fontSize: 10,
                 fontWeight: 700,
-                color: "var(--accent)",
-                background: "var(--accent-dim)",
+                color: "var(--text-primary)",
+                background: "var(--border)",
                 padding: "3px 10px",
                 borderRadius: 8,
                 fontFamily: "var(--font-geist-mono), monospace",
@@ -187,7 +187,7 @@ export default function WelcomeOverlay() {
                 display: "inline-block",
                 fontSize: 10,
                 fontWeight: 700,
-                color: "var(--accent)",
+                color: "var(--text-primary)",
                 textTransform: "uppercase",
                 letterSpacing: 1.4,
                 marginBottom: 12,
@@ -204,7 +204,7 @@ export default function WelcomeOverlay() {
           {isFirst && (
             <div style={{ marginBottom: 16 }}>
               <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>
-                <span style={{ color: "var(--accent)" }}>Memory</span>
+                <span style={{ color: "var(--text-primary)" }}>Memory</span>
                 <span style={{ color: "var(--text-primary)" }}>.Wiki</span>
               </span>
             </div>
@@ -282,7 +282,7 @@ export default function WelcomeOverlay() {
                 height: 6,
                 borderRadius: 3,
                 border: "none",
-                background: current === i ? "var(--accent)" : "var(--border)",
+                background: current === i ? "var(--text-primary)" : "var(--border)",
                 cursor: "pointer",
                 padding: 0,
                 transition: "width 0.2s, background 0.2s",
@@ -317,7 +317,7 @@ export default function WelcomeOverlay() {
               onClick={next}
               style={{
                 flex: 1,
-                background: "var(--accent)",
+                background: "var(--text-primary)",
                 color: "#000",
                 border: "none",
                 padding: "13px 28px",

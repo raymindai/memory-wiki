@@ -2,11 +2,22 @@
 @import "katex/dist/katex.min.css";
 @import "highlight.js/styles/github-dark.min.css";
 
+/* ─── Display fonts — same set as marketing Pure surfaces, loaded
+   globally so editor/viewer/app surfaces can reach for them too
+   (wordmark, modal titles, dashboard headings). Idempotent — CSS
+   imports dedupe even if pure/styles/base.css also imports them. */
+@import url("https://cdn.jsdelivr.net/gh/MarcoBiedermann/cal-sans@1/dist/cal-sans.min.css");
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+
 /* ──────────────────────────────────────────────────────────────────
    Typography tokens — registered with Tailwind v4 theme.
-   Defines the two font families used across the UI:
-     --font-sans : Noto Sans + Noto Sans KR (한글 cascade)
-     --font-mono : JetBrains Mono
+   Defines the font families used across the UI:
+     --font-sans    : Noto Sans + Noto Sans KR (한글 cascade)
+     --font-mono    : JetBrains Mono
+     --font-display : Cal Sans (Latin display) + Pretendard (CJK) +
+                      Noto Sans fallback. For wordmarks, modal titles,
+                      dashboard headings — same display font as the
+                      Pure marketing kit.
 
    Underlying next/font variables (--font-noto, --font-noto-kr,
    --font-jetbrains-mono) are injected by app/layout.tsx.
@@ -19,10 +30,15 @@
 @theme {
   --font-sans: var(--font-noto), var(--font-noto-kr), -apple-system, "Helvetica Neue", system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", "Menlo", monospace;
+  --font-display: "Cal Sans", "Pretendard Variable", Pretendard, var(--font-sans);
 }
 
 .mono {
   font-family: var(--font-mono);
+}
+.display {
+  font-family: var(--font-display);
+  letter-spacing: 0;
 }
 
 /* ========================================
@@ -34,20 +50,78 @@
    ======================================== */
 .text-caption  { font-size: var(--text-caption); line-height: 1.4; }
 .text-body     { font-size: var(--text-body); line-height: 1.5; }
-.text-heading  { font-size: var(--text-heading); line-height: 1.4; font-weight: 600; }
-.text-display  { font-size: var(--text-display); line-height: 1.2; font-weight: 700; }
+/* Section headings — used by viewer + editor surfaces for "Documents",
+   "How to use this bundle", "Stats", etc. Sized as a real h2 (16px /
+   weight 500) so section titles read as section titles, not caption
+   text. Per design rule the global h1-h6 cap is 500 — this class
+   stays in sync. */
+.text-heading  { font-size: var(--text-heading); line-height: 1.35; font-weight: 500; }
+.text-display  { font-size: var(--text-display); line-height: 1.2; font-weight: 500; }
+
+/* ─── Viewer header glass ─── Sticky header with a translucent glass
+   backdrop that mask-fades to transparent on the bottom edge, so the
+   nav dissolves into the page instead of cutting a horizontal line.
+   Mirrors the marketing Pure nav pattern. Pages can opt OUT of the
+   fade by passing `bordered` to the React component — in that case
+   the inline borderBottom replaces the soft fade with a hairline. */
+.mw-viewer-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.mw-viewer-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  bottom: -32px;
+  background: color-mix(in srgb, var(--canvas) 70%, transparent);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  mask-image: linear-gradient(to bottom, black 58%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black 58%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.mw-viewer-header[data-bordered="true"]::before {
+  /* Bordered variant — drop the glass + soft fade, the inline
+     border-bottom handles separation cleanly. */
+  display: none;
+}
+.mw-viewer-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Canvas token ─── The central editing/reading surface (Start,
+   Hub, Bundle, Document) sits one step DARKER than --background so
+   the sidebar + header read as the chrome "frame" around the canvas.
+   Derived from --background via color-mix so it auto-tracks every
+   theme scheme (Nord, Dracula, Solarized…) instead of breaking when
+   the user picks a non-default skin. Per-theme percentages:
+   dark = 8% black (subtle deepen), light = 4% black (paper effect). */
+:root,
+[data-theme="dark"] {
+  --canvas: color-mix(in srgb, var(--background) 92%, black);
+}
+[data-theme="light"] {
+  --canvas: color-mix(in srgb, var(--background) 96%, black);
+}
 
 /* ========================================
    Theme: Dark (default)
    ======================================== */
 :root,
 [data-theme="dark"] {
-  --background: #0d0d10;
+  /* Slightly lifted from pure-black so the editor surface doesn't
+     feel like an OLED void; reads as "soft ink" instead. */
+  --background: #15151a;
   --foreground: #fafafa;
-  --accent: #fb923c;
-  --accent-dim: rgba(251, 146, 60, 0.15);
+  /* Default accent — lime. Pure-brand color; user can pick a
+     different one in Settings → Appearance → Key Color. */
+  --accent: #B5FF1A;
+  --accent-dim: rgba(181, 255, 26, 0.15);
   --surface: #18181b;
-  --surface-hover: rgba(251, 146, 60, 0.03);
+  --surface-hover: rgba(181, 255, 26, 0.03);
   --border: #27272a;
   --border-dim: rgba(39, 39, 42, 0.6);
   --text-primary: #fafafa;
@@ -55,6 +129,18 @@
   --text-tertiary: #a1a1aa;
   --text-muted: #a1a1aa;
   --text-faint: #8a8a91;
+  /* Pure micro-color tokens — semantic spot color. Used for small
+     status dots, badges, state markers, toggle handles, etc. — never
+     for body chrome. Orange is reserved strictly for CAPTURE moments;
+     warnings / negative states / off-toggles use red so the UI
+     doesn't read as "orange everywhere = AI-generated." */
+  --micro-lime:   #B5FF1A;   /* live / shipped / success / toggle-on */
+  --micro-orange: #FF6B1A;   /* capture / paste-from-AI signals */
+  --micro-ai:     #8B5CF6;   /* AI-generated / Sparkles / vision */
+  --micro-info:   #2E7BFF;   /* sync / cloud / informational */
+  --micro-warn:   #FFB400;   /* warning / attention (mild) */
+  --micro-pink:   #FF2A7D;   /* highlight / urgent */
+  --micro-red:    #EF4444;   /* error / stale / off / notification */
   --header-bg: rgba(13, 13, 16, 0.95);
   --editor-text: #d4d4d8;
   --editor-placeholder: #3f3f46;
@@ -133,24 +219,34 @@
    Theme: Light
    ======================================== */
 [data-theme="light"] {
-  /* "Paper" — Notion / Apple Notes feel. Pure-white page on a
-     warm-gray stone palette (stone-50…stone-900). The earlier
-     light mode mixed warm bg with cool zinc surface; this
-     unifies temperature, restores hierarchy, and lets the orange
-     accent breathe. */
+  /* "Paper" — neutral zinc palette. Earlier light theme leaned warm
+     (stone + orange) so the whole UI read as orange-tinted. Switched
+     to cool zinc + a light lime tint on the hover so the accent
+     pulls from the v8 lime link color, not legacy orange. */
   --background: #ffffff;
-  --foreground: #1c1917; /* stone-900 */
-  --accent: #ea580c;
-  --accent-dim: rgba(234, 88, 12, 0.1);
-  --surface: #fafaf9; /* stone-50 — subtle off-white card */
-  --surface-hover: rgba(234, 88, 12, 0.04);
-  --border: #ececec;
-  --border-dim: rgba(231, 229, 228, 0.55); /* stone-200 @ 55% */
-  --text-primary: #1c1917; /* stone-900 */
-  --text-secondary: #44403c; /* stone-700 */
-  --text-tertiary: #57534e; /* stone-600 */
-  --text-muted: #57534e; /* stone-600 */
-  --text-faint: #78716c; /* stone-500 */
+  --foreground: #18181b; /* zinc-900 */
+  /* Default accent — lime (light variant). */
+  --accent: #5BC700;
+  --accent-dim: rgba(91, 199, 0, 0.10);
+  --surface: #fafafa; /* zinc-50 — neutral off-white card */
+  --surface-hover: rgba(91, 199, 0, 0.05);
+  --border: #e4e4e7; /* zinc-200 */
+  --border-dim: rgba(228, 228, 231, 0.6);
+  --text-primary: #18181b; /* zinc-900 */
+  --text-secondary: #3f3f46; /* zinc-700 */
+  --text-tertiary: #52525b; /* zinc-600 */
+  --text-muted: #52525b; /* zinc-600 */
+  --text-faint: #71717a; /* zinc-500 */
+  /* Light-theme micro colors — slightly deeper hues so they pass
+     AA contrast on the warm-paper background. Mirrors
+     pure/styles/tokens.css light-theme values. */
+  --micro-lime:   #5BC700;
+  --micro-orange: #E84500;
+  --micro-ai:     #7C3AFF;
+  --micro-info:   #1565FF;
+  --micro-warn:   #C68800;
+  --micro-pink:   #DB1A60;
+  --micro-red:    #DC2626;
   --header-bg: rgba(255, 255, 255, 0.95);
   --editor-text: #44403c; /* stone-700 — softer than primary for long reads */
   --editor-placeholder: #a8a29e; /* stone-400 */
@@ -195,6 +291,15 @@
    ======================================== */
 
 /* Orange is the default — no override needed */
+
+/* Lime (also the implicit default — see :root). Explicit override
+   so users coming from another accent can pick lime back. */
+[data-accent="lime"] { --accent: #B5FF1A; --accent-dim: rgba(181, 255, 26, 0.15); --surface-hover: rgba(181, 255, 26, 0.03); --badge-bg: rgba(181, 255, 26, 0.15); }
+[data-accent="lime"][data-theme="light"] { --accent: #5BC700; --accent-dim: rgba(91, 199, 0, 0.10); --surface-hover: rgba(91, 199, 0, 0.04); --badge-bg: rgba(91, 199, 0, 0.10); }
+
+/* Orange — original brand accent, kept as an opt-in choice. */
+[data-accent="orange"] { --accent: #fb923c; --accent-dim: rgba(251, 146, 60, 0.15); --surface-hover: rgba(251, 146, 60, 0.03); --badge-bg: rgba(251, 146, 60, 0.15); }
+[data-accent="orange"][data-theme="light"] { --accent: #ea580c; --accent-dim: rgba(234, 88, 12, 0.10); --surface-hover: rgba(234, 88, 12, 0.04); --badge-bg: rgba(234, 88, 12, 0.10); }
 
 /* Blue */
 [data-accent="blue"] { --accent: #60a5fa; --accent-dim: rgba(96, 165, 250, 0.15); --surface-hover: rgba(96, 165, 250, 0.03); --badge-bg: rgba(96, 165, 250, 0.15); }
@@ -711,6 +816,87 @@ body {
   padding: 0;
 }
 
+/* Global heading typography — Cal Sans (Latin) + Pretendard (CJK),
+   uniform weight 500, letter-spacing 0. Applies to EVERY h1–h6
+   across the app (editor chrome, modal titles, sidebar headers,
+   settings, panel sections, viewer chrome, etc.) — not just inside
+   rendered markdown surfaces. 600 is available as the heavier ceiling
+   when a specific spot truly needs more weight, but the default
+   stays at 500 so the UI reads restrained. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* ─── Editor start-screen animated backdrop ─── Mirrors the
+   marketing Pure shell backdrop (same morphing MW-blob asset) so the
+   start screen reads as part of the same brand surface. */
+.mw-start-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.mw-start-backdrop-morph {
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  width: 70vw;
+  height: 70vw;
+  max-width: 1000px;
+  max-height: 1000px;
+  transform: translate3d(-50%, -50%, 0);
+  pointer-events: none;
+  filter: blur(20px);
+  opacity: 0.05;
+}
+[data-theme="light"] .mw-start-backdrop-morph {
+  opacity: 0.12;
+}
+.mw-start-backdrop-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Sidebar inline-action hover micro colors ─── The small
+   right-aligned action icons in section headers (sort, new folder,
+   new doc, new bundle, etc.) light up with the section's own
+   semantic micro hue on hover so users know what's clickable AND
+   which section they're acting on. Targets buttons via a
+   `data-action` attribute so the chevron / label stay neutral. */
+[data-section-id="recent"]   [data-action]:hover { color: var(--micro-info)   !important; }
+[data-section-id="bundles"]  [data-action]:hover { color: var(--micro-lime)   !important; }
+[data-section-id="mds"]      [data-action]:hover { color: var(--micro-orange) !important; }
+[data-section-id="concepts"] [data-action]:hover { color: var(--micro-ai)     !important; }
+[data-section-id="shared"]   [data-action]:hover { color: var(--micro-pink)   !important; }
+[data-section-id="lint"]     [data-action]:hover { color: var(--micro-warn)   !important; }
+[data-section-id="guides"]   [data-action]:hover { color: var(--micro-ai)     !important; }
+[data-section-id="trash"]    [data-action]:hover { color: var(--micro-red)    !important; }
+/* Library header inline actions — each gets its own semantic hue so
+   the row reads as "four distinct tools" rather than a uniform gray
+   strip. Order in the markup: organize, import, refresh, help. */
+[data-library-header] [data-action="organize"]:hover { color: var(--micro-info) !important; }
+[data-library-header] [data-action="import"]:hover   { color: var(--micro-lime) !important; }
+[data-library-header] [data-action="refresh"]:hover  { color: var(--micro-ai)   !important; }
+[data-library-header] [data-action="help"]:hover     { color: var(--micro-warn) !important; }
+
+/* ─── Max font-weight cap ─── Design rule: nothing thicker than 500
+   anywhere in the UI. Cal Sans 600 exists in the bundle but is
+   reserved for special spots — the default ceiling stays at 500 so
+   the interface reads restrained. Body emphasis still works via
+   italic / color shift / inline-code. */
+.font-bold,
+.font-semibold,
+.font-extrabold,
+.font-black,
+b,
+strong {
+  font-weight: 500 !important;
+}
+
 /* ========================================
    mdcore rendered output styles
    ======================================== */
@@ -726,55 +912,61 @@ body {
   pointer-events: none;
 }
 
-/* Headings */
+/* Headings — Cal Sans (Latin) + Pretendard (CJK), letter-spacing 0,
+   uniform weight 600. Same display font as marketing Pure surfaces;
+   replaces Noto Sans body inheritance for all six heading levels in
+   rendered docs. 600 is the heaviest weight the Cal Sans CDN ships,
+   anything beyond renders as faux-bold — keep this consistent with
+   the global h1-h6 rule above. */
+.mdcore-rendered h1,
+.mdcore-rendered h2,
+.mdcore-rendered h3,
+.mdcore-rendered h4,
+.mdcore-rendered h5,
+.mdcore-rendered h6 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
 .mdcore-rendered h1 {
   font-size: 1.5rem;        /* 30 → 24 */
-  font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
-  letter-spacing: -0.025em;
 }
 
 .mdcore-rendered h2 {
   font-size: 1.125rem;      /* 22 → 18 */
-  font-weight: 600;
   color: var(--h2-color);
   margin: 2rem 0 0.75rem;
   padding-bottom: 0.375rem;
   border-bottom: 1px solid var(--border);
-  letter-spacing: -0.015em;
 }
 
 .mdcore-rendered h3 {
   font-size: 0.9375rem;     /* 18 → 15 */
-  font-weight: 600;
   color: var(--h2-color);
   margin: 1.5rem 0 0.5rem;
 }
 
 .mdcore-rendered h4 {
   font-size: 1rem;          /* 16px — stays visibly above body (14) */
-  font-weight: 600;
   color: var(--h2-color);
   margin: 1.25rem 0 0.5rem;
 }
 
 .mdcore-rendered h5 {
   font-size: 0.875rem;      /* matches body */
-  font-weight: 600;
   color: var(--text-tertiary);
   margin: 1rem 0 0.375rem;
 }
 
 .mdcore-rendered h6 {
-  font-size: 0.875rem;      /* matches body */
-  font-weight: 600;
+  font-size: 0.875rem;
   color: var(--text-muted);
   margin: 1rem 0 0.375rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
 }
 
 /* Paragraphs */
@@ -792,7 +984,9 @@ body {
   font-style: italic;
 }
 
-/* Links */
+/* Links — user-configurable accent (Settings → Appearance → Key Color).
+   Default = lime. Same accent drives Tiptap links, blockquote borders,
+   and task-list checks so the editor reads as one coherent surface. */
 .mdcore-rendered a {
   color: var(--accent);
   text-decoration: none;
@@ -804,7 +998,7 @@ body {
   opacity: 0.85;
 }
 
-/* Blockquotes */
+/* Blockquotes — left border picks up the configurable accent. */
 .mdcore-rendered blockquote {
   border-left: 3px solid var(--accent);
   margin: 1rem 0;
@@ -823,14 +1017,16 @@ body {
   margin: 0.5rem 0;
 }
 
-/* Inline code */
+/* Inline code — mono on a dim panel, ink text. The background tint
+   carries the "this is code" signal; the previous bright micro-pink
+   text on every inline code made paragraphs look spotted with red. */
 .mdcore-rendered code {
-  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 0.85em;
   background: var(--border);
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  color: var(--accent);
+  color: var(--text-primary);
 }
 
 /* Code blocks */
@@ -1160,7 +1356,7 @@ article[contenteditable="true"] > pre:last-child::after {
   background: transparent !important;
   border: none !important;
   padding: 1.5rem 2rem !important;
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', ui-monospace, monospace !important;
+  font-family: var(--font-mono) !important;
   font-size: 0.8125rem !important;
   line-height: 1.45 !important;
   letter-spacing: 0 !important;
@@ -1280,7 +1476,9 @@ article[contenteditable="true"] > pre:last-child::after {
   vertical-align: sub;
 }
 
-/* Alerts / Callouts (Obsidian-style) */
+/* Alerts / Callouts — first strong in a callout reads as the
+   callout's "label" and gets the same configurable accent as the
+   left border. */
 .mdcore-rendered blockquote p:first-child strong:first-child {
   color: var(--accent);
 }
@@ -1359,9 +1557,18 @@ textarea::placeholder {
   color: var(--editor-placeholder) !important;
 }
 
-/* Textarea selection highlight */
+/* Text selection — soft lime tied to the Pure brand instead of the
+   orange `accent-dim` we used to use everywhere. Applies globally
+   so editor / viewer / settings / marketing all read the same way
+   when the user drags to select text. */
+::selection,
 textarea::selection {
-  background: var(--accent-dim);
+  background: rgba(181, 255, 26, 0.22);  /* micro-lime @ 22% */
+  color: var(--text-primary);
+}
+[data-theme="light"] ::selection,
+[data-theme="light"] textarea::selection {
+  background: rgba(91, 199, 0, 0.20);    /* micro-lime light variant */
   color: var(--text-primary);
 }
 
@@ -1369,6 +1576,11 @@ textarea::selection {
    Animations
    ======================================== */
 @keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* Alias used by inline button spinners (Run now, etc.) so they don't
+   collide with any third-party rule that hijacks `spin`. */
+@keyframes mw-spin {
   to { transform: rotate(360deg); }
 }
 @keyframes loadbar {
@@ -1718,6 +1930,10 @@ textarea::selection {
 .tiptap li { margin: 0.15rem 0; }
 .tiptap li p { margin: 0; }
 .tiptap blockquote {
+  /* User-configurable accent (Settings → Appearance → Key Color).
+     Default = lime; users can pick any of the 9 accents and the
+     editor's links / blockquotes / task-list checks all update
+     together. */
   border-left: 3px solid var(--accent);
   margin: 0.75rem 0;
   padding: 0.5rem 1rem;
@@ -1805,14 +2021,14 @@ textarea::selection {
   background: transparent;
   padding: 0;
   font-size: 0.875rem;
-  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 .tiptap code {
   background: var(--surface);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   font-size: 0.875em;
-  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--font-mono);
 }
 .tiptap table {
   border-collapse: separate;
@@ -1897,7 +2113,7 @@ textarea::selection {
   display: flex;
   align-items: stretch;
   background: var(--background);
-  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -2309,7 +2525,7 @@ textarea::selection {
   background: #1a1a1e;
   border-radius: 10px;
   overflow: hidden;
-  font-family: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -2727,3 +2943,11 @@ textarea::selection {
 .mw-logo-blob > .mw-logo-blob-lighttheme { display: none; }
 [data-theme="light"] .mw-logo-blob > .mw-logo-blob-darktheme { display: none; }
 [data-theme="light"] .mw-logo-blob > .mw-logo-blob-lighttheme { display: block; }
+
+/* Generic theme-swap for the new brand v2 SVGs (logo-full, logo-textonly,
+   icon-inline). Same idea as the blob: ship one dark-bg variant + one
+   light-bg variant, css picks whichever matches the active theme. */
+.mw-logo-darktheme { display: inline-block; }
+.mw-logo-lighttheme { display: none; }
+[data-theme="light"] .mw-logo-darktheme { display: none; }
+[data-theme="light"] .mw-logo-lighttheme { display: inline-block; }

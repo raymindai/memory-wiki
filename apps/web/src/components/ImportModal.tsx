@@ -275,7 +275,7 @@ export default function ImportModal({
           <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => { if (!busy) { setActive(null); setError(null); } }}
-              className={`text-caption font-mono uppercase tracking-wider ${active ? "hover:text-[var(--accent)]" : "cursor-default"}`}
+              className={`text-caption font-mono uppercase tracking-wider ${active ? "hover:text-[var(--text-primary)]" : "cursor-default"}`}
               style={{ color: active ? "var(--text-muted)" : "var(--text-faint)", letterSpacing: 1.5, fontSize: 10 }}
             >
               {active ? "← Import" : "Import to your hub"}
@@ -434,7 +434,7 @@ function SimpleUrlForm({
         disabled={busy}
         className="px-3 py-2.5 rounded-md text-body outline-none transition-colors"
         style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)" }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--text-primary)")}
         onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border-dim)")}
       />
       {error && (
@@ -471,7 +471,7 @@ function SimpleUrlForm({
                 style={{
                   height: "100%",
                   width: `${pct}%`,
-                  background: "var(--accent)",
+                  background: "var(--text-primary)",
                   transition: "width 0.2s ease",
                 }}
               />
@@ -482,7 +482,7 @@ function SimpleUrlForm({
                   top: 0,
                   height: "100%",
                   width: "30%",
-                  background: "var(--accent)",
+                  background: "var(--text-primary)",
                   borderRadius: 2,
                   animation: "mwBootBar 1.1s ease-in-out infinite",
                 }}
@@ -495,7 +495,7 @@ function SimpleUrlForm({
         type="submit"
         disabled={busy || !value.trim()}
         className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-body font-semibold transition-colors disabled:opacity-40"
-        style={{ background: "var(--accent)", color: "#000" }}
+        style={{ background: "var(--text-primary)", color: "var(--background)" }}
       >
         {busy ? <Loader2 width={14} height={14} className="animate-spin" /> : null}
         {busy ? "Importing…" : "Import"}
@@ -524,7 +524,7 @@ function NotionForm({
           target="_blank"
           rel="noopener noreferrer"
           className="underline"
-          style={{ color: "var(--accent)" }}
+          style={{ color: "var(--text-primary)" }}
         >
           notion.so/profile/integrations
         </a>{" "}
@@ -539,7 +539,7 @@ function NotionForm({
         disabled={busy}
         className="px-3 py-2.5 rounded-md text-body outline-none transition-colors font-mono"
         style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)", fontSize: 12 }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--text-primary)")}
         onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border-dim)")}
       />
       <input
@@ -550,7 +550,7 @@ function NotionForm({
         disabled={busy}
         className="px-3 py-2.5 rounded-md text-body outline-none transition-colors"
         style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)" }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--text-primary)")}
         onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border-dim)")}
       />
       {error && (
@@ -562,7 +562,7 @@ function NotionForm({
         type="submit"
         disabled={busy || !token.trim() || !pageUrl.trim()}
         className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md text-body font-semibold transition-colors disabled:opacity-40"
-        style={{ background: "var(--accent)", color: "#000" }}
+        style={{ background: "var(--text-primary)", color: "var(--background)" }}
       >
         {busy ? <Loader2 width={14} height={14} className="animate-spin" /> : <FileText width={14} height={14} />}
         {busy ? "Importing…" : "Import page"}

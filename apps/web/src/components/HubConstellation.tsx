@@ -78,13 +78,13 @@ const CLUSTER_COLOURS = [
 function colourForBundle(bundleId: string | null | undefined, clusters: ApiCluster[]): string {
   if (!bundleId) return "color-mix(in srgb, var(--text-faint) 40%, transparent 60%)";
   const idx = clusters.findIndex((c) => c.id === bundleId);
-  return idx >= 0 ? CLUSTER_COLOURS[idx % CLUSTER_COLOURS.length] : "var(--accent)";
+  return idx >= 0 ? CLUSTER_COLOURS[idx % CLUSTER_COLOURS.length] : "var(--text-primary)";
 }
 
 function colourForConcept(kind: ApiNode["kind"]): string {
-  if (kind === "entity") return "var(--accent)";
-  if (kind === "tag") return "color-mix(in srgb, var(--accent) 50%, var(--text-muted) 50%)";
-  return "color-mix(in srgb, var(--accent) 75%, var(--text-primary) 25%)";
+  if (kind === "entity") return "var(--text-primary)";
+  if (kind === "tag") return "color-mix(in srgb, var(--text-primary) 50%, var(--text-muted) 50%)";
+  return "color-mix(in srgb, var(--text-primary) 75%, var(--text-primary) 25%)";
 }
 
 const elk = new ELK();
@@ -210,7 +210,7 @@ function HubConstellationInner({ authHeaders, minNodesToShow = 6 }: Props) {
         style: {
           stroke:
             e.kind === "concept_concept"
-              ? "color-mix(in srgb, var(--accent) 35%, transparent 65%)"
+              ? "color-mix(in srgb, var(--text-primary) 35%, transparent 65%)"
               : "color-mix(in srgb, var(--text-faint) 30%, transparent 70%)",
           strokeWidth: e.kind === "concept_concept" ? 1.2 : 0.7,
         },
@@ -415,7 +415,7 @@ function HubConstellationInner({ authHeaders, minNodesToShow = 6 }: Props) {
             setPlaying(false);
             setSliderDate(new Date(target).toISOString().slice(0, 10));
           }}
-          style={{ flex: 1, accentColor: "var(--accent)", cursor: "pointer" }}
+          style={{ flex: 1, accentColor: "var(--text-primary)", cursor: "pointer" }}
         />
         <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)", fontSize: 10 }}>
           {data.hubEnd}

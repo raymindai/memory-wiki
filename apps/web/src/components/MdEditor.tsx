@@ -55,7 +55,7 @@ import {
   FolderPlus, Folder, FolderOpen, File as FileIcon, MoreHorizontal,
   User, Users, Search, X, Trash2, RefreshCw, Lock, ShieldAlert, FileX,
   LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus, Wand2, Atom,
-  ChevronsDownUp, ChevronsUpDown,
+  ChevronsDownUp, ChevronsUpDown, ArrowUpRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
 import { buildAuthHeaders } from "@/lib/auth-fetch";
@@ -81,1560 +81,58 @@ import {
   fetchVersions,
   fetchVersion,
 } from "@/lib/share";
+import type {
+  // Aliased — lucide-react already exports a `Folder` icon component
+  // in the same scope, so we name the data type FolderType to avoid
+  // the collision.
+  Folder as FolderType,
+  Tab,
+  ViewMode,
+  Theme,
+} from "@/lib/editor-types";
+import {
+  FOLDER_FILTER_MY,
+  FOLDER_FILTER_BUNDLES,
+} from "@/lib/editor-types";
+import {
+  SAMPLE_WELCOME,
+  SAMPLE_FORMATTING,
+  SAMPLE_DIAGRAMS,
+  SAMPLE_ASCII,
+  SAMPLE_IMPORT_EXPORT,
+  SAMPLE_FEATURES,
+  SAMPLE_CHROME_EXT,
+  SAMPLE_VSCODE_EXT,
+  SAMPLE_DESKTOP,
+  SAMPLE_CLI,
+  SAMPLE_MCP,
+  SAMPLE_FRESHNESS,
+  SAMPLE_QUICKLOOK,
+  SAMPLE_BUNDLES,
+  SAMPLE_AI_CAPTURE,
+  DOCUMENT_TEMPLATES,
+  EXAMPLE_BUNDLE_ID,
+  EXAMPLE_OWNER,
+  EXAMPLES_FOLDER_ID,
+  EXAMPLE_TABS,
+  EXAMPLE_TAB_IDS,
+  INITIAL_FOLDERS,
+  INITIAL_TABS,
+} from "@/lib/editor-samples";
+import { InlineInput, TBtn } from "@/components/editor-primitives";
+import FlyoutMenu from "@/components/FlyoutMenu";
+import { truncateTitle, dicebearUrl, resolveAvatar, rewriteH1, suggestBundleTitle } from "@/lib/editor-helpers";
+import WysiwygToolbar from "@/components/WysiwygToolbar";
+import BundleCreatorModal from "@/components/modals/BundleCreatorModal";
+import BundleShareModal from "@/components/modals/BundleShareModal";
 
-// ─── Sample documents for default tabs ───
 
-const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
 
-> **The Markdown Hub.** Collect from anywhere. Edit with AI. Publish with a permanent URL.
 
-## Get Started
 
-1. **Type or paste** anything — Markdown, plain text, AI output, code
-2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
-3. **Edit** inline in the Live view, or use Source for raw Markdown
-4. **Share** with one click — generates a permanent URL like \`memory.wiki/abc123\`
 
-## What You Can Do
 
-- **WYSIWYG editing** — click any text in the Live view and start typing
-- **AI Tools** — Polish, Summary, TL;DR, Translate, Chat (right panel)
-- **Document Outline** — heading structure panel on the right
-- **Image Gallery** — upload, manage, and insert images (right panel)
-- **Multi-format import** — drag & drop PDF, DOCX, PPTX, XLSX, or 10+ other formats
-- **Export anywhere** — download as MD/HTML/TXT, print PDF, copy for Docs/Email/Slack
-- **Flavor conversion** — click the flavor badge (GFM ▾) to convert between formats
-- **Folders + Trash** — organize with folders, drag to move, soft delete with restore
-- **Cross-platform sync** — edit on Web, VS Code, Mac Desktop, or CLI. Same URL everywhere
 
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| Cmd+B | Bold |
-| Cmd+I | Italic |
-| Cmd+K | Insert link |
-| Cmd+S | Share (copy URL) |
-| Cmd+Z / Cmd+Shift+Z | Undo / Redo |
-| Cmd+Shift+C | Copy HTML |
-| Cmd+\\\\ | Toggle view mode |
-
-## Available Everywhere
-
-| Channel | How |
-|---------|-----|
-| Web | You are here — [Memory.Wiki](https://memory.wiki) |
-| VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) — Cmd+Shift+M to preview |
-| Mac App | Native desktop with sidebar and sync |
-| CLI | \`npm install -g memory-wiki-cli\` — pipe anything to a URL |
-| Chrome | [Extension](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) — capture AI conversations |
-| MCP | Connect Claude, Cursor, or any AI tool |
-| QuickLook | Press Space on .md files in Finder |
-
-## Try It Now
-
-- **Drop a PDF here** — AI converts it into clean Markdown
-- **Click +** in the sidebar to start from a template
-- **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during beta
-`;
-
-const SAMPLE_FORMATTING = `# Markdown Syntax Guide
-
-## Text Formatting
-
-Regular text, **bold**, *italic*, ***bold italic***, ~~strikethrough~~, and \`inline code\`.
-
-> Blockquotes can contain **formatting** and even
-> multiple paragraphs.
->
-> > Nested blockquotes work too.
-
-## Headings
-
-> # H1 — Document Title
-> ## H2 — Section
-> ### H3 — Subsection
-> #### H4 — Sub-subsection
-> ##### H5 — Minor heading
-> ###### H6 — Smallest heading
-
-## Lists
-
-### Unordered
-- First item
-- Second item
-  - Nested item
-  - Another nested
-    - Even deeper
-
-### Ordered
-1. Step one
-2. Step two
-   1. Sub-step A
-   2. Sub-step B
-
-### Task List
-- [x] Completed task
-- [x] Another done
-- [ ] Still to do
-
-## Tables
-
-| Left | Center | Right |
-|:-----|:------:|------:|
-| L1 | C1 | R1 |
-| L2 | C2 | R2 |
-| L3 | C3 | R3 |
-
-## Code
-
-\`\`\`typescript
-const { html, flavor } = await renderMarkdown(input);
-console.log(\`Detected: \${flavor.primary}\`);
-\`\`\`
-
-\`\`\`python
-import requests
-
-response = requests.post("https://memory.wiki/api/docs", json={
-    "markdown": "# Hello World",
-})
-print(response.json()["id"])  # → "abc123"
-\`\`\`
-
-## Math (KaTeX)
-
-Inline: $E = mc^2$ and $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$
-
-$$
-\\int_0^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}
-$$
-
-$$
-\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\begin{pmatrix} x \\\\ y \\end{pmatrix} = \\begin{pmatrix} ax + by \\\\ cx + dy \\end{pmatrix}
-$$
-
-## Footnotes
-
-Created by John Gruber[^1]. Most popular flavor: GFM[^2].
-
-[^1]: See [Daring Fireball](https://daringfireball.net/projects/markdown/).
-[^2]: [github.github.com/gfm](https://github.github.com/gfm/).
-
-## Description Lists
-
-Markdown
-: A lightweight markup language for creating formatted text.
-
-WASM
-: WebAssembly — a binary instruction format for a stack-based virtual machine.
-`;
-
-const SAMPLE_DIAGRAMS = `# Mermaid Diagrams — All 19 Types
-
-> **Tip:** Double-click any diagram to open the visual editor.
-
-## Flowchart
-
-\`\`\`mermaid
-graph LR
-    A[Markdown] --> B[mdcore Engine]
-    B --> C[WASM]
-    B --> D[Native Binary]
-    C --> E[Browser]
-    D --> F[CLI]
-    style B fill:#fb923c,stroke:#ea580c,color:#000
-\`\`\`
-
-## Sequence Diagram
-
-\`\`\`mermaid
-sequenceDiagram
-    participant User
-    participant App
-    participant API
-    User->>App: Request
-    App->>API: Fetch data
-    API-->>App: Response
-    App-->>User: Render
-\`\`\`
-
-## Pie Chart
-
-\`\`\`mermaid
-pie title Tech Stack
-    "Rust" : 40
-    "TypeScript" : 35
-    "CSS" : 15
-    "Other" : 10
-\`\`\`
-
-## Gantt Chart
-
-\`\`\`mermaid
-gantt
-    title Project Timeline
-    dateFormat YYYY-MM-DD
-    section Phase 1
-    Design :2026-01-01, 10d
-    Develop :2026-01-11, 20d
-    section Phase 2
-    Test :2026-02-01, 7d
-    Launch :2026-02-08, 3d
-\`\`\`
-
-## Class Diagram
-
-\`\`\`mermaid
-classDiagram
-    class Engine {
-        +render(md) HTML
-        +detectFlavor() Flavor
-    }
-    class Renderer {
-        +highlight() void
-        +katex() void
-    }
-    Engine <|-- Renderer
-\`\`\`
-
-## State Diagram
-
-\`\`\`mermaid
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> Loading : fetch
-    Loading --> Rendered : success
-    Loading --> Error : fail
-    Error --> Idle : retry
-    Rendered --> [*]
-\`\`\`
-
-## ER Diagram
-
-\`\`\`mermaid
-erDiagram
-    User {
-        int id
-        string name
-    }
-    Document {
-        int id
-        string markdown
-    }
-    User ||--o{ Document : creates
-\`\`\`
-
-## Mindmap
-
-\`\`\`mermaid
-mindmap
-  root((mdcore))
-    Product
-      Memory.Wiki
-      Chrome Extension
-    Engine
-      Rust
-      WASM
-    Features
-      GFM
-      KaTeX
-      Mermaid
-\`\`\`
-
-## Timeline
-
-\`\`\`mermaid
-timeline
-    title mdcore Milestones
-    2026 Q1 : Engine v0.1
-             : Memory.Wiki launch
-    2026 Q2 : npm package
-             : CLI tool
-    2026 Q3 : API platform
-\`\`\`
-
-## User Journey
-
-\`\`\`mermaid
-journey
-    title First-time User
-    section Discover
-      Visit site: 5: User
-      See demo: 4: User
-    section Use
-      Paste MD: 5: User
-      Share URL: 4: User
-\`\`\`
-
-## Quadrant Chart
-
-\`\`\`mermaid
-quadrantChart
-    title Feature Priority
-    x-axis "Low Effort" --> "High Effort"
-    y-axis "Low Impact" --> "High Impact"
-    Share URL: [0.2, 0.9]
-    PDF Export: [0.4, 0.6]
-    Canvas Mode: [0.8, 0.7]
-    Themes: [0.3, 0.4]
-\`\`\`
-
-## Git Graph
-
-\`\`\`mermaid
-gitGraph
-    commit id: "init"
-    branch feature
-    commit id: "add engine"
-    commit id: "add wasm"
-    checkout main
-    commit id: "hotfix"
-    merge feature
-    commit id: "v0.1"
-\`\`\`
-
-## XY Chart
-
-\`\`\`mermaid
-xychart-beta
-    title "Monthly Users"
-    x-axis ["Jan", "Feb", "Mar", "Apr", "May"]
-    y-axis "Users" 0 --> 500
-    bar [120, 200, 350, 280, 450]
-    line [100, 180, 300, 250, 400]
-\`\`\`
-
-
----
-
-*All 19 Mermaid diagram types with visual editors. Double-click to edit.*
-`;
-
-
-const SAMPLE_ASCII = `# ASCII Art Examples
-
-> Click **"Convert to Mermaid"** on any ASCII diagram to transform it into a rendered Mermaid chart.
-
-## Architecture Diagram
-
-\`\`\`
-┌──────────────────────────────────────────┐
-│              Memory.Wiki                      │
-│                                          │
-│  ┌─ Input ─────────────────────────────┐ │
-│  │ Chrome Extension: AI → capture      │ │
-│  │ Paste: Cmd+V                        │ │
-│  │ Drop: .md file drag                 │ │
-│  └─────────────────────────────────────┘ │
-│                    │                      │
-│                    ▼                      │
-│  ┌─ Engine (mdcore) ───────────────────┐ │
-│  │ AI noise removal                    │ │
-│  │ Code + Math + Diagram rendering     │ │
-│  │ Format detection                    │ │
-│  └─────────────────────────────────────┘ │
-│                    │                      │
-│                    ▼                      │
-│  ┌─ Output ────────────────────────────┐ │
-│  │ memory.wiki/{id} — shareable URL        │ │
-│  │ + "Published with Memory.Wiki" badge    │ │
-│  └─────────────────────────────────────┘ │
-└──────────────────────────────────────────┘
-\`\`\`
-
-## Score Card
-
-\`\`\`
-┌─────────────────────────────┐
-│  Score: 93/100               │
-│                              │
-│  Quality  ████████░░ 85%     │
-│  Style    █████████░ 92%     │
-│  Clarity  ██████░░░░ 63%     │
-│                              │
-│  — Analyzed by mdcore        │
-│  Memory.Wiki                     │
-└─────────────────────────────┘
-\`\`\`
-
-## Comparison Table
-
-\`\`\`
-┌──────────────┬─────────┬──────────┐
-│   Product    │   ARR   │   Moat   │
-├──────────────┼─────────┼──────────┤
-│ Carrd        │ $1.5-2M │ Badge    │
-├──────────────┼─────────┼──────────┤
-│ Plausible    │ $3.1M   │ Anti-GA  │
-├──────────────┼─────────┼──────────┤
-│ Buttondown   │ $180K+  │ Footer   │
-└──────────────┴─────────┴──────────┘
-\`\`\`
-
-## Simple Flow
-
-\`\`\`
-┌────────┐     ┌────────┐     ┌────────┐
-│  Input │────→│ Process│────→│ Output │
-└────────┘     └────────┘     └────────┘
-\`\`\`
-
-## Free During Beta
-
-Everything is unlocked while we're testing — no credit card required.
-
-\`\`\`
-┌─ Beta (everyone) ──────┐
-│ Unlimited documents    │
-│ Documents never expire │
-│ Cloud sync             │
-│ Short URL sharing      │
-│ AI structuring    │
-│ All formats supported  │
-└────────────────────────┘
-\`\`\`
-`;
-
-const SAMPLE_IMPORT_EXPORT = `# Import & Export Guide
-
-## Import — 13+ Formats
-
-Drop any file onto Memory.Wiki, use the **IMPORT** button in the sidebar, or paste content directly.
-
-| Format | How it works |
-|--------|-------------|
-| **PDF** | Server-side text extraction (max 4MB) |
-| **DOCX** | Word → HTML → Markdown via mammoth |
-| **PPTX / XLSX** | Office text extraction via officeparser (max 10MB) |
-| **HTML** | Turndown converts to clean Markdown |
-| **CSV** | Auto-converted to Markdown table |
-| **LaTeX** | Sections, math, formatting → Markdown |
-| **RST** | reStructuredText headings, links → Markdown |
-| **RTF / JSON / XML / TXT** | Text extraction with format hints |
-
-### AI Structuring
-
-After importing, you'll see **"Structure this document?"** — click **Structure it** to let AI:
-
-- Detect headings from context
-- Rebuild lists, tables, code blocks
-- Add emphasis and formatting
-- Preserve all original content
-
-> Works great for PDF imports where formatting is lost during text extraction.
-
-### Import via CLI
-
-\`\`\`bash
-# Pipe any file content
-cat report.md | mw publish
-pbpaste | mw publish
-\`\`\`
-
-### Import from GitHub
-
-Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. Memory.Wiki fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
-
-Works on:
-- \`github.com/owner/repo\` — repo root, recursive
-- \`github.com/owner/repo/tree/main/docs\` — single folder
-- \`github.com/owner/repo/blob/main/README.md\` — single file
-- \`raw.githubusercontent.com/owner/repo/main/path.md\` — raw
-
-### Import an Obsidian vault
-
-Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. Memory.Wiki walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
-
-> v1 doesn't follow \`[[wikilinks]]\` or rewrite attachments — they come through as plain text. The concept index will still connect notes that share concepts once the ontology refresh catches up.
-
-### Import via Chrome Extension
-
-Click the Memory.Wiki button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
-
-## Export — Every Destination
-
-Click the **Export** icon in the Live view header (Cmd+Alt+E).
-
-### Download
-- **Markdown (.md)** — raw source
-- **HTML (.html)** — styled, self-contained
-- **Plain Text (.txt)** — formatting stripped
-
-### Print
-- **PDF** — via browser print dialog (Cmd+P)
-
-### Clipboard
-- **Raw HTML** — for web use
-- **Rich Text** — paste into Google Docs, Email, Word with formatting preserved
-- **Slack (mrkdwn)** — formatted for Slack channels
-- **Plain Text** — no formatting
-
-### Share
-- **Permanent URL** — \`memory.wiki/abc123\` — one click to copy
-- **Embed** — iframe code for websites
-- **QR Code** — for mobile sharing
-`;
-
-const SAMPLE_FEATURES = `# Key Features
-
-## WYSIWYG Editing
-
-Click anywhere in the **Live** view to start editing. Format with the toolbar or keyboard shortcuts.
-
-> No need to learn Markdown syntax — just type naturally.
-
-## Flavor Detection & Conversion
-
-Memory.Wiki auto-detects your Markdown flavor:
-
-- **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
-- **CommonMark** — Standard, maximum compatibility
-- **Obsidian** — Wikilinks, callouts, embeds
-- **MDX** — Markdown + JSX components
-- **Pandoc** — Citations, footnotes, definition lists
-
-Click the **flavor badge** (e.g. \`GFM ▾\`) in the Source header to convert between flavors.
-
-## CLI Output Support
-
-Paste output from **Claude Code** or any terminal — unicode tables and checkmarks auto-convert:
-
-Before (terminal output):
-
-\`\`\`
-┌──────────┬────────┐
-│ Feature  │ Status │
-├──────────┼────────┤
-│ Auth     │ Done   │
-│ Export   │ Done   │
-└──────────┴────────┘
-\`\`\`
-
-After (auto-converted):
-
-| Feature | Status |
-|---------|--------|
-| Auth    | Done   |
-| Export  | Done   |
-
-## AI Tools
-
-Click the **AI** button in the header to open the AI panel:
-
-- **Polish** — improve writing quality and clarity
-- **Summary** — generate a concise summary at the top
-- **TL;DR** — extract key bullet points
-- **Translate** — translate to any language
-- **Chat** — type a natural language instruction to edit the document
-
-Changes are highlighted in orange and fade after 3 seconds.
-
-## Document Outline
-
-Click the **Outline** button to see your document structure. All headings (H1-H6) are listed with hierarchy. Click any heading to scroll directly to it.
-
-## Related in your hub
-
-Under every doc you own, Memory.Wiki lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
-
-## Hub recall + reranker
-
-Open the AI panel in **Hub** mode to chat across your whole hub. Recall fetches candidate chunks via hybrid search (vector + keyword) and a Haiku-based reranker reorders them so the answer cites your most-on-topic passages, not just the lexically nearest ones. Citations link back to the source doc.
-
-## llms.txt + token economy
-
-Every public hub auto-publishes a [\`/llms.txt\`](https://memory.wiki) manifest and a \`/llms-full.txt\` dense bundle so AI agents can discover and ingest your hub the way they do any other site. Append \`?compact\` or \`?digest\` to any \`/raw/\` URL to fetch the same content at a fraction of the token cost — same answer, smaller bill.
-
-## Image Gallery
-
-Click the **Image** button to open the gallery panel:
-
-- Upload images (WebP auto-conversion, max 10MB per file)
-- Click any image to insert at cursor position
-- Storage quota: Free 20MB, Pro 1GB
-
-## Narrow View
-
-Toggle **Narrow View** in the panel header to constrain content width for comfortable reading.
-
-## Folders & Organization
-
-- Create folders via **New Folder** at sidebar bottom
-- **Right-click** documents to move to folders
-- **Trash** section with restore and permanent delete
-- **Sort** by newest, oldest, A-Z, Z-A
-
-## Cross-Platform Sync
-
-Your documents sync across all 7 Memory.Wiki channels:
-
-| Channel | Install | What it does |
-|---------|---------|-------------|
-| Web | [Memory.Wiki](https://memory.wiki) | Full editor with AI tools |
-| VS Code | \`ext install raymindai.memory-wiki-vscode\` | WYSIWYG preview + sync |
-| Mac App | [Download DMG](https://memory.wiki/plugins) | Native sidebar + offline |
-| CLI | \`npm install -g memory-wiki-cli\` | Pipe anything to a URL |
-| Chrome | [Chrome Web Store](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) | Capture AI conversations |
-| MCP | \`npx memory-wiki-mcp\` or hosted at memory.wiki/api/mcp | AI tools integration |
-| QuickLook | Bundled with Mac app | Space to preview in Finder |
-
-Same URL, same content, everywhere.
-`;
-
-/**
- * Profile-menu flyout row. Renders a hover-target row + an absolutely-
- * positioned submenu that opens to the right. Uses a controlled
- * `open` state with a 120ms close-delay so the cursor can cross the
- * gap between the row and the submenu without dropping hover. The
- * earlier Tailwind `group-hover` version dropped the submenu the
- * moment the cursor left the row's exact bounds — common cause of
- * "hover doesn't work" on nested menus.
- */
-function FlyoutMenu({
-  label,
-  icon,
-  width,
-  children,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  width: number;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  // When the user OPENS the flyout by clicking the row (rather than
-  // hovering), we lock it open and dismiss only on outside click.
-  const [clickLocked, setClickLocked] = useState(false);
-  // Position of the flyout panel in viewport coordinates. Computed
-  // from the trigger row's getBoundingClientRect so the panel — which
-  // we portal into document.body to escape the parent auth menu's
-  // overflow-hidden — can sit just to the right of the row. Without
-  // the portal, the panel was clipped invisible the moment it tried
-  // to extend past the auth menu's bounds; that's why earlier clicks
-  // didn't appear to do anything.
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const computePos = () => {
-    const btn = buttonRef.current;
-    if (!btn) return;
-    const r = btn.getBoundingClientRect();
-    // Right of the row, 8px gap. Bottom-aligned to the row so the
-    // panel grows upward (the rows sit near the bottom of the auth
-    // menu so this prevents the panel running off-screen).
-    setPos({ top: r.bottom, left: r.right + 8 });
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    computePos();
-    const onScroll = () => computePos();
-    const onResize = () => computePos();
-    window.addEventListener("scroll", onScroll, true);
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("scroll", onScroll, true);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!clickLocked || !open) return;
-    const onDown = (e: MouseEvent) => {
-      const t = e.target as Node;
-      const insideWrapper = wrapperRef.current?.contains(t);
-      const insidePanel = panelRef.current?.contains(t);
-      if (!insideWrapper && !insidePanel) {
-        setOpen(false);
-        setClickLocked(false);
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [clickLocked, open]);
-
-  const cancelClose = () => {
-    if (closeTimerRef.current) { clearTimeout(closeTimerRef.current); closeTimerRef.current = null; }
-  };
-  const scheduleClose = () => {
-    if (clickLocked) return;
-    cancelClose();
-    closeTimerRef.current = setTimeout(() => setOpen(false), 120);
-  };
-
-  return (
-    <div
-      ref={wrapperRef}
-      className="relative"
-      onMouseEnter={() => { cancelClose(); setOpen(true); }}
-      onMouseLeave={scheduleClose}
-    >
-      <button
-        ref={buttonRef}
-        onClick={() => {
-          setOpen((o) => !o);
-          setClickLocked(true);
-        }}
-        className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--menu-hover)] flex items-center justify-between"
-        style={{ color: "var(--text-secondary)" }}
-      >
-        <span className="flex items-center gap-2">
-          {icon}
-          {label}
-        </span>
-        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 1.5L5.5 4L3 6.5"/></svg>
-      </button>
-      {open && pos && typeof document !== "undefined" && createPortal(
-        <div
-          ref={panelRef}
-          // data-flyout-portal lets the parent menu's outside-click
-          // handler (showAuthMenu's useEffect) recognize clicks inside
-          // this portaled panel as "still inside the menu surface" and
-          // skip closing. Without it the mousedown closed the auth
-          // menu, unmounting the FlyoutMenu wrapper before the
-          // click event could land on the option button.
-          data-flyout-portal
-          className="rounded-lg shadow-xl py-1 max-h-[calc(100vh-40px)] overflow-y-auto"
-          style={{
-            position: "fixed",
-            top: pos.top,
-            left: pos.left,
-            transform: "translateY(-100%)",
-            width,
-            zIndex: 10000,
-            background: "var(--menu-bg)",
-            border: "1px solid var(--border)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-          }}
-          onMouseEnter={cancelClose}
-          onMouseLeave={scheduleClose}
-        >
-          {children}
-        </div>,
-        document.body,
-      )}
-    </div>
-  );
-}
-
-/** Truncate title respecting grapheme clusters (emoji-safe) */
-function truncateTitle(title: string, max: number): string {
-  if (title.length <= max) return title;
-  if (typeof Intl !== "undefined" && Intl.Segmenter) {
-    const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
-    const segments = [...segmenter.segment(title)];
-    if (segments.length <= max) return title;
-    return segments.slice(0, max).map(s => s.segment).join("") + "...";
-  }
-  return title.slice(0, max) + "...";
-}
-
-/** DiceBear identicon avatar URL — fallback when no profile/OAuth avatar */
-function dicebearUrl(seed: string, size = 40): string {
-  return `https://api.dicebear.com/9.x/identicon/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
-}
-/** Resolve best avatar: profile DB → OAuth metadata → DiceBear */
-function resolveAvatar(profile: { avatar_url?: string | null } | null, user: { email?: string; user_metadata?: { avatar_url?: string } } | null, size = 40): string {
-  return profile?.avatar_url || user?.user_metadata?.avatar_url || dicebearUrl(user?.email || "user", size);
-}
-
-// DocStatusIcon → @/components/DocStatusIcon
-// extractTitleFromMd → @/lib/extract-title
-
-/** Splice a new title into the first H1 line, or prepend one if no H1
- *  exists. Used by the Duplicate flow so the resulting markdown's H1
- *  matches the new tab title — the server enforces DB.title = H1, so
- *  without this the server overwrites our chosen title back to the
- *  source H1, which then collides with the source row in dedup. */
-function rewriteH1(md: string, newTitle: string): string {
-  const lines = md.split("\n");
-  const h1Idx = lines.findIndex(l => /^#\s+/.test(l));
-  if (h1Idx >= 0) {
-    lines[h1Idx] = `# ${newTitle}`;
-    return lines.join("\n");
-  }
-  return md.trim() ? `# ${newTitle}\n\n${md}` : `# ${newTitle}\n`;
-}
-
-// ─── Document Templates ───
-
-const DOCUMENT_TEMPLATES: { name: string; icon: string; markdown: string }[] = [
-  {
-    name: "Blank",
-    icon: "M4 2h8l4 4v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4a2 2 0 012-2z",
-    markdown: "# Untitled\n\n",
-  },
-  {
-    name: "Meeting Notes",
-    icon: "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z",
-    markdown: `# Meeting Notes
-
-**Date:** ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-**Attendees:**
-
----
-
-## Agenda
-
-1.
-2.
-3.
-
-## Discussion
-
-### Topic 1
-
-
-
-### Topic 2
-
-
-
-## Action Items
-
-- [ ]
-- [ ]
-- [ ]
-
-## Next Meeting
-
-**Date:** TBD
-`,
-  },
-  {
-    name: "Report",
-    icon: "M9 17v-2m3 2v-4m3 4v-6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z",
-    markdown: `# Report Title
-
-**Author:**
-**Date:** ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-
----
-
-## Executive Summary
-
-
-
-## Background
-
-
-
-## Findings
-
-### Finding 1
-
-
-
-### Finding 2
-
-
-
-## Recommendations
-
-1.
-2.
-3.
-
-## Conclusion
-
-`,
-  },
-  {
-    name: "README",
-    icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
-    markdown: `# Project Name
-
-> Short description of the project.
-
-## Installation
-
-\`\`\`bash
-npm install project-name
-\`\`\`
-
-## Usage
-
-\`\`\`javascript
-import { feature } from 'project-name';
-
-feature();
-\`\`\`
-
-## API
-
-### \`feature(options)\`
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| \`option1\` | \`string\` | \`""\` | Description |
-| \`option2\` | \`boolean\` | \`false\` | Description |
-
-## Contributing
-
-1. Fork the repo
-2. Create your feature branch (\`git checkout -b feature/amazing\`)
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
-## License
-
-MIT
-`,
-  },
-  {
-    name: "Blog Post",
-    icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
-    markdown: `# Blog Post Title
-
-*Published on ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}*
-
----
-
-Introduction paragraph that hooks the reader.
-
-## The Problem
-
-
-
-## The Solution
-
-
-
-## How It Works
-
-### Step 1
-
-
-
-### Step 2
-
-
-
-### Step 3
-
-
-
-## Results
-
-
-
-## Conclusion
-
-
-
----
-
-*Thanks for reading! Share this post if you found it useful.*
-`,
-  },
-  {
-    name: "AI Conversation",
-    icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
-    markdown: `# AI Conversation Summary
-
-**AI:** ChatGPT / Claude / Gemini
-**Date:** ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-**Topic:**
-
----
-
-## Key Takeaways
-
-1.
-2.
-3.
-
-## Conversation
-
-### Prompt 1
-
->
-
-### Response 1
-
-
-
-### Prompt 2
-
->
-
-### Response 2
-
-
-
-## Follow-up Questions
-
-- [ ]
-- [ ]
-`,
-  },
-];
-
-const SAMPLE_CHROME_EXT = `# Chrome Extension
-
-> Capture AI conversations from ChatGPT, Claude, and Gemini with one click.
-
-## Install
-
-1. Visit [Chrome Web Store](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold)
-2. Click "Add to Chrome"
-3. Pin the extension for easy access
-
-## Usage
-
-### Capture from ChatGPT / Claude / Gemini
-
-1. Open any AI conversation
-2. Click the **Memory.Wiki** floating button (bottom-right corner)
-3. Conversation is auto-formatted with User/Assistant roles
-4. URL is copied to clipboard
-
-### Capture from Any Page
-
-1. Click the Memory.Wiki icon in the toolbar
-2. Select "Capture Page"
-3. Page content is converted to Markdown and published
-
-## What Gets Captured
-
-| Source | Format |
-|--------|--------|
-| ChatGPT | Formatted conversation with roles |
-| Claude | Formatted conversation with roles |
-| Gemini | Formatted conversation with roles |
-| Any webpage | Clean Markdown from page content |
-| Selected text | Just the selection |
-
-## Tips
-
-- The floating button only appears on AI chat sites
-- All captures are **private by default**
-- URLs are permanent — share once, update anytime
-`;
-
-const SAMPLE_VSCODE_EXT = `# VS Code Extension
-
-> WYSIWYG preview, one-click publish, and bidirectional sync.
-
-## Install
-
-\`\`\`bash
-ext install raymindai.memory-wiki-vscode
-\`\`\`
-
-Or search "Memory.Wiki" in VS Code Extensions.
-
-## Quick Start
-
-1. Open any \`.md\` file
-2. Press **Cmd+Shift+M** to open WYSIWYG preview
-3. Press **Cmd+Alt+P** to publish → get a URL
-4. Share the URL — recipients see a rendered document
-
-## Features
-
-- **WYSIWYG** — click and type directly in the preview
-- **Toolbar** — bold, italic, headings, lists, code, tables
-- **Cloud Sync** — push/pull with conflict detection
-- **Sidebar** — browse ALL / SYNCED / LOCAL / CLOUD documents
-- **AI Tools** — Polish, Summary, TL;DR, Translate, Ask AI
-- **Export** — HTML, rich text, Markdown
-- **Outline** — document structure panel
-
-## Keyboard Shortcuts
-
-| Shortcut | Command |
-|----------|---------|
-| \`Cmd+Shift+M\` | Open WYSIWYG preview |
-| \`Cmd+Alt+P\` | Publish to Memory.Wiki |
-| \`Cmd+Alt+E\` | Export document |
-
-## Settings
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| \`memorywiki.theme\` | \`auto\` | Follows your VS Code theme |
-| \`memorywiki.autoSync\` | \`false\` | Auto-push on save |
-| \`memorywiki.autoPreview\` | \`true\` | Auto-open preview for .md files |
-| \`memorywiki.syncInterval\` | \`30\` | Polling interval (seconds) |
-`;
-
-const SAMPLE_DESKTOP = `# Memory.Wiki for Mac
-
-> Native desktop app with sidebar, sync, and local rendering.
-
-## Install
-
-1. Download the DMG from [memory.wiki/plugins](https://memory.wiki/plugins)
-2. Drag **Memory.Wiki** to Applications
-3. Launch Memory.Wiki
-
-## Sidebar
-
-| Tab | Contents |
-|-----|----------|
-| ALL | Everything — local + synced + cloud |
-| SYNCED | Local files linked to Memory.Wiki |
-| LOCAL | Unpublished local files |
-| CLOUD | Documents on Memory.Wiki with folders |
-
-## Editing Modes
-
-- **Live** — WYSIWYG editing in rendered preview
-- **Split** — Source on left, preview on right
-- **Source** — Raw Markdown with CodeMirror
-
-## Publish
-
-Click the orange **Publish** button → URL copied to clipboard.
-
-## Features
-
-- Full rendering engine (same as Memory.Wiki web)
-- KaTeX math, Mermaid diagrams, 190+ language highlighting
-- Document outline panel
-- Import: PDF, DOCX, PPTX, XLSX, HTML, CSV
-- Export: HTML, PDF (print), rich text
-- AI tools: Polish, Summarize, Translate, Ask AI
-- Dark and light themes
-- Offline support
-`;
-
-const SAMPLE_CLI = `# Memory.Wiki CLI
-
-> Publish Markdown from the terminal. Pipe anything to a URL.
-
-## Install
-
-\`\`\`bash
-npm install -g memory-wiki-cli
-\`\`\`
-
-## Publish
-
-\`\`\`bash
-# Publish a file
-mw publish README.md
-# → https://memory.wiki/abc123  (copied to clipboard)
-
-# Publish from pipe
-echo "# Hello World" | mw publish
-
-# Publish clipboard
-pbpaste | mw publish
-\`\`\`
-
-## Pipe Anything
-
-\`\`\`bash
-claude "explain React hooks" | mw publish
-git log --oneline -20 | mw publish
-man grep | mw publish
-curl -s https://api.example.com/status | mw publish
-\`\`\`
-
-## Read in Terminal
-
-\`\`\`bash
-Memory.Wiki read abc123
-# → Color-coded headings, bold, code blocks, lists
-\`\`\`
-
-## Manage Documents
-
-\`\`\`bash
-Memory.Wiki list                       # List your documents
-Memory.Wiki update abc123 updated.md   # Update
-Memory.Wiki pull abc123 -o doc.md      # Download
-Memory.Wiki delete abc123              # Delete
-Memory.Wiki open abc123                # Open in browser
-\`\`\`
-
-## tmux Integration
-
-Add to \`~/.tmux.conf\`:
-
-\`\`\`bash
-bind-key M run-shell "tmux capture-pane -p -S -1000 | mw publish"
-\`\`\`
-
-## Short Aliases
-
-| Short | Full |
-|-------|------|
-| \`Memory.Wiki p\` | \`Memory.Wiki publish\` |
-| \`Memory.Wiki ls\` | \`Memory.Wiki list\` |
-| \`Memory.Wiki rm\` | \`Memory.Wiki delete\` |
-| \`Memory.Wiki cat\` | \`Memory.Wiki read\` |
-`;
-
-const SAMPLE_MCP = `# MCP Server
-
-> Let AI tools create, read, and manage documents on Memory.Wiki.
-
-## What is MCP?
-
-MCP (Model Context Protocol) lets AI tools call external APIs. The Memory.Wiki MCP server gives Claude the ability to publish and manage documents.
-
-## Setup
-
-### Option A: Hosted HTTP MCP (recommended)
-
-For **Claude Web**, **Cursor**, **Windsurf**:
-
-1. Go to Settings → Integrations / MCP
-2. Add server URL: \`https://memory.wiki/api/mcp\`
-3. Done — 25 tools available
-
-### Option B: Local stdio MCP
-
-For **Claude Code** and **Claude Desktop**:
-
-\`\`\`bash
-npx memory-wiki-cli login
-\`\`\`
-
-Add to \`.mcp.json\`:
-
-\`\`\`json
-{
-  "mcpServers": {
-    "Memory.Wiki": {
-      "command": "npx",
-      "args": ["memory-wiki-mcp"]
-    }
-  }
-}
-\`\`\`
-
-## Usage Examples
-
-\`\`\`
-You: "Publish my meeting notes to Memory.Wiki"
-Claude: → mw_create → https://memory.wiki/abc123
-
-You: "Show me my documents"
-Claude: → mw_list → 8 documents found
-
-You: "Make that document private"
-Claude: → mw_publish(published: false) → Now private
-
-You: "Update it with this new section"
-Claude: → mw_update → Document updated, same URL
-\`\`\`
-
-## Available Tools
-
-| Tool | Description |
-|------|-------------|
-| \`mw_create\` | Create document, get URL |
-| \`mw_read\` | Read document content |
-| \`mw_update\` | Update document |
-| \`mw_list\` | List your documents |
-| \`mw_publish\` | Toggle public/private |
-| \`mw_delete\` | Delete document |
-
-The hosted HTTP MCP exposes 25 tools including append, sections, versions, folders, and more.
-`;
-
-const SAMPLE_FRESHNESS = `# How Memory.Wiki keeps your docs, bundles, and hub fresh
-
-> Every Memory.Wiki URL is what the AI reads when you paste it. Freshness is part of the deal.
-
-## TL;DR
-
-| Layer | What | How fresh | Click anything? |
-| --- | --- | --- | --- |
-| **Document body** | The markdown you wrote | Always — within ~60 seconds of save | Nothing. Just save. |
-| **Bundle graph** | AI-generated themes / insights | Stays until a member doc's content changes | "Re-analyze with AI" in the bundle header |
-| **Hub concept index** | Cross-doc "related" map | Auto-extracts in seconds; 30-min cooldown per doc | "Re-analyze (N)" banner when stale |
-
-Body markdown is always fresh. The AI-derived layers occasionally need a nudge.
-
-## Document body — always fresh
-
-Save a doc → \`/raw/{id}\` and \`/d/{id}\` see it within ~60 seconds via the edge cache's stale-while-revalidate. **No action needed.**
-
-## Bundle graph — Re-analyze on demand
-
-The graph is computed once with an LLM pass over member docs and stamped with \`graph_generated_at\`. When a member doc's content (not its permissions) has changed since then, the bundle is stale — click **Re-analyze with AI** in the header.
-
-We don't auto-rebuild because graphs cost real LLM calls and you're usually mid-edit. **You decide when it's worth re-running.**
-
-## Hub concept index — automatic, with two guardrails
-
-Every save fires:
-
-1. **Enqueue** an ontology job (deduped at the DB level)
-2. **Fast-path** run inside Vercel's \`after()\` — usually done in seconds
-3. **Cron backstop** picks up pending rows if the instance dies
-
-Normal flow: concept changes show up in the hub URL within seconds. Two guardrails can make things look stale temporarily:
-
-- **30-min per-doc cooldown** — back-to-back edits don't re-run the LLM
-- **200-char minimum delta** — typo-level edits skip extraction
-
-## The "Re-analyze (N)" banner
-
-When the Hub opens, Memory.Wiki compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
-
-> 🟡 Concepts out of date · N docs have changed
-> [Re-analyze (N)]
-
-Clicking it:
-
-- **Only re-extracts the N docs that actually changed.** Unchanged docs skip the LLM entirely.
-- **Caps at 50 per click.** The rest stay queued; the cron worker drains them.
-- **Bypasses the 30-min cooldown** — that's why you clicked.
-
-A Re-analyze click is cheap: at most 50 short LLM calls for the docs that genuinely changed.
-
-## Doc-level Re-analyze
-
-Right-click any doc in the sidebar → **Re-analyze concepts**. Same machinery, scoped to one doc, bypasses cooldown. Use when you've been polishing in tight cycles and want the hub to keep up.
-
-## When clicking is worth it
-
-- You bulk-imported or edited many docs and want the hub's concept map to reflect the new shape *right now*
-- The yellow banner appears and you're about to share your hub URL with an AI
-- You added a doc on a new topic and want it surfaced as "related" immediately
-
-## When you don't need to click anything
-
-- You edited a doc and shared its URL — the receiving AI sees your edits within ~60s, concept attribution catches up automatically
-- You haven't touched anything (just reading) — nothing to refresh
-- You're not signed in — no concept index applies
-
-## Why Memory.Wiki doesn't auto-rebuild more aggressively
-
-**Cost discipline.** Concept extraction is a Haiku call per doc. Auto-rebuilding on every save would burn tokens during noisy editing.
-
-**Predictability.** When something changes in your hub, you chose for it to change. Implicit background rebuilds make "why does my AI see X?" hard to debug.
-
-The trade: body markdown is aggressive-fresh (always, no click). AI-derived metadata is fast-but-not-instant with explicit override available.
-`;
-
-const SAMPLE_QUICKLOOK = `# QuickLook Preview
-
-> Press Space on any .md file in Finder to see a rendered preview.
-
-## Install
-
-1. Install Memory.Wiki for Mac — QuickLook is bundled automatically
-2. Or download MdfyQuickLook separately from [memory.wiki/plugins](https://memory.wiki/plugins)
-3. Enable in **System Settings → Extensions → Quick Look**
-
-## Usage
-
-1. Open Finder
-2. Select any \`.md\` file
-3. Press **Space**
-4. See the rendered preview with syntax highlighting, tables, and math
-
-## What You See
-
-- Rendered Markdown with proper typography
-- Syntax-highlighted code blocks
-- Tables with alignment
-- KaTeX math equations
-- Dark / light theme (follows system preference)
-- "Open on Memory.Wiki" button
-
-## Supported Files
-
-| Extension | Supported |
-|-----------|-----------|
-| \`.md\` | Yes |
-| \`.markdown\` | Yes |
-| \`.mdown\` | Yes |
-| \`.mkd\` | Yes |
-
-## Tips
-
-- Works in Finder, Desktop, and Open/Save dialogs
-- Preview updates when you press Space again after editing
-- Click "Open on Memory.Wiki" to publish directly from the preview
-- No background processes — lightweight QuickLook extension
-`;
-
-const SAMPLE_BUNDLES = `# Bundles, Discoveries, Compile & Concepts
-
-Beyond single docs, Memory.Wiki lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
-
-## Bundles: from folder to thinking surface
-
-Select multiple docs in the sidebar, choose **Bundle**, and you get a bundle URL like \`memory.wiki/b/xxxx\`. Open it and the docs render as nodes on a **Knowledge Constellation** — a 3D-style force-directed graph that shows how documents and their concepts interconnect.
-
-Bundle viewer modes:
-- **Canvas** — the spatial constellation, drag/zoom/pan, click nodes to inspect
-- **List** — sequential reading view with table of contents
-
-## Intent: the North Star of a bundle
-
-A bundle isn't just *what* you collected — it's *why*. At the top of the Discoveries panel you can set the **Intent**:
-
-> *"Decide our SNS launch strategy"*
-
-The intent feeds into every AI prompt — bundle-level analysis weights themes/insights/gaps by relevance to your question, per-doc decomposition labels chunks by their importance to the intent. Without intent, AI gives generic summaries. With intent, it gives you decision-grade output.
-
-## Discoveries: the bundle talks first
-
-Open any bundle and the right panel shows **Discoveries** — what the bundle wants to tell you. Sections that surface automatically once you click "Run discovery":
-
-| Section | What it surfaces |
-|---------|------------------|
-| 🔥 Tensions | Chunks that contradict each other across docs |
-| 💡 Insights | Non-obvious patterns the AI noticed reading them together |
-| ❓ Open Questions | Unresolved questions raised in the source material |
-| ❓ Gaps | What this collection doesn't cover but should |
-| 🔗 Connections | Doc-to-doc relationships ("doc-A frames what doc-B critiques") |
-| 🌿 Threads | Concepts that recur across multiple docs |
-
-Click any item → the canvas flies to the relevant chunk and pulses it. Tensions get an **Resolve with AI** button that generates a reconciliation paragraph in place.
-
-## Decompose: split a doc into semantic chunks
-
-Right-click a document node on the canvas → **Decompose into sections**. The AI breaks the document into typed chunks — \`concept\` (cyan), \`claim\` (orange), \`example\` (green), \`definition\` (blue), \`task\` (yellow), \`question\` (purple), \`evidence\` (pink), \`context\` (gray) — each connected by typed relationships (\`supports\`, \`elaborates\`, \`contradicts\`, \`exemplifies\`).
-
-Inside the decomposed view you can:
-- **Edit** chunk content inline (verbatim find-and-replace into source doc)
-- **Cmd-click** multiple chunks → bulk Copy / Extract → new doc / Branch → new doc / Delete
-- **Drag** a chunk onto another to reorder its position in the source doc
-- **Add chunk** — append a new chunk that gets re-classified on next analyze
-
-Or use the **sidebar Decompose tab** — same data, vertical list editor for focused doc work without the constellation.
-
-## Compile: synthesis becomes a permanent artifact
-
-From the canvas top toolbar, hit **Memo / FAQ / Brief** to synthesize the entire bundle into a coherent output:
-
-- **Memo** — 1-page decision-ready memo (Headline, TL;DR, Key findings, Tensions, Gaps, Recommendations)
-- **FAQ** — 5–10 synthesized questions and answers across docs
-- **Brief** — 400-600 word narrative essay tying the bundle together
-
-Click **Save as document** and the result becomes a *compiled entry*: a normal doc that **remembers its source bundle** and intent. Compiled docs get a **\`Compiled — Memo\`** badge in the editor header and a **\`↻ Recompile\`** button — when source docs change, one click regenerates the synthesis with the latest content.
-
-This is the Karpathy-style "compile knowledge once, query forever" loop, applied to your bundle.
-
-## Concepts: the cross-doc index
-
-In the left sidebar, the **Concepts** section shows every concept that appears in your decomposed docs. Concepts in 2+ docs (cross-linked) get an **orange dot**; single-doc concepts get a faded dot.
-
-Click any concept → drawer with all citations across your library:
-
-\`\`\`
-AI Memory Ownership — 4 docs, 7 mentions
-  ┌─ "Memory.Wiki V2"           [concept] excerpt…
-  ├─ "Bundle Strategy Brief"    [definition] excerpt…
-  └─ "Launch Plan"              [concept] excerpt…
-\`\`\`
-
-Click any citation → opens the source doc as a tab. This is your personal knowledge graph — it grows automatically as you add and decompose docs. No manual wiki maintenance needed.
-
-The home screen shows compounding stats:
-
-> **64 docs, 47 concepts, 23 cross-linked**
->
-> 23 concepts connect multiple docs in your library.
-
-## Workflow recap
-
-1. Drop or write docs → **Library** grows
-2. Group related docs into a **Bundle** → set its **Intent**
-3. **Run discovery** → AI surfaces tensions, insights, gaps, connections
-4. Click chunks to **decompose**, edit, recombine
-5. **Compile** Memo / FAQ / Brief → save as a compiled doc
-6. **Concepts** auto-index across the library → cross-doc references emerge
-
-The bundle is no longer a folder. It's a thinking partner that reads what you've gathered and tells you what it sees.
-`;
-
-// Server-seeded "Sample Bundle: Tour of Memory.Wiki". The bundle row and its
-// 3 member docs are inserted by supabase/migrations/033_example_bundle.sql
-// with fixed ids (mw-ex-bundle / mw-ex-fmt / mw-ex-diag / mw-ex-feat),
-// so this id can be hardcoded on the client. Listed in EXAMPLE_TABS as a
-// kind="bundle" entry so first-time visitors can click it in
-// Guides & Examples and immediately see an interactive bundle —
-// canvas analysis, member-doc list, the full bundle viewer flow.
-const EXAMPLE_BUNDLE_ID = "mw-ex-bundle";
-
-const SAMPLE_AI_CAPTURE = `# Capture AI conversations
-
-Memory.Wiki is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
-
-## Three ways in
-
-### 1. Paste a share URL
-
-Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. Memory.Wiki fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
-
-\`\`\`
-https://chat.openai.com/share/abc-...
-https://claude.ai/share/xyz-...
-\`\`\`
-
-### 2. Drop a transcript
-
-Copied a chat thread to clipboard? Paste it. Memory.Wiki auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
-
-### 3. Capture from where you work
-
-- **\`/memory.wiki capture\`** in Claude Code, Cursor, Codex, or Aider — saves the current conversation segment as a permanent URL.
-- **Chrome extension** — one-click capture from any AI web UI.
-- **API / MCP** — agents can write into your hub directly.
-
-## Why it matters
-
-Every captured doc lives at a permanent URL like \`memory.wiki/abc123\`. Captures roll up into your hub at \`memory.wiki/hub/<you>\`. That URL is the universal context format — paste it back into any AI and they read your full personal knowledge layer.
-
-> The answer you didn't save is the context the next AI session won't have.
-`;
-
-const EXAMPLE_OWNER = "master@mdfy.app";
-const EXAMPLES_FOLDER_ID = "folder-shared-examples";
-
-const INITIAL_FOLDERS: Folder[] = [];
-
-const EXAMPLE_TABS: Tab[] = [
-  { id: "tab-welcome", title: extractTitleFromMd(SAMPLE_WELCOME), markdown: SAMPLE_WELCOME, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-ai-capture", title: extractTitleFromMd(SAMPLE_AI_CAPTURE), markdown: SAMPLE_AI_CAPTURE, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-bundles", title: extractTitleFromMd(SAMPLE_BUNDLES), markdown: SAMPLE_BUNDLES, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  // Real interactive bundle, server-seeded (033_example_bundle.sql).
-  // Markdown is "" because BundleEmbed fetches member docs by bundleId,
-  // not from this tab's local body. readonly:true so the tab persists
-  // across sessions like other Guides & Examples entries.
-  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of Memory.Wiki", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-import", title: extractTitleFromMd(SAMPLE_IMPORT_EXPORT), markdown: SAMPLE_IMPORT_EXPORT, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-features", title: extractTitleFromMd(SAMPLE_FEATURES), markdown: SAMPLE_FEATURES, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-syntax", title: extractTitleFromMd(SAMPLE_FORMATTING), markdown: SAMPLE_FORMATTING, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-diagrams", title: extractTitleFromMd(SAMPLE_DIAGRAMS), markdown: SAMPLE_DIAGRAMS, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-ascii", title: extractTitleFromMd(SAMPLE_ASCII), markdown: SAMPLE_ASCII, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-chrome-ext", title: extractTitleFromMd(SAMPLE_CHROME_EXT), markdown: SAMPLE_CHROME_EXT, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-vscode-ext", title: extractTitleFromMd(SAMPLE_VSCODE_EXT), markdown: SAMPLE_VSCODE_EXT, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-desktop", title: extractTitleFromMd(SAMPLE_DESKTOP), markdown: SAMPLE_DESKTOP, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-cli", title: extractTitleFromMd(SAMPLE_CLI), markdown: SAMPLE_CLI, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-mcp", title: extractTitleFromMd(SAMPLE_MCP), markdown: SAMPLE_MCP, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-quicklook", title: extractTitleFromMd(SAMPLE_QUICKLOOK), markdown: SAMPLE_QUICKLOOK, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-  { id: "tab-freshness", title: extractTitleFromMd(SAMPLE_FRESHNESS), markdown: SAMPLE_FRESHNESS, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
-];
-
-const INITIAL_TABS: Tab[] = [
-  ...EXAMPLE_TABS,
-];
-
-// Fast lookup for "is this tab id one of the bundled examples?".
-// Used by the activeTabId restore logic to drop stale example-tab
-// ids that older sessions left in localStorage.
-const EXAMPLE_TAB_IDS = new Set(EXAMPLE_TABS.map(t => t.id));
-
-type ViewMode = "split" | "preview" | "editor";
-
-type Theme = "dark" | "light";
 
 import {
   ACCENT_COLORS,
@@ -1662,7 +160,7 @@ function useTheme() {
 
   const [accentColor, setAccentColorState] = useState<AccentColor>(() => {
     if (typeof window === "undefined") return "orange";
-    return (localStorage.getItem("mw-accent") as AccentColor) || "orange";
+    return (localStorage.getItem("mw-accent") as AccentColor) || "lime";
   });
 
   const [colorScheme, setColorSchemeState] = useState<ColorScheme>(() => {
@@ -1702,7 +200,7 @@ function useTheme() {
     const onSync = () => {
       try {
         const nextTheme = (localStorage.getItem("mw-theme") as Theme) || "dark";
-        const nextAccent = (localStorage.getItem("mw-accent") as AccentColor) || "orange";
+        const nextAccent = (localStorage.getItem("mw-accent") as AccentColor) || "lime";
         const nextScheme = (localStorage.getItem("mw-scheme") as ColorScheme) || "default";
         setThemeState(nextTheme);
         setAccentColorState(nextAccent);
@@ -1723,15 +221,37 @@ function useTheme() {
     setTheme(theme === "dark" ? "light" : "dark");
   }, [theme, setTheme]);
 
+  // Persist the change to profiles.accent_color / color_scheme too,
+  // so the picker SettingsEmbed reads from the same source on
+  // mount, and the choice survives across devices.
+  const syncPrefToProfile = useCallback(async (col: "accent_color" | "color_scheme", value: string) => {
+    try {
+      const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) return;
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess?.session?.user?.id;
+      if (!uid) return;
+      await supabase.from("profiles").update({ [col]: value }).eq("id", uid);
+    } catch { /* offline ok — localStorage carries the value */ }
+  }, []);
+
   const setAccentColor = useCallback((a: AccentColor) => {
     setAccentColorState(a);
-    if (a === "orange") {
+    // Lime is the root default — removing data-accent lets the
+    // CSS :root value apply; anything else writes the override.
+    if (a === "lime") {
       document.documentElement.removeAttribute("data-accent");
     } else {
       document.documentElement.setAttribute("data-accent", a);
     }
     try { localStorage.setItem("mw-accent", a); } catch { /* quota exceeded */ }
-  }, []);
+    // Broadcast so SettingsEmbed re-reads — without this, the
+    // Appearance picker showed the OLD selection after the user
+    // changed key color via the profile menu.
+    try { window.dispatchEvent(new CustomEvent("mw-theme-changed")); } catch { /* ignore */ }
+    syncPrefToProfile("accent_color", a);
+  }, [syncPrefToProfile]);
 
   const setColorScheme = useCallback((s: ColorScheme) => {
     setColorSchemeState(s);
@@ -1742,1446 +262,33 @@ function useTheme() {
     }
     try { localStorage.setItem("mw-scheme", s); } catch { /* quota exceeded */ }
     // Skin and key color are independent — user can combine any skin with any key color
-  }, []);
+    try { window.dispatchEvent(new CustomEvent("mw-theme-changed")); } catch { /* ignore */ }
+    syncPrefToProfile("color_scheme", s);
+  }, [syncPrefToProfile]);
 
   return { theme, toggleTheme, accentColor, setAccentColor, colorScheme, setColorScheme };
 }
 
-interface Folder {
-  id: string;
-  name: string;
-  collapsed: boolean;
-  section?: "my" | "shared" | "bundles"; // which section this folder belongs to
-  parentId?: string | null;  // null/undefined = root level; otherwise nested under another folder
-  emoji?: string;            // optional folder emoji prefix
-  sortOrder?: number;        // manual sort_order from server (used in custom mode)
-}
 
-// Module-level stable filter functions for SidebarFolderTree's rootFolderFilter prop.
-// MUST be stable across renders — if the function identity changes each render the
-// tree's useMemo (which depends on this filter) invalidates, rebuilding the tree
-// and reconciling root tab DOM nodes. That reconciliation cancels in-flight HTML5
-// drags (Chrome aborts the drag if the dragged element is replaced mid-drag).
-const FOLDER_FILTER_MY = (f: { section?: string }) => !f.section || f.section === "my";
-const FOLDER_FILTER_BUNDLES = (f: { section?: string }) => f.section === "bundles";
 
-interface Tab {
-  id: string;
-  title: string;
-  markdown: string;
-  kind?: "doc" | "bundle" | "hub";  // tab type — defaults to "doc"
-  bundleId?: string;        // for bundle tabs — Supabase bundle id
-  hubSlug?: string;         // for hub tabs — public hub slug
-  folderId?: string;       // null = root level
-  cloudId?: string;        // Supabase document id
-  editToken?: string;      // for token-based ownership
-  deleted?: boolean;       // soft delete → trash
-  deletedAt?: number;      // timestamp for auto-purge
-  readonly?: boolean;      // example docs — not editable
-  shared?: boolean;        // opened from shared URL (not mine)
-  isDraft?: boolean;       // auto-saved but not yet published
-  permission?: "mine" | "editable" | "readonly";  // for sidebar badge
-  editMode?: string;       // "owner" | "token" | "view" | "public"
-  // Cached server share state — populated whenever we fetch the doc
-  // and used to open ShareModal instantly with the right defaults
-  // instead of showing a stale empty list while a fresh GET resolves.
-  allowedEmails?: string[];
-  allowedEditors?: string[];
-  sharedWithCount?: number; // number of non-owner people shared with
-  isSharedByMe?: boolean;  // legacy: I've shared this doc with others
-  isRestricted?: boolean;  // legacy: shared with specific people
-  hasPassword?: boolean;   // password-protected — feeds the "Shared" access icon
-  viewCount?: number;      // document view count
-  ownerEmail?: string;     // owner's email (for shared docs)
-  source?: string;         // origin: "vscode" | "chrome" | null
-  lastOpenedAt?: number;   // timestamp of last open
-  sortOrder?: number;      // manual sort order within folder (used when sortMode="custom")
-  // Compile metadata — set when this doc was generated by bundle synthesis
-  // (memo / faq / brief). The editor surfaces a banner with the source
-  // bundle(s) and a Regenerate button.
-  //
-  // compileFrom can hold either the legacy single-source shape
-  // ({bundleId, docIds, intent}) or the new array shape
-  // ({sources: [...]}). Use lib/compile-sources.ts → readCompileSources
-  // to normalize at the read site instead of branching here.
-  compileKind?: "memo" | "faq" | "brief";
-  // Hermes-style doc-type tag. Optional; null/undefined = uncategorised.
-  // Surfaced in raw exports + concept manifests; UI chip is a follow-up.
-  intent?: "note" | "definition" | "comparison" | "decision" | "question" | "reference" | null;
-  compileFrom?: {
-    bundleId?: string;
-    docIds?: string[];
-    intent?: string | null;
-    sources?: Array<{ bundleId: string; docIds: string[]; intent?: string | null; compiledAt?: string | null }>;
-  };
-  compiledAt?: string;
-  // Bundles that contain this doc as a member. Populated from the
-  // server's GET /api/docs/<id> inBundles field on tab load. Drives
-  // the "Member of N bundles" inline banner. Distinct from
-  // compileFrom (which is the doc's synthesis source).
-  inBundles?: Array<{ id: string; title: string }>;
-  // True when this tab was added programmatically (synthesis / extract / etc.)
-  // and the user hasn't opened it yet. Drives the pulsing orange dot in the
-  // sidebar — cleared the first time the tab is activated. Persisted across
-  // refreshes so the dot survives until the user actually clicks.
-  unread?: boolean;
-}
 
 let tabIdCounter = Date.now();
 
-// ─── Inline Input Popup (replaces prompt()) ───
-function InlineInput({ label, defaultValue, onSubmit, onCancel, position }: {
-  label: string; defaultValue?: string;
-  onSubmit: (value: string) => void; onCancel: () => void;
-  position?: { x: number; y: number };
-}) {
-  const [value, setValue] = useState(defaultValue || "");
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { inputRef.current?.focus(); inputRef.current?.select(); }, []);
-  return (
-    <div className="fixed inset-0 z-[9999]" onClick={onCancel}>
-      <div
-        className="absolute rounded-lg shadow-xl p-3 flex flex-col gap-2"
-        style={{
-          left: position?.x ?? "50%", top: position?.y ?? "50%",
-          transform: position ? "translate(-50%, 0)" : "translate(-50%, -50%)",
-          background: "var(--surface)", border: "1px solid var(--border)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)", minWidth: 280,
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <label className="text-caption font-mono" style={{ color: "var(--text-muted)" }}>{label}</label>
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && value.trim()) { onSubmit(value.trim()); }
-            if (e.key === "Escape") { onCancel(); }
-          }}
-          className="px-3 py-1.5 rounded-md text-sm outline-none"
-          style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-          placeholder={label}
-        />
-        <div className="flex justify-end gap-2">
-          <button onClick={onCancel} className="px-3 py-1 text-caption rounded-md" style={{ color: "var(--text-muted)", background: "var(--toggle-bg)" }}>Cancel</button>
-          <button onClick={() => value.trim() && onSubmit(value.trim())} className="px-3 py-1 text-caption rounded-md font-medium" style={{ background: "var(--accent)", color: "#000" }}>OK</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Toolbar Button with instant tooltip ───
-function TBtn({ tip, preview, active, onClick, children }: {
-  tip: string; preview?: React.ReactNode; active?: boolean; onClick: () => void; children: React.ReactNode;
-}) {
-  return (
-    <div className="relative group shrink-0">
-      <button
-        className={`w-7 h-7 flex items-center justify-center rounded transition-colors
-          ${active
-            ? "bg-[var(--accent-dim)] text-[var(--accent)]"
-            : "hover:bg-[var(--accent-dim)] hover:text-[var(--accent)]"
-          }`}
-        onClick={onClick}
-      >
-        {children}
-      </button>
-      <div
-        className={`absolute top-full left-1/2 -translate-x-1/2 mt-1.5 rounded-lg
-          opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]
-          ${preview ? "p-2.5 w-48" : "px-2 py-1 whitespace-nowrap"}`}
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}
-      >
-        {preview ? (
-          <>
-            <div className="mb-1.5 text-caption" style={{ color: "var(--text-muted)" }}>{tip}</div>
-            <div style={{ borderTop: "1px solid var(--border-dim)", paddingTop: 6 }}>{preview}</div>
-          </>
-        ) : (
-          <span className="text-caption">{tip}</span>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ─── Portal-based Tooltip (never clipped by overflow) ───
 // Tooltip is now in /components/Tooltip.tsx so SidebarFolder + others can use it
 
-// ─── WYSIWYG Fixed Toolbar (Markdown-compatible only) ───
-function WysiwygToolbar({ onInsert, onInsertTable, onInputPopup, cmWrap, cmInsert, onImageUpload, onUndo, onRedo, getTiptapEditor }: {
-  onInsert: (type: "code" | "math" | "mermaid") => void;
-  onInsertTable: (cols: number, rows: number) => void;
-  onInputPopup: (config: { label: string; onSubmit: (v: string) => void }) => void;
-  cmWrap: (prefix: string, suffix?: string) => void;
-  cmInsert: (text: string) => void;
-  onImageUpload: () => void;
-  onUndo: () => void;
-  onRedo: () => void;
-  getTiptapEditor?: () => import("@tiptap/core").Editor | null;
-}) {
-  const mod = typeof navigator !== "undefined" && /Mac/.test(navigator.platform) ? "Cmd" : "Ctrl";
-  const [active, setActive] = useState<Record<string, boolean>>({});
-  const [blockType, setBlockType] = useState("p");
-  const [showTableGrid, setShowTableGrid] = useState(false);
-  const [tableHover, setTableHover] = useState({ col: 0, row: 0 });
-  const tableGridRef = useRef<HTMLDivElement>(null);
 
-  // Close table grid on outside click
-  useEffect(() => {
-    if (!showTableGrid) return;
-    const handler = (e: MouseEvent) => {
-      if (tableGridRef.current && !tableGridRef.current.contains(e.target as Node)) {
-        setShowTableGrid(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [showTableGrid]);
-
-  useEffect(() => {
-    const update = () => {
-      // Try Tiptap editor first
-      const ed = getTiptapEditor?.();
-      if (ed && ed.isFocused) {
-        setActive({
-          bold: ed.isActive("bold"),
-          italic: ed.isActive("italic"),
-          strikethrough: ed.isActive("strike"),
-          ul: ed.isActive("bulletList"),
-          ol: ed.isActive("orderedList"),
-          code: ed.isActive("code"),
-        });
-        if (ed.isActive("heading", { level: 1 })) setBlockType("h1");
-        else if (ed.isActive("heading", { level: 2 })) setBlockType("h2");
-        else if (ed.isActive("heading", { level: 3 })) setBlockType("h3");
-        else if (ed.isActive("blockquote")) setBlockType("blockquote");
-        else setBlockType("p");
-        return;
-      }
-      // Fallback: CM6 / other
-      const sel = window.getSelection();
-      if (!sel || !sel.anchorNode) return;
-    };
-    document.addEventListener("selectionchange", update);
-    return () => document.removeEventListener("selectionchange", update);
-  }, []);
-
-  // Detect if focus is in SOURCE (CM6) or LIVE (Tiptap)
-  const isInCM6 = () => !!document.activeElement?.closest(".cm-editor");
-
-  // Smart exec: routes to Tiptap (Live) or CM6 wrap (Source)
-  const exec = (cmd: string, value?: string) => {
-    if (cmd === "undo") { onUndo(); return; }
-    if (cmd === "redo") { onRedo(); return; }
-    if (isInCM6()) {
-      const mdMap: Record<string, [string, string?]> = {
-        bold: ["**"],
-        italic: ["*"],
-        strikeThrough: ["~~"],
-        insertUnorderedList: ["- "],
-        insertOrderedList: ["1. "],
-      };
-      if (cmd === "createLink" && value) {
-        cmWrap("[", `](${value})`);
-      } else if (cmd === "insertImage" && value) {
-        cmWrap("![", `](${value})`);
-      } else {
-        const wrap = mdMap[cmd];
-        if (wrap) {
-          if (cmd === "insertUnorderedList" || cmd === "insertOrderedList") {
-            cmInsert(wrap[0]);
-          } else {
-            cmWrap(wrap[0], wrap[1]);
-          }
-        }
-      }
-    } else {
-      // Route to Tiptap editor API
-      const ed = getTiptapEditor?.();
-      if (ed) {
-        const tiptapMap: Record<string, () => void> = {
-          bold: () => ed.chain().focus().toggleBold().run(),
-          italic: () => ed.chain().focus().toggleItalic().run(),
-          strikeThrough: () => ed.chain().focus().toggleStrike().run(),
-          insertUnorderedList: () => ed.chain().focus().toggleBulletList().run(),
-          insertOrderedList: () => ed.chain().focus().toggleOrderedList().run(),
-          createLink: () => value && ed.chain().focus().setLink({ href: value }).run(),
-          insertHorizontalRule: () => ed.chain().focus().setHorizontalRule().run(),
-          removeFormat: () => ed.chain().focus().unsetAllMarks().clearNodes().run(),
-          indent: () => ed.chain().focus().sinkListItem("listItem").run(),
-          outdent: () => ed.chain().focus().liftListItem("listItem").run(),
-        };
-        const action = tiptapMap[cmd];
-        if (action) action();
-      }
-    }
-  };
-
-  const fmtBlock = (tag: string) => {
-    if (isInCM6()) {
-      const prefixMap: Record<string, string> = {
-        h1: "# ", h2: "## ", h3: "### ", h4: "#### ", h5: "##### ", h6: "###### ",
-        p: "", blockquote: "> ",
-      };
-      const prefix = prefixMap[tag];
-      if (prefix !== undefined) cmInsert(prefix);
-    } else {
-      // Route to Tiptap
-      const ed = getTiptapEditor?.();
-      if (ed) {
-        const levelMap: Record<string, number> = { h1: 1, h2: 2, h3: 3, h4: 4, h5: 5, h6: 6 };
-        if (levelMap[tag]) {
-          ed.chain().focus().toggleHeading({ level: levelMap[tag] as 1|2|3|4|5|6 }).run();
-        } else if (tag === "blockquote") {
-          ed.chain().focus().toggleBlockquote().run();
-        } else if (tag === "p") {
-          ed.chain().focus().setParagraph().run();
-        }
-      }
-    }
-  };
-
-  const wrapCode = () => {
-    if (isInCM6()) {
-      cmWrap("`");
-    } else {
-      const ed = getTiptapEditor?.();
-      if (ed) { ed.chain().focus().toggleCode().run(); return; }
-    }
-  };
-
-  const sep = <div className="w-px h-5 shrink-0 mx-0.5" style={{ background: "var(--border-dim)" }} />;
-  const I = 14;
-
-  return (
-    <div
-      className="flex flex-wrap items-center justify-center gap-0.5 px-2 py-0.5 shrink-0 relative z-[90]"
-      style={{ borderBottom: "1px solid var(--border-dim)", color: "var(--text-muted)" }}
-      onMouseDown={(e) => e.preventDefault()}
-    >
-      {/* Undo/Redo */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        <TBtn tip={`Undo (${mod}+Z)`} onClick={() => exec("undo")}>
-          <Undo2 size={I} />
-        </TBtn>
-        <TBtn tip={`Redo (${mod}+Shift+Z)`} onClick={() => exec("redo")}>
-          <Redo2 size={I} />
-        </TBtn>
-      </div>
-      {sep}
-      {/* Headings */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        <TBtn tip="Heading 1 — # text" active={blockType==="h1"} onClick={() => fmtBlock("h1")}
-          preview={<div style={{ fontSize: "1.4rem", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em" }}>Heading 1</div>}>
-          <span className="text-caption font-bold">H1</span></TBtn>
-        <TBtn tip="Heading 2 — ## text" active={blockType==="h2"} onClick={() => fmtBlock("h2")}
-          preview={<div style={{ fontSize: "1.1rem", fontWeight: 600, color: "var(--text-primary)" }}>Heading 2</div>}>
-          <span className="text-caption font-bold">H2</span></TBtn>
-        <TBtn tip="Heading 3 — ### text" active={blockType==="h3"} onClick={() => fmtBlock("h3")}
-          preview={<div style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--text-primary)" }}>Heading 3</div>}>
-          <span className="text-caption font-semibold">H3</span></TBtn>
-        <TBtn tip="Heading 4 — #### text" active={blockType==="h4"} onClick={() => fmtBlock("h4")}
-          preview={<div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)" }}>Heading 4</div>}>
-          <span className="text-caption">H4</span></TBtn>
-        <TBtn tip="Heading 5 — ##### text" active={blockType==="h5"} onClick={() => fmtBlock("h5")}
-          preview={<div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-muted)" }}>Heading 5</div>}>
-          <span className="text-caption">H5</span></TBtn>
-        <TBtn tip="Heading 6 — ###### text" active={blockType==="h6"} onClick={() => fmtBlock("h6")}
-          preview={<div style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.025em" }}>Heading 6</div>}>
-          <span className="text-caption">H6</span></TBtn>
-        <TBtn tip="Paragraph — normal text" active={blockType==="p"} onClick={() => fmtBlock("p")}
-          preview={<div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>Normal paragraph text</div>}>
-          <span className="text-caption">P</span></TBtn>
-      </div>
-      {sep}
-      {/* Text style */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        <TBtn tip={`Bold (${mod}+B) → **text**`} active={active.bold} onClick={() => exec("bold")}
-          preview={<span style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: 13 }}>Bold text</span>}>
-          <span className="font-bold text-body">B</span></TBtn>
-        <TBtn tip={`Italic (${mod}+I) → *text*`} active={active.italic} onClick={() => exec("italic")}
-          preview={<span style={{ fontStyle: "italic", color: "var(--text-secondary)", fontSize: 13 }}>Italic text</span>}>
-          <span className="italic text-body">I</span></TBtn>
-        <TBtn tip="Strikethrough → ~~text~~" active={active.strikethrough} onClick={() => exec("strikeThrough")}
-          preview={<span style={{ textDecoration: "line-through", color: "var(--text-muted)", fontSize: 13 }}>Strikethrough</span>}>
-          <span className="line-through text-body">S</span></TBtn>
-        <TBtn tip="Inline code → `code`" active={active.code} onClick={wrapCode}
-          preview={<code style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, background: "var(--border)", padding: "2px 6px", borderRadius: 4, color: "var(--accent)" }}>inline code</code>}>
-          <span className="font-mono text-caption">{`</>`}</span></TBtn>
-      </div>
-      {sep}
-      {/* Lists */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        <TBtn tip="Bullet list → - item" active={active.ul} onClick={() => exec("insertUnorderedList")}
-          preview={<div style={{ fontSize: 12 }}><div style={{ color: "var(--text-muted)" }}>• First item</div><div style={{ color: "var(--text-muted)" }}>• Second item</div></div>}>
-          <List size={I} />
-        </TBtn>
-        <TBtn tip="Numbered list → 1. item" active={active.ol} onClick={() => exec("insertOrderedList")}
-          preview={<div style={{ fontSize: 12 }}><div style={{ color: "var(--text-muted)" }}>1. First item</div><div style={{ color: "var(--text-muted)" }}>2. Second item</div></div>}>
-          <ListOrdered size={I} />
-        </TBtn>
-        <TBtn tip="Task list → - [ ] item" onClick={() => { if (isInCM6()) { cmInsert("- [ ] "); } else { const ed = getTiptapEditor?.(); if (ed) ed.chain().focus().toggleTaskList().run(); } }}
-          preview={<div style={{ fontSize: 12 }}><div style={{ color: "var(--text-muted)" }}>☐ To do item</div><div style={{ color: "var(--accent)" }}>☑ Done item</div></div>}>
-          <svg width={I} height={I} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3"><rect x="2" y="2" width="5" height="5" rx="1"/><path d="M3.5 4.5l1 1 2-2" strokeLinecap="round"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="3" width="5" height="2" rx="0.5" fill="currentColor"/><rect x="9" y="10" width="5" height="2" rx="0.5" fill="currentColor"/></svg>
-        </TBtn>
-        <TBtn tip="Indent" onClick={() => exec("indent")}>
-          <Indent size={I} />
-        </TBtn>
-        <TBtn tip="Outdent" onClick={() => exec("outdent")}>
-          <Outdent size={I} />
-        </TBtn>
-      </div>
-      {sep}
-      {/* Block elements */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        <TBtn tip="Blockquote → > text" active={blockType==="blockquote"} onClick={() => fmtBlock("blockquote")}
-          preview={<div style={{ borderLeft: "3px solid var(--accent)", paddingLeft: 8, color: "var(--text-muted)", fontSize: 12, fontStyle: "italic" }}>Quoted text</div>}>
-          <Quote size={I} />
-        </TBtn>
-        <TBtn tip="Horizontal rule → ---" onClick={() => exec("insertHorizontalRule")}>
-          <Minus size={I} />
-        </TBtn>
-      </div>
-      {sep}
-      {/* Insert */}
-      <div className="flex items-center gap-0.5 shrink-0">
-        <TBtn tip={`Link (${mod}+K) → [text](url)`} onClick={() => onInputPopup({ label: "URL", onSubmit: (u) => exec("createLink", u) })}>
-          <Link size={I} />
-        </TBtn>
-        <TBtn tip="Upload image" onClick={() => onImageUpload()}>
-          <ImageIcon size={I} />
-        </TBtn>
-        <TBtn tip="Clear formatting" onClick={() => exec("removeFormat")}>
-          <RemoveFormatting size={I} />
-        </TBtn>
-      </div>
-      {sep}
-      {/* Insert */}
-      <div className="flex items-center gap-0.5 shrink-0">
-      <div className="relative" ref={tableGridRef}>
-        <TBtn tip="Insert table" onClick={() => setShowTableGrid(v => !v)}>
-          <Table size={I} />
-        </TBtn>
-        {showTableGrid && (
-          <div className="absolute top-full left-0 mt-1 p-2 rounded-lg shadow-xl z-[9998]"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 4px 16px rgba(0,0,0,0.3)" }}
-            onMouseDown={(e) => e.preventDefault()}>
-            <div className="text-caption mb-1.5 text-center" style={{ color: "var(--text-muted)" }}>
-              {tableHover.col > 0 ? `${tableHover.col} x ${tableHover.row}` : "Select size"}
-            </div>
-            <div className="grid gap-[3px]" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
-              {Array.from({ length: 36 }, (_, i) => {
-                const col = (i % 6) + 1;
-                const row = Math.floor(i / 6) + 1;
-                const isActive = col <= tableHover.col && row <= tableHover.row;
-                return (
-                  <div
-                    key={i}
-                    className="w-4 h-4 rounded-sm border cursor-pointer transition-colors"
-                    style={{
-                      borderColor: isActive ? "var(--accent)" : "var(--border-dim)",
-                      background: isActive ? "var(--accent-dim)" : "transparent",
-                    }}
-                    onMouseEnter={() => setTableHover({ col, row })}
-                    onClick={() => {
-                      onInsertTable(col, row);
-                      setShowTableGrid(false);
-                      setTableHover({ col: 0, row: 0 });
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-      <TBtn tip="Insert code block" onClick={() => onInsert("code")}>
-        <Code size={I} />
-      </TBtn>
-      <TBtn tip="Insert math equation" onClick={() => onInsert("math")}>
-        <svg width={I} height={I} viewBox="0 0 16 16" fill="currentColor"><text x="2" y="12" fontSize="11" fontFamily="serif" fontStyle="italic">fx</text></svg>
-      </TBtn>
-      <TBtn tip="Insert Mermaid diagram" onClick={() => onInsert("mermaid")}>
-        <svg width={I} height={I} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="4" y="1" width="8" height="4" rx="1"/><rect x="1" y="11" width="5" height="4" rx="1"/><rect x="10" y="11" width="5" height="4" rx="1"/><path d="M8 5v3M8 8L3.5 11M8 8l4.5 3"/></svg>
-      </TBtn>
-      </div>
-    </div>
-  );
-}
-
-// Heuristic title suggestion for a multi-doc bundle. Looks for tokens
-// that appear in 2+ titles (case-insensitive, stopwords filtered);
-// joins the top 2 with " + ". Falls back to "<first title> + N more".
-function suggestBundleTitle(docs: Array<{ title: string }>): string {
-  if (docs.length === 0) return "";
-  if (docs.length === 1) return docs[0].title || "Untitled";
-  const stop = new Set(["a","an","the","and","or","of","in","on","at","to","for","with","from","by","is","are","was","were","be","been","as","my","your","our","this","that"]);
-  const counts = new Map<string, number>();
-  for (const d of docs) {
-    const seen = new Set<string>();
-    for (const tok of (d.title || "").toLowerCase().split(/[\s\-_,.;:()[\]/]+/)) {
-      if (tok.length < 3 || stop.has(tok)) continue;
-      if (seen.has(tok)) continue;
-      seen.add(tok);
-      counts.set(tok, (counts.get(tok) || 0) + 1);
-    }
-  }
-  const common = Array.from(counts.entries())
-    .filter(([, c]) => c >= 2)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 2)
-    .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
-  if (common.length === 0) {
-    return `${docs[0].title || "Untitled"} + ${docs.length - 1} more`;
-  }
-  return `${common.join(" + ")} (${docs.length})`;
-}
-
-function BundleCreatorModal({
-  allDocs,
-  initiallySelected,
-  authHeaders,
-  onClose,
-  onCreate,
-}: {
-  allDocs: Array<{ id: string; title: string; lastOpenedAt?: number }>;
-  initiallySelected: Array<{ id: string; title: string }>;
-  authHeaders: Record<string, string>;
-  onClose: () => void;
-  onCreate: (args: { title: string; description?: string; docIds: string[]; annotationByDocId?: Record<string, string> }) => void | Promise<void>;
-}) {
-  const [title, setTitle] = useState("");
-  const [search, setSearch] = useState("");
-  const [selectedIds, setSelectedIds] = useState<string[]>(() => initiallySelected.map(d => d.id));
-  const [creating, setCreating] = useState(false);
-
-  // Ask AI section — collapsed by default so the Documents picker
-  // gets the panel's full attention. User clicks the header to open.
-  const [showAskAI, setShowAskAI] = useState(false);
-
-  // AI title suggester state — wired to /api/bundles/suggest-title.
-  // Reads the selected docs' content and fills the title field.
-  const [suggestingTitle, setSuggestingTitle] = useState(false);
-  const [titleSuggestError, setTitleSuggestError] = useState<string | null>(null);
-
-  // AI Bundle Generation state (Ask AI prompt → docs + title)
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiGenerating, setAiGenerating] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
-  const [aiDescription, setAiDescription] = useState("");
-  const [aiAnnotations, setAiAnnotations] = useState<Record<string, string>>({});
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  // Suggestions are user-revealed, not shown by default — the list
-  // was crowding the Documents panel below and pushing the document
-  // picker into a 2-3-row sliver.
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  // Title placeholder — heuristic from currently-selected docs, used
-  // as the visible hint in the input. If the user clicks Create with
-  // the field empty, this is what gets submitted.
-  const selectedDocsForTitle = useMemo(() => {
-    const idSet = new Set(selectedIds);
-    return allDocs.filter((d) => idSet.has(d.id)).map((d) => ({ title: d.title }));
-  }, [selectedIds, allDocs]);
-  const titlePlaceholder = useMemo(() => {
-    if (selectedDocsForTitle.length === 0) return "My Bundle";
-    return suggestBundleTitle(selectedDocsForTitle);
-  }, [selectedDocsForTitle]);
-
-  const requestAITitle = useCallback(async () => {
-    if (suggestingTitle) return;
-    if (selectedIds.length === 0) {
-      setTitleSuggestError("Pick at least one document first.");
-      return;
-    }
-    setTitleSuggestError(null);
-    setSuggestingTitle(true);
-    try {
-      const res = await fetch("/api/bundles/suggest-title", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ documentIds: selectedIds.slice(0, 25) }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
-      if (typeof data?.title === "string" && data.title.trim()) {
-        setTitle(data.title.trim());
-      } else {
-        throw new Error("Empty response from AI");
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to suggest title";
-      setTitleSuggestError(msg);
-    } finally {
-      setSuggestingTitle(false);
-    }
-  }, [authHeaders, selectedIds, suggestingTitle]);
-
-  // Fetch suggestion prompts on mount — fire once, keep result for the
-  // life of the modal. Empty list (cold hub / AI unavailable) hides
-  // the chip row silently.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/bundles/suggestions", { headers: authHeaders });
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        if (Array.isArray(data?.prompts)) setAiSuggestions(data.prompts);
-      } catch { /* silent */ }
-    })();
-    return () => { cancelled = true; };
-  }, [authHeaders]);
-
-  const askAI = useCallback(async () => {
-    const prompt = aiPrompt.trim();
-    if (!prompt || aiGenerating) return;
-    setAiError(null);
-    setAiGenerating(true);
-    try {
-      const res = await fetch("/api/bundles/ai-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ prompt }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Request failed (${res.status})`);
-      }
-      const data = await res.json();
-      const suggestion = data?.suggestion;
-      if (!suggestion) throw new Error("Empty response");
-      // Apply suggestion: fill title, replace selection with AI's picks (in
-      // ranked order), surface annotations + description.
-      if (suggestion.title) setTitle(suggestion.title);
-      setAiDescription(suggestion.description || "");
-      const picks: string[] = Array.isArray(suggestion.documents) ? suggestion.documents.map((d: { id: string }) => d.id) : [];
-      setSelectedIds(picks);
-      const ann: Record<string, string> = {};
-      if (Array.isArray(suggestion.documents)) {
-        for (const d of suggestion.documents as Array<{ id: string; annotation?: string }>) {
-          if (d?.id && d.annotation) ann[d.id] = d.annotation;
-        }
-      }
-      setAiAnnotations(ann);
-    } catch (err) {
-      setAiError(err instanceof Error ? err.message : "AI generation failed");
-    } finally {
-      setAiGenerating(false);
-    }
-  }, [aiPrompt, aiGenerating, authHeaders]);
-
-  // Sort: selected first (preserving selection order), then unselected by recent
-  const sortedDocs = useMemo(() => {
-    const selectedSet = new Set(selectedIds);
-    const selectedInOrder = selectedIds
-      .map(id => allDocs.find(d => d.id === id))
-      .filter((d): d is { id: string; title: string; lastOpenedAt?: number } => !!d);
-    const rest = allDocs
-      .filter(d => !selectedSet.has(d.id))
-      .sort((a, b) => (b.lastOpenedAt || 0) - (a.lastOpenedAt || 0));
-    return [...selectedInOrder, ...rest];
-  }, [allDocs, selectedIds]);
-
-  const filteredDocs = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return sortedDocs;
-    return sortedDocs.filter(d => d.title.toLowerCase().includes(q));
-  }, [sortedDocs, search]);
-
-  const toggle = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const move = (id: string, dir: -1 | 1) => {
-    setSelectedIds(prev => {
-      const idx = prev.indexOf(id);
-      if (idx < 0) return prev;
-      const next = idx + dir;
-      if (next < 0 || next >= prev.length) return prev;
-      const copy = [...prev];
-      [copy[idx], copy[next]] = [copy[next], copy[idx]];
-      return copy;
-    });
-  };
-
-  // 1+ docs is enough — a single-doc bundle is a valid v6 starting point
-  // (user can grow it later with add-documents). Server-side
-  // /api/bundles already accepts documentIds.length >= 1.
-  const canCreate = selectedIds.length >= 1 && !creating;
-
-  return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
-      onClick={onClose}
-    >
-      <div
-        className="rounded-xl w-full max-w-md mx-4 overflow-hidden flex flex-col"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)", maxHeight: "min(80vh, 640px)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-          <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Create Bundle</h3>
-          <p className="text-caption mt-1" style={{ color: "var(--text-muted)" }}>Pick documents to bundle, or ask AI to suggest from your hub.</p>
-        </div>
-        {/* AI Bundle Generation strip — collapsed by default. Header
-            row is a clickable toggle so the Documents picker gets the
-            full panel by default; users who want AI to assemble a
-            bundle from a prompt expand it on demand. */}
-        <div className="shrink-0" style={{ borderBottom: "1px solid var(--border-dim)", background: showAskAI ? "color-mix(in srgb, var(--accent-dim) 25%, var(--surface))" : "var(--surface)" }}>
-          <button
-            type="button"
-            onClick={() => setShowAskAI((s) => !s)}
-            className="w-full flex items-center gap-2 px-5 py-3 transition-colors hover:bg-[var(--accent-dim)]"
-            aria-expanded={showAskAI}
-          >
-            <span
-              className="flex items-center justify-center shrink-0"
-              style={{ width: 22, height: 22, borderRadius: 6, background: "var(--accent-dim)", color: "var(--accent)" }}
-            >
-              <Sparkles width={12} height={12} aria-hidden />
-            </span>
-            <span className="text-caption font-semibold" style={{ color: "var(--accent)" }}>Ask AI</span>
-            <span className="text-caption" style={{ color: "var(--text-faint)" }}>— describe a topic, AI picks docs + title</span>
-            <span style={{ flex: 1 }} />
-            <ChevronDown
-              width={12}
-              height={12}
-              style={{
-                color: "var(--text-faint)",
-                transform: showAskAI ? "rotate(0deg)" : "rotate(-90deg)",
-                transition: "transform 0.15s",
-              }}
-            />
-          </button>
-        </div>
-        {showAskAI && (
-        <div className="px-5 py-4 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)", background: "color-mix(in srgb, var(--accent-dim) 25%, var(--surface))" }}>
-          <p className="text-caption leading-relaxed mb-3" style={{ color: "var(--text-muted)" }}>
-            Describe a topic and AI picks matching docs + writes a title from your hub.
-          </p>
-          {/* Combined input + submit button in a single rounded container —
-              one visual element, like a chat composer. */}
-          <div
-            className="flex items-stretch rounded-lg overflow-hidden"
-            style={{
-              background: "var(--background)",
-              border: `1px solid ${aiPrompt.trim() ? "var(--accent)" : "var(--border-dim)"}`,
-              transition: "border-color 120ms",
-            }}
-          >
-            <input
-              type="text"
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !aiGenerating) askAI(); }}
-              placeholder="e.g. notes on LLM memory architecture"
-              className="flex-1 px-3 py-2 text-body outline-none bg-transparent"
-              style={{ color: "var(--text-primary)" }}
-              disabled={aiGenerating}
-            />
-            <button
-              onClick={askAI}
-              disabled={!aiPrompt.trim() || aiGenerating}
-              className="flex items-center gap-1 px-3 text-caption font-semibold shrink-0 transition-colors"
-              style={{
-                background: !aiPrompt.trim() || aiGenerating ? "transparent" : "var(--accent)",
-                color: !aiPrompt.trim() || aiGenerating ? "var(--text-faint)" : "#fff",
-                cursor: !aiPrompt.trim() || aiGenerating ? "not-allowed" : "pointer",
-                borderLeft: "1px solid var(--border-dim)",
-              }}
-            >
-              {aiGenerating ? (
-                <>
-                  <Loader2 width={11} height={11} className="animate-spin" />
-                  Thinking
-                </>
-              ) : (
-                <>
-                  <Sparkles width={11} height={11} />
-                  Ask
-                </>
-              )}
-            </button>
-          </div>
-          {aiError && (
-            <p className="text-caption mt-2.5" style={{ color: "var(--color-danger)" }}>{aiError}</p>
-          )}
-          {aiDescription && !aiError && (
-            <p className="text-caption mt-2.5 leading-relaxed" style={{ color: "var(--text-muted)" }}>{aiDescription}</p>
-          )}
-          {/* Suggestion list — collapsed by default. Renders the
-              "Try" header as a small toggle; the list only expands
-              when the user opts in. Default-hidden because the
-              suggestions row was eating the Documents picker space
-              below. */}
-          {aiSuggestions.length > 0 && !aiGenerating && !aiDescription && (
-            <div className="mt-3">
-              <button
-                onClick={() => setShowSuggestions(s => !s)}
-                className="flex items-center gap-1 text-caption uppercase tracking-wider mb-1.5 transition-colors hover:text-[var(--text-secondary)]"
-                style={{ color: "var(--text-faint)", fontSize: 10, letterSpacing: "0.06em", cursor: "pointer", background: "transparent", border: "none", padding: 0 }}
-                aria-expanded={showSuggestions}
-              >
-                <ChevronDown
-                  width={9}
-                  height={9}
-                  style={{ transform: showSuggestions ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.15s" }}
-                />
-                Try {aiSuggestions.length > 0 && (
-                  <span style={{ color: "var(--text-faint)", textTransform: "none", letterSpacing: 0 }}>
-                    ({aiSuggestions.length} suggestion{aiSuggestions.length === 1 ? "" : "s"})
-                  </span>
-                )}
-              </button>
-              {showSuggestions && (
-              <div className="flex flex-col gap-1">
-                {aiSuggestions.map((p, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      setAiPrompt(p);
-                      setTimeout(() => {
-                        setAiPrompt(p);
-                        (async () => {
-                          if (aiGenerating) return;
-                          setAiError(null);
-                          setAiGenerating(true);
-                          try {
-                            const res = await fetch("/api/bundles/ai-generate", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json", ...authHeaders },
-                              body: JSON.stringify({ prompt: p }),
-                            });
-                            if (!res.ok) {
-                              const err = await res.json().catch(() => ({}));
-                              throw new Error(err.error || `Request failed (${res.status})`);
-                            }
-                            const data = await res.json();
-                            const suggestion = data?.suggestion;
-                            if (!suggestion) throw new Error("Empty response");
-                            if (suggestion.title) setTitle(suggestion.title);
-                            setAiDescription(suggestion.description || "");
-                            const picks: string[] = Array.isArray(suggestion.documents) ? suggestion.documents.map((d: { id: string }) => d.id) : [];
-                            setSelectedIds(picks);
-                            const ann: Record<string, string> = {};
-                            if (Array.isArray(suggestion.documents)) {
-                              for (const d of suggestion.documents as Array<{ id: string; annotation?: string }>) {
-                                if (d?.id && d.annotation) ann[d.id] = d.annotation;
-                              }
-                            }
-                            setAiAnnotations(ann);
-                          } catch (err) {
-                            setAiError(err instanceof Error ? err.message : "AI generation failed");
-                          } finally {
-                            setAiGenerating(false);
-                          }
-                        })();
-                      }, 0);
-                    }}
-                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-md text-caption transition-colors hover:bg-[var(--toggle-bg)] group/sug"
-                    style={{ color: "var(--text-secondary)", border: "1px solid transparent" }}
-                  >
-                    <Sparkles width={10} height={10} className="shrink-0 transition-colors group-hover/sug:text-[var(--accent)]" style={{ color: "var(--text-faint)" }} aria-hidden />
-                    <span className="flex-1 truncate">{p}</span>
-                    <span className="text-caption opacity-0 group-hover/sug:opacity-100 transition-opacity shrink-0" style={{ color: "var(--accent)", fontSize: 10 }}>
-                      Use →
-                    </span>
-                  </button>
-                ))}
-              </div>
-              )}
-            </div>
-          )}
-        </div>
-        )}
-        <div className="px-5 py-4 shrink-0">
-          <label className="text-caption font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>Bundle Title</label>
-          {/* Title field with an AI button on the right. Empty by
-              default; placeholder shows a heuristic from selected
-              docs (used as the submitted title if user creates
-              without typing). AI button reads the selected docs'
-              content and fills the field. */}
-          <div
-            className="flex items-stretch rounded-lg overflow-hidden"
-            style={{ background: "var(--background)", border: "1px solid var(--border)" }}
-          >
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={titlePlaceholder}
-              className="flex-1 px-3 py-2 text-sm outline-none bg-transparent"
-              style={{ color: "var(--text-primary)" }}
-              autoFocus
-            />
-            <button
-              type="button"
-              onClick={requestAITitle}
-              disabled={suggestingTitle || selectedIds.length === 0}
-              className="flex items-center gap-1 px-3 text-caption font-semibold shrink-0 transition-colors"
-              style={{
-                background: suggestingTitle ? "transparent" : "var(--accent-dim)",
-                color: selectedIds.length === 0 ? "var(--text-faint)" : "var(--accent)",
-                cursor: suggestingTitle || selectedIds.length === 0 ? "not-allowed" : "pointer",
-                borderLeft: "1px solid var(--border-dim)",
-              }}
-              title={selectedIds.length === 0 ? "Pick a document first" : "Let AI suggest a title from the selected docs"}
-            >
-              {suggestingTitle ? (
-                <>
-                  <Loader2 width={11} height={11} className="animate-spin" />
-                  <span>Thinking</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles width={11} height={11} />
-                  <span>AI</span>
-                </>
-              )}
-            </button>
-          </div>
-          {titleSuggestError && (
-            <p className="text-caption mt-1.5" style={{ color: "var(--color-danger)" }}>{titleSuggestError}</p>
-          )}
-        </div>
-        <div className="px-5 shrink-0">
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-caption font-medium" style={{ color: "var(--text-secondary)" }}>
-              Documents <span style={{ color: "var(--text-faint)" }}>({selectedIds.length} selected)</span>
-            </label>
-            {selectedIds.length > 0 && (
-              <button
-                onClick={() => setSelectedIds([])}
-                className="text-caption px-1.5 py-0.5 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ color: "var(--text-faint)" }}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documents..."
-            className="w-full px-3 py-1.5 rounded-md text-body outline-none mb-2"
-            style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)" }}
-          />
-        </div>
-        <div className="px-5 pb-4 flex-1 min-h-0 overflow-auto">
-          {filteredDocs.length === 0 ? (
-            <div className="text-caption text-center py-6" style={{ color: "var(--text-faint)" }}>
-              {search ? "No documents match." : "No documents available. Save a doc to the cloud first."}
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {filteredDocs.map((doc) => {
-                const order = selectedIds.indexOf(doc.id);
-                const isSelected = order >= 0;
-                return (
-                  <div
-                    key={doc.id}
-                    onClick={() => toggle(doc.id)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-caption cursor-pointer transition-colors hover:bg-[var(--accent-dim)]"
-                    style={{
-                      background: isSelected ? "var(--accent-dim)" : "var(--background)",
-                      color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
-                      border: `1px solid ${isSelected ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                    }}
-                  >
-                    <div
-                      className="w-4 h-4 rounded shrink-0 flex items-center justify-center"
-                      style={{
-                        background: isSelected ? "var(--accent)" : "transparent",
-                        border: `1px solid ${isSelected ? "var(--accent)" : "var(--border)"}`,
-                      }}
-                    >
-                      {isSelected && <Check width={10} height={10} style={{ color: "#fff" }} />}
-                    </div>
-                    {isSelected && (
-                      <span className="text-caption font-mono shrink-0" style={{ color: "var(--accent)" }}>{order + 1}</span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate">{doc.title}</div>
-                      {isSelected && aiAnnotations[doc.id] && (
-                        <div className="text-caption truncate mt-0.5 inline-flex items-center gap-1" style={{ color: "var(--accent)", opacity: 0.85 }}>
-                          <Sparkles width={10} height={10} className="shrink-0" aria-hidden /> {aiAnnotations[doc.id]}
-                        </div>
-                      )}
-                    </div>
-                    {isSelected && (
-                      <div className="flex gap-0.5 shrink-0">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); move(doc.id, -1); }}
-                          disabled={order === 0}
-                          className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)] disabled:opacity-30"
-                          style={{ color: "var(--text-faint)" }}
-                          title="Move up"
-                        >
-                          <ChevronUp width={11} height={11} />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); move(doc.id, 1); }}
-                          disabled={order === selectedIds.length - 1}
-                          className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)] disabled:opacity-30"
-                          style={{ color: "var(--text-faint)" }}
-                          title="Move down"
-                        >
-                          <ChevronDown width={11} height={11} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-        <div className="px-5 py-3 flex justify-end gap-2 shrink-0" style={{ borderTop: "1px solid var(--border-dim)" }}>
-          <button
-            onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--toggle-bg)]"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={async () => {
-              if (!canCreate) return;
-              setCreating(true);
-              try {
-                await onCreate({
-                  title: title.trim() || titlePlaceholder || "Untitled Bundle",
-                  description: aiDescription.trim() || undefined,
-                  docIds: selectedIds,
-                  annotationByDocId: Object.keys(aiAnnotations).length > 0 ? aiAnnotations : undefined,
-                });
-              } finally {
-                setCreating(false);
-              }
-            }}
-            disabled={!canCreate}
-            className="px-4 py-1.5 rounded-md text-caption font-medium transition-opacity"
-            style={{
-              background: "var(--accent)",
-              color: "#fff",
-              opacity: canCreate ? 1 : 0.4,
-              cursor: canCreate ? "pointer" : "not-allowed",
-            }}
-          >
-            {creating ? "Creating..." : "Create Bundle"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-type BundleDocStatus = {
-  id: string;
-  title: string | null;
-  is_draft: boolean;
-  edit_mode: string;
-  allowed_emails_count: number;
-  allowed_emails?: string[];
-  allowed_editors?: string[];
-};
-
-/**
- * BundleShareModal — wraps the same `ShareModal` used for individual documents.
- * Shares all of ShareModal's UI (email chips, access modes, copy link, make private)
- * but routes API calls through bundle adapters that:
- *   1) Update the bundle's own state (publish flips is_draft).
- *   2) Cascade allowed_emails / edit_mode onto every included document so each
- *      doc is also accessible directly via /d/<id> with the same permissions.
- * Renders a banner above "General access" listing the documents that will be affected.
- */
-function BundleShareModal({
-  bundleId,
-  bundleTitle,
-  ownerEmail,
-  ownerName,
-  userId,
-  authHeaders,
-  onClose,
-  onBundleUpdated,
-}: {
-  bundleId: string;
-  bundleTitle: string;
-  ownerEmail: string;
-  ownerName?: string;
-  userId: string;
-  authHeaders: Record<string, string>;
-  onClose: () => void;
-  onBundleUpdated: (changes: { is_draft?: boolean; allowed_emails_count?: number }) => void;
-}) {
-  const [_loading, setLoading] = useState(true);
-  const [docs, setDocs] = useState<BundleDocStatus[]>([]);
-  const [editMode, setEditMode] = useState<string>("owner");
-  const [allowedEmails, setAllowedEmails] = useState<string[]>([]);
-  const [showRevertPicker, setShowRevertPicker] = useState(false);
-  const [revertDocIds, setRevertDocIds] = useState<Set<string>>(new Set());
-  const [reverting, setReverting] = useState(false);
-  const [bundleEditToken, setBundleEditToken] = useState<string | undefined>(undefined);
-  // Whether the bundle row itself is a draft. The Share modal's
-  // "Anyone with link" badge was hardcoded-cheerful for newly
-  // created bundles because we never propagated bundles.is_draft
-  // into ShareModal's isPrivate prop — the modal then defaulted
-  // to "anyone" (no emails set, no isPrivate signal) even though
-  // /b/<id> still 404'd for everyone but the owner.
-  const [bundleIsDraft, setBundleIsDraft] = useState<boolean>(true);
-  // Readiness for cross-AI fetch: graph_data + embedding pipeline.
-  // Surfaces in the Share modal so the user sees "Ready / Pending"
-  // before they hand the URL to Claude / Cursor / ChatGPT.
-  const [bundleAiReady, setBundleAiReady] = useState<{ hasGraph: boolean; hasEmbedding: boolean; isAnalysisStale: boolean; memberCount: number } | null>(null);
-
-  // Load bundle + docs to derive current shared state. The bundle row
-  // now owns its own allowed_emails list (cascaded on every email
-  // change), so we read it directly off the bundle response instead
-  // of doing a second sequential GET against the first published
-  // member doc. That second fetch was the load-time culprit: the
-  // modal opened with a stale "Anyone with the link" default for up
-  // to ~2 seconds until that follow-up resolved.
-  useEffect(() => {
-    // Skip the fetch while authHeaders is empty — the owner-only
-    // draft bundle would 404 on the first paint (no x-user-id),
-    // then refetch and 200 once the parent hydrated identity. The
-    // intermediate 404 was just noise in the console.
-    if (!authHeaders["x-user-id"] && !authHeaders.Authorization) return;
-    let cancelled = false;
-    fetch(`/api/bundles/${bundleId}`, { headers: authHeaders })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (cancelled || !data?.documents) return;
-        const docList: BundleDocStatus[] = data.documents.map((d: BundleDocStatus) => ({
-          id: d.id,
-          title: d.title,
-          is_draft: d.is_draft !== false,
-          edit_mode: d.edit_mode || "owner",
-          allowed_emails_count: d.allowed_emails_count || 0,
-        }));
-        setDocs(docList);
-
-        const publishedDocs = docList.filter(d => !d.is_draft);
-        const sample = publishedDocs[0] || docList[0];
-        if (sample) setEditMode(sample.edit_mode || "owner");
-
-        if (Array.isArray(data.allowed_emails)) {
-          setAllowedEmails(data.allowed_emails);
-        }
-        // Owner-only: capture the edit token so the Developer-access
-        // footer can surface it for programmatic API access.
-        if (typeof data.editToken === "string") {
-          setBundleEditToken(data.editToken);
-        }
-        // Capture the bundle's own draft state so ShareModal's
-        // People-tab badge tells the truth ("Only you" for a
-        // freshly-created bundle, not "Anyone with link").
-        if (typeof data.is_draft === "boolean") {
-          setBundleIsDraft(data.is_draft);
-        }
-        setBundleAiReady({
-          hasGraph: !!data.hasGraph,
-          hasEmbedding: !!data.hasEmbedding,
-          isAnalysisStale: !!data.isAnalysisStale,
-          memberCount: docList.length,
-        });
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [bundleId, authHeaders]);
-
-  // Adapter: persist allowed_emails on the bundle row AND cascade to every doc
-  // (so each doc is also accessible via /d/<id> with the same permissions).
-  const setAllowedEmailsAdapter = useCallback(async (
-    _id: string,
-    uid: string,
-    emails: string[],
-    editors: string[],
-  ) => {
-    await fetch(`/api/bundles/${bundleId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", ...authHeaders },
-      body: JSON.stringify({ userId: uid, action: "set-allowed-emails", allowedEmails: emails, allowedEditors: editors }),
-    }).catch(() => {});
-    await Promise.all(docs.map(d =>
-      fetch(`/api/docs/${d.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ userId: uid, action: "set-allowed-emails", allowedEmails: emails, allowedEditors: editors }),
-      }).catch(() => {})
-    ));
-    // Notify parent so it refetches bundles → sidebar icon updates immediately
-    // to reflect the new allowed_emails_count (gray → blue+avatar).
-    onBundleUpdated({});
-    setAllowedEmails(emails);
-    return { allowedEmails: emails, allowedEditors: editors };
-  }, [docs, bundleId, authHeaders, onBundleUpdated]);
-
-  // Adapter: cascade edit-mode change + ensure bundle is published when sharing,
-  // and publish each doc so it can also be opened directly.
-  const changeEditModeAdapter = useCallback(async (
-    _id: string,
-    uid: string,
-    mode: "owner" | "view" | "public",
-  ) => {
-    setEditMode(mode);
-    // Ensure bundle is published (so /b/<id> is reachable)
-    await fetch(`/api/bundles/${bundleId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", ...authHeaders },
-      body: JSON.stringify({ userId: uid, action: "publish" }),
-    }).catch(() => {});
-    // Persist edit_mode on the bundle row too
-    await fetch(`/api/bundles/${bundleId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", ...authHeaders },
-      body: JSON.stringify({ userId: uid, action: "change-edit-mode", editMode: mode }),
-    }).catch(() => {});
-    setBundleIsDraft(false);
-    onBundleUpdated({ is_draft: false });
-    // Cascade publish + edit-mode onto every doc
-    await Promise.all(docs.map(async d => {
-      await fetch(`/api/docs/${d.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ userId: uid, action: "publish" }),
-      }).catch(() => {});
-      await fetch(`/api/docs/${d.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ userId: uid, action: "change-edit-mode", editMode: mode }),
-      }).catch(() => {});
-    }));
-  }, [docs, bundleId, authHeaders, onBundleUpdated]);
-
-  const handleMakePrivate = useCallback(() => {
-    // Open per-doc revert picker. Default-select every doc that's currently published.
-    setRevertDocIds(new Set(docs.filter(d => !d.is_draft).map(d => d.id)));
-    setShowRevertPicker(true);
-  }, [docs]);
-
-  const submitRevert = useCallback(async () => {
-    setReverting(true);
-    try {
-      // Always unpublish the bundle
-      await fetch(`/api/bundles/${bundleId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({ userId, action: "unpublish" }),
-      }).catch(() => {});
-      // Unpublish only the selected docs
-      const toRevert = docs.filter(d => revertDocIds.has(d.id));
-      await Promise.all(toRevert.map(d =>
-        fetch(`/api/docs/${d.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", ...authHeaders },
-          body: JSON.stringify({ userId, action: "unpublish" }),
-        }).catch(() => {})
-      ));
-      setBundleIsDraft(true);
-      onBundleUpdated({ is_draft: true });
-      showToast(
-        toRevert.length === 0
-          ? "Bundle unpublished. Documents kept as-is."
-          : `Bundle and ${toRevert.length} document${toRevert.length === 1 ? "" : "s"} reverted to private`,
-        "success"
-      );
-      onClose();
-    } finally {
-      setReverting(false);
-    }
-  }, [docs, revertDocIds, bundleId, userId, authHeaders, onBundleUpdated, onClose]);
-
-  if (showRevertPicker) {
-    const toggleRevert = (id: string) => {
-      setRevertDocIds(prev => {
-        const next = new Set(prev);
-        if (next.has(id)) next.delete(id); else next.add(id);
-        return next;
-      });
-    };
-    return (
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center"
-        style={{ background: "rgba(0,0,0,0.7)" }}
-        onClick={() => setShowRevertPicker(false)}
-      >
-        <div
-          className="w-full max-w-md mx-4 rounded-xl shadow-2xl flex flex-col"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)", maxHeight: "80vh" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="px-5 pt-5 pb-3">
-            <h2 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>Make Bundle Private</h2>
-            <p className="text-caption mt-1" style={{ color: "var(--text-muted)" }}>
-              Bundle will be unpublished. Pick which documents inside should also revert to private.
-            </p>
-          </div>
-          <div className="px-5 pb-3 flex-1 min-h-0 overflow-auto">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-caption font-medium" style={{ color: "var(--text-muted)" }}>{revertDocIds.size} of {docs.length} selected</span>
-              <div className="flex gap-1.5 text-caption">
-                <button onClick={() => setRevertDocIds(new Set(docs.map(d => d.id)))} className="px-1.5 py-0.5 rounded hover:bg-[var(--toggle-bg)]" style={{ color: "var(--text-faint)" }}>All</button>
-                <button onClick={() => setRevertDocIds(new Set())} className="px-1.5 py-0.5 rounded hover:bg-[var(--toggle-bg)]" style={{ color: "var(--text-faint)" }}>None</button>
-              </div>
-            </div>
-            <div className="space-y-1">
-              {docs.map(d => {
-                const isSelected = revertDocIds.has(d.id);
-                const status = d.is_draft
-                  ? { label: "Already private", color: "var(--text-faint)" }
-                  : d.edit_mode === "view"
-                  ? { label: "Public link", color: "#4ade80" }
-                  : d.allowed_emails_count > 0
-                  ? { label: `Shared with ${d.allowed_emails_count}`, color: "#60a5fa" }
-                  : { label: "Published", color: "#4ade80" };
-                return (
-                  <div
-                    key={d.id}
-                    onClick={() => toggleRevert(d.id)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-caption cursor-pointer transition-colors hover:bg-[var(--accent-dim)]"
-                    style={{
-                      background: isSelected ? "var(--accent-dim)" : "var(--background)",
-                      color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
-                      border: `1px solid ${isSelected ? "var(--accent-dim)" : "var(--border-dim)"}`,
-                      opacity: d.is_draft ? 0.6 : 1,
-                    }}
-                  >
-                    <div
-                      className="w-4 h-4 rounded shrink-0 flex items-center justify-center"
-                      style={{
-                        background: isSelected ? "var(--accent)" : "transparent",
-                        border: `1px solid ${isSelected ? "var(--accent)" : "var(--border)"}`,
-                      }}
-                    >
-                      {isSelected && <Check width={10} height={10} style={{ color: "#fff" }} />}
-                    </div>
-                    <span className="flex-1 truncate">{d.title || "Untitled"}</span>
-                    <span className="shrink-0 text-caption" style={{ color: status.color }}>{status.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="flex items-center justify-end gap-2 px-5 py-3" style={{ borderTop: "1px solid var(--border-dim)" }}>
-            <button
-              onClick={() => setShowRevertPicker(false)}
-              className="px-3 py-1.5 rounded-md text-caption font-medium hover:bg-[var(--toggle-bg)]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={submitRevert}
-              disabled={reverting}
-              className="px-4 py-1.5 rounded-md text-caption font-medium"
-              style={{ background: "#ef4444", color: "#fff", opacity: reverting ? 0.5 : 1 }}
-            >
-              {reverting ? "Working..." : "Make Private"}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // One-line cascade hint — short enough to read at a glance.
-  const banner = (
-    <div className="rounded-lg px-3 py-2" style={{ background: "var(--toggle-bg)", border: "1px solid var(--border-dim)" }}>
-      <div className="flex items-center gap-2">
-        <ShieldAlert width={13} height={13} style={{ color: "#fbbf24", flexShrink: 0 }} />
-        <p className="text-caption" style={{ color: "var(--text-muted)" }}>
-          Applies to every member doc — each one also at <code style={{ background: "var(--toggle-bg)", padding: "1px 5px", borderRadius: 3, fontSize: "0.85em" }}>/d/&lt;id&gt;</code>
-        </p>
-      </div>
-    </div>
-  );
-
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/b/${bundleId}` : `/b/${bundleId}`;
-
-  return (
-    <ShareModal
-      docId={bundleId}
-      title={bundleTitle}
-      headerTitle={`Share Bundle "${bundleTitle.length > 30 ? bundleTitle.slice(0, 30) + "..." : bundleTitle}"`}
-      userId={userId}
-      ownerEmail={ownerEmail}
-      ownerName={ownerName}
-      currentEditMode={editMode}
-      initialAllowedEmails={allowedEmails}
-      initialAllowedEditors={[]}
-      isPrivate={bundleIsDraft}
-      onClose={onClose}
-      onEditModeChange={(mode) => {
-        setEditMode(mode);
-        // is_draft change handled inside changeEditModeAdapter
-      }}
-      onAllowedEmailsChange={setAllowedEmails}
-      onMakePrivate={handleMakePrivate}
-      setAllowedEmailsOverride={setAllowedEmailsAdapter}
-      changeEditModeOverride={changeEditModeAdapter}
-      shareUrlOverride={shareUrl}
-      editToken={bundleEditToken}
-      aiReadiness={bundleAiReady}
-      onReanalyze={() => {
-        // Fire-and-forget — no await. The ShareModal handles its own
-        // pending-state UX (button → "Running… ~60s"). We never block
-        // the click handler on the LLM call.
-        //
-        // After firing, poll readiness every 10s until both flags
-        // flip green. This is more responsive than the prior fixed
-        // 65s sleep, especially when embedding completes in <2s and
-        // the user just wants confirmation the embed half landed.
-        void fetch(`/api/bundles/${bundleId}/graph`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...authHeaders },
-          body: JSON.stringify({}),
-        }).catch(() => {});
-        void fetch(`/api/embed/bundle/${bundleId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...authHeaders },
-        }).catch(() => {});
-
-        // Poll every 10s for up to 2 minutes. Stop early once both
-        // flags are green so we don't keep hitting the API.
-        let attempts = 0;
-        const maxAttempts = 12;
-        const poll = () => {
-          attempts++;
-          fetch(`/api/bundles/${bundleId}`, { headers: authHeaders })
-            .then((r) => r.ok ? r.json() : null)
-            .then((d) => {
-              if (!d) return;
-              setBundleAiReady({
-                hasGraph: !!d.hasGraph,
-                hasEmbedding: !!d.hasEmbedding,
-                isAnalysisStale: !!d.isAnalysisStale,
-                memberCount: (d.documents || []).length,
-              });
-              const ready = d.hasGraph && d.hasEmbedding && !d.isAnalysisStale;
-              if (!ready && attempts < maxAttempts) {
-                setTimeout(poll, 10_000);
-              }
-            })
-            .catch(() => {
-              if (attempts < maxAttempts) setTimeout(poll, 10_000);
-            });
-        };
-        setTimeout(poll, 5_000);
-      }}
-      banner={banner}
-    />
-  );
-}
 
 export default function MdEditor() {
+  // Mark editor as opened — the root `/` page route reads this flag
+  // and only routes returning visitors here instead of /about. First
+  // run with no flag still passes through /about; the moment the
+  // editor mounts, future visits land straight in the editor.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { localStorage.setItem("mw-editor-opened", "1"); } catch { /* private mode */ }
+  }, []);
   const isMobile = useIsMobile();
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
   const mod = isMac ? "Cmd" : "Ctrl";
@@ -3238,7 +345,7 @@ export default function MdEditor() {
   const newMenuRef = useRef<HTMLDivElement>(null);
   const [authEmailInput, setAuthEmailInput] = useState("");
   const [authEmailSent, setAuthEmailSent] = useState(false);
-  const [folders, setFolders] = useState<Folder[]>(() => {
+  const [folders, setFolders] = useState<FolderType[]>(() => {
     if (typeof window === "undefined") return INITIAL_FOLDERS;
     try { const s = localStorage.getItem("mw-folders"); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length > 0) return p; } } catch { /* */ }
     return INITIAL_FOLDERS;
@@ -4939,8 +2046,8 @@ export default function MdEditor() {
       });
 
       if (bestEl) {
-        (bestEl as HTMLElement).style.boxShadow = "inset 3px 0 0 var(--accent)";
-        (bestEl as HTMLElement).style.background = "color-mix(in srgb, var(--accent) 6%, transparent)";
+        (bestEl as HTMLElement).style.boxShadow = "inset 3px 0 0 var(--text-primary)";
+        (bestEl as HTMLElement).style.background = "color-mix(in srgb, var(--text-primary) 6%, transparent)";
         (bestEl as HTMLElement).style.borderRadius = "0 4px 4px 0";
         (bestEl as HTMLElement).style.transition = "background 0.2s, box-shadow 0.2s";
         (bestEl as HTMLElement).scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -5854,7 +2961,10 @@ export default function MdEditor() {
         startOnLoad: false,
         securityLevel: "loose",
         theme: isDark ? "dark" : "default",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        // Mermaid renders to SVG and sets font-family as a presentation
+        // attribute, so CSS var() doesn't resolve. Use a literal cascade
+        // that matches the body font (Noto Sans + Pretendard for KR).
+        fontFamily: "'Noto Sans', 'Pretendard Variable', 'Noto Sans KR', system-ui, sans-serif",
         fontSize: 15,
         // Layout config — generous spacing to match AI render feel
         flowchart: {
@@ -5934,7 +3044,7 @@ export default function MdEditor() {
           toolbar.className = "mermaid-toolbar";
           toolbar.style.cssText = "display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:8px 10px 0;flex-wrap:nowrap;opacity:0;transition:opacity 0.15s";
 
-          const btnStyle = "padding:4px 10px;font-size:11px;font-family:ui-monospace,monospace;border-radius:4px;cursor:pointer;line-height:14px";
+          const btnStyle = "padding:4px 10px;font-size:11px;font-family:var(--font-mono);border-radius:4px;cursor:pointer;line-height:14px";
 
           // "Edit" button — Mermaid visual editor
           const editBtn = document.createElement("button");
@@ -6056,8 +3166,8 @@ export default function MdEditor() {
       btn.textContent = "Convert to Mermaid";
       btn.title = "Convert this ASCII diagram to Mermaid code using AI";
       btn.style.cssText = `
-        padding:4px 10px;font-size:11px;font-family:ui-monospace,monospace;
-        background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);
+        padding:4px 10px;font-size:11px;font-family:var(--font-mono);
+        background:var(--border);color:var(--text-primary);border:1px solid var(--text-primary);
         border-radius:4px;cursor:pointer;line-height:14px;
       `;
       toolbar.appendChild(btn);
@@ -6067,7 +3177,7 @@ export default function MdEditor() {
       const copyBtn = document.createElement("button");
       copyBtn.title = "Copy ASCII source";
       copyBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M5 11H3.5A1.5 1.5 0 012 9.5v-7A1.5 1.5 0 013.5 1h7A1.5 1.5 0 0112 2.5V5"/></svg><span style="margin-left:4px">Copy</span>';
-      copyBtn.style.cssText = "display:flex;align-items:center;padding:4px 10px;font-size:11px;font-family:ui-monospace,monospace;background:var(--code-copy-bg);color:var(--code-copy-color);border:1px solid var(--code-copy-border);border-radius:4px;cursor:pointer;line-height:14px";
+      copyBtn.style.cssText = "display:flex;align-items:center;padding:4px 10px;font-size:11px;font-family:var(--font-mono);background:var(--code-copy-bg);color:var(--code-copy-color);border:1px solid var(--code-copy-border);border-radius:4px;cursor:pointer;line-height:14px";
       copyBtn.addEventListener("click", () => {
         navigator.clipboard.writeText(srcText).then(() => {
           const orig = copyBtn.innerHTML;
@@ -6158,7 +3268,7 @@ export default function MdEditor() {
             btn.textContent = "Convert to Mermaid";
             btn.style.opacity = "1";
             btn.style.pointerEvents = "";
-            btn.style.color = "var(--accent)";
+            btn.style.color = "var(--text-primary)";
           }, 2000);
         }
       });
@@ -7487,12 +4597,12 @@ export default function MdEditor() {
         header.innerHTML = `
           <div style="display:flex;align-items:center;gap:0;">
             <input id="code-lang" type="text" value="${currentLang}" placeholder="language"
-              style="width:110px;padding:4px 10px;font-size:13px;font-family:ui-monospace,monospace;font-weight:600;
-              background:var(--accent-dim);color:var(--accent);border:1px solid transparent;
+              style="width:110px;padding:4px 10px;font-size:13px;font-family:var(--font-mono);font-weight:600;
+              background:var(--border);color:var(--text-primary);border:1px solid transparent;
               border-radius:6px;outline:none;text-transform:uppercase;letter-spacing:0.5px;" />
           </div>
           <div style="display:flex;gap:6px;">
-            <button id="code-save" style="padding:4px 12px;font-size:11px;background:var(--accent);color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Save</button>
+            <button id="code-save" style="padding:4px 12px;font-size:11px;background:var(--text-primary);color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:600;">Save</button>
             <button id="code-cancel" style="padding:4px 12px;font-size:11px;background:var(--toggle-bg);color:var(--text-muted);border:none;border-radius:6px;cursor:pointer;">Cancel</button>
           </div>
         `;
@@ -7562,12 +4672,12 @@ export default function MdEditor() {
                   ]),
                   EditorView.theme({
                     "&": { fontSize: "13px", height: "100%" },
-                    ".cm-scroller": { fontFamily: "ui-monospace, 'JetBrains Mono', 'Fira Code', monospace", overflow: "auto" },
+                    ".cm-scroller": { fontFamily: "var(--font-mono)", overflow: "auto" },
                     ".cm-gutters": { background: "var(--background)", borderRight: "1px solid var(--border-dim)", color: "var(--text-faint)" },
-                    ".cm-activeLineGutter": { background: "var(--accent-dim)" },
+                    ".cm-activeLineGutter": { background: "var(--border)" },
                     ".cm-activeLine": { background: "rgba(255,255,255,0.03)" },
-                    ".cm-content": { caretColor: "var(--accent)" },
-                    ".cm-cursor": { borderLeftColor: "var(--accent)" },
+                    ".cm-content": { caretColor: "var(--text-primary)" },
+                    ".cm-cursor": { borderLeftColor: "var(--text-primary)" },
                     ".cm-selectionBackground": { background: "rgba(251,146,60,0.2) !important" },
                   }),
                   EditorView.updateListener.of(update => {
@@ -7582,7 +4692,7 @@ export default function MdEditor() {
             // Fallback to textarea if CM6 fails to load
             const textarea = document.createElement("textarea");
             textarea.value = originalCode;
-            textarea.style.cssText = `width:100%;min-height:200px;background:var(--background);color:var(--editor-text);border:none;padding:12px;font-family:ui-monospace,monospace;font-size:13px;line-height:1.6;resize:vertical;outline:none;`;
+            textarea.style.cssText = `width:100%;min-height:200px;background:var(--background);color:var(--editor-text);border:none;padding:12px;font-family:var(--font-mono);font-size:13px;line-height:1.6;resize:vertical;outline:none;`;
             textarea.spellcheck = false;
             editorContainer.appendChild(textarea);
             textarea.focus();
@@ -9632,11 +6742,11 @@ ${clone.innerHTML}
       {isDragging && (
         <div
           className="absolute inset-0 z-[9998] flex items-center justify-center border-2 border-dashed rounded-lg m-2"
-          style={{ background: "var(--drag-bg)", borderColor: "var(--accent)" }}
+          style={{ background: "var(--drag-bg)", borderColor: "var(--text-primary)" }}
         >
           <div className="text-center">
             <div className="text-4xl mb-3 opacity-60">•</div>
-            <p className="text-lg font-medium" style={{ color: "var(--accent)" }}>Drop your file</p>
+            <p className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>Drop your file</p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>MD, PDF, DOCX, PPTX, XLSX, HTML, CSV, LaTeX, RST, JSON, TXT</p>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Supports .md, .markdown, .txt</p>
           </div>
@@ -9656,7 +6766,7 @@ ${clone.innerHTML}
             onClick={() => window.open("/about", "_blank")}
             title="Memory.Wiki — About"
           >
-            <MemoryWikiLogo size={isMobile ? 14 : 18} />
+            <MemoryWikiLogo size={isMobile ? 14 : 18} variant="full" />
           </h1>
           {/* Document / Bundle / Hub URL chip — refined chip group.
               For doc tabs: shows /{cloudId} → memory.wiki/{cloudId}.
@@ -9722,8 +6832,8 @@ ${clone.innerHTML}
                   try {
                     await navigator.clipboard.writeText(fullUrl);
                     const btn = e.currentTarget;
-                    btn.style.color = "var(--accent)";
-                    btn.style.borderColor = "var(--accent)";
+                    btn.style.color = "var(--text-primary)";
+                    btn.style.borderColor = "var(--text-primary)";
                     setTimeout(() => { btn.style.color = "var(--text-muted)"; btn.style.borderColor = "var(--border-dim)"; }, 800);
                     showToast("URL copied", "success");
                   } catch { /* ignore */ }
@@ -9850,8 +6960,8 @@ ${clone.innerHTML}
             onClick={() => { setShowOnboarding(true); setShowHub(false); setShowGalaxy(false); setShowSettings(false); if (viewMode === "editor") setViewMode("preview"); }}
             className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
             style={{
-              background: showOnboarding && !viewMode ? "var(--accent-dim)" : showOnboarding ? "var(--accent-dim)" : "var(--toggle-bg)",
-              color: showOnboarding ? "var(--accent)" : "var(--text-muted)",
+              background: showOnboarding && !viewMode ? "var(--border)" : showOnboarding ? "var(--border)" : "var(--toggle-bg)",
+              color: showOnboarding ? "var(--text-primary)" : "var(--text-muted)",
             }}
             title="Start (Alt+H)"
           >
@@ -9882,8 +6992,8 @@ ${clone.innerHTML}
                     }}
                     className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
                     style={{
-                      background: isHubActive ? "var(--accent-dim)" : "var(--toggle-bg)",
-                      color: isHubActive ? "var(--accent)" : "var(--text-muted)",
+                      background: isHubActive ? "var(--border)" : "var(--toggle-bg)",
+                      color: isHubActive ? "var(--text-primary)" : "var(--text-muted)",
                     }}
                     aria-pressed={isHubActive}
                   >
@@ -9909,8 +7019,8 @@ ${clone.innerHTML}
                     }}
                     className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
                     style={{
-                      background: isGalaxyActive ? "var(--accent-dim)" : "var(--toggle-bg)",
-                      color: isGalaxyActive ? "var(--accent)" : "var(--text-muted)",
+                      background: isGalaxyActive ? "var(--border)" : "var(--toggle-bg)",
+                      color: isGalaxyActive ? "var(--text-primary)" : "var(--text-muted)",
                     }}
                     aria-pressed={isGalaxyActive}
                     aria-label="Galaxy"
@@ -9967,8 +7077,8 @@ ${clone.innerHTML}
                 <button key={mode} onClick={() => { setBundleView(mode); setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(false); }} title={`${label} (Alt+${shortcut})`}
                   className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
                   style={{
-                    background: active ? "var(--accent-dim)" : "var(--toggle-bg)",
-                    color: active ? "var(--accent)" : "var(--text-muted)",
+                    background: active ? "var(--border)" : "var(--toggle-bg)",
+                    color: active ? "var(--text-primary)" : "var(--text-muted)",
                   }}>
                   {icon}
                   <span className="hidden sm:inline">{label}</span>
@@ -10008,8 +7118,8 @@ ${clone.innerHTML}
                 title={`${label} (Alt+${shortcut})`}
                 className="flex items-center gap-1 px-2 h-6 text-caption font-medium transition-colors"
                 style={{
-                  background: active ? "var(--accent-dim)" : "var(--toggle-bg)",
-                  color: active ? "var(--accent)" : "var(--text-muted)",
+                  background: active ? "var(--border)" : "var(--toggle-bg)",
+                  color: active ? "var(--text-primary)" : "var(--text-muted)",
                   opacity: disabled ? 0.35 : 1,
                   cursor: disabled ? "default" : "pointer",
                 }}
@@ -10100,13 +7210,13 @@ ${clone.innerHTML}
                     setShowNotifications(!showNotifications);
                   }}
                   className="relative h-6 w-6 rounded-md flex items-center justify-center transition-colors"
-                  style={{ background: showNotifications ? "var(--accent-dim)" : "var(--toggle-bg)", color: showNotifications ? "var(--accent)" : "var(--text-muted)" }}
+                  style={{ background: showNotifications ? "var(--border)" : "var(--toggle-bg)", color: showNotifications ? "var(--text-primary)" : "var(--text-muted)" }}
                   aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
                   title={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
                 >
                   <Bell width={13} height={13} />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-caption font-bold" style={{ background: "var(--accent)", color: "#000" }}>
+                    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center text-caption font-bold" style={{ background: "var(--micro-red)", color: "#fff" }}>
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}
@@ -10200,7 +7310,7 @@ ${clone.innerHTML}
                               {new Date(n.createdAt).toLocaleDateString()} {new Date(n.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </p>
                           </div>
-                          {!n.read && <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-2" style={{ background: "var(--accent)" }} />}
+                          {!n.read && <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-2" style={{ background: "var(--text-primary)" }} />}
                         </button>
                       ))
                     )}
@@ -10236,19 +7346,19 @@ ${clone.innerHTML}
                   const isMine = !ct?.permission || ct.permission === "mine";
                   if (docId && isMine) return (
                     <>
-                      <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>Share Settings</p>
+                      <p style={{ color: "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Share Settings</p>
                       <p>Manage who can view or edit this document. Add people by email, set general access, and copy the share link.</p>
                     </>
                   );
                   if (docId && !isMine) return (
                     <>
-                      <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>Share</p>
+                      <p style={{ color: "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Share</p>
                       <p>View document info, copy the share link, or request edit access from the owner.</p>
                     </>
                   );
                   return (
                     <>
-                      <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>Share</p>
+                      <p style={{ color: "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Share</p>
                       <p>Publish and create a share link for this document. Changes auto-save automatically. <span style={{ color: "var(--text-faint)" }}>{mod}+S</span></p>
                     </>
                   );
@@ -10274,8 +7384,8 @@ ${clone.innerHTML}
                     disabled={!enabled}
                     className="px-2 h-6 rounded-md transition-colors flex items-center gap-1.5 text-caption font-medium"
                     style={{
-                      background: !enabled ? "var(--toggle-bg)" : (showAIPanel || aiProcessing ? "var(--accent-dim)" : "var(--toggle-bg)"),
-                      color: !enabled ? "var(--text-faint)" : (showAIPanel || aiProcessing ? "var(--accent)" : "var(--text-muted)"),
+                      background: !enabled ? "var(--toggle-bg)" : (showAIPanel || aiProcessing ? "var(--border)" : "var(--toggle-bg)"),
+                      color: !enabled ? "var(--text-faint)" : (showAIPanel || aiProcessing ? "var(--text-primary)" : "var(--text-muted)"),
                       opacity: !enabled ? 0.45 : 1,
                       cursor: !enabled ? "not-allowed" : "pointer",
                     }}
@@ -10407,7 +7517,7 @@ ${clone.innerHTML}
                               <p className="text-caption mb-2" style={{ color: "var(--text-muted)" }}>This will invalidate all existing edit links.</p>
                               <div className="flex gap-1">
                                 <button onClick={() => setConfirmRotateToken(false)} className="flex-1 px-2 py-1 rounded text-caption" style={{ background: "var(--toggle-bg)", color: "var(--text-muted)" }}>Cancel</button>
-                                <button onClick={handleRotateToken} disabled={rotatingToken} className="flex-1 px-2 py-1 rounded text-caption" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>
+                                <button onClick={handleRotateToken} disabled={rotatingToken} className="flex-1 px-2 py-1 rounded text-caption" style={{ background: "var(--border)", color: "var(--text-primary)" }}>
                                   {rotatingToken ? "Rotating..." : "Confirm"}
                                 </button>
                               </div>
@@ -10500,16 +7610,16 @@ ${clone.innerHTML}
       {showAiBanner && (
         <div
           className="flex items-center justify-between px-3 sm:px-5 py-2 text-xs"
-          style={{ background: "var(--accent-dim)", borderBottom: "1px solid var(--border-dim)" }}
+          style={{ background: "var(--border)", borderBottom: "1px solid var(--border-dim)" }}
         >
-          <span style={{ color: "var(--accent)" }}>
+          <span style={{ color: "var(--text-primary)" }}>
             AI conversation detected. Format as a clean document?
           </span>
           <div className="flex gap-2">
             <button
               onClick={handleFormatAiConversation}
               className="px-2.5 py-1 rounded font-mono text-caption"
-              style={{ background: "var(--accent)", color: "#000", fontWeight: 600 }}
+              style={{ background: "var(--text-primary)", color: "var(--background)", fontWeight: 600 }}
               title="Format AI conversation as a clean document"
             >
               Format
@@ -10571,6 +7681,7 @@ ${clone.innerHTML}
               borderBottom (which would stack as a doubled line). */}
           <div className="shrink-0 select-none">
           <div
+            data-library-header
             className="flex items-center justify-between px-2 py-1.5 text-caption font-mono"
             style={{ color: "var(--text-muted)", cursor: "default" }}
           >
@@ -10579,12 +7690,12 @@ ${clone.innerHTML}
                 <button
                   onClick={() => closeSidebar()}
                   className="p-1 rounded transition-colors shrink-0"
-                  style={{ color: "var(--accent)" }}
+                  style={{ color: "var(--text-primary)" }}
                 >
                   <PanelLeft width={14} height={14} />
                 </button>
               </Tooltip>
-              <span style={{ color: "var(--accent)" }} className="shrink-0">LIBRARY</span>
+              <span style={{ color: "var(--text-primary)" }} className="shrink-0">LIBRARY</span>
             </div>
             <div className="flex items-stretch gap-0.5 shrink-0">
               {/* Library-level sort removed — each section (MDs,
@@ -10608,7 +7719,7 @@ ${clone.innerHTML}
                           allFolders.forEach(f => { if (f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: false }) }).catch(() => {}); });
                         }
                       }}
-                      className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
+                      className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]" data-action="organize"
                       style={{ color: "var(--text-faint)" }}
                     >
                       {anyOpen ? <ChevronsDownUp width={12} height={12} /> : <ChevronsUpDown width={12} height={12} />}
@@ -10623,7 +7734,7 @@ ${clone.innerHTML}
               <Tooltip text="Import from Files, GitHub, Obsidian, URL, or Notion">
                 <button
                   onClick={(e) => { e.stopPropagation(); setShowImportModal(true); }}
-                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
+                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]" data-action="import"
                   style={{ color: "var(--text-faint)" }}
                 >
                   <Download width={12} height={12} />
@@ -10678,7 +7789,7 @@ ${clone.innerHTML}
                       })
                       .catch(() => {});
                   }}
-                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
+                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]" data-action="refresh"
                   style={{ color: "var(--text-faint)" }}
                 >
                   <RefreshCw width={11} height={11} className={refreshSpinning ? "animate-spin" : ""} />
@@ -10687,8 +7798,8 @@ ${clone.innerHTML}
               <Tooltip text="What do the icons and filters mean?">
                 <button
                   onClick={(e) => { e.stopPropagation(); setShowSidebarHelp(prev => !prev); }}
-                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
-                  style={{ color: showSidebarHelp ? "var(--accent)" : "var(--text-faint)" }}
+                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]" data-action="help"
+                  style={{ color: showSidebarHelp ? "var(--text-primary)" : "var(--text-faint)" }}
                 >
                   <HelpCircle width={12} height={12} />
                 </button>
@@ -10703,8 +7814,8 @@ ${clone.innerHTML}
               collide with --surface section headers — only its border defines
               the control. */}
           <div className="px-2 pb-1.5 flex items-center gap-1.5">
-            <div className="flex items-center gap-1.5 flex-1 px-2 rounded" style={{ background: "transparent", border: `1px solid ${sidebarSearch ? "var(--accent)" : "var(--border-dim)"}` }}>
-              <Search width={11} height={11} className="shrink-0" style={{ color: sidebarSearch ? "var(--accent)" : "var(--text-faint)" }} />
+            <div className="flex items-center gap-1.5 flex-1 px-2 rounded" style={{ background: "transparent", border: `1px solid ${sidebarSearch ? "var(--text-primary)" : "var(--border-dim)"}` }}>
+              <Search width={11} height={11} className="shrink-0" style={{ color: sidebarSearch ? "var(--text-primary)" : "var(--text-faint)" }} />
               <input
                 ref={sidebarSearchInputRef}
                 type="text"
@@ -10877,15 +7988,15 @@ ${clone.innerHTML}
           {showSidebarHelp && (
             <div className="shrink-0 mx-2 mt-1.5 mb-1.5 p-2.5 rounded-md text-caption space-y-2" style={{ background: "var(--toggle-bg)", border: "1px solid var(--border-dim)" }}>
               <div className="font-semibold text-caption uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Filters</div>
-              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--accent)", fontFamily: "'SF Mono', monospace" }}>ALL</span><span style={{ color: "var(--text-muted)" }}>All your documents</span></div>
-              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-faint)", fontFamily: "'SF Mono', monospace" }}>PRIVATE</span><span style={{ color: "var(--text-muted)" }}>Not shared with anyone (includes synced)</span></div>
-              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-faint)", fontFamily: "'SF Mono', monospace" }}>SHARED</span><span style={{ color: "var(--text-muted)" }}>Shared with others</span></div>
-              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-faint)", fontFamily: "'SF Mono', monospace" }}>SYNCED</span><span style={{ color: "var(--text-muted)" }}>From VS Code, Desktop, CLI, or MCP</span></div>
+              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-mono)" }}>ALL</span><span style={{ color: "var(--text-muted)" }}>All your documents</span></div>
+              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>PRIVATE</span><span style={{ color: "var(--text-muted)" }}>Not shared with anyone (includes synced)</span></div>
+              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>SHARED</span><span style={{ color: "var(--text-muted)" }}>Shared with others</span></div>
+              <div className="flex items-center gap-2"><span className="shrink-0 font-semibold" style={{ color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>SYNCED</span><span style={{ color: "var(--text-muted)" }}>From VS Code, Desktop, CLI, or MCP</span></div>
               <div className="my-1.5" style={{ borderTop: "1px solid var(--border-dim)" }} />
               <div className="font-semibold text-caption uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Document Icons</div>
               <div className="flex items-center gap-2"><Globe width={12} height={12} style={{ color: "#22c55e" }} /><span style={{ color: "var(--text-muted)" }}>Public — anyone with the link can read</span></div>
               <div className="flex items-center gap-2"><Users width={12} height={12} style={{ color: "#60a5fa" }} /><span style={{ color: "var(--text-muted)" }}>Shared — password or specific people</span></div>
-              <div className="flex items-center gap-2"><Cloud width={12} height={12} style={{ color: "var(--text-faint)" }} /><span style={{ color: "var(--text-muted)" }}>Private — saved to cloud, only you can read</span></div>
+              <div className="flex items-center gap-2"><Cloud width={12} height={12} style={{ color: "var(--micro-info)" }} /><span style={{ color: "var(--text-muted)" }}>Private — saved to cloud, only you can read</span></div>
               <div className="flex items-center gap-2"><Eye width={12} height={12} style={{ color: "#a78bfa" }} /><span style={{ color: "var(--text-muted)" }}>View only — shared with you</span></div>
               <div className="flex items-center gap-2">
                 <div className="relative shrink-0" style={{ width: 12, height: 12 }}>
@@ -10984,15 +8095,15 @@ ${clone.innerHTML}
                   <div
                     data-section-id="recent"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                    style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showRecent ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
+                    style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                     onClick={() => setShowRecent(!showRecent)}
                   >
                     <ChevronDown
                       width={10} height={10}
-                      className={`shrink-0 transition-transform ${showRecent ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                      className={`shrink-0 transition-transform ${showRecent ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                       style={{ transform: showRecent ? "rotate(0deg)" : "rotate(-90deg)" }}
                     />
-                    <span className={`flex-1 text-caption font-medium transition-colors ${showRecent ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>Recent</span>
+                    <span className={`flex-1 text-caption font-medium transition-colors ${showRecent ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Recent</span>
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{recentEntries.length}</span>
                   </div>
                   {showRecent && (
@@ -11086,15 +8197,15 @@ ${clone.innerHTML}
                     <div
                       data-section-id="bundles"
                       className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                      style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showMyBundles ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
+                      style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                       onClick={() => setShowMyBundles(!showMyBundles)}
                     >
                       <ChevronDown
                         width={10} height={10}
-                        className={`shrink-0 transition-transform ${showMyBundles ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                        className={`shrink-0 transition-transform ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                         style={{ transform: showMyBundles ? "rotate(0deg)" : "rotate(-90deg)" }}
                       />
-                      <span className={`flex-1 text-caption font-medium transition-colors ${showMyBundles ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>MD Bundles</span>
+                      <span className={`flex-1 text-caption font-medium transition-colors ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>MD Bundles</span>
                       {showMyBundles && bundleFolders.length > 0 && (
                         <Tooltip text={anyBundleFolderExpanded ? "Collapse all bundle folders" : "Expand all bundle folders"}>
                           <button
@@ -11120,7 +8231,7 @@ ${clone.innerHTML}
                         <Tooltip text={`Sort bundles: ${SECTION_SORT_OPTIONS.find((o) => o.value === bundlesSortMode)?.label}`}>
                           <button
                             onClick={() => setOpenSortMenu((m) => m === "bundles" ? null : "bundles")}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <ArrowUpDown width={11} height={11} />
@@ -11136,7 +8247,7 @@ ${clone.innerHTML}
                                 key={opt.value}
                                 onClick={() => { setBundlesSortMode(opt.value); setOpenSortMenu(null); }}
                                 className="w-full text-left px-3 py-1.5 text-caption hover:bg-[var(--menu-hover)]"
-                                style={{ color: bundlesSortMode === opt.value ? "var(--accent)" : "var(--text-secondary)", fontWeight: bundlesSortMode === opt.value ? 600 : 400 }}
+                                style={{ color: bundlesSortMode === opt.value ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: bundlesSortMode === opt.value ? 600 : 400 }}
                               >
                                 {opt.label}
                               </button>
@@ -11157,7 +8268,7 @@ ${clone.innerHTML}
                               fetch("/api/user/folders", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name: "New Folder", section: "bundles" }) }).catch(() => {});
                               setInlineInput({ label: "Folder name", defaultValue: "New Folder", onSubmit: (name) => { setFolders(prev => prev.map(f => f.id === id ? { ...f, name } : f)); fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name }) }).catch(() => {}); setInlineInput(null); }});
                             }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="folder"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <FolderPlus width={11} height={11} />
@@ -11171,7 +8282,7 @@ ${clone.innerHTML}
                         <Tooltip text="New bundle">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowMyBundles(true); setBundleCreatorDocs([]); setShowBundleCreator(true); }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="create"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <Plus width={12} height={12} />
@@ -11416,15 +8527,15 @@ ${clone.innerHTML}
                       <div
                         data-section-id="mds"
                         className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                        style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showMyDocs ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
+                        style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                         onClick={() => { setShowMyDocs(!showMyDocs); }}
                       >
                         <ChevronDown
                           width={10} height={10}
-                          className={`shrink-0 transition-transform ${showMyDocs ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                          className={`shrink-0 transition-transform ${showMyDocs ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                           style={{ transform: showMyDocs ? "rotate(0deg)" : "rotate(-90deg)" }}
                         />
-                        <span className={`flex-1 text-caption font-medium transition-colors ${showMyDocs ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>MDs</span>
+                        <span className={`flex-1 text-caption font-medium transition-colors ${showMyDocs ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>MDs</span>
                         {showMyDocs && myFolders.length > 0 && (
                           <Tooltip text={anyMyFolderExpanded ? "Collapse all folders" : "Expand all folders"}>
                             <button
@@ -11449,7 +8560,7 @@ ${clone.innerHTML}
                           <Tooltip text={`Sort docs: ${SECTION_SORT_OPTIONS.find((o) => o.value === mdsSortMode)?.label}`}>
                             <button
                               onClick={() => setOpenSortMenu((m) => m === "mds" ? null : "mds")}
-                              className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                              className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
                               style={{ color: "var(--text-faint)" }}
                             >
                               <ArrowUpDown width={11} height={11} />
@@ -11465,7 +8576,7 @@ ${clone.innerHTML}
                                   key={opt.value}
                                   onClick={() => { setMdsSortMode(opt.value); setOpenSortMenu(null); }}
                                   className="w-full text-left px-3 py-1.5 text-caption hover:bg-[var(--menu-hover)]"
-                                  style={{ color: mdsSortMode === opt.value ? "var(--accent)" : "var(--text-secondary)", fontWeight: mdsSortMode === opt.value ? 600 : 400 }}
+                                  style={{ color: mdsSortMode === opt.value ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: mdsSortMode === opt.value ? 600 : 400 }}
                                 >
                                   {opt.label}
                                 </button>
@@ -11485,7 +8596,7 @@ ${clone.innerHTML}
                               fetch("/api/user/folders", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name: "New Folder", section: "my" }) }).catch(() => {});
                               setInlineInput({ label: "Folder name", defaultValue: "New Folder", onSubmit: (name) => { setFolders(prev => prev.map(f => f.id === id ? { ...f, name } : f)); fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name }) }).catch(() => {}); setInlineInput(null); }});
                             }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="folder"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <FolderPlus width={11} height={11} />
@@ -11498,7 +8609,7 @@ ${clone.innerHTML}
                         <Tooltip text="New document">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowMyDocs(true); addTab(); }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="create"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <Plus width={12} height={12} />
@@ -11529,8 +8640,8 @@ ${clone.innerHTML}
                               title={tips[f]}
                               className="flex-1 text-caption py-1 rounded transition-colors"
                               style={{
-                                background: isActive ? "var(--accent-dim)" : "transparent",
-                                color: isActive ? "var(--accent)" : "var(--text-faint)",
+                                background: isActive ? "var(--border)" : "transparent",
+                                color: isActive ? "var(--text-primary)" : "var(--text-faint)",
                                 fontWeight: isActive ? 600 : 500,
                               }}
                               onMouseEnter={(e) => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = "var(--toggle-bg)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; } }}
@@ -11734,7 +8845,7 @@ ${clone.innerHTML}
                                         }
                                       }}
                                     >
-                                      <Search width={11} height={11} className="shrink-0" style={{ color: "var(--accent)" }} />
+                                      <Search width={11} height={11} className="shrink-0" style={{ color: "var(--text-primary)" }} />
                                       <div className="flex-1 min-w-0">
                                         <div className="text-caption font-medium truncate" style={{ color: "var(--text-primary)" }}>{r.title}</div>
                                         <div className="text-caption truncate" style={{ color: "var(--text-faint)" }}>{snippet || ago}</div>
@@ -11765,15 +8876,15 @@ ${clone.innerHTML}
                 <div
                   data-section-id="concepts"
                   className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                  style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showConcepts ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
+                  style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                   onClick={() => setShowConcepts(prev => !prev)}
                 >
                   <ChevronDown
                     width={10} height={10}
-                    className={`shrink-0 transition-transform ${showConcepts ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                    className={`shrink-0 transition-transform ${showConcepts ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                     style={{ transform: showConcepts ? "rotate(0deg)" : "rotate(-90deg)" }}
                   />
-                  <span className={`flex-1 text-caption font-medium transition-colors ${showConcepts ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>Concepts</span>
+                  <span className={`flex-1 text-caption font-medium transition-colors ${showConcepts ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Concepts</span>
                   <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{conceptIndex.concepts.length}</span>
                 </div>
                 {showConcepts && (() => {
@@ -11788,9 +8899,9 @@ ${clone.innerHTML}
                         className="w-full flex items-center gap-2 px-2 py-1 text-caption cursor-pointer transition-colors hover:bg-[var(--toggle-bg)]"
                         style={{ color: "var(--text-secondary)" }}
                       >
-                        <span aria-hidden className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: isCross ? "var(--accent)" : "var(--text-faint)" }} />
+                        <span aria-hidden className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: isCross ? "var(--text-primary)" : "var(--text-faint)" }} />
                         <span className="flex-1 truncate text-left">{c.label}</span>
-                        <span className="text-caption tabular-nums shrink-0" style={{ color: isCross ? "var(--accent)" : "var(--text-faint)" }}>
+                        <span className="text-caption tabular-nums shrink-0" style={{ color: isCross ? "var(--text-primary)" : "var(--text-faint)" }}>
                           {c.docCount}
                         </span>
                       </button>
@@ -11897,15 +9008,15 @@ ${clone.innerHTML}
                   <div
                     data-section-id="shared"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                    style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showSharedDocs ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
+                    style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                     onClick={() => { const next = !showSharedDocs; setShowSharedDocs(next); localStorage.setItem("mw-show-shared", String(next)); }}
                   >
                     <ChevronDown
                       width={10} height={10}
-                      className={`shrink-0 transition-transform ${showSharedDocs ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                      className={`shrink-0 transition-transform ${showSharedDocs ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                       style={{ transform: showSharedDocs ? "rotate(0deg)" : "rotate(-90deg)" }}
                     />
-                    <span className={`flex-1 text-caption font-medium transition-colors ${showSharedDocs ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>Shared with me</span>
+                    <span className={`flex-1 text-caption font-medium transition-colors ${showSharedDocs ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Shared with me</span>
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{totalShared}</span>
                   </div>
                   {showSharedDocs && (
@@ -11921,11 +9032,11 @@ ${clone.innerHTML}
                             try { e.dataTransfer.setData("text/plain", tab.id); } catch { /* ignore */ }
                           }}
                           onDragEnd={() => { setDragTabId(null); setDragOverTarget(null); }}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md cursor-pointer group text-xs transition-colors relative ${dragOverTarget === tab.id ? "ring-1 ring-[var(--accent)]" : ""} ${tab.id === activeTabId ? "bg-[var(--accent-dim)]" : "hover:bg-[var(--toggle-bg)]"}`}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md cursor-pointer group text-xs transition-colors relative ${dragOverTarget === tab.id ? "ring-1 ring-[var(--text-primary)]" : ""} ${tab.id === activeTabId ? "bg-[var(--border)]" : "hover:bg-[var(--toggle-bg)]"}`}
                           style={{
                             color: tab.id === activeTabId ? "var(--text-primary)" : "var(--text-secondary)",
                             opacity: dragTabId === tab.id ? 0.4 : 1,
-                            outline: selectedTabIds.has(tab.id) ? "1px solid var(--accent)" : "none",
+                            outline: selectedTabIds.has(tab.id) ? "1px solid var(--text-primary)" : "none",
                             outlineOffset: "-1px",
                           }}
                           onClick={(e) => handleDocClick(tab.id, e)}
@@ -11941,7 +9052,7 @@ ${clone.innerHTML}
                           {tab.cloudId && (unreadDocIds.has(tab.cloudId) || tab.unread || !tab.lastOpenedAt) && (
                             <span
                               className="w-1.5 h-1.5 rounded-full shrink-0"
-                              style={{ background: "var(--accent)" }}
+                              style={{ background: "var(--text-primary)" }}
                               title="New — you haven't opened this yet"
                             />
                           )}
@@ -11980,9 +9091,9 @@ ${clone.innerHTML}
                                   <div key={tab.id} draggable={tab.ownerEmail !== EXAMPLE_OWNER} onDragStart={(e) => { if (tab.ownerEmail === EXAMPLE_OWNER) return; setDragTabId(tab.id); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", tab.id); } catch { /* ignore */ } }} onDragEnd={() => { setDragTabId(null); setDragOverTarget(null); }}
                                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-md cursor-pointer group text-xs transition-colors"
                                     style={{
-                                      background: selectedTabIds.has(tab.id) || tab.id === activeTabId ? "var(--accent-dim)" : "transparent",
+                                      background: selectedTabIds.has(tab.id) || tab.id === activeTabId ? "var(--border)" : "transparent",
                                       color: selectedTabIds.has(tab.id) || tab.id === activeTabId ? "var(--text-primary)" : "var(--text-secondary)",
-                                      outline: selectedTabIds.has(tab.id) ? "1px solid var(--accent)" : "none",
+                                      outline: selectedTabIds.has(tab.id) ? "1px solid var(--text-primary)" : "none",
                                       outlineOffset: "-1px",
                                     }}
                                     onClick={(e) => handleDocClick(tab.id, e)}
@@ -12079,7 +9190,7 @@ ${clone.innerHTML}
                             )}
                           </div>
                           {unreadDocIds.has(doc.id) && (
-                            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--accent)" }} />
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--text-primary)" }} />
                           )}
                         </div>
                       ))}
@@ -12087,7 +9198,7 @@ ${clone.innerHTML}
                       {dragTabId && (
                         <div
                           className="mx-2 mt-2 px-3 py-2 rounded-md text-caption text-center transition-colors"
-                          style={{ border: "1px dashed var(--border)", color: "var(--text-faint)", background: dragOverTarget === "shared-root" ? "var(--accent-dim)" : "transparent" }}
+                          style={{ border: "1px dashed var(--border)", color: "var(--text-faint)", background: dragOverTarget === "shared-root" ? "var(--border)" : "transparent" }}
                           onDragOver={(e) => { e.preventDefault(); setDragOverTarget("shared-root"); }}
                           onDragLeave={() => setDragOverTarget(null)}
                           onDrop={(e) => {
@@ -12125,19 +9236,19 @@ ${clone.innerHTML}
                   data-section-id="lint"
                   className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
                   style={{
-                    background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)",
+                    background: "var(--background)",
                     borderTop: "1px solid var(--border)",
-                    borderBottom: showLint ? "1px solid var(--border)" : "1px solid transparent",
+                    borderBottom: "none",
                     position: "sticky", top: 0, zIndex: 10,
                   }}
                   onClick={() => { const next = !showLint; setShowLint(next); try { localStorage.setItem("mw-show-lint", String(next)); } catch {} }}
                 >
                   <ChevronDown
                     width={10} height={10}
-                    className={`shrink-0 transition-transform ${showLint ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                    className={`shrink-0 transition-transform ${showLint ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                     style={{ transform: showLint ? "rotate(0deg)" : "rotate(-90deg)" }}
                   />
-                  <span className={`flex-1 text-caption font-medium transition-colors ${showLint ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>Needs review</span>
+                  <span className={`flex-1 text-caption font-medium transition-colors ${showLint ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Needs review</span>
                   <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{
                     (curatorSettings.orphan ? lintReport.orphans.filter((o) => !lintResolved.orphans.has(o.id)).length : 0)
                     + (curatorSettings.duplicate ? lintReport.duplicates.filter((p) => !lintResolved.duplicates.has(`${p.a.id}|${p.b.id}`)).length : 0)
@@ -12292,7 +9403,9 @@ ${clone.innerHTML}
                           style={{ color: "var(--text-muted)", height: 28 }}
                           title="Orphan — not in any bundle, not linked from any other doc. Resolve re-runs concept extraction on this doc."
                         >
-                          <span className="shrink-0 px-1 rounded-sm font-mono uppercase" style={{ fontSize: 8, letterSpacing: 0.5, color: "var(--text-faint)", border: "1px solid var(--border-dim)" }}>orphan</span>
+                          {/* ORPHAN — warm warning hue (not red — orphan isn't
+                              an error, it's a "needs attention" state). */}
+                          <span className="shrink-0 px-1 rounded-sm font-mono uppercase" style={{ fontSize: 8, letterSpacing: 0.5, color: "var(--micro-warn)", border: "1px solid var(--micro-warn)" }}>orphan</span>
                           <button
                             onClick={() => {
                               const existing = tabs.find((t) => t.cloudId === o.id);
@@ -12317,7 +9430,7 @@ ${clone.innerHTML}
                             onClick={(e) => { e.stopPropagation(); resolveOrphan(o.id, o.title); }}
                             className="shrink-0 hidden group-hover/lint:inline-flex items-center px-2 py-0.5 rounded"
                             style={{ background: "var(--toggle-bg)", color: "var(--text-secondary)", fontSize: 10, fontWeight: 600, border: "1px solid var(--border-dim)" }}
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--accent)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--text-primary)"; }}
                             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)"; }}
                             title="Re-extract concepts for this doc — usually fixes the orphan"
                           >
@@ -12332,7 +9445,9 @@ ${clone.innerHTML}
                           style={{ color: "var(--text-muted)", height: 28 }}
                           title={`Likely duplicate — distance ${p.distance.toFixed(3)}. Resolve moves the older copy to Trash and keeps the newer one.`}
                         >
-                          <span className="shrink-0 px-1 rounded-sm font-mono uppercase" style={{ fontSize: 8, letterSpacing: 0.5, color: "var(--accent)", border: "1px solid var(--accent-dim)" }}>dup</span>
+                          {/* DUP — info hue (informational duplicate, not an
+                              error; the resolve action moves the older copy). */}
+                          <span className="shrink-0 px-1 rounded-sm font-mono uppercase" style={{ fontSize: 8, letterSpacing: 0.5, color: "var(--micro-info)", border: "1px solid var(--micro-info)" }}>dup</span>
                           <button
                             onClick={() => {
                               for (const id of [p.a.id, p.b.id]) {
@@ -12357,7 +9472,7 @@ ${clone.innerHTML}
                             onClick={(e) => { e.stopPropagation(); resolveDuplicate(p.a.id, p.a.title, p.b.id, p.b.title); }}
                             className="shrink-0 hidden group-hover/lint:inline-flex items-center px-2 py-0.5 rounded"
                             style={{ background: "var(--toggle-bg)", color: "var(--text-secondary)", fontSize: 10, fontWeight: 600, border: "1px solid var(--border-dim)" }}
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--accent)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--text-primary)"; }}
                             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)"; }}
                             title="Move the older copy to Trash"
                           >
@@ -12387,7 +9502,7 @@ ${clone.innerHTML}
                             color: "var(--text-secondary)",
                             border: "1px solid var(--border-dim)",
                           }}
-                          onMouseEnter={(e) => { if (!lintLoading) { (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; (e.currentTarget as HTMLElement).style.color = "var(--accent)"; } }}
+                          onMouseEnter={(e) => { if (!lintLoading) { (e.currentTarget as HTMLElement).style.borderColor = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; } }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; }}
                           title="Recompute orphans + duplicates from the current hub state"
                         >
@@ -12403,7 +9518,7 @@ ${clone.innerHTML}
                             color: "var(--text-secondary)",
                             border: "1px solid var(--border-dim)",
                           }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; (e.currentTarget as HTMLElement).style.color = "var(--accent)"; }}
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; }}
                           title="Run Resolve on every finding — re-extract orphans, move duplicate pair's older copy to Trash"
                         >
@@ -12427,22 +9542,22 @@ ${clone.innerHTML}
                   <div
                     data-section-id="guides"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                    style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: !examplesCollapsed ? "1px solid var(--border)" : "none", position: "sticky", top: 0, zIndex: 10 }}
+                    style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                     onClick={() => { const next = !examplesCollapsed; setExamplesCollapsed(next); localStorage.setItem("mw-examples-collapsed", String(next)); }}
                   >
                     <ChevronDown
                       width={10} height={10}
-                      className={`shrink-0 transition-transform ${!examplesCollapsed ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                      className={`shrink-0 transition-transform ${!examplesCollapsed ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                       style={{ transform: examplesCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
                     />
-                    <span className={`flex-1 text-caption font-medium transition-colors ${!examplesCollapsed ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>Guides & Examples</span>
+                    <span className={`flex-1 text-caption font-medium transition-colors ${!examplesCollapsed ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Guides & Examples</span>
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{exampleTabs.length}</span>
                   </div>
                   {!examplesCollapsed && <div className="space-y-0.5 pb-1 pl-2 pr-2">
                     {exampleTabs.map(tab => (
                       <div
                         key={tab.id}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md cursor-pointer group text-xs transition-colors ${tab.id === activeTabId ? "bg-[var(--accent-dim)]" : "hover:bg-[var(--toggle-bg)]"}`}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md cursor-pointer group text-xs transition-colors ${tab.id === activeTabId ? "bg-[var(--border)]" : "hover:bg-[var(--toggle-bg)]"}`}
                         style={{
                           color: tab.id === activeTabId ? "var(--text-primary)" : "var(--text-secondary)",
                         }}
@@ -12451,7 +9566,7 @@ ${clone.innerHTML}
                       >
                         {tab.kind === "bundle"
                           ? renderBundleStatusIcon(tab.bundleId, 13)
-                          : <Eye width={13} height={13} className="shrink-0" style={{ color: tab.id === activeTabId ? "var(--accent)" : "var(--text-faint)" }} />
+                          : <Eye width={13} height={13} className="shrink-0" style={{ color: tab.id === activeTabId ? "var(--text-primary)" : "var(--text-faint)" }} />
                         }
                         <span className="truncate flex-1">{tab.title || "Untitled"}</span>
                       </div>
@@ -12470,15 +9585,15 @@ ${clone.innerHTML}
                   <div
                     data-section-id="trash"
                     className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                    style={{ background: "color-mix(in srgb, var(--background) 25%, var(--surface) 75%)", borderTop: "1px solid var(--border)", borderBottom: showTrash ? "1px solid var(--border)" : "1px solid transparent", position: "sticky", top: 0, zIndex: 10 }}
+                    style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
                     onClick={() => { const next = !showTrash; setShowTrash(next); localStorage.setItem("mw-show-trash", String(next)); }}
                   >
                     <ChevronDown
                       width={10} height={10}
-                      className={`shrink-0 transition-transform ${showTrash ? "text-[var(--accent)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--accent)]"}`}
+                      className={`shrink-0 transition-transform ${showTrash ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                       style={{ transform: showTrash ? "rotate(0deg)" : "rotate(-90deg)" }}
                     />
-                    <span className={`flex-1 text-caption font-medium transition-colors ${showTrash ? "text-[var(--accent)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--accent)]"}`}>Trash</span>
+                    <span className={`flex-1 text-caption font-medium transition-colors ${showTrash ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Trash</span>
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{trashTabs.length}</span>
                   </div>
                   {showTrash && (
@@ -12500,7 +9615,7 @@ ${clone.innerHTML}
                             }
                             setTabs(prev => prev.map(t => t.id === tab.id ? { ...t, deleted: false, deletedAt: undefined } : t));
                           }}
-                            className="text-caption hidden group-hover:inline-flex px-1 rounded" style={{ color: "var(--accent)" }}
+                            className="text-caption hidden group-hover:inline-flex px-1 rounded" style={{ color: "var(--text-primary)" }}
                             title="Restore this document">
                             Restore
                           </button>
@@ -12593,7 +9708,7 @@ ${clone.innerHTML}
                         const target = root?.querySelector(`[data-section-id="${s.id}"]`) as HTMLElement | null;
                         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
                       }}
-                      className="shrink-0 inline-flex items-center gap-1 text-caption px-2 py-0.5 rounded-full transition-colors hover:bg-[var(--accent-dim)]"
+                      className="shrink-0 inline-flex items-center gap-1 text-caption px-2 py-0.5 rounded-full transition-colors hover:bg-[var(--border)]"
                       style={{ color: "var(--text-muted)", background: "var(--toggle-bg)", border: "1px solid var(--border-dim)" }}
                     >
                       <span>{s.label}</span>
@@ -12612,7 +9727,7 @@ ${clone.innerHTML}
             <div className="shrink-0 px-3 py-2.5 mw-multiselect-bar" style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
               {/* Header: count + clear */}
               <div className="flex items-center justify-between mb-2">
-                <span className="text-caption font-semibold" style={{ color: "var(--accent)" }}>{selectedTabIds.size} document{selectedTabIds.size > 1 ? "s" : ""} selected</span>
+                <span className="text-caption font-semibold" style={{ color: "var(--text-primary)" }}>{selectedTabIds.size} document{selectedTabIds.size > 1 ? "s" : ""} selected</span>
                 <button onClick={() => setSelectedTabIds(new Set())} className="text-caption px-1.5 py-0.5 rounded transition-colors hover:bg-[var(--toggle-bg)]" style={{ color: "var(--text-faint)" }} title="Clear selection">
                   Clear
                 </button>
@@ -12621,7 +9736,7 @@ ${clone.innerHTML}
               <div className="flex gap-1.5">
                 {(folders.filter(f => !f.section || f.section === "my").length > 0 || !!user?.id) && (
                   <div className="relative group/move flex-1">
-                    <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]" style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }} title="Move to folder">
+                    <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--border)]" style={{ color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }} title="Move to folder">
                       <Folder width={11} height={11} /><span className="mw-collapse-label">Move</span><ChevronDown width={8} height={8} />
                     </button>
                     <div
@@ -12643,7 +9758,7 @@ ${clone.innerHTML}
                     >
                       {folders.filter(f => !f.section || f.section === "my").map(f => (
                         <button key={f.id} onClick={() => { setTabs(prev => prev.map(t => selectedTabIds.has(t.id) ? { ...t, folderId: f.id } : t)); setSelectedTabIds(new Set()); }}
-                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2 whitespace-nowrap"
+                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--border)] flex items-center gap-2 whitespace-nowrap"
                           style={{ color: "var(--text-secondary)" }}
                           title={f.name}>
                           <Folder width={11} height={11} style={{ color: "var(--text-faint)", flexShrink: 0 }} />
@@ -12651,7 +9766,7 @@ ${clone.innerHTML}
                         </button>
                       ))}
                       <button onClick={() => { setTabs(prev => prev.map(t => selectedTabIds.has(t.id) ? { ...t, folderId: undefined } : t)); setSelectedTabIds(new Set()); }}
-                        className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2 whitespace-nowrap"
+                        className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--border)] flex items-center gap-2 whitespace-nowrap"
                         style={{ color: "var(--text-secondary)", borderTop: "1px solid var(--border-dim)" }}>
                         <FileIcon width={11} height={11} style={{ color: "var(--text-faint)", flexShrink: 0 }} />Root
                       </button>
@@ -12690,8 +9805,8 @@ ${clone.innerHTML}
                               },
                             });
                           }}
-                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--accent-dim)] flex items-center gap-2 whitespace-nowrap"
-                          style={{ color: "var(--accent)", borderTop: "1px solid var(--border-dim)" }}
+                          className="w-full text-left px-3 py-1.5 text-caption transition-colors hover:bg-[var(--border)] flex items-center gap-2 whitespace-nowrap"
+                          style={{ color: "var(--text-primary)", borderTop: "1px solid var(--border-dim)" }}
                           title="Create a new folder and move the selected docs into it"
                         >
                           <FolderPlus width={11} height={11} style={{ flexShrink: 0 }} />
@@ -12720,8 +9835,8 @@ ${clone.innerHTML}
                         setShowBundleCreator(true);
                         setSelectedTabIds(new Set());
                       }}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--accent-dim)]"
-                      style={{ color: "var(--accent)", border: "1px solid var(--accent-dim)" }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--border)]"
+                      style={{ color: "var(--text-primary)", border: "1px solid var(--border)" }}
                       title={`Bundle ${bundleable.length} selected docs`}
                     >
                       <Layers width={11} height={11} />
@@ -12762,7 +9877,7 @@ ${clone.innerHTML}
               <div ref={authMenuTriggerRef} className="relative flex items-center gap-1">
                 <button
                   onClick={() => setShowAuthMenu(!showAuthMenu)}
-                  className="flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors hover:bg-[var(--accent-dim)]"
+                  className="flex-1 min-w-0 flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors hover:bg-[var(--border)]"
                   title="Account menu"
                 >
                   <img src={resolveAvatar(profile, user, 20)} alt="" className="w-5 h-5 rounded-full shrink-0" />
@@ -12780,7 +9895,7 @@ ${clone.innerHTML}
                 <Tooltip text="Account settings" position="top">
                   <button
                     onClick={() => { setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(true); }}
-                    className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md transition-colors hover:bg-[var(--accent-dim)]"
+                    className="shrink-0 flex items-center justify-center w-7 h-7 rounded-md transition-colors hover:bg-[var(--border)]"
                     style={{ color: "var(--text-faint)" }}
                     aria-label="Account settings"
                   >
@@ -12819,7 +9934,7 @@ ${clone.innerHTML}
                         <span
                           className="text-caption px-1.5 py-0.5 rounded font-mono font-semibold"
                           style={{
-                            background: profile?.plan === "pro" ? "var(--accent)" : "var(--toggle-bg)",
+                            background: profile?.plan === "pro" ? "var(--text-primary)" : "var(--toggle-bg)",
                             color: profile?.plan === "pro" ? "#000" : "var(--text-secondary)",
                           }}
                         >
@@ -12827,13 +9942,20 @@ ${clone.innerHTML}
                         </span>
                         <span className="flex-1" />
                         {(!profile?.plan || profile.plan === "free") && (
+                          /* Soft filled chip — matches the Canvas / Full guide
+                              / List view shape across the app. Tint background
+                              + same-color text + arrow icon. */
                           <button
-                            onClick={() => { setShowAuthMenu(false); window.open("/pricing", "_blank"); }}
-                            className="text-caption font-medium px-2 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
-                            style={{ color: "var(--accent)" }}
+                            onClick={() => { setShowAuthMenu(false); window.open("/about#pricing", "_blank"); }}
+                            className="inline-flex items-center gap-1 text-caption font-medium px-2.5 py-1 rounded transition-opacity hover:opacity-85"
+                            style={{
+                              color: "var(--micro-info)",
+                              background: "rgba(46, 123, 255, 0.10)",
+                            }}
                             title="See Pro features"
                           >
-                            Upgrade →
+                            Upgrade
+                            <ArrowUpRight width={11} height={11} />
                           </button>
                         )}
                       </div>
@@ -12846,8 +9968,14 @@ ${clone.innerHTML}
                         >
                           <BookOpen width={12} height={12} />
                           <span className="flex-1">Show Guides & Examples</span>
+                          {/* Semantic toggle: ON = lime (active), OFF = red dim.
+                              Reads at a glance even without labels. */}
                           <span className="relative inline-flex items-center" style={{ width: 28, height: 14 }}>
-                            <span className="absolute inset-0 rounded-full transition-colors" style={{ background: showExamples ? "var(--accent)" : "var(--text-faint)", opacity: showExamples ? 1 : 0.3 }} />
+                            {/* Solid, slightly desaturated micro colors at full
+                                alpha — thin red on dark bg at < 1 opacity turned
+                                muddy brown; saturated hex at alpha 1 reads as
+                                clean ON/OFF. */}
+                            <span className="absolute inset-0 rounded-full transition-colors" style={{ background: showExamples ? "#7CC400" : "#9A2A2A" }} />
                             <span className="absolute rounded-full transition-transform" style={{ width: 10, height: 10, top: 2, background: "#fff", transform: showExamples ? "translateX(16px)" : "translateX(2px)" }} />
                           </span>
                         </button>
@@ -12859,7 +9987,7 @@ ${clone.innerHTML}
                           <List width={12} height={12} />
                           <span className="flex-1">{sidebarMode === "simple" ? "Detailed Sidebar" : "Simple Sidebar"}</span>
                           <span className="relative inline-flex items-center" style={{ width: 28, height: 14 }}>
-                            <span className="absolute inset-0 rounded-full transition-colors" style={{ background: sidebarMode === "detailed" ? "var(--accent)" : "var(--text-faint)", opacity: sidebarMode === "detailed" ? 1 : 0.3 }} />
+                            <span className="absolute inset-0 rounded-full transition-colors" style={{ background: sidebarMode === "detailed" ? "#7CC400" : "#9A2A2A" }} />
                             <span className="absolute rounded-full transition-transform" style={{ width: 10, height: 10, top: 2, background: "#fff", transform: sidebarMode === "detailed" ? "translateX(16px)" : "translateX(2px)" }} />
                           </span>
                         </button>
@@ -12885,9 +10013,9 @@ ${clone.innerHTML}
                               key={s.name}
                               onClick={() => setColorScheme(s.name)}
                               className="w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-[var(--menu-hover)]"
-                              style={{ color: colorScheme === s.name ? "var(--accent)" : "var(--text-secondary)" }}
+                              style={{ color: colorScheme === s.name ? "var(--text-primary)" : "var(--text-secondary)" }}
                             >
-                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.preview, outline: colorScheme === s.name ? "1.5px solid var(--accent)" : "1px solid var(--border)", outlineOffset: "1px" }} />
+                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.preview, outline: colorScheme === s.name ? "1.5px solid var(--text-primary)" : "1px solid var(--border)", outlineOffset: "1px" }} />
                               <span>
                                 <span className="text-caption block" style={{ fontWeight: colorScheme === s.name ? 600 : 400 }}>{s.label}</span>
                                 <span className="text-caption block" style={{ color: "var(--text-faint)" }}>{s.desc}</span>
@@ -12898,7 +10026,7 @@ ${clone.innerHTML}
                         {/* Key Color */}
                         <FlyoutMenu
                           label="Key Color"
-                          icon={<span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: "var(--accent)" }} />}
+                          icon={<span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: "var(--text-primary)" }} />}
                           width={128}
                         >
                           <div className="text-caption font-mono uppercase tracking-wider mb-1 px-3 pt-1" style={{ color: "var(--text-faint)" }}>Key Color</div>
@@ -12908,11 +10036,11 @@ ${clone.innerHTML}
                               onClick={() => { setAccentColor(c.name); }}
                               className="w-full flex items-center gap-2 px-3 py-1 text-caption transition-colors hover:bg-[var(--menu-hover)] text-left"
                               style={{
-                                color: accentColor === c.name ? "var(--accent)" : "var(--text-secondary)",
+                                color: accentColor === c.name ? "var(--text-primary)" : "var(--text-secondary)",
                                 fontWeight: accentColor === c.name ? 600 : 400,
                               }}
                             >
-                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: theme === "dark" ? c.dark : c.light, outline: accentColor === c.name ? "1.5px solid var(--accent)" : "1px solid var(--border)", outlineOffset: "1px" }} />
+                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: theme === "dark" ? c.dark : c.light, outline: accentColor === c.name ? "1.5px solid var(--text-primary)" : "1px solid var(--border)", outlineOffset: "1px" }} />
                               {c.label}
                             </button>
                           ))}
@@ -13005,7 +10133,7 @@ ${clone.innerHTML}
               <>
                 <button
                   onClick={() => setShowAuthMenu(true)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors text-xs hover:bg-[var(--accent-dim)]"
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors text-xs hover:bg-[var(--border)]"
                   style={{ color: "var(--text-muted)" }}
                 >
                   <User width={14} height={14} className="shrink-0" />
@@ -13057,7 +10185,7 @@ ${clone.innerHTML}
               <button
                 onClick={() => setShowNewMenu(v => !v)}
                 className="p-1 rounded transition-colors"
-                style={{ color: showNewMenu ? "var(--accent)" : "var(--text-muted)", background: showNewMenu ? "var(--accent-dim)" : "transparent" }}
+                style={{ color: showNewMenu ? "var(--text-primary)" : "var(--text-muted)", background: showNewMenu ? "var(--border)" : "transparent" }}
               >
                 <Plus width={14} height={14} />
               </button>
@@ -13120,7 +10248,7 @@ ${clone.innerHTML}
             <button
               onClick={() => { setShowSidebar(true); setTimeout(() => setShowAuthMenu(true), 100); }}
               className="p-1 rounded transition-colors"
-              style={{ color: isAuthenticated ? "var(--accent)" : "var(--text-faint)" }}
+              style={{ color: isAuthenticated ? "var(--text-primary)" : "var(--text-faint)" }}
             >
               {isAuthenticated ? (
                 <img src={resolveAvatar(profile, user, 16)} alt="" className="w-4 h-4 rounded-full" />
@@ -13137,6 +10265,7 @@ ${clone.innerHTML}
       <div
         ref={splitContainerRef}
         className={`flex flex-1 min-h-0 overflow-hidden relative ${isMobile && viewMode === "split" ? "flex-col" : ""}`}
+        style={{ background: "var(--canvas)" }}
         onMouseMove={(e) => {
           if (!isDraggingSplit.current || !splitContainerRef.current) return;
           const rect = splitContainerRef.current.getBoundingClientRect();
@@ -13182,7 +10311,7 @@ ${clone.innerHTML}
       >
         {/* Editor placeholder — replaces all panes when active */}
         {editorPlaceholder ? (
-          <div className="flex-1 flex items-center justify-center" style={{ background: "var(--background)" }}>
+          <div className="flex-1 flex items-center justify-center" style={{ background: "var(--canvas)" }}>
             <div className="flex flex-col items-center gap-4 px-6 max-w-sm text-center">
               {editorPlaceholder === "sign-in" && (
                 <>
@@ -13192,7 +10321,7 @@ ${clone.innerHTML}
                     This document may be private or shared with specific people. Sign in to view it if you have access.
                   </p>
                   <div className="flex gap-2 mt-2">
-                    <button onClick={signInWithGoogle} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--accent)", color: "#000" }}>
+                    <button onClick={signInWithGoogle} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--text-primary)", color: "var(--background)" }}>
                       Sign in with Google
                     </button>
                     <button onClick={signInWithGitHub} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
@@ -13227,7 +10356,7 @@ ${clone.innerHTML}
                     This document may have been deleted or the link is incorrect.
                   </p>
                   <div className="flex gap-2 mt-2">
-                    <button onClick={() => { setEditorPlaceholder(null); window.history.replaceState(null, "", "/"); addTab(); }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--accent)", color: "#000" }}>
+                    <button onClick={() => { setEditorPlaceholder(null); window.history.replaceState(null, "", "/"); addTab(); }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--text-primary)", color: "var(--background)" }}>
                       New document
                     </button>
                     <button onClick={() => {
@@ -13264,7 +10393,7 @@ ${clone.innerHTML}
                       setDeletedDocId(null);
                       // Reload the page to properly load the document
                       window.location.reload();
-                    }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--accent)", color: "#000" }}>
+                    }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--text-primary)", color: "var(--background)" }}>
                       Restore
                     </button>
                     <button onClick={() => {
@@ -13306,7 +10435,7 @@ ${clone.innerHTML}
             data-pane="render"
             className="flex flex-col min-h-0"
             style={{
-              background: "var(--background)",
+              background: "var(--canvas)",
               width: sourceVisible && !isMobile ? `${splitPercentRef.current}%` : "100%",
               height: sourceVisible && isMobile ? `${splitPercentRef.current}%` : undefined,
               flexShrink: 0,
@@ -13316,12 +10445,22 @@ ${clone.innerHTML}
           >
           {showOnboarding ? (
             /* ─── Start Screen ─── */
-            <div className="flex-1 overflow-y-auto flex flex-col" style={{ background: "var(--background)" }}>
-              {/* Width + padding match HubEmbed and BundleOverview
-                  (max-w-3xl, px-6 py-10) so the three "destination"
-                  surfaces — Start, Hub, Bundle — share a consistent
-                  content frame. */}
-              <div className="w-full max-w-3xl mx-auto px-6 py-10">
+            <div className="flex-1 overflow-y-auto flex flex-col relative" style={{ background: "var(--canvas)" }}>
+              {/* Animated MW-blob backdrop — same morphing SVG the
+                  marketing Pure shell uses, so the start surface
+                  reads as part of the same brand world (not a flat
+                  app pane). Theme-swapped via the mw-logo-blob-*
+                  CSS rules. */}
+              <div className="mw-start-backdrop" aria-hidden>
+                <img className="mw-start-backdrop-morph mw-logo-darktheme" src="/brand/mwblob_morph.svg" alt="" draggable={false} />
+                <img className="mw-start-backdrop-morph mw-logo-lighttheme" src="/brand/mwblob_morph_dark.svg" alt="" draggable={false} />
+              </div>
+              {/* Centered vertically + horizontally — the start
+                  content is short, so anchoring it to the visual
+                  midpoint reads as a "destination" rather than a
+                  half-empty top-aligned panel. Width + padding still
+                  match Hub / Bundle so the three share one frame. */}
+              <div className="flex-1 w-full max-w-3xl mx-auto px-6 py-10 mw-start-backdrop-content flex flex-col justify-center">
 
                 {/* Growing-knowledge-hub surface (Pulse / Constellation /
                     Frontier) HIDDEN by founder request 2026-05-17 — the
@@ -13361,7 +10500,12 @@ ${clone.innerHTML}
                   const isSignedIn = isAuthenticated && !!user;
                   return (
                     <header className="mb-8">
-                      <h1 className="text-display font-bold tracking-tight" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
+                      {/* Cal Sans display headline — a touch larger than the
+                          old text-display utility (24px → 30px) since the
+                          surrounding chrome is mono/caption-sized; weight
+                          500 + letter-spacing 0 come from the global h1
+                          rule. */}
+                      <h1 style={{ color: "var(--text-primary)", lineHeight: 1.15, fontSize: 30 }}>
                         {isSignedIn
                           ? (displayName ? `${timeGreeting}, ${displayName}` : timeGreeting)
                           : "Welcome to Memory.Wiki"}
@@ -13381,7 +10525,7 @@ ${clone.innerHTML}
                     Will return when v6 launch settles. */}
                 {FEATURES.THINKING_SURFACE && isAuthenticated && conceptIndex && conceptIndex.stats.totalDocs > 0 && (
                   <div className="mb-6 rounded-xl px-4 py-3" style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}>
-                    <div className="text-caption font-mono uppercase tracking-wider mb-2" style={{ color: "var(--accent)" }}>
+                    <div className="text-caption font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-primary)" }}>
                       Your knowledge
                     </div>
                     <div className="flex items-center gap-4 flex-wrap">
@@ -13402,7 +10546,7 @@ ${clone.innerHTML}
                         onClick={() => { setShowSidebar(true); setShowConcepts(true); }}
                         className="flex flex-col text-left transition-opacity hover:opacity-80"
                       >
-                        <span className="text-display font-bold tabular-nums" style={{ color: "var(--accent)" }}>{conceptIndex.stats.crossLinkedConcepts}</span>
+                        <span className="text-display font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{conceptIndex.stats.crossLinkedConcepts}</span>
                         <span className="text-caption" style={{ color: "var(--text-faint)" }}>cross-linked</span>
                       </button>
                       {conceptIndex.stats.decomposedDocs < conceptIndex.stats.totalDocs && (
@@ -13463,7 +10607,7 @@ ${clone.innerHTML}
                         <button
                           onClick={() => toggleStartSection("recent")}
                           className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider cursor-pointer"
-                          style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                          style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                         >
                           <ChevronDown width={11} height={11} style={{ transform: startSections.recent ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                           Recent
@@ -13535,7 +10679,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => toggleStartSection("create")}
                     className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
-                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                    style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                   >
                     <ChevronDown width={11} height={11} style={{ transform: startSections.create ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                     Create
@@ -13579,9 +10723,9 @@ ${clone.innerHTML}
                       desktop-style file drag-and-drop. */}
                   <div className="hidden sm:block mt-2 py-5 rounded-xl cursor-pointer text-center"
                     style={{ border: "2px dashed var(--border)", color: "var(--text-faint)", background: "var(--surface)", transition: "all 0.15s" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--text-primary)"; e.currentTarget.style.color = "var(--text-primary)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
-                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = "var(--accent-dim)"; }}
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--text-primary)"; e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.background = "var(--border)"; }}
                     onDragLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.background = "var(--surface)"; }}
                     onDrop={(e) => { e.preventDefault(); setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} }}
                     onClick={() => { setShowOnboarding(false); try { localStorage.setItem("mw-onboarded", "1"); } catch {} imageFileRef.current?.click(); }}>
@@ -13600,7 +10744,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => toggleStartSection("deploy")}
                     className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-2 cursor-pointer"
-                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                    style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                   >
                     <ChevronDown width={11} height={11} style={{ transform: startSections.deploy ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                     Deploy to AI
@@ -13654,8 +10798,8 @@ ${clone.innerHTML}
                                   <span
                                     className="text-caption font-mono px-1.5 py-px rounded"
                                     style={{
-                                      background: "var(--accent-dim)",
-                                      color: "var(--accent)",
+                                      background: "var(--border)",
+                                      color: "var(--text-primary)",
                                       fontSize: 9,
                                       letterSpacing: 0.5,
                                       textTransform: "uppercase",
@@ -13703,7 +10847,7 @@ ${clone.innerHTML}
                     <button
                       onClick={() => toggleStartSection("cases")}
                       className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider cursor-pointer"
-                      style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                      style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                     >
                       <ChevronDown width={11} height={11} style={{ transform: startSections.cases ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                       What people put in Memory.Wiki
@@ -13752,7 +10896,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => toggleStartSection("guides")}
                     className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
-                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                    style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                   >
                     <ChevronDown width={11} height={11} style={{ transform: startSections.guides ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                     Guides & Examples
@@ -13764,7 +10908,7 @@ ${clone.innerHTML}
                         title={ex.title}
                         className="flex items-center gap-2 min-w-0 px-3 py-2 rounded-lg text-body text-left cursor-pointer"
                         style={{ background: "var(--surface)", color: "var(--text-muted)", border: "1px solid var(--border-dim)", transition: "all 0.12s" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--text-primary)"; e.currentTarget.style.color = "var(--text-primary)"; }}
                         onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-dim)"; e.currentTarget.style.color = "var(--text-muted)"; }}>
                         {ex.kind === "bundle" ? renderBundleStatusIcon(ex.bundleId, 14) : <DocStatusIcon tab={ex} isActive={false} />}
                         <span className="flex-1 min-w-0 truncate">{ex.title}</span>
@@ -13779,7 +10923,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => toggleStartSection("explore")}
                     className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider mb-3 cursor-pointer"
-                    style={{ color: "var(--accent)", background: "none", border: "none", padding: 0 }}
+                    style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                   >
                     <ChevronDown width={11} height={11} style={{ transform: startSections.explore ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
                     Explore
@@ -13831,7 +10975,7 @@ ${clone.innerHTML}
               style={{ color: "var(--text-muted)", borderBottom: "1px solid var(--border-dim)", cursor: "default", display: (activeTab?.kind === "bundle" || showHub || showGalaxy || showSettings || showOnboarding) ? "none" : undefined }}
             >
               <div className="flex items-center gap-2 shrink-0 min-w-0">
-                <span className="shrink-0" style={{ color: "var(--accent)" }}>LIVE</span>
+                <span className="shrink-0" style={{ color: "var(--text-primary)" }}>LIVE</span>
                 {/* Doc intent chip (Hermes Step 4 / page-type tag).
                     Shown for the doc owner only. No intent → faint
                     "+ Type" pill; intent set → coloured pill with X
@@ -13936,8 +11080,8 @@ ${clone.innerHTML}
                 {canEdit && <div className="relative group">
                   <button
                     onClick={() => { setShowToolbar(!showToolbar); if (!showToolbar && !toolbarHintDismissed) { setToolbarHintDismissed(true); try { localStorage.setItem("mw-toolbar-hint-dismissed", "1"); } catch {} } }}
-                    className={`flex items-center justify-center h-6 w-6 rounded-md transition-colors ${!showToolbar && !toolbarHintDismissed ? "ring-1 ring-[var(--accent)]" : ""}`}
-                    style={{ background: showToolbar ? "var(--accent-dim)" : "transparent", color: showToolbar ? "var(--accent)" : "var(--text-faint)" }}
+                    className={`flex items-center justify-center h-6 w-6 rounded-md transition-colors ${!showToolbar && !toolbarHintDismissed ? "ring-1 ring-[var(--text-primary)]" : ""}`}
+                    style={{ background: showToolbar ? "var(--border)" : "transparent", color: showToolbar ? "var(--text-primary)" : "var(--text-faint)" }}
                     title={`Formatting toolbar ${showToolbar ? "ON" : "OFF"}`}
                   >
                     <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1 4h14M1 8h14M1 12h14"/><circle cx="5" cy="4" r="1.5" fill="currentColor"/><circle cx="10" cy="8" r="1.5" fill="currentColor"/><circle cx="7" cy="12" r="1.5" fill="currentColor"/></svg>
@@ -13945,8 +11089,8 @@ ${clone.innerHTML}
                   {/* Hint for new users — subtle ring + expanded tooltip */}
                   {!showToolbar && !toolbarHintDismissed && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-40 p-2 rounded-lg text-caption leading-relaxed z-[9998]"
-                      style={{ background: "var(--surface)", border: "1px solid var(--accent)", color: "var(--text-secondary)", boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
-                      <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 3 }}>Formatting Tools</p>
+                      style={{ background: "var(--surface)", border: "1px solid var(--text-primary)", color: "var(--text-secondary)", boxShadow: "0 4px 16px rgba(0,0,0,0.4)" }}>
+                      <p style={{ color: "var(--text-primary)", fontWeight: 600, marginBottom: 3 }}>Formatting Tools</p>
                       <p style={{ color: "var(--text-muted)", marginBottom: 6 }}>Click to enable bold, headings, lists, and more.</p>
                       <button
                         onClick={(e) => { e.stopPropagation(); setToolbarHintDismissed(true); try { localStorage.setItem("mw-toolbar-hint-dismissed", "1"); } catch {} }}
@@ -13957,7 +11101,7 @@ ${clone.innerHTML}
                   {toolbarHintDismissed && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-44 p-2.5 rounded-lg text-caption leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
                       style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                      <p style={{ color: showToolbar ? "var(--accent)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Formatting Toolbar {showToolbar ? "ON" : "OFF"}</p>
+                      <p style={{ color: showToolbar ? "var(--text-primary)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Formatting Toolbar {showToolbar ? "ON" : "OFF"}</p>
                       <p>Bold, italic, headings, lists, links, and more.</p>
                     </div>
                   )}
@@ -13969,14 +11113,14 @@ ${clone.innerHTML}
                   <button
                     onClick={() => setNarrowView(!narrowView)}
                     className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
-                    style={{ background: !narrowView ? "var(--accent-dim)" : "transparent", color: !narrowView ? "var(--accent)" : "var(--text-faint)" }}
+                    style={{ background: !narrowView ? "var(--border)" : "transparent", color: !narrowView ? "var(--text-primary)" : "var(--text-faint)" }}
                     title={`Wide view ${!narrowView ? "ON" : "OFF"}`}
                   >
                     <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M2 4v8M14 4v8M1 8h14" strokeLinecap="round"/><path d="M5 6L3 8l2 2M11 6l2 2-2 2" strokeLinecap="round"/></svg>
                   </button>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-44 p-2.5 rounded-lg text-caption leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
                     style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                    <p style={{ color: !narrowView ? "var(--accent)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Wide View {!narrowView ? "ON" : "OFF"}</p>
+                    <p style={{ color: !narrowView ? "var(--text-primary)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Wide View {!narrowView ? "ON" : "OFF"}</p>
                     <p>Default: narrow, book-like reading width. Click to expand to full width.</p>
                   </div>
                 </div>
@@ -13988,15 +11132,15 @@ ${clone.innerHTML}
                     <button
                       onClick={handleToggleHistory}
                       className="flex items-center justify-center h-6 w-6 rounded-md transition-colors relative"
-                      style={{ background: showHistory ? "var(--accent-dim)" : "transparent", color: showHistory ? "var(--accent)" : "var(--text-faint)" }}
+                      style={{ background: showHistory ? "var(--border)" : "transparent", color: showHistory ? "var(--text-primary)" : "var(--text-faint)" }}
                       title="Version history"
                     >
                       <Clock width={11} height={11} />
-                      {versions.length > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full text-caption flex items-center justify-center" style={{ background: "var(--accent)", color: "#000", fontWeight: 700 }}>{versions.length}</span>}
+                      {versions.length > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full text-caption flex items-center justify-center" style={{ background: "var(--micro-red)", color: "#fff", fontWeight: 700 }}>{versions.length}</span>}
                     </button>
                     <div className="absolute top-full right-0 mt-1.5 w-44 p-2.5 rounded-lg text-caption leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
                       style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                      <p style={{ color: showHistory ? "var(--accent)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Version History</p>
+                      <p style={{ color: showHistory ? "var(--text-primary)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Version History</p>
                       <p>{versions.length > 0 ? `${versions.length} version${versions.length > 1 ? "s" : ""} saved. Click to browse and restore.` : "Save history appears after sharing your document."}</p>
                     </div>
                   </div>
@@ -14006,7 +11150,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => { setShowOutlinePanel(prev => !prev); setShowAIPanel(false); setShowImagePanel(false); }}
                     className="flex items-center justify-center h-6 px-1.5 rounded-md transition-colors"
-                    style={{ background: showOutlinePanel ? "var(--accent-dim)" : "transparent", color: showOutlinePanel ? "var(--accent)" : "var(--text-faint)" }}
+                    style={{ background: showOutlinePanel ? "var(--border)" : "transparent", color: showOutlinePanel ? "var(--text-primary)" : "var(--text-faint)" }}
                     title="Document outline"
                   >
                     <List width={13} height={13} />
@@ -14024,7 +11168,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => { setShowAIPanel(prev => !prev); setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false); }}
                     className="flex items-center justify-center h-6 px-2.5 rounded-md transition-colors gap-1.5"
-                    style={{ background: showAIPanel || aiProcessing ? "var(--accent-dim)" : "transparent", color: showAIPanel || aiProcessing ? "var(--accent)" : "var(--text-faint)", fontWeight: 600, fontSize: 11 }}
+                    style={{ background: showAIPanel || aiProcessing ? "var(--border)" : "transparent", color: showAIPanel || aiProcessing ? "var(--text-primary)" : "var(--text-faint)", fontWeight: 600, fontSize: 11 }}
                     title="AI tools"
                   >
                     {aiProcessing ? <Loader2 width={11} height={11} className="animate-spin" /> : <Sparkles width={11} height={11} />}
@@ -14057,7 +11201,7 @@ ${clone.innerHTML}
                       setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
                     }}
                     className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
-                    style={{ background: showImagePanel ? "var(--accent-dim)" : "transparent", color: showImagePanel ? "var(--accent)" : "var(--text-faint)" }}
+                    style={{ background: showImagePanel ? "var(--border)" : "transparent", color: showImagePanel ? "var(--text-primary)" : "var(--text-faint)" }}
                     title="My images"
                   >
                     <ImageIcon width={11} height={11} />
@@ -14075,7 +11219,7 @@ ${clone.innerHTML}
                   <button
                     onClick={() => { setShowExportMenu(prev => !prev); setShowMenu(false); }}
                     className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
-                    style={{ background: showExportMenu ? "var(--accent-dim)" : "transparent", color: showExportMenu ? "var(--accent)" : "var(--text-faint)" }}
+                    style={{ background: showExportMenu ? "var(--border)" : "transparent", color: showExportMenu ? "var(--text-primary)" : "var(--text-faint)" }}
                     title="Export"
                   >
                     <Upload width={11} height={11} />
@@ -14158,7 +11302,7 @@ ${clone.innerHTML}
               <div
                 className="flex items-center justify-between gap-3 px-3 py-2 text-caption"
                 style={{
-                  background: "var(--accent-dim)",
+                  background: "var(--border)",
                   borderTop: "1px solid var(--border-dim)",
                   borderBottom: "1px solid var(--border-dim)",
                   color: "var(--text-secondary)",
@@ -14166,10 +11310,10 @@ ${clone.innerHTML}
               >
                 <div className="flex items-center gap-1.5">
                   {activeTab?.readonly ? (
-                    <span style={{ color: "var(--accent)", fontWeight: 600 }}>Read-only example</span>
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>Read-only example</span>
                   ) : (
                     <>
-                      <span style={{ color: "var(--accent)", fontWeight: 600 }}>View only</span>
+                      <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>View only</span>
                       <span style={{ color: "var(--text-muted)" }}>— this document was shared with you.</span>
                     </>
                   )}
@@ -14177,7 +11321,7 @@ ${clone.innerHTML}
                 <button
                   onClick={duplicateCurrentTabAsEditable}
                   className="px-2.5 py-1 rounded text-caption font-semibold"
-                  style={{ background: "var(--accent)", color: "#000", border: "none", cursor: "pointer" }}
+                  style={{ background: "var(--text-primary)", color: "var(--background)", border: "none", cursor: "pointer" }}
                 >
                   Duplicate to edit
                 </button>
@@ -14453,7 +11597,7 @@ ${clone.innerHTML}
                   // outline panel here — don't reserve space for it either.
                   right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
                   background: "var(--background)",
-                  outline: dragTabId ? "2px dashed var(--accent)" : undefined,
+                  outline: dragTabId ? "2px dashed var(--text-primary)" : undefined,
                   outlineOffset: dragTabId ? "-8px" : undefined,
                   transition: "outline-color 0.12s",
                 }}
@@ -14590,7 +11734,7 @@ ${clone.innerHTML}
                       style={{ background: "var(--surface)", color: "var(--text-secondary)", border: "1px solid var(--border-dim)" }}
                       title={`${c.label} appears in ${otherDocCount} ${otherDocCount === 1 ? "doc" : "docs"} across your library`}
                     >
-                      <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--accent)" }} />
+                      <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--text-primary)" }} />
                       {c.label}
                       <span className="tabular-nums" style={{ color: "var(--text-faint)" }}>{otherDocCount}</span>
                     </button>
@@ -14610,19 +11754,13 @@ ${clone.innerHTML}
                 // to re-trigger on the takeover, which is what the
                 // founder saw as a second logo appearing.
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-10" style={{ background: "var(--background)", gap: 14 }}>
-                  <MemoryWikiLogo size={26} />
-                  <div style={{ width: 96, height: 2, background: "var(--border-dim)", borderRadius: 1, overflow: "hidden", position: "relative" }}>
-                    <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "var(--accent)", borderRadius: 1, animation: "mwLoaderBar 1.1s ease-in-out infinite" }} />
-                  </div>
+                  {/* Inner doc loader — matches the boot loader: symbol
+                      only + "Loading" caption. Bar and wordmark removed
+                      so this transition reads as one continuous moment. */}
+                  <MemoryWikiLogo size={64} variant="icon-only" />
                   <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
                     Loading
                   </span>
-                  <style>{`
-                    @keyframes mwLoaderBar {
-                      0%   { left: -40%; }
-                      100% { left: 100%; }
-                    }
-                  `}</style>
                 </div>
               )}
                 {/* Compiled-doc banner removed per founder feedback —
@@ -14744,8 +11882,8 @@ ${clone.innerHTML}
                 const isBundleMode = !isHubMode && activeTab?.kind === "bundle";
                 const activeBundle = isBundleMode ? bundles.find(b => b.id === activeTab?.bundleId) : null;
                 const docWordCount = !isHubMode && !isBundleMode ? markdown.trim().split(/\s+/).filter(Boolean).length : 0;
-                const accent = "var(--accent)";
-                const accentDim = "var(--accent-dim)";
+                const accent = "var(--text-primary)";
+                const accentDim = "var(--border)";
                 const mode = isHubMode
                   ? {
                       id: "hub" as const,
@@ -14844,14 +11982,14 @@ ${clone.innerHTML}
                         className="flex items-center justify-center shrink-0"
                         style={{
                           width: 24, height: 24, borderRadius: 6,
-                          background: "var(--accent-dim)",
-                          color: "var(--accent)",
+                          background: "var(--border)",
+                          color: "var(--text-primary)",
                         }}
                       >
                         {mode.icon}
                       </span>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-caption font-semibold leading-tight" style={{ color: "var(--accent)" }}>{mode.label}</span>
+                        <span className="text-caption font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>{mode.label}</span>
                         <span className="leading-tight truncate" style={{ color: "var(--text-faint)", fontSize: 10 }} title={mode.scope}>
                           {mode.scope}
                         </span>
@@ -14948,8 +12086,8 @@ ${clone.innerHTML}
                             onClick={t.onClick}
                             className="flex-1 flex items-center justify-center gap-1.5 h-7 rounded-md text-caption font-semibold transition-colors"
                             style={{
-                              background: t.active ? "var(--accent-dim)" : "transparent",
-                              color: t.active ? "var(--accent)" : "var(--text-faint)",
+                              background: t.active ? "var(--border)" : "transparent",
+                              color: t.active ? "var(--text-primary)" : "var(--text-faint)",
                             }}
                             title={t.title}
                           >
@@ -15028,7 +12166,7 @@ ${clone.innerHTML}
                   <div className="px-2 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="grid grid-cols-2 gap-1">
                       {([
-                        { action: "polish", icon: <Sparkles width={11} height={11} style={{ color: "var(--accent)" }} />, label: "Polish", desc: "Fix grammar, spelling, and improve clarity. Preserves meaning." },
+                        { action: "polish", icon: <Sparkles width={11} height={11} style={{ color: "var(--micro-ai)" }} />, label: "Polish", desc: "Fix grammar, spelling, and improve clarity. Preserves meaning." },
                         { action: "compact", icon: <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round"><path d="M3 4h10M3 8h10M3 12h7"/><path d="M14 6l-2 2 2 2"/></svg>, label: "Compact", desc: "Halve the length while keeping every heading, code block, table, and diagram intact." },
                         { action: "summary", icon: <AlignLeft width={11} height={11} style={{ color: "#60a5fa" }} />, label: "Summary", desc: "Generate a 2-4 sentence summary and add it to the top of the document." },
                         { action: "tldr", icon: <List width={11} height={11} style={{ color: "#fbbf24" }} />, label: "TL;DR", desc: "Create 2-5 bullet points of key takeaways and add to the top." },
@@ -15085,13 +12223,13 @@ ${clone.innerHTML}
                           <div className="flex items-center gap-1.5">
                             <div
                               className="flex items-center justify-center shrink-0"
-                              style={{ width: 20, height: 20, borderRadius: 4, background: "var(--accent-dim)" }}
+                              style={{ width: 20, height: 20, borderRadius: 4, background: "var(--border)" }}
                             >
-                              <FileText width={11} height={11} style={{ color: "var(--accent)" }} />
+                              <FileText width={11} height={11} style={{ color: "var(--text-primary)" }} />
                             </div>
                             <span
                               className="font-bold uppercase tracking-wider"
-                              style={{ color: "var(--accent)", fontSize: 10, letterSpacing: "0.08em" }}
+                              style={{ color: "var(--text-primary)", fontSize: 10, letterSpacing: "0.08em" }}
                             >
                               Document
                             </span>
@@ -15117,7 +12255,7 @@ ${clone.innerHTML}
                                   setAiChatHistory(prev => prev.map((m, j) => j === i ? { ...m, canUndo: false, text: m.text + " (undone)" } : m));
                                 }}
                                 className="ml-2 px-1.5 py-0.5 rounded text-caption font-medium transition-colors hover:opacity-80"
-                                style={{ color: "var(--accent)", background: "var(--accent-dim)" }}
+                                style={{ color: "var(--text-primary)", background: "var(--border)" }}
                               >
                                 Undo
                               </button>
@@ -15186,7 +12324,7 @@ ${clone.innerHTML}
                           }}
                           disabled={!aiChatInput.trim() || !!aiProcessing}
                           className="p-1.5 rounded-md transition-colors"
-                          style={{ background: aiChatInput.trim() ? "var(--accent)" : "transparent", color: aiChatInput.trim() ? "#000" : "var(--text-faint)" }}
+                          style={{ background: aiChatInput.trim() ? "var(--text-primary)" : "transparent", color: aiChatInput.trim() ? "#000" : "var(--text-faint)" }}
                           title="Send (Enter)"
                         >
                           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2L2 8.5l5 2L9.5 16z"/><path d="M14 2L7 10.5"/></svg>
@@ -15207,7 +12345,7 @@ ${clone.innerHTML}
                 >
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="flex items-center gap-1.5">
-                      <List width={12} height={12} style={{ color: "var(--accent)" }} />
+                      <List width={12} height={12} style={{ color: "var(--text-primary)" }} />
                       <span className="text-caption font-semibold" style={{ color: "var(--text-primary)" }}>Outline</span>
                     </div>
                     <button onClick={() => setShowOutlinePanel(false)} className="p-0.5 rounded hover:bg-[var(--menu-hover)] transition-colors" title="Close outline">
@@ -15272,9 +12410,9 @@ ${clone.innerHTML}
                   {/* Header */}
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="flex items-center gap-1.5">
-                      <ImageIcon width={12} height={12} style={{ color: "var(--accent)" }} />
+                      <ImageIcon width={12} height={12} style={{ color: "var(--text-primary)" }} />
                       <span className="text-caption font-semibold" style={{ color: "var(--text-primary)" }}>My Images</span>
-                      {userImages.length > 0 && <span className="text-caption px-1 rounded" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>{userImages.length}</span>}
+                      {userImages.length > 0 && <span className="text-caption px-1 rounded" style={{ background: "var(--border)", color: "var(--text-primary)" }}>{userImages.length}</span>}
                     </div>
                     <button onClick={() => setShowImagePanel(false)} className="flex items-center justify-center w-5 h-5 rounded transition-colors hover:bg-[var(--menu-hover)]" style={{ color: "var(--text-muted)" }} title="Close image panel">
                       <X width={10} height={10} />
@@ -15288,7 +12426,7 @@ ${clone.innerHTML}
                         <span>{Math.round(imageQuota.total / 1024 / 1024)}MB total</span>
                       </div>
                       <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--toggle-bg)" }}>
-                        <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (imageQuota.used / imageQuota.total) * 100)}%`, background: imageQuota.used / imageQuota.total > 0.9 ? "#ef4444" : "var(--accent)" }} />
+                        <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (imageQuota.used / imageQuota.total) * 100)}%`, background: imageQuota.used / imageQuota.total > 0.9 ? "#ef4444" : "var(--text-primary)" }} />
                       </div>
                     </div>
                   )}
@@ -15330,7 +12468,7 @@ ${clone.innerHTML}
                                 doRender(newMd);
                                 cmSetDocRef.current?.(newMd);
                                 showToast("Image inserted", "success");
-                              }} className="flex-1 py-1 rounded text-caption font-semibold transition-colors hover:opacity-90" style={{ background: "var(--accent)", color: "#000" }} title="Insert image into document">
+                              }} className="flex-1 py-1 rounded text-caption font-semibold transition-colors hover:opacity-90" style={{ background: "var(--text-primary)", color: "var(--background)" }} title="Insert image into document">
                                 Insert
                               </button>
                               <button onClick={() => { navigator.clipboard.writeText(img.url); showToast("URL copied", "success"); }}
@@ -15373,10 +12511,10 @@ ${clone.innerHTML}
                   {/* History header */}
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="flex items-center gap-1.5">
-                      <Clock width={12} height={12} style={{ color: "var(--accent)" }} />
+                      <Clock width={12} height={12} style={{ color: "var(--text-primary)" }} />
                       <span className="text-caption font-semibold" style={{ color: "var(--text-primary)" }}>Version History</span>
                       {versions.length > 0 && (
-                        <span className="text-caption px-1 rounded" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>{versions.length}</span>
+                        <span className="text-caption px-1 rounded" style={{ background: "var(--border)", color: "var(--text-primary)" }}>{versions.length}</span>
                       )}
                     </div>
                     <button
@@ -15391,7 +12529,7 @@ ${clone.innerHTML}
                   <div className="flex-1 overflow-y-auto">
                     {historyLoading ? (
                       <div className="flex items-center justify-center py-8">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite", color: "var(--accent)" }}><circle cx="8" cy="8" r="6" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite", color: "var(--text-primary)" }}><circle cx="8" cy="8" r="6" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round"/></svg>
                       </div>
                     ) : versions.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
@@ -15409,18 +12547,18 @@ ${clone.innerHTML}
                               key={v.id}
                               className="px-3 py-2 transition-colors cursor-pointer"
                               style={{
-                                background: isPreviewing ? "var(--accent-dim)" : "transparent",
+                                background: isPreviewing ? "var(--border)" : "transparent",
                                 borderBottom: "1px solid var(--border-dim)",
                               }}
                               onClick={() => handlePreviewVersion(v.id)}
                             >
                               <div className="flex items-center justify-between mb-0.5">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="text-caption font-semibold" style={{ color: isPreviewing ? "var(--accent)" : "var(--text-primary)" }}>
+                                  <span className="text-caption font-semibold" style={{ color: isPreviewing ? "var(--text-primary)" : "var(--text-primary)" }}>
                                     v{v.version_number}
                                   </span>
                                   {isCurrent && (
-                                    <span className="text-caption px-1 py-0.5 rounded font-semibold uppercase" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>Current</span>
+                                    <span className="text-caption px-1 py-0.5 rounded font-semibold uppercase" style={{ background: "var(--border)", color: "var(--text-primary)" }}>Current</span>
                                   )}
                                   {isPreviewing && (
                                     <span className="text-caption px-1 py-0.5 rounded font-semibold uppercase" style={{ background: "rgba(59,130,246,0.15)", color: "#60a5fa" }}>Previewing</span>
@@ -15516,13 +12654,13 @@ ${clone.innerHTML}
               style={{ color: "var(--text-muted)", borderBottom: "1px solid var(--border-dim)", cursor: "default" }}
             >
               <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                <span className="shrink-0" style={{ color: "var(--accent)" }}>SOURCE</span>
+                <span className="shrink-0" style={{ color: "var(--text-primary)" }}>SOURCE</span>
                 {/* Flavor badge — click to convert */}
                 <div className="relative">
                   <button
                     onClick={() => setShowFlavorMenu(!showFlavorMenu)}
                     className="px-1.5 py-0.5 rounded font-mono cursor-pointer transition-colors hover:brightness-110"
-                    style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+                    style={{ background: "var(--border)", color: "var(--text-primary)" }}
                   >
                     {flavor.toUpperCase()} ▾
                   </button>
@@ -15579,7 +12717,7 @@ ${clone.innerHTML}
                                 // Nothing to convert — show inline feedback on the clicked button
                                 const btn = e.currentTarget as HTMLElement;
                                 const orig = btn.innerHTML;
-                                btn.innerHTML = `<div style="color:var(--accent);font-size:10px;padding:4px 0;text-align:center;font-weight:600">Already compatible</div>`;
+                                btn.innerHTML = `<div style="color:var(--text-primary);font-size:10px;padding:4px 0;text-align:center;font-weight:600">Already compatible</div>`;
                                 setTimeout(() => { btn.innerHTML = orig; }, 1500);
                                 return;
                               }
@@ -15614,14 +12752,14 @@ ${clone.innerHTML}
                   <button
                     onClick={() => setNarrowSource(!narrowSource)}
                     className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
-                    style={{ background: !narrowSource ? "var(--accent-dim)" : "transparent", color: !narrowSource ? "var(--accent)" : "var(--text-faint)" }}
+                    style={{ background: !narrowSource ? "var(--border)" : "transparent", color: !narrowSource ? "var(--text-primary)" : "var(--text-faint)" }}
                     title={`Wide view ${!narrowSource ? "ON" : "OFF"}`}
                   >
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M2 4v8M14 4v8M1 8h14" strokeLinecap="round"/><path d="M5 6L3 8l2 2M11 6l2 2-2 2" strokeLinecap="round"/></svg>
                   </button>
                   <div className="absolute top-full right-0 mt-1.5 w-44 p-2.5 rounded-lg text-caption leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
                     style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                    <p style={{ color: !narrowSource ? "var(--accent)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Wide View {!narrowSource ? "ON" : "OFF"}</p>
+                    <p style={{ color: !narrowSource ? "var(--text-primary)" : "var(--text-primary)", fontWeight: 600, marginBottom: 4 }}>Wide View {!narrowSource ? "ON" : "OFF"}</p>
                     <p>Default: narrow, comfortable editing width. Click to expand.</p>
                   </div>
                 </div>
@@ -15685,9 +12823,9 @@ ${clone.innerHTML}
             <span
               className="inline-flex items-center font-semibold uppercase shrink-0"
               style={{
-                color: "var(--accent)",
-                background: "var(--accent-dim)",
-                border: "1px solid var(--accent)",
+                color: "var(--text-primary)",
+                background: "var(--border)",
+                border: "1px solid var(--text-primary)",
                 letterSpacing: "0.06em",
                 fontSize: 8,
                 padding: "1px 4px",
@@ -15742,7 +12880,7 @@ ${clone.innerHTML}
               <p className="font-semibold mb-1.5" style={{ color: "var(--text-primary)" }}>Import</p>
               <div className="flex flex-wrap gap-1 mb-2">
                 {["MD", "PDF", "DOCX", "PPTX", "XLSX", "HTML", "CSV", "LaTeX", "RST", "RTF", "JSON", "XML", "TXT"].map(f => (
-                  <span key={f} className="px-1 py-0.5 rounded font-mono" style={{ background: "var(--accent-dim)", color: "var(--accent)", fontSize: 9 }}>{f}</span>
+                  <span key={f} className="px-1 py-0.5 rounded font-mono" style={{ background: "var(--border)", color: "var(--text-primary)", fontSize: 9 }}>{f}</span>
                 ))}
               </div>
               <p className="text-caption" style={{ color: "var(--text-faint)" }}>Drag & drop or use IMPORT in sidebar</p>
@@ -15818,7 +12956,7 @@ ${clone.innerHTML}
               users can act on (slow render → maybe a long mermaid or
               math block to investigate). */}
           <div className="relative group hidden sm:block">
-            <span className="flex items-center gap-0.5" style={{ color: "var(--accent)" }}>
+            <span className="flex items-center gap-0.5" style={{ color: "var(--text-primary)" }}>
               <Zap width={10} height={10} fill="currentColor" stroke="none" />
               {renderTime.toFixed(0)}ms
             </span>
@@ -16214,63 +13352,102 @@ ${clone.innerHTML}
       )}
 
       {/* Memory.Wiki AI structuring prompt */}
-      {/* Sign In / Sign Up modal */}
+      {/* Sign In / Sign Up modal — Pure redesign:
+          - MW brand symbol (morph blob) anchors the top so the
+            dialog reads as Memory.Wiki and not generic OAuth glue
+          - Title in Cal Sans 500 (no more 700 bold)
+          - OAuth buttons: pure outlined pills with brand glyph in
+            its own color, NOT a bright vendor-blue fill
+          - Email + Send merged into one bordered group (no separate
+            button hex chip)
+          - Footnote: no em-dash, "What you get" demoted to text-link
+            with ArrowUpRight */}
       {showAuthMenu && !isAuthenticated && (
-        // Slim sign-in modal. Previous version was a 560px-wide
-        // dialog with a 3-column tier comparison (No Account / Beta /
-        // Pro) below the OAuth + email block. The comparison created
-        // decision friction at the wrong moment — and one of the
-        // listed Pro features ("Password protect") referred to a
-        // mode that no longer exists. Pricing tiers belong on
-        // /pricing, not in the sign-in dialog. This version: avatar
-        // → headline → OAuth → email → tiny "free during beta" line.
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => { setShowAuthMenu(false); setAuthEmailSent(false); }}>
-          <div className="rounded-xl w-[400px] max-w-[92vw]" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 16px 64px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
-            <div className="px-6 pt-6 pb-4">
-              <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-                Sign in to <span style={{ color: "var(--accent)" }}>Memory.Wiki</span>.app
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+          onClick={() => { setShowAuthMenu(false); setAuthEmailSent(false); }}
+        >
+          <div
+            className="rounded-2xl w-[420px] max-w-full"
+            style={{ background: "var(--canvas)", border: "1px solid var(--border-dim)", boxShadow: "0 20px 80px rgba(0,0,0,0.45)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-6 pb-5 text-center">
+              <div className="mx-auto mb-6 flex items-center justify-center" style={{ width: 44, height: 44 }}>
+                <MemoryWikiLogo size={36} variant="icon-only" withBlob />
+              </div>
+              <h2
+                style={{
+                  color: "var(--text-primary)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  letterSpacing: 0,
+                  lineHeight: 1.2,
+                  margin: 0,
+                }}
+              >
+                Sign in to Memory.Wiki
               </h2>
-              <p className="text-caption mt-1" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-1.5" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.5 }}>
                 Save, sync, and publish your knowledge hub.
               </p>
             </div>
 
-            {/* OAuth */}
+            {/* OAuth — outlined pills, brand glyph keeps its own
+                colour so the row reads as a quiet "pick a provider"
+                instead of two competing vivid buttons. */}
             <div className="px-6 space-y-2">
               <button
                 onClick={() => { signInWithGoogle(); setShowAuthMenu(false); }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-body font-medium transition-colors hover:brightness-110"
-                style={{ background: "#4285F4", color: "#fff" }}
+                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden>
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 1 1-3.3-13l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28.4l-6.6 5A20 20 0 0 0 24 44z"/>
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.6l6.2 5.2C39.9 36 44 30.5 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                </svg>
                 Continue with Google
               </button>
               <button
                 onClick={() => { signInWithGitHub(); setShowAuthMenu(false); }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-body font-medium transition-colors hover:brightness-110"
-                style={{ background: "#24292f", color: "#fff" }}
+                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
                 Continue with GitHub
               </button>
             </div>
 
-            <div className="flex items-center gap-3 px-6 my-3">
+            <div className="flex items-center gap-3 px-6 my-4">
               <div className="flex-1 h-px" style={{ background: "var(--border-dim)" }} />
-              <span className="text-caption" style={{ color: "var(--text-faint)" }}>or with email</span>
+              <span className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em" }}>
+                or with email
+              </span>
               <div className="flex-1 h-px" style={{ background: "var(--border-dim)" }} />
             </div>
 
-            <div className="px-6 mb-4">
+            <div className="px-6 mb-5">
               {authEmailSent ? (
-                <div className="text-body text-center py-3 rounded-lg" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>
+                <div
+                  className="text-center py-3 rounded-lg inline-flex items-center justify-center gap-2 w-full"
+                  style={{ background: "rgba(181, 255, 26, 0.10)", color: "var(--micro-lime)", border: "1px solid rgba(181, 255, 26, 0.25)", fontSize: 13 }}
+                >
                   Check your email for the login link
                 </div>
               ) : (
-                <div className="flex gap-1.5">
+                <div
+                  className="flex items-stretch rounded-full overflow-hidden"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)" }}
+                >
                   <input
                     type="email"
-                    placeholder="email@example.com"
+                    placeholder="you@email.com"
                     value={authEmailInput}
                     onChange={(e) => setAuthEmailInput(e.target.value)}
                     onKeyDown={async (e) => {
@@ -16283,8 +13460,8 @@ ${clone.innerHTML}
                         }
                       }
                     }}
-                    className="flex-1 px-3 py-2 rounded-lg text-body outline-none"
-                    style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                    className="flex-1 min-w-0 px-4 py-2 outline-none"
+                    style={{ background: "transparent", color: "var(--text-primary)", fontSize: 13 }}
                   />
                   <button
                     onClick={async () => {
@@ -16297,23 +13474,26 @@ ${clone.innerHTML}
                         }
                       }
                     }}
-                    className="px-3 py-2 rounded-lg text-caption font-medium transition-colors"
-                    style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+                    className="shrink-0 px-4 transition-colors"
+                    style={{ background: "var(--text-primary)", color: "var(--background)", fontSize: 13, fontWeight: 500 }}
                   >
-                    Send Link
+                    Send link
                   </button>
                 </div>
               )}
             </div>
 
-            <div className="px-6 pb-5 flex items-center justify-between text-caption" style={{ color: "var(--text-faint)" }}>
-              <span>Free during beta — no card.</span>
+            <div className="px-6 pb-5 flex items-center justify-between" style={{ color: "var(--text-faint)" }}>
+              <span className="font-mono" style={{ fontSize: 11, letterSpacing: "0.04em" }}>
+                Free during beta, no card.
+              </span>
               <button
                 onClick={() => { setShowAuthMenu(false); window.open("/pricing", "_blank"); }}
-                className="hover:underline"
-                style={{ color: "var(--text-muted)" }}
+                className="inline-flex items-center gap-1 transition-colors hover:underline"
+                style={{ color: "var(--text-muted)", fontSize: 12 }}
               >
-                What you get →
+                What you get
+                <ArrowUpRight width={11} height={11} />
               </button>
             </div>
           </div>
@@ -16324,7 +13504,7 @@ ${clone.innerHTML}
         <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => !mwLoading && setMdfyPrompt(null)}>
           <div className="rounded-xl p-5 w-80" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--accent)" }}>Memory.Wiki</span> this document?</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--text-primary)" }}>Memory.Wiki</span> this document?</span>
               <span className="text-caption font-mono" style={{ color: "var(--text-muted)" }}>
                 {(mwPrompt.text.length / 1024).toFixed(0)} KB
               </span>
@@ -16333,7 +13513,7 @@ ${clone.innerHTML}
               This file was imported as raw text — all formatting (headings, lists, tables, emphasis) was lost during extraction.
             </p>
             <p className="text-caption mb-4" style={{ color: "var(--text-muted)" }}>
-              <strong style={{ color: "var(--accent)" }}>Memory.Wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
+              <strong style={{ color: "var(--text-primary)" }}>Memory.Wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
               {mwPrompt.text.length > 200_000 && (
                 <span style={{ color: "var(--text-faint)" }}> Large documents may take 30–60 seconds.</span>
               )}
@@ -16381,7 +13561,7 @@ ${clone.innerHTML}
                   setMdfyPrompt(null);
                 }}
                 className="flex-1 px-3 py-2 rounded-md text-caption font-medium transition-colors flex items-center justify-center gap-1.5"
-                style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+                style={{ background: "var(--border)", color: "var(--text-primary)" }}
               >
                 {mwLoading ? (
                   <>
@@ -16873,7 +14053,7 @@ ${clone.innerHTML}
                   showToast("Your version saved", "info");
                 }}
                 className="flex-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-                style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+                style={{ background: "var(--border)", color: "var(--text-primary)" }}
               >
                 Keep mine
               </button>
@@ -17028,7 +14208,7 @@ ${clone.innerHTML}
               <button
                 onClick={() => setShowViewerShareModal(false)}
                 className="px-5 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                style={{ background: "var(--accent)", color: "#000" }}
+                style={{ background: "var(--text-primary)", color: "var(--background)" }}
               >
                 Done
               </button>
@@ -17053,7 +14233,7 @@ ${clone.innerHTML}
             size="lg"
             title={
               <span className="inline-flex items-center gap-2 min-w-0">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: c.docCount >= 2 ? "var(--accent)" : "var(--text-faint)" }} />
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: c.docCount >= 2 ? "var(--text-primary)" : "var(--text-faint)" }} />
                 <span className="truncate">{c.label}</span>
               </span>
             }
@@ -17070,9 +14250,9 @@ ${clone.innerHTML}
                   the user back to the source — the occurrence card below is
                   already the "open in doc" CTA. */}
               {c.docCount >= 2 ? (
-                <div className="rounded-md" style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)", padding: "var(--space-3)" }}>
+                <div className="rounded-md" style={{ background: "var(--border)", border: "1px solid var(--text-primary)", padding: "var(--space-3)" }}>
                   <div className="flex items-center justify-between" style={{ marginBottom: "var(--space-2)" }}>
-                    <h4 className="text-caption font-semibold uppercase tracking-wider" style={{ color: "var(--accent)" }}>What it means across your library</h4>
+                    <h4 className="text-caption font-semibold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>What it means across your library</h4>
                     {!def && (
                       <Button variant="primary" size="xs" onClick={() => fetchConceptDefinition(c.id, c.label, c.occurrences)}>
                         Define with AI
@@ -17082,7 +14262,7 @@ ${clone.innerHTML}
                       <button
                         onClick={() => fetchConceptDefinition(c.id, c.label, c.occurrences)}
                         className="text-caption hover:underline"
-                        style={{ color: "var(--accent)" }}
+                        style={{ color: "var(--text-primary)" }}
                       >
                         Re-define
                       </button>
@@ -17090,7 +14270,7 @@ ${clone.innerHTML}
                   </div>
                   {def?.loading && (
                     <div className="text-caption flex items-center gap-1.5" style={{ color: "var(--text-faint)" }}>
-                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--text-primary)" }} />
                       Synthesizing definition…
                     </div>
                   )}
@@ -17315,9 +14495,9 @@ ${clone.innerHTML}
                     fontWeight: 500,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--accent)";
-                    e.currentTarget.style.color = "var(--accent)";
-                    e.currentTarget.style.background = "var(--accent-dim)";
+                    e.currentTarget.style.borderColor = "var(--text-primary)";
+                    e.currentTarget.style.color = "var(--text-primary)";
+                    e.currentTarget.style.background = "var(--border)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = "var(--border-dim)";
@@ -17347,7 +14527,7 @@ ${clone.innerHTML}
                 defaultValue={codeEditState.lang}
                 placeholder="language"
                 className="px-2.5 py-1 text-body font-mono font-semibold uppercase tracking-wider rounded-md outline-none"
-                style={{ background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid transparent", width: 120 }}
+                style={{ background: "var(--border)", color: "var(--text-primary)", border: "1px solid transparent", width: 120 }}
               />
               <div className="flex gap-2">
                 <button
@@ -17379,7 +14559,7 @@ ${clone.innerHTML}
                     setCodeEditState(null);
                   }}
                   className="px-3 py-1 text-caption font-semibold rounded-md"
-                  style={{ background: "var(--accent)", color: "#000" }}
+                  style={{ background: "var(--text-primary)", color: "var(--background)" }}
                 >Save</button>
                 <button onClick={() => setCodeEditState(null)} className="px-3 py-1 text-caption rounded-md" style={{ background: "var(--toggle-bg)", color: "var(--text-muted)" }}>Cancel</button>
               </div>
@@ -17395,7 +14575,7 @@ ${clone.innerHTML}
                 if (e.key === "Escape") setCodeEditState(null);
                 if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
-                  (document.querySelector('[style*="var(--accent)"][class*="font-semibold"]') as HTMLButtonElement)?.click();
+                  (document.querySelector('[style*="var(--text-primary)"][class*="font-semibold"]') as HTMLButtonElement)?.click();
                 }
               }}
             />
@@ -17509,7 +14689,7 @@ ${clone.innerHTML}
             <div
               className="mb-8 py-6 rounded-lg text-center"
               style={{ border: "1px dashed var(--border)", color: "var(--text-faint)" }}
-              onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = "var(--text-primary)"; e.currentTarget.style.color = "var(--text-primary)"; }}
               onDragLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-faint)"; }}
               onDrop={(e) => {
                 e.preventDefault();
@@ -17775,9 +14955,9 @@ ${clone.innerHTML}
                               onMouseEnter={() => setCmdSelectedIdx(flatIdx)}
                               onClick={() => { item.action(); closePalette(); }}
                               className="w-full text-left px-4 py-2 text-sm flex items-center gap-2.5 transition-colors"
-                              style={{ background: active ? "var(--accent-dim)" : "transparent", color: active ? "var(--accent)" : "var(--text-primary)" }}
+                              style={{ background: active ? "var(--border)" : "transparent", color: active ? "var(--text-primary)" : "var(--text-primary)" }}
                             >
-                              <span className="shrink-0" style={{ color: active ? "var(--accent)" : "var(--text-muted)" }}>{item.icon}</span>
+                              <span className="shrink-0" style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}>{item.icon}</span>
                               <span className="flex-1 min-w-0 flex items-baseline gap-2">
                                 <span className="truncate">{item.label}</span>
                                 {item.hint && <span className="text-caption truncate" style={{ color: "var(--text-faint)" }}>{item.hint}</span>}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { Globe, Users } from "lucide-react";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import RelatedInHubPanel from "@/components/RelatedInHubPanel";
@@ -274,17 +275,29 @@ export default function DocumentViewer({
     // takes its real content height instead of being clipped to 0.
     <div
       className="flex flex-col min-h-screen"
-      style={{ background: "var(--background)", color: "var(--foreground)" }}
+      style={{ background: "var(--canvas)", color: "var(--foreground)" }}
     >
       <ViewerHeader
         title={title || "Untitled"}
-        breadcrumb={<>memory.wiki/<span style={{ color: "var(--accent)" }}>{id}</span></>}
+        breadcrumb={
+          <span className="inline-flex items-center gap-1.5">
+            {isRestricted ? (
+              <Users width={12} height={12} style={{ color: "#60a5fa" }} aria-label="Shared with specific people" />
+            ) : (
+              <Globe width={12} height={12} style={{ color: "#4ade80" }} aria-label="Public" />
+            )}
+            <span>memory.wiki/<span style={{ color: "var(--text-secondary)" }}>{id}</span></span>
+          </span>
+        }
         actions={
           <>
             <button
               onClick={copyLink}
               className={actionBtn}
-              style={{ background: "var(--toggle-bg)", color: copied ? "#4ade80" : "var(--text-muted)" }}
+              style={{
+                background: copied ? "rgba(181,255,26,0.12)" : "var(--toggle-bg)",
+                color: copied ? "var(--micro-lime)" : "var(--text-muted)",
+              }}
               title="Copy link"
               aria-label="Copy link"
             >
@@ -298,8 +311,11 @@ export default function DocumentViewer({
             <button
               onClick={copyMarkdown}
               className={actionBtn}
-              style={{ background: "var(--toggle-bg)", color: copiedMd ? "#4ade80" : "var(--text-muted)" }}
-              title="Copy markdown — paste into any AI as context"
+              style={{
+                background: copiedMd ? "rgba(181,255,26,0.12)" : "var(--toggle-bg)",
+                color: copiedMd ? "var(--micro-lime)" : "var(--text-muted)",
+              }}
+              title="Copy markdown, paste into any AI as context"
               aria-label="Copy markdown"
             >
               {copiedMd ? (
@@ -334,14 +350,14 @@ export default function DocumentViewer({
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.3 }}>
               <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/>
             </svg>
-            <p className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>This document is no longer available</p>
+            <p className="text-lg" style={{ color: "var(--text-primary)", fontWeight: 500 }}>This document is no longer available</p>
             <p className="text-sm text-center" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
               The owner has changed the permissions or made this document private.
             </p>
             <Link
               href="/"
               className="mt-2 px-5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-1.5"
-              style={{ background: "var(--accent)", color: "#000" }}
+              style={{ background: "var(--text-primary)", color: "var(--background)" }}
             >
               Create your own
               <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3l5 5-5 5"/></svg>
@@ -363,7 +379,7 @@ export default function DocumentViewer({
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.3 }}>
               <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 118 0v4"/>
             </svg>
-            <p className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>You need access</p>
+            <p className="text-lg" style={{ color: "var(--text-primary)", fontWeight: 500 }}>You need access</p>
             <p className="text-sm text-center" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
               This document is shared with specific people.
               Sign in with an authorized email, or ask the owner for access.
@@ -381,7 +397,7 @@ export default function DocumentViewer({
                   } catch { window.location.href = "/"; }
                 }}
                 className="px-5 py-2 rounded-lg text-sm font-medium"
-                style={{ background: "var(--accent)", color: "#000" }}
+                style={{ background: "var(--text-primary)", color: "var(--background)" }}
               >
                 Sign in with Google
               </button>
@@ -400,7 +416,7 @@ export default function DocumentViewer({
                       }),
                     });
                     const btn = document.activeElement as HTMLButtonElement;
-                    if (btn) { btn.textContent = "Request sent"; btn.style.color = "#4ade80"; }
+                    if (btn) { btn.textContent = "Request sent"; btn.style.color = "var(--micro-lime)"; }
                   } catch { /* ignore */ }
                 }}
                 className="px-5 py-2 rounded-lg text-sm font-medium"
@@ -409,8 +425,8 @@ export default function DocumentViewer({
                 Request access
               </button>
             </div>
-            <Link href="/" className="mt-2 text-xs underline" style={{ color: "var(--text-muted)" }}>
-              Or create your own document →
+            <Link href="/" className="mt-2 text-xs" style={{ color: "var(--text-muted)" }}>
+              Or create your own document
             </Link>
           </div>
         ) : isExpired ? (
@@ -425,7 +441,7 @@ export default function DocumentViewer({
             <Link
               href="/"
               className="mt-2 px-5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-1.5"
-              style={{ background: "var(--accent)", color: "#000" }}
+              style={{ background: "var(--text-primary)", color: "var(--background)" }}
             >
               Create your own
               <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3l5 5-5 5"/></svg>

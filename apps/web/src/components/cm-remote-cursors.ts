@@ -69,7 +69,7 @@ class CursorWidget extends WidgetType {
     label.style.top = "-1.4em";
     label.style.padding = "1px 5px";
     label.style.fontSize = "10px";
-    label.style.fontFamily = "ui-monospace, monospace";
+    label.style.fontFamily = "var(--font-mono)";
     label.style.lineHeight = "1.2";
     label.style.background = this.color;
     label.style.color = "#000";

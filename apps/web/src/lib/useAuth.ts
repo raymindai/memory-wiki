@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getSupabaseBrowserClient } from "./supabase-browser";
 import { getAnonymousId, clearAnonymousId } from "./anonymous-id";
 import { readMdfyAnonCookie, clearMdfyAnonCookie } from "./anonymous-cookie-client";
@@ -9,10 +9,20 @@ import type { User } from "@supabase/supabase-js";
 interface Profile {
   display_name: string | null;
   avatar_url: string | null;
+  /** DiceBear style id ("identicon" / "oauth" / etc.) — when set
+   *  (and not "oauth") it overrides avatar_url in resolveAvatar. */
+  avatar_style?: string | null;
   plan: string;
   hub_slug?: string | null;
   hub_public?: boolean;
   hub_description?: string | null;
+  /** Auto-management config — synced from Settings → Auto-management. */
+  curator_settings?: Record<string, unknown> | null;
+  /** Key Color picker — drives `--accent` everywhere (links,
+   *  blockquotes, task checks). */
+  accent_color?: string | null;
+  /** Skin scheme picker (default / nord / dracula / …). */
+  color_scheme?: string | null;
 }
 
 interface AuthState {
@@ -20,6 +30,26 @@ interface AuthState {
   profile: Profile | null;
   loading: boolean;
   accessToken: string | null;
+}
+
+async function fetchProfileFromServer(
+  userId: string,
+  accessToken: string | null,
+): Promise<Profile | null> {
+  try {
+    const res = await fetch("/api/user/profile", {
+      credentials: "include",
+      headers: {
+        "x-user-id": userId,
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+    });
+    if (!res.ok) return null;
+    const body = await res.json().catch(() => null);
+    return (body?.profile as Profile | null) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function fetchProfile(
@@ -31,16 +61,42 @@ function fetchProfile(
   if (!supabase) return;
   supabase
     .from("profiles")
-    .select("display_name, avatar_url, plan, hub_slug, hub_public, hub_description")
+    .select("display_name, avatar_url, avatar_style, plan, hub_slug, hub_public, hub_description, curator_settings, accent_color, color_scheme")
     .eq("id", userId)
-    .single()
-    .then((res: { data: Profile | null }) => {
-      if (res.data) setState((prev) => ({ ...prev, profile: res.data }));
-      // Every signed-in user gets a hub by default. If the profile
-      // doesn't already have a slug, ask the server to assign a
-      // nanoid one and re-hydrate. Fires once per session — the
-      // endpoint is idempotent so retries are safe but wasteful.
-      if (res.data && !res.data.hub_slug) {
+    .maybeSingle()
+    .then(async (res: { data: Profile | null; error: { message: string } | null }) => {
+      // Authoritative source: browser SELECT may return a row whose
+      // hub_slug column reads null (RLS quirk, stale replica, etc.)
+      // even when the DB row really has a slug. Fall through to the
+      // server endpoint, which uses the service role and is the
+      // ground truth.
+      let profile: Profile | null = res.data ?? null;
+      if (!profile || !profile.hub_slug) {
+        const fromServer = await fetchProfileFromServer(userId, accessToken);
+        if (fromServer) profile = fromServer;
+      }
+      if (profile) {
+        // MERGE rather than REPLACE — preserves any field already in
+        // state that the fetched row happens to be missing (avoids
+        // the prior class of bug where an inline SELECT with fewer
+        // columns silently nulled out avatar_style / accent_color /
+        // hub_slug for the rest of the session). Also preserves a
+        // hub_slug that was patched in via a "mw-profile-changed"
+        // detail payload if the fetched copy lost it.
+        setState((prev) => {
+          const merged: Profile = { ...(prev.profile || ({} as Profile)) };
+          for (const k of Object.keys(profile!) as (keyof Profile)[]) {
+            const v = profile![k];
+            if (v !== null && v !== undefined) {
+              (merged[k] as unknown) = v;
+            }
+          }
+          return { ...prev, profile: merged };
+        });
+        if (!profile.hub_slug) {
+          ensureHubSlug(supabase, userId, accessToken, setState);
+        }
+      } else {
         ensureHubSlug(supabase, userId, accessToken, setState);
       }
     });
@@ -53,10 +109,10 @@ function ensureHubSlug(
   setState: React.Dispatch<React.SetStateAction<AuthState>>,
 ) {
   if (typeof window === "undefined") return;
-  try {
-    if (sessionStorage.getItem("mw-hub-ensure-attempted") === "1") return;
-    sessionStorage.setItem("mw-hub-ensure-attempted", "1");
-  } catch { /* ignore */ }
+  // Guard removed — the endpoint is idempotent (returns the existing
+  // slug when one already exists), and the earlier sessionStorage
+  // guard meant users stuck in a "no slug" state had no way to
+  // recover within a tab session without a full reload.
   fetch("/api/user/hub/ensure", {
     method: "POST",
     credentials: "include",
@@ -66,18 +122,18 @@ function ensureHubSlug(
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
   })
-    .then((r) => (r.ok ? r.json() : null))
+    .then(async (r) => {
+      if (!r.ok) return null;
+      return r.json().catch(() => null);
+    })
     .then((data) => {
       if (!data?.slug || !supabase) return;
-      // Re-hydrate the profile with the new slug + the auto-publish flag.
-      supabase
-        .from("profiles")
-        .select("display_name, avatar_url, plan, hub_slug, hub_public, hub_description")
-        .eq("id", userId)
-        .single()
-        .then((res: { data: Profile | null }) => {
-          if (res.data) setState((prev) => ({ ...prev, profile: res.data }));
-        });
+      // Re-hydrate via the SAME fetch path as the initial load — the
+      // earlier inline SELECT here was missing avatar_style /
+      // curator_settings / accent_color / color_scheme, so on every
+      // sign-in path that triggered hub-ensure, the profile state
+      // was clobbered and the picked avatar/accent silently reverted.
+      fetchProfile(supabase, userId, setState, accessToken);
       if (data.created) {
         // Surface a one-shot notice so the user knows where to
         // customize. Components subscribe via the event listener.
@@ -152,6 +208,13 @@ export function useAuth() {
   });
 
   const supabase = getSupabaseBrowserClient();
+  // Stable ref to the latest state so the window-level
+  // "mw-profile-changed" listener can always reach the *current* user
+  // + token without re-binding (and without the stale-closure bug that
+  // made avatar swaps silently no-op when state changed between mount
+  // and event-fire).
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     if (!supabase) {
@@ -207,7 +270,40 @@ export function useAuth() {
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Listen for profile-changed events fired from SettingsEmbed
+    // (avatar swap, accent picker, hub edits). Re-fetch the profile
+    // so the header avatar / colors update immediately. Reads user +
+    // token from stateRef so the listener doesn't capture a stale
+    // snapshot — the previous closure-based read kept firing with the
+    // user=null value from the first effect run and silently bailed.
+    const onProfileChanged = (evt: Event) => {
+      const u = stateRef.current.user;
+      if (!supabase || !u) return;
+      // If the dispatcher attached a `detail` payload with the
+      // changed fields, patch state directly and TRUST IT — don't
+      // call fetchProfile, because fetchProfile's RLS-bound browser
+      // SELECT was returning a profile with hub_slug=null and
+      // overwriting the slug we just patched (the load-bearing race
+      // that kept "Recover hub" from ever surfacing the slug in the
+      // header). Issuer is expected to send the authoritative value.
+      const detail = (evt as CustomEvent<{ slug?: string; profilePatch?: Partial<Profile> }>).detail;
+      if (detail?.profilePatch) {
+        setState((prev) => ({ ...prev, profile: { ...(prev.profile || ({} as Profile)), ...detail.profilePatch } }));
+        return;
+      }
+      if (detail?.slug) {
+        setState((prev) => ({ ...prev, profile: { ...(prev.profile || ({} as Profile)), hub_slug: detail.slug } }));
+        return;
+      }
+      // No detail payload — fall back to a full re-fetch.
+      fetchProfile(supabase, u.id, setState, stateRef.current.accessToken);
+    };
+    window.addEventListener("mw-profile-changed", onProfileChanged);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("mw-profile-changed", onProfileChanged);
+    };
   }, [supabase]);
 
   const signInWithGoogle = useCallback(async () => {

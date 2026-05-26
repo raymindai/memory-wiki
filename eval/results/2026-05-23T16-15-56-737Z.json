@@ -1,0 +1,199 @@
+{
+  "bench": "MWBench v1",
+  "corpus_url": "https://memory.wiki/hub/raymindai/llms-full.txt",
+  "corpus_hash": "394a92c6c7a1e471",
+  "started_at": "2026-05-23T16:15:56.737Z",
+  "finished_at": "2026-05-23T16:18:02.150Z",
+  "queries": [
+    {
+      "id": "q-001",
+      "q": "What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?",
+      "expected_doc": "SKaY7VJP",
+      "expected_keywords": [
+        "cross-AI",
+        "URL",
+        "paste"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-002",
+      "q": "Why is the founder Hyunsang Cho building memory.wiki?",
+      "expected_doc": "fz45GXXj",
+      "expected_keywords": [
+        "founder",
+        "memory",
+        "AI"
+      ],
+      "category": "single-doc"
+    },
+    {
+      "id": "q-003",
+      "q": "What are mdfy's core product features as of 2026-05?",
+      "expected_doc": "bmZYfZez",
+      "expected_keywords": [
+        "mdfy",
+        "features",
+        "2026"
+      ],
+      "category": "single-doc"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's wedge is **cross-AI portability through URL-native architecture**. Here's why this is structural:\n\n## The Vendor Lock-In Problem\n\nSingle-AI memory systems (ChatGPT Memory, Claude Projects, Gemini's saved context) face a fundamental constraint: they can't make their memory work *across* competing AI platforms without undermining their own moat. OpenAI won't make ChatGPT Memory readable by Claude, and Anthropic won't make Claude Projects work in ChatGPT.\n\n## Memory.Wiki's Structural Position\n\nMemory.Wiki sits **outside** any single AI vendor, which enables:\n\n1. **One URL, every AI**: A `memory.wiki/<id>` URL works identically in ChatGPT, Claude, Gemini, Cursor, or any future AI tool that can fetch HTTP\n2. **User owns the graph**: The knowledge graph (concepts, relations, embeddings) lives at the URL, not locked in a vendor's database\n3. **No re-explaining tax**: Switch from Claude to ChatGPT mid-project? Paste the same bundle URL — no context loss\n\n## Why This Is Hard to Replicate\n\n- **Vendor-neutral position**: No single AI company can credibly offer \"works with our competitors\" without strategic contradiction\n- **URL as primitive**: The architecture decision to make URLs the unit (not API keys, not OAuth tokens) means any AI that can fetch a webpage can use it\n- **Graph in the response**: The concept graph ships *inside* the markdown payload, so the receiving AI inherits structure without needing Memory.Wiki-specific integration\n\n## The Moat in Practice\n\nFrom the v8 plan:\n\n> \"OpenAI는 Claude로 memory deliver 안 한다. Anthropic은 ChatGPT로 안 한다. cross-AI layer는 둘 다 만들 수 없는 구조다. 그래서 외부에서 만든다.\"\n\nThis isn't a feature advantage — it's a **position** advantage. Memory.Wiki can be the cross-AI memory layer *because* it's not competing to be the AI itself.\n\n---\n\n**Related**: [mdfy vs vendor memory](/mdfy-vs-vendor-memory) for the full comparison matrix.",
+      "tokens_in": 128091,
+      "tokens_out": 517,
+      "latency_ms": 16866,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki's wedge, or structural advantage, over single-AI memory systems is its cross-AI capability. The platform is designed as a memory layer that any AI can access via a URL, allowing it to function across multiple AI systems rather than being confined to a single one. This cross-AI feature is something that major AI companies like OpenAI or Anthropic cannot easily replicate because it would mean supporting their competitors. Memory.Wiki's approach allows users to deploy their knowledge graph to any AI, making it a unique and open solution in a landscape where most memory systems are closed and vendor-specific. This cross-AI capability is emphasized as a key differentiator and moat, as it provides a universal interface that any AI tool can read, thus positioning Memory.Wiki as an independent layer that can integrate with various AI platforms.",
+      "tokens_in": 97710,
+      "tokens_out": 166,
+      "latency_ms": 3563,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "According to the provided content, Memory.Wiki's structural advantage, or \"wedge,\" is that it provides a cross-AI memory layer, which large AI vendors like OpenAI and Anthropic are structurally incentivized not to build.\n\nThe internal thesis states, \"Cross-AI is the structural wedge giants cannot build.\" The reasoning is that vendors like OpenAI will not create a memory layer that also serves their direct competitors, such as Anthropic's Claude, and vice versa. This creates a gap for an independent, external layer.\n\nAs one document puts it, \"They can't ship a memory layer that serves their competitors. So it has to come from outside.\" This positions Memory.Wiki not as a competitor to any single AI, but as a neutral infrastructure layer that makes all of them more useful by providing a portable context URL.",
+      "tokens_in": 102543,
+      "tokens_out": 170,
+      "latency_ms": 12282,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "Based on the hub content, Hyunsang Cho is building memory.wiki because he identified a fundamental gap in how AI systems handle knowledge and memory. Here are the key motivations:\n\n**The Core Problem He Saw:**\n- People pour their thinking into ChatGPT, Claude, Gemini, and Cursor daily, get valuable answers, then close the tab and lose that knowledge\n- Every AI conversation starts from zero, requiring users to re-explain context repeatedly\n- Existing solutions are either closed vendor systems (ChatGPT Memory, Claude Projects) or extraction-based approaches (Mem0, Letta) that don't give users ownership\n\n**His Unique Perspective:**\nFrom his experience at Humain (Saudi Arabia's national AI project), he observed that:\n- Model quality rapidly equalizes across providers\n- The real differentiation opportunity is in the application layer\n- However, model companies can't build cross-AI memory without alienating partners\n- This creates a structural gap that only an independent third party can fill\n\n**The Strategic Insight:**\nHe recognized that \"cross-AI memory is structurally impossible for OpenAI or Anthropic to build\" because:\n- OpenAI won't ship memory that serves Claude\n- Anthropic won't ship memory that serves ChatGPT\n- The cross-AI layer can only come from outside\n\n**His Solution:**\nMemory.wiki positions itself as Layer 3 (Memory Protocol) between:\n- Layer 4 (Applications like Notion, Cursor, ChatGPT)\n- Layer 2 (Models like GPT, Claude, Solar)\n\nThe vision is to create an open, URL-based memory protocol that any AI can read - similar to how RSS, OAuth, and Open Graph became universal standards.\n\n**Personal Background:**\nHis 20-year career across three countries (UK, Korea, Saudi Arabia) at different scales (enterprise, national, consumer, studio) gave him pattern recognition about technology transitions and where differentiation opportunities exist during platform shifts.\n\nIn essence, he's building memory.wiki because he saw a once-in-a-decade opportunity to define the memory protocol for the AI era - a layer that the big labs structurally cannot own, but that the entire ecosystem needs.",
+      "tokens_in": 128086,
+      "tokens_out": 493,
+      "latency_ms": 19121,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "Hyunsang Cho is building memory.wiki to address the problem of knowledge delivery rather than AI memory. He observed that every day, millions of people pour their thoughts into AI tools like ChatGPT, Claude, Gemini, and Cursor, but the insights gained are often lost as they are not effectively stored or reused. The industry typically focuses on creating memory stores that AI can query to remember user information, but Cho sees the real issue as the lack of a place where user knowledge can live in a format that any AI can read. Memory.wiki aims to be that place, offering a URL-based system where knowledge is not only stored but also organized and deployable across different AI platforms. This approach allows users to own their knowledge and deploy it anywhere, addressing the gap where user knowledge is not effectively captured and utilized by AI systems.",
+      "tokens_in": 97703,
+      "tokens_out": 166,
+      "latency_ms": 2952,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "According to the provided content, Hyunsang Cho is building Memory.Wiki to solve the problem of knowledge delivery in the AI era.\n\nHe believes the real issue isn't a lack of \"AI memory,\" but that knowledge is trapped in closed systems (Notion, Google Docs, or a specific AI's internal memory). Users constantly have to re-explain their context to every AI they use because their knowledge doesn't live at a universal URL that any AI can read.\n\nMemory.Wiki is his solution: a platform where knowledge lives as a URL, making it a portable, cross-AI \"capture layer.\" He also believes that large AI companies like OpenAI and Anthropic are structurally unable to build a true cross-AI memory layer because it would mean helping their competitors, creating a strategic opening for an independent tool like Memory.Wiki.",
+      "tokens_in": 102535,
+      "tokens_out": 172,
+      "latency_ms": 10454,
+      "error": null
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "Based on the hub content, mdfy's core product features as of 2026-05 include:\n\n**Three-Layer Architecture:**\n- **Document URLs** (`mdfy.app/<id>`): Individual markdown files with permanent URLs\n- **Bundle URLs** (`mdfy.app/b/<id>`): Curated collections of related documents with AI-generated analysis\n- **Hub URLs** (`mdfy.app/hub/<slug>`): User's entire knowledge base with concept index and cross-references\n\n**Multi-Surface Capture:**\n- Chrome extension for one-click capture from AI chats\n- VS Code extension for direct markdown publishing\n- Mac desktop app with clipboard monitoring\n- CLI tool for terminal-based capture\n- MCP server with 26 tools for AI agent integration\n- macOS QuickLook plugin for preview\n\n**AI-Powered Organization:**\n- Automatic concept extraction from documents\n- Bundle graph analysis (themes, insights, typed edges)\n- Semantic search via embeddings (pgvector)\n- Cross-document relationship mapping\n- Hub-level concept index with weighted relations\n\n**Collaboration & Sharing:**\n- Real-time collaborative editing (Yjs CRDT)\n- Three permission roles (owner/editor/readonly)\n- Multiple edit modes (owner/account/token/view/public)\n- Version history with snapshots\n- Public/private document controls\n\n**AI Integration:**\n- Three-provider failover (Anthropic → OpenAI → Gemini)\n- In-document AI actions (polish, shorten, expand, translate)\n- AI side panel for document chat\n- Visitor \"Ask AI\" feature on public documents\n- Bundle auto-analysis with graph generation\n\n**Technical Infrastructure:**\n- Markdown-native with GFM support\n- KaTeX math, Mermaid diagrams, syntax highlighting\n- 14+ file format imports\n- REST API access\n- Webhook support for automation\n\nThe system is designed around the principle that \"a mdfy URL is an API for any AI\" - making knowledge deployable across different AI tools through simple URL sharing.",
+      "tokens_in": 128086,
+      "tokens_out": 465,
+      "latency_ms": 13658,
+      "error": null
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "As of May 2026, mdfy's core product features include:\n\n1. **URL Architecture**: mdfy operates on a three-tier URL system, consisting of Document URLs, Bundle URLs, and Hub URLs. Each URL serves as a living, editable, and versioned document that can be deployed to any AI.\n\n2. **Multi-Surface Capture**: Users can capture content from various surfaces, including a Chrome extension, VS Code extension, Mac desktop app, CLI, and MCP server. This allows for seamless integration and capture from different environments.\n\n3. **AI Integration**: mdfy supports AI tools for polishing, summarizing, translating, and chatting about documents. It includes a concept index for ontology extraction and embeddings for semantic search.\n\n4. **Real-Time Collaboration**: The platform supports real-time collaborative editing using Yjs CRDT over Supabase Realtime, allowing multiple users to edit documents simultaneously.\n\n5. **Permissions and Sharing**: mdfy provides robust sharing controls with roles like owner, editor, and readonly, along with permanent URLs for documents.\n\n6. **Semantic Search and Auto-Organization**: The system includes semantic search capabilities and auto-organization features powered by LLMs, which help in maintaining and organizing the knowledge graph.\n\n7. **AI Bundle Generation**: Users can request AI to generate bundles based on natural language prompts, which are then reviewed and edited by the user.\n\nThese features collectively position mdfy as a personal knowledge hub for the AI era, emphasizing cross-AI compatibility and user-driven content organization.",
+      "tokens_in": 97706,
+      "tokens_out": 316,
+      "latency_ms": 6999,
+      "error": null
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "As of May 2026, mdfy's core product features are organized into several key areas:\n\n*   **Editing & Rendering:** A dual-pane editor with both a WYSIWYG (Live) and a raw markdown (Source) view. It supports GFM tables, task lists, footnotes, KaTeX for math formulas, Mermaid for diagrams, and code highlighting.\n\n*   **AI Integration:** The system uses a three-provider failover (Anthropic, OpenAI, Gemini) for AI tasks. Features include in-document actions like polishing and translating text, an AI side panel for chatting about content, automatic concept extraction to build an ontology, and embeddings for semantic search.\n\n*   **Real-time Collaboration:** Live collaborative editing is supported via Yjs, showing remote cursors and presence avatars for up to five collaborators.\n\n*   **Multi-channel Surfaces:** mdfy is available across numerous platforms, including a web app, VS Code extension, a signed macOS desktop app, a Chrome extension, a CLI, an MCP server, and a macOS QuickLook plugin.\n\n*   **Permissions & Sharing:** Documents have permanent URLs and can be managed with three roles (owner, editor, readonly) and various privacy controls.",
+      "tokens_in": 102543,
+      "tokens_out": 257,
+      "latency_ms": 13024,
+      "error": null
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Answer correctly identifies cross-AI portability via URL architecture as the wedge, includes expected keywords (cross-AI, URL, paste), and accurately reflects the vendor lock-in problem and structural positioning from the expected document."
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies the cross-AI capability via URL as Memory.Wiki's structural advantage, matching all expected keywords and the core concept."
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies the cross-AI structural wedge and explains why AI vendors cannot build it, matching expected keywords 'cross-AI' and 'URL'."
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer comprehensively addresses the founder's motivations using relevant content about the structural gap in cross-AI memory, his experience at Humain, and the vision for a memory protocol layer, with appropriate keywords present."
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer addresses why the founder is building memory.wiki with relevant keywords about knowledge storage and AI memory, consistent with what would be expected from the referenced document."
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer correctly explains the founder's motivation using expected keywords and addresses knowledge portability across AI systems, which aligns with the document's likely content."
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The answer comprehensively describes mdfy's core product features with specific technical details that align with the expected 2026-05 timeframe and document source."
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": false,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The answer contains extensive specific technical details (Yjs CRDT, Supabase Realtime, MCP server, etc.) that appear to be hallucinated rather than verifiable from the expected source document."
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": true,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The answer comprehensively describes mdfy's core product features with specific technical details consistent with a 2026-05 product documentation."
+    }
+  ]
+}

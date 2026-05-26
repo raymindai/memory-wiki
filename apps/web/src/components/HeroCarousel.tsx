@@ -126,7 +126,7 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                     style={{
                       fontSize: 11,
                       fontWeight: 600,
-                      color: "var(--accent)",
+                      color: "var(--text-primary)",
                       textDecoration: "none",
                       whiteSpace: "nowrap",
                       flexShrink: 0,

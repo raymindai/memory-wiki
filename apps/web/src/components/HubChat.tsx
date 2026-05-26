@@ -43,8 +43,8 @@ const QUICK_ACTIONS = [
 ];
 
 export default function HubChat({ slug, hubName, conceptCount, accent, accentDim, onCitationClick, onDocCreated }: HubChatProps) {
-  const themeAccent = accent || "var(--accent)";
-  const themeAccentDim = accentDim || "var(--accent-dim)";
+  const themeAccent = accent || "var(--text-primary)";
+  const themeAccentDim = accentDim || "var(--border)";
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -287,8 +287,8 @@ function MessageBubble({ message, onCitationClick, isStreaming, onSaveAsDoc, sav
   // Chat bubbles use the global Memory.Wiki orange uniformly — per-mode colour
   // already lives in the panel header so you know which assistant is
   // active; the bubble itself doesn't need to repeat that signal.
-  const chatAccent = "var(--accent)";
-  const chatAccentDim = "var(--accent-dim)";
+  const chatAccent = "var(--text-primary)";
+  const chatAccentDim = "var(--border)";
 
   const isUser = message.role === "user";
   if (isUser) {

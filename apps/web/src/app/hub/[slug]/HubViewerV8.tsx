@@ -1,9 +1,20 @@
 import Link from "next/link";
 import {
-  Layers, Globe, ArrowRight, Clock, Sparkles,
+  Layers, Globe, ArrowRight, Clock, Sparkles, ArrowUpRight, ExternalLink, Copy,
 } from "lucide-react";
 import HubCopyUrlButton from "./HubCopyUrlButton";
+import ViewerHeader from "@/components/ViewerHeader";
 import "../../v8-preview/frontier/frontier.css";
+
+// IMPORTANT: the v8-frontier shell (aurora overlays, grain texture,
+// forced data-frontier-theme="dark") used to wrap this whole viewer
+// and made the hub face look like a totally different product from
+// the doc / bundle viewers, which use plain ViewerHeader + var(--canvas).
+// We've stripped the frontier shell and switched to the standard
+// chrome so all three public viewers share one visual family.
+// The .vhub-* class names stay (frontier.css already styled them
+// chromelessly after the earlier polish pass) but the page no longer
+// forces a theme — the user's data-theme on <html> wins.
 
 type HubDoc = {
   id: string;
@@ -77,17 +88,19 @@ export default function HubViewerV8({
   const recentForList = recent.slice(0, 8);
 
   return (
-    <div className="v8-frontier" data-frontier-theme="dark">
-      <div className="aurora aurora-1" aria-hidden />
-      <div className="aurora aurora-2" aria-hidden />
-      <div className="grain" aria-hidden />
+    <div
+      className="v8-frontier flex flex-col"
+      style={{ background: "var(--canvas)", color: "var(--text-primary)" }}
+    >
+      {/* ViewerHeader lives in page.tsx (the wrapper) — don't render
+          another one here, that was causing the doubled header bar. */}
 
       <main className="vhub">
         {atLabel && (
           <div className="vhub-time-banner">
             <Clock size={13} strokeWidth={1.75} />
             <span>
-              Hub as of <strong>{atLabel}</strong> — {docs.length} {docs.length === 1 ? "doc" : "docs"} and{" "}
+              Hub as of <strong>{atLabel}</strong>, with {docs.length} {docs.length === 1 ? "doc" : "docs"} and{" "}
               {bundles.length} {bundles.length === 1 ? "bundle" : "bundles"} that existed by then.
             </span>
             <Link href={`/hub/${slug}`} className="vhub-time-back">
@@ -96,17 +109,25 @@ export default function HubViewerV8({
           </div>
         )}
 
-        {/* Identity card — centered */}
+        {/* Identity card — centered. Avatar carries a Globe corner
+            overlay (public-only hub) so the share state reads at a
+            glance — mirrors the Layers + Globe pattern in BundleOverview. */}
         <div className="vhub-card">
-          {profile.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt=""
-              className="vhub-avatar"
-            />
-          ) : (
-            <div className="avatar xl vhub-avatar">{initial}</div>
-          )}
+          <div className="vhub-avatar-wrap">
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="vhub-avatar"
+              />
+            ) : (
+              <div className="avatar xl vhub-avatar">{initial}</div>
+            )}
+            <span aria-hidden className="vhub-avatar-overlay" title="Public hub">
+              <Globe size={14} strokeWidth={1.75} />
+            </span>
+          </div>
+          <span className="vhub-access-pill mono">Public</span>
           <h1 className="vhub-name">{author}&apos;s hub</h1>
           {profile.hub_description ? (
             <p className="vhub-bio">{profile.hub_description}</p>
@@ -133,22 +154,22 @@ export default function HubViewerV8({
           <div className="vhub-stats">
             <div className="vhub-stat">
               <span className="vhub-stat-num">{docs.length}</span>
-              <span className="vhub-stat-label mono">{docs.length === 1 ? "document" : "documents"}</span>
+              <span className="vhub-stat-label mono">{docs.length === 1 ? "Document" : "Documents"}</span>
             </div>
             <div className="vhub-stat">
               <span className="vhub-stat-num">{bundles.length}</span>
-              <span className="vhub-stat-label mono">{bundles.length === 1 ? "bundle" : "bundles"}</span>
+              <span className="vhub-stat-label mono">{bundles.length === 1 ? "Bundle" : "Bundles"}</span>
             </div>
             {recent.length > 0 && (
               <div className="vhub-stat">
                 <span className="vhub-stat-num vhub-stat-accent">{recent.length}</span>
-                <span className="vhub-stat-label mono">this week</span>
+                <span className="vhub-stat-label mono">This Week</span>
               </div>
             )}
             {indexTokens && (
               <div className="vhub-stat">
-                <span className="vhub-stat-num">≈ {fmtTok(indexTokens)}</span>
-                <span className="vhub-stat-label mono">tokens</span>
+                <span className="vhub-stat-num">≈{fmtTok(indexTokens)}</span>
+                <span className="vhub-stat-label mono">Tokens</span>
               </div>
             )}
           </div>
@@ -168,15 +189,35 @@ export default function HubViewerV8({
             </div>
           </div>
 
-          <div className="vhub-deploy-url-row">
+          {/* URL + Copy as a single bordered card. URL on the left,
+              Copy on the right split by a hairline divider. The Copy
+              half flips to lime on success, mirroring the hero pattern
+              in BundleOverview. */}
+          <div className="vhub-deploy-urlcard">
             <code className="vhub-deploy-url mono">{hubUrl}</code>
             <HubCopyUrlButton url={hubUrl} />
+          </div>
+
+          {/* Demoted utility links — Raw .md is supporting nav, not a
+              CTA. Right-aligned muted text-link with leading icon. */}
+          <div className="vhub-deploy-utilrow">
             <Link
               href={`/hub/${slug}.md`}
               target="_blank"
-              className="vhub-deploy-raw"
+              rel="noopener noreferrer"
+              className="vhub-deploy-util"
             >
-              View raw .md
+              <ExternalLink size={11} strokeWidth={1.75} />
+              Raw
+            </Link>
+            <Link
+              href="/docs/integrate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="vhub-deploy-util"
+            >
+              Full guide
+              <ArrowUpRight size={11} strokeWidth={1.75} />
             </Link>
           </div>
 
@@ -197,11 +238,11 @@ export default function HubViewerV8({
           <section className="vhub-section">
             <header className="vhub-section-head">
               <div className="vhub-section-titles">
-                <div className="vhub-section-eyebrow mono">BUNDLES</div>
-                <h2 className="vhub-section-title">
-                  {bundles.length === 1 ? "1 bundle" : `${bundles.length} bundles`}
-                </h2>
+                <h2 className="vhub-section-title">Bundles</h2>
               </div>
+              <span className="vhub-section-meta mono">
+                {bundles.length} {bundles.length === 1 ? "item" : "items"}
+              </span>
             </header>
             <div className="vhub-bundle-grid">
               {bundles.map((b) => (
@@ -229,7 +270,6 @@ export default function HubViewerV8({
           <section className="vhub-section">
             <header className="vhub-section-head">
               <div className="vhub-section-titles">
-                <div className="vhub-section-eyebrow mono">RECENT</div>
                 <h2 className="vhub-section-title">Latest documents</h2>
               </div>
               <span className="vhub-section-meta mono">last 7 days</span>
@@ -252,7 +292,6 @@ export default function HubViewerV8({
           <section className="vhub-section">
             <header className="vhub-section-head">
               <div className="vhub-section-titles">
-                <div className="vhub-section-eyebrow mono">ARCHIVE</div>
                 <h2 className="vhub-section-title">
                   {recent.length > 0 ? "Older documents" : "Documents"}
                 </h2>

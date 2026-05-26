@@ -1,0 +1,1447 @@
+{
+  "bench": "MWBench v1",
+  "queries_file": "queries/zorblax-v1.jsonl",
+  "modes": [
+    "compact"
+  ],
+  "corpora": {
+    "hub|mwbench-zorblax|compact": {
+      "url": "https://memory.wiki/raw/hub/mwbench-zorblax?digest=1&compact=1",
+      "chars": 4404,
+      "hash": "fd62ab35be0d80ee",
+      "error": null
+    }
+  },
+  "started_at": "2026-05-24T11:49:41.324Z",
+  "finished_at": "2026-05-24T11:53:33.914Z",
+  "queries": [
+    {
+      "id": "qz-001",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "Who is the CEO of ZorblaxCorp and what's their cryptography background?",
+      "expected_doc": "zx-vision",
+      "expected_keywords": [
+        "Talia Renford",
+        "CipherSafe",
+        "NIST PQC"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-002",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the latency budget commitment CipherPlate makes for a single signature operation on Tier-3 hardware?",
+      "expected_doc": "zx-vision",
+      "expected_keywords": [
+        "14 ms",
+        "p99",
+        "Tier-3"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-003",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What is the monthly USD price for the CipherPlate Team tier and how many operations does it include?",
+      "expected_doc": "zx-pricing",
+      "expected_keywords": [
+        "$499",
+        "50,000,000",
+        "Team"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-004",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the per-operation overage rate for Builder and Team tier customers?",
+      "expected_doc": "zx-pricing",
+      "expected_keywords": [
+        "$0.000028",
+        "per operation",
+        "overage"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-005",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What is ZorblaxCorp's largest single contract value in annual recurring revenue, and what kind of customer is it?",
+      "expected_doc": "zx-pricing",
+      "expected_keywords": [
+        "$267,000",
+        "defense",
+        "Tier-1"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-006",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What programming language is the CipherPlate sidecar implemented in, and what's the test coverage?",
+      "expected_doc": "zx-architecture",
+      "expected_keywords": [
+        "Rust",
+        "94.3",
+        "coverage"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-007",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What date is the planned Series A close target and what's the dollar range?",
+      "expected_doc": "zx-roadmap",
+      "expected_keywords": [
+        "2027-12-15",
+        "$14M",
+        "$18M"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-008",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "Who are the three members of ZorblaxCorp's external Cryptography Review Board?",
+      "expected_doc": "zx-team",
+      "expected_keywords": [
+        "Petra Wismer",
+        "Reginald Apothio",
+        "Saskia Yelchin"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-009",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the total monthly operation volume across all current paying customers?",
+      "expected_doc": "zx-customers",
+      "expected_keywords": [
+        "4.1 billion",
+        "operations"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-010",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the median signature latency for SPHINCS+ on Tier-3 hardware, and what tradeoff justifies it?",
+      "expected_doc": "zx-product",
+      "expected_keywords": [
+        "192 ms",
+        "archival",
+        "tradeoff"
+      ],
+      "category": "hub"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "qz-001",
+      "answer": "Based on the hub content, the CEO and co-founder of ZorblaxCorp is **Talia Renford**. Her cryptography background includes previously serving as the **cryptography lead at CipherSafe**, a company that was subsequently acquired by Salesforce.",
+      "tokens_in": 1532,
+      "tokens_out": 62,
+      "latency_ms": 2297,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-001",
+      "answer": "The CEO of ZorblaxCorp is **Talia Renford**, CEO and co-founder. Her cryptography background is that she was previously **cryptography lead at CipherSafe**, which was acquired by Salesforce.",
+      "tokens_in": 1339,
+      "tokens_out": 102,
+      "latency_ms": 2257,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-001",
+      "answer": "Based on the provided content, the CEO and co-founder of ZorblaxCorp is **Talia Renford**. Her cryptography background includes previously serving as the cryptography lead at **CipherSafe** (which was acquired by Salesforce).",
+      "tokens_in": 1459,
+      "tokens_out": 46,
+      "latency_ms": 2243,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-002",
+      "answer": "Based on the hub digest provided, I can see that the **Performance envelope** section exists in the CipherPlate v3.4.1 product document (measured on Tier-3 reference hardware: 8 vCPU, 16 GiB, Linux 6.10, x86_64), but the specific latency figures are not included in this digest summary — the content is truncated with \"…\"\n\nTo get the full details, you would need to fetch the complete document at:\n**https://memory.wiki/raw/zx-product?compact=1**",
+      "tokens_in": 1538,
+      "tokens_out": 132,
+      "latency_ms": 3672,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-002",
+      "answer": "The provided hub digest mentions a “Performance envelope” for CipherPlate on Tier-3 hardware, but it does not include the specific latency budget for a single signature operation.",
+      "tokens_in": 1341,
+      "tokens_out": 123,
+      "latency_ms": 2448,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-002",
+      "answer": "Based on the provided content, the exact latency budget commitment for a single signature operation on Tier-3 hardware is not mentioned. The document \"CipherPlate v3.4.1 — Product\" references a \"Performance envelope: Measured on Tier-3 reference hardware,\" but the specific details and metrics are truncated and not available in the provided text.",
+      "tokens_in": 1463,
+      "tokens_out": 69,
+      "latency_ms": 3513,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-003",
+      "answer": "Based on the hub digest, the pricing details table is referenced in the [ZorblaxCorp — Pricing](https://memory.wiki/zx-pricing) document, but the specific price and operation count for the Team tier are not fully displayed in the digest summary provided here.\n\nTo get the exact figures, you would need to fetch the full document at `https://memory.wiki/raw/zx-pricing?compact=1`.",
+      "tokens_in": 1535,
+      "tokens_out": 97,
+      "latency_ms": 2908,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-003",
+      "answer": "The provided hub content mentions a CipherPlate Pricing document and its tiers, but it does not include the Team tier’s monthly USD price or included operations.",
+      "tokens_in": 1342,
+      "tokens_out": 109,
+      "latency_ms": 2657,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-003",
+      "answer": "Based on the provided content, the exact monthly USD price and the number of included operations for the Team tier are not mentioned. The pricing document snippet lists the table headers but does not contain the specific figures for the Team tier.",
+      "tokens_in": 1462,
+      "tokens_out": 45,
+      "latency_ms": 4423,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-004",
+      "answer": "Based on the pricing document in the hub, the overage rate for **Builder and Team tier** customers is **$0.000028 per operation** for operations exceeding their included monthly quota.",
+      "tokens_in": 1529,
+      "tokens_out": 44,
+      "latency_ms": 1921,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-004",
+      "answer": "The per-operation overage rate for Builder and Team customers is **$0.000028 per operation**.",
+      "tokens_in": 1336,
+      "tokens_out": 57,
+      "latency_ms": 2198,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-004",
+      "answer": "According to the ZorblaxCorp — Pricing document, operations over the included quota are billed at $0.000028 per operation for Builder and Team tiers.",
+      "tokens_in": 1459,
+      "tokens_out": 36,
+      "latency_ms": 2076,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-005",
+      "answer": "Based on the hub content, I can see that ZorblaxCorp has **3 Sovereign tier customers contributing a total ARR of $550,500**, but the digest does not break down the ARR by individual customer. Therefore, I cannot determine the largest single contract value from the information provided.\n\nWhat I can tell you is that all three customers are **Sovereign tier** clients:\n- A US defense subcontractor\n- An EU central bank\n- An NIH-funded healthcare consortium\n\nTo get the individual contract values, you would need to fetch the full document at `https://memory.wiki/raw/zx-customers?compact=1`.",
+      "tokens_in": 1539,
+      "tokens_out": 144,
+      "latency_ms": 4978,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-005",
+      "answer": "The provided hub digest does not state the largest single contract value or identify which customer has it.\n\nIt only says ZorblaxCorp has **3 Sovereign customers contributing total ARR of $550,500**, including a US defense subcontractor, an EU central bank, and an NIH-funded healthcare consortium.",
+      "tokens_in": 1347,
+      "tokens_out": 185,
+      "latency_ms": 3478,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-005",
+      "answer": "Based on the provided content, the exact value of ZorblaxCorp's largest single contract is not specified. \n\nThe text only notes that there are 3 Sovereign tier customers contributing a combined total ARR of $550,500. These three customers are:\n* **Customer A:** A US defense subcontractor\n* **Customer B:** An EU central bank\n* **Customer C:** An NIH-funded healthcare consortium\n\nBecause individual contract breakdowns are not provided in the text, it is not possible to determine which of these has the largest single contract value.",
+      "tokens_in": 1467,
+      "tokens_out": 116,
+      "latency_ms": 3589,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-006",
+      "answer": "Based on the hub content, CipherPlate's internal architecture document states the **implementation language is Rust 1.78 (locked in CI)**.\n\nHowever, the hub digest only provides a brief gist of each document — **test coverage details are not included** in the provided content. For that information, you'd need to fetch the full architecture document at `https://memory.wiki/raw/zx-architecture?compact=1`.",
+      "tokens_in": 1535,
+      "tokens_out": 97,
+      "latency_ms": 3093,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-006",
+      "answer": "The CipherPlate sidecar is implemented in **Rust 1.78**, locked in CI.\n\nThe provided hub content does **not** state the test coverage.",
+      "tokens_in": 1340,
+      "tokens_out": 98,
+      "latency_ms": 2078,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-006",
+      "answer": "Based on the provided content, the CipherPlate sidecar is implemented in **Rust 1.78** (locked in CI). \n\nThe provided documents do not contain any information regarding the test coverage.",
+      "tokens_in": 1462,
+      "tokens_out": 42,
+      "latency_ms": 2935,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-007",
+      "answer": "Based on the hub content, the Series A target close date is **2027-12-15**. However, the specific dollar range for the Series A is not included in the digest summary provided — only the close date is mentioned in the roadmap section gist. You would need to fetch the full roadmap document at `https://memory.wiki/raw/zx-roadmap?compact=1` for additional details.",
+      "tokens_in": 1529,
+      "tokens_out": 92,
+      "latency_ms": 3251,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-007",
+      "answer": "The planned Series A target close date is **2027-12-15**.\n\nThe **dollar range is not provided** in the supplied hub content.",
+      "tokens_in": 1337,
+      "tokens_out": 104,
+      "latency_ms": 2169,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-007",
+      "answer": "Based on the provided content, the planned Series A target close date is **2027-12-15**. \n\nThe provided text does not contain information regarding the dollar range for the Series A.",
+      "tokens_in": 1459,
+      "tokens_out": 44,
+      "latency_ms": 3276,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-008",
+      "answer": "Based on the hub content, only one member of the external Cryptography Review Board is mentioned: **Petra Wismer (Chair)** from Princeton, specializing in post-quantum signature schemes.\n\nThe other two members of the board are not listed in the digest summary provided. To get the full details, you would need to fetch the complete team document at `https://memory.wiki/raw/zx-team?compact=1`.",
+      "tokens_in": 1533,
+      "tokens_out": 96,
+      "latency_ms": 3151,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-008",
+      "answer": "The provided hub content only names one external Cryptography Review Board member:\n\n- Petra Wismer — Chair, Princeton, post-quantum signature schemes\n\nThe other two members are not listed in the provided content.",
+      "tokens_in": 1340,
+      "tokens_out": 155,
+      "latency_ms": 2763,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-008",
+      "answer": "Based on the provided content, only one member of the external Cryptography Review Board is named: **Petra Wismer** (Chair), who is associated with Princeton and post-quantum signature schemes. \n\nThe names of the other two members of the board are not mentioned in the provided content.",
+      "tokens_in": 1460,
+      "tokens_out": 58,
+      "latency_ms": 2726,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-009",
+      "answer": "Based on the provided hub content, I cannot answer this question. The pricing document ([ZorblaxCorp — Pricing](https://memory.wiki/zx-pricing)) mentions the tier structure, included operations per month, and overage rates, but the digest excerpt doesn't include the specific operations/month figures for each tier. Without those numbers and the customer counts per tier (96 Builder, 38 Team, 3 Sovereign), I can't calculate a total monthly operation volume.\n\nTo get the full details, you'd need to fetch the complete pricing document at `https://memory.wiki/raw/zx-pricing?compact=1`.",
+      "tokens_in": 1526,
+      "tokens_out": 143,
+      "latency_ms": 5212,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-009",
+      "answer": "The provided hub content does not include the operation quotas for each pricing tier, so the total monthly operation volume cannot be calculated from it.\n\nIt only states there are 137 paying customers: 96 Builder, 38 Team, and 3 Sovereign.",
+      "tokens_in": 1334,
+      "tokens_out": 203,
+      "latency_ms": 4025,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-009",
+      "answer": "Based on the provided content, the total monthly operation volume across all current paying customers is not mentioned.",
+      "tokens_in": 1456,
+      "tokens_out": 20,
+      "latency_ms": 2902,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-010",
+      "answer": "Based on the hub digest provided, I can see that the **CipherPlate v3.4.1 — Product** document ([https://memory.wiki/zx-product](https://memory.wiki/zx-product)) contains a **Performance envelope** section measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64), but the specific latency figures and algorithm details are not included in this digest summary.\n\nTo get the exact median signature latency for SPHINCS+ and the associated tradeoff explanation, you would need to fetch the full document at:\n**https://memory.wiki/raw/zx-product?compact=1**\n\nThat document's algorithm matrix and performance envelope sections would contain the specific numbers and justification you're looking for.",
+      "tokens_in": 1542,
+      "tokens_out": 187,
+      "latency_ms": 4168,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-010",
+      "answer": "The provided hub digest does not include the median signature latency for SPHINCS+ on Tier-3 hardware, nor the specific tradeoff that justifies it. It only notes that a “Performance envelope” exists in the CipherPlate v3.4.1 product document.",
+      "tokens_in": 1347,
+      "tokens_out": 155,
+      "latency_ms": 2661,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-010",
+      "answer": "Based on the provided hub content, the specific median signature latency for SPHINCS+ on Tier-3 hardware and the tradeoff that justifies it are not mentioned. The details are truncated in the document summaries.",
+      "tokens_in": 1467,
+      "tokens_out": 42,
+      "latency_ms": 3283,
+      "error": null,
+      "mode": "compact",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "qz-001",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All three substantive claims in the answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The CEO and co-founder of ZorblaxCorp is Talia Renford",
+          "quote": "Talia Renford — CEO & co-founder",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford previously served as cryptography lead at CipherSafe",
+          "quote": "Previously cryptography lead at CipherSafe",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired by Salesforce",
+          "quote": "CipherSafe (acquired by Salesforce",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-001",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All four claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The CEO of ZorblaxCorp is Talia Renford",
+          "quote": "CEO: Talia Renford",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford is co-founder of ZorblaxCorp",
+          "quote": "Talia Renford — CEO & co-founder",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford was previously cryptography lead at CipherSafe",
+          "quote": "Previously cryptography lead at CipherSafe",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired by Salesforce",
+          "quote": "CipherSafe (acquired by Salesforce",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-001",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All three claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The CEO and co-founder of ZorblaxCorp is Talia Renford",
+          "quote": "Talia Renford — CEO & co-founder.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford previously served as the cryptography lead at CipherSafe",
+          "quote": "Previously cryptography lead at CipherSafe",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired by Salesforce",
+          "quote": "CipherSafe (acquired by Salesforce",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-002",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "All claims made by the candidate are supported by the corpus; however, the answer fails to surface the ≤14ms p99 latency commitment that is clearly stated in the Vision document, which was also available in the runner's corpus.",
+      "claims": [
+        {
+          "text": "The Performance envelope section exists in the CipherPlate v3.4.1 product document",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier-3 reference hardware is 8 vCPU, 16 GiB, Linux 6.10, x86_64",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        },
+        {
+          "text": "The specific latency figures are not included in the digest summary — the content is truncated",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664): |",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The full document can be fetched at https://memory.wiki/raw/zx-product?compact=1",
+          "quote": "Fetch any as `https://memory.wiki/raw/<id>?compact=1` for the full body.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-002",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate correctly notes a performance envelope section exists, but incorrectly claims the specific latency budget is absent — the corpus explicitly states ≤ 14 ms p99 for a single signature operation on Tier-3 hardware.",
+      "claims": [
+        {
+          "text": "The hub digest mentions a 'Performance envelope' for CipherPlate on Tier-3 hardware",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub digest does not include the specific latency budget for a single signature operation",
+          "quote": "Latency budget: ≤ 14 ms p99 added latency on a single signature operation on Tier-3 hardware (8 vCPU, 16 GiB).",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-002",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.33,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer incorrectly claims the latency budget is not mentioned, when the corpus clearly states '≤ 14 ms p99 added latency on a single signature operation on Tier-3 hardware (8 vCPU, 16 GiB)' in the Vision document.",
+      "claims": [
+        {
+          "text": "The exact latency budget commitment for a single signature operation on Tier-3 hardware is not mentioned in the provided content",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The document 'CipherPlate v3.4.1 — Product' references a 'Performance envelope: Measured on Tier-3 reference hardware'",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        },
+        {
+          "text": "The specific details and metrics are truncated and not available in the provided text",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-003",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer incorrectly claims the Team tier price and operation count are not available in the corpus, when the primary source document clearly states $499/month and 50,000,000 operations/month for the Team tier.",
+      "claims": [
+        {
+          "text": "The pricing details for the Team tier are referenced in the ZorblaxCorp — Pricing document",
+          "quote": "ZorblaxCorp — Pricing](https://memory.wiki/zx-pricing)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The specific price for the Team tier is not fully displayed in the digest summary",
+          "quote": "| Tier | Price (USD) | Operations/month | Threat model | Support | |",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The operation count for the Team tier is not fully displayed in the digest summary",
+          "quote": "| Tier | Price (USD) | Operations/month | Threat model | Support | |",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The full document can be fetched at https://memory.wiki/raw/zx-pricing?compact=1",
+          "quote": "Fetch any as `https://memory.wiki/raw/<id>?compact=1` for the full body.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-003",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.33,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The candidate answer falsely claims the pricing document does not include the Team tier's monthly USD price or operations, when in fact the corpus explicitly states $499/month and 50,000,000 operations/month for the Team tier.",
+      "claims": [
+        {
+          "text": "The hub content mentions a CipherPlate Pricing document",
+          "quote": "ZorblaxCorp — Pricing](https://memory.wiki/zx-pricing)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub content does not include the Team tier's monthly USD price",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The hub content does not include the Team tier's included operations",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-003",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The corpus clearly states the Team tier costs $499/month and includes 50,000,000 operations/month, directly contradicting the candidate answer's claim that this information was not available.",
+      "claims": [
+        {
+          "text": "The exact monthly USD price for the Team tier is not mentioned in the provided content",
+          "quote": "| **Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review |",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The number of included operations for the Team tier is not mentioned in the provided content",
+          "quote": "| **Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review |",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The pricing document snippet lists the table headers but does not contain the specific figures for the Team tier",
+          "quote": "| Tier | Price (USD) | Operations/month | Threat model | Support |",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-004",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims in the candidate answer are directly and verbatim supported by the pricing document in the corpus.",
+      "claims": [
+        {
+          "text": "The overage rate for Builder and Team tier customers is $0.000028 per operation",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The overage rate applies to operations exceeding their included monthly quota",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-004",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The single claim in the answer is directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "The per-operation overage rate for Builder and Team customers is $0.000028 per operation",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-004",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Both claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "Operations over the included quota are billed at $0.000028 per operation for Builder and Team tiers",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The source document is ZorblaxCorp — Pricing",
+          "quote": "ZorblaxCorp — Pricing",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-005",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.71,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "Most factual claims about customer types and total ARR are supported, but the answer incorrectly states the corpus doesn't break down ARR by individual customer when it actually does (the primary source document lists the largest single contract as $267,000 ARR for a Tier-1 US defense subcontractor), making the core answer to the question wrong by omission and misdirection.",
+      "claims": [
+        {
+          "text": "ZorblaxCorp has 3 Sovereign tier customers contributing a total ARR of $550,500",
+          "quote": "3 Sovereign customers contributing total ARR of $550,500",
+          "verdict": "supported"
+        },
+        {
+          "text": "The digest does not break down the ARR by individual customer",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "All three customers are Sovereign tier clients",
+          "quote": "3 Sovereign customers contributing total ARR of $550,500",
+          "verdict": "supported"
+        },
+        {
+          "text": "One Sovereign customer is a US defense subcontractor",
+          "quote": "Customer A (Sovereign tier, US defense subcontractor)",
+          "verdict": "supported"
+        },
+        {
+          "text": "One Sovereign customer is an EU central bank",
+          "quote": "Customer B (Sovereign tier, EU central bank)",
+          "verdict": "supported"
+        },
+        {
+          "text": "One Sovereign customer is an NIH-funded healthcare consortium",
+          "quote": "Customer C (Sovereign tier, NIH-funded healthcare consortium)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Individual contract values require fetching the full document at https://memory.wiki/raw/zx-customers?compact=1",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-005",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.67,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer falsely claims the corpus does not state the largest single contract value, when in fact the pricing document explicitly states '$267,000 ARR (a Tier-1 US defense subcontractor whose name is under NDA)'; the other claims about Sovereign customers are supported.",
+      "claims": [
+        {
+          "text": "The hub digest does not state the largest single contract value",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The hub digest does not identify which customer has the largest single contract",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "ZorblaxCorp has 3 Sovereign customers contributing total ARR of $550,500",
+          "quote": "3 Sovereign customers contributing total ARR of $550,500",
+          "verdict": "supported"
+        },
+        {
+          "text": "One of the Sovereign customers is a US defense subcontractor",
+          "quote": "Customer A (Sovereign tier, US defense subcontractor)",
+          "verdict": "supported"
+        },
+        {
+          "text": "One of the Sovereign customers is an EU central bank",
+          "quote": "Customer B (Sovereign tier, EU central bank)",
+          "verdict": "supported"
+        },
+        {
+          "text": "One of the Sovereign customers is an NIH-funded healthcare consortium",
+          "quote": "Customer C (Sovereign tier, NIH-funded healthcare consortium)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-005",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies the three Sovereign customers but falsely claims the largest single contract value is unspecified, when the corpus explicitly states it is $267,000 ARR from a Tier-1 US defense subcontractor.",
+      "claims": [
+        {
+          "text": "The exact value of ZorblaxCorp's largest single contract is not specified in the text",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "There are 3 Sovereign tier customers contributing a combined total ARR of $550,500",
+          "quote": "3 Sovereign customers contributing total ARR of $550,500",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer A is a US defense subcontractor",
+          "quote": "Customer A (Sovereign tier, US defense subcontractor)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer B is an EU central bank",
+          "quote": "Customer B (Sovereign tier, EU central bank)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer C is an NIH-funded healthcare consortium",
+          "quote": "Customer C (Sovereign tier, NIH-funded healthcare consortium)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Individual contract breakdowns are not provided, so the largest single contract cannot be determined",
+          "quote": "",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-006",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "While the language claim is correct, the answer incorrectly states test coverage is not in the provided content — the corpus clearly includes '94.3% line coverage as of 3.4.1 release' and '1,847 tests' in the primary source document.",
+      "claims": [
+        {
+          "text": "The implementation language is Rust 1.78",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Rust 1.78 is locked in CI",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Test coverage details are not included in the provided content",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "To get test coverage details, you would need to fetch the full architecture document",
+          "quote": "",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-006",
+      "runner": "openai",
+      "accurate": true,
+      "score": 0.75,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The language and version claims are correct, but the answer incorrectly claims test coverage is not stated when the corpus explicitly provides 94.3% line coverage with 1,847 tests.",
+      "claims": [
+        {
+          "text": "The CipherPlate sidecar is implemented in Rust",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Rust version is 1.78",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Rust version is locked in CI",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The provided hub content does not state the test coverage",
+          "quote": "Test suite: 1,847 tests, 94.3% line coverage as of 3.4.1 release",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-006",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 0.75,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies Rust 1.78 as the implementation language but incorrectly claims no test coverage information is available, when the corpus clearly states 94.3% line coverage with 1,847 tests.",
+      "claims": [
+        {
+          "text": "The CipherPlate sidecar is implemented in Rust",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Rust version is 1.78",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Rust version is locked in CI",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The provided documents do not contain any information regarding the test coverage",
+          "quote": "Test suite: 1,847 tests, 94.3% line coverage as of 3.4.1 release",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-007",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.33,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies the close date but falsely claims the dollar range is absent from the corpus — the corpus explicitly states '$14M-$18M target range' in the roadmap document and key takeaways.",
+      "claims": [
+        {
+          "text": "The Series A target close date is 2027-12-15",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "supported"
+        },
+        {
+          "text": "The specific dollar range for the Series A is not included in the digest summary provided",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "Only the close date is mentioned in the roadmap section gist",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-007",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The close date is correctly stated, but the answer incorrectly claims the dollar range is not provided when the corpus explicitly states $14M-$18M.",
+      "claims": [
+        {
+          "text": "The planned Series A target close date is 2027-12-15",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "supported"
+        },
+        {
+          "text": "The dollar range is not provided in the supplied hub content",
+          "quote": "Series A target range: $14M-$18M",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-007",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The close date claim is correct and supported, but the answer falsely claims no dollar range information exists when the corpus explicitly states $14M-$18M.",
+      "claims": [
+        {
+          "text": "The planned Series A target close date is 2027-12-15",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "supported"
+        },
+        {
+          "text": "The provided text does not contain information regarding the dollar range for the Series A",
+          "quote": "Series A target range: $14M-$18M",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-008",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.6,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies Petra Wismer but falsely claims the other two board members (Reginald Apothio and Saskia Yelchin) are not listed, when they are explicitly named in the corpus under the Cryptography Review Board section.",
+      "claims": [
+        {
+          "text": "Petra Wismer is Chair of the external Cryptography Review Board",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is from Princeton",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer specializes in post-quantum signature schemes",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "The other two members of the board are not listed in the digest summary provided",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "To get the full details you would need to fetch the complete team document",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-008",
+      "runner": "openai",
+      "accurate": true,
+      "score": 0.75,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies Petra Wismer and her role/affiliation but incorrectly claims the other two members (Reginald Apothio and Saskia Yelchin) are not listed, when they are clearly present in the corpus.",
+      "claims": [
+        {
+          "text": "Petra Wismer is a member of the external Cryptography Review Board",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is the Chair of the board",
+          "quote": "Petra Wismer (Chair)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is from Princeton and specializes in post-quantum signature schemes",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "The other two members are not listed in the provided content",
+          "quote": "",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-008",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 0.75,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies Petra Wismer but falsely claims the other two members are not named, when in fact Reginald Apothio and Saskia Yelchin are explicitly listed in the corpus.",
+      "claims": [
+        {
+          "text": "Petra Wismer is a member of the external Cryptography Review Board",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is the Chair of the board",
+          "quote": "Petra Wismer (Chair)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is associated with Princeton and post-quantum signature schemes",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "The names of the other two members of the board are not mentioned in the provided content",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-009",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.4,
+      "keyword_hits": 1,
+      "keyword_total": 2,
+      "reason": "The answer incorrectly claims it cannot answer the question when the primary source document explicitly states total monthly operations across all customers is ~4.1 billion.",
+      "claims": [
+        {
+          "text": "The pricing document mentions the tier structure, included operations per month, and overage rates",
+          "quote": "Overage: Operations over the included quota are billed at $0.000028 per operation for Builder and Team.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The digest excerpt doesn't include the specific operations/month figures for each tier",
+          "quote": "_The ontology for this hub hasn't been built yet. Ask the owner to run **Build ontology** in their hub view, or fetch [the full index](https://memory.wiki/raw/hub/mwbench-zorblax?compact=1) instead._",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Customer counts are 96 Builder, 38 Team, 3 Sovereign",
+          "quote": "Current paying customers as of 2027-03-15: 137 (96 Builder, 38 Team, 3 Sovereign)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The total monthly operation volume cannot be calculated from the available information",
+          "quote": "Total monthly operations across all customers: ~4.1 billion",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "To get full details, fetch the complete pricing document at https://memory.wiki/raw/zx-pricing?compact=1",
+          "quote": "Fetch any as `https://memory.wiki/raw/<id>?compact=1` for the full body.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-009",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.33,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "The answer correctly states customer counts but incorrectly claims the total monthly operation volume cannot be determined, when the corpus explicitly states ~4.1 billion total monthly operations.",
+      "claims": [
+        {
+          "text": "The hub content does not include the operation quotas for each pricing tier",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The total monthly operation volume cannot be calculated from the hub content",
+          "quote": "Total monthly operations across all customers: ~4.1 billion",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "There are 137 paying customers",
+          "quote": "Current paying customers as of 2027-03-15: 137 (96 Builder, 38 Team, 3 Sovereign)",
+          "verdict": "supported"
+        },
+        {
+          "text": "96 Builder customers",
+          "quote": "96 Builder",
+          "verdict": "supported"
+        },
+        {
+          "text": "38 Team customers",
+          "quote": "38 Team",
+          "verdict": "supported"
+        },
+        {
+          "text": "3 Sovereign customers",
+          "quote": "3 Sovereign",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-009",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "The corpus explicitly states 'Total monthly operations across all customers: ~4.1 billion' in the Facts section, directly contradicting the answer's claim that this information is not mentioned.",
+      "claims": [
+        {
+          "text": "The total monthly operation volume across all current paying customers is not mentioned",
+          "quote": "",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-010",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The answer incorrectly claims the specific latency figures are not available in the corpus, when in fact the primary source document clearly states the SPHINCS+ median latency is 192 ms with the tradeoff being it is reserved for archival use.",
+      "claims": [
+        {
+          "text": "The CipherPlate v3.4.1 — Product document contains a Performance envelope section",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Performance envelope was measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64)",
+          "quote": "Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The specific latency figures and algorithm details are not included in the digest summary",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The full document can be fetched at https://memory.wiki/raw/zx-product?compact=1",
+          "quote": "Fetch any as `https://memory.wiki/raw/<id>?compact=1` for the full body.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The document contains an algorithm matrix section",
+          "quote": "Algorithm matrix: | Algorithm | Use case | Mode | Status |",
+          "verdict": "supported"
+        },
+        {
+          "text": "The specific median signature latency for SPHINCS+ is not provided in the answer",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-010",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.33,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The runner incorrectly claimed the corpus lacked SPHINCS+ latency and tradeoff data, when both (192 ms median and 'reserved for archival' justification) are explicitly present in the primary source document.",
+      "claims": [
+        {
+          "text": "The hub digest does not include the median signature latency for SPHINCS+ on Tier-3 hardware",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The hub digest does not include the specific tradeoff that justifies the SPHINCS+ latency",
+          "quote": "acknowledged tradeoff; reserved for archival",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The hub digest only notes that a 'Performance envelope' exists in the CipherPlate v3.4.1 product document",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    },
+    {
+      "query_id": "qz-010",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "The corpus explicitly states SPHINCS+ median signature latency is 192 ms on Tier-3 hardware with the tradeoff being it is reserved for archival use, directly contradicting the candidate answer's claim that this information is not mentioned or truncated.",
+      "claims": [
+        {
+          "text": "The specific median signature latency for SPHINCS+ on Tier-3 hardware is not mentioned in the document summaries",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The tradeoff justifying SPHINCS+ latency is not mentioned in the document summaries",
+          "quote": "",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "The details are truncated in the document summaries",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "contradicts"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "compact"
+    }
+  ]
+}

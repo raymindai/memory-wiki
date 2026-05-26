@@ -17,72 +17,71 @@
    ══════════════════════════════════════════════════════════════════ */
 
 .v8-frontier {
-  /* DARK-FIRST tokens */
-  --bg:        #08080a;
-  --bg-deep:   #04040a;
-  --canvas-1:  rgba(255, 255, 255, 0.03);
-  --canvas-2:  rgba(255, 255, 255, 0.05);
-  --canvas-3:  rgba(255, 255, 255, 0.08);
-  --canvas-4:  rgba(255, 255, 255, 0.12);
+  /* Forward to the app's standard tokens so the hub viewer follows
+     the user's chosen skin + key color instead of being locked to
+     the old dark-first preview palette. The vhub-* rules below
+     reference --ink/--body/--bg etc. — pointing them at globals
+     means changing data-theme / data-scheme on <html> re-skins
+     this surface the same way it re-skins the editor. */
+  --bg:        var(--canvas);
+  --bg-deep:   var(--background);
+  --canvas-1:  var(--toggle-bg);
+  --canvas-2:  var(--surface);
+  --canvas-3:  var(--border-dim);
+  --canvas-4:  var(--border);
 
-  /* Hairlines */
-  --hair:      rgba(255, 255, 255, 0.08);
-  --hair-strong: rgba(255, 255, 255, 0.14);
-  --hair-soft: rgba(255, 255, 255, 0.04);
+  --hair:        var(--border-dim);
+  --hair-strong: var(--border);
+  --hair-soft:   var(--border-dim);
 
-  /* Text */
-  --ink:    #fafafa;
-  --strong: #ededed;
-  --body:   #c2c2c5;
-  --muted:  #8a8a92;
-  --faint:  #5a5a62;
+  --ink:    var(--text-primary);
+  --strong: var(--text-primary);
+  --body:   var(--text-secondary);
+  --muted:  var(--text-muted);
+  --faint:  var(--text-faint);
 
-  /* Accent — warm orange aurora */
-  --accent:        #ff7a3d;
-  --accent-strong: #ffb380;
-  --accent-soft:   rgba(255, 122, 61, 0.14);
-  --accent-glow:   rgba(255, 122, 61, 0.4);
-  --accent-ink:    #1a0a02;
+  /* Accent — picks up the user's key color (lime by default).
+     SOFT + GLOW pinned to transparent so nothing draws a coloured
+     gradient/halo backdrop on viewer surfaces. Small interactive
+     elements (dots, buttons) still get their --accent color, but
+     any radial/ambient layer using --accent-soft/--accent-glow
+     becomes invisible. */
+  --accent:        var(--accent);
+  --accent-strong: var(--accent);
+  --accent-soft:   transparent;
+  --accent-glow:   transparent;
+  --accent-ink:    var(--background);
 
-  /* Aurora — one orange light source over warm-neutral atmosphere */
-  --aurora-a:  rgba(245, 220, 190, 0.08);  /* warm cream, near-neutral */
-  --aurora-b:  rgba(255, 122, 61, 0.18);   /* the orange — single source */
-  --aurora-c:  rgba(210, 190, 175, 0.06);  /* desaturated peach-grey */
+  --aurora-a:  transparent;
+  --aurora-b:  transparent;
+  --aurora-c:  transparent;
 
-  /* AI tint — desaturated mint, low-contrast on dark */
-  --ai-tint:   rgba(56, 189, 248, 0.06);
-  --ai-ink:    #7ee7ff;
+  --ai-tint:   rgba(139, 92, 246, 0.10);
+  --ai-ink:    var(--micro-ai);
 
-  /* Radii */
   --r-sm: 10px;
   --r-md: 14px;
   --r-lg: 20px;
   --r-xl: 28px;
   --r-pill: 9999px;
 
-  /* Shadows / inner highlight (used by .glass) */
-  --shadow-soft: 0 30px 80px -20px rgba(0, 0, 0, 0.6),
-                 0 12px 24px -12px rgba(0, 0, 0, 0.4);
-  --shadow-lift: 0 60px 140px -40px rgba(0, 0, 0, 0.8),
-                 0 24px 60px -20px rgba(0, 0, 0, 0.5);
-  --inner-stroke: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --shadow-soft: none;
+  --shadow-lift: none;
+  --inner-stroke: none;
 
-  /* Fonts — --font-sans / --font-mono inherit from :root in globals.css */
   --font-serif: var(--font-instrument), "Iowan Old Style", "Apple Garamond", Garamond, "Times New Roman", serif;
 
-  background: var(--bg);
-  color: var(--body);
+  background: var(--canvas);
+  color: var(--text-secondary);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.55;
-  letter-spacing: -0.005em;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "ss01", "cv11";
   margin: 0;
   position: relative;
   overflow-x: hidden;
-  transition: background 240ms ease, color 240ms ease;
 }
 
 /* ═══ LIGHT MODE — kept available, but secondary ═══ */
@@ -103,15 +102,15 @@
   --muted:  #6b655e;
   --faint:  #aaa39a;
 
-  --accent:        #ea580c;
-  --accent-strong: #c2410c;
-  --accent-soft:   rgba(234, 88, 12, 0.1);
-  --accent-glow:   rgba(234, 88, 12, 0.28);
+  --accent:        #0c0a08;          /* ink — quiet, never a highlight */
+  --accent-strong: #1c1917;
+  --accent-soft:   rgba(0, 0, 0, 0.05);
+  --accent-glow:   rgba(0, 0, 0, 0.16);
   --accent-ink:    #ffffff;
 
-  --aurora-a:  rgba(245, 220, 190, 0.08);
-  --aurora-b:  rgba(234, 88, 12, 0.12);
-  --aurora-c:  rgba(210, 190, 175, 0.06);
+  --aurora-a:  rgba(220, 215, 200, 0.06);
+  --aurora-b:  rgba(0, 0, 0, 0.04);
+  --aurora-c:  rgba(210, 190, 175, 0.04);
 
   --ai-tint:   rgba(13, 148, 136, 0.06);
   --ai-ink:    #0f766e;
@@ -123,44 +122,33 @@
   --inner-stroke: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* ═══ AMBIENT BACKGROUND LAYERS ═══ */
-.v8-frontier .aurora {
-  position: fixed;
-  pointer-events: none;
-  filter: blur(120px) saturate(1.4);
-  opacity: 1;
-  z-index: 0;
+/* ═══ AMBIENT BACKGROUND LAYERS — fully suppressed inside the
+   frontier scope for viewer surfaces. Anything matching aurora /
+   grain / blob / glow class names gets display:none so leftover
+   marketing-shell decoration can't bleed colored halos into the
+   public hub viewer. */
+.v8-frontier .aurora,
+.v8-frontier .grain,
+.v8-frontier [class*="hero-blob"],
+.v8-frontier [class*="aurora"],
+.v8-frontier [class*="-glow"],
+.v8-frontier [class*="ambient"] {
+  display: none !important;
 }
-.v8-frontier .aurora-1 {
-  top: -20vh;
-  left: -10vw;
-  width: 80vw;
-  height: 80vh;
-  background:
-    radial-gradient(ellipse 60% 60% at 30% 40%, var(--aurora-b) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 70% 60%, var(--aurora-a) 0%, transparent 60%);
+
+/* Blanket override — strip every box-shadow, backdrop-filter, and
+   blur-style filter inside the frontier scope so the chrome reads
+   as flat canvas instead of a halo-y glass surface. */
+.v8-frontier,
+.v8-frontier *,
+.v8-frontier *::before,
+.v8-frontier *::after {
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
-.v8-frontier .aurora-2 {
-  top: 40vh;
-  right: -10vw;
-  width: 70vw;
-  height: 70vh;
-  background:
-    radial-gradient(ellipse 60% 60% at 60% 50%, var(--aurora-c) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 30% 70%, var(--aurora-a) 0%, transparent 60%);
-}
-.v8-frontier .grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.4;
-  z-index: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  mix-blend-mode: overlay;
-}
-.v8-frontier[data-frontier-theme="light"] .grain {
-  opacity: 0.5;
-  mix-blend-mode: multiply;
+.v8-frontier *:not(svg):not(svg *) {
+  filter: none !important;
 }
 
 /* Force content above ambient layers */
@@ -4393,28 +4381,24 @@
 }
 .v8-frontier .vhub-strip-action:hover { background: var(--canvas-3); color: var(--ink); }
 
-/* Identity card */
+/* Identity card — chromeless. Mirrors BundleOverview's hero: title +
+   avatar + meta sit directly on the page canvas (no border, no
+   surface fill, no radial spotlight). The visual identity comes from
+   typography + the avatar overlay glyph, not a framing card. */
 .v8-frontier .vhub-card {
-  background: linear-gradient(180deg, var(--canvas-2), var(--canvas-1));
-  border: 1px solid var(--hair);
-  border-radius: var(--r-xl);
-  padding: 32px 32px 24px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 32px 0 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: visible;
+  box-shadow: none;
 }
 .v8-frontier .vhub-card::before {
-  content: "";
-  position: absolute;
-  top: -40%;
-  right: -10%;
-  width: 60%;
-  height: 100%;
-  background: radial-gradient(ellipse 60% 70% at 60% 50%, var(--accent-soft), transparent 70%);
-  pointer-events: none;
+  content: none;
 }
 .v8-frontier .vhub-card-head {
   display: flex;
@@ -4437,7 +4421,7 @@
 .v8-frontier .vhub-card-text { flex: 1; min-width: 0; }
 .v8-frontier .vhub-name {
   font-size: 32px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--ink);
   line-height: 1.05;
@@ -4479,16 +4463,19 @@
   gap: 4px;
 }
 .v8-frontier .vhub-stat-num {
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0;
   color: var(--ink);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 .v8-frontier .vhub-stat-label {
-  font-size: 10.5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 .v8-frontier .vhub-stat-meta {
   margin-left: auto;
@@ -4519,12 +4506,13 @@
   margin-bottom: 4px;
 }
 .v8-frontier .vhub-section-title {
+  font-family: var(--font-display);
   font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 .v8-frontier .vhub-section-link {
   display: inline-flex;
@@ -4643,8 +4631,8 @@
    HUB DEPLOY PANEL — orange-bordered Frontier glass card
    ══════════════════════════════════════════════════════════════════ */
 .v8-frontier .vhub-deploy {
-  background: var(--accent-soft);
-  border: 1px solid rgba(255, 122, 61, 0.32);
+  background: var(--canvas-2);
+  border: 1px solid var(--hair-strong);
   border-radius: var(--r-lg);
   padding: 22px 24px;
   display: flex;
@@ -4660,17 +4648,19 @@
   align-items: flex-start;
 }
 .v8-frontier .vhub-deploy-icon {
-  color: var(--accent);
+  color: var(--micro-ai, #8B5CF6);
   margin-top: 3px;
   flex-shrink: 0;
 }
 .v8-frontier .vhub-deploy-text { flex: 1; min-width: 0; }
 .v8-frontier .vhub-deploy-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
   color: var(--ink);
   margin-bottom: 6px;
   letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 .v8-frontier .vhub-deploy-body {
   font-size: 13px;
@@ -4688,6 +4678,35 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+
+/* Unified URL + Copy card. The URL sits left, the Copy button sits
+   right separated by a left hairline — reads as one action surface
+   instead of two adjacent controls. Mirrors the bundle overview
+   hero. */
+.v8-frontier .vhub-deploy-urlcard {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-deep);
+  border: 1px solid var(--hair-strong);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: border-color 160ms ease;
+}
+.v8-frontier .vhub-deploy-urlcard:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.v8-frontier[data-frontier-theme="light"] .vhub-deploy-urlcard:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+.v8-frontier .vhub-deploy-urlcard .vhub-deploy-url {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 12px 14px;
+}
+
 .v8-frontier .vhub-deploy-url {
   flex: 1;
   min-width: 0;
@@ -4701,6 +4720,31 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Demoted utility row — sits under the URL card. Plain text-links
+   with a small leading icon, right-aligned, no outline pills. */
+.v8-frontier .vhub-deploy-utilrow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 6px;
+}
+.v8-frontier .vhub-deploy-util {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+.v8-frontier .vhub-deploy-util:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .v8-frontier .vhub-deploy-raw {
   display: inline-flex;
   align-items: center;
@@ -4708,15 +4752,15 @@
   color: var(--muted);
   font-family: var(--font-sans);
   font-size: 12.5px;
-  padding: 7px 12px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--hair);
+  padding: 6px 4px;
+  border: 0;
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease;
+  transition: color 160ms ease;
 }
 .v8-frontier .vhub-deploy-raw:hover {
-  background: var(--canvas-2);
   color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .v8-frontier .vhub-deploy-manifest {
   display: flex;
@@ -4725,7 +4769,7 @@
   flex-wrap: wrap;
   font-size: 11.5px;
   padding-top: 14px;
-  border-top: 1px solid rgba(255, 122, 61, 0.18);
+  border-top: 1px solid var(--hair);
 }
 .v8-frontier .vhub-deploy-manifest-label {
   color: var(--muted);
@@ -4749,28 +4793,47 @@
   color: var(--ink);
 }
 
-/* Hub Copy URL button — neutral ghost, no aggressive accent border */
+/* Hub Copy URL button — right half of the unified .vhub-deploy-urlcard.
+   Separated from the URL by a left hairline; flips to lime text + Check
+   on success. No standalone background fill so the whole card reads as
+   one surface. */
 .v8-frontier .hub-copy-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--canvas-2);
+  gap: 7px;
+  background: transparent;
   color: var(--ink);
-  border: 1px solid var(--hair);
+  border: 0;
+  border-left: 1px solid var(--hair);
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
-  padding: 6px 11px;
-  border-radius: var(--r-sm);
+  padding: 0 16px;
+  border-radius: 0;
   cursor: pointer;
-  backdrop-filter: blur(10px) saturate(150%);
-  -webkit-backdrop-filter: blur(10px) saturate(150%);
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 .v8-frontier .hub-copy-btn:hover {
-  background: var(--canvas-3);
+  background: var(--canvas-2);
 }
-.v8-frontier .hub-copy-btn svg { color: var(--ink); }
+.v8-frontier .hub-copy-btn svg { color: currentColor; }
+.v8-frontier .hub-copy-btn.is-copied {
+  background: transparent;
+  color: var(--micro-lime, #B5FF1A);
+  border-left-color: rgba(181, 255, 26, 0.32);
+}
+.v8-frontier[data-frontier-theme="light"] .hub-copy-btn.is-copied {
+  color: var(--micro-lime, #5BC700);
+  border-left-color: rgba(91, 199, 0, 0.36);
+}
+/* When .hub-copy-btn sits inside the unified urlcard, the card's own
+   border colour should also flip lime to signal the success state. */
+.v8-frontier .vhub-deploy-urlcard:has(.hub-copy-btn.is-copied) {
+  border-color: rgba(181, 255, 26, 0.32);
+}
+.v8-frontier[data-frontier-theme="light"] .vhub-deploy-urlcard:has(.hub-copy-btn.is-copied) {
+  border-color: rgba(91, 199, 0, 0.36);
+}
 
 /* ════════════════════════════════════════════════════════════════════
    HUB BUNDLES — uniform grid, all bundles, no fake categories
@@ -4839,38 +4902,41 @@
    HEADER WEIGHT BUMP — Inter 700/800 across all display + titles
    ══════════════════════════════════════════════════════════════════ */
 .v8-frontier .display-hero,
-.v8-frontier .display-md { font-weight: 800; }
+.v8-frontier .display-md { font-weight: 600; }
 
+/* Hub viewer (vhub-) display headings default to 500 — the v8 Pure
+   weight cap. Other variant surfaces keep 600 where the variant
+   defines its own typographic style. */
 .v8-frontier .vhub-name,
+.v8-frontier .vhub-section-title,
+.v8-frontier .vhub-deploy-title,
+.v8-frontier .vhub-bundle-title,
+.v8-frontier .vhub-feat-title,
+.v8-frontier .vhub-preview-title,
+.v8-frontier .vhub-stat-num { font-weight: 500; }
+
 .v8-frontier .hub-name,
 .v8-frontier .real-hub-name,
 .v8-frontier .pdoc-title,
-.v8-frontier .app-doc-title { font-weight: 700; }
+.v8-frontier .app-doc-title { font-weight: 600; }
 
-.v8-frontier .vhub-section-title,
-.v8-frontier .vhub-deploy-title,
 .v8-frontier .pillar-title,
 .v8-frontier .hub-section-title,
 .v8-frontier .hero-card-title,
 .v8-frontier .real-card-title,
 .v8-frontier .hub-card-section-title,
-.v8-frontier .pillar-title,
 .v8-frontier .hub-tile-title,
-.v8-frontier .vhub-bundle-title,
-.v8-frontier .vhub-feat-title,
-.v8-frontier .vhub-preview-title,
-.v8-frontier .v2-sec-title { font-weight: 700; }
+.v8-frontier .v2-sec-title { font-weight: 600; }
 
 .v8-frontier .bnum-num,
-.v8-frontier .vhub-stat-num,
 .v8-frontier .hub-stat-num,
 .v8-frontier .hub-card-stat-num,
 .v8-frontier .real-stat-num,
 .v8-frontier .pd-stat-num,
 .v8-frontier .price-amount,
-.v8-frontier .metric-num { font-weight: 700; }
+.v8-frontier .metric-num { font-weight: 600; }
 
-.v8-frontier .brand-word { font-weight: 800; }
+.v8-frontier .brand-word { font-weight: 600; }
 
 
 /* Hub identity card — centered layout */
@@ -4906,27 +4972,14 @@
    ══════════════════════════════════════════════════════════════════ */
 .v8-frontier.promo {
   border-top: 1px solid var(--hair);
-  border-bottom: 1px solid var(--hair);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.012)),
-    var(--canvas-2);
+  background: var(--canvas);
   padding: 72px 32px;
   position: relative;
   overflow: hidden;
 }
-.v8-frontier.promo::before {
-  content: "";
-  position: absolute;
-  top: -30%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 100%;
-  background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--accent-soft), transparent 70%);
-  pointer-events: none;
-  filter: blur(40px);
-  opacity: 0.7;
-}
+/* Radial accent glow removed — the lime-tinted blur read as a
+   green halo over the promo strip. Flat canvas only. */
+.v8-frontier.promo::before { content: none; }
 .v8-frontier .promo-inner {
   position: relative;
   z-index: 1;
@@ -4935,16 +4988,16 @@
 }
 .v8-frontier .promo-eyebrow {
   font-size: 11px;
-  color: var(--accent);
+  color: var(--muted);
   letter-spacing: 0.14em;
   margin-bottom: 18px;
 }
 .v8-frontier .promo-title {
-  font-family: var(--font-sans);
-  font-size: clamp(36px, 4.5vw, 52px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.15;
   color: var(--ink);
   margin: 0 0 16px;
 }
@@ -5153,62 +5206,98 @@
   color: var(--muted);
 }
 
-/* Identity card — centered */
+/* Identity card — centered, chromeless. Avatar + title + meta sit
+   directly on the page canvas. Mirrors BundleOverview's hero: no
+   border, no surface fill, no radial spotlight — the framing comes
+   from spacing and typography, not a card outline. */
 .v8-frontier .vhub-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 56px 32px 44px;
+  padding: 56px 0 32px;
   gap: 18px;
-  background: linear-gradient(180deg, var(--canvas-2), var(--canvas-1));
-  border: 1px solid var(--hair);
-  border-radius: var(--r-xl);
+  background: none;
+  border: 0;
+  border-radius: 0;
   position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: visible;
+  box-shadow: none;
 }
 .v8-frontier .vhub-card::before {
-  content: "";
-  position: absolute;
-  top: -40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 100%;
-  background: radial-gradient(ellipse 50% 60% at 50% 50%, var(--accent-soft), transparent 70%);
-  pointer-events: none;
-  filter: blur(30px);
+  content: none;
 }
 .v8-frontier .vhub-card > * { position: relative; z-index: 1; }
 .v8-frontier .vhub-avatar {
   width: 88px;
   height: 88px;
-  border-radius: 22px;
+  border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 0 0 1px rgba(255, 122, 61, 0.22),
-    0 14px 44px -8px var(--accent-glow),
-    0 0 80px -10px rgba(255, 122, 61, 0.32);
+  border: 1px solid var(--hair);
+  /* Glow removed — was a 4-layer drop-shadow including an 80px
+     ambient blur that read as a halo on the canvas. Now flat. */
+  box-shadow: none;
 }
 .v8-frontier .vhub-card .avatar.xl.vhub-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--ink);
+  color: var(--bg);
   font-size: 38px;
-  font-weight: 700;
+  font-weight: 600;
 }
 .v8-frontier .vhub-name {
   font-size: clamp(28px, 3.2vw, 36px);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.03em;
   line-height: 1.05;
   color: var(--ink);
   margin: 6px 0 0;
+}
+
+/* Avatar wrap — relative anchor so the Globe overlay can sit at the
+   bottom-right corner, mirroring the bundle hero's Layers + Globe
+   composition. Public-only, since hubs are inherently public. */
+.v8-frontier .vhub-avatar-wrap {
+  position: relative;
+  display: inline-block;
+}
+.v8-frontier .vhub-avatar-overlay {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg);
+  color: #4ade80;
+  box-shadow: 0 0 0 1px var(--hair-strong);
+}
+.v8-frontier[data-frontier-theme="light"] .vhub-avatar-overlay {
+  color: #16a34a;
+}
+
+/* Access pill — small mono label under the avatar matching the
+   public/shared/private indicator pattern from BundleOverview. Hubs
+   are always public so this stays Public. */
+.v8-frontier .vhub-access-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 9999px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+}
+.v8-frontier[data-frontier-theme="light"] .vhub-access-pill {
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.12);
 }
 .v8-frontier .vhub-bio {
   font-size: 14.5px;
@@ -5269,17 +5358,21 @@
   align-items: center;
 }
 .v8-frontier .vhub-stat-num {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0;
   line-height: 1;
   color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
-.v8-frontier .vhub-stat-accent { color: var(--accent); }
+.v8-frontier .vhub-stat-accent { color: var(--micro-lime, #B5FF1A); }
+.v8-frontier[data-frontier-theme="light"] .vhub-stat-accent { color: var(--micro-lime, #5BC700); }
 .v8-frontier .vhub-stat-label {
-  font-size: 10.5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 /* Sections */
@@ -5295,15 +5388,17 @@
 }
 .v8-frontier .vhub-section-eyebrow {
   font-size: 10.5px;
-  color: var(--accent);
+  color: var(--muted);
   letter-spacing: 0.12em;
 }
 .v8-frontier .vhub-section-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0;
+  line-height: 1.25;
 }
 .v8-frontier .vhub-section-meta {
   margin-left: auto;
@@ -5443,11 +5538,11 @@
   margin-bottom: 18px;
 }
 .v8-frontier .promo-title {
-  font-family: var(--font-sans);
-  font-size: clamp(36px, 4.5vw, 52px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.15;
   color: var(--ink);
   margin: 0 0 16px;
 }
@@ -6008,11 +6103,12 @@
 .v8-frontier[data-frontier-approach="pure"] .glass,
 .v8-frontier[data-frontier-approach="pure"] .big-numbers-inner,
 .v8-frontier[data-frontier-approach="pure"] .pillar,
-.v8-frontier[data-frontier-approach="pure"] .vhub-card,
 .v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .glass,
 .v8-frontier[data-frontier-approach="pure"][data-frontier-theme="light"] .pillar {
   background: var(--canvas-2);
 }
+/* .vhub-card is intentionally chromeless — see the centered identity
+   card rule above. Pure mode must not re-apply a surface fill here. */
 
 /* Radial accent spotlights inside cards — already neutral via
    --accent-soft override, but kill the gradient outright so there's
@@ -6107,10 +6203,12 @@
 /* (Previously killed every backdrop-filter. Removed so pure-nav and
    pure cards can opt into glass via their own rules.) */
 
-/* Card surfaces use solid --bg-deep instead of translucent canvas */
+/* Card surfaces use solid --bg-deep instead of translucent canvas.
+   .vhub-card is intentionally excluded — the identity hero stays
+   chromeless on every approach so the avatar + title sit on the
+   page canvas. */
 .v8-frontier[data-frontier-approach="pure"] .glass,
 .v8-frontier[data-frontier-approach="pure"] .pillar,
-.v8-frontier[data-frontier-approach="pure"] .vhub-card,
 .v8-frontier[data-frontier-approach="pure"] .hero-card,
 .v8-frontier[data-frontier-approach="pure"] .picker-paste,
 .v8-frontier[data-frontier-approach="pure"] .real-hub-id,

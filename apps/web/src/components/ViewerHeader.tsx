@@ -31,31 +31,37 @@ interface ViewerHeaderProps {
   /** Action buttons (Copy / Theme / Edit / etc.). Each viewer keeps its
    *  buttons compact (h-7, gap-1.5) so the right side stays one row. */
   actions?: ReactNode;
+  /** When true, the header carries a hard bottom border instead of
+   *  the soft mask-fade. Bundle viewer uses this — the canvas + doc
+   *  split below needs a clean horizontal hairline to anchor the
+   *  fixed-height pane underneath. */
+  bordered?: boolean;
 }
 
-export default function ViewerHeader({ title, subtitle, breadcrumb, actions }: ViewerHeaderProps) {
+export default function ViewerHeader({ title, subtitle, breadcrumb, actions, bordered = false }: ViewerHeaderProps) {
   return (
     <header
-      className="sticky top-0 z-30 shrink-0 flex items-center gap-3 px-4 sm:px-5 py-2.5"
+      className="sticky top-0 z-30 shrink-0 flex items-center gap-3 px-4 sm:px-5 py-3 mw-viewer-header"
+      data-bordered={bordered ? "true" : undefined}
       style={{
-        borderBottom: "1px solid var(--border-dim)",
-        background: "color-mix(in srgb, var(--background) 88%, transparent)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        // Bordered variant (bundle viewer) needs a SOLID bg so the
+        // canvas + doc split underneath doesn't bleed through the
+        // sticky header on scroll. Default variant stays transparent
+        // because the glass ::before layer below provides the
+        // backdrop.
+        background: bordered ? "var(--canvas)" : "transparent",
+        borderBottom: bordered ? "1px solid var(--border-dim)" : undefined,
       }}
     >
       <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="Memory.Wiki home">
         <MemoryWikiLogo size={18} withBlob />
       </Link>
 
-      <div
-        className="flex-1 min-w-0 flex items-center gap-2"
-        style={{ borderLeft: "1px solid var(--border-dim)", paddingLeft: 12 }}
-      >
+      <div className="flex-1 min-w-0 flex items-center gap-2 pl-3">
         <div className="min-w-0 flex-1">
           <div
-            className="text-body font-semibold truncate"
-            style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
+            className="truncate"
+            style={{ color: "var(--text-primary)", lineHeight: 1.2, fontSize: 14, fontWeight: 500 }}
           >
             {title}
           </div>

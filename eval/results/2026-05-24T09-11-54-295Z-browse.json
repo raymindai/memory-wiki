@@ -1,0 +1,3362 @@
+{
+  "bench": "MWBench v2 (browse)",
+  "queries_file": "queries/v1.jsonl",
+  "modes": [
+    "browse"
+  ],
+  "started_at": "2026-05-24T09:11:54.295Z",
+  "finished_at": "2026-05-24T09:29:08.978Z",
+  "queries": [
+    {
+      "id": "q-001",
+      "q": "What is Memory.Wiki's wedge — the structural advantage it has over single-AI memory systems?",
+      "expected_doc": "SKaY7VJP",
+      "expected_keywords": [
+        "cross-AI",
+        "URL",
+        "paste"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-002",
+      "q": "Why is the founder Hyunsang Cho building memory.wiki?",
+      "expected_doc": "fz45GXXj",
+      "expected_keywords": [
+        "founder",
+        "memory",
+        "AI"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-003",
+      "q": "What are mdfy's core product features as of 2026-05?",
+      "expected_doc": "bmZYfZez",
+      "expected_keywords": [
+        "mdfy",
+        "features",
+        "2026"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-004",
+      "q": "How does mdfy do RAG / retrieval?",
+      "expected_doc": "mdfy-memory",
+      "expected_keywords": [
+        "RAG",
+        "retrieval"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-005",
+      "q": "How does mdfy keep documents, bundles, and hubs fresh over time?",
+      "expected_doc": "RUMdz2fQ",
+      "expected_keywords": [
+        "fresh",
+        "update",
+        "sync"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-006",
+      "q": "What was the Upstage Memory Protocol alliance proposal about?",
+      "expected_doc": "yWkfCPhn",
+      "expected_keywords": [
+        "Upstage",
+        "Memory Protocol",
+        "alliance"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-007",
+      "q": "What's the K-Tech Pioneers presentation evaluation context?",
+      "expected_doc": "jRpEdqww",
+      "expected_keywords": [
+        "K-TECH",
+        "Pioneers",
+        "평가"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-008",
+      "q": "What's in the a16z application?",
+      "expected_doc": "wNEDgXMs",
+      "expected_keywords": [
+        "a16z"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-009",
+      "q": "What's in the a16z speedrun pitch deck content?",
+      "expected_doc": "gnEMFJgI",
+      "expected_keywords": [
+        "a16z",
+        "speedrun",
+        "pitch"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-010",
+      "q": "How does memdo (멤도) work?",
+      "expected_doc": "QF-bp5G_",
+      "expected_keywords": [
+        "memdo",
+        "멤도"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-011",
+      "q": "What is the SNS launch execution plan?",
+      "expected_doc": "jryfJV4D",
+      "expected_keywords": [
+        "SNS",
+        "launch",
+        "plan"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-012",
+      "q": "What's the v8 product idea — the AI-era pivot?",
+      "expected_doc": "pCiEhvu2",
+      "expected_keywords": [
+        "v8",
+        "idea"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-013",
+      "q": "What's outlined in the Memory.Wiki v8 UI and brand direction document?",
+      "expected_doc": "37MqmCM-",
+      "expected_keywords": [
+        "v8",
+        "UI",
+        "brand"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-014",
+      "q": "What's the Memory.Wiki product specification?",
+      "expected_doc": "Tk71NDw0",
+      "expected_keywords": [
+        "specification",
+        "product"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-015",
+      "q": "How does mdfy work overall — the architecture and flow?",
+      "expected_doc": "KRKz_MD-",
+      "expected_keywords": [
+        "mdfy",
+        "work",
+        "flow"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-016",
+      "q": "What was the strategic pivot from mdfy to Memory.Wiki?",
+      "expected_doc": "4N8X52tq",
+      "expected_keywords": [
+        "pivot",
+        "mdfy",
+        "Memory.wiki"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-017",
+      "q": "What's Hyunsang Cho's background as an AI product executive?",
+      "expected_doc": "ZVfnXzCU",
+      "expected_keywords": [
+        "Hyunsang",
+        "Cho",
+        "AI",
+        "executive"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-018",
+      "q": "What's the mdfy.cc v6 FINAL business plan?",
+      "expected_doc": "_4iafQ8K",
+      "expected_keywords": [
+        "mdfy.cc",
+        "v6",
+        "사업계획"
+      ],
+      "category": "single-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-019",
+      "q": "What's the difference between v7 and v7-revised business plans?",
+      "expected_doc": "nvF3Li2x",
+      "expected_keywords": [
+        "v7",
+        "revised",
+        "사업계획"
+      ],
+      "category": "cross-doc",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    },
+    {
+      "id": "q-020",
+      "q": "Summarize Memory.Wiki's overall product strategy and product evolution.",
+      "expected_doc": "KFtUbXkS",
+      "expected_keywords": [
+        "product",
+        "strategy"
+      ],
+      "category": "synthesis",
+      "scope": "hub",
+      "scope_id": "raymindai"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "q-001",
+      "answer": "Based on the Memory.Wiki product specification, here is a clear answer:\n\n---\n\n**Memory.Wiki's wedge is the \"One URL deploys everywhere\" principle** — a single, user-authored hub URL that works across *any* AI tool without vendor lock-in.\n\nSingle-AI memory systems (like Mem.ai) extract and store your memory *inside* one platform, binding your knowledge to that ecosystem. Memory.Wiki inverts this: **you author it, it lives at a permanent public URL, and any AI can consume it** — via URL paste, `llms.txt` fetch, MCP server, or native partner integration.\n\nThis gives it a structural moat in three ways:\n1. **Cross-AI portability** — paste your hub URL into ChatGPT, Claude, Cursor, or Codex and it just works.\n2. **User ownership** — the author, not the AI, controls and curates the content.\n3. **Open spec, not platform lock-in** — the Bundle URL format is a standard; no single vendor can wall it off.\n\nThe positioning is deliberately infrastructure, not app: Memory.Wiki aims to be the *memory protocol layer* that sits beneath all AI tools, rather than competing with any one of them.",
+      "tokens_in": 18066,
+      "tokens_out": 515,
+      "latency_ms": 15847,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-001",
+      "answer": "Memory.Wiki’s wedge is **delivery, not storage/retrieval**.\n\nSingle-AI memory systems—ChatGPT Memory, OpenAI/Google memory, Mem0-style stores—remember inside one system or require an integration/query layer. Their memory is tied to one vendor, one app, or one API.\n\nMemory.Wiki instead turns a user’s knowledge graph into **fetchable Markdown URLs**:\n\n- `memory.wiki/<id>` = one document  \n- `memory.wiki/b/<id>` = a bundle with prebuilt graph/context  \n- `memory.wiki/hub/<slug>` = the user’s broader “thinking shape”\n\nAny AI that can open a URL—ChatGPT, Claude, Gemini, Cursor, agents—can inherit the same context without SDKs, plugins, or vendor lock-in.\n\nSo the structural advantage is: **Memory.Wiki sits above individual AI products as an open, portable memory layer.** The user owns and curates the knowledge; Memory.Wiki organizes it into concepts, relations, bundles, and embeddings; then it delivers that graph to any AI.\n\nIn short: single-AI memory remembers you inside one AI. Memory.Wiki lets you deploy your knowledge graph to every AI.",
+      "tokens_in": 24588,
+      "tokens_out": 589,
+      "latency_ms": 10769,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-001",
+      "answer": "",
+      "tokens_in": 14953,
+      "tokens_out": 107,
+      "latency_ms": 7263,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-002",
+      "answer": "## Why Hyunsang Cho Is Building Memory.Wiki\n\nHyunsang sees the real problem not as AI *memory*, but as AI *delivery*. Every day, people get valuable insights from ChatGPT, Claude, and other AI tools — then close the tab, losing that knowledge. The next day, they paste the same context and repeat the cycle.\n\nHis core insight: **your knowledge doesn't live somewhere any AI can read it.** Notion, Google Docs, and local files are all locked to specific tools or users.\n\nMemory.wiki solves this with a simple primitive: **a URL that any AI can fetch.** Paste a memory.wiki link into any LLM and it instantly receives your knowledge — not just documents, but the *graph* of relationships between concepts across them.\n\nHe's also motivated by a broader mission: to establish an **open standard** before big AI platforms (OpenAI, Google, etc.) lock everyone's knowledge inside their own closed memory systems. He draws a parallel to HTTP — the open protocol that won because the primitive was right, not because someone declared it the winner.\n\nIn short: he's building memory.wiki to give people **ownership of their knowledge graph**, portable and deployable to any AI, forever.",
+      "tokens_in": 15794,
+      "tokens_out": 447,
+      "latency_ms": 13497,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-002",
+      "answer": "Hyunsang Cho is building memory.wiki because he believes the real problem with AI memory is not storage, but **delivery**.\n\nPeople pour valuable thinking into ChatGPT, Claude, Gemini, Cursor, etc., but that knowledge gets trapped in closed chat histories, Notion, Google Docs, or vendor-specific memory systems. It cannot easily be reused across tools or carried into the next AI conversation.\n\nmemory.wiki is his attempt to make personal knowledge live at **open, AI-readable URLs**: plain Markdown that any AI can fetch, understand, and use. Instead of another closed memory store, it provides documents, bundles, and hubs that expose not only content but also the graph of concepts and relationships between ideas.\n\nHis broader motivation is to make an open alternative to closed AI memory systems. He wants users to own their knowledge, deploy it to any AI, and avoid being locked into one platform. In his words, he is building it to make the “open standard” outcome for AI memory more likely.",
+      "tokens_in": 10518,
+      "tokens_out": 341,
+      "latency_ms": 9004,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-002",
+      "answer": "Founder Hyunsang Cho is building **memory.wiki** because he believes the real issue with AI memory is **delivery, not storage**. Currently, valuable AI-generated insights are lost when chat tabs close because user knowledge is locked in closed platforms (like Notion or Google Docs) that AIs cannot easily access. \n\nTo solve this, memory.wiki turns user knowledge into **open, markdown-formatted URLs** that any AI can instantly fetch and read. Rather than just storing documents, the platform automatically extracts concepts to build a **knowledge graph** (relationships, themes, and edges) of the user's thinking. \n\nCho is building this based on five core beliefs:\n1. **Markdown** is the ideal primitive for AI-era knowledge.\n2. **URLs** are the simplest, most open delivery interface.\n3. **The graph** (not just the documents) is the actual product.\n4. **Delivery** (pre-organizing and shipping the graph) is the crucial new layer.\n5. **Open standards** prevent vendor lock-in, ensuring users truly own their knowledge. \n\nUltimately, he is building memory.wiki to establish an open standard for AI memory before closed, proprietary systems monopolize user data.",
+      "tokens_in": 10821,
+      "tokens_out": 316,
+      "latency_ms": 6518,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-003",
+      "answer": "## mdfy's Core Product Features (as of 2026-05)\n\n**Three Primitives:**\n- **Document** – a single captured answer/file at a permanent URL\n- **Bundle** – a curated grouping of related docs with its own URL\n- **Hub** – your entire knowledge layer as one deployable URL\n\n**Three Operations:**\n1. **Capture** – paste share URLs, drop files (PDF, DOCX, etc.), or use `/mdfy` from coding agents (Claude Code, Cursor, Codex CLI)\n2. **Organize** – auto-synthesis with diff/accept UI merges new captures into wiki pages; bundles group by topic; hub log & lint keep knowledge coherent\n3. **Deploy** – paste any URL into Claude, ChatGPT, Cursor, or Codex; AI fetches it as plain markdown context. Alternatively, use `/api/hub/<slug>/recall` for targeted retrieval\n\n**Under the Hood:**\n- Hybrid BM25 + vector (pgvector) retrieval with OpenAI `text-embedding-3-small` embeddings\n- Hub-wide semantic graph with cross-hub citation rollups\n- MCP server (26-tool integration) for agents writing/querying hubs directly\n- Confidence tags (`[EXTRACTED]` / `[INFERRED]` / `[AMBIGUOUS]`) on synthesized claims\n\nThe key differentiator: **a public URL is the universal AI context format** — no SDK or plugin needed.",
+      "tokens_in": 11943,
+      "tokens_out": 561,
+      "latency_ms": 13577,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-003",
+      "answer": "As of 2026-05, mdfy’s core product features are:\n\n- **URL-based knowledge hub**: every **Document**, **Bundle**, and **Hub** is a permanent, editable, shareable URL.\n- **Capture**: save AI chats, share URLs, pasted text/code, files like PDF/DOCX/PPTX/XLSX/HTML/CSV, transcripts, and agent outputs from tools like Claude Code, Cursor, Codex CLI, and Aider.\n- **Organize**: documents roll into hubs; related docs can become bundles; AI-assisted synthesis, bundle suggestions, tags/folders, logs, and linting help keep knowledge coherent.\n- **Deploy to any AI**: paste a document, bundle, or hub URL into Claude, ChatGPT, Cursor, Codex, etc.; the AI reads clean markdown context.\n- **mdfy Memory / recall**: embeddings, chunking by markdown structure, semantic search, and hybrid BM25 + vector retrieval via `/api/hub/<slug>/recall`.\n- **Schema/graph layer**: per-doc concepts, embeddings, bundle relationships, hub graph, cross-references, and provenance/confidence tags.\n- **Multi-surface access**: web editor, Chrome extension/bookmarklet, VS Code, Mac app, CLI, API, and MCP server.\n- **Markdown-native publishing**: WYSIWYG editor, versioning, syntax highlighting, KaTeX, Mermaid, sharing/privacy controls.",
+      "tokens_in": 49915,
+      "tokens_out": 752,
+      "latency_ms": 18189,
+      "tool_calls": 6,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-003",
+      "answer": "As of May 2026, **mdfy** is a personal knowledge hub designed for the AI era, structured around three core layers and three primary operations:\n\n### **Three Layers**\n1. **Raw (Captures):** Stores unedited artifacts (transcripts, PDFs, code, share URLs) as permanent, AI-fetchable markdown URLs (`mdfy.app/<id>`).\n2. **Wiki (Synthesis):** Organizes raw captures into structured pages using an auto-synthesis diff-and-accept UI (with confidence tags), multi-doc **Bundles**, and auto-generated Hub logs/lints.\n3. **Schema (Connective Tissue):** Automatically maintains a structured graph with concept extraction, semantic embeddings (OpenAI `text-embedding-3-small` with HNSW indexing), and cross-references.\n\n### **Three Operations**\n* **Ingest:** Captures material via pasting, file drops, browser extensions, APIs, or the `/mdfy` skill integrated directly into AI tools (Claude Code, Cursor, Codex, Aider).\n* **Query:** Enables semantic search, surfaces pre-computed suggested queries, and deploys the Hub URL as a universal markdown context format readable by any LLM.\n* **Lint:** Keeps the hub coherent through scheduled lint passes (flagging gaps/conflicts) and proactive bundle suggestions.",
+      "tokens_in": 31640,
+      "tokens_out": 371,
+      "latency_ms": 9762,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-004",
+      "answer": "Here's how mdfy does RAG / retrieval:\n\nmdfy now calls it **mdfy Memory** rather than \"RAG,\" but the architecture is the same. It uses a **four-layer retrieval pipeline**:\n\n1. **Idempotent embeddings** — Every doc, chunk, and bundle gets a 1536-dim vector via OpenAI `text-embedding-3-small` (HNSW index). A sha256 hash prevents re-embedding unchanged content, so unchanged saves cost zero.\n\n2. **Chunk-level splitting** — Docs are split by markdown headings into chunks (~1800 chars max), each tagged with a breadcrumb (e.g., *\"mdfy Memory > How it works > Layer 1\"*) so an LLM knows exactly where a snippet came from.\n\n3. **Recall HTTP endpoint** — A single public `POST /api/hub/<slug>/recall` endpoint supports three granularities: `doc`, `chunk`, or `bundle`. No SDK or API key needed.\n\n4. **Hybrid retrieval (BM25 + vector via RRF)** — When `hybrid: true`, it combines vector cosine search with Postgres full-text search (BM25), merging results via **Reciprocal Rank Fusion** — handling cases where acronyms (e.g., \"MCP server\") have weak semantic but strong lexical signal.\n\nPrivacy gates (drafts, deleted, password-protected docs) are enforced directly **in SQL**, not in the API layer.",
+      "tokens_in": 36015,
+      "tokens_out": 584,
+      "latency_ms": 16066,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-004",
+      "answer": "mdfy’s RAG is now framed as **mdfy Memory**, but the retrieval architecture is the same.\n\nIt stores user knowledge as readable markdown docs, bundles, and chunks. Each doc, bundle, and markdown-heading-based chunk gets an OpenAI `text-embedding-3-small` embedding, indexed with HNSW cosine similarity. Embedding refresh is idempotent: artifacts are hashed with sha256, so unchanged docs/chunks are skipped.\n\nRetrieval happens through a public HTTP endpoint:\n\n```http\nPOST /api/hub/<slug>/recall\n```\n\nwith:\n\n```json\n{\n  \"question\": \"...\",\n  \"k\": 5,\n  \"level\": \"doc | chunk | bundle\",\n  \"hybrid\": true\n}\n```\n\nGranularities:\n\n- `doc`: top whole documents\n- `chunk`: paragraph/section-level chunks with breadcrumbs\n- `bundle`: curated topic bundles\n\nFor chunk retrieval, `hybrid: true` combines:\n\n1. vector cosine search over chunk embeddings\n2. Postgres full-text/BM25 search\n3. Reciprocal Rank Fusion: `1 / (60 + rank)`\n\nResults include the markdown snippet, breadcrumb, source doc URL, vector rank, FTS rank, and RRF score.\n\nPrivacy is enforced in SQL: drafts, deleted docs, password-protected docs, and email-restricted docs are excluded from public recall.",
+      "tokens_in": 12576,
+      "tokens_out": 404,
+      "latency_ms": 9144,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-004",
+      "answer": "`mdfy` (now framed as **mdfy Memory**) performs RAG and retrieval through a multi-layered, human-readable architecture:\n\n1. **Idempotent Embeddings:** Uses OpenAI `text-embedding-3-small` (1536-dim) indexed with HNSW. It hashes content (SHA-256) to skip re-embedding unchanged documents, chunks, or bundles, keeping costs low.\n2. **Markdown-Structured Chunking:** Splits documents by markdown headings (`#`, `##`, `###`). Each chunk includes its heading subtree and a hierarchical breadcrumb (e.g., `Doc > Section > Subsection`) to provide context to LLMs.\n3. **HTTP Recall Endpoint:** Exposes a single public endpoint (`POST /api/hub/<slug>/recall`) supporting retrieval at three granularities: `doc`, `chunk`, or `bundle`.\n4. **Hybrid Retrieval (BM25 + Vector RRF):** When enabled, it combines vector cosine similarity and Postgres Full-Text Search (BM25) using Reciprocal Rank Fusion (RRF) to merge lexical and semantic results cleanly.\n5. **SQL-Enforced Privacy:** Privacy gates (filtering drafts, soft-deletes, password-protected, or restricted docs) are enforced directly within SQL queries to prevent accidental leaks.",
+      "tokens_in": 31040,
+      "tokens_out": 362,
+      "latency_ms": 9587,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-005",
+      "answer": "mdfy keeps documents, bundles, and hubs fresh through a dedicated **Lint** operation built on three mechanisms:\n\n1. **Auto-synthesis with diff/accept** — When new content is captured, the system generates a proposed update to existing wiki pages. You review a diff and accept or skip changes, keeping content aligned with new captures rather than accumulating stale duplicates. Confidence tags (`[EXTRACTED]` / `[INFERRED]` / `[AMBIGUOUS]`) make the AI's certainty visible.\n\n2. **Hub lint passes** — A periodic automated scan surfaces gaps, conflicts, and orphaned documents as a checklist at `hub/<slug>/lint.md`, so problems are flagged without you having to manually audit the hub.\n\n3. **Proactive bundle suggestions** — When a cluster of related documents forms, the system proactively suggests grouping them into a bundle, keeping the schema organized as content grows.\n\nUnderlying all of this, embedding maintenance, graph computation, and cross-reference tracking run automatically in the background — you only weigh in on what enters the wiki layer, with intentional friction via the diff/accept UI.",
+      "tokens_in": 28958,
+      "tokens_out": 416,
+      "latency_ms": 13447,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-005",
+      "answer": "mdfy keeps knowledge fresh with a maintenance loop around three layers:\n\n- **Documents**: new captures are saved as stable, AI-fetchable markdown URLs and embedded on save, so search and retrieval stay current.\n- **Bundles**: when related documents cluster around a topic, mdfy proactively suggests turning them into bundles, keeping grouped context organized instead of scattered.\n- **Hubs**: new captures don’t just pile up. Auto-synthesis compares them against existing wiki pages and proposes updates through a **diff-and-accept** flow, so the user can approve what should enter the cleaned-up knowledge layer.\n\nIt also runs **hub lint** periodically to flag gaps, conflicts, and orphan documents, and generates hub artifacts like logs and lint checklists showing what changed or needs attention.\n\nIn short: AI does the ongoing synthesis, bundle discovery, embedding maintenance, graph/cross-reference computation, and linting; the user stays in the loop for accepting meaningful wiki updates.",
+      "tokens_in": 35711,
+      "tokens_out": 445,
+      "latency_ms": 11952,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-005",
+      "answer": "",
+      "tokens_in": 26949,
+      "tokens_out": 124,
+      "latency_ms": 7590,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-006",
+      "answer": "",
+      "tokens_in": 36469,
+      "tokens_out": 413,
+      "latency_ms": 14369,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-006",
+      "answer": "",
+      "tokens_in": 18450,
+      "tokens_out": 202,
+      "latency_ms": 8998,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-006",
+      "answer": "",
+      "tokens_in": 20135,
+      "tokens_out": 122,
+      "latency_ms": 6401,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-007",
+      "answer": "There is **no document or concept related to \"K-Tech Pioneers\"** anywhere in the `raymindai` Memory.Wiki hub. The hub covers topics such as Memory.Wiki/Mdfy product development, OAuth 2.0 + PKCE implementation, Rust error handling, RAG/mdfy Memory architecture, and MCP server integration — but contains no presentation, evaluation context, or any reference to something called \"K-Tech Pioneers.\"\n\nIt's possible that document is private, hasn't been added to this hub, or the name may be slightly different. You may want to double-check the document name or confirm it has been published to this hub.",
+      "tokens_in": 12566,
+      "tokens_out": 319,
+      "latency_ms": 8848,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-007",
+      "answer": "",
+      "tokens_in": 18450,
+      "tokens_out": 312,
+      "latency_ms": 8724,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-007",
+      "answer": "",
+      "tokens_in": 46839,
+      "tokens_out": 106,
+      "latency_ms": 10024,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-008",
+      "answer": "",
+      "tokens_in": 38793,
+      "tokens_out": 387,
+      "latency_ms": 11647,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-008",
+      "answer": "",
+      "tokens_in": 18438,
+      "tokens_out": 197,
+      "latency_ms": 6472,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-008",
+      "answer": "",
+      "tokens_in": 20277,
+      "tokens_out": 115,
+      "latency_ms": 6282,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-009",
+      "answer": "",
+      "tokens_in": 23419,
+      "tokens_out": 347,
+      "latency_ms": 10714,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-009",
+      "answer": "",
+      "tokens_in": 18454,
+      "tokens_out": 210,
+      "latency_ms": 8215,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-009",
+      "answer": "",
+      "tokens_in": 20385,
+      "tokens_out": 115,
+      "latency_ms": 6674,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-010",
+      "answer": "## How memdo (멤도) works\n\n**The core idea:** A memdo (mdfy) URL is an API for any AI. When you paste a `mdfy.app` URL into ChatGPT, Claude, or any LLM, it fetches the URL and receives clean **markdown** — your knowledge, pre-shaped for AI consumption. No app, no login, no JavaScript — just markdown over HTTPS.\n\n**Three URL types:**\n- **`/d/<id>`** — a single document (raw markdown + frontmatter)\n- **`/b/<id>`** — a bundle: AI-generated summary, themes, insights, and a linked doc index (~95% fewer tokens than pasting every doc)\n- **`/hub/<slug>`** — your full knowledge hub: top 40 concepts by weight, their relationships, and links to relevant bundles/docs\n\n**Two ways an LLM talks to it:**\n1. **URL fetch (pull)** — paste the URL; any AI reads it instantly\n2. **MCP server (push + pull)** — 26 tools (create, search, append, etc.) for AI tools that support the Model Context Protocol\n\n**The underlying engine:** Everything — the visual Galaxy, bundle canvas, hub digest, and MCP search — reads from the same graph: your concept index, typed relations, documents, and bundles. The graph *is* the product.",
+      "tokens_in": 12384,
+      "tokens_out": 472,
+      "latency_ms": 15825,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-010",
+      "answer": "memdo/멤도 works by turning your knowledge into **AI-readable URLs**.\n\nThe core idea: **a memdo URL is an API for any AI**. When you paste a document, bundle, or hub URL into ChatGPT, Claude, Gemini, Cursor, etc., the AI fetches clean markdown over HTTPS—no login flow, app install, JavaScript rendering, or file upload needed.\n\nIt has three main URL types:\n\n- **Document**: one markdown file, returned as-is with metadata.\n- **Bundle**: a curated set of documents plus an AI-generated compact digest: summaries, themes, insights, concepts, relations, and links to source docs.\n- **Hub**: a person’s whole knowledge map: top concepts, related documents, bundles, and concept relationships.\n\nBehind the scenes, memdo maintains:\n\n- source markdown,\n- an AI-extracted graph,\n- a personal concept index,\n- embeddings for semantic search.\n\nLLMs can interact in two ways:\n\n1. **Fetch URLs** to read your knowledge.\n2. Use the **MCP server** to create, append, search, outline, publish, and manage knowledge directly.\n\nIn short: memdo makes your thinking portable, structured, and instantly usable by any AI.",
+      "tokens_in": 9522,
+      "tokens_out": 375,
+      "latency_ms": 7964,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-010",
+      "answer": "**memdo (멤도)**—also known as **mdfy** or **Memory.Wiki**—works on a simple core premise: **a memdo URL is an API for any AI**. \n\nWhen you paste a memdo URL (for a document, bundle, or hub) into an AI tool like ChatGPT or Claude, the AI fetches it and receives clean, structured markdown optimized for AI reading.\n\nIt operates through four main components:\n1. **The Markdown:** The source text written by the user.\n2. **The AI Graph:** Themes, insights, and connections extracted from document bundles.\n3. **The Concept Index:** A lifelong ontology of concepts pooled across your bundles.\n4. **The Embeddings:** Vectors used internally to power semantic search.\n\nAIs interact with memdo in two ways:\n* **URL Fetch (Pull):** The AI reads a compact, token-efficient markdown digest directly from a pasted link.\n* **MCP Server (Push/Pull):** Using the Model Context Protocol, AI agents gain access to 26 tools to search, create, and edit your knowledge base directly.",
+      "tokens_in": 10246,
+      "tokens_out": 289,
+      "latency_ms": 6688,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-011",
+      "answer": "",
+      "tokens_in": 23415,
+      "tokens_out": 359,
+      "latency_ms": 12717,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-011",
+      "answer": "",
+      "tokens_in": 18438,
+      "tokens_out": 219,
+      "latency_ms": 6253,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-011",
+      "answer": "",
+      "tokens_in": 29610,
+      "tokens_out": 124,
+      "latency_ms": 8511,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-012",
+      "answer": "",
+      "tokens_in": 36456,
+      "tokens_out": 415,
+      "latency_ms": 13751,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-012",
+      "answer": "",
+      "tokens_in": 18454,
+      "tokens_out": 232,
+      "latency_ms": 6765,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-012",
+      "answer": "",
+      "tokens_in": 39750,
+      "tokens_out": 107,
+      "latency_ms": 8860,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-013",
+      "answer": "",
+      "tokens_in": 24320,
+      "tokens_out": 427,
+      "latency_ms": 12906,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-013",
+      "answer": "",
+      "tokens_in": 18466,
+      "tokens_out": 229,
+      "latency_ms": 6542,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-013",
+      "answer": "",
+      "tokens_in": 20464,
+      "tokens_out": 122,
+      "latency_ms": 7433,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-014",
+      "answer": "## Memory.Wiki Product Specification Summary\n\n**Memory.Wiki** is a **personal knowledge wiki** and **AI-deployable memory layer**, built on a single core promise:\n> *\"You author. AI uses. The wiki maintains itself.\"*\n\n### Key Architecture\n- **4 Primitives**: Hub (user namespace), Docs (markdown URLs), Bundles (deployable URL groups), and a Concept Index (LLM-generated)\n- **URL-first design**: One hub URL works across any AI tool, session, or platform\n\n### Must-Have Features (Tier 1)\n- `[[wikilink]]` syntax + auto-resolve\n- Backlinks panel\n- Hub-wide full-text search\n- LLM-generated Concept Index\n- Semantic Retrieval API (`?q=...`)\n- `llms.txt` for AI crawling\n\n### Tech Stack\nNext.js 15, Supabase (Postgres), pgvector + Upstage Solar embeddings, MCP server integration\n\n### What It Is NOT\n❌ Another note app (Notion/Obsidian) | ❌ AI-extracted memory (Mem.ai model) | ❌ Enterprise wiki | ❌ Vendor lock-in\n\n### 6-Month Adoption Targets\n1,000+ active public hubs, 3+ native LLM integrations, 1+ enterprise PoC",
+      "tokens_in": 12180,
+      "tokens_out": 482,
+      "latency_ms": 13082,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-014",
+      "answer": "Memory.Wiki is specified as a **personal knowledge wiki** and a **deployable memory layer for any AI**. Its core promise is:\n\n> “You author. AI uses. The wiki maintains itself.”\n\nIt is not meant to be another notes app, AI-extracted memory system, enterprise wiki, login-walled content store, or lock-in platform.\n\nThe product centers on four primitives:\n\n- **Hub**: a user namespace\n- **Docs**: individual Markdown URLs with links, backlinks, concepts, and history\n- **Bundles**: deployable URL packages for AI context\n- **Concept Index**: an automatically generated index of ideas across a hub\n\nRequired launch-level features include `[[wikilink]]` support, backlinks, hub-wide search, LLM-generated concept indexes, semantic retrieval APIs, `llms.txt`, compact token-efficient URLs, and a public spec page.\n\nIts technical stack includes Next.js, Supabase/Postgres, pgvector, markdown-it, Upstage Solar embeddings, Claude for linting, and MCP/native AI integrations.\n\nThe roadmap prioritizes wiki primitives first, then semantic retrieval, version history, graph views, verified profiles, AI wiki linting, auto-build intelligence, and native integrations with tools like Cursor and Claude.",
+      "tokens_in": 9002,
+      "tokens_out": 339,
+      "latency_ms": 6645,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-014",
+      "answer": "**Memory.Wiki** is a personal knowledge wiki and a deployable AI memory layer designed around the promise: *\"You author. AI uses. The wiki maintains itself.\"* \n\n### Key Specifications:\n* **Two Doors**: \n  * **Memory Door**: 1-click capture to generate deployable URLs for any AI.\n  * **Wiki Door**: A self-organizing personal wiki featuring automatic concept indexing, backlinks, and LLM-powered linting.\n* **Four Primitives**: Hubs (user namespaces), Docs (markdown files), Bundles (curated document groups), and Concept Indexes (automatically generated indexes of recurring topics).\n* **Core Features**: `[[wikilink]]` syntax, backlinks panel, semantic retrieval API, `llms.txt` support for AI readability, and a token-efficient compact form (`?compact=1`).\n* **Technical Stack**: Next.js 15, Supabase (PostgreSQL), pgvector (using Upstage Solar embeddings), and LLMs (Upstage Solar, Claude, Gemini) for automated maintenance and search.\n* **Migration**: Rebranding and migrating from the legacy `mdfy.app` to `memory.wiki` (with `mori.wiki` as a short URL).",
+      "tokens_in": 9539,
+      "tokens_out": 318,
+      "latency_ms": 5747,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-015",
+      "answer": "Here's how mdfy works overall:\n\n**Three-layer architecture (Raw → Wiki → Schema):**\n\n1. **Raw** — Everything you capture (pasted AI conversations, PDFs, code files, share URLs) lands as a permanent URL. Storage is idempotent and AI-fetchable as clean markdown.\n\n2. **Wiki** — Captures are synthesized into structured pages. A diff-and-accept UI proposes wiki updates from new captures (with confidence tags: `[EXTRACTED]` / `[INFERRED]` / `[AMBIGUOUS]`). Related docs are grouped into **Bundles**. Auto-generated hub logs and lint reports track activity and surface gaps.\n\n3. **Schema** — A background graph layer handles semantic embeddings (OpenAI `text-embedding-3-small` + HNSW index), entity/relationship graphs, doc-doc edges, and cross-hub citations — all maintained automatically, never by hand.\n\n**Three operations:**\n- **Ingest** — via paste, file drop, `/mdfy` CLI skill, bookmarklet, or API/MCP\n- **Query** — via semantic search, suggested queries, or by pasting a hub URL into any AI\n- **Lint** — auto-synthesis + periodic lint passes keep the hub coherent\n\n**Key design principle:** The hub URL *is* the integration. Any AI that can fetch a URL and read markdown works — no SDK, no API key required.",
+      "tokens_in": 28934,
+      "tokens_out": 478,
+      "latency_ms": 14118,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-015",
+      "answer": "mdfy is a personal AI knowledge hub built around one primitive: **fetchable URLs**.\n\nOverall architecture has three layers:\n\n1. **Raw** — every captured artifact  \n   You paste a ChatGPT/Claude URL, drop a file, or capture from tools like Claude Code/Cursor. It becomes a permanent document URL like `mdfy.app/<id>`, available as clean markdown.\n\n2. **Wiki** — synthesized knowledge  \n   Raw captures are organized into readable pages, bundles, and hub updates. mdfy suggests synthesis, diffs changes, groups related docs, and lets the user accept or skip.\n\n3. **Schema** — retrieval infrastructure  \n   Underneath, docs, chunks, and bundles are embedded with OpenAI embeddings, indexed in Postgres/pgvector with HNSW. It also builds semantic graphs, cross-references, confidence tags, and bundle relationships.\n\nThe main flow is:\n\n**Capture → Embed/chunk → Organize/synthesize → Retrieve/deploy**\n\nRetrieval happens in two ways:\n\n- Paste a **hub URL** like `mdfy.app/hub/<you>` into any AI; it fetches the markdown index and follows links.\n- Use the recall API: `POST /api/hub/<slug>/recall`, with doc/chunk/bundle retrieval and optional hybrid BM25 + vector RRF.\n\nSo mdfy is not just RAG; it is a user-owned, URL-native memory layer readable by any AI.",
+      "tokens_in": 12426,
+      "tokens_out": 552,
+      "latency_ms": 9897,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-015",
+      "answer": "**mdfy** operates on a three-layer architecture designed to capture, organize, and retrieve knowledge for AI workflows:\n\n1. **Raw Layer**: The unedited stream of captured artifacts (pasted URLs, PDFs, transcripts, CLI agent captures) stored in a `documents` table and served as clean, AI-fetchable Markdown.\n2. **Wiki Layer**: Synthesized, navigable knowledge. Raw captures are rolled up into structured pages, topic bundles, and activity logs using an AI-driven diff-and-accept UI.\n3. **Schema Layer**: The connective tissue. A structured graph utilizing semantic embeddings (OpenAI `text-embedding-3-small` indexed with HNSW via pgvector) and cross-references to map relationships.\n\n### The Flow (Three Operations)\n* **Ingest**: Users paste content, drop files, or use integrations (CLI, Chrome extension, MCP) to save artifacts to a permanent URL.\n* **Query**: Users or downstream AI agents retrieve knowledge via semantic search or by fetching a Hub URL, which serves as a universal Markdown context format.\n* **Lint**: The system maintains coherence over time through scheduled lint passes, proactive bundle suggestions, and auto-synthesis.",
+      "tokens_in": 26437,
+      "tokens_out": 306,
+      "latency_ms": 7283,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-016",
+      "answer": "Here's a concise summary of the strategic pivot from **mdfy to Memory.Wiki**:\n\n---\n\n**The pivot was essentially a rebrand and sharpening of vision, not a technical overhaul.**\n\n- **Mdfy** was the original brand (mdfy.app) with a full technical foundation already built in roughly one month: web app, Chrome/VS Code extensions, CLI, MCP server, Mac app, and more.\n- **Memory.Wiki** became the new name with a clearer, more memorable identity and a tighter core proposition: *\"Your knowledge as a URL, readable by any AI.\"*\n- The **framing** also shifted — the product stopped describing itself in technical terms like \"RAG\" and rebranded its retrieval system as simply **\"mdfy Memory,\"** making it more accessible.\n- The **strategic goal** crystallized around becoming the **default memory layer for LLMs** — starting with manual URL-pasting by users, with a long-term vision of LLM platforms (ChatGPT, Claude, Cursor) natively asking users to connect Memory.Wiki.\n\nIn short: same infrastructure, cleaner brand, and a sharper narrative aimed at the broader \"AI memory\" category.",
+      "tokens_in": 11585,
+      "tokens_out": 444,
+      "latency_ms": 13068,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-016",
+      "answer": "The pivot was from **mdfy as a personal knowledge hub / markdown publishing tool** to **Memory.Wiki as an AI memory infrastructure layer**.\n\nIn v6, mdfy was framed as: “your personal knowledge hub for the AI era” — capture knowledge, bundle it, and deploy it to AI via URLs.\n\nIn v7, Memory.Wiki sharpened the thesis to:\n\n> **“Your knowledge graph as a URL for any AI.”**  \n> **“Markdown URL = API for any AI.”**\n\nKey changes:\n\n- **Brand:** mdfy → memory.wiki, with mdfy.app migrating to the new domain.\n- **Positioning:** from “better PKM / knowledge hub” to a **cross-AI memory protocol layer**.\n- **Core product:** not just documents and bundles, but the user’s **knowledge graph**: concepts, relations, embeddings, bundle analysis.\n- **Model:** from “capture / bundle / deploy” to **capture / digestion / utilization**.\n- **Moat:** not retrieval/RAG, but **delivery** — any AI can fetch a URL and receive pre-organized markdown/graph context.\n\nIn short: mdfy was a user-facing knowledge hub; Memory.Wiki became the infrastructure for making personal knowledge portable across all AI tools.",
+      "tokens_in": 34036,
+      "tokens_out": 612,
+      "latency_ms": 9500,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-016",
+      "answer": "The strategic pivot from **mdfy** to **Memory.Wiki** (finalized in May 2026) shifted the product from a \"personal knowledge hub\" (competing with PKM tools like Notion or Obsidian) to a **cross-AI memory protocol layer**. \n\nKey aspects of this pivot include:\n\n* **Strategic Thesis Sharpening:** Transitioning from a retrieval-focused system to a **delivery-focused infrastructure**. The core thesis became **\"Markdown URL = API for any AI\"** and **\"The graph is the product,\"** delivering pre-organized knowledge graphs directly to any LLM via a simple URL.\n* **Framework Restructuring:** Reorganizing the product pillars into a clear 3-tier funnel: **Capture (수집)**, **Digestion (소화)**, and **Utilization (활용)**.\n* **Technical Shift:** Sunsetting the Rust-based engine (`mdcore`) in favor of a JavaScript-only (`markdown-it`) engine.\n* **Brand Consolidation:** Migrating from `mdfy.app` and `mdfy.cc` to the single, global domain `memory.wiki` to establish a standard-setting brand for AI memory.",
+      "tokens_in": 24738,
+      "tokens_out": 336,
+      "latency_ms": 9001,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-017",
+      "answer": "Based on the Memory.Wiki content, here's a summary of **Hyunsang Cho's background as an AI product executive**:\n\nHyunsang Cho is the founder of **Raymind AI** and the builder of **Memory.Wiki** (previously branded as **Mdfy**). He operates at the intersection of AI product strategy and indie software development, with a clear focus on the AI knowledge management space.\n\nHis background highlights include:\n\n- **Solo founder/builder**: He spent ~5 months building Memory.Wiki nights and weekends before transitioning to full-time, shipping a broad product suite solo — a web app, Chrome extension, VS Code extension, macOS desktop app, CLI, MCP server (26 tools), real-time collaborative editing, and AI-powered concept extraction.\n- **AI-native product thinking**: He has a sharp perspective on the AI memory landscape, positioning his product distinctly against ChatGPT Memory, Mem0, Notion, and others.\n- **Open standards advocate**: He plans to publish the **Bundle Spec** as an open RFC on GitHub, signaling a platform/infrastructure mindset.\n- **Currently not fundraising**: He's focused on metrics-driven growth before seeking investment.\n\nHe can be reached at **hi@raymind.ai**.",
+      "tokens_in": 16510,
+      "tokens_out": 497,
+      "latency_ms": 15925,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-017",
+      "answer": "",
+      "tokens_in": 18458,
+      "tokens_out": 198,
+      "latency_ms": 6951,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-017",
+      "answer": "Hyunsang Cho is the founder of **Raymind AI** and the creator of **memory.wiki** (formerly mdfy). As an AI product executive, his background is defined by a hands-on, \"delivery-first\" approach to AI memory and knowledge management:\n\n* **Product Creator & Developer:** He spent five months building memory.wiki's extensive multi-surface infrastructure—including web/desktop apps, browser/VS Code extensions, a CLI, and a 26-tool Model Context Protocol (MCP) server—before transitioning to the project full-time in April 2026.\n* **Strategic Visionary:** Cho champions the thesis that **\"Markdown URL = API for any AI.\"** He advocates for a delivery-focused knowledge graph model over traditional closed retrieval systems, aiming to make user-owned markdown the universal interface for AI memory.\n* **Standardization Leader:** He is driving the **Bundle Spec v1.0**, an open standard designed to make AI-deployable knowledge portable across platforms like ChatGPT, Claude, and Cursor, positioning his work as an open-source alternative to vendor lock-in.",
+      "tokens_in": 39484,
+      "tokens_out": 316,
+      "latency_ms": 10983,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-018",
+      "answer": "## mdfy.cc v6 FINAL Business Plan\n\n**Core concept:** mdfy is a **personal knowledge hub for the AI era** — built by Hyunsang at Raymind.AI, targeting a **June 16, 2026 launch** (Show HN).\n\n**The URL Architecture** is the central innovation — three scopes sharing one URL primitive:\n- **Document URL** — single markdown file\n- **Bundle URL** — themed collection (manual or AI-generated)\n- **Hub URL** — your entire knowledge as one deployable URL\n\n**AI as Collaborator:** Users ask in natural language (e.g., *\"bundle my Acme project docs\"*), AI generates the bundle, and the user reviews/edits — distinct from auto-extraction tools like Mem0.\n\n**Business Model:**\n- Free → **Pro $9/mo** (AI bundle generation 10×/mo, auto-organized hub) → **Build $19/mo** (unlimited AI bundles, API/MCP)\n\n**12-Month Targets:** $80–150K MRR, 10,000–20,000 paying users, Bundle Spec v1.0 as open standard.\n\n**Biggest risks:** Big-tech competitive entry, build scope creep (v6 is more ambitious than v5), and solo founder burnout.",
+      "tokens_in": 23274,
+      "tokens_out": 468,
+      "latency_ms": 14109,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-018",
+      "answer": "The **mdfy.cc v6 FINAL business plan** positions mdfy as:\n\n> **“Your personal knowledge hub for the AI era.”**\n\nCore idea: **everything is a URL**. Users capture knowledge from anywhere, turn it into markdown documents, group it into bundles, and expose their whole knowledge hub as a URL that can be pasted into any AI.\n\nKey product architecture:\n\n- **Document URL**: one markdown note / AI answer / file\n- **Bundle URL**: themed collection of documents, manual or AI-generated\n- **Hub URL**: the user’s entire knowledge base, auto-organized and queryable\n\nThe big v6 shift is from a markdown publishing/memory tool to a **cloud-based, Human-AI collaborated knowledge hub**. AI acts as librarian and collaborator: users ask things like “bundle everything about Project Acme,” AI finds relevant docs, creates a bundle, and the user reviews/edits it.\n\nBusiness model:\n\n- **Free**: public docs, 3 bundles\n- **Pro $9/mo**: private posts, search, tags, 20 bundles, 10 AI bundle generations/month, hub URL\n- **Build $19/mo**: unlimited bundles/AI generation, API/MCP, analytics, adapters\n- Team, Scale, Enterprise tiers later\n\nLaunch target: **June 16, 2026 Show HN**, aiming for 100 paid users, then $80–150K MRR within 12 months.",
+      "tokens_in": 17388,
+      "tokens_out": 439,
+      "latency_ms": 8468,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-018",
+      "answer": "The **mdfy.cc v6 FINAL business plan** positions the product as the **\"personal knowledge hub for the AI era.\"** \n\n### Core Pillars & Architecture\n* **The URL Architecture:** Everything is a URL across three progressive scopes: **Document URL** (single markdown file), **Bundle URL** (themed collection), and **Hub URL** (user's entire knowledge base). All URLs are living, editable, versioned, and deployable to any AI as context.\n* **AI as Collaborator:** AI acts as a librarian and collaborator. Users can request bundles via natural language, and the AI automatically searches, groups, and generates them for user review.\n\n### Business Model & Pricing\n* **Free:** Unlimited public publishing, 3 bundles.\n* **Pro ($9/mo):** Private posts, auto-organized hub, and 10 AI bundle generations/month.\n* **Build ($19/mo):** Unlimited AI generation, API/MCP write access, and custom domains.\n\n### Launch & Goals\n* **Launch Date:** June 16, 2026 (via HN Show HN), alongside open-sourcing the core engine (`mdcore`) and the `Bundle Spec v1.0` standard.\n* **12-Month Target:** Achieve **$80K–$150K MRR** and **10,000–20,000 paying users**.",
+      "tokens_in": 18244,
+      "tokens_out": 358,
+      "latency_ms": 6672,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-019",
+      "answer": "",
+      "tokens_in": 38859,
+      "tokens_out": 412,
+      "latency_ms": 12725,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-019",
+      "answer": "",
+      "tokens_in": 45264,
+      "tokens_out": 340,
+      "latency_ms": 8419,
+      "tool_calls": 6,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-019",
+      "answer": "",
+      "tokens_in": 38597,
+      "tokens_out": 112,
+      "latency_ms": 8834,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "claude",
+      "query_id": "q-020",
+      "answer": "## Memory.Wiki: Product Strategy & Evolution Summary\n\n**Origin:** Memory.Wiki evolved from an earlier product called **Mdfy** (mdfy.app), a personal knowledge management tool. The rebrand to memory.wiki reflects a deliberate strategic pivot.\n\n**Strategic Shift:** The core strategy moved from building *\"a better PKM tool\"* (competing with Notion or Obsidian) to becoming a **\"Memory Protocol Layer\"** — infrastructure that any AI can use, rather than another note-taking app.\n\n**Core Promise:** *\"You author. AI uses. The wiki maintains itself.\"* Users write content, AI agents consume it via a standard URL, and an LLM periodically organizes the wiki automatically.\n\n**Two Entry Points (\"Two Doors\"):**\n- **Memory Door** — 1-click capture so \"AI remembers you\"\n- **Wiki Door** — auto-indexed concepts and backlinks so \"your mind gets organized\"\n\n**Key Differentiators:**\n- One URL deploys to any AI tool (ChatGPT, Claude, Cursor, etc.)\n- Open spec, no vendor lock-in\n- MCP server integration already shipped\n- Partnership with Upstage Solar for embeddings and AI lint\n\n**Roadmap:** Pre-launch focuses on wikilinks, backlinks, and a Concept Index; longer-term goals include AI Wiki Lint, semantic retrieval, and native integration into 3+ LLM tools.",
+      "tokens_in": 13028,
+      "tokens_out": 533,
+      "latency_ms": 14648,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "openai",
+      "query_id": "q-020",
+      "answer": "Memory.Wiki’s strategy is to become a **cross-AI memory protocol layer**, not just another PKM or notes app. Its core thesis is: **“Markdown URL = API for any AI”** and **“your knowledge graph as a URL for any AI.”** Users author and own knowledge; AI systems fetch, use, and help organize it.\n\nProduct evolution: it began as **mdfy**, a multi-surface capture and RAG/memory tool, then shifted toward **memory.wiki** with stronger positioning around open, URL-delivered knowledge graphs. The product moved from “better PKM” to infrastructure: user-authored docs become hubs, bundles, concept indexes, backlinks, embeddings, and graph relationships that can be pasted into ChatGPT, Claude, Cursor, Gemini, or accessed via MCP.\n\nThe roadmap is organized into three tiers: **Capture** via web, Chrome, VS Code, desktop, CLI, MCP, and future mobile/share flows; **Digestion** via AI-generated concepts, bundles, semantic search, and wiki lint; and **Utilization** via doc/bundle/hub URLs, compact AI payloads, public hubs, embedded chat, MCP, and eventual native LLM integrations.\n\nIn short: Memory.Wiki is evolving from an AI-assisted knowledge app into an open, graph-based memory delivery layer for all AI tools.",
+      "tokens_in": 23779,
+      "tokens_out": 533,
+      "latency_ms": 10796,
+      "tool_calls": 5,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "q-020",
+      "answer": "Memory.Wiki evolved from **Mdfy** (a RAG-centric personal knowledge base) into a **cross-AI memory protocol layer**. Rather than competing with traditional PKM tools like Notion or Obsidian, its strategy focuses on providing an open, infrastructure-level memory layer for AI.\n\nIts core promise is: *\"You author. AI uses. The wiki maintains itself.\"* This is executed through a \"Two Doors\" product strategy:\n1. **Memory Door:** Enables 1-click context capture that users can deploy across any AI tool or session via a single URL.\n2. **Wiki Door:** Automatically organizes the user's mind using LLM-generated concept indexes, backlinks, and nightly \"Wiki Lints\" to resolve duplicates or contradictions.\n\nTechnically, Memory.Wiki prioritizes AI-readiness. It features token-efficient payloads (`?compact=1`), `llms.txt` hub indexes, and an MCP server, allowing LLMs (like Cursor or Claude) to natively read, write, and search user knowledge without vendor lock-in.",
+      "tokens_in": 14963,
+      "tokens_out": 301,
+      "latency_ms": 8783,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "url": "https://memory.wiki/hub/raymindai"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "q-001",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.71,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The core wedge claim (cross-AI structural advantage) and several supporting points are well-grounded in the corpus, but two specific claims about llms.txt/MCP delivery methods and the 'open spec' framing lack direct corpus support.",
+      "claims": [
+        {
+          "text": "Memory.Wiki's wedge is a single user-authored hub URL that works across any AI tool without vendor lock-in",
+          "quote": "Cross-AI is the structural wedge giants cannot build.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Single-AI memory systems bind your knowledge to one ecosystem, while Memory.Wiki inverts this with a permanent public URL any AI can consume",
+          "quote": "Stop re-explaining your context to every AI.\nPut your knowledge in one URL they can all read.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Any AI can consume the URL via URL paste, llms.txt fetch, MCP server, or native partner integration",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Cross-AI portability allows pasting your hub URL into ChatGPT, Claude, Cursor, or Codex and it just works",
+          "quote": "Paste one URL into any AI — it knows you.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The user, not the AI, controls and curates the content (user ownership)",
+          "quote": "사람이 쓴 것은 sacred. AI 가 만든 것은 attributed.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Bundle URL format is an open spec that no single vendor can wall off",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Memory.Wiki aims to be the memory protocol layer that sits beneath all AI tools rather than competing with any one of them",
+          "quote": "Memory.Wiki v8 — the cross-AI capture layer",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-001",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 3,
+      "reason": "All claims are supported or paraphrase-supported by the corpus, primarily through the internal thesis about cross-AI being the structural wedge and the URL architecture details.",
+      "claims": [
+        {
+          "text": "Single-AI memory systems remember inside one system, tied to one vendor, one app, or one API",
+          "quote": "Cross-AI is the structural wedge giants cannot build.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Memory.Wiki turns a user's knowledge graph into fetchable Markdown URLs",
+          "quote": "Knowledge as URL = API for any AI",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "memory.wiki/<id> = one document",
+          "quote": "L1: memory.wiki/<id>             ← Document (12자 nanoid)",
+          "verdict": "supported"
+        },
+        {
+          "text": "memory.wiki/b/<id> = a bundle",
+          "quote": "L2: memory.wiki/b/<id>           ← Bundle (collection)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Any AI that can open a URL—ChatGPT, Claude, Gemini, Cursor, agents—can inherit the same context without SDKs, plugins, or vendor lock-in",
+          "quote": "AI (ChatGPT/Claude/Cursor) | 같은 URL | markdown digest (token-budgeted, 8-16KB)",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Memory.Wiki sits above individual AI products as an open, portable memory layer",
+          "quote": "Cross-AI is the structural wedge giants cannot build.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The user owns and curates the knowledge; Memory.Wiki organizes it into concepts, relations, bundles, and embeddings; then it delivers that graph to any AI",
+          "quote": "Capture anything. AI organizes. Use everywhere.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "memory.wiki/hub/<slug> = the user's broader thinking shape",
+          "quote": "/hub/<slug> → /@<username> 301 redirect",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-001",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-002",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All eight claims are directly supported or paraphrase-supported by verbatim passages in the primary source document.",
+      "claims": [
+        {
+          "text": "Every day, people get valuable insights from ChatGPT, Claude, and other AI tools — then close the tab, losing that knowledge.",
+          "quote": "매일 수백만 명이 ChatGPT, Claude, Gemini, Cursor에 자신의 사고를 쏟아붓습니다. 어려운 질문을 합니다. 정말로 유용한 답변을 받습니다 — 전략, 코드, 프레임워크, 전문가들이 수십 년에 걸쳐 개발한 통찰들. 그리고 탭을 닫습니다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The next day, they paste the same context and repeat the cycle.",
+          "quote": "다음 날, 비슷한 질문을 합니다. 같은 컨텍스트를 다시 paste합니다. 내가 누구인지, 무엇을 하고 있는지, 이미 무엇을 결정했는지를 다시 설명합니다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Your knowledge doesn't live somewhere any AI can read it — Notion, Google Docs, and local files are all locked to specific tools or users.",
+          "quote": "진짜 문제는 당신의 지식이 어떤 AI도 읽을 수 있는 곳에 살지 않는다는 것입니다. 지식이 Notion에 살 수 있습니다 (단 AI는 인증 없이 fetch 못 함). Google Docs에 살 수 있습니다 (같은 문제). 로컬 파일에 살 수 있습니다 (AI가 보지 못함).",
+          "verdict": "supported"
+        },
+        {
+          "text": "Memory.wiki solves this with a URL that any AI can fetch — paste a memory.wiki link into any LLM and it instantly receives your knowledge.",
+          "quote": "당신의 지식이 URL로 살아서, 어떤 AI든 읽을 수 있고, 편집하면 업데이트되고, 문서뿐만 아니라 그들 사이의 관계까지 담는 곳이 필요합니다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Memory.wiki stores not just documents but the graph of relationships between concepts across them.",
+          "quote": "대부분의 지식 도구는 docs를 저장합니다. memory.wiki는 docs 와 그들 사이의 graph를 저장합니다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "He is motivated by a broader mission to establish an open standard before big AI platforms lock everyone's knowledge inside their own closed memory systems.",
+          "quote": "지난 2년간, 모든 AI 회사가 자신의 벽 안에 closed memory를 build해왔습니다. ChatGPT Memory. Google Memory Bank. SDK 안의 추출-memory 스타트업들. 각자 자신의 product 안에서 당신의 지식을 소유하려고 합니다. 저는 두 번째 결과를 더 가능하게 만들기 위해 memory.wiki를 build하고 있습니다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "He draws a parallel to HTTP — the open protocol that won because the primitive was right, not because someone declared it the winner.",
+          "quote": "이게 HTTP가 문서에 대해 한 같은 베팅입니다. HTTP가 이긴 건 누가 선언해서가 아닙니다. Primitive가 옳았고 대안들이 더 나빴기 때문에 이겼습니다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "He's building memory.wiki to give people ownership of their knowledge graph, portable and deployable to any AI.",
+          "quote": "당신의 지식 그래프, AI와 함께 build, AI에 deploy, 당신이 소유.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-002",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the primary source document.",
+      "claims": [
+        {
+          "text": "The real problem with AI memory is not storage, but delivery",
+          "quote": "문제는 memory가 아닙니다. Delivery입니다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "People pour valuable thinking into ChatGPT, Claude, Gemini, Cursor but that knowledge gets trapped in closed chat histories, Notion, Google Docs, or vendor-specific memory systems",
+          "quote": "지식이 Notion에 살 수 있습니다 (단 AI는 인증 없이 fetch 못 함). Google Docs에 살 수 있습니다 (같은 문제). 로컬 파일에 살 수 있습니다 (AI가 보지 못함). ChatGPT Memory에 살 수 있습니다 (단 ChatGPT만 읽을 수 있음). 각 container가 닫혀있습니다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "memory.wiki makes personal knowledge live at open, AI-readable URLs: plain Markdown that any AI can fetch",
+          "quote": "당신의 지식이 URL로 살아서, 어떤 AI든 읽을 수 있고, 편집하면 업데이트되고, 문서뿐만 아니라 그들 사이의 관계까지 담는 곳",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "It provides documents, bundles, and hubs that expose not only content but also the graph of concepts and relationships between ideas",
+          "quote": "세 URL scope — Doc, Bundle, Hub",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "His broader motivation is to make an open alternative to closed AI memory systems",
+          "quote": "저는 두 번째 결과를 더 가능하게 만들기 위해 memory.wiki를 build하고 있습니다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "He wants users to own their knowledge, deploy it to any AI, and avoid being locked into one platform",
+          "quote": "당신의 지식 그래프, AI와 함께 build, AI에 deploy, 당신이 소유.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "He is building it to make the 'open standard' outcome for AI memory more likely",
+          "quote": "open standard가 등장하고 — 어떤 AI든 fetch할 수 있는 markdown URL, vendor를 가로질러 휴대하는 지식, 당신이 통제하는 format. 저는 두 번째 결과를 더 가능하게 만들기 위해 memory.wiki를 build하고 있습니다.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-002",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported or closely paraphrased by the primary source document.",
+      "claims": [
+        {
+          "text": "The real issue with AI memory is delivery, not storage",
+          "quote": "문제는 memory가 아닙니다. Delivery입니다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Valuable AI-generated insights are lost when chat tabs close because user knowledge is locked in closed platforms that AIs cannot easily access",
+          "quote": "그 답변은 사라집니다. 문자 그대로는 아닙니다 — 어딘가의 채팅 기록에 남아있지만, 다시 검색하지 않습니다. 기능적으로는 사라진 겁니다. 찾을 수 없고, 지난주의 통찰과 연결할 수 없고, 내일의 대화에 다시 ship할 수 없습니다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "memory.wiki turns user knowledge into open, markdown-formatted URLs that any AI can instantly fetch and read",
+          "quote": "당신의 지식이 URL로 살아서, 어떤 AI든 읽을 수 있고, 편집하면 업데이트되고, 문서뿐만 아니라 그들 사이의 관계까지 담는 곳",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The platform automatically extracts concepts to build a knowledge graph (relationships, themes, and edges) of the user's thinking",
+          "quote": "LLM이 concept을 추출하고 태그합니다. Docs를 bundle할 때마다, 다른 LLM이 themes를 찾고 edges를 그립니다. 모든 bundle을 가로지른 모든 concept이 당신의 개인 ontology로 누적됩니다 — typed relations, weights, cross-references.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Markdown is the ideal primitive for AI-era knowledge",
+          "quote": "마크다운은 AI 시대 지식의 올바른 primitive다.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "URLs are the simplest, most open delivery interface",
+          "quote": "URL은 올바른 인터페이스다. SDK가 아니라. Vendor lock-in이 아니라. URL은 가능한 가장 단순한 delivery mechanism입니다",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The graph (not just the documents) is the actual product",
+          "quote": "그래프가 product입니다",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Cho is building memory.wiki to establish an open standard for AI memory before closed, proprietary systems monopolize user data",
+          "quote": "저는 두 번째 결과를 더 가능하게 만들기 위해 memory.wiki를 build하고 있습니다... open standard가 등장하고 — 어떤 AI든 fetch할 수 있는 markdown URL, vendor를 가로질러 휴대하는 지식, 당신이 통제하는 format.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-003",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.636,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "About 7 of 11 claims are supported or paraphrase-supported by the corpus, but several specific claims (diff/accept UI, /api/hub/recall endpoint, confidence tags, PDF/DOCX capture) have no corpus support, pulling the score below 0.7.",
+      "claims": [
+        {
+          "text": "Document is a single captured answer/file at a permanent URL",
+          "quote": "Doc | mdfy.app/<id> | A single markdown document. The atom.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Bundle is a curated grouping of related docs with its own URL",
+          "quote": "Bundle | mdfy.app/b/<id> | An ordered set of docs + an AI-extracted graph (themes, edges).",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub is your entire knowledge layer as one deployable URL",
+          "quote": "Hub | mdfy.app/hub/<slug> | A user's whole bundle library + cross-bundle concept ontology.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Capture operation includes paste share URLs, drop files (PDF, DOCX, etc.), or use /mdfy from coding agents",
+          "quote": "Drag-and-drop import, paste-as-markdown, GitHub repo import, GFM tables paste support.",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Auto-synthesis with diff/accept UI merges new captures into wiki pages",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Deploy by pasting any URL into Claude, ChatGPT, Cursor, or Codex; AI fetches it as plain markdown context",
+          "quote": "mdfy turns any markdown — typed, pasted from an AI, imported from a file — into a clean public URL that any human reads in a browser and any LLM (Claude, ChatGPT, Gemini, Cursor) ingests as native context.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Use /api/hub/<slug>/recall for targeted retrieval",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Hybrid BM25 + vector (pgvector) retrieval with OpenAI text-embedding-3-small embeddings",
+          "quote": "lib/embeddings.ts — OpenAI text-embedding-3-small for doc + chunk vectors. ... pgvector for similarity search.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "MCP server with 26-tool integration for agents writing/querying hubs directly",
+          "quote": "26-tool integration layer allowing agents to query, write, and search within a user's knowledge hub.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Confidence tags ([EXTRACTED] / [INFERRED] / [AMBIGUOUS]) on synthesized claims",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "A public URL is the universal AI context format — no SDK or plugin needed",
+          "quote": "A mdfy URL is an API for any AI.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-003",
+      "runner": "openai",
+      "accurate": true,
+      "score": 0.75,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Most core feature claims are supported by the corpus, but specific capture formats (PDF/DOCX/PPTX etc.) and organizational features like linting/bundle suggestions are not found in the primary source document.",
+      "claims": [
+        {
+          "text": "Every Document, Bundle, and Hub is a permanent, editable, shareable URL",
+          "quote": "Three tiers, each with its own page route and its own LLM-ready `/raw` payload.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Permanent URLs — docs never expire",
+          "quote": "Permanent URLs — docs **never expire** (pricing policy: free during beta, future Pro for auto-analysis; expiry never).",
+          "verdict": "supported"
+        },
+        {
+          "text": "Deploy to any AI: paste a document, bundle, or hub URL into Claude, ChatGPT, Cursor, Codex, etc.; the AI reads clean markdown context",
+          "quote": "mdfy turns any markdown — typed, pasted from an AI, imported from a file — into a clean public URL that any human reads in a browser and any LLM (Claude, ChatGPT, Gemini, Cursor) ingests as native context.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "mdfy Memory / recall: embeddings, chunking by markdown structure, semantic search, and hybrid BM25 + vector retrieval",
+          "quote": "Embeddings: per-doc + per-chunk pgvector vectors backing semantic search via MCP.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Multi-surface access: web editor, Chrome extension/bookmarklet, VS Code, Mac app, CLI, API, and MCP server",
+          "quote": "VS Code (mdfy-vscode) | Marketplace v1.4.0 ... Desktop (DMG) | v2.2.0 ... Chrome Web Store | v2.x ... CLI (mdfy-cli) | npm v1.3.x ... MCP server (mdfy-mcp) | npm v1.3.x",
+          "verdict": "supported"
+        },
+        {
+          "text": "Markdown-native publishing: WYSIWYG editor, versioning, syntax highlighting, KaTeX, Mermaid, sharing/privacy controls",
+          "quote": "Tiptap (ProseMirror) **Live** tab — WYSIWYG over the same markdown-it parser the viewers use ... GFM tables, task lists, footnotes, KaTeX (`$..$`, `$$..$$`), Mermaid (dark/light aware), code highlighting (highlight.js)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Save AI chats, share URLs, pasted text/code, files like PDF/DOCX/PPTX/XLSX/HTML/CSV, transcripts, and agent outputs",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "AI-assisted synthesis, bundle suggestions, tags/folders, logs, and linting help keep knowledge coherent",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 6
+    },
+    {
+      "query_id": "q-003",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.6,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer correctly identifies several real mdfy features (URLs, bundles, embeddings, concept graphs, ingestion methods) but fabricates several specific details not present in the corpus, including lint passes, diff-and-accept UI with confidence tags, HNSW indexing, and the /mdfy skill for AI tools.",
+      "claims": [
+        {
+          "text": "mdfy stores artifacts as permanent, AI-fetchable markdown URLs at mdfy.app/<id>",
+          "quote": "Doc | mdfy.app/<id> | A single markdown document. The atom.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy organizes docs into multi-doc Bundles",
+          "quote": "Bundle | mdfy.app/b/<id> | An ordered set of docs + an AI-extracted graph (themes, edges).",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy uses concept extraction and semantic embeddings with OpenAI text-embedding-3-small",
+          "quote": "lib/embeddings.ts — OpenAI text-embedding-3-small for doc + chunk vectors.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy uses cross-references and a structured graph with concept extraction",
+          "quote": "Concept index (ontology extraction per doc) → cross-bundle graph at the Hub level.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy captures material via pasting, file drops, browser extensions, and APIs",
+          "quote": "Drag-and-drop import, paste-as-markdown, GitHub repo import, GFM tables paste support.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Hub URL acts as a universal markdown context format readable by any LLM",
+          "quote": "A mdfy URL is an API for any AI.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "mdfy has a /mdfy skill integrated directly into AI tools like Claude Code, Cursor, Codex, Aider",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "mdfy performs scheduled lint passes flagging gaps/conflicts and proactive bundle suggestions",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "mdfy has an auto-synthesis diff-and-accept UI with confidence tags",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "mdfy has HNSW indexing for semantic embeddings",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-004",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All nine claims are directly and verbatim supported by the primary source corpus.",
+      "claims": [
+        {
+          "text": "mdfy now calls it mdfy Memory rather than RAG",
+          "quote": "The product that replaced the RAG-centric framing as the primary way to understand mdfy's retrieval and storage system.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Every doc, chunk, and bundle gets a 1536-dim vector via OpenAI text-embedding-3-small with HNSW index",
+          "quote": "Every public doc carries a 1536-dimensional vector embedded with OpenAI `text-embedding-3-small`, indexed with HNSW for cosine similarity. Same for every bundle. Same, at a finer grain, for every chunk inside a doc.",
+          "verdict": "supported"
+        },
+        {
+          "text": "A sha256 hash prevents re-embedding unchanged content, so unchanged saves cost zero",
+          "quote": "The route hashes the current source. If the hash matches stored, it returns `{skipped: \"unchanged\"}` without ever calling OpenAI. Cost on a no-op save: zero.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Docs are split by markdown headings into chunks (~1800 chars max), each tagged with a breadcrumb",
+          "quote": "A doc isn't one vector. It's split on markdown headings (`#` / `##` / `###`); each chunk is the heading line plus everything until the next heading at equal-or-higher rank... Sections longer than ~1800 chars further split on blank-line boundaries",
+          "verdict": "supported"
+        },
+        {
+          "text": "A single public POST /api/hub/<slug>/recall endpoint supports three granularities: doc, chunk, or bundle",
+          "quote": "POST mdfy.app/api/hub/<slug>/recall\nbody:\n  {\n    \"question\": \"...\",\n    \"k\": 5,\n    \"level\": \"doc\" | \"chunk\" | \"bundle\",\n    \"hybrid\": false\n  }",
+          "verdict": "supported"
+        },
+        {
+          "text": "No SDK or API key needed",
+          "quote": "No SDK, no API key, no MCP server.",
+          "verdict": "supported"
+        },
+        {
+          "text": "When hybrid: true, it combines vector cosine search with Postgres full-text search (BM25), merging results via Reciprocal Rank Fusion",
+          "quote": "Vector cosine over chunk embeddings (top `k×4`).\n2. Postgres FTS (BM25 via tsvector) over the same chunks (top `k×4`).\n3. Reciprocal Rank Fusion: `score = sum( 1 / (60 + rank_in_list) )`",
+          "verdict": "supported"
+        },
+        {
+          "text": "RRF handles cases where acronyms like MCP server have weak semantic but strong lexical signal",
+          "quote": "query *\"MCP server\"* has weak semantic signal (an acronym to the embedding model) but strong lexical signal (the chunk that *literally mentions MCP* should win). Vector-only ranks a vague \"Why now?\" doc first. Hybrid promotes the chunk that says \"Built the MCP server\" to top-1.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Privacy gates (drafts, deleted, password-protected docs) are enforced directly in SQL, not in the API layer",
+          "quote": "Every public retrieval RPC enforces the same four privacy gates *in SQL*, not in the API route",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-004",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All seven claims are directly supported by verbatim passages in the primary source corpus.",
+      "claims": [
+        {
+          "text": "mdfy's RAG is now framed as mdfy Memory",
+          "quote": "The product that replaced the RAG-centric framing as the primary way to understand mdfy's retrieval and storage system.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Each doc, bundle, and markdown-heading-based chunk gets an OpenAI text-embedding-3-small embedding, indexed with HNSW cosine similarity",
+          "quote": "Every public doc carries a 1536-dimensional vector embedded with OpenAI `text-embedding-3-small`, indexed with HNSW for cosine similarity. Same for every bundle. Same, at a finer grain, for every chunk inside a doc.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Embedding refresh is idempotent: artifacts are hashed with sha256, so unchanged docs/chunks are skipped",
+          "quote": "Each artifact carries a sha256 hash of its source. When you save a doc... The route hashes the current source. If the hash matches stored, it returns `{skipped: \"unchanged\"}` without ever calling OpenAI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Retrieval happens through a public HTTP endpoint POST /api/hub/<slug>/recall",
+          "quote": "POST mdfy.app/api/hub/<slug>/recall",
+          "verdict": "supported"
+        },
+        {
+          "text": "hybrid: true combines vector cosine search, Postgres full-text/BM25 search, and Reciprocal Rank Fusion: 1 / (60 + rank)",
+          "quote": "Vector cosine over chunk embeddings (top `k×4`). Postgres FTS (BM25 via tsvector) over the same chunks (top `k×4`). Reciprocal Rank Fusion: `score = sum( 1 / (60 + rank_in_list) )`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Results include the markdown snippet, breadcrumb, source doc URL, vector rank, FTS rank, and RRF score",
+          "quote": "The response carries `results[].markdown` (the actual chunk), `heading_path` (breadcrumb), `doc_url` (link back), `rrf_score` / `vector_rank` / `fts_rank` so you can see *why* each chunk surfaced.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Privacy is enforced in SQL: drafts, deleted docs, password-protected docs, and email-restricted docs are excluded from public recall",
+          "quote": "WHERE d.is_draft = FALSE AND d.deleted_at IS NULL AND d.password_hash IS NULL AND (d.allowed_emails IS NULL OR array_length(d.allowed_emails, 1) IS NULL)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-004",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All seven atomic claims are directly and verbatim supported by the primary source document.",
+      "claims": [
+        {
+          "text": "mdfy uses OpenAI text-embedding-3-small (1536-dim) indexed with HNSW",
+          "quote": "Every public doc carries a 1536-dimensional vector embedded with OpenAI `text-embedding-3-small`, indexed with HNSW for cosine similarity.",
+          "verdict": "supported"
+        },
+        {
+          "text": "It hashes content (SHA-256) to skip re-embedding unchanged documents, chunks, or bundles",
+          "quote": "Each artifact carries a sha256 hash of its source. When you save a doc: ... The route hashes the current source. If the hash matches stored, it returns `{skipped: \"unchanged\"}` without ever calling OpenAI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Splits documents by markdown headings (#, ##, ###). Each chunk includes its heading subtree and a hierarchical breadcrumb",
+          "quote": "A doc isn't one vector. It's split on markdown headings (`#` / `##` / `###`); each chunk is the heading line plus everything until the next heading at equal-or-higher rank.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Each chunk includes a hierarchical breadcrumb (e.g., Doc > Section > Subsection) to provide context to LLMs",
+          "quote": "Each chunk carries a *breadcrumb*:\n```\nmdfy Memory > How the memory layer works > Layer 1 — embeddings everywhere\n```\nWhen recall returns chunks, the breadcrumb tells the LLM — and the human reading the JSON — exactly *where* in the doc the snippet came from.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Exposes a single public endpoint (POST /api/hub/<slug>/recall) supporting retrieval at three granularities: doc, chunk, or bundle",
+          "quote": "The retrieval surface is a single public endpoint. No SDK, no API key, no MCP server.\n```\nPOST mdfy.app/api/hub/<slug>/recall\nbody:\n  {\n    \"question\": \"...\",\n    \"k\": 5,\n    \"level\": \"doc\" | \"chunk\" | \"bundle\",\n    \"hybrid\": false\n  }\n```",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hybrid retrieval combines vector cosine similarity and Postgres Full-Text Search (BM25) using Reciprocal Rank Fusion (RRF)",
+          "quote": "Vector cosine over chunk embeddings (top `k×4`). Postgres FTS (BM25 via tsvector) over the same chunks (top `k×4`). Reciprocal Rank Fusion: `score = sum( 1 / (60 + rank_in_list) )`.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Privacy gates filtering drafts, soft-deletes, password-protected, or restricted docs are enforced directly within SQL queries",
+          "quote": "Every public retrieval RPC enforces the same four privacy gates *in SQL*, not in the API route:\n```sql\nWHERE d.is_draft = FALSE\n  AND d.deleted_at IS NULL\n  AND d.password_hash IS NULL\n  AND (d.allowed_emails IS NULL OR array_length(d.allowed_emails, 1) IS NULL)\n```",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-005",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Every claim in the candidate answer is fabricated and contradicts or is entirely absent from the corpus, which describes freshness via document body auto-propagation (~60s), manual Re-analyze for bundle graphs, and an automatic+cooldown system for hub concept indexes — none of the diff/accept, lint.md, or confidence tag mechanisms mentioned appear anywhere in the corpus.",
+      "claims": [
+        {
+          "text": "When new content is captured, the system generates a proposed update to existing wiki pages via auto-synthesis with diff/accept",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Confidence tags such as [EXTRACTED], [INFERRED], and [AMBIGUOUS] make the AI's certainty visible",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "A periodic automated scan surfaces gaps, conflicts, and orphaned documents as a checklist at hub/<slug>/lint.md",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "The system proactively suggests grouping related documents into a bundle when a cluster forms",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Embedding maintenance, graph computation, and cross-reference tracking run automatically in the background",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "There is intentional friction via the diff/accept UI controlling what enters the wiki layer",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-005",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.29,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer invents several features (diff-and-accept flow, hub lint, bundle discovery suggestions, lint checklists) that have no support in the corpus, and misses the actual freshness mechanisms described (60-second propagation, 30-min cooldown, Re-analyze button, concept index pipeline).",
+      "claims": [
+        {
+          "text": "Documents are saved as stable, AI-fetchable markdown URLs and embedded on save, so search and retrieval stay current",
+          "quote": "/raw/{id} and /d/{id} always read straight from the database",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "mdfy proactively suggests turning related documents into bundles when they cluster around a topic",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Auto-synthesis compares new captures against existing wiki pages and proposes updates through a diff-and-accept flow",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Hub lint runs periodically to flag gaps, conflicts, and orphan documents",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Hub artifacts like logs and lint checklists are generated showing what changed or needs attention",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "AI does the ongoing synthesis, bundle discovery, embedding maintenance, graph/cross-reference computation, and linting",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "The user stays in the loop for accepting meaningful wiki updates",
+          "quote": "You decide when the analysis is worth re-running",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-005",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-006",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-006",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-006",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-007",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.857,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer correctly identifies that the raymindai hub contains no K-Tech Pioneers content and accurately lists the hub's actual topics, with only the speculative closing suggestion lacking corpus support.",
+      "claims": [
+        {
+          "text": "There is no document or concept related to 'K-Tech Pioneers' in the raymindai Memory.Wiki hub",
+          "quote": "concept_count: 40",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub covers Memory.Wiki/Mdfy product development",
+          "quote": "Memory.Wiki\n*entity • weight 184 • 6 docs*",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub covers OAuth 2.0 + PKCE implementation",
+          "quote": "OAuth 2.0 + PKCE Implementation Guide",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub covers Rust error handling",
+          "quote": "Rust Error Handling: From Beginner to Production",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub covers RAG/mdfy Memory architecture",
+          "quote": "How mdfy does RAG → mdfy Memory",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub covers MCP server integration",
+          "quote": "MCP server\n*entity • weight 77 • 6 docs*",
+          "verdict": "supported"
+        },
+        {
+          "text": "The K-Tech Pioneers document may be private, not added to the hub, or named differently",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-007",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-007",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-008",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 1,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-008",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 1,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-008",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 1,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-009",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-009",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-009",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-010",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims are directly supported by verbatim or near-verbatim passages in the primary source document.",
+      "claims": [
+        {
+          "text": "A memdo (mdfy) URL is an API for any AI",
+          "quote": "A mdfy URL is an API for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "When you paste a mdfy.app URL into ChatGPT, Claude, or any LLM, it fetches the URL and receives clean markdown",
+          "quote": "When you paste `mdfy.app/d/abc123` or `mdfy.app/b/xyz` or `mdfy.app/hub/yourname` into ChatGPT, Claude, Gemini, or Cursor, the LLM fetches that URL and gets back clean markdown",
+          "verdict": "supported"
+        },
+        {
+          "text": "No app, no login, no JavaScript — just markdown over HTTPS",
+          "quote": "No app to install. No format to learn. No JS to render. Just markdown over HTTPS.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "/d/<id> is a single document (raw markdown + frontmatter)",
+          "quote": "No AI processing. Just the source markdown wrapped in frontmatter.",
+          "verdict": "supported"
+        },
+        {
+          "text": "/b/<id> is a bundle with AI-generated summary, themes, insights, and a linked doc index (~95% fewer tokens than pasting every doc)",
+          "quote": "Same context, ~95% fewer tokens than concatenating every doc.",
+          "verdict": "supported"
+        },
+        {
+          "text": "/hub/<slug> shows your full knowledge hub: top 40 concepts by weight, their relationships, and links to relevant bundles/docs",
+          "quote": "A hub digest is the **shape of someone's thinking** — top 40 concepts by weight, the typed edges between them, which bundle each concept lives in.",
+          "verdict": "supported"
+        },
+        {
+          "text": "MCP server provides 26 tools (create, search, append, etc.) for AI tools that support the Model Context Protocol",
+          "quote": "`mdfy-mcp` is a published npm package. Hosts that speak MCP (Claude Desktop, Cursor, Cline, Windsurf) load it once and gain 26 tools the LLM can call by itself: `mdfy_create`, `mdfy_append`, `mdfy_search`, `mdfy_outline`, `mdfy_versions`, `mdfy_publish`, etc.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Everything — the visual Galaxy, bundle canvas, hub digest, and MCP search — reads from the same graph: your concept index, typed relations, documents, and bundles",
+          "quote": "every mdfy surface — bundle canvas, hub galaxy, raw markdown digest, MCP search results — is **a different reader of the same underlying graph**. The graph is the product.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-010",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "A memdo URL is an API for any AI",
+          "quote": "A mdfy URL is an API for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "When you paste a document, bundle, or hub URL into ChatGPT, Claude, Gemini, Cursor, etc., the AI fetches clean markdown over HTTPS—no login flow, app install, JavaScript rendering, or file upload needed",
+          "quote": "When you paste `mdfy.app/d/abc123` or `mdfy.app/b/xyz` or `mdfy.app/hub/yourname` into ChatGPT, Claude, Gemini, or Cursor, the LLM fetches that URL and gets back clean markdown — *your* thinking, already shaped for an AI to read. No app to install. No format to learn. No JS to render. Just markdown over HTTPS.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle URL returns a curated set of documents plus an AI-generated compact digest: summaries, themes, insights, concepts, relations, and links to source docs",
+          "quote": "## Summary           ← AI graph\n## Themes            ← AI graph\n## Cross-document insights\n## Concepts          ← AI graph (this bundle's concept subgraph)\n## Concept relations\n## Documents\n- [Doc A](https://mdfy.app/d/...) — annotation",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub URL returns a person's whole knowledge map: top concepts, related documents, bundles, and concept relationships",
+          "quote": "A hub digest is the **shape of someone's thinking** — top 40 concepts by weight, the typed edges between them, which bundle each concept lives in.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Behind the scenes, memdo maintains source markdown, an AI-extracted graph, a personal concept index, and embeddings for semantic search",
+          "quote": "| **The markdown** | Source of truth. What the human types. | `documents.markdown` |\n| **The AI graph** | What Claude/GPT extracted from a *bundle*: themes, insights, edges. | `bundles.graph_data` (JSON) |\n| **The concept index** | The user's lifelong ontology — concepts pooled across every bundle. | `concept_index` + `concept_relations` |\n| **The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\"). Internal. |",
+          "verdict": "supported"
+        },
+        {
+          "text": "LLMs can interact by fetching URLs to read your knowledge",
+          "quote": "**URL fetch (pull)** — covered above. The LLM has the URL, it wants the content, it `GET`s and reads.",
+          "verdict": "supported"
+        },
+        {
+          "text": "LLMs can use the MCP server to create, append, search, outline, publish, and manage knowledge directly",
+          "quote": "`mdfy-mcp` is a published npm package. Hosts that speak MCP (Claude Desktop, Cursor, Cline, Windsurf) load it once and gain 26 tools the LLM can call by itself: `mdfy_create`, `mdfy_append`, `mdfy_search`, `mdfy_outline`, `mdfy_versions`, `mdfy_publish`, etc.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-010",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All eight atomic claims are directly or paraphrase-supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "memdo/mdfy URL is an API for any AI",
+          "quote": "A mdfy URL is an API for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "When you paste a memdo URL into an AI tool like ChatGPT or Claude, the AI fetches it and receives clean, structured markdown",
+          "quote": "When you paste `mdfy.app/d/abc123` or `mdfy.app/b/xyz` or `mdfy.app/hub/yourname` into ChatGPT, Claude, Gemini, or Cursor, the LLM fetches that URL and gets back clean markdown",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Markdown is the source text written by the user",
+          "quote": "The markdown | Source of truth. What the human types.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The AI Graph consists of themes, insights, and connections extracted from document bundles",
+          "quote": "The AI graph | What Claude/GPT extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Concept Index is a lifelong ontology of concepts pooled across your bundles",
+          "quote": "The concept index | The user's lifelong ontology — concepts pooled across every bundle.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Embeddings are vectors used internally to power semantic search",
+          "quote": "The embeddings | Vectors. Power semantic recall (\"which docs cover X?\"). Internal.",
+          "verdict": "supported"
+        },
+        {
+          "text": "URL Fetch (Pull): The AI reads a compact, token-efficient markdown digest directly from a pasted link",
+          "quote": "URL fetch (pull) — covered above. The LLM has the URL, it wants the content, it `GET`s and reads.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "MCP Server gives AI agents access to 26 tools to search, create, and edit the knowledge base",
+          "quote": "mdfy-mcp` is a published npm package. Hosts that speak MCP (Claude Desktop, Cursor, Cline, Windsurf) load it once and gain 26 tools the LLM can call by itself: `mdfy_create`, `mdfy_append`, `mdfy_search`, `mdfy_outline`, `mdfy_versions`, `mdfy_publish`, etc.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-011",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-011",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-011",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-012",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-012",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-012",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 2,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-013",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-013",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-013",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-014",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Memory.Wiki is a personal knowledge wiki and AI-deployable memory layer",
+          "quote": "memory.wiki는 **개인 지식 위키**이면서 동시에 **모든 AI에 deploy 가능한 메모리 레이어**다",
+          "verdict": "supported"
+        },
+        {
+          "text": "Core promise is 'You author. AI uses. The wiki maintains itself.'",
+          "quote": "**\"You author. AI uses. The wiki maintains itself.\"**",
+          "verdict": "supported"
+        },
+        {
+          "text": "4 Primitives: Hub, Docs, Bundles, and Concept Index",
+          "quote": "Hub ← 사용자 namespace\n ├── Docs ← 단일 markdown URL\n │ ├── outbound [[links]]\n │ ├── backlinks (computed)\n │ ├── concepts (LLM-extracted)\n │ └── version history\n ├── Bundles ← deployable URL\n └── Concept Index ← 자동 생성 색인",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 1 must-have features include [[wikilink]] syntax, backlinks panel, full-text search, LLM-generated Concept Index, Semantic Retrieval API, and llms.txt",
+          "quote": "- **[F1] `[[wikilink]]` syntax + auto-resolve** ⭐\n- **[F2] Backlinks panel** ⭐\n- **[F3] Hub-wide full-text search**\n- **[F4] Concept Index (LLM-generated)** ⭐\n- **[F5] Semantic Retrieval API** ⭐\n- **[F6] llms.txt for hub**",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tech stack includes Next.js 15, Supabase (Postgres), pgvector + Upstage Solar embeddings, MCP server integration",
+          "quote": "Frontend | Next.js 15 App Router, Tiptap editor, Tailwind\nDatabase | Supabase (Postgres)\nVector store | pgvector — Upstage Solar embeddings",
+          "verdict": "supported"
+        },
+        {
+          "text": "Memory.Wiki is NOT another note app like Notion/Obsidian, NOT AI-extracted memory (Mem.ai model), NOT enterprise wiki, NOT vendor lock-in",
+          "quote": "❌ 또 하나의 노트 앱 (Notion, Obsidian)\n- ❌ AI-extracted memory (Mem.ai 모델 — 정반대)\n- ❌ 기업용 위키 (Confluence)\n- ❌ Vendor lock-in",
+          "verdict": "supported"
+        },
+        {
+          "text": "6-month adoption targets: 1,000+ active public hubs, 3+ native LLM integrations, 1+ enterprise PoC",
+          "quote": "활성 public hubs | 1,000+\n| Hub당 평균 doc | 15+\n| Native LLM 통합 | 3+\n| Enterprise PoC | 1+ (Upstage)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-014",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 2,
+      "reason": "All seven substantive claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Memory.Wiki is a personal knowledge wiki and a deployable memory layer for any AI",
+          "quote": "memory.wiki는 **개인 지식 위키**이면서 동시에 **모든 AI에 deploy 가능한 메모리 레이어**다.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Its core promise is 'You author. AI uses. The wiki maintains itself.'",
+          "quote": "**\"You author. AI uses. The wiki maintains itself.\"**",
+          "verdict": "supported"
+        },
+        {
+          "text": "It is not meant to be another notes app, AI-extracted memory system, enterprise wiki, login-walled content store, or lock-in platform",
+          "quote": "❌ 또 하나의 노트 앱 (Notion, Obsidian)\n- ❌ AI-extracted memory (Mem.ai 모델 — 정반대)\n- ❌ 기업용 위키 (Confluence)\n- ❌ Login wall 뒤의 콘텐츠\n- ❌ Vendor lock-in",
+          "verdict": "supported"
+        },
+        {
+          "text": "The product centers on four primitives: Hub, Docs, Bundles, and Concept Index",
+          "quote": "### 2.1 4 Primitives\n\n```\nHub                                 ← 사용자 namespace\n ├── Docs                           ← 단일 markdown URL\n │    ├── outbound [[links]]\n │    ├── backlinks (computed)\n │    ├── concepts (LLM-extracted)\n │    └── version history\n ├── Bundles                        ← deployable URL\n └── Concept Index                  ← 자동 생성 색인",
+          "verdict": "supported"
+        },
+        {
+          "text": "Required launch-level features include wikilink support, backlinks, hub-wide search, LLM-generated concept indexes, semantic retrieval APIs, llms.txt, compact token-efficient URLs, and a public spec page",
+          "quote": "- **[F1] `[[wikilink]]` syntax + auto-resolve**\n- **[F2] Backlinks panel**\n- **[F3] Hub-wide full-text search**\n- **[F4] Concept Index (LLM-generated)**\n- **[F5] Semantic Retrieval API**\n- **[F6] llms.txt for hub**\n- **[F7] Compact form** (`?compact=1`)\n- **[F8] Public spec page** (`memory.wiki/spec`)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Its technical stack includes Next.js, Supabase/Postgres, pgvector, markdown-it, Upstage Solar embeddings, Claude for linting, and MCP/native AI integrations",
+          "quote": "| Frontend | Next.js 15 App Router, Tiptap editor, Tailwind |\n| Backend | Vercel Functions (Node.js / Fluid Compute) |\n| Database | Supabase (Postgres) |\n| Vector store | pgvector — Upstage Solar embeddings |\n| Markdown engine | markdown-it (shared) |\n| AI | Upstage Solar (primary), Claude (lint), Gemini (fallback) |",
+          "verdict": "supported"
+        },
+        {
+          "text": "The roadmap prioritizes wiki primitives first, then semantic retrieval, version history, graph views, verified profiles, AI wiki linting, auto-build intelligence, and native integrations with tools like Cursor and Claude",
+          "quote": "### Pre-Launch (~6월 초 HN/PH)\n- [F1] wikilink + resolver\n- [F2] Backlinks panel\n- [F4] Concept Index v1\n- [F8] Public spec page\n\n### Post-Launch (6-8월, K-Tech 시작 전)\n- [F5] Semantic Retrieval API\n- [F11] Version history\n- [F12] Doc graph\n- [F15] Verified profiles\n\n### K-Tech 6개월 (8-12월)\n- [F9] AI Wiki Lint\n- [F10] Auto-build intelligence\n- [F14] Native LLM partner 통합 (3개 목표)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-014",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 1,
+      "keyword_total": 2,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "Memory.Wiki is a personal knowledge wiki and a deployable AI memory layer",
+          "quote": "memory.wiki는 **개인 지식 위키**이면서 동시에 **모든 AI에 deploy 가능한 메모리 레이어**다",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The core promise is 'You author. AI uses. The wiki maintains itself.'",
+          "quote": "**\"You author. AI uses. The wiki maintains itself.\"**",
+          "verdict": "supported"
+        },
+        {
+          "text": "Memory Door: 1-click capture to generate deployable URLs for any AI",
+          "quote": "**Memory door** | \"AI가 나를 기억한다\" | 1-click capture → URL → paste anywhere",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Wiki Door: A self-organizing personal wiki featuring automatic concept indexing, backlinks, and LLM-powered linting",
+          "quote": "**Wiki door** | \"내 머릿속이 정리된다\" | 자동 concept index, backlinks, search, LLM lint",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Four Primitives: Hubs, Docs, Bundles, and Concept Indexes",
+          "quote": "Hub\n ├── Docs\n │    ├── outbound [[links]]\n │    ├── backlinks (computed)\n │    ├── concepts (LLM-extracted)\n │    └── version history\n ├── Bundles\n └── Concept Index",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Core features include [[wikilink]] syntax, backlinks panel, semantic retrieval API, llms.txt support, and compact form (?compact=1)",
+          "quote": "- **[F1] `[[wikilink]]` syntax + auto-resolve**\n- **[F2] Backlinks panel**\n- **[F5] Semantic Retrieval API**\n- **[F6] llms.txt for hub**\n- **[F7] Compact form** (`?compact=1`)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Technical stack includes Next.js 15, Supabase (PostgreSQL), pgvector using Upstage Solar embeddings, and LLMs (Upstage Solar, Claude, Gemini)",
+          "quote": "| Frontend | Next.js 15 App Router, Tiptap editor, Tailwind |\n| Backend | Vercel Functions (Node.js / Fluid Compute) |\n| Database | Supabase (Postgres) |\n| Vector store | pgvector — Upstage Solar embeddings |\n| AI | Upstage Solar (primary), Claude (lint), Gemini (fallback) |",
+          "verdict": "supported"
+        },
+        {
+          "text": "Migrating from mdfy.app to memory.wiki with mori.wiki as a short URL",
+          "quote": "Primary brand:  memory.wiki\nShort URL:      mori.wiki  (이미 확보)\nLegacy:         mdfy.app   (1년 이상 redirect 유지)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-015",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "About half the claims are supported by the corpus, but several specific architectural details (confidence tags, HNSW/text-embedding-3-small, lint reports, specific ingest methods) are not found in the source document and appear to be fabricated or drawn from outside the corpus.",
+      "claims": [
+        {
+          "text": "Everything captured lands as a permanent URL that is AI-fetchable as clean markdown",
+          "quote": "Paste `mdfy.app/<id>`, `mdfy.app/b/<id>`, or `mdfy.app/hub/<slug>` into ChatGPT, Claude, Gemini, or Cursor — the LLM fetches it and gets back clean markdown shaped for an AI to read.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Related docs are grouped into Bundles",
+          "quote": "**Bundle** — a curated set of docs analyzed as a group. URL: `mdfy.app/b/<id>`. Has its own AI graph.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "A background graph layer handles semantic embeddings",
+          "quote": "**The embeddings** | Vectors. Power semantic recall (\"which docs cover X?\"). | `documents.embedding`, `bundles.embedding`, `document_chunks.embedding`",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Confidence tags [EXTRACTED] / [INFERRED] / [AMBIGUOUS] are used in a diff-and-accept UI",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "OpenAI text-embedding-3-small + HNSW index is used for embeddings",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "The hub URL is the integration — any AI that can fetch a URL and read markdown works with no SDK or API key required",
+          "quote": "No app to install. No format to learn. No JavaScript to render. Just markdown over HTTPS.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Ingest is available via paste, file drop, /mdfy CLI skill, bookmarklet, or API/MCP",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Auto-generated hub logs and lint reports track activity and surface gaps",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-015",
+      "runner": "openai",
+      "accurate": true,
+      "score": 0.71,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Most high-level architectural claims are supported or paraphrase-supported by the corpus, but specific implementation details like pgvector/HNSW indexing and the /api/hub/recall endpoint are not found in the source document.",
+      "claims": [
+        {
+          "text": "Every captured artifact becomes a permanent document URL like `mdfy.app/<id>`, available as clean markdown",
+          "quote": "Paste `mdfy.app/<id>`, `mdfy.app/b/<id>`, or `mdfy.app/hub/<slug>` into ChatGPT, Claude, Gemini, or Cursor — the LLM fetches it and gets back clean markdown shaped for an AI to read.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Docs, chunks, and bundles are embedded with OpenAI embeddings, indexed in Postgres/pgvector with HNSW",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "mdfy builds semantic graphs, cross-references, and bundle relationships",
+          "quote": "What an LLM extracted from a *bundle*: themes, insights, edges.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Paste a hub URL like `mdfy.app/hub/<you>` into any AI; it fetches the markdown index and follows links",
+          "quote": "mdfy.app/hub/<slug>` — a person's whole hub (default: **Compact**)",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The MCP server ships 26 tools",
+          "quote": "mdfy-mcp` is a published npm package. Hosts that speak MCP — Claude Desktop, Cursor, Cline, Windsurf — load it once and get **26 tools** the LLM can call by itself",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy is a user-owned, URL-native memory layer readable by any AI",
+          "quote": "A mdfy URL is an API for any AI.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Retrieval uses hybrid BM25 + vector RRF via a recall API at `POST /api/hub/<slug>/recall`",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-015",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.375,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The answer invents several specific technical details (OpenAI text-embedding-3-small, HNSW, pgvector, Chrome extension, lint passes, three-layer Raw/Wiki/Schema architecture) that have no support in the corpus, while only partially capturing the actual mdfy architecture described in the source.",
+      "claims": [
+        {
+          "text": "Raw artifacts are stored in a documents table and served as clean, AI-fetchable Markdown",
+          "quote": "The markdown | Source of truth. What the human types. | documents.markdown",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Semantic embeddings are used (OpenAI text-embedding-3-small indexed with HNSW via pgvector)",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Embeddings power semantic recall and back mdfy_search via MCP",
+          "quote": "Embeddings never go to the LLM directly — they back `mdfy_search` via MCP.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Users paste content or use integrations (CLI, Chrome extension, MCP) to save artifacts to a permanent URL",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Knowledge is organized into topic bundles",
+          "quote": "Bundle — a curated set of docs analyzed as a group. URL: mdfy.app/b/<id>. Has its own AI graph.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Users or downstream AI agents retrieve knowledge via semantic search or by fetching a Hub URL, which serves as a universal Markdown context format",
+          "quote": "A mdfy URL is an API for any AI. Paste `mdfy.app/<id>`, `mdfy.app/b/<id>`, or `mdfy.app/hub/<slug>` into ChatGPT, Claude, Gemini, or Cursor — the LLM fetches it and gets back clean markdown shaped for an AI to read.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The system maintains coherence through scheduled lint passes, proactive bundle suggestions, and auto-synthesis",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "The architecture has three layers: Raw, Wiki, and Schema",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-016",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.57,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "The core rebrand, URL-as-API proposition, RAG-to-Memory-framing shift, and LLM memory layer claims are supported, but several specific claims about the technical infrastructure inventory and the 'same infrastructure' framing and the native LLM integration vision have no corpus support.",
+      "claims": [
+        {
+          "text": "Mdfy was the original brand (mdfy.app) and Memory.Wiki became the new name through a rebrand",
+          "quote": "The project underwent a major rebranding from \"mdfy.app\" to \"memory.wiki\" between v6 and v7, with the domain secured and finalized",
+          "verdict": "supported"
+        },
+        {
+          "text": "The core proposition became: 'Your knowledge as a URL, readable by any AI'",
+          "quote": "The core value proposition is \"A memory.wiki URL is an API for any AI\" - users can paste URLs into ChatGPT, Claude, Gemini, or Cursor",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The product stopped describing itself in technical terms like 'RAG' and rebranded its retrieval system as 'mdfy Memory'",
+          "quote": "The product that replaced the RAG-centric framing as the primary way to understand mdfy's retrieval and storage system.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The strategic goal crystallized around becoming the default memory layer for LLMs",
+          "quote": "the project positioning shifted from being another note-taking app to serving as \"LLM 서비스의 기본 지원 메모리 레이어\" (fundamental memory layer for LLM services)",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Mdfy had a full technical foundation already built including web app, Chrome/VS Code extensions, CLI, MCP server, Mac app",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "The pivot was essentially a rebrand and sharpening of vision, not a technical overhaul / same infrastructure",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Long-term vision of LLM platforms (ChatGPT, Claude, Cursor) natively asking users to connect Memory.Wiki",
+          "quote": "users can paste URLs into ChatGPT, Claude, Gemini, or Cursor",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-016",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All substantive claims in the answer are supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "The pivot was from mdfy as a personal knowledge hub / markdown publishing tool to Memory.Wiki as an AI memory infrastructure layer",
+          "quote": "The documents chronicle memory.wiki's strategic evolution from a basic markdown sharing tool to an AI-native knowledge graph platform",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "In v7, Memory.Wiki sharpened the thesis to 'Your knowledge graph as a URL for any AI' and 'Markdown URL = API for any AI'",
+          "quote": "The core value proposition is \"A memory.wiki URL is an API for any AI\" - users can paste URLs into ChatGPT, Claude, Gemini, or Cursor",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Brand change: mdfy → memory.wiki, with mdfy.app migrating to the new domain",
+          "quote": "The project underwent a major rebranding from \"mdfy.app\" to \"memory.wiki\" between v6 and v7, with the domain secured and finalized",
+          "verdict": "supported"
+        },
+        {
+          "text": "Positioning shifted from 'better PKM / knowledge hub' to a cross-AI memory protocol layer",
+          "quote": "The project positioning shifted from being another note-taking app to serving as \"LLM 서비스의 기본 지원 메모리 레이어\" (fundamental memory layer for LLM services)",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The model shifted from 'capture / bundle / deploy' to capture / digestion / utilization",
+          "quote": "The system operates on a 3-tier architecture: \"수집/소화/활용\" (Capture/Digestion/Utilization) where users author content, AI organizes it into graphs, and any AI can consume it via URLs",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The moat is not retrieval/RAG, but delivery — any AI can fetch a URL and receive pre-organized markdown/graph context",
+          "quote": "targeting the knowledge delivery problem rather than AI memory",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Mdfy was a user-facing knowledge hub; Memory.Wiki became the infrastructure for making personal knowledge portable across all AI tools",
+          "quote": "Previous brand name for memory.wiki with existing user base and technical infrastructure",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-016",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 0.875,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Most claims are well-supported by the corpus, with the only unsupported claim being the specific technical detail about sunsetting a Rust-based engine (mdcore) in favor of a markdown-it JavaScript engine.",
+      "claims": [
+        {
+          "text": "The pivot was finalized in May 2026",
+          "quote": "updated: 2026-05-21T02:50:03.911Z",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The shift was from a personal knowledge hub competing with PKM tools like Notion or Obsidian to a cross-AI memory protocol layer",
+          "quote": "Competitive differentiation strategy against established players like Notion and emerging AI memory solutions",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The core thesis became 'A memory.wiki URL is an API for any AI'",
+          "quote": "A memory.wiki URL is an API for any AI",
+          "verdict": "supported"
+        },
+        {
+          "text": "The product was repositioned as delivery-focused infrastructure rather than retrieval-focused",
+          "quote": "The project positioning shifted from being another note-taking app to serving as \"LLM 서비스의 기본 지원 메모리 레이어\" (fundamental memory layer for LLM services), targeting the knowledge delivery problem rather than AI memory",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 3-tier framework is Capture (수집), Digestion (소화), and Utilization (활용)",
+          "quote": "The system operates on a 3-tier architecture: \"수집/소화/활용\" (Capture/Digestion/Utilization)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Rust-based engine (mdcore) was sunset in favor of a JavaScript-only (markdown-it) engine",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "The brand migrated from mdfy.app and mdfy.cc to the single domain memory.wiki",
+          "quote": "The project underwent a major rebranding from \"mdfy.app\" to \"memory.wiki\" between v6 and v7, with the domain secured and finalized",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The rebranding occurred between v6 and v7",
+          "quote": "The project underwent a major rebranding from \"mdfy.app\" to \"memory.wiki\" between v6 and v7",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-017",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.43,
+      "keyword_hits": 4,
+      "keyword_total": 4,
+      "reason": "The answer makes several specific claims about Cho's background (5 months building, open RFC, not fundraising, contact email) that have no support in the provided corpus, which contains only minimal information about him as a founder.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho is the founder of Raymind AI",
+          "quote": "Everything about Raymind AI and its founder Hyunsang Cho",
+          "verdict": "supported"
+        },
+        {
+          "text": "He is the builder of Memory.Wiki (previously branded as Mdfy)",
+          "quote": "Previous brand name for memory.wiki with existing user base and technical infrastructure",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "He spent ~5 months building Memory.Wiki nights and weekends before transitioning to full-time",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "He shipped a broad product suite solo including a web app, Chrome extension, VS Code extension, macOS desktop app, CLI, MCP server (26 tools), real-time collaborative editing, and AI-powered concept extraction",
+          "quote": "26-tool integration layer allowing agents to query, write, and search within a user's knowledge hub.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "He plans to publish the Bundle Spec as an open RFC on GitHub",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "He is currently not fundraising and is focused on metrics-driven growth before seeking investment",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "He can be reached at hi@raymind.ai",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-017",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 4,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-017",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.43,
+      "keyword_hits": 4,
+      "keyword_total": 4,
+      "reason": "Only 3 of 7 claims are supported by the corpus; most specific details about his background, timeline, strategic thesis, and Bundle Spec are not found in the provided corpus.",
+      "claims": [
+        {
+          "text": "Hyunsang Cho is the founder of Raymind AI",
+          "quote": "Everything about Raymind AI and its founder Hyunsang Cho",
+          "verdict": "supported"
+        },
+        {
+          "text": "He is the creator of memory.wiki (formerly mdfy)",
+          "quote": "Mdfy evolved into Memory.Wiki",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "He spent five months building memory.wiki's extensive multi-surface infrastructure",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Infrastructure includes web/desktop apps, browser/VS Code extensions, a CLI, and a 26-tool MCP server",
+          "quote": "26-tool integration layer allowing agents to query, write, and search within a user's knowledge hub",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "He transitioned to the project full-time in April 2026",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Cho champions the thesis that 'Markdown URL = API for any AI'",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "He is driving the Bundle Spec v1.0, an open standard designed to make AI-deployable knowledge portable across platforms",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-018",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All 10 claims are directly supported or paraphrase-supported by verbatim passages in the primary source document.",
+      "claims": [
+        {
+          "text": "mdfy is a personal knowledge hub for the AI era",
+          "quote": "mdfy is your personal knowledge hub for the AI era.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Built by Hyunsang at Raymind.AI",
+          "quote": "Founder: Hyunsang at Raymind.AI",
+          "verdict": "supported"
+        },
+        {
+          "text": "Targeting a June 16, 2026 launch (Show HN)",
+          "quote": "Launch deadline: 2026년 6월 16일 (Week 7 Tuesday, HN Show HN)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Three URL scopes: Document URL (single markdown file), Bundle URL (themed collection), Hub URL (entire knowledge)",
+          "quote": "Document URL — 한 markdown 파일\nBundle URL — 주제로 묶은 collection (manual or AI-generated)\nHub URL — 사용자의 전체 지식허브",
+          "verdict": "supported"
+        },
+        {
+          "text": "AI generates bundles from natural language requests and user reviews/edits — distinct from auto-extraction tools like Mem0",
+          "quote": "사용자가 자연어로 요청 → AI가 bundle 생성\n사용자가 검토하고 편집\nMem0의 자동 추출과도, LLM Wiki의 LLM 단독 build와도 다름. Human-AI 협업.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Pro tier at $9/mo includes AI bundle generation 10×/mo and auto-organized hub",
+          "quote": "AI bundle generation (10/month) ⭐\nAuto-organized hub ⭐",
+          "verdict": "supported"
+        },
+        {
+          "text": "Build tier at $19/mo includes unlimited AI bundles and API/MCP access",
+          "quote": "Unlimited AI bundle generation\nAPI access (read/write)\nMCP server (full)",
+          "verdict": "supported"
+        },
+        {
+          "text": "12-month targets: $80–150K MRR and 10,000–20,000 paying users",
+          "quote": "$80-150K MRR\n10,000-20,000 paying users",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle Spec v1.0 as open standard is a 12-month target",
+          "quote": "Bundle Spec community 활성화",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Biggest risks include big-tech competitive entry, build scope creep, and solo founder burnout",
+          "quote": "Risk 1: 거인들 진입 (확률 60%, impact 매우 큼)\nRisk 2: Build scope creep (확률 50%, impact 매우 큼) ⭐ v6 더 위험\nRisk 7: Solo burnout (확률 50%, impact 매우 큼) ⭐ v6 더 위험",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-018",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages from the corpus.",
+      "claims": [
+        {
+          "text": "mdfy is positioned as 'Your personal knowledge hub for the AI era'",
+          "quote": "H1: Your personal knowledge hub for the AI era.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Everything is a URL — document, bundle, and hub all use the same URL primitive",
+          "quote": "URL이 모든 것의 단위. Document, Bundle, Hub 모두 URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document URL is one markdown note/AI answer/file",
+          "quote": "Document URL — 한 markdown 파일 (한 답변, 한 노트, 한 글)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle URL is a themed collection of documents, manual or AI-generated",
+          "quote": "Bundle URL — 주제로 묶은 collection (manual or AI-generated)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub URL is the user's entire knowledge base, auto-organized and queryable",
+          "quote": "Hub URL — 사용자의 전체 지식허브 — Auto-organized by AI — Queryable as one URL",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "AI acts as librarian and collaborator, allowing users to ask things like 'bundle everything about Project Acme'",
+          "quote": "\"프로젝트 Acme 관련 답변들 다 묶어줘\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Free tier: public docs, 3 bundles",
+          "quote": "3 bundles",
+          "verdict": "supported"
+        },
+        {
+          "text": "Pro $9/mo includes private posts, search, tags, 20 bundles, 10 AI bundle generations/month, hub URL",
+          "quote": "Pro $9/mo (개인) ⭐ Hub 활성화 - Private posts - Custom domain - Tags, folders - Semantic search - AI tools (polish, summary, translate) - 20 bundles - AI bundle generation (10/month) ⭐ - Auto-organized hub ⭐ - Hub URL (public/private)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Build $19/mo includes unlimited bundles/AI generation, API/MCP, analytics, adapters",
+          "quote": "Build $19/mo (Power user) ⭐ 무제한 + API - Unlimited bundles - Unlimited AI bundle generation - Hub URL with custom domain - API access (read/write) - MCP server (full) - Bundle versioning + snapshots - Format adapters - Token budget management - Bundle analytics",
+          "verdict": "supported"
+        },
+        {
+          "text": "Launch target is June 16, 2026 Show HN",
+          "quote": "Launch deadline: 2026-06-16 (Week 7 Tuesday, HN Show HN)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Aiming for 100 paid users at launch",
+          "quote": "100+ paid (Pro $9 → $900 MRR)",
+          "verdict": "supported"
+        },
+        {
+          "text": "12-month goal is $80–150K MRR",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-018",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "mdfy.cc v6 FINAL positions the product as the 'personal knowledge hub for the AI era'",
+          "quote": "mdfy is your personal knowledge hub for the AI era.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The URL Architecture has three progressive scopes: Document URL (single markdown file), Bundle URL (themed collection), and Hub URL (user's entire knowledge base)",
+          "quote": "Document URL — 한 markdown 파일\nBundle URL — 주제로 묶은 documents\nHub URL — 사용자의 전체 지식허브",
+          "verdict": "supported"
+        },
+        {
+          "text": "All URLs are living, editable, versioned, and deployable to any AI as context",
+          "quote": "Living — 항상 편집 가능\nPermanent — URL 안 바뀜\nVersioned — 히스토리 추적\nAddressable — 어디서든 paste\nDeployable — AI에 컨텍스트로",
+          "verdict": "supported"
+        },
+        {
+          "text": "AI acts as a librarian and collaborator, allowing users to request bundles via natural language",
+          "quote": "AI는 librarian + collaborator:\n- 사용자가 자연어로 요청 → AI가 bundle 생성\n- 사용자가 검토하고 편집",
+          "verdict": "supported"
+        },
+        {
+          "text": "Free tier includes unlimited public publishing and 3 bundles",
+          "quote": "Free\n- Unlimited document publishing\n- Permanent URLs\n- WYSIWYG editor\n- Public posts only\n- Chrome extension capture\n- 3 bundles",
+          "verdict": "supported"
+        },
+        {
+          "text": "Pro tier costs $9/mo and includes auto-organized hub and 10 AI bundle generations/month",
+          "quote": "Pro $9/mo (개인) ⭐ Hub 활성화\n- AI bundle generation (10/month) ⭐\n- Auto-organized hub ⭐",
+          "verdict": "supported"
+        },
+        {
+          "text": "Build tier costs $19/mo and includes unlimited AI generation, API/MCP write access, and custom domains",
+          "quote": "Build $19/mo (Power user) ⭐ 무제한 + API\n- Unlimited bundles\n- Unlimited AI bundle generation\n- Hub URL with custom domain\n- API access (read/write)\n- MCP server (full)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Launch date is June 16, 2026 via HN Show HN",
+          "quote": "Launch deadline: 2026년 6월 16일 (Week 7 Tuesday, HN Show HN)",
+          "verdict": "supported"
+        },
+        {
+          "text": "12-Month Target is $80K–$150K MRR and 10,000–20,000 paying users",
+          "quote": "$80-150K MRR\n10,000-20,000 paying users",
+          "verdict": "supported"
+        },
+        {
+          "text": "The core engine mdcore and Bundle Spec v1.0 are to be open-sourced at launch",
+          "quote": "Bundle Spec v1.0 RFC 공개\nOpen source engine: github.com/raymindai/mdcore",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "q-019",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-019",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 6
+    },
+    {
+      "query_id": "q-019",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0,
+      "keyword_hits": 0,
+      "keyword_total": 3,
+      "reason": "empty answer",
+      "claims": [],
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "q-020",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.75,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Most core strategic claims are directly supported by the corpus, but two specific detail claims (MCP shipped status and Upstage partnership specifics) lack corpus backing.",
+      "claims": [
+        {
+          "text": "Memory.Wiki evolved from an earlier product called Mdfy",
+          "quote": "Previous brand name for memory.wiki with existing user base and technical infrastructure",
+          "verdict": "supported"
+        },
+        {
+          "text": "Strategic shift from 'better PKM tool' to 'Memory Protocol Layer' — infrastructure over competing with PKM tools",
+          "quote": "The strategic positioning shifted from \"better PKM tool\" to \"Memory Protocol Layer\" (Future B), choosing infrastructure over competing with existing PKM tools",
+          "verdict": "supported"
+        },
+        {
+          "text": "Core promise is 'You author. AI uses. The wiki maintains itself.'",
+          "quote": "the core promise being \"You author. AI uses. The wiki maintains itself.\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Two Doors: Memory Door (1-click capture, 'AI remembers me') and Wiki Door ('my mind gets organized')",
+          "quote": "Two Doors: a Memory door promising \"AI remembers me\" via 1-click capture, and a Wiki door promising \"my mind gets organized\" through automatic indexing and LLM maintenance",
+          "verdict": "supported"
+        },
+        {
+          "text": "One URL deploys to any AI tool",
+          "quote": "Technical architecture for cross-AI deployment and the \"one URL deploys everywhere\" promise",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "MCP server integration already shipped",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Partnership with Upstage Solar for embeddings and AI lint",
+          "quote": "Upstage Solar represents the first official partnership",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Current gaps include link graphs, semantic search, and LLM self-organization",
+          "quote": "Current gaps compared to existing mdfy implementation are \"link graphs, semantic search, and LLM self-organization\"",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "q-020",
+      "runner": "openai",
+      "accurate": true,
+      "score": 0.71,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Most core claims about strategy and evolution are supported, but specific details like the 'Markdown URL = API' thesis and three-tier roadmap taxonomy have no corpus support.",
+      "claims": [
+        {
+          "text": "Memory.Wiki's strategy is to become a cross-AI memory protocol layer, not just another PKM or notes app",
+          "quote": "strategic positioning shifted from \"better PKM tool\" to \"Memory Protocol Layer\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Core thesis includes 'Markdown URL = API for any AI' and 'your knowledge graph as a URL for any AI'",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Product began as mdfy, then shifted toward memory.wiki",
+          "quote": "Mdfy evolved into Memory.Wiki",
+          "verdict": "supported"
+        },
+        {
+          "text": "Strategic positioning shifted from 'better PKM' to infrastructure/protocol layer",
+          "quote": "The strategic positioning shifted from \"better PKM tool\" to \"Memory Protocol Layer\" (Future B), choosing infrastructure over competing with existing PKM tools",
+          "verdict": "supported"
+        },
+        {
+          "text": "The product uses MCP for AI access",
+          "quote": "MCP server — 26-tool integration layer allowing agents to query, write, and search within a user's knowledge hub",
+          "verdict": "supported"
+        },
+        {
+          "text": "The roadmap is organized into three tiers: Capture, Digestion, and Utilization",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Users author and own knowledge; AI systems fetch, use, and help organize it",
+          "quote": "memory.wiki is a personal wiki that you author, AI uses, and LLM maintains itself",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 5
+    },
+    {
+      "query_id": "q-020",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 0.875,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "Most claims are well-supported by the corpus, with only the specific 'Wiki Lints' detail lacking any supporting quote.",
+      "claims": [
+        {
+          "text": "Memory.Wiki evolved from Mdfy",
+          "quote": "evolved from → **Mdfy**",
+          "verdict": "supported"
+        },
+        {
+          "text": "Its core promise is: 'You author. AI uses. The wiki maintains itself.'",
+          "quote": "\"You author. AI uses. The wiki maintains itself.\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "The strategy focuses on providing infrastructure-level memory rather than competing with PKM tools like Notion or Obsidian",
+          "quote": "The strategic positioning shifted from \"better PKM tool\" to \"Memory Protocol Layer\" (Future B), choosing infrastructure over competing with existing PKM tools",
+          "verdict": "supported"
+        },
+        {
+          "text": "The product operates through a 'Two Doors' strategy: a Memory Door and a Wiki Door",
+          "quote": "The product operates through \"Two Doors\": a Memory door promising \"AI remembers me\" via 1-click capture, and a Wiki door promising \"my mind gets organized\" through automatic indexing and LLM maintenance",
+          "verdict": "supported"
+        },
+        {
+          "text": "Memory Door enables 1-click context capture deployable via a single URL across any AI tool",
+          "quote": "a Memory door promising \"AI remembers me\" via 1-click capture",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Wiki Door automatically organizes using LLM-generated concept indexes and resolves duplicates or contradictions",
+          "quote": "a Wiki door promising \"my mind gets organized\" through automatic indexing and LLM maintenance",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Memory.Wiki features token-efficient payloads (?compact=1), llms.txt hub indexes, and an MCP server",
+          "quote": "MCP server",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Nightly 'Wiki Lints' resolve duplicates or contradictions",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "raymindai",
+      "tool_calls": 3
+    }
+  ]
+}

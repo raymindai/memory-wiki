@@ -1,0 +1,1888 @@
+{
+  "bench": "MWBench v2 (browse)",
+  "queries_file": "queries/bundles-v1.jsonl",
+  "modes": [
+    "browse"
+  ],
+  "started_at": "2026-05-24T10:04:36.229Z",
+  "finished_at": "2026-05-24T10:11:36.659Z",
+  "queries": [
+    {
+      "id": "qb-001",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "q": "What MRR target does the v7 business plan project at 12 months?",
+      "expected_doc": "qHc1FWxq",
+      "expected_keywords": [
+        "MRR",
+        "12",
+        "80"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-002",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "q": "In what month is memory.wiki targeting its launch?",
+      "expected_doc": "qHc1FWxq",
+      "expected_keywords": [
+        "August",
+        "8월",
+        "launch"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-003",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "q": "What are the three URL primitives mdfy uses?",
+      "expected_doc": "mdfy-three-primitives",
+      "expected_keywords": [
+        "Document",
+        "Bundle",
+        "Hub"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-004",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "q": "Why does mdfy use URLs instead of relying on a vendor memory layer like ChatGPT memory or Claude projects?",
+      "expected_doc": "what-is-mdfy",
+      "expected_keywords": [
+        "vendor",
+        "walls",
+        "lock"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-005",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "q": "What is the strongest single recommendation from the native skills vs current surfaces strategy?",
+      "expected_doc": "NpXe_CnP",
+      "expected_keywords": [
+        "Electron",
+        "mac-native",
+        "desktop"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-006",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "q": "Which AI platform integration is prioritized first in the native connectors roadmap?",
+      "expected_doc": "LpLbS250",
+      "expected_keywords": [
+        "ChatGPT",
+        "Actions",
+        "priority"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-007",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "q": "How does mdfy help onboarding every new Claude Code session?",
+      "expected_doc": "case-claude-md-personal-context",
+      "expected_keywords": [
+        "CLAUDE.md",
+        "hub",
+        "snippet"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-008",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "q": "What pain does the Cursor + Claude cross-tool handoff case study solve?",
+      "expected_doc": "case-cross-tool-handoff",
+      "expected_keywords": [
+        "context",
+        "handoff",
+        "re-explain"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-009",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "q": "What is the one-line positioning for memory.wiki in the v7 plan?",
+      "expected_doc": "qHc1FWxq",
+      "expected_keywords": [
+        "knowledge graph",
+        "URL",
+        "API"
+      ],
+      "category": "bundle"
+    },
+    {
+      "id": "qb-010",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "q": "What three-tier architecture does memory.wiki use?",
+      "expected_doc": "qHc1FWxq",
+      "expected_keywords": [
+        "capture",
+        "digestion",
+        "utilization"
+      ],
+      "category": "bundle"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "qb-001",
+      "answer": "Based on the bundle content, the answer is clearly stated in the v7 business plan documents:\n\nThe **memory.wiki v7 business plan projects an MRR target of **$80,000–$150,000** at the 12-month mark** (\"12개월 후: $80-150K MRR\"). This target appears consistently across both versions of the v7 business plan documents (docs `qHc1FWxq` and `xv6A2DKS`).",
+      "tokens_in": 4948,
+      "tokens_out": 183,
+      "latency_ms": 7730,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "url": "https://memory.wiki/b/ggAzbcHr"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-001",
+      "answer": "The v7 business plan projects **$80K–$150K MRR at 12 months**.\n\nIn the more detailed revenue scenarios, it also lists:\n- Conservative: **$33K MRR**\n- Realistic: **$88K MRR**\n- Optimistic: **$216K MRR**",
+      "tokens_in": 18918,
+      "tokens_out": 168,
+      "latency_ms": 8168,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "url": "https://memory.wiki/b/ggAzbcHr"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-001",
+      "answer": "Based on the **memory.wiki Business Plan v7 (FINAL)**, the projected MRR (Monthly Recurring Revenue) target at 12 months is **$80K to $150K** ($80,000 - $150,000).",
+      "tokens_in": 3316,
+      "tokens_out": 87,
+      "latency_ms": 3523,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "url": "https://memory.wiki/b/ggAzbcHr"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-002",
+      "answer": "Based on the fetched content, memory.wiki is targeting its launch in **August**. This is mentioned multiple times across the documents, including in the business plan sections which reference **\"8월 launch까지 도달 지점\"** (meaning \"milestones to reach by August launch\"), and the recap document which states the founder plans to launch in August.",
+      "tokens_in": 4932,
+      "tokens_out": 149,
+      "latency_ms": 4374,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "url": "https://memory.wiki/b/ggAzbcHr"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-002",
+      "answer": "memory.wiki is targeting its launch in **August**.",
+      "tokens_in": 3342,
+      "tokens_out": 83,
+      "latency_ms": 3809,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "url": "https://memory.wiki/b/ggAzbcHr"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-002",
+      "answer": "Based on the provided documents, memory.wiki is targeting its launch in **August** (as detailed in the final business plan v7 and v6 recap). \n\nAdditionally, the product specification notes an earlier milestone of rebranding from mdfy.app and launching to Hacker News in **early June**.",
+      "tokens_in": 3300,
+      "tokens_out": 88,
+      "latency_ms": 3713,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "url": "https://memory.wiki/b/ggAzbcHr"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-003",
+      "answer": "The three URL primitives mdfy uses are:\n\n1. **Document** — `mdfy.app/<id>` — A single captured answer, paper, or transcript.\n2. **Bundle** — `mdfy.app/b/<id>` — A curated collection of multiple documents grouped together.\n3. **Hub** — `mdfy.app/hub/<you>` — A personal hub containing all of a user's public content.\n\nAll three share the same shape: they are fetchable as clean markdown via a public URL, so any AI tool can read them without custom integration. You don't need to learn different interfaces for each level — the viewer and AI fetch path work the same way across all three scopes.",
+      "tokens_in": 4152,
+      "tokens_out": 226,
+      "latency_ms": 7728,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "url": "https://memory.wiki/b/9FATHAnw"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-003",
+      "answer": "The three URL primitives mdfy uses are:\n\n1. **Document** — `mdfy.app/<id>`  \n   A single captured answer, paper, transcript, or piece of content.\n\n2. **Bundle** — `mdfy.app/b/<id>`  \n   A curated collection of documents.\n\n3. **Hub** — `mdfy.app/hub/<you>`  \n   A user’s public knowledge base containing all their public content.",
+      "tokens_in": 2933,
+      "tokens_out": 147,
+      "latency_ms": 3139,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "url": "https://memory.wiki/b/9FATHAnw"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-003",
+      "answer": "Based on the provided documentation, the three URL primitives used by **mdfy** are:\n\n1. **Document** (`mdfy.app/<id>`): Represents a single captured item, such as an answer, paper, or transcript.\n2. **Bundle** (`mdfy.app/b/<id>`): A curated collection of multiple documents grouped together.\n3. **Hub** (`mdfy.app/hub/<you>`): A personal knowledge hub containing all of a user's public content.\n\nThese three primitives share the same underlying interface, allowing any AI tool to fetch clean markdown at different scopes.",
+      "tokens_in": 13701,
+      "tokens_out": 189,
+      "latency_ms": 6910,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "url": "https://memory.wiki/b/9FATHAnw"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-004",
+      "answer": "The bundle summary already contains the key information needed. Here's the answer based on the mdfy Foundations bundle:\n\n---\n\n**mdfy uses URLs because vendor memory layers are walled gardens that only work within their own ecosystem.**\n\nChatGPT memory stays in ChatGPT. Claude projects don't work in Cursor. Cursor docs don't appear in Claude. Your knowledge is trapped in whichever tool captured it, and it can't follow you when you switch.\n\nmdfy's approach is the opposite: every piece of knowledge becomes a **public URL serving plain markdown**. Because any AI tool can fetch a URL over HTTP, no custom integration is needed — if a tool can read a URL, it can use mdfy. This is what the bundle calls the **\"URL as contract\"** principle.\n\nThis design delivers three things vendor memory can't:\n1. **Portability** — the same URL works in Claude, ChatGPT, Cursor, Codex, or any future tool.\n2. **Shareability** — you can hand the URL to another person or AI without exporting anything.\n3. **Ownership** — your knowledge isn't locked inside a vendor's database; it lives at a permanent URL you control.\n\nIn short, mdfy treats the URL as universal infrastructure rather than betting on any single vendor's memory API.",
+      "tokens_in": 16440,
+      "tokens_out": 425,
+      "latency_ms": 12420,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "url": "https://memory.wiki/b/9FATHAnw"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-004",
+      "answer": "mdfy uses URLs because URLs are the most universal “memory interface” across AI tools.\n\nVendor memory layers like ChatGPT memory, Claude Projects, or Cursor docs are useful inside one product, but they are walled off: ChatGPT memory does not help Claude, Claude Projects do not help Cursor, and the user’s knowledge becomes trapped in that vendor’s ecosystem.\n\nmdfy’s bet is that any AI that can fetch a URL can use the same memory. A document, bundle, or hub is exposed as clean markdown at a public URL, so the same context can be pasted into ChatGPT, Claude, Cursor, Codex, or shared with another person. The URL becomes the contract.\n\nSo the point is portability and ownership: mdfy is not trying to replace vendor memory for invisible preferences inside one chat tool. It is for substantive knowledge you want to reuse, cite, share, and carry across tools without lock-in.",
+      "tokens_in": 12624,
+      "tokens_out": 338,
+      "latency_ms": 8663,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "url": "https://memory.wiki/b/9FATHAnw"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-004",
+      "answer": "`mdfy` uses public URLs instead of relying on vendor memory layers (like ChatGPT memory or Claude projects) to solve the problem of **vendor lock-in** and enable **cross-tool portability**. \n\nVendor memory systems are locked behind proprietary walls; ChatGPT memory cannot be accessed by Claude, and Claude projects do not work in Cursor. \n\nBy using public URLs as a universal interface, `mdfy` establishes a \"contract\" with AI tools. Because almost any AI tool can fetch and read a URL, this approach makes your knowledge layer fully portable, shareable, and human-readable across any platform or LLM you choose to use.",
+      "tokens_in": 13879,
+      "tokens_out": 192,
+      "latency_ms": 6998,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "url": "https://memory.wiki/b/9FATHAnw"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-005",
+      "answer": "The **strongest single recommendation** from the *Native skills vs current surfaces* strategy is:\n\n> **Drop the Electron desktop app in favor of a \"mac-native triplet.\"**\n\nThe Electron app carries the highest maintenance cost (code signing, auto-updates, RAM footprint, a separate GitHub Releases channel) while delivering the lowest unique value over the web app. Three genuinely mac-native scenarios users would actually want — **Spotlight/Raycast search** (via PWA + URL scheme handler), **\"Save to mdfy\" from Safari/Mail/Notes** (via a macOS Share Sheet extension), and **Finder QuickLook preview of `.md` files** (via a QuickLook plugin) — are all *unreachable* from Electron.\n\nThe recommendation: ship those three lighter pieces, then issue a one-year deprecation notice for the Electron app and redirect the download page to the PWA install.",
+      "tokens_in": 7203,
+      "tokens_out": 340,
+      "latency_ms": 11324,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "url": "https://memory.wiki/b/Ih0eUczw"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-005",
+      "answer": "The strongest single recommendation is:\n\n**Drop the Electron desktop app and replace it with a “mac-native triplet”:**\n\n1. **PWA install + URL scheme handler** for Spotlight/Raycast-style access  \n2. **macOS Share Sheet extension** for “Save to mdfy” from Safari, Mail, Notes, etc.  \n3. **QuickLook plugin** for rendering `.md` files from Finder preview  \n\nThe rationale is that the Electron app has high maintenance cost—auto-updates, code signing, RAM footprint, separate releases—while offering little unique value beyond the web app. The proposed native macOS pieces would deliver more meaningful desktop functionality and still be lighter to maintain than Electron. After shipping them, the recommendation is to give the Electron app a 1-year deprecation notice.",
+      "tokens_in": 5133,
+      "tokens_out": 286,
+      "latency_ms": 5708,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "url": "https://memory.wiki/b/Ih0eUczw"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-005",
+      "answer": "The strongest single recommendation from the \"native skills vs current surfaces\" strategy is to **drop the Electron desktop app and replace it with a \"mac-native triplet.\"** \n\nThe Electron app has the highest upkeep cost (auto-updates, code signing, RAM footprint) but offers low unique value compared to the web app. Replacing it with three lighter, macOS-native alternatives provides features Electron cannot reach:\n\n1. **PWA install + URL scheme handler:** Enables Spotlight or Raycast search for mdfy docs.\n2. **macOS Share Sheet extension:** Allows \"Save to mdfy\" functionality directly from Safari, Mail, and Notes.\n3. **QuickLook plugin:** Enables a rendered preview of `.md` files when pressing the space-bar in Finder.\n\nCombined, these three native pieces are lighter to maintain than the Electron app. The strategy recommends shipping them, giving the Electron app a one-year deprecation notice, and redirecting users to the PWA install.",
+      "tokens_in": 5359,
+      "tokens_out": 259,
+      "latency_ms": 5975,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "url": "https://memory.wiki/b/Ih0eUczw"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-006",
+      "answer": "Based on the bundle content, the answer is clear from Document 1's summary:\n\n**ChatGPT GPT + Actions** is prioritized first in the native connectors roadmap. The document explicitly lists it as the top \"highest-leverage\" priority, citing its **near-zero build cost, largest install base, and an already-existing public REST API**. Claude Skills is listed as the second priority, followed by Gemini. The rationale is that building ChatGPT Actions first demonstrates cross-AI interoperability as a competitive differentiator at minimal development cost.",
+      "tokens_in": 3068,
+      "tokens_out": 194,
+      "latency_ms": 5290,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "url": "https://memory.wiki/b/Ih0eUczw"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-006",
+      "answer": "The first prioritized AI platform integration is **ChatGPT GPT + Actions**.\n\nIt’s listed as highest priority because it has near-zero build cost, the largest install base, and can use the existing public REST API, making it shippable in 1–2 days.",
+      "tokens_in": 5102,
+      "tokens_out": 188,
+      "latency_ms": 6445,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "url": "https://memory.wiki/b/Ih0eUczw"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-006",
+      "answer": "Based on the native connectors roadmap, the AI platform integration prioritized first is **ChatGPT GPT + Actions**. \n\nThis integration is ranked as the highest-leverage priority because it has a near-zero build cost (using the existing public REST API and an OpenAPI schema config file), targets the largest install base, and can be shipped in just 1–2 days.",
+      "tokens_in": 5360,
+      "tokens_out": 131,
+      "latency_ms": 5262,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "url": "https://memory.wiki/b/Ih0eUczw"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-007",
+      "answer": "Here's how mdfy helps onboard every new Claude Code session:\n\n**The Problem:** Opening a fresh Claude Code session meant spending ~5 minutes re-pasting the same project background (stack, auth, deploy config, preferences, etc.). Across 8–12 sessions per week, that wastes roughly an hour weekly.\n\n**The Solution — One-Time Setup:** You visit `mdfy.app/install`, sign in, and append a small snippet to `~/.claude/CLAUDE.md`:\n\n```\n## Personal context (mdfy hub)\nHub URL: https://mdfy.app/hub/<me>\n\nWhen you need background on me — projects, decisions, references —\nfetch the URL above.\n```\n\n**What Changes:** Every new Claude Code session automatically reads `CLAUDE.md` and has your hub URL available. When context is needed, Claude fetches the hub and follows relevant links — no manual re-pasting required.\n\nFor **project-specific** context, you add a similar block to a repo's local `CLAUDE.md`, pointing at a project-specific *bundle* URL instead.\n\n**Result:** 1 minute of one-time setup → 0 minutes of context overhead per session. Because the hub URL returns plain markdown, it also works across other tools like Cursor, Codex, and Aider.",
+      "tokens_in": 18545,
+      "tokens_out": 432,
+      "latency_ms": 12006,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "url": "https://memory.wiki/b/4OGRyHs9"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-007",
+      "answer": "mdfy helps onboard every new Claude Code session by putting a permanent context pointer into `~/.claude/CLAUDE.md`.\n\nYou install/sign in at `mdfy.app/install`, copy a small snippet, and paste it once into `CLAUDE.md`. That snippet contains your mdfy hub URL. Since Claude Code automatically reads `CLAUDE.md`, every new session already knows where to fetch your background: projects, decisions, references, and other public docs/bundles.\n\nWhen a question needs context, Claude fetches the hub, follows the relevant links, and uses that information—so you don’t have to re-paste “we use Tailwind, Supabase, Vercel…” every time.\n\nFor repo-specific onboarding, you can add a similar block to that repo’s `CLAUDE.md`, pointing at a project bundle URL.\n\nResult: one-time setup of about a minute; per new chat, zero minutes of context bootstrapping.",
+      "tokens_in": 14239,
+      "tokens_out": 295,
+      "latency_ms": 6567,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "url": "https://memory.wiki/b/4OGRyHs9"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-007",
+      "answer": "`mdfy` simplifies onboarding for new Claude Code sessions by eliminating the need to repeatedly re-paste project background and personal context (such as tech stacks or coding preferences). \n\nTo set it up, you perform a one-time, one-minute configuration:\n1. Sign in to `mdfy` and copy your personal hub snippet.\n2. Append this snippet—which contains your permanent `mdfy` hub URL (e.g., `https://mdfy.app/hub/<me>`)—to your global `~/.claude/CLAUDE.md` file.\n\nOnce added, every new Claude Code session automatically has access to your hub. When Claude needs background information, it fetches your hub URL, reads the markdown index of your documents, and follows the relevant links. \n\nFor repository-specific context (like architecture or local decisions), you can append a similar block to that specific repository's `CLAUDE.md` pointing to a project-specific `mdfy` bundle URL. This reduces the onboarding time for every new chat to zero minutes.",
+      "tokens_in": 15957,
+      "tokens_out": 288,
+      "latency_ms": 7508,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "url": "https://memory.wiki/b/4OGRyHs9"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-008",
+      "answer": "The **Cursor + Claude cross-tool handoff** case study solves the pain of **constant, repetitive context re-priming when switching between AI tools**.\n\nSpecifically, the problem is:\n- You spend ~30 minutes priming Cursor with project context (codebase details, design decisions, customer feedback).\n- You hit a dead end and want Claude's input — but when you paste the conversation over, **half the context is lost**.\n- You re-prime Claude for another ~20 minutes, get unstuck, then switch back to Cursor — and have to repeat the priming all over again.\n- The result: **most of your AI time is spent re-explaining what you already explained an hour ago**, rather than doing actual work.\n\nThe solution is a shared Memory.Wiki \"project hub\" — a bundle of docs (spec, decisions, feedback) with a single permanent URL. You paste that URL into both Cursor (`.cursorrules`) and Claude (system prompt), and both tools read the same context. Switching tools becomes a paste, not a 20-minute re-priming session.",
+      "tokens_in": 24196,
+      "tokens_out": 380,
+      "latency_ms": 10924,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "url": "https://memory.wiki/b/4OGRyHs9"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-008",
+      "answer": "It solves the pain of **lost context and repeated re-priming when switching between AI tools like Cursor and Claude**.\n\nThe case describes a developer starting work in Cursor, spending ~30 minutes giving it project context, then needing Claude for a second opinion. When they paste the conversation into Claude, key context is missing: codebase details, design decisions, customer feedback, constraints. After getting unstuck in Claude, they must repeat the process when returning to Cursor.\n\nMemory.Wiki solves this by creating a shared project hub with a permanent URL that both tools can read, so switching tools becomes “paste the same URL” instead of re-explaining the project every time.",
+      "tokens_in": 18664,
+      "tokens_out": 251,
+      "latency_ms": 6971,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "url": "https://memory.wiki/b/4OGRyHs9"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-008",
+      "answer": "The **Cursor + Claude cross-tool handoff** case study addresses the pain of **lost context and repetitive re-priming** when switching between different AI tools mid-flow. \n\nSpecifically, it solves the following problems:\n* **Context Loss:** When switching from Cursor to Claude (or vice versa) for a second opinion, the new tool lacks critical background like codebase details, design decisions, and customer feedback.\n* **Wasted Time:** Developers waste 20 to 30 minutes repeatedly re-explaining and re-priming the same project context in separate chat histories.\n* **Tool Churn Overhead:** Moving between different platforms (Cursor, Claude, ChatGPT) requires manual context migration.\n\n**The Solution:** By creating a single, permanent Memory.Wiki project hub URL containing all specs and decisions, developers can instantly prime any AI tool with a single paste. This shifts the setup cost from \"every conversation\" to \"once per project,\" allowing seamless, zero-repriming tool switching.",
+      "tokens_in": 20851,
+      "tokens_out": 265,
+      "latency_ms": 7448,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "url": "https://memory.wiki/b/4OGRyHs9"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-009",
+      "answer": "The one-line positioning for memory.wiki in the v7 plan is:\n\n**\"memory.wiki — your knowledge graph as a URL for any AI.\"**\n\nThis tagline appears in both final v7 business plan documents (docs `qHc1FWxq` and `xv6A2DKS`) under the section labeled **\"한 줄로\"** (meaning \"in one line\" in Korean).",
+      "tokens_in": 3874,
+      "tokens_out": 167,
+      "latency_ms": 6600,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "url": "https://memory.wiki/b/rN2L-MvM"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-009",
+      "answer": "The one-line positioning is:\n\n**“memory.wiki — your knowledge graph as a URL for any AI.”**",
+      "tokens_in": 2597,
+      "tokens_out": 55,
+      "latency_ms": 2479,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "url": "https://memory.wiki/b/rN2L-MvM"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-009",
+      "answer": "According to the *memory.wiki 사업계획 v7 (FINAL)* documents, the one-line positioning for memory.wiki is:\n\n> **\"memory.wiki — your knowledge graph as a URL for any AI.\"**",
+      "tokens_in": 2611,
+      "tokens_out": 78,
+      "latency_ms": 3539,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "url": "https://memory.wiki/b/rN2L-MvM"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qb-010",
+      "answer": "## Memory.wiki's Three-Tier Architecture\n\nAccording to the content, memory.wiki uses a **three-tier architecture** consisting of:\n\n1. **Capture** – The ingestion layer where user knowledge and documents are collected into the platform.\n2. **Digestion** – An AI-powered processing layer that analyzes, structures, and extracts concepts and relationships from the captured content.\n3. **Utilization** – The delivery layer where the processed knowledge becomes accessible to any AI via simple URLs that return markdown.\n\nThis architecture mirrors how humans naturally work with knowledge (intake → process → apply), rather than being purely technically driven. Notably, the bundle summary highlights that each tier is being enhanced ahead of the August launch, with one key improvement per tier. The platform's core innovation sits at the **utilization** tier: every URL functions as an API, allowing any LLM (ChatGPT, Claude, Gemini, etc.) to fetch a user's structured knowledge graph without authentication or special setup.",
+      "tokens_in": 3868,
+      "tokens_out": 297,
+      "latency_ms": 8867,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "url": "https://memory.wiki/b/rN2L-MvM"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qb-010",
+      "answer": "Memory.wiki uses a three-tier architecture:\n\n1. **Capture** — collecting and saving user knowledge from documents, conversations, and notes.  \n2. **Digestion** — processing that knowledge with AI into summaries, concepts, relationships, embeddings, and a knowledge graph.  \n3. **Utilization** — making the digested knowledge usable by any AI through shareable URLs that return clean markdown, effectively acting as APIs.\n\nIn short: **capture → digestion → utilization**.",
+      "tokens_in": 2585,
+      "tokens_out": 168,
+      "latency_ms": 4068,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "url": "https://memory.wiki/b/rN2L-MvM"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qb-010",
+      "answer": "Memory.wiki uses a three-tier architecture designed to capture, organize, and deliver user knowledge to any AI:\n\n1. **Capture:** Markdown content is collected from various sources—such as a Chrome extension (for ChatGPT/Claude), VS Code, a CLI, or the web editor—and saved as living, editable Document URLs.\n2. **Digestion:** An LLM automatically extracts concepts from saved documents to build a personal ontology, analyzes document bundles to identify themes and insights, and generates embeddings to power semantic search.\n3. **Delivery (or Utilization):** The organized knowledge graph is delivered to any AI via three nested URL scopes (Doc, Bundle, Hub) that return clean, AI-readable markdown. It can also be accessed through a 26-tool Model Context Protocol (MCP) server, allowing AI agents to seamlessly query and write back to the user's hub.",
+      "tokens_in": 9342,
+      "tokens_out": 242,
+      "latency_ms": 7921,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "url": "https://memory.wiki/b/rN2L-MvM"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "qb-001",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The v7 business plan projects an MRR target of $80,000–$150,000 at the 12-month mark",
+          "quote": "12개월 후: $80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "This target appears in doc qHc1FWxq",
+          "quote": "12개월 후: $80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "This target appears in doc xv6A2DKS",
+          "quote": "12개월 후: $80-150K MRR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-001",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All four claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "The v7 business plan projects $80K–$150K MRR at 12 months",
+          "quote": "12개월 후: $80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Conservative scenario: $33K MRR",
+          "quote": "$33K MRR / $400K ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Realistic scenario: $88K MRR",
+          "quote": "$88K MRR / $1.0M ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Optimistic scenario: $216K MRR",
+          "quote": "$216K MRR / $2.5M ARR",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-001",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The v7 business plan projects an MRR target at 12 months",
+          "quote": "12개월 후",
+          "verdict": "supported"
+        },
+        {
+          "text": "The 12-month MRR target is $80K to $150K",
+          "quote": "$80-150K MRR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The source document is the memory.wiki Business Plan v7 (FINAL)",
+          "quote": "memory.wiki 사업계획 v7 (FINAL)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-002",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.67,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Two of three claims are directly supported by the corpus, but the third claim about the recap document stating the founder plans to launch in August cannot be verified verbatim, though the corpus does contain a paraphrase of this fact.",
+      "claims": [
+        {
+          "text": "memory.wiki is targeting its launch in August",
+          "quote": "Launch deadline: 2026년 8월 말 (16주)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The business plan references '8월 launch까지 도달 지점' meaning milestones to reach by August launch",
+          "quote": "8월 launch까지 도달 지점: 3단계 (수집/소화/활용) 각각 핵심 enhancement 1개씩 ship",
+          "verdict": "supported"
+        },
+        {
+          "text": "The recap document states the founder plans to launch in August",
+          "quote": "The founder plans to launch in August",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-002",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The corpus explicitly states the launch deadline is end of August 2026, directly supporting the claim.",
+      "claims": [
+        {
+          "text": "memory.wiki is targeting its launch in August",
+          "quote": "Launch deadline: 2026년 8월 말 (16주)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-002",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All four claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "memory.wiki is targeting its launch in August",
+          "quote": "Launch deadline: 2026년 8월 말 (16주)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The launch target is stated in the final business plan v7",
+          "quote": "memory.wiki 사업계획 v7 (FINAL)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The launch target is stated in the v6 recap",
+          "quote": "The founder plans to launch in August and ultimately position it as the default memory layer for LLM services.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The product specification notes an earlier milestone of rebranding from mdfy.app and launching to Hacker News in early June",
+          "quote": "The product requires four core features to launch—wikilink syntax, backlinks, concept indexing, and a public spec page—before rebranding from mdfy.app and launching to Hacker News in early June.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "ggAzbcHr",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-003",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "The first URL primitive is Document at mdfy.app/<id>",
+          "quote": "mdfy.app/<id>\n\nA single captured artifact.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document is a single captured answer, paper, or transcript",
+          "quote": "A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code. One markdown page, one permanent URL.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The second URL primitive is Bundle at mdfy.app/b/<id>",
+          "quote": "mdfy.app/b/<id>",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated collection of multiple documents grouped together",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The third URL primitive is Hub at mdfy.app/hub/<you>",
+          "quote": "mdfy.app/hub/<you>",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub contains all of a user's public content",
+          "quote": "Your whole knowledge layer as one URL. The hub page lists every public doc and bundle",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "All three are fetchable as clean markdown via a public URL so any AI tool can read them",
+          "quote": "Every primitive is fetchable as clean markdown by any AI that can hit an HTTP endpoint.",
+          "verdict": "supported"
+        },
+        {
+          "text": "You don't need to learn different interfaces for each level — the viewer and AI fetch path work the same way across all three scopes",
+          "quote": "You don't need to learn three different surfaces. The viewer chrome is shared, the AI fetch path is shared",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-003",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All seven claims are directly supported or paraphrase-supported by the corpus, accurately describing the three URL primitives, their URL patterns, and their descriptions.",
+      "claims": [
+        {
+          "text": "The three URL primitives mdfy uses are Document, Bundle, and Hub",
+          "quote": "mdfy uses one primitive — the URL — at three nested scopes.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Document uses the URL pattern mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document is a single captured answer, paper, transcript, or piece of content",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code. One markdown page, one permanent URL.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Bundle uses the URL pattern mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated collection of documents",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub uses the URL pattern mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub is a user's public knowledge base containing all their public content",
+          "quote": "Your whole knowledge layer as one URL. The hub page lists every public doc and bundle, grouped by recency and topic.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-003",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "The three URL primitives used by mdfy are Document, Bundle, and Hub",
+          "quote": "mdfy uses one primitive — the URL — at three nested scopes.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document uses the URL pattern mdfy.app/<id>",
+          "quote": "`mdfy.app/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Document represents a single captured item, such as an answer, paper, or transcript",
+          "quote": "A single captured artifact. A pasted ChatGPT share URL. A dropped PDF. A `/mdfy capture` from inside Claude Code. One markdown page, one permanent URL.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Bundle uses the URL pattern mdfy.app/b/<id>",
+          "quote": "`mdfy.app/b/<id>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Bundle is a curated collection of multiple documents grouped together",
+          "quote": "A curated grouping of docs around a topic.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Hub uses the URL pattern mdfy.app/hub/<you>",
+          "quote": "`mdfy.app/hub/<you>`",
+          "verdict": "supported"
+        },
+        {
+          "text": "Hub contains all of a user's public content",
+          "quote": "Your whole knowledge layer as one URL. The hub page lists every public doc and bundle",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The three primitives share the same underlying interface, allowing any AI tool to fetch clean markdown at different scopes",
+          "quote": "You don't need to learn three different surfaces. The viewer chrome is shared, the AI fetch path is shared, and the embed pipeline is shared.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-004",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly or semantically supported by the corpus, covering vendor lock-in, the URL-as-contract principle, portability, shareability, and ownership.",
+      "claims": [
+        {
+          "text": "ChatGPT memory stays in ChatGPT and doesn't work in other tools",
+          "quote": "ChatGPT memory doesn't work in Claude.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Claude projects don't work in Cursor",
+          "quote": "Claude projects don't work in Cursor.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Vendor memory layers are walled gardens / live behind walls",
+          "quote": "Vendor memory layers (ChatGPT memory, Claude projects, Cursor docs) all live behind walls. They don't talk to each other, you can't share them, and you can't paste them into the other tool tomorrow.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Every piece of knowledge in mdfy becomes a public URL serving plain markdown",
+          "quote": "mdfy is a vendor-independent memory layer that captures AI conversations and documents as public markdown URLs",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Any AI tool can fetch a URL over HTTP with no custom integration needed — if a tool can read a URL, it can use mdfy",
+          "quote": "A public URL is the one format every AI already knows how to read. No SDK, no plugin, no MCP server required.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The 'URL as contract' principle",
+          "quote": "The URL is the contract; mdfy makes the URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The same URL works in Claude, ChatGPT, Cursor, Codex, or any future tool (portability)",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer. Same URL, every AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Knowledge is shareable — you can hand the URL to another person or AI without exporting anything",
+          "quote": "you can't share them",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Your knowledge isn't locked inside a vendor's database; it lives at a permanent URL you control (ownership)",
+          "quote": "mdfy knowledge is portable across tools, shareable with others, and owned by the user rather than trapped within a single vendor's ecosystem.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-004",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Vendor memory layers like ChatGPT memory, Claude Projects, or Cursor docs are walled off and do not work across tools",
+          "quote": "Vendor memory layers (ChatGPT memory, Claude projects, Cursor docs) all live behind walls. They don't talk to each other, you can't share them, and you can't paste them into the *other* tool tomorrow.",
+          "verdict": "supported"
+        },
+        {
+          "text": "ChatGPT memory does not help Claude, Claude Projects do not help Cursor",
+          "quote": "ChatGPT memory doesn't work in Claude. Claude projects don't work in Cursor.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The user's knowledge becomes trapped in that vendor's ecosystem",
+          "quote": "One vendor only. ChatGPT memory doesn't work in Claude. Claude projects don't work in Cursor. The me",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Any AI that can fetch a URL can use the same memory — a document, bundle, or hub is exposed as clean markdown at a public URL",
+          "quote": "A public URL is the one format every AI already knows how to read. No SDK, no plugin, no MCP server required.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The same context can be pasted into ChatGPT, Claude, Cursor, Codex, or shared with another person",
+          "quote": "You paste that hub URL into Claude, ChatGPT, Cursor, or Codex and they fetch the whole thing as your personal knowledge layer.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The URL becomes the contract",
+          "quote": "The URL is the contract; mdfy makes the URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy is not trying to replace vendor memory for invisible preferences inside one chat tool — it is for substantive knowledge you want to reuse, cite, share, and carry across tools without lock-in",
+          "quote": "The two serve complementary purposes: vendor memory for invisible preferences within one tool, mdfy for substantive knowledge portability across tools.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-004",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "mdfy uses public URLs instead of vendor memory layers to solve vendor lock-in and enable cross-tool portability",
+          "quote": "Vendor memory layers (ChatGPT memory, Claude projects, Cursor docs) all live behind walls. They don't talk to each other, you can't share them, and you can't paste them into the *other* tool tomorrow.",
+          "verdict": "supported"
+        },
+        {
+          "text": "ChatGPT memory cannot be accessed by Claude",
+          "quote": "One vendor only. ChatGPT memory doesn't work in Claude.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Claude projects do not work in Cursor",
+          "quote": "Claude projects don't work in Cursor.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Public URLs serve as a universal interface because almost any AI tool can fetch and read a URL",
+          "quote": "A public URL is the one format every AI already knows how to read. No SDK, no plugin, no MCP server required.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The URL is a 'contract' between mdfy and AI tools",
+          "quote": "The URL is the contract; mdfy makes the URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "mdfy knowledge is shareable and human-readable across any platform",
+          "quote": "mdfy is a shareable, human-readable markdown format designed for reusing knowledge across multiple AI tools and sharing with others.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "9FATHAnw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-005",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Every substantive claim in the candidate answer is directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The strongest single recommendation is to drop the Electron desktop app in favor of a 'mac-native triplet'",
+          "quote": "**Drop the Electron desktop app → \"mac-native triplet.\"**",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Electron app carries the highest maintenance cost including code signing, auto-updates, RAM footprint, and a separate GitHub Releases channel",
+          "quote": "The Electron app has the highest current upkeep cost (auto-update, code signing, RAM footprint, separate GitHub Releases channel)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Electron app delivers the lowest unique value over the web app",
+          "quote": "and the lowest unique value vs. the web app",
+          "verdict": "supported"
+        },
+        {
+          "text": "Spotlight/Raycast search is achievable via PWA + URL scheme handler",
+          "quote": "**Spotlight / Raycast search for mdfy docs** — PWA install + URL scheme handler",
+          "verdict": "supported"
+        },
+        {
+          "text": "'Save to mdfy' from Safari/Mail/Notes is achievable via a macOS Share Sheet extension",
+          "quote": "**\"Save to mdfy\" from Safari / Mail / Notes** — macOS Share Sheet extension (Swift App Extension)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Finder QuickLook preview of .md files is achievable via a QuickLook plugin",
+          "quote": "**Finder space-bar on a** `.md` **file → rendered preview** — QuickLook plugin",
+          "verdict": "supported"
+        },
+        {
+          "text": "These three mac-native scenarios are unreachable from Electron",
+          "quote": "Three real mac-native scenarios users would actually use are *not* reachable from Electron",
+          "verdict": "supported"
+        },
+        {
+          "text": "The recommendation is to ship those three pieces, issue a one-year deprecation notice, and redirect the download page to PWA install",
+          "quote": "After they ship, give the Electron app a 1-year deprecation notice and point the download page at PWA install.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-005",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "judge exception: Expected ',' or '}' after property value in JSON at position 209 (line 1 column 210) — keyword fallback",
+      "claims": [],
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-005",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The strongest single recommendation is to drop the Electron desktop app and replace it with a 'mac-native triplet.'",
+          "quote": "Drop the Electron desktop app → \"mac-native triplet.\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Electron app has the highest upkeep cost including auto-updates, code signing, and RAM footprint.",
+          "quote": "The Electron app has the highest current upkeep cost (auto-update, code signing, RAM footprint, separate GitHub Releases channel)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Electron app offers low unique value compared to the web app.",
+          "quote": "the lowest unique value vs. the web app",
+          "verdict": "supported"
+        },
+        {
+          "text": "PWA install + URL scheme handler enables Spotlight or Raycast search for mdfy docs.",
+          "quote": "Spotlight / Raycast search for mdfy docs — PWA install + URL scheme handler",
+          "verdict": "supported"
+        },
+        {
+          "text": "macOS Share Sheet extension allows 'Save to mdfy' functionality from Safari, Mail, and Notes.",
+          "quote": "\"Save to mdfy\" from Safari / Mail / Notes — macOS Share Sheet extension (Swift App Extension)",
+          "verdict": "supported"
+        },
+        {
+          "text": "QuickLook plugin enables a rendered preview of .md files when pressing the space-bar in Finder.",
+          "quote": "Finder space-bar on a .md file → rendered preview — QuickLook plugin",
+          "verdict": "supported"
+        },
+        {
+          "text": "The three native pieces combined are lighter to maintain than the Electron app.",
+          "quote": "The three combined are still lighter than maintaining Electron.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The strategy recommends giving the Electron app a one-year deprecation notice and redirecting users to the PWA install.",
+          "quote": "give the Electron app a 1-year deprecation notice and point the download page at PWA install",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-006",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "ChatGPT GPT + Actions is prioritized first in the native connectors roadmap",
+          "quote": "1. **ChatGPT GPT + Actions** — near-zero build cost, largest install base, public REST API already exists. Ship-able in 1-2 days.",
+          "verdict": "supported"
+        },
+        {
+          "text": "It is listed as the top highest-leverage priority",
+          "quote": "## Highest-leverage order (priority)\n\n1. **ChatGPT GPT + Actions**",
+          "verdict": "supported"
+        },
+        {
+          "text": "It has near-zero build cost",
+          "quote": "near-zero build cost",
+          "verdict": "supported"
+        },
+        {
+          "text": "It has the largest install base",
+          "quote": "largest install base",
+          "verdict": "supported"
+        },
+        {
+          "text": "The public REST API already exists",
+          "quote": "public REST API already exists",
+          "verdict": "supported"
+        },
+        {
+          "text": "Claude Skills is listed as the second priority",
+          "quote": "2. **Claude Skill (.ai web)** — covers mobile Claude + the desktop Claude app that the Chrome ext can't reach.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Gemini is listed after Claude (third priority)",
+          "quote": "### 3. Gemini — `Gemini Extension`",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Building ChatGPT Actions first demonstrates cross-AI interoperability as a competitive differentiator",
+          "quote": "Shipping ChatGPT GPT + Claude Skill **simultaneously** turns the cross-AI thesis into a demonstrable artifact",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-006",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All five atomic claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The first prioritized AI platform integration is ChatGPT GPT + Actions",
+          "quote": "1. **ChatGPT GPT + Actions** — near-zero build cost, largest install base, public REST API already exists.",
+          "verdict": "supported"
+        },
+        {
+          "text": "It has near-zero build cost",
+          "quote": "near-zero build cost",
+          "verdict": "supported"
+        },
+        {
+          "text": "It has the largest install base",
+          "quote": "largest install base",
+          "verdict": "supported"
+        },
+        {
+          "text": "It can use the existing public REST API",
+          "quote": "public REST API already exists",
+          "verdict": "supported"
+        },
+        {
+          "text": "It is shippable in 1-2 days",
+          "quote": "Ship-able in 1-2 days.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-006",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The AI platform integration prioritized first is ChatGPT GPT + Actions",
+          "quote": "1. **ChatGPT GPT + Actions** — near-zero build cost, largest install base, public REST API already exists. Ship-able in 1-2 days.",
+          "verdict": "supported"
+        },
+        {
+          "text": "This integration has a near-zero build cost",
+          "quote": "Build cost: **near-zero**. OpenAPI spec + GPT instruction text.",
+          "verdict": "supported"
+        },
+        {
+          "text": "It uses the existing public REST API and an OpenAPI schema config file",
+          "quote": "The most mature surface. OpenAPI schema is a single config file.",
+          "verdict": "supported"
+        },
+        {
+          "text": "It targets the largest install base",
+          "quote": "near-zero build cost, largest install base, public REST API already exists",
+          "verdict": "supported"
+        },
+        {
+          "text": "It can be shipped in just 1-2 days",
+          "quote": "Ship-able in 1-2 days.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "Ih0eUczw",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-007",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Opening a fresh Claude Code session meant spending ~5 minutes re-pasting the same project background",
+          "quote": "I'd spend 5 minutes re-pasting the same project background",
+          "verdict": "supported"
+        },
+        {
+          "text": "Across 8–12 sessions per week, that wastes roughly an hour weekly",
+          "quote": "Multiply by the 8-12 fresh chats per week and that's an hour a week of just bootstrapping context",
+          "verdict": "supported"
+        },
+        {
+          "text": "You visit mdfy.app/install, sign in, and append a small snippet to ~/.claude/CLAUDE.md",
+          "quote": "Visited `mdfy.app/install`, signed in, copied the snippet, appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "The snippet includes a Hub URL pointing to https://mdfy.app/hub/<me>",
+          "quote": "Hub URL: https://mdfy.app/hub/<me>",
+          "verdict": "supported"
+        },
+        {
+          "text": "Every new Claude Code session automatically reads CLAUDE.md and has your hub URL available, and Claude fetches the hub and follows relevant links",
+          "quote": "Now every Claude Code session, anywhere on my machine, automatically has my hub URL. When I ask a question that needs project context, Claude fetches the hub and follows the relevant link.",
+          "verdict": "supported"
+        },
+        {
+          "text": "For project-specific context, you add a similar block to a repo's local CLAUDE.md, pointing at a project-specific bundle URL",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's CLAUDE.md — but pointing at a project-specific *bundle* URL instead of my personal hub.",
+          "verdict": "supported"
+        },
+        {
+          "text": "1 minute of one-time setup → 0 minutes of context overhead per session",
+          "quote": "One-time setup: 1 minute.\n- Per new chat: 0 minutes. The hub URL is already in CLAUDE.md.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The hub URL returns plain markdown and works across other tools like Cursor, Codex, and Aider",
+          "quote": "The hub URL is just markdown. Any AI that can fetch a URL can read it — Cursor, Codex, Aider, ChatGPT.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-007",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "mdfy helps onboard every new Claude Code session by putting a permanent context pointer into ~/.claude/CLAUDE.md",
+          "quote": "appended it to ~/.claude/CLAUDE.md",
+          "verdict": "supported"
+        },
+        {
+          "text": "You install/sign in at mdfy.app/install, copy a small snippet, and paste it once into CLAUDE.md",
+          "quote": "Visited `mdfy.app/install`, signed in, copied the snippet, appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "That snippet contains your mdfy hub URL",
+          "quote": "Hub URL: https://mdfy.app/hub/<me>",
+          "verdict": "supported"
+        },
+        {
+          "text": "Every new session already knows where to fetch your background: projects, decisions, references, and other public docs/bundles",
+          "quote": "When you need background on me — projects, decisions, references — fetch the URL above. It returns a markdown index of every public doc and bundle in my hub.",
+          "verdict": "supported"
+        },
+        {
+          "text": "When a question needs context, Claude fetches the hub, follows the relevant links, and uses that information",
+          "quote": "When I ask a question that needs project context, Claude fetches the hub and follows the relevant link.",
+          "verdict": "supported"
+        },
+        {
+          "text": "For repo-specific onboarding, you can add a similar block to that repo's CLAUDE.md, pointing at a project bundle URL",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's CLAUDE.md — but pointing at a project-specific *bundle* URL instead of my personal hub.",
+          "verdict": "supported"
+        },
+        {
+          "text": "One-time setup of about a minute; per new chat, zero minutes of context bootstrapping",
+          "quote": "One-time setup: 1 minute.\n- Per new chat: 0 minutes. The hub URL is already in CLAUDE.md.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-007",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim or semantically equivalent passages in the corpus.",
+      "claims": [
+        {
+          "text": "mdfy eliminates the need to repeatedly re-paste project background and personal context such as tech stacks or coding preferences",
+          "quote": "I'd spend 5 minutes re-pasting the same project background. \"We use Tailwind. The auth is Supabase. The deploy is Vercel. The team prefers tabs...\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Setup requires signing in to mdfy and copying your personal hub snippet",
+          "quote": "Visited `mdfy.app/install`, signed in, copied the snippet, appended it to `~/.claude/CLAUDE.md`",
+          "verdict": "supported"
+        },
+        {
+          "text": "The snippet contains your permanent mdfy hub URL (e.g., https://mdfy.app/hub/<me>) and is appended to ~/.claude/CLAUDE.md",
+          "quote": "Hub URL: https://mdfy.app/hub/<me>",
+          "verdict": "supported"
+        },
+        {
+          "text": "Every new Claude Code session automatically has access to your hub URL",
+          "quote": "Now every Claude Code session, anywhere on my machine, automatically has my hub URL.",
+          "verdict": "supported"
+        },
+        {
+          "text": "When Claude needs background information, it fetches your hub URL, reads the markdown index of your documents, and follows the relevant links",
+          "quote": "When I ask a question that needs project context, Claude fetches the hub and follows the relevant link.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "For repository-specific context you can append a similar block to that specific repository's CLAUDE.md pointing to a project-specific mdfy bundle URL",
+          "quote": "For project-specific context (this repo's architecture, this repo's decisions), I append the same kind of block to that repo's `CLAUDE.md` — but pointing at a project-specific *bundle* URL instead of my personal hub.",
+          "verdict": "supported"
+        },
+        {
+          "text": "This reduces the onboarding time for every new chat to zero minutes",
+          "quote": "Per new chat: 0 minutes. The hub URL is already in CLAUDE.md.",
+          "verdict": "supported"
+        },
+        {
+          "text": "One-time setup takes one minute",
+          "quote": "One-time setup: 1 minute.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-008",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.875,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Most claims are broadly supported or paraphrase-supported by the corpus, but the specific mechanism described (pasting URL into .cursorrules and system prompt) contradicts the corpus, which describes using save/fetch commands instead.",
+      "claims": [
+        {
+          "text": "The case study solves the pain of constant, repetitive context re-priming when switching between AI tools",
+          "quote": "Every time I switch, I re-paste the same context: \"here's the project, here's the constraint, here's what we decided last week...\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "You spend time priming Cursor with project context (codebase details, design decisions, customer feedback)",
+          "quote": "I do real coding in Cursor. I do research and architecture thinking in Claude. They don't share memory.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "When you paste the conversation over to Claude, half the context is lost",
+          "quote": "They don't share memory. Every time I switch, I re-paste the same context",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "You re-prime Claude and then switch back to Cursor and have to repeat the priming all over again",
+          "quote": "Every time I switch, I re-paste the same context: \"here's the project, here's the constraint, here's what we decided last week...\"",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Most of your AI time is spent re-explaining what you already explained, rather than doing actual work",
+          "quote": "Forty conversations in, I had four loose threads of work in two different chat histories with no way to cross-reference them.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The solution is a shared Memory.Wiki project hub — a bundle of docs with a single permanent URL",
+          "quote": "fetch https://mdfy.app/hub/me and pick up the auth thread",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "You paste that URL into both Cursor (.cursorrules) and Claude (system prompt)",
+          "quote": "In Cursor, after we figure out a non-trivial decision: `save this to mdfy as \"Auth provider tradeoffs\"`. The skill captures the conversation segment as a permanent URL.\n\nIn Claude Code the next morning: `fetch https://mdfy.app/hub/me and pick up the auth thread`. Claude reads the markdown index, follows the link to that exact doc, loads it as context.",
+          "verdict": "contradicts"
+        },
+        {
+          "text": "Switching tools becomes a paste, not a 20-minute re-priming session",
+          "quote": "The handoff is **one capture command, one paste**.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-008",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims are supported or paraphrase-supported by the corpus, though the answer adds some specific details (30 minutes, customer feedback) not found verbatim in the corpus but the core claims about the pain and solution are well-supported.",
+      "claims": [
+        {
+          "text": "The pain is lost context and repeated re-priming when switching between AI tools like Cursor and Claude",
+          "quote": "I do real coding in Cursor. I do research and architecture thinking in Claude. They don't share memory. Every time I switch, I re-paste the same context",
+          "verdict": "supported"
+        },
+        {
+          "text": "A developer spends time giving Cursor project context then needs Claude for a second opinion",
+          "quote": "I do real coding in Cursor. I do research and architecture thinking in Claude.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "When switching to Claude, key context is missing including codebase details, design decisions, and constraints",
+          "quote": "Every time I switch, I re-paste the same context: \"here's the project, here's the constraint, here's what we decided last week...\"",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "After 40 conversations there were four loose threads of work in two different chat histories with no way to cross-reference them",
+          "quote": "Forty conversations in, I had four loose threads of work in two different chat histories with no way to cross-reference them.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Memory.Wiki solves this by creating a shared project hub with a permanent URL that both tools can read",
+          "quote": "fetch https://mdfy.app/hub/me and pick up the auth thread. Claude reads the markdown index, follows the link to that exact doc, loads it as context.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Switching tools becomes 'paste the same URL' instead of re-explaining the project every time",
+          "quote": "The handoff is one capture command, one paste. I never re-explain the project to a fresh chat.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The developer must repeat the process when returning to Cursor after using Claude",
+          "quote": "Same in reverse. Whatever I think through with Claude lands in mdfy and is available to Cursor.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-008",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 0.857,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Most claims are supported or paraphrase-supported by the corpus, but the specific '20 to 30 minutes' time waste figure has no basis in the source material.",
+      "claims": [
+        {
+          "text": "The case study addresses the pain of lost context and repetitive re-priming when switching between different AI tools",
+          "quote": "Every time I switch, I re-paste the same context: \"here's the project, here's the constraint, here's what we decided last week...\"",
+          "verdict": "supported"
+        },
+        {
+          "text": "Context Loss: When switching from Cursor to Claude (or vice versa), the new tool lacks critical background like codebase details, design decisions",
+          "quote": "I do real coding in Cursor. I do research and architecture thinking in Claude. They don't share memory.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Developers waste 20 to 30 minutes repeatedly re-explaining the same project context",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Forty conversations in, the user had four loose threads of work in two different chat histories with no way to cross-reference them",
+          "quote": "Forty conversations in, I had four loose threads of work in two different chat histories with no way to cross-reference them.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Moving between different platforms requires manual context migration",
+          "quote": "Every time I switch, I re-paste the same context",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "By creating a single, permanent Memory.Wiki project hub URL, developers can instantly prime any AI tool with a single paste",
+          "quote": "fetch https://mdfy.app/hub/me and pick up the auth thread. Claude reads the markdown index, follows the link to that exact doc, loads it as context.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "This shifts the setup cost from 'every conversation' to 'once per project'",
+          "quote": "I never re-explain the project to a fresh chat.",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "4OGRyHs9",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qb-009",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The one-line positioning for memory.wiki in the v7 plan is 'memory.wiki — your knowledge graph as a URL for any AI.'",
+          "quote": "memory.wiki — your knowledge graph as a URL for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "This tagline appears under the section labeled '한 줄로' (meaning 'in one line' in Korean)",
+          "quote": "## 한 줄로\n\n> **memory.wiki — your knowledge graph as a URL for any AI.**",
+          "verdict": "supported"
+        },
+        {
+          "text": "The tagline appears in doc qHc1FWxq",
+          "quote": "memory.wiki — your knowledge graph as a URL for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The tagline appears in doc xv6A2DKS",
+          "quote": "한 줄로: memory.wiki — your knowledge graph as a URL for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "These are final v7 business plan documents",
+          "quote": "title: \"memory.wiki 사업계획 v7 (FINAL)\"",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-009",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The candidate answer exactly matches the one-line positioning stated in the corpus under the '한 줄로' section of the Executive Summary.",
+      "claims": [
+        {
+          "text": "The one-line positioning for memory.wiki in the v7 plan is 'memory.wiki — your knowledge graph as a URL for any AI.'",
+          "quote": "memory.wiki — your knowledge graph as a URL for any AI.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-009",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Both claims are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "The one-line positioning for memory.wiki is 'memory.wiki — your knowledge graph as a URL for any AI.'",
+          "quote": "memory.wiki — your knowledge graph as a URL for any AI.",
+          "verdict": "supported"
+        },
+        {
+          "text": "This positioning comes from the memory.wiki 사업계획 v7 (FINAL) document",
+          "quote": "title: \"memory.wiki 사업계획 v7 (FINAL)\"",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-010",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims are directly supported by verbatim or paraphrase-equivalent passages in the corpus.",
+      "claims": [
+        {
+          "text": "memory.wiki uses a three-tier architecture consisting of Capture, Digestion, and Utilization",
+          "quote": "3-tier framework backbone\n**v6**: Three Pillars (Capture / Bundle / Deploy)\n**v7**: **수집 / 소화 / 활용** (Capture / Digestion / Utilization)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Capture is the ingestion layer where user knowledge and documents are collected into the platform",
+          "quote": "수집 (Capture)\n│  Multi-surface로 markdown 모음",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Digestion is an AI-powered processing layer that analyzes, structures, and extracts concepts and relationships from captured content",
+          "quote": "소화 (Digestion)\n│  AI가 자동으로 graph build\n│  - Concept extraction\n│  - Relations 추출\n│  - Bundle analysis\n│  - Embeddings",
+          "verdict": "supported"
+        },
+        {
+          "text": "Utilization is the delivery layer where processed knowledge becomes accessible to any AI via simple URLs that return markdown",
+          "quote": "활용 (Utilization)\n│  어떤 AI에든 URL로 deliver\n│  - Doc URL\n│  - Bundle URL (Compact / Full)\n│  - Hub URL (Compact / Full / Since)\n│  - MCP integration",
+          "verdict": "supported"
+        },
+        {
+          "text": "The architecture mirrors how humans naturally work with knowledge rather than being purely technically driven",
+          "quote": "The three-tier architecture (capture/digestion/utilization) mirrors how humans actually work with knowledge, suggesting the product design follows natural cognitive patterns rather than technical constraints.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Each tier is being enhanced ahead of the August launch, with one key improvement per tier",
+          "quote": "3단계 (수집/소화/활용) 각각 핵심 enhancement 1개씩 ship",
+          "verdict": "supported"
+        },
+        {
+          "text": "Every URL functions as an API, allowing any LLM to fetch a user's structured knowledge graph without authentication or special setup",
+          "quote": "A memory.wiki URL is an API for any AI.\n\nPaste `memory.wiki/<id>`, `memory.wiki/b/<id>`, or `memory.wiki/hub/<slug>` into ChatGPT, Claude, Gemini, or Cursor. LLM이 fetch해서 markdown으로 받음. No app to install. No format to learn. Just markdown over HTTPS.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-010",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All five claims are directly supported by verbatim passages in the corpus describing memory.wiki's three-tier capture/digestion/utilization architecture and URL-as-API concept.",
+      "claims": [
+        {
+          "text": "Memory.wiki uses a three-tier architecture",
+          "quote": "3-Tier Architecture (수집/소화/활용)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 1 is Capture — collecting and saving user knowledge from documents, conversations, and notes",
+          "quote": "1. 수집 (Capture)\n│  Multi-surface로 markdown 모음",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 2 is Digestion — processing that knowledge with AI into summaries, concepts, relationships, embeddings, and a knowledge graph",
+          "quote": "2. 소화 (Digestion)\n│  AI가 자동으로 graph build\n│  - Concept extraction\n│  - Relations 추출\n│  - Bundle analysis\n│  - Embeddings",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 3 is Utilization — making the digested knowledge usable by any AI through shareable URLs that return clean markdown",
+          "quote": "3. 활용 (Utilization)\n│  어떤 AI에든 URL로 deliver",
+          "verdict": "supported"
+        },
+        {
+          "text": "The URLs effectively act as APIs",
+          "quote": "A memory.wiki URL is an API for any AI.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qb-010",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or paraphrase-supported by the corpus.",
+      "claims": [
+        {
+          "text": "Tier 1 is Capture, where markdown content is collected from various sources such as a Chrome extension (for ChatGPT/Claude), VS Code, a CLI, or the web editor, and saved as living, editable Document URLs.",
+          "quote": "✅ **Chrome extension** — ChatGPT, Claude, Gemini capture\n✅ **VS Code extension** — Marketplace v1.4.0\n✅ **CLI** — npm v1.3.x",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 2 is Digestion, where an LLM automatically extracts concepts from saved documents to build a personal ontology.",
+          "quote": "Concept ontology auto-extraction (doc_ontology job, 30-min throttle)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 2 Digestion analyzes document bundles to identify themes and insights.",
+          "quote": "Bundle graph analysis (themes, insights, edges via LLM)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 2 Digestion generates embeddings to power semantic search.",
+          "quote": "✅ **Embeddings** (doc + chunk via OpenAI text-embedding-3-small)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 3 is Delivery/Utilization, where the organized knowledge graph is delivered to any AI via three nested URL scopes (Doc, Bundle, Hub) that return clean, AI-readable markdown.",
+          "quote": "3. 활용 (Utilization)\n  어떤 AI에든 URL로 deliver\n  - Doc URL\n  - Bundle URL (Compact / Full)\n  - Hub URL (Compact / Full / Since)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier 3 can also be accessed through a 26-tool Model Context Protocol (MCP) server.",
+          "quote": "✅ **MCP server** — npm v1.3.x, 26 tools",
+          "verdict": "supported"
+        },
+        {
+          "text": "The MCP server allows AI agents to seamlessly query and write back to the user's hub.",
+          "quote": "MCP server full (write enabled)",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "bundle",
+      "scope_id": "rN2L-MvM",
+      "tool_calls": 2
+    }
+  ]
+}

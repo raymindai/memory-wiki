@@ -52,23 +52,30 @@ export async function POST(req: NextRequest) {
     // Try up to 5 attempts — nanoid collisions at 8 lowercase chars
     // are astronomically rare (36^8 = 2.8e12) but the unique index
     // protects us anyway. Retry on 23505 just in case.
+    //
+    // UPSERT (not UPDATE) so a missing profile row gets inserted with
+    // the new slug instead of the UPDATE silently affecting zero
+    // rows. We saw users whose handle_new_user trigger never fired
+    // (OAuth edge cases, manual user creation) end up in a state
+    // where the API claimed `created: true` but no DB row existed.
+    // Verify with .select() so we KNOW a row landed.
     for (let attempt = 0; attempt < 5; attempt++) {
       const slug = genSlug();
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
-        .update({ hub_slug: slug, hub_public: true })
-        .eq("id", userId);
-      if (!error) {
+        .upsert({ id: userId, hub_slug: slug, hub_public: true }, { onConflict: "id" })
+        .select("hub_slug");
+      if (!error && data && data.length > 0 && data[0].hub_slug === slug) {
         return NextResponse.json({ slug, created: true });
       }
-      if (error.code !== "23505") {
-        console.error("hub/ensure update failed:", error);
-        return NextResponse.json({ error: "Failed to assign hub slug" }, { status: 500 });
+      if (error && error.code !== "23505") {
+        console.error("hub/ensure upsert failed:", error);
+        return NextResponse.json({ error: "Failed to assign hub slug", detail: error.message }, { status: 500 });
       }
     }
     return NextResponse.json({ error: "Slug collision retry exhausted" }, { status: 500 });
   } catch (err) {
     console.error("hub/ensure error:", err);
-    return NextResponse.json({ error: "Ensure failed" }, { status: 500 });
+    return NextResponse.json({ error: "Ensure failed", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }

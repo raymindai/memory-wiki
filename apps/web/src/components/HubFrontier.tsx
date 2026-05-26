@@ -192,7 +192,7 @@ export default function HubFrontier({ authHeaders }: Props) {
           <Link
             href="/hubs"
             className="text-caption"
-            style={{ color: "var(--accent)", textDecoration: "none" }}
+            style={{ color: "var(--text-primary)", textDecoration: "none" }}
           >
             Review all suggestions in /hubs →
           </Link>

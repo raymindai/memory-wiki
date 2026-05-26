@@ -104,7 +104,7 @@ export function InlineCode({ children }: { children: string }) {
         borderRadius: 4,
         fontSize: 13,
         fontFamily: mono,
-        color: "var(--accent)",
+        color: "var(--text-primary)",
       }}
     >
       {children}
@@ -648,8 +648,8 @@ export function DocsSidebar({
               style={{
                 fontSize: 13,
                 fontWeight: active ? 600 : 400,
-                color: active ? "var(--accent)" : "var(--text-muted)",
-                background: active ? "var(--accent-dim)" : "transparent",
+                color: active ? "var(--text-primary)" : "var(--text-muted)",
+                background: active ? "var(--border)" : "transparent",
                 textDecoration: "none",
                 padding: "6px 12px",
                 borderRadius: 6,

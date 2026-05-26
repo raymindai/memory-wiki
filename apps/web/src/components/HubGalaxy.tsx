@@ -292,16 +292,16 @@ function GalaxyKeyframes() {
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-dim);
+        background: var(--text-primary);
+        box-shadow: 0 0 0 3px var(--border);
         border: none;
       }
       .galaxy-range::-moz-range-thumb {
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-dim);
+        background: var(--text-primary);
+        box-shadow: 0 0 0 3px var(--border);
         border: none;
       }
     `}</style>
@@ -445,7 +445,7 @@ const Star = memo(function Star({
           style={{
             fontSize: 10 / Math.max(0.6, viewK * 0.7),
             fill: "#fafafa",
-            fontFamily: "ui-monospace, 'JetBrains Mono', 'Fira Code', monospace",
+            fontFamily: "var(--font-mono)",
             letterSpacing: 0.3,
             pointerEvents: "none",
             paintOrder: "stroke",
@@ -522,13 +522,13 @@ function GalaxyButton({
         height: 26,
         padding: "0 10px",
         background: primary
-          ? "var(--accent-dim)"
+          ? "var(--border)"
           : active
             ? "var(--toggle-bg)"
             : floating ? "rgba(9, 9, 11, 0.6)" : "transparent",
-        color: primary || active ? "var(--accent)" : "var(--text-secondary)",
+        color: primary || active ? "var(--text-primary)" : "var(--text-secondary)",
         border: "1px solid",
-        borderColor: primary || active ? "var(--accent-dim)" : "var(--border)",
+        borderColor: primary || active ? "var(--border)" : "var(--border)",
         borderRadius: 6,
         cursor: "pointer",
         letterSpacing: 0.3,
@@ -1297,7 +1297,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
         <Link
           href="/"
           className="text-caption font-mono"
-          style={{ background: "var(--accent)", color: "var(--background)", padding: "8px 16px", borderRadius: 6, textDecoration: "none", fontWeight: 600, letterSpacing: 0.3 }}
+          style={{ background: "var(--text-primary)", color: "var(--background)", padding: "8px 16px", borderRadius: 6, textDecoration: "none", fontWeight: 600, letterSpacing: 0.3 }}
         >
           Go to Memory.Wiki
         </Link>
@@ -1314,7 +1314,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
         <Link
           href="/"
           className="text-caption font-mono"
-          style={{ background: "var(--accent)", color: "var(--background)", padding: "8px 16px", borderRadius: 6, textDecoration: "none", fontWeight: 600, letterSpacing: 0.3 }}
+          style={{ background: "var(--text-primary)", color: "var(--background)", padding: "8px 16px", borderRadius: 6, textDecoration: "none", fontWeight: 600, letterSpacing: 0.3 }}
         >
           Back to editor
         </Link>
@@ -2197,9 +2197,9 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
               const className = "flex items-center gap-1.5 rounded-md text-xs transition-colors hover:bg-[var(--toggle-bg)]";
               const style = {
                 padding: "6px 8px",
-                color: "var(--accent)",
+                color: "var(--text-primary)",
                 textDecoration: "none",
-                background: "var(--accent-dim)",
+                background: "var(--border)",
               } as const;
               if (embedded && onOpenDoc) {
                 return (
@@ -2329,7 +2329,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
         <span
           className="text-caption font-mono"
           style={{
-            color: displayDate === data.hubStart ? "var(--accent)" : "var(--text-faint)",
+            color: displayDate === data.hubStart ? "var(--text-primary)" : "var(--text-faint)",
             fontWeight: displayDate === data.hubStart ? 600 : 400,
             letterSpacing: 0.3,
             flexShrink: 0,
@@ -2392,7 +2392,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
                 left: `${Math.max(8, Math.min(92, sliderPct * 100))}%`,
                 transform: "translateX(-50%)",
                 bottom: 0,
-                color: "var(--accent)",
+                color: "var(--text-primary)",
                 letterSpacing: 0.3,
                 fontWeight: 600,
                 whiteSpace: "nowrap",
@@ -2408,7 +2408,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
         <span
           className="text-caption font-mono"
           style={{
-            color: (!displayDate || displayDate === data.hubEnd) ? "var(--accent)" : "var(--text-faint)",
+            color: (!displayDate || displayDate === data.hubEnd) ? "var(--text-primary)" : "var(--text-faint)",
             fontWeight: (!displayDate || displayDate === data.hubEnd) ? 600 : 400,
             letterSpacing: 0.3,
             flexShrink: 0,

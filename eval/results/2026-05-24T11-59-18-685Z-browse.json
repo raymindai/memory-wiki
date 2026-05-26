@@ -1,0 +1,1829 @@
+{
+  "bench": "MWBench v2 (browse)",
+  "queries_file": "queries/zorblax-v1.jsonl",
+  "modes": [
+    "browse"
+  ],
+  "started_at": "2026-05-24T11:59:18.685Z",
+  "finished_at": "2026-05-24T12:05:44.294Z",
+  "queries": [
+    {
+      "id": "qz-001",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "Who is the CEO of ZorblaxCorp and what's their cryptography background?",
+      "expected_doc": "zx-vision",
+      "expected_keywords": [
+        "Talia Renford",
+        "CipherSafe",
+        "NIST PQC"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-002",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the latency budget commitment CipherPlate makes for a single signature operation on Tier-3 hardware?",
+      "expected_doc": "zx-vision",
+      "expected_keywords": [
+        "14 ms",
+        "p99",
+        "Tier-3"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-003",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What is the monthly USD price for the CipherPlate Team tier and how many operations does it include?",
+      "expected_doc": "zx-pricing",
+      "expected_keywords": [
+        "$499",
+        "50,000,000",
+        "Team"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-004",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the per-operation overage rate for Builder and Team tier customers?",
+      "expected_doc": "zx-pricing",
+      "expected_keywords": [
+        "$0.000028",
+        "per operation",
+        "overage"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-005",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What is ZorblaxCorp's largest single contract value in annual recurring revenue, and what kind of customer is it?",
+      "expected_doc": "zx-pricing",
+      "expected_keywords": [
+        "$267,000",
+        "defense",
+        "Tier-1"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-006",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What programming language is the CipherPlate sidecar implemented in, and what's the test coverage?",
+      "expected_doc": "zx-architecture",
+      "expected_keywords": [
+        "Rust",
+        "94.3",
+        "coverage"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-007",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What date is the planned Series A close target and what's the dollar range?",
+      "expected_doc": "zx-roadmap",
+      "expected_keywords": [
+        "2027-12-15",
+        "$14M",
+        "$18M"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-008",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "Who are the three members of ZorblaxCorp's external Cryptography Review Board?",
+      "expected_doc": "zx-team",
+      "expected_keywords": [
+        "Petra Wismer",
+        "Reginald Apothio",
+        "Saskia Yelchin"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-009",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the total monthly operation volume across all current paying customers?",
+      "expected_doc": "zx-customers",
+      "expected_keywords": [
+        "4.1 billion",
+        "operations"
+      ],
+      "category": "hub"
+    },
+    {
+      "id": "qz-010",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "q": "What's the median signature latency for SPHINCS+ on Tier-3 hardware, and what tradeoff justifies it?",
+      "expected_doc": "zx-product",
+      "expected_keywords": [
+        "192 ms",
+        "archival",
+        "tradeoff"
+      ],
+      "category": "hub"
+    }
+  ],
+  "runs": [
+    {
+      "runner": "claude",
+      "query_id": "qz-001",
+      "answer": "**ZorblaxCorp's CEO is Talia Renford**, co-founder with a strong cryptography background:\n\n- **Education:** MSc in Cryptography, University of Bristol (2015)\n- **Industry experience:** Previously served as **cryptography lead at CipherSafe**, a company later acquired by Salesforce in 2024\n- **Standards involvement:** Served as a **NIST Post-Quantum Cryptography (PQC) working group observer** from 2022–2025, placing her at the center of the landmark standardization of quantum-resistant algorithms like FALCON, SPHINCS+, and ML-KEM\n\nHer background is squarely in applied and post-quantum cryptography, which directly informs ZorblaxCorp's product focus on making PQC adoption easier for engineering teams.",
+      "tokens_in": 7193,
+      "tokens_out": 346,
+      "latency_ms": 11451,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-001",
+      "answer": "The CEO of ZorblaxCorp is **Talia Renford**, who is also a co-founder.\n\nHer cryptography background includes:\n- Former **cryptography lead at CipherSafe**, which was acquired by Salesforce in 2024\n- **NIST PQC working group observer** from 2022–2025\n- **MSc in cryptography** from the University of Bristol, 2015\n\nSo she has both industry cryptography leadership experience and direct exposure to post-quantum cryptography standards work.",
+      "tokens_in": 13667,
+      "tokens_out": 204,
+      "latency_ms": 8450,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-001",
+      "answer": "The CEO of ZorblaxCorp is **Talia Renford**. \n\nHer cryptography background includes:\n* **Academic Credentials:** She holds an MSc in cryptography from the University of Bristol (2015).\n* **Industry Experience:** She previously served as the cryptography lead at CipherSafe, which was acquired by Salesforce in 2024.\n* **Standardization Involvement:** She served as an observer for the NIST Post-Quantum Cryptography (PQC) working group from 2022 to 2025.",
+      "tokens_in": 14918,
+      "tokens_out": 171,
+      "latency_ms": 5474,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-002",
+      "answer": "Here's the answer based on the CipherPlate product documentation:\n\nCipherPlate's **performance envelope**, measured on **Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64)**, commits to the following latency budgets for a single signature operation:\n\n- **FALCON-1024 signature:** **8.3 ms median / 13.7 ms p99**\n- **SPHINCS+ signature:** **192 ms median / 311 ms p99** *(acknowledged tradeoff; reserved for archival use)*\n\nSo the specific latency commitment depends on the algorithm. For the primary post-quantum signature algorithm (FALCON-1024), the commitment is **8.3 ms at median and 13.7 ms at p99** on Tier-3 hardware. SPHINCS+ is significantly slower but intentionally scoped to long-term archival scenarios only.",
+      "tokens_in": 17738,
+      "tokens_out": 383,
+      "latency_ms": 12638,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-002",
+      "answer": "CipherPlate’s Tier-3 hardware latency commitment for a single signature operation depends on the signature algorithm:\n\n- **FALCON-1024 signature:** **8.3 ms median**, **13.7 ms p99**\n- **SPHINCS+ signature:** **192 ms median**, **311 ms p99** — noted as a tradeoff and reserved for archival use.\n\nThese figures are measured on Tier-3 reference hardware: **8 vCPU, 16 GiB RAM, Linux 6.10, x86_64**.",
+      "tokens_in": 13966,
+      "tokens_out": 214,
+      "latency_ms": 4922,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-002",
+      "answer": "For a single signature operation on Tier-3 reference hardware (8 vCPU, 16 GiB), CipherPlate commits to a latency budget of **≤ 14 ms p99 added latency**.",
+      "tokens_in": 37473,
+      "tokens_out": 143,
+      "latency_ms": 13422,
+      "tool_calls": 4,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-003",
+      "answer": "The answer is available directly from the hub digest. Based on the **Team tier** concept entry:\n\n> **Team tier**: Enterprise tier at **$499/month** with **50 million operations** included, comprehensive threat coverage, and a 12-hour SLA.\n\nThis is also corroborated by the Pricing document snippet, which confirms per-operation overage billing applies beyond the included quota. No additional fetch is needed.",
+      "tokens_in": 8177,
+      "tokens_out": 172,
+      "latency_ms": 5915,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-003",
+      "answer": "The CipherPlate **Team** tier costs **$499/month** and includes **50,000,000 operations per month**.",
+      "tokens_in": 13636,
+      "tokens_out": 168,
+      "latency_ms": 7420,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-003",
+      "answer": "Based on the ZorblaxCorp pricing documentation, the **Team tier** for CipherPlate has the following details:\n\n* **Monthly Price:** $499 USD per month (with an 18% discount available for annual prepayment).\n* **Included Operations:** 50,000,000 (50 million) cryptographic operations per month. \n\nAny operations exceeding this included quota are billed at an overage rate of $0.000028 per operation.",
+      "tokens_in": 14844,
+      "tokens_out": 157,
+      "latency_ms": 4485,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-004",
+      "answer": "The answer is right there in the hub digest, in the **Overage** section of the Pricing document summary:\n\n> *\"Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.\"*\n\nBoth **Builder tier** ($79/month, 5M ops included) and **Team tier** ($499/month, 50M ops included) share the same per-operation overage rate of **$0.000028** (2.8 ten-thousandths of a cent) for any operations exceeding their monthly quota. The Sovereign tier has no listed per-operation overage rate, as it offers unlimited operations.",
+      "tokens_in": 8165,
+      "tokens_out": 227,
+      "latency_ms": 6089,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-004",
+      "answer": "Builder and Team tier customers are billed **$0.000028 per operation** for operations over their included monthly quota.",
+      "tokens_in": 6223,
+      "tokens_out": 67,
+      "latency_ms": 3255,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-004",
+      "answer": "For Builder and Team tier customers, operations that exceed the included monthly quota are billed at an overage rate of **$0.000028 per operation**.",
+      "tokens_in": 14879,
+      "tokens_out": 88,
+      "latency_ms": 4244,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-005",
+      "answer": "ZorblaxCorp's largest single contract is **Customer A**, a **US defense subcontractor**, with an annual contract value of **$267,000 ARR**. This customer is on the Sovereign tier and uses CipherPlate for **code signing of satellite firmware images**, processing 312 million cryptographic operations per month from a single private-cloud region. It is the largest of the three Sovereign-tier customers, ahead of Customer B (EU central bank at $194,000) and Customer C (NIH-funded healthcare consortium at $89,500).",
+      "tokens_in": 17383,
+      "tokens_out": 265,
+      "latency_ms": 12124,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-005",
+      "answer": "ZorblaxCorp’s largest single contract is **$267,000 in annual recurring revenue**.\n\nIt is **Customer A**, a **Sovereign-tier US defense subcontractor**, using CipherPlate for **code signing satellite firmware images**.",
+      "tokens_in": 13709,
+      "tokens_out": 141,
+      "latency_ms": 6542,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-005",
+      "answer": "ZorblaxCorp’s largest single contract value in annual recurring revenue (ARR) is **$267,000**. \n\nThis customer is a **Sovereign-tier US defense subcontractor** (referred to as Customer A), who uses the platform for code signing of satellite firmware images.",
+      "tokens_in": 14908,
+      "tokens_out": 117,
+      "latency_ms": 4782,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-006",
+      "answer": "Here's the answer based on the architecture document:\n\n**The CipherPlate sidecar is implemented in Rust 1.78**, locked in CI to enforce that version consistently. The gRPC layer uses the `tonic 0.12.x` crate, and post-quantum algorithms (FALCON, SPHINCS+, ML-KEM) are dispatched via C FFI bindings to the Open Quantum Safe `liboqs 0.11.0` library.\n\n**Test coverage stands at 94.3% line coverage**, measured across **1,847 tests** as of the v3.4.1 release. The project also enforces `clippy` at the `warn(clippy::pedantic)` level, with CI failing on any warning, ensuring strict code quality alongside the test suite.",
+      "tokens_in": 42644,
+      "tokens_out": 431,
+      "latency_ms": 15423,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-006",
+      "answer": "CipherPlate’s sidecar is implemented in **Rust 1.78** (locked in CI). Its test suite has **1,847 tests** with **94.3% line coverage** as of the 3.4.1 release.",
+      "tokens_in": 13849,
+      "tokens_out": 152,
+      "latency_ms": 5272,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-006",
+      "answer": "The CipherPlate sidecar is implemented in **Rust** (specifically Rust 1.78, locked in CI). \n\nAs of the v3.4.1 release, its test suite contains 1,847 tests and achieves **94.3% line coverage**.",
+      "tokens_in": 37208,
+      "tokens_out": 142,
+      "latency_ms": 12192,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-007",
+      "answer": "Based on the fetched content, the answer is clear from the **Series A funding** concept entry:\n\n- **Target close date:** **December 15, 2027** (2027-12-15)\n- **Dollar range:** **$14M–$18M**\n\nThis is described as a key business milestone in ZorblaxCorp's Q4 2027 roadmap, with the funding intended to gate downstream hiring and expansion plans.",
+      "tokens_in": 8165,
+      "tokens_out": 178,
+      "latency_ms": 6556,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-007",
+      "answer": "The planned Series A close target is **December 15, 2027**, with a target raise of **$14M–$18M**.",
+      "tokens_in": 6225,
+      "tokens_out": 74,
+      "latency_ms": 2986,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-007",
+      "answer": "Based on the ZorblaxCorp roadmap, the details for the planned Series A funding are:\n\n* **Planned Close Target Date:** December 15, 2027 (Q4 2027)\n* **Dollar Range:** $14 million to $18 million ($14M–$18M)",
+      "tokens_in": 15091,
+      "tokens_out": 124,
+      "latency_ms": 6479,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-008",
+      "answer": "The three members of ZorblaxCorp's external **Cryptography Review Board** are:\n\n1. **Petra Wismer** (Chair) — Princeton University, specializing in post-quantum signature schemes.\n2. **Reginald Apothio** — Tsinghua University, specializing in lattice-based KEM analysis.\n3. **Saskia Yelchin** — Independent consultant, formerly of NSA/CSS (retired 2023).",
+      "tokens_in": 17433,
+      "tokens_out": 276,
+      "latency_ms": 7457,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-008",
+      "answer": "The three members of ZorblaxCorp’s external Cryptography Review Board are:\n\n- **Petra Wismer** — Chair, Princeton\n- **Reginald Apothio** — Tsinghua University\n- **Saskia Yelchin** — independent, formerly NSA/CSS (retired 2023)",
+      "tokens_in": 13670,
+      "tokens_out": 166,
+      "latency_ms": 5001,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-008",
+      "answer": "The three members of ZorblaxCorp's external Cryptography Review Board are:\n\n1. **Petra Wismer (Chair)** — Affiliated with Princeton, specializing in post-quantum signature schemes.\n2. **Reginald Apothio** — Affiliated with Tsinghua University, specializing in lattice-based KEM (Key Encapsulation Mechanism) analysis.\n3. **Saskia Yelchin** — An independent expert who formerly worked at the NSA/CSS (retired in 2023).",
+      "tokens_in": 14789,
+      "tokens_out": 159,
+      "latency_ms": 4500,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-009",
+      "answer": "The hub digest already contains the key figure. According to the **\"Cryptographic operations\"** concept entry in ZorblaxCorp's Customer notes:\n\n> *\"Central workload metric across all customer tiers; primary unit of service consumption at **4.1 billion monthly operations**.\"*\n\n**The total monthly operation volume across all current paying customers is 4.1 billion operations.**\n\nThis spans all 137 paying customers (96 Builder, 38 Team, and 3 Sovereign tier accounts) as of March 15, 2027.",
+      "tokens_in": 8159,
+      "tokens_out": 203,
+      "latency_ms": 7208,
+      "tool_calls": 1,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-009",
+      "answer": "The total monthly operation volume across all current paying customers is **approximately 4.1 billion operations per month**.",
+      "tokens_in": 13670,
+      "tokens_out": 202,
+      "latency_ms": 5400,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-009",
+      "answer": "Based on ZorblaxCorp's internal customer notes, the total monthly operation volume across all current paying customers is approximately **4.1 billion** cryptographic operations. \n\nThis volume is distributed across the customer tiers as follows:\n* **Sovereign Tier (3 customers):** 447 million operations/month in total (Customer A: 312M, Customer B: 88M, Customer C: 47M).\n* **Team Tier (38 customers):** A median of 19 million operations/month per customer.\n* **Builder Tier (96 customers):** A median of 1.4 million operations/month per customer.",
+      "tokens_in": 24625,
+      "tokens_out": 220,
+      "latency_ms": 7343,
+      "tool_calls": 3,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "claude",
+      "query_id": "qz-010",
+      "answer": "Here's your answer:\n\n**SPHINCS+ median signature latency on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64) is 192 ms** (p99: 311 ms).\n\n**The justifying tradeoff:** SPHINCS+ is explicitly reserved for **long-term archival signatures** — use cases where signature validity must survive decades of cryptanalytic advances. Its security relies on conservative hash-based constructions rather than lattice assumptions, making it highly resilient over time. The ~23× latency penalty versus FALCON-1024 (8.3 ms median) is considered acceptable because archival signing is inherently low-frequency, so throughput is not a concern. CipherPlate's own docs describe this as an \"acknowledged tradeoff; reserved for archival.\"",
+      "tokens_in": 17746,
+      "tokens_out": 357,
+      "latency_ms": 10808,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "openai",
+      "query_id": "qz-010",
+      "answer": "SPHINCS+ signature latency on Tier-3 reference hardware is **192 ms median** (311 ms p99).\n\nThe tradeoff is performance for assurance: SPHINCS+ is kept for **long-term archival signatures**, where durability/security over long horizons justifies the higher latency.",
+      "tokens_in": 13984,
+      "tokens_out": 167,
+      "latency_ms": 4809,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    },
+    {
+      "runner": "gemini",
+      "query_id": "qz-010",
+      "answer": "On Tier-3 reference hardware, the median signature latency for SPHINCS+ (specifically SPHINCS+ SHAKE-256) is **192 ms** (with a p99 latency of 311 ms). \n\nThis high latency is justified by reserving the algorithm specifically for **long-term archival signatures**, where immediate performance is less critical than the robust, long-term security properties required for archival use.",
+      "tokens_in": 15244,
+      "tokens_out": 145,
+      "latency_ms": 4851,
+      "tool_calls": 2,
+      "error": null,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "url": "https://memory.wiki/hub/mwbench-zorblax"
+    }
+  ],
+  "judgments": [
+    {
+      "query_id": "qz-001",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.71,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Most claims about Talia Renford are supported, but the MSc degree and the specific dates of NIST involvement (2022-2025) are fabricated and not found in the corpus.",
+      "claims": [
+        {
+          "text": "ZorblaxCorp's CEO is Talia Renford",
+          "quote": "CEO: Talia Renford",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford is a co-founder",
+          "quote": "Talia Renford — CEO & co-founder",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford has an MSc in Cryptography from the University of Bristol (2015)",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Talia Renford previously served as cryptography lead at CipherSafe",
+          "quote": "Previously cryptography lead at CipherSafe",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired by Salesforce in 2024",
+          "quote": "CipherSafe (acquired by Salesforce",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Talia Renford served as a NIST PQC working group observer from 2022–2025",
+          "quote": "ex-NIST PQC working group observer",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Her standards involvement was from 2022–2025",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-001",
+      "runner": "openai",
+      "accurate": true,
+      "score": 0.71,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Most core claims about Talia Renford are supported, but two specific details (acquisition year 2024 and MSc from University of Bristol 2015) have no corpus support, and the date range 2022–2025 for NIST observer role is not found in the corpus.",
+      "claims": [
+        {
+          "text": "The CEO of ZorblaxCorp is Talia Renford",
+          "quote": "CEO: Talia Renford",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford is also a co-founder",
+          "quote": "Talia Renford — CEO & co-founder.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Talia Renford was former cryptography lead at CipherSafe",
+          "quote": "Previously cryptography lead at CipherSafe",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired by Salesforce",
+          "quote": "CipherSafe (acquired by Salesforce",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired in 2024",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Talia Renford was NIST PQC working group observer from 2022–2025",
+          "quote": "ex-NIST PQC working group observer",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Talia Renford has an MSc in cryptography from the University of Bristol, 2015",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-001",
+      "runner": "gemini",
+      "accurate": false,
+      "score": 0.5,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "While the CEO identity and two background facts (CipherSafe role, NIST observer) are supported, the answer fabricates specific details including an MSc from University of Bristol, the Salesforce acquisition year (2024), and the specific dates of NIST involvement (2022-2025) that are not found in the corpus.",
+      "claims": [
+        {
+          "text": "The CEO of ZorblaxCorp is Talia Renford",
+          "quote": "CEO: Talia Renford (ex-CipherSafe, ex-NIST PQC working group observer)",
+          "verdict": "supported"
+        },
+        {
+          "text": "She holds an MSc in cryptography from the University of Bristol (2015)",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "She previously served as the cryptography lead at CipherSafe",
+          "quote": "Talia Renford — CEO & co-founder. Previously cryptography lead at CipherSafe (acquired by Salesforce",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherSafe was acquired by Salesforce in 2024",
+          "quote": "Previously cryptography lead at CipherSafe (acquired by Salesforce",
+          "verdict": "not_found"
+        },
+        {
+          "text": "She served as an observer for the NIST Post-Quantum Cryptography (PQC) working group",
+          "quote": "ex-NIST PQC working group observer",
+          "verdict": "supported"
+        },
+        {
+          "text": "She served as a NIST PQC working group observer from 2022 to 2025",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-002",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.14,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Only the hardware specification claim is supported by the corpus; all specific latency numbers and algorithm characterizations are not found in the provided corpus text.",
+      "claims": [
+        {
+          "text": "Performance is measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64)",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664):",
+          "verdict": "supported"
+        },
+        {
+          "text": "FALCON-1024 signature has 8.3 ms median latency",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "FALCON-1024 signature has 13.7 ms p99 latency",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "SPHINCS+ signature has 192 ms median latency",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "SPHINCS+ signature has 311 ms p99 latency",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "SPHINCS+ is reserved for archival use",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "FALCON-1024 is the primary post-quantum signature algorithm",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-002",
+      "runner": "openai",
+      "accurate": false,
+      "score": 0.17,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "The answer provides specific per-algorithm latency figures (FALCON-1024 at 8.3ms/13.7ms p99, SPHINCS+ at 192ms/311ms p99) that do not appear anywhere in the corpus; only the hardware spec is supported, while the corpus only states the overall ≤14ms p99 commitment.",
+      "claims": [
+        {
+          "text": "FALCON-1024 signature median latency is 8.3 ms on Tier-3 hardware",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "FALCON-1024 signature p99 latency is 13.7 ms on Tier-3 hardware",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "SPHINCS+ signature median latency is 192 ms on Tier-3 hardware",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "SPHINCS+ signature p99 latency is 311 ms on Tier-3 hardware",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "SPHINCS+ is noted as a tradeoff and reserved for archival use",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Tier-3 reference hardware is 8 vCPU, 16 GiB RAM, Linux 6.10, x86_64",
+          "quote": "Performance envelope: Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x8664)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-002",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All three atomic claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "CipherPlate commits to a latency budget of ≤ 14 ms p99 added latency",
+          "quote": "≤ 14 ms p99 added latency on a single signature operation on Tier-3 hardware",
+          "verdict": "supported"
+        },
+        {
+          "text": "This is for a single signature operation",
+          "quote": "≤ 14 ms p99 added latency on a single signature operation on Tier-3 hardware",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier-3 reference hardware is 8 vCPU, 16 GiB",
+          "quote": "Tier-3 hardware (8 vCPU, 16 GiB)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 4
+    },
+    {
+      "query_id": "qz-003",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly and verbatim supported by the corpus.",
+      "claims": [
+        {
+          "text": "The CipherPlate Team tier costs $499/month",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "supported"
+        },
+        {
+          "text": "The CipherPlate Team tier includes 50 million operations per month",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Team tier has comprehensive threat coverage",
+          "quote": "all three",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Team tier has a 12-hour SLA",
+          "quote": "12h SLA",
+          "verdict": "supported"
+        },
+        {
+          "text": "Per-operation overage billing applies beyond the included quota for the Team tier",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qz-003",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Both claims are directly supported by the pricing table in the corpus.",
+      "claims": [
+        {
+          "text": "The CipherPlate Team tier costs $499/month",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "supported"
+        },
+        {
+          "text": "The CipherPlate Team tier includes 50,000,000 operations per month",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-003",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All four substantive claims in the answer are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The Team tier monthly price is $499 USD per month",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Team tier includes 50,000,000 (50 million) cryptographic operations per month",
+          "quote": "**Team** | $499/month | 50,000,000 | all three | Email, 12h SLA, quarterly review",
+          "verdict": "supported"
+        },
+        {
+          "text": "An 18% discount is available for annual prepayment",
+          "quote": "18% off annual prepayment",
+          "verdict": "supported"
+        },
+        {
+          "text": "Operations exceeding the included quota are billed at $0.000028 per operation",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-004",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported or semantically equivalent to passages in the corpus.",
+      "claims": [
+        {
+          "text": "Operations over the included quota are billed at $0.000028 per operation for Builder and Team",
+          "quote": "Operations over the included quota are billed at $0.000028 per operation for Builder and Team.",
+          "verdict": "supported"
+        },
+        {
+          "text": "Builder tier costs $79/month",
+          "quote": "$79/month",
+          "verdict": "supported"
+        },
+        {
+          "text": "Builder tier includes 5M operations per month",
+          "quote": "5M operations",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Team tier costs $499/month",
+          "quote": "$499/month",
+          "verdict": "supported"
+        },
+        {
+          "text": "Team tier includes 50M operations per month",
+          "quote": "50M operations",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Sovereign tier has unlimited operations and no listed per-operation overage rate",
+          "quote": "Sovereign customers contractually negotiate overage",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qz-004",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Both claims in the answer are directly supported by verbatim text in the corpus.",
+      "claims": [
+        {
+          "text": "Builder and Team tier customers are billed $0.000028 per operation",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The rate applies to operations over their included monthly quota",
+          "quote": "Operations over the included quota are billed at **$0.000028 per operation** for Builder and Team.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qz-004",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim text in the corpus.",
+      "claims": [
+        {
+          "text": "Builder and Team tier customers have an overage rate for operations exceeding the included monthly quota",
+          "quote": "Operations over the included quota are billed at $0.000028 per operation for Builder and Team.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The overage rate is $0.000028 per operation",
+          "quote": "Operations over the included quota are billed at $0.000028 per operation for Builder and Team.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The overage rate applies to operations that exceed the included monthly quota",
+          "quote": "Operations over the included quota are billed at $0.000028 per operation for Builder and Team.",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-005",
+      "runner": "claude",
+      "accurate": false,
+      "score": 0.625,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Core claims about the largest contract value and customer type are supported, but specific ARR figures for Customer B and C and the 312M operations figure are not found in the corpus.",
+      "claims": [
+        {
+          "text": "ZorblaxCorp's largest single contract is Customer A, a US defense subcontractor",
+          "quote": "Largest single contract: $267,000 ARR (a Tier-1 US defense subcontractor whose name is under NDA)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The largest single contract value is $267,000 ARR",
+          "quote": "Largest single contract: $267,000 ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer A is on the Sovereign tier",
+          "quote": "Customer A (Sovereign tier, US defense subcontractor)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer A uses CipherPlate for code signing of satellite firmware images",
+          "quote": "Code signing: Specific Sovereign-tier workload for US defense contractor securing satellite firmware integrity.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "Customer A processes 312 million cryptographic operations per month",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Customer A operates from a single private-cloud region",
+          "quote": "Deployed 2027-02-04, single region (us-east-1 equivalent on private cloud)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer B is an EU central bank at $194,000 ARR",
+          "quote": "",
+          "verdict": "not_found"
+        },
+        {
+          "text": "Customer C is an NIH-funded healthcare consortium at $89,500 ARR",
+          "quote": "Customer C (Sovereign tier, NIH-funded healthcare consortium)",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-005",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All five claims are directly supported or paraphrase-supported by the corpus, including the contract value, customer type, tier, identity, and use case.",
+      "claims": [
+        {
+          "text": "ZorblaxCorp's largest single contract is $267,000 in annual recurring revenue",
+          "quote": "Largest single contract: $267,000 ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The customer is a Sovereign-tier customer",
+          "quote": "a Tier-1 US defense subcontractor whose name is under NDA",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The customer is a US defense subcontractor",
+          "quote": "a Tier-1 US defense subcontractor whose name is under NDA",
+          "verdict": "supported"
+        },
+        {
+          "text": "The customer is identified as Customer A",
+          "quote": "Customer A (Sovereign tier, US defense subcontractor)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The customer uses CipherPlate for code signing satellite firmware images",
+          "quote": "Code signing: Specific Sovereign-tier workload for US defense contractor securing satellite firmware integrity",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-005",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All five claims are directly supported or paraphrase-supported by the corpus, including the $267,000 ARR figure, the US defense subcontractor identity, the Customer A label, and the satellite firmware code-signing use case.",
+      "claims": [
+        {
+          "text": "ZorblaxCorp's largest single contract value in ARR is $267,000",
+          "quote": "Largest single contract: $267,000 ARR",
+          "verdict": "supported"
+        },
+        {
+          "text": "The customer is a Sovereign-tier customer",
+          "quote": "a Tier-1 US defense subcontractor whose name is under NDA",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The customer is a US defense subcontractor",
+          "quote": "a Tier-1 US defense subcontractor whose name is under NDA",
+          "verdict": "supported"
+        },
+        {
+          "text": "The customer is referred to as Customer A",
+          "quote": "Customer A (Sovereign tier, US defense subcontractor)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The customer uses the platform for code signing of satellite firmware images",
+          "quote": "Code signing: Specific Sovereign-tier workload for US defense contractor securing satellite firmware integrity",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-006",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The CipherPlate sidecar is implemented in Rust 1.78",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Rust 1.78 is locked in CI",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The gRPC layer uses the tonic 0.12.x crate",
+          "quote": "gRPC stack: tonic 0.12.x",
+          "verdict": "supported"
+        },
+        {
+          "text": "Post-quantum algorithms are dispatched via C FFI bindings to the Open Quantum Safe liboqs 0.11.0 library",
+          "quote": "C FFI dependency: liboqs 0.11.0",
+          "verdict": "supported"
+        },
+        {
+          "text": "Test coverage stands at 94.3% line coverage",
+          "quote": "Test suite: 1,847 tests, 94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "Coverage measured across 1,847 tests",
+          "quote": "Test suite: 1,847 tests, 94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "Coverage measured as of the v3.4.1 release",
+          "quote": "94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "The project enforces clippy at the warn(clippy::pedantic) level with CI failing on any warning",
+          "quote": "Linter: clippy at `warn(clippy::pedantic)`; CI fails on warning",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "qz-006",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "CipherPlate's sidecar is implemented in Rust 1.78",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Rust 1.78 is locked in CI",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The test suite has 1,847 tests",
+          "quote": "Test suite: 1,847 tests, 94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "Test coverage is 94.3% line coverage",
+          "quote": "94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "The coverage figure is as of the 3.4.1 release",
+          "quote": "94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-006",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The CipherPlate sidecar is implemented in Rust",
+          "quote": "Implementation language: Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Specifically Rust version 1.78",
+          "quote": "Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Rust is locked in CI",
+          "quote": "Rust 1.78 (locked in CI)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The test suite contains 1,847 tests",
+          "quote": "Test suite: 1,847 tests, 94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "The test coverage is 94.3% line coverage",
+          "quote": "94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        },
+        {
+          "text": "The coverage figure is as of the v3.4.1 release",
+          "quote": "94.3% line coverage as of 3.4.1 release",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "qz-007",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The Series A target close date is December 15, 2027 (2027-12-15)",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Series A dollar range is $14M–$18M",
+          "quote": "Series A target range: $14M-$18M",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Series A is described as a key business milestone",
+          "quote": "Key business milestone targeting $14M-$18M close in Q4 2027 that gates downstream hiring and expansion plans.",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Series A is in ZorblaxCorp's Q4 2027 roadmap",
+          "quote": "2027 Q4 (Oct-Dec)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The funding is intended to gate downstream hiring and expansion plans",
+          "quote": "gates downstream hiring and expansion plans",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qz-007",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "Both claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The planned Series A close target date is December 15, 2027",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Series A target raise range is $14M–$18M",
+          "quote": "Series A target range: $14M-$18M",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qz-007",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All three claims are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The planned Series A close target date is December 15, 2027",
+          "quote": "Series A target close date: 2027-12-15",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Series A close is in Q4 2027",
+          "quote": "Series A target close** — $14M-$18M target range, lead unannounced. Bridge from Quantilever Capital pre-negotiated.",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The dollar range for the Series A is $14 million to $18 million",
+          "quote": "Series A target range: $14M-$18M",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-008",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All seven atomic claims are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Petra Wismer is a member and Chair of the Cryptography Review Board",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is affiliated with Princeton University",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer specializes in post-quantum signature schemes",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Reginald Apothio is a member of the Cryptography Review Board affiliated with Tsinghua University",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "supported"
+        },
+        {
+          "text": "Reginald Apothio specializes in lattice-based KEM analysis",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "supported"
+        },
+        {
+          "text": "Saskia Yelchin is a member of the Cryptography Review Board and is an independent consultant",
+          "quote": "Saskia Yelchin — independent, formerly NSA/CSS (retired 2023)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Saskia Yelchin formerly worked at NSA/CSS and retired in 2023",
+          "quote": "Saskia Yelchin — independent, formerly NSA/CSS (retired 2023)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-008",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All seven atomic claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "Petra Wismer is a member of the Cryptography Review Board",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is the Chair of the Cryptography Review Board",
+          "quote": "Petra Wismer (Chair)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is affiliated with Princeton",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Reginald Apothio is a member of the Cryptography Review Board",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "supported"
+        },
+        {
+          "text": "Reginald Apothio is affiliated with Tsinghua University",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "supported"
+        },
+        {
+          "text": "Saskia Yelchin is a member of the Cryptography Review Board",
+          "quote": "Saskia Yelchin — independent, formerly NSA/CSS (retired 2023)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Saskia Yelchin is independent and formerly NSA/CSS (retired 2023)",
+          "quote": "Saskia Yelchin — independent, formerly NSA/CSS (retired 2023)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-008",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All seven atomic claims in the candidate answer are directly supported by verbatim text in the corpus.",
+      "claims": [
+        {
+          "text": "Petra Wismer is the Chair of the Cryptography Review Board",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer is affiliated with Princeton",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Petra Wismer specializes in post-quantum signature schemes",
+          "quote": "Petra Wismer (Chair) — Princeton, post-quantum signature schemes",
+          "verdict": "supported"
+        },
+        {
+          "text": "Reginald Apothio is affiliated with Tsinghua University",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "supported"
+        },
+        {
+          "text": "Reginald Apothio specializes in lattice-based KEM analysis",
+          "quote": "Reginald Apothio — Tsinghua University, lattice-based KEM analysis",
+          "verdict": "supported"
+        },
+        {
+          "text": "Saskia Yelchin is an independent expert",
+          "quote": "Saskia Yelchin — independent, formerly NSA/CSS (retired 2023)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Saskia Yelchin formerly worked at NSA/CSS and retired in 2023",
+          "quote": "Saskia Yelchin — independent, formerly NSA/CSS (retired 2023)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-009",
+      "runner": "claude",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The total monthly operation volume across all current paying customers is 4.1 billion operations",
+          "quote": "Total monthly operations across all customers: ~4.1 billion",
+          "verdict": "supported"
+        },
+        {
+          "text": "This figure spans all 137 paying customers",
+          "quote": "Current paying customers as of 2027-03-15: 137 (96 Builder, 38 Team, 3 Sovereign)",
+          "verdict": "supported"
+        },
+        {
+          "text": "96 Builder tier accounts",
+          "quote": "96 Builder, 38 Team, 3 Sovereign",
+          "verdict": "supported"
+        },
+        {
+          "text": "38 Team tier accounts",
+          "quote": "96 Builder, 38 Team, 3 Sovereign",
+          "verdict": "supported"
+        },
+        {
+          "text": "3 Sovereign tier accounts",
+          "quote": "96 Builder, 38 Team, 3 Sovereign",
+          "verdict": "supported"
+        },
+        {
+          "text": "The data is as of March 15, 2027",
+          "quote": "Current paying customers as of 2027-03-15: 137 (96 Builder, 38 Team, 3 Sovereign)",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 1
+    },
+    {
+      "query_id": "qz-009",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "The single substantive claim is directly supported verbatim in the corpus.",
+      "claims": [
+        {
+          "text": "The total monthly operation volume across all current paying customers is approximately 4.1 billion operations per month.",
+          "quote": "Total monthly operations across all customers: ~4.1 billion",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-009",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 2,
+      "reason": "All claims in the candidate answer are directly supported by verbatim quotes from the corpus.",
+      "claims": [
+        {
+          "text": "The total monthly operation volume across all current paying customers is approximately 4.1 billion cryptographic operations.",
+          "quote": "Total monthly operations across all customers: ~4.1 billion",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer A has 312 million operations per month.",
+          "quote": "312 million operations / month",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer B has 88 million operations per month.",
+          "quote": "88 million operations / month",
+          "verdict": "supported"
+        },
+        {
+          "text": "Customer C has 47 million operations per month.",
+          "quote": "47 million operations / month",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Sovereign tier total is 447 million operations per month (312+88+47).",
+          "quote": "312 million operations / month",
+          "verdict": "paraphrase_supported"
+        },
+        {
+          "text": "The Team tier has a median of 19 million operations per month per customer.",
+          "quote": "Median operations: 19 million / month",
+          "verdict": "supported"
+        },
+        {
+          "text": "The Builder tier has a median of 1.4 million operations per month per customer.",
+          "quote": "Median operations: 1.4 million / month",
+          "verdict": "supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 3
+    },
+    {
+      "query_id": "qz-010",
+      "runner": "claude",
+      "accurate": true,
+      "score": 0.875,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "Almost all claims are directly supported by the corpus; only the claim about hash-based vs lattice constructions has no corpus support.",
+      "claims": [
+        {
+          "text": "SPHINCS+ median signature latency on Tier-3 reference hardware is 192 ms",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "supported"
+        },
+        {
+          "text": "p99 latency for SPHINCS+ is 311 ms",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Tier-3 reference hardware is 8 vCPU, 16 GiB, Linux 6.10, x86_64",
+          "quote": "Measured on Tier-3 reference hardware (8 vCPU, 16 GiB, Linux 6.10, x86_64)",
+          "verdict": "supported"
+        },
+        {
+          "text": "SPHINCS+ is reserved for long-term archival signatures",
+          "quote": "SPHINCS+ SHAKE-256 | Long-term archival signature | post-quantum signature | GA",
+          "verdict": "supported"
+        },
+        {
+          "text": "CipherPlate's docs describe the latency as an 'acknowledged tradeoff; reserved for archival'",
+          "quote": "acknowledged tradeoff; reserved for archival",
+          "verdict": "supported"
+        },
+        {
+          "text": "FALCON-1024 has a median latency of 8.3 ms",
+          "quote": "FALCON-1024 signature: 8.3 ms median, 13.7 ms p99",
+          "verdict": "supported"
+        },
+        {
+          "text": "SPHINCS+ incurs approximately a 23x latency penalty versus FALCON-1024",
+          "quote": "SPHINCS+ incurs a 23x latency penalty versus FALCON-1024 but is retained specifically for archival use",
+          "verdict": "supported"
+        },
+        {
+          "text": "SPHINCS+ security relies on hash-based constructions rather than lattice assumptions",
+          "quote": "",
+          "verdict": "not_found"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-010",
+      "runner": "openai",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 3,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim or semantically equivalent passages in the corpus.",
+      "claims": [
+        {
+          "text": "SPHINCS+ signature latency on Tier-3 reference hardware is 192 ms median",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99",
+          "verdict": "supported"
+        },
+        {
+          "text": "SPHINCS+ signature latency on Tier-3 reference hardware is 311 ms p99",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99",
+          "verdict": "supported"
+        },
+        {
+          "text": "The tradeoff is performance for assurance: SPHINCS+ is kept for long-term archival signatures",
+          "quote": "acknowledged tradeoff; reserved for archival",
+          "verdict": "supported"
+        },
+        {
+          "text": "The higher latency is justified by durability/security over long horizons",
+          "quote": "SPHINCS+ SHAKE-256 | Long-term archival signature | post-quantum signature | GA",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    },
+    {
+      "query_id": "qz-010",
+      "runner": "gemini",
+      "accurate": true,
+      "score": 1,
+      "keyword_hits": 2,
+      "keyword_total": 3,
+      "reason": "All claims in the candidate answer are directly supported by verbatim passages in the corpus.",
+      "claims": [
+        {
+          "text": "The median signature latency for SPHINCS+ on Tier-3 reference hardware is 192 ms",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The p99 latency for SPHINCS+ is 311 ms",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "supported"
+        },
+        {
+          "text": "The algorithm is specifically SPHINCS+ SHAKE-256",
+          "quote": "SPHINCS+ SHAKE-256 | Long-term archival signature | post-quantum signature | GA",
+          "verdict": "supported"
+        },
+        {
+          "text": "The high latency is justified by reserving the algorithm for long-term archival signatures",
+          "quote": "SPHINCS+ signature: 192 ms median, 311 ms p99 (acknowledged tradeoff; reserved for archival)",
+          "verdict": "supported"
+        },
+        {
+          "text": "Immediate performance is less critical than long-term security properties for archival use",
+          "quote": "reserved for archival",
+          "verdict": "paraphrase_supported"
+        }
+      ],
+      "used_retrieval": false,
+      "mode": "browse",
+      "scope": "hub",
+      "scope_id": "mwbench-zorblax",
+      "tool_calls": 2
+    }
+  ]
+}

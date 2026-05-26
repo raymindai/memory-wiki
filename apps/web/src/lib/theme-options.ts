@@ -5,6 +5,7 @@
 // duplicating the arrays.
 
 export type AccentColor =
+  | "lime"
   | "orange"
   | "blue"
   | "purple"
@@ -46,6 +47,9 @@ export interface ColorSchemeOption {
 }
 
 export const ACCENT_COLORS: AccentColorOption[] = [
+  // Lime first — new app default (replaces orange as the accent that
+  // drives editor links / blockquotes / task-list checks).
+  { name: "lime",   label: "Lime",   dark: "#B5FF1A", light: "#5BC700" },
   { name: "orange", label: "Orange", dark: "#fb923c", light: "#ea580c" },
   { name: "blue",   label: "Blue",   dark: "#60a5fa", light: "#2563eb" },
   { name: "purple", label: "Purple", dark: "#a78bfa", light: "#7c3aed" },

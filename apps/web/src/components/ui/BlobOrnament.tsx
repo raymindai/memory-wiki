@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
  * no JS runtime cost.
  *
  * Usage:
- *   <BlobOrnament v={3} size={240} color="var(--accent)" opacity={0.1} />
+ *   <BlobOrnament v={3} size={240} color="var(--text-primary)" opacity={0.1} />
  *   <BlobOrnament v="random" size={120} />  // seed-by-key for stability across renders
  */
 
@@ -47,7 +47,7 @@ export function BlobOrnament({
   v = 1,
   seed,
   size = 200,
-  color = "var(--accent)",
+  color = "var(--text-primary)",
   opacity = 0.12,
   rotate = 0,
   top, left, right, bottom,

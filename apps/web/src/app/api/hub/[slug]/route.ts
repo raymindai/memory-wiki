@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, hub_slug, hub_public, hub_description, plan")
+    .select("id, display_name, avatar_url, avatar_style, hub_slug, hub_public, hub_description, plan")
     .eq("hub_slug", slug)
     .single();
 
@@ -47,23 +47,33 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   }
 
   // Avatar resolution must match the editor sidebar's `resolveAvatar`:
-  // profile.avatar_url → OAuth user_metadata.avatar_url → dicebear
-  // identicon seeded by EMAIL (not slug). Without this fall-through
-  // the in-editor hub page showed a slug-seeded dicebear identicon
-  // while the sidebar showed the user's Google/GitHub OAuth photo —
-  // same person, two different faces.
-  let resolvedAvatar = profile.avatar_url || null;
+  //   1. avatar_style (when not "oauth") — user explicitly picked a
+  //      DiceBear style in Settings. Beats the OAuth photo so the
+  //      picker actually takes effect on the hub face too.
+  //   2. profile.avatar_url — uploaded / cached avatar.
+  //   3. OAuth metadata avatar.
+  //   4. DiceBear identicon seeded by email.
   let ownerEmail: string | null = null;
+  let oauthAvatar: string | null = null;
   try {
     const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
     ownerEmail = authUser?.user?.email || null;
-    if (!resolvedAvatar) {
-      const meta = (authUser?.user?.user_metadata as { avatar_url?: string } | undefined) || {};
-      if (meta.avatar_url) resolvedAvatar = meta.avatar_url;
-    }
+    const meta = (authUser?.user?.user_metadata as { avatar_url?: string } | undefined) || {};
+    if (meta.avatar_url) oauthAvatar = meta.avatar_url;
   } catch { /* admin lookup unavailable — fall through to dicebear */ }
-  if (!resolvedAvatar) {
-    const seed = encodeURIComponent(ownerEmail || profile.hub_slug || "user");
+  const seed = encodeURIComponent(ownerEmail || profile.hub_slug || "user");
+  let resolvedAvatar: string;
+  const style = (profile as { avatar_style?: string | null }).avatar_style;
+  if (style && style !== "oauth") {
+    // Match editor-helpers.dicebearStyleUrl shape so the hub face
+    // tracks Settings → Appearance → Avatar picks the moment the
+    // user updates them.
+    resolvedAvatar = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+  } else if (profile.avatar_url) {
+    resolvedAvatar = profile.avatar_url;
+  } else if (oauthAvatar) {
+    resolvedAvatar = oauthAvatar;
+  } else {
     resolvedAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${seed}`;
   }
 

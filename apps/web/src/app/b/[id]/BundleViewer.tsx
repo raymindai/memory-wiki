@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { File as FileIcon, Sparkles, BookOpen, Tag, Box, Hash, ArrowRight, ArrowLeftRight, AlertTriangle } from "lucide-react";
+import { File as FileIcon, Sparkles, BookOpen, Tag, Box, Hash, ArrowRight, ArrowLeftRight, AlertTriangle, Globe } from "lucide-react";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
@@ -428,11 +428,11 @@ export default function BundleViewer({
   // ─── Password screen ───
   if (isProtected && !unlocked) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--canvas)" }}>
         <div className="w-full max-w-sm mx-4">
           <div className="text-center mb-6">
             <MemoryWikiLogo />
-            <h1 className="text-lg font-semibold mt-4" style={{ color: "var(--text-primary)" }}>Protected Bundle</h1>
+            <h1 className="text-lg mt-4" style={{ color: "var(--text-primary)", fontWeight: 500 }}>Protected Bundle</h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>{documentCount} documents</p>
           </div>
           <div className="flex gap-2">
@@ -443,14 +443,14 @@ export default function BundleViewer({
               onKeyDown={e => e.key === "Enter" && handlePasswordSubmit()}
               placeholder="Enter password"
               className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
-              style={{ background: "var(--surface)", color: "var(--text-primary)", border: `1px solid ${passwordError ? "#ef4444" : "var(--border)"}` }}
+              style={{ background: "var(--surface)", color: "var(--text-primary)", border: `1px solid ${passwordError ? "var(--micro-red)" : "var(--border)"}` }}
               autoFocus
             />
-            <button onClick={handlePasswordSubmit} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--accent)", color: "#fff" }}>
+            <button onClick={handlePasswordSubmit} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--text-primary)", color: "var(--background)" }}>
               Unlock
             </button>
           </div>
-          {passwordError && <p className="text-xs mt-2 text-center" style={{ color: "#ef4444" }}>Wrong password</p>}
+          {passwordError && <p className="text-xs mt-2 text-center" style={{ color: "var(--micro-red)" }}>Wrong password</p>}
         </div>
       </div>
     );
@@ -459,7 +459,7 @@ export default function BundleViewer({
   // ─── Loading ───
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--background)" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--canvas)" }}>
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }} />
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>Loading bundle...</span>
@@ -480,12 +480,13 @@ export default function BundleViewer({
   const showSummaryBand = documents.length >= 2 && (summaryText || isAnalyzing);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
       <ViewerHeader
+        bordered
         title={
           editToken ? (
             <input
-              className="bg-transparent outline-none border-b border-transparent hover:border-[var(--border)] focus:border-[var(--accent)] transition-colors w-full text-body font-semibold"
+              className="bg-transparent outline-none border-b border-transparent hover:border-[var(--border)] focus:border-[var(--accent)] transition-colors w-full text-body font-medium"
               style={{ color: "var(--text-primary)" }}
               defaultValue={initialTitle || "Untitled Bundle"}
               onBlur={(e) => {
@@ -505,7 +506,12 @@ export default function BundleViewer({
           )
         }
         subtitle={description || undefined}
-        breadcrumb={<>memory.wiki/b/<span style={{ color: "var(--accent)" }}>{id}</span></>}
+        breadcrumb={
+          <span className="inline-flex items-center gap-1.5">
+            <Globe width={12} height={12} style={{ color: "#4ade80" }} aria-label="Public bundle" />
+            <span>memory.wiki/b/<span style={{ color: "var(--text-secondary)" }}>{id}</span></span>
+          </span>
+        }
         actions={
           <>
             <button onClick={toggleTheme} className={actionBtn} style={{ background: "var(--toggle-bg)", color: "var(--text-muted)" }} title="Toggle theme" aria-label="Toggle theme">
@@ -515,7 +521,7 @@ export default function BundleViewer({
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               )}
             </button>
-            <button onClick={copyLink} className={actionBtn} style={{ background: "var(--toggle-bg)", color: copied ? "#4ade80" : "var(--text-muted)" }} title="Copy link" aria-label="Copy link">
+            <button onClick={copyLink} className={actionBtn} style={{ background: copied ? "rgba(181,255,26,0.12)" : "var(--toggle-bg)", color: copied ? "var(--micro-lime)" : "var(--text-muted)" }} title="Copy link" aria-label="Copy link">
               {copied ? (
                 <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 8 7 11 12 5"/></svg>
               ) : (
@@ -527,46 +533,15 @@ export default function BundleViewer({
         }
       />
 
-      {/* Summary band — surfaces the bundle's executive summary (from
-          graph_data) under the header so visitors see the gist before
-          touching the canvas. Two-line clamp keeps the band a fixed
-          predictable height across bundles. */}
-      {showSummaryBand && (
-        <div
-          className="shrink-0 flex items-center px-6"
-          style={{
-            height: "4.5rem",
-            borderBottom: "1px solid var(--border-dim)",
-            background: "var(--surface)",
-          }}
-        >
-          {summaryText ? (
-            <p
-              className="text-sm leading-relaxed mx-auto w-full"
-              style={{
-                color: "var(--text-secondary)",
-                maxWidth: "72rem",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {summaryText}
-            </p>
-          ) : (
-            <p className="text-sm mx-auto w-full" style={{ color: "var(--text-faint)", maxWidth: "72rem" }}>
-              Analyzing this bundle…
-            </p>
-          )}
-        </div>
-      )}
+      {/* Summary band removed — the executive summary now lives inside
+          the bundle's Canvas tab (Summary panel), so surfacing it
+          again above the canvas was duplicate noise. */}
 
-      {/* Canvas + Document Reader split. The chrome (header + summary +
-          this split) is locked to one viewport so the canvas always
-          opens fully visible; scrolling the page reveals the promo
-          strip and shared footer underneath, matching the doc viewer. */}
-      <div className="flex shrink-0" style={{ height: showSummaryBand ? "calc(100vh - 53px - 4.5rem)" : "calc(100vh - 53px)" }}>
+      {/* Canvas + Document Reader split. Chrome (header + this split)
+          is locked to one viewport so the canvas always opens fully
+          visible; scrolling the page reveals the promo strip and
+          shared footer underneath, matching the doc viewer. */}
+      <div className="flex shrink-0" style={{ height: "calc(100vh - 53px)" }}>
         {/* Canvas */}
         <div className="relative" style={{ flex: 1, height: "100%", borderRight: selectedDocId ? "1px solid var(--border)" : "none" }}>
           {documents.length > 0 ? (
@@ -589,7 +564,7 @@ export default function BundleViewer({
 
           {/* Context copied toast */}
           {contextCopied && (
-            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-lg text-xs font-medium animate-in fade-in" style={{ background: "var(--accent)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-lg text-xs font-medium animate-in fade-in" style={{ background: "rgba(181,255,26,0.14)", color: "var(--micro-lime)", border: "1px solid rgba(181,255,26,0.32)", boxShadow: "0 4px 14px rgba(0,0,0,0.32)" }}>
               Copied all documents as AI context
             </div>
           )}
@@ -605,7 +580,7 @@ export default function BundleViewer({
                   {selectedDocId ? (
                     <>
                       <FileIcon width={13} height={13} className="shrink-0" style={{ color: "var(--accent)" }} aria-hidden />
-                      <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                      <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
                         {documents.find(d => d.id === selectedDocId)?.title || "Untitled"}
                       </span>
                       <button
@@ -629,7 +604,7 @@ export default function BundleViewer({
                           : Hash;
                         return <NodeIcon width={13} height={13} className="shrink-0" style={{ color }} aria-hidden />;
                       })()}
-                      <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                      <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
                         {selectedNodeInfo.label}
                       </span>
                       <span className="text-xs px-1.5 py-0.5 rounded shrink-0" style={{
@@ -715,7 +690,7 @@ export default function BundleViewer({
                                 style={{
                                   background: isActive ? "var(--accent-dim)" : "transparent",
                                   color: isActive ? "var(--accent)" : empty ? "var(--text-faint)" : "var(--text-secondary)",
-                                  fontWeight: isActive ? 600 : 500,
+                                  fontWeight: 500,
                                   opacity: empty ? 0.4 : 1,
                                   cursor: empty ? "default" : "pointer",
                                 }}
@@ -750,7 +725,7 @@ export default function BundleViewer({
                               <ol className="space-y-3">
                                 {selectedNodeInfo.keyTakeaways.map((t, i) => (
                                   <li key={i} className="flex gap-3">
-                                    <span className="font-mono tabular-nums shrink-0" style={{ color: "var(--accent)", fontSize: 13, fontWeight: 600, lineHeight: 1.5 }}>{String(i + 1).padStart(2, "0")}</span>
+                                    <span className="font-mono tabular-nums shrink-0" style={{ color: "var(--accent)", fontSize: 13, fontWeight: 500, lineHeight: 1.5 }}>{String(i + 1).padStart(2, "0")}</span>
                                     <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{t}</p>
                                   </li>
                                 ))}
@@ -777,7 +752,7 @@ export default function BundleViewer({
                               <ol className="space-y-4">
                                 {selectedNodeInfo.insights.map((ins, i) => (
                                   <li key={i} className="flex gap-3">
-                                    <span className="font-mono tabular-nums shrink-0" style={{ color: "var(--accent)", fontSize: 11, fontWeight: 700, marginTop: 4 }}>↳ {String(i + 1).padStart(2, "0")}</span>
+                                    <span className="font-mono tabular-nums shrink-0" style={{ color: "var(--accent)", fontSize: 11, fontWeight: 500, marginTop: 4 }}>↳ {String(i + 1).padStart(2, "0")}</span>
                                     <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{ins}</p>
                                   </li>
                                 ))}
@@ -807,7 +782,7 @@ export default function BundleViewer({
                                           className="w-full text-left text-sm flex items-baseline gap-3 py-1.5 px-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
                                           style={{ color: "var(--text-primary)" }}
                                         >
-                                          <span className="font-mono tabular-nums shrink-0" style={{ color: "var(--accent)", fontSize: 11, fontWeight: 600 }}>{String(i + 1).padStart(2, "0")}</span>
+                                          <span className="font-mono tabular-nums shrink-0" style={{ color: "var(--accent)", fontSize: 11, fontWeight: 500 }}>{String(i + 1).padStart(2, "0")}</span>
                                           <span className="truncate">{doc.title || "Untitled"}</span>
                                         </button>
                                       </li>
@@ -816,7 +791,7 @@ export default function BundleViewer({
                                 </ol>
                                 {selectedNodeInfo.readingOrderReason && (
                                   <p className="text-caption pt-3 leading-relaxed" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-dim)" }}>
-                                    <span className="font-mono uppercase mr-2" style={{ fontSize: 9, letterSpacing: 0.5, color: "var(--text-faint)" }}>Why</span>
+                                    <span className="font-mono mr-2" style={{ fontSize: 11, letterSpacing: "0.04em", color: "var(--text-faint)" }}>Why</span>
                                     {selectedNodeInfo.readingOrderReason}
                                   </p>
                                 )}
@@ -832,7 +807,7 @@ export default function BundleViewer({
                           <div className="space-y-5">
                             {selectedNodeInfo.connections && selectedNodeInfo.connections.length > 0 && (
                               <div>
-                                <h5 className="font-mono uppercase mb-2" style={{ fontSize: 9, letterSpacing: 0.5, color: "var(--text-faint)" }}>Connections</h5>
+                                <h5 className="font-mono mb-2" style={{ fontSize: 11, letterSpacing: "0.04em", color: "var(--text-faint)" }}>Connections</h5>
                                 <ul className="space-y-3">
                                   {selectedNodeInfo.connections.map((c, i) => {
                                     const d1 = documents.find(d => `doc:${d.id}` === c.doc1);
@@ -853,8 +828,8 @@ export default function BundleViewer({
                             )}
                             {selectedNodeInfo.gaps && selectedNodeInfo.gaps.length > 0 && (
                               <div className={selectedNodeInfo.connections?.length ? "pt-4" : ""} style={selectedNodeInfo.connections?.length ? { borderTop: "1px solid var(--border-dim)" } : {}}>
-                                <h5 className="font-mono uppercase mb-2 flex items-center gap-1.5" style={{ fontSize: 9, letterSpacing: 0.5, color: "#f87171" }}>
-                                  <AlertTriangle width={10} height={10} aria-hidden /> Gaps
+                                <h5 className="font-mono mb-2 flex items-center gap-1.5" style={{ fontSize: 11, letterSpacing: "0.04em", color: "#f87171" }}>
+                                  <AlertTriangle width={11} height={11} aria-hidden /> Gaps
                                 </h5>
                                 <ul className="space-y-2">
                                   {selectedNodeInfo.gaps.map((gap, i) => (
@@ -884,7 +859,7 @@ export default function BundleViewer({
 
                       {selectedNodeInfo.connectedDocs && selectedNodeInfo.connectedDocs.length > 0 && (
                         <div>
-                          <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-faint)" }}>Appears in {selectedNodeInfo.connectedDocs.length} document{selectedNodeInfo.connectedDocs.length > 1 ? "s" : ""}</h4>
+                          <h4 className="font-mono mb-2" style={{ fontSize: 11, letterSpacing: "0.04em", color: "var(--text-faint)" }}>Appears in {selectedNodeInfo.connectedDocs.length} document{selectedNodeInfo.connectedDocs.length > 1 ? "s" : ""}</h4>
                           <div className="space-y-1.5">
                             {selectedNodeInfo.connectedDocs.map((doc) => (
                               <button key={doc.id}
@@ -903,7 +878,7 @@ export default function BundleViewer({
 
                       {selectedNodeInfo.relationships && selectedNodeInfo.relationships.length > 0 && (
                         <div>
-                          <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-faint)" }}>Relationships</h4>
+                          <h4 className="font-mono mb-2" style={{ fontSize: 11, letterSpacing: "0.04em", color: "var(--text-faint)" }}>Relationships</h4>
                           <div className="space-y-1.5">
                             {selectedNodeInfo.relationships.map((rel, i) => (
                               <div key={i} className="flex items-start gap-2.5 px-3 py-2 rounded-lg text-sm" style={{ background: "var(--toggle-bg)" }}>

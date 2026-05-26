@@ -28,7 +28,7 @@ const SIZE: Record<Size, { h: string; px: string; gap: string; text: string; ico
 };
 
 const VARIANT: Record<Variant, string> = {
-  primary:   "bg-[var(--accent)] text-black hover:brightness-110 active:brightness-95 disabled:bg-[var(--toggle-bg)] disabled:text-[var(--text-faint)] disabled:cursor-not-allowed",
+  primary:   "bg-[var(--text-primary)] text-black hover:brightness-110 active:brightness-95 disabled:bg-[var(--toggle-bg)] disabled:text-[var(--text-faint)] disabled:cursor-not-allowed",
   secondary: "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)] hover:bg-[var(--toggle-bg)] hover:text-[var(--text-primary)] disabled:opacity-50 disabled:cursor-not-allowed",
   ghost:     "bg-transparent text-[var(--text-muted)] hover:bg-[var(--toggle-bg)] hover:text-[var(--text-primary)] disabled:opacity-50 disabled:cursor-not-allowed",
   danger:    "bg-[var(--color-danger-dim)] text-[var(--color-danger)] border border-[var(--color-danger)] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed",

@@ -51,7 +51,7 @@ const S = {
   input: "px-3 py-2 text-sm rounded-lg outline-none transition-colors",
   inputCSS: { background: "var(--background)", border: "1px solid var(--border)", color: "var(--text-primary)" } as React.CSSProperties,
   card: { background: "var(--background)", border: "1px solid var(--border)", borderRadius: 10 } as React.CSSProperties,
-  accentBtn: { background: "var(--accent-dim)", color: "var(--accent)", border: "1px dashed var(--accent)" } as React.CSSProperties,
+  accentBtn: { background: "var(--border)", color: "var(--text-primary)", border: "1px dashed var(--text-primary)" } as React.CSSProperties,
   delBtn: { color: "#ef4444", background: "rgba(239,68,68,0.1)", border: "none", borderRadius: 6 } as React.CSSProperties,
 };
 
@@ -256,7 +256,7 @@ function SequenceEditor({ code, onChange }: EditorProps) {
                     {arrows.map(a => (
                       <button key={a.value} onMouseDown={(e) => { e.preventDefault(); const n = [...messages]; n[i] = { ...n[i], arrow: a.value }; rebuild(participants, n); }}
                         className="px-1 py-1 rounded text-caption font-mono" title={a.label}
-                        style={{ background: m.arrow === a.value ? "var(--accent)" : "var(--surface)", color: m.arrow === a.value ? "#000" : "var(--text-muted)", border: "1px solid var(--border)" }}>
+                        style={{ background: m.arrow === a.value ? "var(--text-primary)" : "var(--surface)", color: m.arrow === a.value ? "#000" : "var(--text-muted)", border: "1px solid var(--border)" }}>
                         {a.icon}
                       </button>
                     ))}
@@ -420,7 +420,7 @@ function EntityRelEditor({ code, onChange, config }: EditorProps & {
                 {entities.map(e => <option key={e.name} value={e.name}>{e.name}</option>)}
               </select>
               <select value={r.rel} onChange={(e) => { rels[ri].rel = e.target.value; update(entities, [...rels]); }}
-                className="w-16 text-xs font-mono text-center rounded px-1 py-1 outline-none" style={{ ...S.inputCSS, color: "var(--accent)" }}>
+                className="w-16 text-xs font-mono text-center rounded px-1 py-1 outline-none" style={{ ...S.inputCSS, color: "var(--text-primary)" }}>
                 {config.relOptions.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
               <select value={r.to} onChange={(e) => { rels[ri].to = e.target.value; update(entities, [...rels]); }}
@@ -494,7 +494,7 @@ export function DiagramFormEditor({ code, onChange }: EditorProps) {
           },
           itemFields: [
             { key: "name", label: "Task name" },
-            { key: "status", label: "status", width: "w-16", mono: true, color: "var(--accent)" },
+            { key: "status", label: "status", width: "w-16", mono: true, color: "var(--text-primary)" },
             { key: "date", label: "date, duration", width: "w-32", mono: true, color: "var(--text-muted)" },
           ],
           sectionLabel: "Section",
@@ -698,7 +698,7 @@ export function DiagramFormEditor({ code, onChange }: EditorProps) {
                     className={`w-24 ${S.input} text-xs`} style={S.inputCSS}>
                     <option value="[*]">[*]</option>{states.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
-                  <span style={{ color: "var(--accent)" }}>→</span>
+                  <span style={{ color: "var(--text-primary)" }}>→</span>
                   <select value={t.to} onChange={(e) => { transitions[ti].to = e.target.value; rebuild(); }}
                     className={`w-24 ${S.input} text-xs`} style={S.inputCSS}>
                     {states.map(s => <option key={s} value={s}>{s}</option>)}<option value="[*]">[*]</option>

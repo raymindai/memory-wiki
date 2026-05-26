@@ -288,8 +288,8 @@ function SymbolsPanel({
                     transition: "border-color 0.12s, color 0.12s",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--accent)";
-                    e.currentTarget.style.color = "var(--accent)";
+                    e.currentTarget.style.borderColor = "var(--text-primary)";
+                    e.currentTarget.style.color = "var(--text-primary)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = "var(--border-dim)";
@@ -542,8 +542,8 @@ function MathEditor({
               className="px-2.5 font-mono text-caption font-semibold leading-[24px]"
               style={{
                 height: 24,
-                background: mode === "inline" ? "var(--accent-dim)" : "transparent",
-                color: mode === "inline" ? "var(--accent)" : "var(--text-faint)",
+                background: mode === "inline" ? "var(--border)" : "transparent",
+                color: mode === "inline" ? "var(--text-primary)" : "var(--text-faint)",
                 border: "none",
                 cursor: "pointer",
               }}
@@ -555,8 +555,8 @@ function MathEditor({
               className="px-2.5 font-mono text-caption font-semibold leading-[24px]"
               style={{
                 height: 24,
-                background: mode === "block" ? "var(--accent-dim)" : "transparent",
-                color: mode === "block" ? "var(--accent)" : "var(--text-faint)",
+                background: mode === "block" ? "var(--border)" : "transparent",
+                color: mode === "block" ? "var(--text-primary)" : "var(--text-faint)",
                 border: "none",
                 borderLeft: "1px solid var(--border-dim)",
                 cursor: "pointer",
@@ -573,7 +573,7 @@ function MathEditor({
             {LAYOUTS.map((l) => (
               <button key={l.id} title={l.title}
                 className="p-1 rounded"
-                style={{ color: layout === l.id ? "var(--accent)" : "var(--text-faint)", opacity: layout === l.id ? 1 : 0.4, background: "none", border: "none", cursor: "pointer" }}
+                style={{ color: layout === l.id ? "var(--text-primary)" : "var(--text-faint)", opacity: layout === l.id ? 1 : 0.4, background: "none", border: "none", cursor: "pointer" }}
                 onClick={() => setLayout(l.id)}>
                 {l.icon}
               </button>
@@ -593,7 +593,7 @@ function MathEditor({
             disabled={!latex.trim()}
             className="px-3 py-1 rounded-md font-mono text-caption font-semibold"
             style={{
-              background: latex.trim() ? "var(--accent)" : "var(--toggle-bg)",
+              background: latex.trim() ? "var(--text-primary)" : "var(--toggle-bg)",
               color: latex.trim() ? "#000" : "var(--text-muted)",
               border: "none",
               cursor: latex.trim() ? "pointer" : "default",

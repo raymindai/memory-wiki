@@ -200,7 +200,7 @@ export default function SynthesisDiff({ docId, auth, onClose, onAccepted }: Prop
           {diff && !diff.identical && (
             <pre
               style={{
-                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, monospace",
+                fontFamily: "var(--font-mono)",
                 fontSize: 12,
                 lineHeight: 1.55,
                 margin: 0,
@@ -275,8 +275,8 @@ export default function SynthesisDiff({ docId, auth, onClose, onAccepted }: Prop
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid var(--accent)",
-              background: "var(--accent)",
+              border: "1px solid var(--text-primary)",
+              background: "var(--text-primary)",
               color: "#000",
               fontSize: 13,
               fontWeight: 600,

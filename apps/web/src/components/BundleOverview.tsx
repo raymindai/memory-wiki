@@ -17,6 +17,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, Network, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import { ProviderIcon, type ProviderBrand } from "@/components/pure";
+import DocStatusIcon from "@/components/DocStatusIcon";
 
 interface BundleDoc {
   id: string;
@@ -150,31 +152,85 @@ export default function BundleOverview({
 
   const accessIcon = accessKind === "public" ? <Globe width={14} height={14} /> : accessKind === "shared" ? <Users width={14} height={14} /> : <Cloud width={14} height={14} />;
   const accessLabel = accessKind === "public" ? "PUBLIC" : accessKind === "shared" ? "SHARED" : "PRIVATE";
-  const accessColor = accessKind === "public" ? "#4ade80" : accessKind === "shared" ? "#60a5fa" : "var(--text-faint)";
+  // Semantic micro-colors: public = live/lime, shared = info/blue, private = info-dim (cloud sync)
+  const accessColor = accessKind === "public" ? "var(--micro-lime)" : accessKind === "shared" ? "var(--micro-info)" : "var(--micro-info)";
 
   const [showCopyHint, setShowCopyHint] = useState(false);
   useEffect(() => { if (!showCopyHint) return; const t = setTimeout(() => setShowCopyHint(false), 1600); return () => clearTimeout(t); }, [showCopyHint]);
 
   return (
-    <div className="h-full overflow-y-auto" style={{ background: "var(--background)" }}>
+    <div className="h-full relative overflow-hidden" style={{ background: "var(--canvas)" }}>
+      {/* Animated MW-blob backdrop — lives OUTSIDE the scroll
+          container so the blob stays anchored to the viewport while
+          the user scrolls the content. (When the backdrop was inside
+          the scroll area the absolute positioning still inherited
+          the scrollable coordinate system and dragged the blob with
+          the content.) */}
+      <div className="mw-start-backdrop" aria-hidden>
+        <img className="mw-start-backdrop-morph mw-logo-darktheme" src="/brand/mwblob_morph.svg" alt="" draggable={false} />
+        <img className="mw-start-backdrop-morph mw-logo-lighttheme" src="/brand/mwblob_morph_dark.svg" alt="" draggable={false} />
+      </div>
+      <div className="h-full overflow-y-auto relative mw-start-backdrop-content">
       <div className="max-w-3xl mx-auto px-6 py-10">
         {/* Identity hero — same card shape as Hub's hero so both
             surfaces read as one family. Big centered icon + title
             (inline-editable for owners) + AI digest + description
             + intent + meta with Canvas CTA. */}
         <header
-          className="mb-6 rounded-xl text-center"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "32px 24px 24px" }}
+          className="mb-8 text-center"
+          style={{ padding: "32px 24px 24px" }}
         >
-          <div
-            className="mx-auto flex items-center justify-center rounded-2xl"
-            style={{ width: 80, height: 80, background: "var(--accent-dim)", color: "var(--accent)" }}
-          >
-            <Layers width={40} height={40} />
+          {/* Hero glyph — mirrors the sidebar BundleStatusIcon so the
+              same bundle reads identically in two surfaces (sidebar
+              row + viewer hero): Layers colored by access tier with a
+              Globe / Users / Cloud overlay in the corner. */}
+          {(() => {
+            const layersColor = accessKind === "shared" ? "#60a5fa" : accessKind === "public" ? "#4ade80" : "var(--text-faint)";
+            const OverlayIcon = accessKind === "public" ? Globe : accessKind === "shared" ? Users : Cloud;
+            const overlayColor = accessKind === "shared" ? "#60a5fa" : accessKind === "public" ? "#4ade80" : "var(--text-faint)";
+            return (
+              <div
+                className="mx-auto relative flex items-center justify-center"
+                style={{ width: 64, height: 64 }}
+                title={accessKind === "public" ? "Public bundle" : accessKind === "shared" ? "Shared bundle" : "Private bundle"}
+              >
+                <Layers width={56} height={56} strokeWidth={1.5} style={{ color: layersColor }} />
+                <span
+                  aria-hidden
+                  className="absolute flex items-center justify-center rounded-full"
+                  style={{
+                    right: -2, bottom: -2, width: 22, height: 22,
+                    background: "var(--canvas)",
+                    color: overlayColor,
+                  }}
+                >
+                  <OverlayIcon width={14} height={14} />
+                </span>
+              </div>
+            );
+          })()}
+          {/* Access badge — small pill under the icon so the share
+              state is also surfaced as a readable label, not just an
+              icon overlay. */}
+          <div className="mt-3 flex justify-center">
+            <span
+              className="inline-flex items-center gap-1 text-caption font-mono px-2 py-0.5 rounded-full"
+              style={{
+                color: accessKind === "shared" ? "#60a5fa" : accessKind === "public" ? "#4ade80" : "var(--text-faint)",
+                background: accessKind === "shared"
+                  ? "rgba(96, 165, 250, 0.12)"
+                  : accessKind === "public"
+                    ? "rgba(74, 222, 128, 0.12)"
+                    : "var(--toggle-bg)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              {accessKind === "public" ? "Public" : accessKind === "shared" ? "Shared" : "Private"}
+            </span>
           </div>
           {onRenameBundle ? (
             <h1
-              className="text-display font-bold tracking-tight mt-4 outline-none rounded transition-colors hover:bg-[var(--toggle-bg)] focus:bg-[var(--toggle-bg)]"
+              className="text-display tracking-tight mt-4 outline-none rounded transition-colors hover:bg-[var(--toggle-bg)] focus:bg-[var(--toggle-bg)]"
               style={{ color: "var(--text-primary)", lineHeight: 1.2, padding: "2px 8px", display: "inline-block", minWidth: 120 }}
               contentEditable
               suppressContentEditableWarning
@@ -204,25 +260,30 @@ export default function BundleOverview({
             </h1>
           ) : (
             <h1
-              className="text-display font-bold tracking-tight mt-4"
+              className="text-display tracking-tight mt-4"
               style={{ color: "var(--text-primary)", lineHeight: 1.2 }}
             >
               {bundleTitle || "Untitled bundle"}
             </h1>
           )}
-          {/* AI digest — 2-3 sentence summary from graph_data.summary.
-              Sits directly under the title so the gist reads first,
-              ahead of user-set description / intent / meta. Clamped
-              to 3 lines by default; long summaries reveal a More
-              chip that toggles the full text inline. */}
-          {bundleSummary && (() => {
-            const isLong = bundleSummary.length > 180;
+          {/* Single overview line — prefer the AI-generated summary
+              from graph_data.summary (richer, content-derived); fall
+              back to the user-set description when no analysis has
+              been run. Showing BOTH read as two duplicate "summary"
+              paragraphs to the user, so we collapse to one. Clamped
+              to 3 lines by default; long copy reveals an inline
+              More toggle. */}
+          {(bundleSummary || bundleDescription) && (() => {
+            const overview = bundleSummary || bundleDescription || "";
+            const isLong = overview.length > 180;
             return (
               <div className="mt-3 mx-auto" style={{ maxWidth: 560 }}>
                 <p
-                  className="text-body leading-relaxed text-center"
+                  className="leading-relaxed text-center"
                   style={{
                     color: "var(--text-secondary)",
+                    fontSize: 13,
+                    lineHeight: 1.6,
                     ...(summaryExpanded ? {} : {
                       display: "-webkit-box",
                       WebkitLineClamp: 3,
@@ -231,7 +292,7 @@ export default function BundleOverview({
                     }),
                   }}
                 >
-                  {bundleSummary}
+                  {overview}
                 </p>
                 {isLong && (
                   <button
@@ -250,36 +311,30 @@ export default function BundleOverview({
               </div>
             );
           })()}
-          {bundleDescription && (
-            <p
-              className="text-body mt-3 mx-auto leading-relaxed"
-              style={{ color: "var(--text-secondary)", maxWidth: 480 }}
-            >
-              {bundleDescription}
-            </p>
-          )}
           {bundleIntent && (
             <p
-              className="text-caption mt-2 mx-auto italic"
-              style={{ color: "var(--text-faint)", maxWidth: 480 }}
+              className="mt-2 mx-auto text-center italic"
+              style={{ color: "var(--text-faint)", maxWidth: 560, fontSize: 12, lineHeight: 1.55 }}
             >
               Intent: {bundleIntent}
             </p>
           )}
-          {/* Meta strip — centered row. */}
+          {/* Meta strip — neutral throughout. Color was reading as
+              "everything here is important"; the meta row is just
+              context, so all glyphs + text settle to text-faint. */}
           <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
             <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
               <Layers width={11} height={11} />
-              {documents.length} {documents.length === 1 ? "doc" : "docs"}
+              <span>{documents.length} {documents.length === 1 ? "doc" : "docs"}</span>
             </span>
             {lastUpdatedAt && (
               <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
                 <Clock width={11} height={11} />
-                Updated {relativeTime(lastUpdatedAt)}
+                <span>Updated {relativeTime(lastUpdatedAt)}</span>
               </span>
             )}
             {accessKind === "shared" && bundleAllowedEmails && bundleAllowedEmails.length > 0 && (
-              <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "#60a5fa" }}>
+              <span className="inline-flex items-center gap-1 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
                 <Users width={11} height={11} />
                 Shared with {bundleAllowedEmails.length}
               </span>
@@ -287,13 +342,8 @@ export default function BundleOverview({
             {onSwitchToCanvas && (
               <button
                 onClick={() => onSwitchToCanvas()}
-                className="inline-flex items-center gap-1.5 text-caption font-mono px-2.5 py-1 rounded transition-colors hover:bg-[var(--accent-dim)]"
-                style={{
-                  color: "var(--accent)",
-                  background: "var(--accent-dim)",
-                  border: "1px solid var(--accent-dim)",
-                  letterSpacing: 0.3,
-                }}
+                className="inline-flex items-center gap-1 text-caption font-mono transition-colors hover:underline"
+                style={{ color: "var(--text-faint)" }}
                 title="Open this bundle as a canvas"
               >
                 <Network width={11} height={11} />
@@ -357,17 +407,20 @@ Memory.Wiki search "topic"`;
             snippet: string;
             explanation: string;
             docHref: string;
+            /** Brand mark from the Pure ProviderIcon set — surfaces in
+             *  the tab so each tool is visually distinct. */
+            brand: ProviderBrand;
           };
           const TOOLS: Tool[] = [
-            { id: "claude", label: "Claude", hint: "Drop the URL into a Claude chat", snippet: bundleUrl, explanation: "Works the same in Claude.ai (web) and the Mac / Windows desktop app. Claude fetches the bundle payload and follows inline doc links as needed.", docHref: "/docs/integrate" },
-            { id: "chatgpt", label: "ChatGPT", hint: "Drop the URL into a ChatGPT chat", snippet: bundleUrl, explanation: "Works in ChatGPT web and the Mac desktop app. ChatGPT fetches the URL via its built-in browser tool and reads the bundle's markdown.", docHref: "/docs/integrate" },
-            { id: "gemini", label: "Gemini", hint: "Drop the URL into Gemini (web or app)", snippet: bundleUrl, explanation: "Gemini reads the URL via its built-in tool use. Same payload format as Claude and ChatGPT.", docHref: "/docs/integrate#gemini" },
-            { id: "claude-code", label: "Claude Code", hint: "Save as CLAUDE.md in your project root", savePath: "CLAUDE.md", snippet: projCtx, explanation: "Claude Code auto-loads CLAUDE.md at the start of every session. Save this snippet to your project root and the bundle becomes ambient context for every conversation in the repo.", docHref: "/docs/integrate#claude-code" },
-            { id: "cursor", label: "Cursor", hint: "Save as .cursor/rules/memorywiki.mdc", savePath: ".cursor/rules/memorywiki.mdc", snippet: cursorRule, explanation: "Cursor's Rules feature reads .mdc files from .cursor/rules/. alwaysApply: true keeps the bundle URL in context on every chat, including ad-hoc questions.", docHref: "/docs/integrate#cursor" },
-            { id: "generic", label: "Generic", hint: "Paste the URL into any AI that can fetch a webpage", snippet: bundleUrl, explanation: "Any LLM with web-fetch (or a configured browser tool) works. Append ?full=1 for every doc inline, or use /b/<id>.md for the raw markdown payload.", docHref: "/docs/integrate" },
-            { id: "mcp", label: "MCP", hint: "Add memory-wiki-mcp to your MCP host config", snippet: mcpConfig, explanation: "Compatible with Claude Desktop, Cursor, Cline, Windsurf, and any MCP-capable host. Exposes 26 tools across capture / bundle / search / share / version history.", docHref: "/docs/mcp" },
-            { id: "skill", label: "Skill", hint: "Use /memory.wiki slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install Memory.Wiki`. Then inside any Claude Code session, run /memory.wiki bundle <id> or /memory.wiki search to pull this bundle in.", docHref: "/docs/integrate" },
-            { id: "cli", label: "CLI", hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run Memory.Wiki bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
+            { id: "claude",      label: "Claude",       brand: "claude",   hint: "Drop the URL into a Claude chat", snippet: bundleUrl, explanation: "Works the same in Claude.ai (web) and the Mac / Windows desktop app. Claude fetches the bundle payload and follows inline doc links as needed.", docHref: "/docs/integrate" },
+            { id: "chatgpt",     label: "ChatGPT",      brand: "chatgpt",  hint: "Drop the URL into a ChatGPT chat", snippet: bundleUrl, explanation: "Works in ChatGPT web and the Mac desktop app. ChatGPT fetches the URL via its built-in browser tool and reads the bundle's markdown.", docHref: "/docs/integrate" },
+            { id: "gemini",      label: "Gemini",       brand: "gemini",   hint: "Drop the URL into Gemini (web or app)", snippet: bundleUrl, explanation: "Gemini reads the URL via its built-in tool use. Same payload format as Claude and ChatGPT.", docHref: "/docs/integrate#gemini" },
+            { id: "claude-code", label: "Claude Code",  brand: "claude",   hint: "Save as CLAUDE.md in your project root", savePath: "CLAUDE.md", snippet: projCtx, explanation: "Claude Code auto-loads CLAUDE.md at the start of every session. Save this snippet to your project root and the bundle becomes ambient context for every conversation in the repo.", docHref: "/docs/integrate#claude-code" },
+            { id: "cursor",      label: "Cursor",       brand: "cursor",   hint: "Save as .cursor/rules/memorywiki.mdc", savePath: ".cursor/rules/memorywiki.mdc", snippet: cursorRule, explanation: "Cursor's Rules feature reads .mdc files from .cursor/rules/. alwaysApply: true keeps the bundle URL in context on every chat, including ad-hoc questions.", docHref: "/docs/integrate#cursor" },
+            { id: "generic",     label: "Generic",      brand: "terminal", hint: "Paste the URL into any AI that can fetch a webpage", snippet: bundleUrl, explanation: "Any LLM with web-fetch (or a configured browser tool) works. Append ?full=1 for every doc inline, or use /b/<id>.md for the raw markdown payload.", docHref: "/docs/integrate" },
+            { id: "mcp",         label: "MCP",          brand: "mcp",      hint: "Add memory-wiki-mcp to your MCP host config", snippet: mcpConfig, explanation: "Compatible with Claude Desktop, Cursor, Cline, Windsurf, and any MCP-capable host. Exposes 26 tools across capture / bundle / search / share / version history.", docHref: "/docs/mcp" },
+            { id: "skill",       label: "Skill",        brand: "claude",   hint: "Use /memory.wiki slash commands inside Claude Code", snippet: skillUse, explanation: "Install once with `claude skill install Memory.Wiki`. Then inside any Claude Code session, run /memory.wiki bundle <id> or /memory.wiki search to pull this bundle in.", docHref: "/docs/integrate" },
+            { id: "cli",         label: "CLI",          brand: "cli",      hint: "Pull this bundle from your terminal", snippet: cliUse, explanation: "Globally-installed npm package. Run Memory.Wiki bundle <id> from any directory to fetch the bundle's content; useful for scripting or terminal-first workflows.", docHref: "/docs/cli" },
           ];
           const active = TOOLS.find((t) => t.id === activeTool) || TOOLS[0];
           const URL_TOOL_IDS = new Set(["claude", "chatgpt", "gemini", "generic"]);
@@ -376,96 +429,117 @@ Memory.Wiki search "topic"`;
           return (
             <section className="mb-8 rounded-xl"
               style={{ background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "20px 20px 18px" }}>
-              <h2 className="text-heading font-semibold" style={{ color: "var(--text-primary)", margin: 0 }}>
+              <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>
                 How to use this bundle
               </h2>
               <p className="text-caption mt-1 mb-4" style={{ color: "var(--text-muted)", lineHeight: 1.55 }}>
                 Pick your AI tool. Each one shows exactly what to paste and where.
               </p>
 
-              {/* Flat tab row — same style as the canvas's
-                  Document / Insights / Decompose tabs. Active = text
-                  + 2px accent underline, no chip backgrounds. */}
-              <div className="flex flex-wrap items-center mb-3" style={{ borderBottom: "1px solid var(--border-dim)" }}>
+              {/* Quieter tab row — active tool gets a soft surface
+                  fill (not the stark ink-fill that read as a button
+                  pressed permanently); inactive tools stay plain text
+                  at text-muted with a faint brand glyph. */}
+              <div className="flex flex-wrap items-center gap-x-1 gap-y-1.5 mb-5">
                 {TOOLS.map((t) => {
                   const isActive = activeTool === t.id;
                   return (
                     <button
                       key={t.id}
                       onClick={() => setActiveTool(t.id)}
-                      className="px-3 pt-1.5 pb-2 text-caption font-medium transition-colors relative"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-caption font-medium transition-colors"
                       style={{
-                        color: isActive ? "var(--text-primary)" : "var(--text-faint)",
-                        background: "transparent",
-                        border: "none",
+                        color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                        background: isActive ? "var(--toggle-bg)" : "transparent",
                       }}
                     >
+                      <span
+                        style={{ display: "inline-flex", width: 12, height: 12, color: isActive ? "currentColor" : "var(--text-faint)" }}
+                        aria-hidden
+                      >
+                        <ProviderIcon brand={t.brand} />
+                      </span>
                       {t.label}
-                      {isActive && (
-                        <div
-                          className="absolute left-0 right-0 -bottom-px h-[2px]"
-                          style={{ background: "var(--accent)" }}
-                        />
-                      )}
                     </button>
                   );
                 })}
               </div>
 
-              {/* Active tab content card */}
-              <div className="rounded-lg overflow-hidden"
-                style={{ background: "var(--background)", border: "1px solid var(--border-dim)" }}>
-                <div className="flex items-baseline justify-between px-3 py-2 gap-2"
-                  style={{ borderBottom: "1px solid var(--border-dim)" }}>
-                  <span className="text-caption truncate" style={{ color: "var(--text-secondary)" }}>
-                    {active.savePath ? (
-                      <>Save to{" "}<code className="font-mono" style={{ color: "var(--accent)" }}>{active.savePath}</code></>
-                    ) : (
-                      <>{active.hint}</>
-                    )}
-                  </span>
-                  <span className="text-caption shrink-0" style={{ color: "var(--text-faint)" }}>
-                    {active.label}
-                  </span>
-                </div>
+              {/* Active tab content — borderless, padding-only. The
+                  card outline was redundant chrome around an already-
+                  outlined section. */}
+              <div>
+                {/* One-line hint above the action — no separate
+                    header strip, no redundant tool-name badge. */}
+                <p className="text-caption mb-3" style={{ color: "var(--text-secondary)" }}>
+                  {active.savePath ? (
+                    <>Save to{" "}<code className="font-mono" style={{ color: "var(--text-primary)" }}>{active.savePath}</code></>
+                  ) : (
+                    <>{active.hint}</>
+                  )}
+                </p>
 
                 {isUrlTool ? (
-                  <div className="px-3 py-3">
-                    <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-                      <div className="flex items-center">
-                        {(["digest", "full"] as const).map((v) => {
-                          const isActive = urlVariant === v;
-                          const tokenLabel = v === "digest" ? `≈ ${fmt(digestTokens)} tok` : `≈ ${fmt(fullTokens)} tok`;
-                          return (
-                            <button
-                              key={v}
-                              type="button"
-                              onClick={() => setUrlVariant(v)}
-                              className="px-3 pt-1.5 pb-2 transition-colors relative flex items-center gap-1.5"
-                              style={{
-                                color: isActive ? "var(--text-primary)" : "var(--text-faint)",
-                                background: "transparent",
-                                border: "none",
-                              }}
-                            >
-                              <span className="font-medium" style={{ fontSize: 12 }}>
-                                {v === "digest" ? "Compact" : "Full"}
+                  <>
+                    {/* Side-by-side option cards. Both variants shown
+                        at once so the trade-off is visible without a
+                        toggle interaction. Active option marked by a
+                        lime dot + subtle surface fill, not the prior
+                        stark white ink-fill. */}
+                    <div className="grid grid-cols-2 gap-2 mb-3" role="tablist" aria-label="Payload size">
+                      {(["digest", "full"] as const).map((v) => {
+                        const isActive = urlVariant === v;
+                        const tokens = v === "digest" ? digestTokens : fullTokens;
+                        const label = v === "digest" ? "Compact" : "Full";
+                        // Real cheaper-% computed from the two
+                        // token estimates so the claim adapts to the
+                        // bundle (a 4-doc bundle with tiny docs may
+                        // only save 60%; a 30-doc one saves 95%+).
+                        const cheaperPct = fullTokens > digestTokens
+                          ? Math.round((1 - digestTokens / fullTokens) * 100)
+                          : 0;
+                        const desc = v === "digest"
+                          ? (cheaperPct > 0 ? `Concept map, ~${cheaperPct}% lighter` : "Concept map")
+                          : "Every doc inlined";
+                        return (
+                          <button
+                            key={v}
+                            type="button"
+                            role="tab"
+                            aria-selected={isActive}
+                            onClick={() => setUrlVariant(v)}
+                            className="text-left rounded-md px-3 py-2 transition-colors"
+                            style={{
+                              background: isActive ? "var(--toggle-bg)" : "transparent",
+                              border: `1px solid ${isActive ? "var(--border)" : "var(--border-dim)"}`,
+                              color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                            }}
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                aria-hidden
+                                style={{
+                                  width: 6, height: 6, borderRadius: "50%",
+                                  background: isActive ? "var(--micro-lime)" : "var(--border)",
+                                  display: "inline-block",
+                                }}
+                              />
+                              <span className="font-medium" style={{ fontSize: 12 }}>{label}</span>
+                              <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)" }}>
+                                ≈{fmt(tokens)} tokens
                               </span>
-                              <span style={{ fontSize: 10, opacity: 0.7, fontFamily: "var(--font-mono)" }}>{tokenLabel}</span>
-                              {isActive && (
-                                <div
-                                  className="absolute left-0 right-0 -bottom-px h-[2px]"
-                                  style={{ background: "var(--accent)" }}
-                                />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <span className="text-caption pb-1.5" style={{ color: "var(--text-faint)" }}>
-                        {urlVariant === "digest" ? "concept map, cheap to paste" : "every doc inline"}
-                      </span>
+                            </div>
+                            <div className="text-caption mt-0.5" style={{ color: "var(--text-faint)" }}>
+                              {desc}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
+
+                    {/* Hero — URL + Copy. Visually the loudest thing
+                        in the card. Slightly stronger border + a
+                        touch more padding so it reads as the action. */}
                     <button
                       onClick={() => {
                         if (typeof navigator === "undefined") return;
@@ -476,74 +550,102 @@ Memory.Wiki search "topic"`;
                           setTimeout(() => { setCopied(false); setCopiedTool(null); }, 1500);
                         });
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)]"
+                      className="w-full flex items-center gap-3 px-3.5 py-3 rounded-lg font-mono transition-colors hover:bg-[var(--toggle-bg)] group/copy"
                       style={{
                         fontSize: 13,
-                        background: "var(--surface)",
-                        color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
-                        border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                        background: "var(--background)",
+                        color: copiedTool === active.id ? "var(--micro-lime)" : "var(--text-primary)",
+                        border: `1px solid ${copiedTool === active.id ? "var(--micro-lime)" : "var(--border)"}`,
                       }}
                       title="Copy URL"
                     >
                       <span className="flex-1 text-left truncate">{activeUrl}</span>
-                      <span className="flex items-center gap-1 shrink-0" style={{ color: copiedTool === active.id ? "#22c55e" : "var(--text-faint)" }}>
-                        {copiedTool === active.id ? <Check width={12} height={12} /> : <Copy width={12} height={12} />}
-                        <span className="text-caption">{copiedTool === active.id ? "Copied" : "Copy"}</span>
+                      <span
+                        className="flex items-center gap-1.5 shrink-0 pl-3 font-medium font-sans"
+                        style={{
+                          borderLeft: "1px solid var(--border-dim)",
+                          color: copiedTool === active.id ? "var(--micro-lime)" : "var(--text-primary)",
+                        }}
+                      >
+                        {copiedTool === active.id ? <Check width={13} height={13} /> : <Copy width={13} height={13} />}
+                        <span>{copiedTool === active.id ? "Copied" : "Copy URL"}</span>
                       </span>
                     </button>
-                  </div>
-                ) : (
-                  <pre
-                    className="px-3 py-2 text-caption font-mono whitespace-pre-wrap"
-                    style={{ color: "var(--text-primary)", margin: 0, fontSize: 11, lineHeight: 1.6 }}
-                  >{active.snippet}</pre>
-                )}
 
-                <div className="flex items-center justify-between gap-2 px-3 py-2"
-                  style={{ borderTop: "1px solid var(--border-dim)" }}>
-                  {isUrlTool ? (
-                    <a
-                      href={rawHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-caption transition-colors hover:underline"
-                      style={{ color: "var(--text-muted)" }}
-                      title="Raw .md payload — what the AI actually sees"
-                    >
-                      <ExternalLink width={11} height={11} />
-                      See raw payload
-                    </a>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        if (typeof navigator === "undefined") return;
-                        navigator.clipboard.writeText(active.snippet).then(() => {
-                          setCopiedTool(active.id);
-                          setTimeout(() => setCopiedTool(null), 1500);
-                        });
-                      }}
-                      className="flex items-center gap-1 text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                    {/* Support row — just the small "raw / guide"
+                        links. Variant description lives inside the
+                        option cards above, so this row stays minimal. */}
+                    <div className="flex items-center justify-end gap-3 mt-2.5 text-caption" style={{ color: "var(--text-muted)" }}>
+                      <a
+                        href={rawHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 transition-colors hover:underline"
+                        title="Raw .md payload, what the AI actually sees"
+                      >
+                        <ExternalLink width={11} height={11} />
+                        Raw
+                      </a>
+                      <a
+                        href={active.docHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 transition-colors hover:underline"
+                        title="Read the full integration guide"
+                      >
+                        Full guide
+                        <ArrowUpRight width={11} height={11} />
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <pre
+                      className="px-3 py-2.5 rounded-lg font-mono whitespace-pre-wrap"
                       style={{
-                        background: "var(--surface)",
-                        color: copiedTool === active.id ? "#22c55e" : "var(--text-primary)",
-                        border: `1px solid ${copiedTool === active.id ? "rgba(34,197,94,0.4)" : "var(--border-dim)"}`,
+                        color: "var(--text-primary)",
+                        background: "var(--background)",
+                        border: "1px solid var(--border-dim)",
+                        margin: 0,
+                        fontSize: 11,
+                        lineHeight: 1.6,
                       }}
-                      title="Copy snippet"
-                    >
-                      {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
-                      <span>{copiedTool === active.id ? "Copied" : "Copy"}</span>
-                    </button>
-                  )}
-                  <a href={active.docHref} target="_blank" rel="noopener noreferrer"
-                    className="text-caption font-mono" style={{ color: "var(--accent)" }}>
-                    Full guide →
-                  </a>
-                </div>
+                    >{active.snippet}</pre>
+                    <div className="flex items-center justify-between gap-3 mt-2.5 text-caption" style={{ color: "var(--text-muted)" }}>
+                      <button
+                        onClick={() => {
+                          if (typeof navigator === "undefined") return;
+                          navigator.clipboard.writeText(active.snippet).then(() => {
+                            setCopiedTool(active.id);
+                            setTimeout(() => setCopiedTool(null), 1500);
+                          });
+                        }}
+                        className="inline-flex items-center gap-1 transition-colors hover:underline"
+                        style={{ color: copiedTool === active.id ? "var(--micro-lime)" : "var(--text-muted)" }}
+                        title="Copy snippet"
+                      >
+                        {copiedTool === active.id ? <Check width={11} height={11} /> : <Copy width={11} height={11} />}
+                        {copiedTool === active.id ? "Copied" : "Copy snippet"}
+                      </button>
+                      <a
+                        href={active.docHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 transition-colors hover:underline"
+                        title="Read the full integration guide"
+                      >
+                        Full guide
+                        <ArrowUpRight width={11} height={11} />
+                      </a>
+                    </div>
+                  </>
+                )}
               </div>
+
               {active.explanation && (
                 <p
-                  className="text-caption leading-relaxed"
-                  style={{ color: "var(--text-secondary)", whiteSpace: "pre-wrap", margin: "12px 4px 0" }}
+                  className="leading-relaxed mt-4"
+                  style={{ color: "var(--text-muted)", whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.6 }}
                 >
                   {active.explanation}
                 </p>
@@ -552,91 +654,194 @@ Memory.Wiki search "topic"`;
           );
         })()}
 
-        {/* ─── Stat strip ─── */}
-        <section className="grid grid-cols-3 gap-2 mb-7">
+        {/* ─── Stat strip ─── Typographic contrast: hero number in
+            Cal Sans (display font, ~32px), descriptor in JetBrains
+            Mono with a touch of letter-spacing so it reads as a
+            "data label", and a quieter mono-cased context row at
+            the bottom (access tier / scope / canvas link). The two
+            type families do the visual work — no chip backgrounds
+            or uppercase eyebrows fighting for attention. */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-7">
+          {/* Documents — count + access tier */}
           <div
-            className="rounded-lg px-4 py-3.5"
+            className="rounded-lg px-4 py-4 flex flex-col"
             style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
           >
-            <div className="flex items-center gap-1.5 mb-1.5" style={{ color: accessColor }}>
-              {accessIcon}
-              <span className="text-caption font-mono uppercase tracking-wider font-semibold">{accessLabel}</span>
-            </div>
-            <div className="text-display font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
+            <div
+              className="tabular-nums"
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: 32,
+                lineHeight: 1,
+                letterSpacing: 0,
+              }}
+            >
               {fmtCount(documents.length)}
             </div>
-            <div className="text-caption" style={{ color: "var(--text-faint)" }}>
-              {documents.length === 1 ? "document" : "documents"}
+            <div
+              className="mt-1"
+              style={{
+                color: "var(--text-muted)",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.04em",
+              }}
+            >
+              {documents.length === 1 ? "Document" : "Documents"}
+            </div>
+            <div
+              className="mt-auto pt-4 flex items-center gap-1.5"
+              style={{
+                color: "var(--text-faint)",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.04em",
+              }}
+            >
+              {accessIcon}
+              <span>
+                {accessKind === "public" ? "Public" : accessKind === "shared" ? "Shared" : "Private"}
+              </span>
             </div>
           </div>
+
+          {/* Words — pure scale */}
           <div
-            className="rounded-lg px-4 py-3.5"
+            className="rounded-lg px-4 py-4 flex flex-col"
             style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
           >
-            <div className="flex items-center gap-1.5 mb-1.5" style={{ color: "var(--text-muted)" }}>
-              <FileText width={14} height={14} />
-              <span className="text-caption font-mono uppercase tracking-wider font-semibold">WORDS</span>
-            </div>
-            <div className="text-display font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
+            <div
+              className="tabular-nums"
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: 32,
+                lineHeight: 1,
+                letterSpacing: 0,
+              }}
+            >
               {fmtCount(totalWords)}
             </div>
-            <div className="text-caption" style={{ color: "var(--text-faint)" }}>
-              total prose
+            <div
+              className="mt-1"
+              style={{
+                color: "var(--text-muted)",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.04em",
+              }}
+            >
+              {totalWords === 1 ? "Word" : "Words"}
+            </div>
+            <div
+              className="mt-auto pt-4 flex items-center gap-1.5"
+              style={{
+                color: "var(--text-faint)",
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.04em",
+              }}
+            >
+              <FileText width={13} height={13} />
+              <span>Across all docs</span>
             </div>
           </div>
+
+          {/* AI analysis — themes + insights count, with Canvas
+              action + optional stale signal at the bottom. */}
           <div
-            className="rounded-lg px-4 py-3.5"
+            className="rounded-lg px-4 py-4 flex flex-col"
             style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
           >
-            <div className="flex items-center gap-1.5 mb-1.5" style={{ color: hasDiscoveries ? "var(--accent)" : "var(--text-faint)" }}>
-              <Sparkles width={14} height={14} />
-              <span className="text-caption font-mono uppercase tracking-wider font-semibold">AI</span>
-              {hasDiscoveries && isAnalysisStale && (
-                <span
-                  className="text-caption font-mono px-1 rounded uppercase tracking-wider"
-                  style={{ background: "rgba(245,158,11,0.18)", color: "#f59e0b", fontSize: 9, fontWeight: 700, marginLeft: "auto" }}
-                  title="Member docs have changed since the last analysis"
-                >
-                  STALE
-                </span>
-              )}
-            </div>
-            {/* Concrete counts when we have them; falls back to a
-                status label so the card stays readable for bundles
-                that haven't been analyzed yet. */}
             {hasDiscoveries && (themeCount || insightCount) ? (
-              <div className="text-body font-semibold tabular-nums" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
-                {themeCount ? `${themeCount} theme${themeCount === 1 ? "" : "s"}` : null}
-                {themeCount && insightCount ? <span style={{ color: "var(--text-faint)", fontWeight: 400 }}>, </span> : null}
-                {insightCount ? `${insightCount} insight${insightCount === 1 ? "" : "s"}` : null}
-              </div>
+              <>
+                <div
+                  className="tabular-nums"
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 32,
+                    lineHeight: 1,
+                    letterSpacing: 0,
+                  }}
+                >
+                  {(themeCount || 0) + (insightCount || 0)}
+                </div>
+                <div
+                  className="mt-1"
+                  style={{
+                    color: "var(--text-muted)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {themeCount ? `${themeCount} ${themeCount === 1 ? "Theme" : "Themes"}` : null}
+                  {themeCount && insightCount ? ", " : null}
+                  {insightCount ? `${insightCount} ${insightCount === 1 ? "Insight" : "Insights"}` : null}
+                </div>
+              </>
             ) : (
-              <div className="text-body font-semibold" style={{ color: "var(--text-primary)", lineHeight: 1.2 }}>
-                {hasDiscoveries ? "Analyzed" : hasGraph ? "Graph ready" : "Not analyzed"}
-              </div>
+              <>
+                <div
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 20,
+                    lineHeight: 1.1,
+                    letterSpacing: 0,
+                    fontWeight: 500,
+                  }}
+                >
+                  {hasGraph ? "Graph ready" : "Not analyzed"}
+                </div>
+                <div
+                  className="mt-1"
+                  style={{
+                    color: "var(--text-muted)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {hasGraph ? "Open canvas to inspect" : "Run analysis to discover"}
+                </div>
+              </>
             )}
-            <button
-              onClick={() => onSwitchToCanvas?.()}
-              className="text-caption mt-0.5 transition-colors hover:underline"
-              style={{ color: "var(--text-faint)" }}
-            >
-              {hasDiscoveries ? "Open canvas →" : "Run analysis →"}
-            </button>
+            <div className="mt-auto pt-4 flex items-center gap-1.5">
+              {/* Canvas icon, not Sparkles. Color removed to match
+                  the other stat cells — context icons stay neutral
+                  text-faint here; the action itself is the link. */}
+              <button
+                onClick={() => onSwitchToCanvas?.()}
+                className="inline-flex items-center gap-1.5 transition-colors hover:underline"
+                style={{
+                  color: "var(--text-faint)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 11,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                <Network width={13} height={13} />
+                <span>{hasDiscoveries ? "Open canvas" : "Run analysis"}</span>
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* Stale analysis banner — surfaces the same signal the canvas
-            shows, but on the overview surface so users see it before
-            opening the canvas tab. Only renders when there IS an
-            analysis and member docs have moved on since then. */}
+        {/* Stale analysis banner — "out of date" is an attention
+            signal, not an error. Switched from micro-red (which
+            read as "something broke") to micro-orange so the banner
+            warns without alarming. */}
         {hasDiscoveries && isAnalysisStale && (
           <section
             className="mb-7 rounded-lg flex items-start gap-2.5 px-4 py-3"
-            style={{ background: "rgba(245,158,11,0.10)", border: "1px solid rgba(245,158,11,0.35)" }}
+            style={{ background: "rgba(255, 107, 26, 0.08)", border: "1px solid rgba(255, 107, 26, 0.28)" }}
           >
-            <AlertTriangle width={16} height={16} className="shrink-0 mt-0.5" style={{ color: "#f59e0b" }} />
+            <AlertTriangle width={16} height={16} className="shrink-0 mt-0.5" style={{ color: "var(--micro-orange)" }} />
             <div className="flex-1 min-w-0">
-              <p className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
+              <p className="text-body font-semibold" style={{ color: "var(--micro-orange)" }}>
                 Analysis is out of date
               </p>
               <p className="text-caption" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>
@@ -645,10 +850,10 @@ Memory.Wiki search "topic"`;
             </div>
             <button
               onClick={() => onSwitchToCanvas?.()}
-              className="shrink-0 text-caption font-medium px-2.5 py-1 rounded transition-colors hover:bg-[rgba(245,158,11,0.18)]"
-              style={{ color: "#f59e0b", border: "1px solid rgba(245,158,11,0.5)" }}
+              className="shrink-0 text-caption font-mono uppercase tracking-wider px-2 py-0.5 rounded transition-opacity hover:opacity-80"
+              style={{ fontSize: 10, color: "var(--micro-orange)", border: "1px solid var(--micro-orange)" }}
             >
-              Re-run →
+              Re-run
             </button>
           </section>
         )}
@@ -656,15 +861,20 @@ Memory.Wiki search "topic"`;
         {/* ─── Documents ─── */}
         <section className="mb-8">
           <header className="flex items-baseline justify-between mb-3">
-            <h2 className="text-heading" style={{ color: "var(--accent)" }}>
+            <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>
               Documents
             </h2>
+            {/* Plain text link — supporting nav, not a primary
+                action. Same weight as "Full guide" / "See raw
+                payload" so the section header isn't pulled away
+                from its title. */}
             <button
               onClick={() => onSwitchToList?.()}
-              className="text-caption transition-colors hover:underline"
-              style={{ color: "var(--text-faint)" }}
+              className="inline-flex items-center gap-1 text-caption transition-colors hover:underline"
+              style={{ color: "var(--text-muted)" }}
             >
-              List view →
+              List view
+              <ArrowUpRight width={11} height={11} />
             </button>
           </header>
           {documents.length === 0 ? (
@@ -679,38 +889,55 @@ Memory.Wiki search "topic"`;
                 const updated = relativeTime(d.updated_at);
                 return (
                   <li key={d.id}>
+                    {/* One-row primary entry: icon, title (flex-1),
+                        updated, words — all vertically centered so
+                        the four atoms share a single baseline.
+                        Annotation, when present, drops to a second
+                        row indented under the title (icon column
+                        stays empty so the indent visually groups
+                        with its title). */}
                     <button
                       onClick={() => onOpenDoc?.(d.id)}
-                      className="w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-md transition-colors group hover:bg-[var(--toggle-bg)]"
+                      className="w-full text-left rounded-md transition-colors group hover:bg-[var(--toggle-bg)]"
                       style={{ border: "1px solid var(--border-dim)" }}
                     >
-                      <FileText width={13} height={13} className="shrink-0 mt-1" style={{ color: "var(--accent)" }} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2">
-                          <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
-                            {d.title || "Untitled"}
-                          </span>
-                          {updated && (
-                            <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)" }}>
-                              {updated}
-                            </span>
-                          )}
+                      <div className="flex items-center gap-3 px-3 py-2.5">
+                        <div className="shrink-0">
+                          <DocStatusIcon
+                            tab={{
+                              isDraft: d.isDraft,
+                              sharedWithCount: d.sharedWithCount,
+                              cloudId: d.id,
+                            }}
+                            isActive={false}
+                          />
                         </div>
-                        {annotation && (
-                          <p className="text-caption mt-1" style={{ color: "var(--text-muted)", lineHeight: 1.45 }}>
-                            <span
-                              className="font-mono uppercase mr-1.5"
-                              style={{ color: "var(--accent)", fontWeight: 700, fontSize: 9, letterSpacing: 0.5 }}
-                            >
-                              AI
-                            </span>
-                            {annotation}
-                          </p>
+                        <span className="truncate flex-1 min-w-0 text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {d.title || "Untitled"}
+                        </span>
+                        {updated && (
+                          <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)" }}>
+                            {updated}
+                          </span>
                         )}
+                        <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-faint)" }}>
+                          {fmtCount(wordCount)} words
+                        </span>
                       </div>
-                      <span className="text-caption font-mono shrink-0 mt-1" style={{ color: "var(--text-faint)" }}>
-                        {fmtCount(wordCount)} words
-                      </span>
+                      {annotation && (
+                        <p
+                          className="text-caption px-3 pb-2.5 -mt-1"
+                          style={{ color: "var(--text-muted)", lineHeight: 1.45, paddingLeft: 42 }}
+                        >
+                          <span
+                            className="font-mono uppercase mr-1.5"
+                            style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: 9, letterSpacing: 0.5 }}
+                          >
+                            AI
+                          </span>
+                          {annotation}
+                        </p>
+                      )}
                     </button>
                   </li>
                 );
@@ -718,6 +945,7 @@ Memory.Wiki search "topic"`;
             </ul>
           )}
         </section>
+      </div>
       </div>
     </div>
   );

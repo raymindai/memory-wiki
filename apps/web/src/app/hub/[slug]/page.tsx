@@ -5,6 +5,7 @@ import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
 import HubViewerV8 from "./HubViewerV8";
+import { Globe } from "lucide-react";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -40,26 +41,35 @@ async function getHub(slug: string, at: Date | null): Promise<HubData | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, hub_slug, hub_public, hub_description")
+    .select("id, display_name, avatar_url, avatar_style, hub_slug, hub_public, hub_description")
     .eq("hub_slug", slug)
     .single();
   if (!profile || !profile.hub_public) return null;
 
-  // Match the sidebar's resolveAvatar fallback chain (profile →
-  // OAuth metadata → dicebear) so the hub page never shows a
-  // different face than the in-app sidebar for the same person.
-  let resolvedAvatar = profile.avatar_url || null;
+  // Match the sidebar / editor `resolveAvatar` chain: avatar_style
+  // (when not "oauth") wins, then profile.avatar_url, then OAuth
+  // metadata, then a deterministic DiceBear identicon. Without
+  // honouring avatar_style here, the public hub showed the OAuth
+  // photo even when the user had explicitly picked Identicon in
+  // Settings — which is exactly what the user reported.
   let ownerEmail: string | null = null;
+  let oauthAvatar: string | null = null;
   try {
     const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
     ownerEmail = authUser?.user?.email || null;
-    if (!resolvedAvatar) {
-      const meta = (authUser?.user?.user_metadata as { avatar_url?: string } | undefined) || {};
-      if (meta.avatar_url) resolvedAvatar = meta.avatar_url;
-    }
+    const meta = (authUser?.user?.user_metadata as { avatar_url?: string } | undefined) || {};
+    if (meta.avatar_url) oauthAvatar = meta.avatar_url;
   } catch { /* admin lookup unavailable */ }
-  if (!resolvedAvatar) {
-    const seed = encodeURIComponent(ownerEmail || profile.hub_slug || "user");
+  const seed = encodeURIComponent(ownerEmail || profile.hub_slug || "user");
+  const style = (profile as { avatar_style?: string | null }).avatar_style;
+  let resolvedAvatar: string;
+  if (style && style !== "oauth") {
+    resolvedAvatar = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+  } else if (profile.avatar_url) {
+    resolvedAvatar = profile.avatar_url;
+  } else if (oauthAvatar) {
+    resolvedAvatar = oauthAvatar;
+  } else {
     resolvedAvatar = `https://api.dicebear.com/7.x/identicon/svg?seed=${seed}`;
   }
 
@@ -95,7 +105,8 @@ async function getHub(slug: string, at: Date | null): Promise<HubData | null> {
     profile: {
       id: profile.id,
       display_name: profile.display_name,
-      avatar_url: profile.avatar_url,
+      // Resolved avatar, not the raw column — honours avatar_style.
+      avatar_url: resolvedAvatar,
       hub_slug: profile.hub_slug,
       hub_description: profile.hub_description,
     },
@@ -189,10 +200,15 @@ export default async function HubPage({ params, searchParams }: Props) {
   const atLabel = at ? at.toISOString().slice(0, 10) : null;
 
   return (
-    <div className="min-h-screen" style={{ background: "#08080a", color: "#fafafa" }}>
+    <div className="min-h-screen" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
       <ViewerHeader
         title={`${author}'s hub`}
-        breadcrumb={<>memory.wiki/hub/<span style={{ color: "var(--accent)" }}>{slug}</span></>}
+        breadcrumb={
+          <span className="inline-flex items-center gap-1.5">
+            <Globe width={12} height={12} style={{ color: "#4ade80" }} aria-label="Public hub" />
+            <span>memory.wiki/hub/<span style={{ color: "var(--text-secondary)" }}>{slug}</span></span>
+          </span>
+        }
       />
       <HubViewerV8
         slug={slug}

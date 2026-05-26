@@ -430,7 +430,7 @@ function ShareModal({
                       padding: "7px 12px 9px",
                       background: "transparent",
                       border: "none",
-                      borderBottom: `2px solid ${active ? "var(--accent)" : "transparent"}`,
+                      borderBottom: `2px solid ${active ? "var(--text-primary)" : "transparent"}`,
                       marginBottom: -1,
                       cursor: "pointer",
                       minWidth: 0,
@@ -667,7 +667,7 @@ function ShareModal({
               >
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center text-caption font-bold shrink-0"
-                  style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+                  style={{ background: "var(--border)", color: "var(--text-primary)" }}
                 >
                   {(ownerName || ownerEmail)[0]?.toUpperCase() || "O"}
                 </div>
@@ -798,18 +798,18 @@ function ShareModal({
                   disabled={isDisabled}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors"
                   style={{
-                    background: selected ? "var(--accent-dim)" : "var(--background)",
-                    border: selected ? "1px solid var(--accent)" : "1px solid var(--border-dim)",
+                    background: selected ? "var(--border)" : "var(--background)",
+                    border: selected ? "1px solid var(--text-primary)" : "1px solid var(--border-dim)",
                     opacity: isDisabled ? 0.45 : 1,
                     cursor: isDisabled ? "not-allowed" : "pointer",
                   }}
                 >
                   <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center" style={{ border: selected ? "none" : "2px solid var(--border)" }}>
-                    {selected && <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "var(--accent)" }}>
+                    {selected && <span className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "var(--text-primary)" }}>
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#000" }} />
                     </span>}
                   </span>
-                  <span className="shrink-0" style={{ color: selected ? "var(--accent)" : "var(--text-faint)" }}>{opt.icon}</span>
+                  <span className="shrink-0" style={{ color: selected ? "var(--text-primary)" : "var(--text-faint)" }}>{opt.icon}</span>
                   <div className="flex-1">
                     <p className="text-xs font-medium" style={{ color: selected ? "var(--text-primary)" : "var(--text-muted)" }}>{opt.label}</p>
                     <p className="text-caption" style={{ color: "var(--text-faint)" }}>{opt.desc}</p>
@@ -851,7 +851,7 @@ function ShareModal({
                 target="_blank"
                 rel="noreferrer"
                 className="text-caption"
-                style={{ color: "var(--accent)", textDecoration: "underline" }}
+                style={{ color: "var(--text-primary)", textDecoration: "underline" }}
               >
                 Setup guide
               </a>

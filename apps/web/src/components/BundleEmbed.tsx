@@ -17,6 +17,7 @@ import Tooltip from "@/components/Tooltip";
 import { showToast } from "@/components/Toast";
 import { Button, Chip, Badge, ModalShell, EmptyState } from "@/components/ui";
 import BundleOverview from "@/components/BundleOverview";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import { Layers, AlertTriangle, HelpCircle, GitBranch, Sparkles, Lightbulb, Zap, CheckSquare, Tag, FileText, X as XIcon, PanelLeft, List } from "lucide-react";
 
 // Module-level cache so re-mounting a bundle tab paints instantly
@@ -1151,7 +1152,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
           <div className="shrink-0 h-0.5" style={{ background: "var(--border-dim)" }} />
           <div className="flex-1 flex min-h-0">
             <aside className="shrink-0 w-64 overflow-hidden" style={{ borderRight: "1px solid var(--border-dim)" }}>
-              <div className="flex items-center gap-1.5 px-2 py-1.5 text-caption font-mono" style={{ color: "var(--accent)" }}>
+              <div className="flex items-center gap-1.5 px-2 py-1.5 text-caption font-mono" style={{ color: "var(--text-primary)" }}>
                 <List width={14} height={14} />
                 <span>CONTENTS</span>
               </div>
@@ -1184,7 +1185,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
           <div className="max-w-3xl mx-auto px-6 py-10 flex flex-col items-center gap-3">
             <div
               className="rounded-2xl"
-              style={{ width: 80, height: 80, background: "var(--accent-dim)", opacity: 0.5 }}
+              style={{ width: 80, height: 80, background: "var(--border)", opacity: 0.5 }}
             />
             <SkeletonBar width={240} height={32} />
             <SkeletonBar width={320} height={14} />
@@ -1197,13 +1198,16 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         </div>
       );
     }
-    // Canvas (default) — generic centered spinner.
+    // Canvas (default) — same MW-blob loader shape every other surface
+    // uses (boot, inner doc, hub): animated symbol + caption only. The
+    // progress bar was removed app-wide so the loading moment reads as
+    // a brand pause, not a chrome filling.
     return (
-      <div className="w-full h-full flex items-center justify-center" style={{ background: "var(--background)" }}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }} />
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>Loading bundle...</span>
-        </div>
+      <div className="w-full h-full flex flex-col items-center justify-center" style={{ background: "var(--background)", gap: 14 }}>
+        <MemoryWikiLogo size={64} variant="icon-only" />
+        <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+          Loading bundle
+        </span>
       </div>
     );
   }
@@ -1603,12 +1607,12 @@ function DiscoveriesReopenButton({ onClick, count }: { onClick: () => void; coun
     <button
       onClick={onClick}
       className="absolute top-3 right-[180px] z-[35] flex items-center gap-1.5 h-8 px-3 rounded-lg text-caption font-semibold transition-all hover:brightness-110"
-      style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)", color: "var(--accent)" }}
+      style={{ background: "var(--border)", border: "1px solid var(--text-primary)", color: "var(--text-primary)" }}
     >
       <Sparkles width={11} height={11} />
       <span>Discoveries</span>
       {count > 0 && (
-        <span className="text-caption px-1 py-0 rounded font-mono tabular-nums" style={{ background: "var(--accent)", color: "#000" }}>{count}</span>
+        <span className="text-caption px-1 py-0 rounded font-mono tabular-nums" style={{ background: "var(--text-primary)", color: "var(--background)" }}>{count}</span>
       )}
     </button>
   );
@@ -1665,7 +1669,7 @@ function DiscoveriesPanel({
       {/* Header */}
       <div className="shrink-0 px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <Sparkles width={13} height={13} style={{ color: "var(--accent)" }} />
+          <Sparkles width={13} height={13} style={{ color: "var(--micro-ai)" }} />
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Discoveries</span>
           <span className="text-caption px-1.5 py-0.5 rounded" style={{ background: "var(--toggle-bg)", color: "var(--text-faint)" }}>
             {decomposedCount} / {totalDocs} analyzed
@@ -1685,17 +1689,17 @@ function DiscoveriesPanel({
 
       {/* Run / re-run CTA strip */}
       {(!fullyAnalyzed || isBulkRunning) && (
-        <div className="shrink-0 px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-dim)", background: "var(--accent-dim)" }}>
+        <div className="shrink-0 px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-dim)", background: "var(--border)" }}>
           {isBulkRunning ? (
             <>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full animate-pulse shrink-0" style={{ background: "var(--accent)" }} />
-                <span className="text-caption" style={{ color: "var(--accent)" }}>
+                <span className="w-2 h-2 rounded-full animate-pulse shrink-0" style={{ background: "var(--text-primary)" }} />
+                <span className="text-caption" style={{ color: "var(--text-primary)" }}>
                   Analyzing {isBulkRunning.done} / {isBulkRunning.total}…
                 </span>
               </div>
               <div className="flex-1 ml-3 h-1 rounded-full overflow-hidden" style={{ background: "var(--toggle-bg)" }}>
-                <div className="h-full transition-all" style={{ width: `${(isBulkRunning.done / isBulkRunning.total) * 100}%`, background: "var(--accent)" }} />
+                <div className="h-full transition-all" style={{ width: `${(isBulkRunning.done / isBulkRunning.total) * 100}%`, background: "var(--text-primary)" }} />
               </div>
             </>
           ) : (
@@ -1707,7 +1711,7 @@ function DiscoveriesPanel({
               </span>
               <button onClick={onRun}
                 className="px-2.5 py-1 rounded-md text-caption font-semibold transition-colors hover:brightness-110 shrink-0"
-                style={{ background: "var(--accent)", color: "#000" }}>
+                style={{ background: "var(--text-primary)", color: "var(--background)" }}>
                 Run discovery
               </button>
             </>
@@ -1729,7 +1733,7 @@ function DiscoveriesPanel({
             as a paragraph with citations instead of a colored alert box. */}
         {tensions.length > 0 && (
           <DiscoverySection
-            icon={<AlertTriangle width={12} height={12} style={{ color: "var(--color-danger)" }} />}
+            icon={<AlertTriangle width={12} height={12} style={{ color: "var(--micro-red)" }} />}
             label="Tensions"
             count={tensions.length}
             color="var(--color-danger)"
@@ -1937,7 +1941,7 @@ function BundleIntentBlock({ intent, canEdit, onSave }: {
           onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(intent); setEditing(false); } }}
           placeholder="What question is this bundle here to answer?"
           className="w-full text-body px-2 py-1 rounded outline-none"
-          style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--accent)" }}
+          style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--text-primary)" }}
         />
       ) : (
         <button
@@ -2054,7 +2058,7 @@ function SectionEditor({ docId, section, onClose, onSave }: {
           placeholder="Section content (markdown)…"
           spellCheck={false}
           className="text-body rounded-md outline-none resize-none flex-1"
-          style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)", padding: "var(--space-2) var(--space-3)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", lineHeight: 1.55, minHeight: 240 }}
+          style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)", padding: "var(--space-2) var(--space-3)", fontFamily: "var(--font-mono)", lineHeight: 1.55, minHeight: 240 }}
         />
       </div>
     </ModalShell>
@@ -2221,9 +2225,9 @@ function ChunkBulkBar({ count, onClear, onCopy, onExtract, onExtractKeep, onDele
 }) {
   return (
     <div className="flex items-center gap-1 px-1 py-1 rounded-lg shadow-xl"
-      style={{ background: "var(--surface)", border: "1px solid var(--accent)", boxShadow: "0 8px 24px rgba(0,0,0,0.35)" }}>
+      style={{ background: "var(--surface)", border: "1px solid var(--text-primary)", boxShadow: "0 8px 24px rgba(0,0,0,0.35)" }}>
       <span className="text-caption font-semibold px-2 py-1 rounded-md"
-        style={{ color: "var(--accent)", background: "var(--accent-dim)" }}>
+        style={{ color: "var(--text-primary)", background: "var(--border)" }}>
         {count} selected
       </span>
       <div style={{ width: 1, height: 18, background: "var(--border-dim)" }} />
@@ -2325,7 +2329,7 @@ function AddChunkModal({ onClose, onCreate }: {
             placeholder="What does this chunk say? Markdown is fine."
             spellCheck={false}
             className="text-body rounded-md outline-none resize-none flex-1"
-            style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)", padding: "var(--space-2) var(--space-3)", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", lineHeight: 1.55, minHeight: 200 }}
+            style={{ background: "var(--background)", color: "var(--text-primary)", border: "1px solid var(--border-dim)", padding: "var(--space-2) var(--space-3)", fontFamily: "var(--font-mono)", lineHeight: 1.55, minHeight: 200 }}
           />
           <p className="text-caption" style={{ color: "var(--text-faint)", marginTop: "var(--space-2)" }}>
             The chunk will be appended to the source document and re-classified by AI on the next decompose run.
@@ -2360,7 +2364,7 @@ function SynthesisModal({ kind, isLoading, markdown, onClose, onSaveAsDoc, onCop
       size="lg"
       title={
         <span className="inline-flex items-center gap-2">
-          <Sparkles width={14} height={14} style={{ color: "var(--accent)" }} />
+          <Sparkles width={14} height={14} style={{ color: "var(--micro-ai)" }} />
           {titles[kind] || "Synthesis"}
         </span>
       }
@@ -2377,7 +2381,7 @@ function SynthesisModal({ kind, isLoading, markdown, onClose, onSaveAsDoc, onCop
     >
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-12 gap-2" style={{ color: "var(--text-faint)" }}>
-          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }} />
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--text-primary)" }} />
           <span className="text-caption">AI is synthesizing the bundle…</span>
           <span className="text-caption">This usually takes 5-15 seconds.</span>
         </div>
@@ -2507,8 +2511,8 @@ function AddDocsPicker({ existingIds, onClose, onAdd, authHeaders }: { existingI
                 style={{ color: "var(--text-secondary)", gap: "var(--space-2)", padding: "var(--space-2) var(--space-2)" }}
               >
                 <span className="shrink-0 w-4 h-4 rounded border flex items-center justify-center" style={{
-                  background: checked ? "var(--accent)" : "transparent",
-                  borderColor: checked ? "var(--accent)" : "var(--border)",
+                  background: checked ? "var(--text-primary)" : "transparent",
+                  borderColor: checked ? "var(--text-primary)" : "var(--border)",
                 }}>
                   {checked && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
                 </span>
@@ -2756,7 +2760,7 @@ function NodeInfoPanel({ info, onClose, onOpenDoc, decomposeBridge }: {
                         >
                           {c.doc1}
                         </button>
-                        <span className="font-mono shrink-0" style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>↔</span>
+                        <span className="font-mono shrink-0" style={{ fontSize: 11, color: "var(--text-primary)", fontWeight: 600 }}>↔</span>
                         <button
                           onClick={() => onOpenDoc?.(c.doc2Id)}
                           className="font-medium truncate text-left hover:underline"
@@ -2780,7 +2784,7 @@ function NodeInfoPanel({ info, onClose, onOpenDoc, decomposeBridge }: {
                 <ul className="space-y-2">
                   {info.insights.map((ins: string, i: number) => (
                     <li key={i} className="flex gap-2.5 items-baseline">
-                      <Zap width={11} height={11} style={{ color: "var(--accent)", flexShrink: 0, transform: "translateY(2px)" }} />
+                      <Zap width={11} height={11} style={{ color: "var(--text-primary)", flexShrink: 0, transform: "translateY(2px)" }} />
                       <p style={{ fontSize: 12, lineHeight: 1.55, color: "var(--text-secondary)" }}>{ins}</p>
                     </li>
                   ))}
@@ -2988,7 +2992,7 @@ function DocumentNodeBody({ info, decomposeBridge, onOpenDoc }: { info: any; dec
             >
               {t.label}
               {active && (
-                <div className="absolute left-0 right-0 -bottom-px h-[2px]" style={{ background: "var(--accent)" }} />
+                <div className="absolute left-0 right-0 -bottom-px h-[2px]" style={{ background: "var(--text-primary)" }} />
               )}
             </button>
           );
@@ -3124,7 +3128,7 @@ function DocumentNodeBody({ info, decomposeBridge, onOpenDoc }: { info: any; dec
                       onClick={() => onOpenDoc?.(c.id)}
                       className="inline-flex items-center font-mono rounded transition-colors"
                       style={{ background: "var(--bg-elevated)", color: "var(--text-muted)", fontSize: 10, letterSpacing: 0.3, cursor: onOpenDoc ? "pointer" : "default", gap: 4, padding: "3px 7px", border: "1px solid var(--border-dim)" }}
-                      onMouseEnter={(e) => { if (onOpenDoc) { (e.currentTarget as HTMLElement).style.background = "var(--accent-dim)"; (e.currentTarget as HTMLElement).style.color = "var(--accent)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; } }}
+                      onMouseEnter={(e) => { if (onOpenDoc) { (e.currentTarget as HTMLElement).style.background = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--text-primary)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--text-primary)"; } }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)"; }}
                     >
                       <Lightbulb width={9} height={9} style={{ color: "#38bdf8" }} />
@@ -3160,7 +3164,7 @@ function DecomposeListPane({ bridge }: { bridge: DecomposeBridge }) {
     return (
       <div className="flex-1 flex items-center justify-center" style={{ color: "var(--text-faint)" }}>
         <div className="flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }} />
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--text-primary)" }} />
           <span className="text-caption">Analyzing document…</span>
         </div>
       </div>
@@ -3170,7 +3174,7 @@ function DecomposeListPane({ bridge }: { bridge: DecomposeBridge }) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <EmptyState
-          icon={<Layers width={28} height={28} style={{ color: "var(--accent)" }} />}
+          icon={<Layers width={28} height={28} style={{ color: "var(--text-primary)" }} />}
           heading="Not decomposed yet"
           guidance="Break this doc into AI-classified semantic chunks (concepts, claims, examples…) and edit each piece independently."
           cta={
@@ -3216,7 +3220,7 @@ function DecomposeExplainerBanner() {
     >
       <span
         className="font-mono uppercase shrink-0 mt-0.5"
-        style={{ color: "var(--accent)", fontSize: 9, letterSpacing: 0.5, fontWeight: 700 }}
+        style={{ color: "var(--text-primary)", fontSize: 9, letterSpacing: 0.5, fontWeight: 700 }}
       >
         About
       </span>
@@ -3271,7 +3275,7 @@ function DecomposeListPaneBody({ bridge, decomp }: { bridge: DecomposeBridge; de
         <Tooltip text="Add a new chunk" position="bottom">
           <button onClick={bridge.onAddChunk}
             className="p-1 rounded-md hover:bg-[var(--menu-hover)] transition-colors"
-            style={{ color: "var(--accent)" }}>
+            style={{ color: "var(--text-primary)" }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </Tooltip>
@@ -3305,8 +3309,8 @@ function DecomposeListPaneBody({ bridge, decomp }: { bridge: DecomposeBridge; de
                   onClick={() => setFilter(t === null ? null : (isActive ? null : t))}
                   className="px-2 py-1 text-caption rounded transition-colors capitalize flex items-center gap-1"
                   style={{
-                    background: isActive ? "var(--accent-dim)" : "transparent",
-                    color: isActive ? "var(--accent)" : "var(--text-faint)",
+                    background: isActive ? "var(--border)" : "transparent",
+                    color: isActive ? "var(--text-primary)" : "var(--text-faint)",
                     fontWeight: isActive ? 600 : 500,
                   }}
                   onMouseEnter={(e) => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = "var(--toggle-bg)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; } }}
@@ -3615,7 +3619,7 @@ function BundleListView({
           can see how far they are through the bundle without
           having to scan the TOC. */}
       <div className="shrink-0 h-0.5" style={{ background: "var(--border-dim)" }}>
-        <div className="h-full transition-all duration-150" style={{ background: "var(--accent)", width: `${(progress * 100).toFixed(1)}%` }} />
+        <div className="h-full transition-all duration-150" style={{ background: "var(--text-primary)", width: `${(progress * 100).toFixed(1)}%` }} />
       </div>
       <div className="flex-1 flex min-h-0">
       {/* ─── TOC sidebar — search, per-doc word counts, active-row
@@ -3632,7 +3636,7 @@ function BundleListView({
             <button
               onClick={() => setContentsCollapsed(false)}
               className="p-1 rounded transition-colors shrink-0"
-              style={{ color: "var(--accent)" }}
+              style={{ color: "var(--text-primary)" }}
             >
               <List width={14} height={14} />
             </button>
@@ -3655,23 +3659,16 @@ function BundleListView({
                 <button
                   onClick={() => setContentsCollapsed(true)}
                   className="p-1 rounded transition-colors shrink-0"
-                  style={{ color: "var(--accent)" }}
+                  style={{ color: "var(--text-primary)" }}
                 >
                   <List width={14} height={14} />
                 </button>
               </Tooltip>
-              <span style={{ color: "var(--accent)" }} className="shrink-0">CONTENTS</span>
+              <span style={{ color: "var(--text-primary)" }} className="shrink-0">CONTENTS</span>
             </div>
-            {onSwitchToBundle && (
-              <button
-                onClick={onSwitchToBundle}
-                className="text-caption transition-colors hover:underline shrink-0"
-                style={{ color: "var(--text-faint)" }}
-                title="Back to Bundle overview"
-              >
-                ← Bundle
-              </button>
-            )}
+            {/* Removed "← Bundle" back link — bundle row already lives at
+                the top of the parent tab bar, so the same navigation is
+                always available without the extra chrome. */}
           </div>
         </div>
         <div className="px-3 py-3">
@@ -3694,11 +3691,11 @@ function BundleListView({
                   key={doc.id}
                   onClick={() => scrollToDoc(doc.id)}
                   className="w-full text-left px-2.5 py-2 rounded-md flex items-start gap-2 transition-colors hover:bg-[var(--toggle-bg)] mb-0.5"
-                  style={{ background: isActive ? "var(--accent-dim)" : "transparent" }}
+                  style={{ background: isActive ? "var(--border)" : "transparent" }}
                 >
                   <span className="text-caption font-mono w-4 shrink-0 mt-0.5 tabular-nums" style={{ color: "var(--text-faint)" }}>{i + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="text-xs truncate" style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)", fontWeight: isActive ? 600 : 400 }}>
+                    <div className="text-xs truncate" style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: isActive ? 600 : 400 }}>
                       {doc.title || "Untitled"}
                     </div>
                     <div className="text-caption mt-0.5 tabular-nums" style={{ color: "var(--text-faint)" }}>
@@ -3772,7 +3769,7 @@ function BundleListView({
                   <button
                     onClick={() => copyDocUrl(doc.id)}
                     className="text-caption px-2 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
-                    style={{ color: copiedDocId === doc.id ? "var(--accent)" : "var(--text-muted)", border: `1px solid ${copiedDocId === doc.id ? "var(--accent)" : "var(--border-dim)"}` }}
+                    style={{ color: copiedDocId === doc.id ? "var(--text-primary)" : "var(--text-muted)", border: `1px solid ${copiedDocId === doc.id ? "var(--text-primary)" : "var(--border-dim)"}` }}
                     title="Copy doc URL"
                   >
                     {copiedDocId === doc.id ? "Copied" : "Copy URL"}
@@ -3792,7 +3789,7 @@ function BundleListView({
                   inline for owners, read-only for viewers. Empty + non-owner
                   → row is hidden. Empty + owner → "Add note" CTA. */}
               {isEditing ? (
-                <div className="mb-4 px-3 py-2 rounded-md" style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)" }}>
+                <div className="mb-4 px-3 py-2 rounded-md" style={{ background: "var(--border)", border: "1px solid var(--text-primary)" }}>
                   <textarea
                     autoFocus
                     value={draftAnnotation}
@@ -3822,14 +3819,14 @@ function BundleListView({
                   onClick={() => startEdit(doc)}
                   className="w-full text-left mb-4 px-3 py-2 rounded-md transition-colors group"
                   style={{
-                    background: "var(--accent-dim)",
+                    background: "var(--border)",
                     border: "1px solid transparent",
                     cursor: canEdit ? "pointer" : "default",
                   }}
                   disabled={!canEdit}
                   title={canEdit ? "Edit this note — explains why the doc belongs in this bundle" : "Note: why this doc belongs in this bundle"}
                 >
-                  <div className="text-caption font-mono uppercase tracking-wider mb-0.5" style={{ color: "var(--accent)", fontSize: 9, letterSpacing: 0.6 }}>
+                  <div className="text-caption font-mono uppercase tracking-wider mb-0.5" style={{ color: "var(--text-primary)", fontSize: 9, letterSpacing: 0.6 }}>
                     Why this doc belongs
                   </div>
                   <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>

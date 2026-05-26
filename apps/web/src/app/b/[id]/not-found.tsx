@@ -1,36 +1,69 @@
 import Link from "next/link";
-import MemoryWikiLogo from "@/components/MemoryWikiLogo";
+import ViewerHeader from "@/components/ViewerHeader";
+
+// Bundle viewer 404. Uses ViewerHeader so the chrome matches the
+// real bundle viewer the user expected to land on — keeps the
+// "this URL just doesn't have content" reading instead of a
+// generic site error. Canvas bg + Cal Sans display title; the
+// primary action is an ink-filled pill, the secondary is a quiet
+// text link below.
 
 export default function BundleNotFound() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--text-primary)" }}>
-      <header className="px-6 py-3 flex items-center" style={{ borderBottom: "1px solid var(--border-dim)" }}>
-        <Link href="/" className="shrink-0"><MemoryWikiLogo size={18} /></Link>
-      </header>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
+      <ViewerHeader title="Bundle not found" />
 
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-md text-center">
-          <div className="text-display font-bold mb-4" style={{ color: "var(--accent)" }}>
-            Bundle not found
+          <div
+            className="font-mono mb-3"
+            style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase" }}
+          >
+            404, bundle
           </div>
-          <p className="text-body leading-relaxed mb-6" style={{ color: "var(--text-secondary)" }}>
+          <h1
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-display)",
+              fontSize: 32,
+              fontWeight: 500,
+              letterSpacing: 0,
+              lineHeight: 1.2,
+              margin: 0,
+            }}
+          >
+            Bundle not found
+          </h1>
+          <p
+            className="mt-3 leading-relaxed"
+            style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6 }}
+          >
             This bundle doesn&apos;t exist, was deleted, or its owner restricted access.
           </p>
-          <p className="text-caption leading-relaxed mb-8" style={{ color: "var(--text-faint)" }}>
-            Bundles are collections of documents — they share one URL but contain many docs. Make your own from any pair of docs in Memory.Wiki.
+          <p
+            className="mt-2 mb-6 leading-relaxed"
+            style={{ color: "var(--text-faint)", fontSize: 12, lineHeight: 1.55 }}
+          >
+            Bundles are collections of documents, they share one URL but contain many docs. Make your own from any pair of docs in Memory.Wiki.
           </p>
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col items-center gap-3">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-body font-semibold transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "#000" }}
+              className="inline-flex items-center px-4 py-2 rounded-lg transition-opacity hover:opacity-90"
+              style={{
+                background: "var(--text-primary)",
+                color: "var(--background)",
+                fontSize: 13,
+                fontWeight: 500,
+                textDecoration: "none",
+              }}
             >
-              Start a bundle →
+              Start a bundle
             </Link>
             <Link
               href="/shared"
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-body font-semibold transition-colors"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              className="inline-flex items-center transition-colors hover:underline"
+              style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "none" }}
             >
               Browse shared bundles
             </Link>

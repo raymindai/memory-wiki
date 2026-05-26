@@ -57,8 +57,8 @@ export default function FolderEmojiPicker({
             style={{
               padding: "var(--space-2) var(--space-2)",
               marginBottom: "var(--space-2)",
-              color: currentEmoji ? "var(--text-secondary)" : "var(--accent)",
-              border: `1px dashed ${currentEmoji ? "var(--border-dim)" : "var(--accent)"}`,
+              color: currentEmoji ? "var(--text-secondary)" : "var(--text-primary)",
+              border: `1px dashed ${currentEmoji ? "var(--border-dim)" : "var(--text-primary)"}`,
             }}
           >
             Use default folder icon
@@ -71,10 +71,10 @@ export default function FolderEmojiPicker({
                   <button
                     key={emoji}
                     onClick={() => onSelect(emoji)}
-                    className="w-8 h-8 rounded text-[18px] leading-none flex items-center justify-center transition-colors hover:bg-[var(--accent-dim)]"
+                    className="w-8 h-8 rounded text-[18px] leading-none flex items-center justify-center transition-colors hover:bg-[var(--border)]"
                     style={{
-                      background: currentEmoji === emoji ? "var(--accent-dim)" : "transparent",
-                      outline: currentEmoji === emoji ? "1px solid var(--accent)" : "none",
+                      background: currentEmoji === emoji ? "var(--border)" : "transparent",
+                      outline: currentEmoji === emoji ? "1px solid var(--text-primary)" : "none",
                     }}
                     title={emoji}
                   >

@@ -1,82 +1,130 @@
 "use client";
 
 /**
- * Canonical Memory.Wiki logo component.
- * Two-tone wordmark — orange "Memory" + theme-primary ".Wiki".
- * Gray is intentionally NOT used in the wordmark (founder spec).
+ * Canonical Memory.Wiki logo.
  *
- * Default split ("Memory.Wiki"):
- *   "Memory"   accent         (#fb923c dark / #ea580c light)
- *   ".Wiki"    text-primary   (#fafafa dark / #09090b light)
+ * Renders the brand v2 monochrome mark + wordmark on a SINGLE
+ * horizontal line. The full v2 SVG lockup (logo-full-*.svg) is
+ * STACKED (memory / .wiki on two rows) by design — that shape fits
+ * the marketing nav but not the editor / viewer header strip, so we
+ * render the lockup ourselves: SVG icon + Cal Sans wordmark next to
+ * it. Theme-swapped via the .mw-logo-{dark,light}theme rules in
+ * globals.css.
  *
- * Compact mobile collapses to "M.W" — same two-tone split:
- *   "M"    accent
- *   ".W"   text-primary
+ * Variants:
+ *   - "full"      (default) → icon + wordmark inline
+ *   - "text-only"           → wordmark only
+ *   - "icon-only"           → SVG mark alone
+ *
+ * `size` is the rendered HEIGHT in px (icon SVG height + wordmark
+ * font-size). Width auto-derives.
  */
+
+export type MemoryWikiLogoVariant = "full" | "text-only" | "icon-only";
+
 export default function MemoryWikiLogo({
   size = 22,
-  variant = "Memory.Wiki",
-  compact = false,
-  withBlob = false,
+  variant = "full",
+  // Back-compat with the previous component:
+  //   withBlob === false  ⇒  text-only
+  //   withBlob === true   ⇒  full
+  // New callers should set `variant` directly.
+  withBlob,
 }: {
   size?: number;
-  variant?: "Memory.Wiki" | "mdcore.ai";
-  /** When true, render the "M.W" mark on mobile and the full
-   *  wordmark on desktop. Useful in tight rows (app toolbar)
-   *  where the full wordmark would crowd. */
-  compact?: boolean;
-  /** When true, prepend the animated MW blob mark in front of the
-   *  wordmark — the "full" logo lock-up (blob + wordmark together).
-   *  The blob swaps light/dark variants automatically via the
-   *  `data-theme` attribute on `<html>`. */
+  variant?: MemoryWikiLogoVariant;
   withBlob?: boolean;
 }) {
-  const weight = 800;
-  const letterSpacing = "-0.02em";
-  const left = variant === "mdcore.ai" ? "md" : "Memory";
-  const right = variant === "mdcore.ai" ? "core.ai" : ".Wiki";
+  const resolved: MemoryWikiLogoVariant =
+    withBlob === false ? "text-only"
+    : withBlob === true ? "full"
+    : variant;
 
-  // Blob mark sized relative to wordmark — slightly taller so the curve
-  // sits on the cap-height of the wordmark without dominating it.
-  const blobSize = Math.round(size * 1.35);
-  const blob = withBlob && variant === "Memory.Wiki" ? (
+  // Uniform wordmark weight 500 (max weight rule across the app).
+  // Symbol scales relative to cap-height: 1.55x in small/mid lockups
+  // so the mark dominates the wordmark, 1.25x in large lockups so
+  // the wordmark gets more visual presence in headline contexts.
+  const isCompact = size <= 30;
+  const wordmarkWeight = 500;
+  const iconScale = isCompact ? 1.55 : 1.25;
+  const iconSize = Math.round(size * iconScale);
+
+  // The symbol is ALWAYS the animated morph blob — same asset the
+  // marketing nav uses — so the brand mark feels alive everywhere
+  // (editor header, loaders, viewer chrome). File naming convention:
+  //   mwblob_morph.svg       = white blob → use on dark theme
+  //   mwblob_morph_dark.svg  = dark blob  → use on light theme
+  // (The "_dark" suffix is the historical name for the dark-on-light
+  // variant, not the dark-theme asset.)
+  // .mw-logo-blob in globals.css does the theme swap + positions both
+  // imgs absolute inside the span; both imgs share the span's size.
+  const Icon = (
     <span
-      aria-hidden
       className="mw-logo-blob"
-      style={{ width: blobSize, height: blobSize, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+      aria-hidden
+      style={{ display: "inline-block", width: iconSize, height: iconSize, flexShrink: 0 }}
     >
-      <img src="/brand/mwblob_morph.svg" alt="" className="mw-logo-blob-darktheme" style={{ width: "100%", height: "100%", display: "block" }} />
-      <img src="/brand/mwblob_morph_dark.svg" alt="" className="mw-logo-blob-lighttheme" style={{ width: "100%", height: "100%", display: "block" }} />
+      <img
+        src="/brand/mwblob_morph.svg"
+        alt=""
+        className="mw-logo-blob-darktheme"
+        draggable={false}
+      />
+      <img
+        src="/brand/mwblob_morph_dark.svg"
+        alt=""
+        className="mw-logo-blob-lighttheme"
+        draggable={false}
+      />
     </span>
-  ) : null;
+  );
 
-  if (compact) {
-    const baseStyle = { fontSize: size, fontWeight: weight, letterSpacing, whiteSpace: "nowrap" as const };
+  const Wordmark = (
+    <span
+      style={{
+        fontFamily: "var(--font-display)",
+        fontWeight: wordmarkWeight,
+        letterSpacing: 0,
+        fontSize: size,
+        lineHeight: 1,
+        whiteSpace: "nowrap",
+        color: "var(--text-primary)",
+      }}
+    >
+      memory.wiki
+    </span>
+  );
+
+  if (resolved === "icon-only") {
     return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: withBlob ? 8 : 0 }}>
-        {blob}
-        <span className="sm:hidden" style={baseStyle} aria-label={variant}>
-          <span style={{ color: "var(--accent)" }}>{variant === "mdcore.ai" ? "m" : "M"}</span>
-          <span style={{ color: "var(--text-primary)" }}>{variant === "mdcore.ai" ? "d" : ".W"}</span>
-        </span>
-        <span className="hidden sm:inline" style={baseStyle} aria-label={variant}>
-          <span style={{ color: "var(--accent)" }}>{left}</span>
-          <span style={{ color: "var(--text-primary)" }}>{right}</span>
-        </span>
+      <span className="mw-logo" style={{ display: "inline-block", lineHeight: 0 }} aria-label="Memory.Wiki">
+        {Icon}
       </span>
     );
   }
-
+  if (resolved === "text-only") {
+    return (
+      <span className="mw-logo" aria-label="Memory.Wiki">
+        {Wordmark}
+      </span>
+    );
+  }
+  // "full" — icon + wordmark on one line
   return (
     <span
-      style={{ display: "inline-flex", alignItems: "center", gap: withBlob ? 8 : 0 }}
-      aria-label={variant}
+      className="mw-logo"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        // Gap scales with size so the lockup keeps its visual rhythm
+        // whether the logo is 14 (mobile) or 32 (auth pages) tall.
+        gap: Math.max(6, Math.round(size * 0.35)),
+        lineHeight: 1,
+      }}
+      aria-label="Memory.Wiki"
     >
-      {blob}
-      <span style={{ fontSize: size, fontWeight: weight, letterSpacing, whiteSpace: "nowrap" }}>
-        <span style={{ color: "var(--accent)" }}>{left}</span>
-        <span style={{ color: "var(--text-primary)" }}>{right}</span>
-      </span>
+      {Icon}
+      {Wordmark}
     </span>
   );
 }

@@ -45,7 +45,7 @@ const shapeCSS: Record<CanvasNode["shape"], React.CSSProperties> = {
 // SVG mini icons for shape selector
 function ShapeIcon({ shape, size = 14 }: { shape: CanvasNode["shape"]; size?: number }) {
   const s = size;
-  const c = "var(--accent)";
+  const c = "var(--text-primary)";
   switch (shape) {
     case "round":
       return <svg width={s} height={s} viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="5" fill="none" stroke={c} strokeWidth="1.5"/></svg>;
@@ -64,7 +64,7 @@ const _PIE_COLORS = ["#fb923c", "#60a5fa", "#4ade80", "#c4b5fd", "#f472b6", "#fb
 
 // ─── Diagram-type-specific Help ───
 
-const A = ({ children }: { children: React.ReactNode }) => <span style={{ color: "var(--accent)" }}>{children}</span>;
+const A = ({ children }: { children: React.ReactNode }) => <span style={{ color: "var(--text-primary)" }}>{children}</span>;
 const HelpCol = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div><p className="font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>{title}</p>{children}</div>
 );
@@ -451,7 +451,7 @@ function FlowchartLayout({
       {(["LR", "TD"] as Direction[]).map((d) => (
         <button key={d} onClick={() => setDirection(d)}
           className="px-2.5 py-1 text-caption font-mono font-semibold"
-          style={{ background: direction === d ? "var(--accent-dim)" : "transparent", color: direction === d ? "var(--accent)" : "var(--text-faint)" }}>
+          style={{ background: direction === d ? "var(--border)" : "transparent", color: direction === d ? "var(--text-primary)" : "var(--text-faint)" }}>
           {d === "LR" ? (<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{display:"inline",verticalAlign:"middle"}}><path d="M3 8h10M10 5l3 3-3 3"/></svg>) : (<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{display:"inline",verticalAlign:"middle"}}><path d="M8 3v10M5 10l3 3 3-3"/></svg>)}
         </button>
       ))}
@@ -586,7 +586,7 @@ function MdCanvas({
           clusterBkg: "#18181b", titleColor: "#fafafa", edgeLabelBackground: "#18181b",
           pie1: "#fb923c", pie2: "#60a5fa", pie3: "#4ade80", pie4: "#c4b5fd", pie5: "#f472b6",
         },
-        fontFamily: "ui-monospace, monospace", fontSize: 13,
+        fontFamily: "var(--font-mono)", fontSize: 13,
       });
 
       (async () => {
@@ -941,7 +941,7 @@ function MdCanvas({
         style={{ borderBottom: "1px solid var(--border-dim)" }}
       >
         <div className="flex items-center gap-2">
-          <span className="font-mono uppercase tracking-wider text-caption" style={{ color: "var(--accent)" }}>
+          <span className="font-mono uppercase tracking-wider text-caption" style={{ color: "var(--text-primary)" }}>
             Mermaid Diagrams
           </span>
           <button
@@ -949,8 +949,8 @@ function MdCanvas({
             className="px-2 rounded-md font-mono text-caption leading-[24px]"
             style={{
               height: 24,
-              background: showGuide ? "var(--accent-dim)" : "var(--toggle-bg)",
-              color: showGuide ? "var(--accent)" : "var(--text-muted)",
+              background: showGuide ? "var(--border)" : "var(--toggle-bg)",
+              color: showGuide ? "var(--text-primary)" : "var(--text-muted)",
             }}
           >
             Help
@@ -962,7 +962,7 @@ function MdCanvas({
             {LAYOUTS.map((l) => (
               <button key={l.id} title={l.title}
                 className="p-1 rounded"
-                style={{ color: rawLayout === l.id ? "var(--accent)" : "var(--text-faint)", opacity: rawLayout === l.id ? 1 : 0.4 }}
+                style={{ color: rawLayout === l.id ? "var(--text-primary)" : "var(--text-faint)", opacity: rawLayout === l.id ? 1 : 0.4 }}
                 onClick={() => {
                   setRawLayout(l.id);
                   // Layout applies to both modes via CSS Grid
@@ -994,7 +994,7 @@ function MdCanvas({
             disabled={nodes.length === 0 && !rawCodeMode}
             className="px-3 py-1 rounded-md font-mono text-caption font-semibold"
             style={{
-              background: (nodes.length > 0 || rawCodeMode) ? "var(--accent)" : "var(--toggle-bg)",
+              background: (nodes.length > 0 || rawCodeMode) ? "var(--text-primary)" : "var(--toggle-bg)",
               color: (nodes.length > 0 || rawCodeMode) ? "#000" : "var(--text-muted)",
             }}
           >
@@ -1029,8 +1029,8 @@ function MdCanvas({
               }}
               className="px-2 py-1 rounded-md text-caption transition-colors whitespace-nowrap shrink-0"
               style={{
-                background: currentType === dt.id ? "var(--accent-dim)" : "var(--toggle-bg)",
-                color: currentType === dt.id ? "var(--accent)" : "var(--text-muted)",
+                background: currentType === dt.id ? "var(--border)" : "var(--toggle-bg)",
+                color: currentType === dt.id ? "var(--text-primary)" : "var(--text-muted)",
               }}
             >
               {dt.label}
@@ -1056,7 +1056,7 @@ function MdCanvas({
             <button
               onClick={handleImport}
               className="px-3 py-1 rounded text-caption font-mono"
-              style={{ background: "var(--accent-dim)", color: "var(--accent)" }}
+              style={{ background: "var(--border)", color: "var(--text-primary)" }}
             >
               Load
             </button>
@@ -1191,7 +1191,7 @@ function MdCanvas({
               <polygon points="0 0, 6 2, 0 4" fill="var(--text-muted)" />
             </marker>
             <marker id="arr-accent" markerWidth="6" markerHeight="4" refX="5.5" refY="2" orient="auto">
-              <polygon points="0 0, 6 2, 0 4" fill="var(--accent)" />
+              <polygon points="0 0, 6 2, 0 4" fill="var(--text-primary)" />
             </marker>
           </defs>
 
@@ -1266,7 +1266,7 @@ function MdCanvas({
               x1={getEdgePoint(connectState.fromId, connectState.mouseX, connectState.mouseY).x}
               y1={getEdgePoint(connectState.fromId, connectState.mouseX, connectState.mouseY).y}
               x2={connectState.mouseX} y2={connectState.mouseY}
-              stroke="var(--accent)" strokeWidth={1.5} strokeDasharray="6 3"
+              stroke="var(--text-primary)" strokeWidth={1.5} strokeDasharray="6 3"
               markerEnd="url(#arr-accent)"
             />
           )}
@@ -1320,7 +1320,7 @@ function MdCanvas({
                     }}
                     className="px-2 py-1 rounded text-caption"
                     style={{
-                      background: (edge.style || "solid") === s ? "var(--accent)" : "var(--background)",
+                      background: (edge.style || "solid") === s ? "var(--text-primary)" : "var(--background)",
                       color: (edge.style || "solid") === s ? "#000" : "var(--text-secondary)",
                       border: "1px solid var(--border)",
                     }}
@@ -1338,7 +1338,7 @@ function MdCanvas({
                     }}
                     className="px-2 py-1 rounded text-caption"
                     style={{
-                      background: (edge.direction || "forward") === d ? "var(--accent)" : "var(--background)",
+                      background: (edge.direction || "forward") === d ? "var(--text-primary)" : "var(--background)",
                       color: (edge.direction || "forward") === d ? "#000" : "var(--text-secondary)",
                       border: "1px solid var(--border)",
                     }}
@@ -1368,9 +1368,9 @@ function MdCanvas({
               className="px-3 py-2 text-sm transition-colors relative"
               style={{
                 background: "var(--surface)",
-                border: `1.5px solid ${isSelected ? "var(--accent)" : "var(--border)"}`,
+                border: `1.5px solid ${isSelected ? "var(--text-primary)" : "var(--border)"}`,
                 boxShadow: isSelected
-                  ? "0 0 0 2px var(--accent-dim), 0 4px 12px rgba(0,0,0,0.3)"
+                  ? "0 0 0 2px var(--border), 0 4px 12px rgba(0,0,0,0.3)"
                   : "0 2px 8px rgba(0,0,0,0.2)",
                 ...shapeCSS[node.shape],
               }}
@@ -1423,8 +1423,8 @@ function MdCanvas({
               top: Math.min(selectionBox.startY, selectionBox.endY),
               width: Math.abs(selectionBox.endX - selectionBox.startX),
               height: Math.abs(selectionBox.endY - selectionBox.startY),
-              border: "1px dashed var(--accent)",
-              background: "var(--accent-dim)",
+              border: "1px dashed var(--text-primary)",
+              background: "var(--border)",
               borderRadius: 4,
               zIndex: 20,
             }}
@@ -1439,7 +1439,7 @@ function MdCanvas({
             </p>
             <div className="text-xs space-y-1 text-center" style={{ color: "var(--text-faint)" }}>
               <p>Alt + drag between nodes to connect them</p>
-              <p>Click <span style={{ color: "var(--accent)" }}>?</span> for the full guide</p>
+              <p>Click <span style={{ color: "var(--text-primary)" }}>?</span> for the full guide</p>
             </div>
           </div>
         )}

@@ -238,7 +238,7 @@ async function buildLayout(
           // Connect the root to every chunk so the cluster is rooted; AI edges
           // layer on top with their semantic relations.
           elkEdges.push({ id: `cr-${rootId}-${cid}`, sources: [rootId], targets: [cid] });
-          edges.push({ id: `cr-${rootId}-${cid}`, source: rootId, target: cid, type: "default", style: { stroke: "var(--accent)", strokeWidth: 1, opacity: 0.18 } });
+          edges.push({ id: `cr-${rootId}-${cid}`, source: rootId, target: cid, type: "default", style: { stroke: "var(--text-primary)", strokeWidth: 1, opacity: 0.18 } });
         });
 
         // AI semantic edges between chunks
@@ -254,7 +254,7 @@ async function buildLayout(
           const src = chunkIdMap.get(e.source);
           const tgt = chunkIdMap.get(e.target);
           if (!src || !tgt) return;
-          const stroke = edgeColors[e.type] || "var(--accent)";
+          const stroke = edgeColors[e.type] || "var(--text-primary)";
           if (e.label) {
             const labelId = `clabel-${doc.id}-${i}`;
             addNode(labelId, "edgeLabel", { label: e.label, color: stroke });
@@ -341,7 +341,7 @@ async function buildLayout(
       if (!nodeSet.has(src) || !nodeSet.has(tgt)) continue;
       const isDocToDoc = e.source.startsWith("doc:") && e.target.startsWith("doc:");
       // Edge color = source node's color
-      const sourceColor = nodeColorMap.get(e.source) || "var(--accent)";
+      const sourceColor = nodeColorMap.get(e.source) || "var(--text-primary)";
       const edgeColor = isDocToDoc ? "#60a5fa" : sourceColor;
       const edgeStyle = {
         stroke: edgeColor, strokeWidth: 1,
@@ -599,7 +599,7 @@ function EdgeLabelNode({ data }: { data: any }) {
 
 function FlowingEdge({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style, data }: EdgeProps) {
   const [path] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
-  const stroke = (style as any)?.stroke || "var(--accent)";
+  const stroke = (style as any)?.stroke || "var(--text-primary)";
   const width = (style as any)?.strokeWidth || 1;
   const opacity = (style as any)?.opacity || 0.3;
   const flowing = (data as any)?.flowing;
@@ -1373,8 +1373,8 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
       onDrop={handleDrop}
     >
       {dropActive && (
-        <div className="absolute inset-0 z-[50] pointer-events-none flex items-center justify-center" style={{ background: "rgba(251,146,60,0.06)", border: "2px dashed var(--accent)", borderRadius: 8 }}>
-          <div className="px-4 py-2 rounded-lg text-body font-semibold" style={{ background: "var(--accent)", color: "#000" }}>
+        <div className="absolute inset-0 z-[50] pointer-events-none flex items-center justify-center" style={{ background: "rgba(251,146,60,0.06)", border: "2px dashed var(--text-primary)", borderRadius: 8 }}>
+          <div className="px-4 py-2 rounded-lg text-body font-semibold" style={{ background: "var(--text-primary)", color: "#000" }}>
             Drop to add to bundle
           </div>
         </div>
@@ -1387,7 +1387,7 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
            main color (set via --node-color) instead of a soft glow. The ring
            is drawn with box-shadow spread so it respects rounded corners. */
         .react-flow__node:hover > div {
-          box-shadow: 0 0 0 1px var(--node-color, var(--accent)) !important;
+          box-shadow: 0 0 0 1px var(--node-color, var(--text-primary)) !important;
           transition: box-shadow 0.12s;
         }
         /* Edge labels are inline pills, not interactive nodes. Their wrapper
@@ -1399,29 +1399,29 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
           box-shadow: none !important;
         }
         .bundle-node-focused > div {
-          box-shadow: 0 0 0 1px var(--node-color, var(--accent)) !important;
+          box-shadow: 0 0 0 1px var(--node-color, var(--text-primary)) !important;
         }
         .bundle-node-ext-hover > div {
-          box-shadow: 0 0 0 1px var(--node-color, var(--accent)) !important;
+          box-shadow: 0 0 0 1px var(--node-color, var(--text-primary)) !important;
           transform: scale(1.02);
           transition: box-shadow 0.15s, transform 0.15s;
         }
         .bundle-chunk-selected > div {
-          box-shadow: 0 0 0 2px var(--node-color, var(--accent)) !important;
+          box-shadow: 0 0 0 2px var(--node-color, var(--text-primary)) !important;
         }
         .bundle-chunk-filtered-out { opacity: 0.18; transition: opacity 0.2s; }
         @keyframes bundleDotFlow { to { stroke-dashoffset: -18; } }
         .bundle-dot-overlay { stroke-dasharray: 0.01 6; stroke-linecap: round; animation: bundleDotFlow 2s linear infinite; }
         /* Pulse: outline thickens/expands rhythmically — no fuzzy glow */
         @keyframes bundleChunkPulseOutline {
-          0%   { box-shadow: 0 0 0 1px var(--node-color, var(--accent)); }
-          50%  { box-shadow: 0 0 0 3px var(--node-color, var(--accent)); }
-          100% { box-shadow: 0 0 0 1px var(--node-color, var(--accent)); }
+          0%   { box-shadow: 0 0 0 1px var(--node-color, var(--text-primary)); }
+          50%  { box-shadow: 0 0 0 3px var(--node-color, var(--text-primary)); }
+          100% { box-shadow: 0 0 0 1px var(--node-color, var(--text-primary)); }
         }
         .bundle-chunk-pulse > div { animation: bundleChunkPulseOutline 1.4s ease-in-out 2 !important; }
         @keyframes analyzeShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .bundle-analyzing-bar {
-          height: 2px; background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+          height: 2px; background: linear-gradient(90deg, transparent 0%, var(--text-primary) 50%, transparent 100%);
           background-size: 200% 100%; animation: analyzeShimmer 1.5s ease infinite;
         }
       `}</style>
@@ -1447,12 +1447,12 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
               className="flex items-center gap-2 px-3 py-1.5 rounded-full text-caption"
               style={{
                 background: "var(--surface)",
-                border: "1px solid var(--accent)",
+                border: "1px solid var(--text-primary)",
                 boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
                 color: "var(--text-secondary)",
               }}
             >
-              <span style={{ color: "var(--accent)" }}>◉</span>
+              <span style={{ color: "var(--text-primary)" }}>◉</span>
               <span>Filtered to <strong style={{ color: "var(--text-primary)" }}>{highlightedDocIds.length} doc{highlightedDocIds.length === 1 ? "" : "s"}</strong> from the chat</span>
               <button
                 onClick={onClearHighlight}
@@ -1529,7 +1529,7 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
           <>
             <div
               className="flex items-center h-8 overflow-hidden"
-              style={{ background: "var(--bg-elevated)", border: "1px solid var(--accent)", borderRadius: "var(--radius-md)" }}
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--text-primary)", borderRadius: "var(--radius-md)" }}
             >
               {/* "Done" instead of "Collapse" — the previous label was a
                   mode-mechanic word ("collapse the tree"); users read it as
@@ -1540,15 +1540,15 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
                 <button
                   onClick={onCollapseDoc}
                   className="inline-flex items-center text-caption font-semibold h-full hover:brightness-110 transition-all"
-                  style={{ background: "var(--accent)", color: "#000", padding: "0 var(--space-3)", gap: "var(--space-2)" }}
+                  style={{ background: "var(--text-primary)", color: "#000", padding: "0 var(--space-3)", gap: "var(--space-2)" }}
                 >
                   <Check width={11} height={11} strokeWidth={2.5} />
                   Done
                 </button>
               </Tooltip>
               {isDecomposing ? (
-                <div className="inline-flex items-center text-caption" style={{ color: "var(--accent)", padding: "0 var(--space-3)", gap: "var(--space-2)" }}>
-                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--accent)" }} />
+                <div className="inline-flex items-center text-caption" style={{ color: "var(--text-primary)", padding: "0 var(--space-3)", gap: "var(--space-2)" }}>
+                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "var(--text-primary)" }} />
                   Decomposing…
                 </div>
               ) : decomposition ? (
@@ -1652,8 +1652,8 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
                   onClick={() => onChangeChunkTypeFilter(t === null ? null : (isActive ? null : t))}
                   className="px-2.5 py-1 text-caption rounded transition-colors capitalize"
                   style={{
-                    background: isActive ? "var(--accent-dim)" : "transparent",
-                    color: isActive ? "var(--accent)" : "var(--text-faint)",
+                    background: isActive ? "var(--border)" : "transparent",
+                    color: isActive ? "var(--text-primary)" : "var(--text-faint)",
                     fontWeight: isActive ? 600 : 500,
                   }}
                   onMouseEnter={(e) => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = "var(--toggle-bg)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; } }}
@@ -1880,12 +1880,12 @@ function CanvasMoreMenu({
                 // .mw-detail-slider ::-webkit-slider-runnable-track.
                 // Firefox uses ::-moz-range-progress which is value-aware
                 // natively, so the var is ignored there.
-                ["--mw-detail-progress" as string]: `linear-gradient(to right, var(--accent) 0%, var(--accent) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) 100%)`,
+                ["--mw-detail-progress" as string]: `linear-gradient(to right, var(--text-primary) 0%, var(--text-primary) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) ${((detail - 1) / 4) * 100}%, var(--toggle-bg) 100%)`,
               } as React.CSSProperties}
             />
             <span
               className="text-xs font-medium text-center"
-              style={{ color: "var(--accent)" }}
+              style={{ color: "var(--text-primary)" }}
             >
               {detailLabels[detail] || `Level ${detail}`}
             </span>
