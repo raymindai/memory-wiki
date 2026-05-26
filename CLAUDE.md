@@ -28,7 +28,7 @@ AI 출력물의 크로스플랫폼 퍼블리싱 레이어. Markdown은 엔진이
 
 ## GitHub
 
-- **Repo**: `raymindai/mdcore` (이름은 역사적 — 향후 `raymindai/memory.wiki`로 rename 검토 중)
+- **Repo**: `raymindai/memory-wiki` (이름은 역사적 — 향후 `raymindai/memory.wiki`로 rename 검토 중)
 - **CI**: GitHub Actions (`.github/workflows/ci.yml` — build-web + e2e-test)
 - **Deploy**: Vercel 자동 배포, push하면 Memory.Wiki에 반영
 

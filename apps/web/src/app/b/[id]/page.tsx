@@ -3,6 +3,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import ClientViewer from "./ClientViewer";
+import { getReferencedBy } from "@/lib/queryBacklinks";
 
 // ISR-cached at the edge. The supabase calls are wrapped in
 // `unstable_cache` so Vercel can emit `cache-control: public,
@@ -126,6 +127,19 @@ export default async function BundlePage({ params }: Props) {
   const isDraft = !!(bundle as { isDraft?: boolean }).isDraft;
   const visibleDocs = !isProtected && !isDraft ? (bundle.documents || []) : [];
 
+  const referencedBy = await (async () => {
+    if (isProtected || isDraft) {
+      return { documents: [], bundles: [], hubs: [], total: 0 };
+    }
+    try {
+      const supa = getSupabaseClient();
+      if (!supa) return { documents: [], bundles: [], hubs: [], total: 0 };
+      return await getReferencedBy(supa, "bundle", id, 20);
+    } catch {
+      return { documents: [], bundles: [], hubs: [], total: 0 };
+    }
+  })();
+
   const jsonLd = !isProtected && !isDraft
     ? {
         "@context": "https://schema.org",
@@ -193,6 +207,7 @@ export default async function BundlePage({ params }: Props) {
         documentCount={bundle.documentCount}
         showBadge={bundle.ownerPlan !== "pro"}
         layout={bundle.layout || "graph"}
+        referencedBy={referencedBy}
       />
     </div>
   );

@@ -30,7 +30,7 @@ export default function ViewerFooter({ stats }: ViewerFooterProps) {
         <Link href="/install" className="transition-colors hover:text-[var(--text-primary)] hidden sm:inline">Install /memory.wiki</Link>
         <Link href="/plugins" className="transition-colors hover:text-[var(--text-primary)] hidden sm:inline">Plugins</Link>
         <a
-          href="https://github.com/raymindai/mdcore"
+          href="https://github.com/raymindai/memory-wiki"
           className="transition-colors hover:text-[var(--text-primary)] hidden md:inline"
           target="_blank"
           rel="noopener noreferrer"

@@ -1,16 +1,24 @@
 {
   "name": "memory-wiki-cli",
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "Memory.Wiki CLI — publish Markdown from anywhere",
   "bin": {
     "mw": "./bin/mw.js"
   },
-  "files": ["bin/", "README.md"],
-  "keywords": ["markdown", "publish", "cli", "memory.wiki"],
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "keywords": [
+    "markdown",
+    "publish",
+    "cli",
+    "memory.wiki"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/raymindai/mdcore"
+    "url": "https://github.com/raymindai/memory-wiki"
   },
   "engines": {
     "node": ">=18"

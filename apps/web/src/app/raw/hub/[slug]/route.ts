@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { compactMarkdown, estimateTokens, isCompactRequested, isDigestRequested, isFullRequested, tokenEconomyHeaders } from "@/lib/markdown-compact";
 import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
+import { extractFacts, extractSkeleton, firstParagraph } from "@/lib/doc-gist";
 
 /**
  * v6 — Hub URL raw fetch.
@@ -283,6 +284,13 @@ interface DigestArgs {
   since: string | null;
 }
 
+// extractFacts / extractSkeleton / firstParagraph live in
+// @/lib/doc-gist so hub, bundle, and single-doc routes share the same
+// gist chain. Previously the hub route had its own copies that drifted
+// out of sync with the lib version — the lib version got an
+// extractFacts fix (m-flag regex was capturing only the first bullet),
+// but the hub copy kept the bug.
+
 async function renderDigest({ supabase, profile, slug, compact, since }: DigestArgs): Promise<string> {
   const author = (profile.display_name || slug).replace(/"/g, '\\"');
   const description = (profile.hub_description || "").trim();
@@ -305,16 +313,35 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
   const docIdSet = new Set<string>();
   for (const c of concepts) for (const id of c.doc_ids || []) docIdSet.add(id);
   let docTitleById = new Map<string, string>();
+  // Per-doc gist for compact digest. Priority:
+  //   1) Phase B  — `## Facts` block from the body (owner-curated)
+  //   2) Phase A.2 — `documents.summary` (LLM-generated, cheap)
+  //   3) Phase A.1 — first paragraph of the body (zero-cost fallback)
+  // The chain degrades gracefully so a hub without LLM summaries or
+  // explicit Facts still gets the first-paragraph extract.
+  let docGistById = new Map<string, string>();
   if (docIdSet.size > 0) {
     const { data: docRows } = await supabase
       .from("documents")
-      .select("id, title, is_draft, password_hash, allowed_emails, deleted_at")
+      .select(
+        "id, title, markdown, summary, is_draft, password_hash, allowed_emails, deleted_at",
+      )
       .in("id", Array.from(docIdSet));
-    docTitleById = new Map(
-      (docRows || [])
-        .filter((d) => !d.is_draft && !d.deleted_at && !d.password_hash &&
-          !(Array.isArray(d.allowed_emails) && d.allowed_emails.length > 0))
-        .map((d) => [d.id, d.title || "Untitled"]),
+    const visible = (docRows || []).filter(
+      (d) =>
+        !d.is_draft &&
+        !d.deleted_at &&
+        !d.password_hash &&
+        !(Array.isArray(d.allowed_emails) && d.allowed_emails.length > 0),
+    );
+    docTitleById = new Map(visible.map((d) => [d.id, d.title || "Untitled"]));
+    docGistById = new Map(
+      visible.map((d) => {
+        const facts = extractFacts(d.markdown || "");
+        if (facts) return [d.id, facts];
+        if (d.summary && d.summary.trim().length > 0) return [d.id, d.summary.trim()];
+        return [d.id, firstParagraph(d.markdown || "")];
+      }),
     );
   }
 
@@ -427,7 +454,16 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
       ].join(" • ");
       sections.push(`### ${c.label}\n*${meta}*`);
       if (c.description) sections.push(`> ${c.description.split("\n")[0]}`);
-      sections.push(visibleDocs.map((id) => `- [${docTitleById.get(id)}](https://memory.wiki/${id})`).join("\n"));
+      sections.push(
+        visibleDocs
+          .map((id) => {
+            const title = docTitleById.get(id);
+            const gist = docGistById.get(id);
+            const head = `- [${title}](https://memory.wiki/${id})`;
+            return gist ? `${head}\n  ${gist}` : head;
+          })
+          .join("\n"),
+      );
 
       // Related concepts inside the top-40 set — gives the AI
       // first-class navigation between ideas without needing to read
@@ -486,6 +522,44 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
         renderableTopRels.join("\n"),
       );
     }
+  }
+
+  // ── All-documents catalog — every public doc in the hub with its
+  // gist inlined, even when the doc isn't part of the top-40 concept
+  // clusters above. Concept clustering is excellent for navigation but
+  // hides the long tail; this section guarantees an AI never misses a
+  // doc just because it didn't make a top concept. Ordered by recency
+  // (most recently updated first).
+  const allDocsQuery = await supabase
+    .from("documents")
+    .select("id, title, markdown, summary, updated_at, is_draft, password_hash, allowed_emails, deleted_at")
+    .eq("user_id", profile.id)
+    .eq("is_draft", false)
+    .is("deleted_at", null)
+    .is("password_hash", null)
+    .order("updated_at", { ascending: false })
+    .limit(120);
+  const allDocs = (allDocsQuery.data || []).filter(
+    (d) => !(Array.isArray(d.allowed_emails) && d.allowed_emails.length > 0),
+  );
+  if (allDocs.length > 0) {
+    const lines: string[] = [];
+    lines.push("## All documents");
+    lines.push(
+      `_${allDocs.length} public document${allDocs.length === 1 ? "" : "s"}, ordered by recency. Each entry includes a one-paragraph gist for quick scanning. Fetch any as \`https://memory.wiki/raw/<id>?compact=1\` for the full body._`,
+    );
+    for (const d of allDocs) {
+      const gist =
+        extractFacts(d.markdown || "") ||
+        (d.summary && d.summary.trim().length > 0 ? d.summary.trim() : "") ||
+        firstParagraph(d.markdown || "");
+      const skeleton = extractSkeleton(d.markdown || "");
+      const title = d.title || "Untitled";
+      lines.push(`- [${title}](https://memory.wiki/${d.id})`);
+      if (gist) lines.push(`  ${gist}`);
+      if (skeleton) lines.push(`  _sections:_ ${skeleton}`);
+    }
+    sections.push(lines.join("\n"));
   }
 
   sections.push(

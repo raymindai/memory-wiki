@@ -7,20 +7,22 @@ import { homedir } from "os";
 
 // ─── Config ───
 
-const BASE_URL = (process.env.MDFY_BASE_URL || "https://memory.wiki").replace(/\/$/, "");
-const MDFY_DIR = join(homedir(), ".memory.wiki");
-const CONFIG_FILE = join(MDFY_DIR, "config.json");
-const TOKEN_FILE = join(MDFY_DIR, "tokens.json");
+// MEMORY_WIKI_BASE_URL is the canonical env var. MDFY_BASE_URL stays
+// as a deprecated alias so existing shells keep working.
+const BASE_URL = (process.env.MEMORY_WIKI_BASE_URL || process.env.MDFY_BASE_URL || "https://memory.wiki").replace(/\/$/, "");
+const CONFIG_DIR = join(homedir(), ".memory.wiki");
+const CONFIG_FILE = join(CONFIG_DIR, "config.json");
+const TOKEN_FILE = join(CONFIG_DIR, "tokens.json");
 
-// ─── Auth (JWT from `Memory.Wiki login`) ───
+// ─── Auth (JWT from `memory.wiki login`) ───
 
-interface MdfyConfig {
+interface MwConfig {
   token?: string;
   userId?: string;
   email?: string;
 }
 
-function loadConfig(): MdfyConfig {
+function loadConfig(): MwConfig {
   try {
     if (existsSync(CONFIG_FILE)) {
       return JSON.parse(readFileSync(CONFIG_FILE, "utf-8"));
@@ -58,7 +60,7 @@ function loadTokens(): Record<string, string> {
 }
 
 function saveToken(docId: string, editToken: string): void {
-  if (!existsSync(MDFY_DIR)) mkdirSync(MDFY_DIR, { recursive: true });
+  if (!existsSync(CONFIG_DIR)) mkdirSync(CONFIG_DIR, { recursive: true });
   const tokens = loadTokens();
   tokens[docId] = editToken;
   const tmpFile = TOKEN_FILE + `.tmp.${process.pid}`;

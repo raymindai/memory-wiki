@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import ClientViewer from "./ClientViewer";
 import { render } from "@/lib/render";
+import { getReferencedBy } from "@/lib/queryBacklinks";
 
 // Force this page to be ISR-cached at the edge. The supabase calls
 // below are wrapped in `unstable_cache` so Next.js can treat them as
@@ -132,6 +133,21 @@ export default async function DocPage({ params }: Props) {
   const isRestricted = (doc.allowed_emails || []).length > 0;
   const isDraft = !!(doc as { isDraft?: boolean }).isDraft;
 
+  // Self-wiring backlinks. Best-effort — returns empty when the
+  // migration hasn't been applied yet.
+  const referencedBy = await (async () => {
+    if (isExpired || isRestricted || isDraft) {
+      return { documents: [], bundles: [], hubs: [], total: 0 };
+    }
+    try {
+      const supa = getSupabaseClient();
+      if (!supa) return { documents: [], bundles: [], hubs: [], total: 0 };
+      return await getReferencedBy(supa, "document", id, 20);
+    } catch {
+      return { documents: [], bundles: [], hubs: [], total: 0 };
+    }
+  })();
+
   const visibleMarkdown = isExpired || isRestricted || isDraft ? "" : doc.markdown;
   // SSR the markdown body so non-JS clients (ChatGPT browse, Google,
   // Claude, etc.) see the actual content. ClientViewer removes this
@@ -195,6 +211,7 @@ export default async function DocPage({ params }: Props) {
         isRestricted={isRestricted || isDraft}
         showBadge={doc.ownerPlan !== "pro"}
         editMode={doc.edit_mode || "token"}
+        referencedBy={referencedBy}
       />
     </div>
   );

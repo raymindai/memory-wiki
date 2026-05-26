@@ -135,7 +135,7 @@ Memory.Wiki is available everywhere:
 - Website: [Memory.Wiki](https://memory.wiki)
 - Plugins: [memory.wiki/plugins](https://memory.wiki/plugins)
 - API Docs: [memory.wiki/docs](https://memory.wiki/docs)
-- GitHub: [github.com/raymindai/mdcore](https://github.com/raymindai/mdcore)
+- GitHub: [github.com/raymindai/memory-wiki](https://github.com/raymindai/memory-wiki)
 
 ## License
 

@@ -250,7 +250,7 @@ async function callExtractor(title: string, markdown: string, overrideKey?: stri
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: "claude-haiku-4-5",
           max_tokens: 2048,
           system: "You return ONLY valid JSON matching the schema requested. No prose, no fences.",
           messages: [{ role: "user", content: `${PER_DOC_PROMPT}\n\nDocument:\n${userBlock}` }],

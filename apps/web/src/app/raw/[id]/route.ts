@@ -35,7 +35,7 @@ export async function GET(
 
   const { data } = await supabase
     .from("documents")
-    .select("id, markdown, title, is_draft, deleted_at, password_hash, expires_at, allowed_emails, updated_at, source, user_id")
+    .select("id, markdown, title, is_draft, deleted_at, password_hash, expires_at, allowed_emails, updated_at, source, user_id, ai_graph, ai_graph_generated_at, summary")
     .eq("id", id)
     .single();
 
@@ -68,116 +68,161 @@ export async function GET(
   const updated = data.updated_at ? new Date(data.updated_at).toISOString() : "";
   const source = data.source ? String(data.source).replace(/"/g, '\\"') : "Memory.Wiki";
 
-  // Pull doc-level AI metadata + extracted concepts + within-doc concept
-  // relations. Each query is wrapped so a failure on the side metadata
-  // never blocks the main body response.
-  type RelRow = {
-    relation_label: string;
-    weight: number;
-    source_concept: { label: string } | null;
-    target_concept: { label: string } | null;
+  // ── Knowledge-graph context for this doc ──────────────────────
+  // The hub-level digest carries the full concept graph; for an AI
+  // landing on a single doc URL we surface just the concepts that
+  // touch THIS doc + the relations between them + the bundles that
+  // include it. Lets the AI position the doc inside the larger hub
+  // without an extra round-trip.
+  type ConceptRow = { id: number; label: string; concept_type: string | null; description: string | null; weight: number | null; doc_ids: string[] | null };
+  const { data: conceptRows } = await supabase
+    .from("concept_index")
+    .select("id, label, concept_type, description, weight, doc_ids")
+    .eq("user_id", data.user_id)
+    .contains("doc_ids", [id])
+    .order("weight", { ascending: false })
+    .limit(12);
+  const concepts = (conceptRows as ConceptRow[] | null) || [];
+  const conceptIds = concepts.map((c) => c.id);
+  type RelationRow = { source_concept_id: number; target_concept_id: number; relation_label: string | null };
+  let relations: RelationRow[] = [];
+  if (conceptIds.length > 1) {
+    const { data: relRows } = await supabase
+      .from("concept_relations")
+      .select("source_concept_id, target_concept_id, relation_label")
+      .eq("user_id", data.user_id)
+      .in("source_concept_id", conceptIds)
+      .in("target_concept_id", conceptIds)
+      .limit(20);
+    relations = (relRows as RelationRow[] | null) || [];
+  }
+  const conceptLabelById = new Map(concepts.map((c) => [c.id, c.label]));
+
+  // Bundles that contain this doc. Cheap one-shot join. Filter out
+  // private/draft/restricted bundles so we don't leak metadata.
+  type BundleRow = { id: string; title: string | null; description: string | null; is_draft: boolean | null; password_hash: string | null; allowed_emails: string[] | null };
+  type BundleDocRow = { bundle_id: string };
+  const { data: bdRows } = await supabase
+    .from("bundle_documents")
+    .select("bundle_id")
+    .eq("document_id", id);
+  const bundleIds = Array.from(new Set((bdRows as BundleDocRow[] | null || []).map((r) => r.bundle_id)));
+  let parentBundles: BundleRow[] = [];
+  if (bundleIds.length > 0) {
+    const { data: bundleRows } = await supabase
+      .from("bundles")
+      .select("id, title, description, is_draft, password_hash, allowed_emails")
+      .in("id", bundleIds);
+    parentBundles = ((bundleRows as BundleRow[] | null) || []).filter(
+      (b) => !b.is_draft && !b.password_hash && !(Array.isArray(b.allowed_emails) && b.allowed_emails.length > 0),
+    );
+  }
+
+  // Owner's hub slug — gives the AI the canonical "what hub does this
+  // doc live in" pointer so it can fetch the wider corpus if needed.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("hub_slug, hub_public, display_name")
+    .eq("id", data.user_id)
+    .single();
+  const hubSlug = profile?.hub_public ? profile.hub_slug : null;
+
+  const contextLines: string[] = [];
+
+  // AI graph (themes / insights / takeaways / open questions) generated
+  // by Claude Haiku at write time and cached on the row. Same shape as
+  // bundle.graph_data but scoped to a single doc — lets an AI fetching
+  // /raw/<id> see the analytical surface, not just the body. Surfaced
+  // FIRST in the context block so it anchors interpretation.
+  type DocGraph = {
+    themes?: string[];
+    insights?: string[];
+    keyTakeaways?: string[];
+    openQuestions?: string[];
   };
-  type ConceptRow = { id: number; label: string; description: string | null; weight: number };
-  type AiMetaRow = { tags?: string[] | null; ai_summary?: string | null };
+  const aiGraph = (data as { ai_graph?: DocGraph | null }).ai_graph;
+  if (aiGraph && typeof aiGraph === "object") {
+    const summary = (data as { summary?: string | null }).summary || null;
+    if (summary && summary.trim().length > 0) {
+      contextLines.push("## Summary");
+      contextLines.push(summary.trim());
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.themes) && aiGraph.themes.length > 0) {
+      contextLines.push("## Themes");
+      contextLines.push(aiGraph.themes.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.keyTakeaways) && aiGraph.keyTakeaways.length > 0) {
+      contextLines.push("## Key takeaways");
+      contextLines.push(aiGraph.keyTakeaways.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.insights) && aiGraph.insights.length > 0) {
+      contextLines.push("## Insights");
+      contextLines.push(aiGraph.insights.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+    if (Array.isArray(aiGraph.openQuestions) && aiGraph.openQuestions.length > 0) {
+      contextLines.push("## Open questions / gaps");
+      contextLines.push(aiGraph.openQuestions.map((t) => `- ${t}`).join("\n"));
+      contextLines.push("");
+    }
+  }
 
-  const [aiMeta, conceptsInDoc, relationsInDoc] = await Promise.all([
-    (async (): Promise<AiMetaRow | null> => {
-      try {
-        const { data: m } = await supabase
-          .from("document_ai_metadata")
-          .select("tags, ai_summary")
-          .eq("document_id", id)
-          .maybeSingle();
-        return (m as AiMetaRow | null) ?? null;
-      } catch { return null; }
-    })(),
-    (async (): Promise<ConceptRow[]> => {
-      try {
-        const { data: c } = await supabase
-          .from("concept_index")
-          .select("id, label, description, weight")
-          .eq("user_id", data.user_id)
-          .contains("doc_ids", [id])
-          .order("weight", { ascending: false })
-          .limit(30);
-        return (c as ConceptRow[] | null) ?? [];
-      } catch { return []; }
-    })(),
-    (async (): Promise<RelRow[]> => {
-      try {
-        const { data: r } = await supabase
-          .from("concept_relations")
-          .select("relation_label, weight, source_concept:source_concept_id ( label ), target_concept:target_concept_id ( label )")
-          .eq("user_id", data.user_id)
-          .contains("evidence_doc_ids", [id])
-          .order("weight", { ascending: false })
-          .limit(40);
-        return (r as unknown as RelRow[] | null) ?? [];
-      } catch { return []; }
-    })(),
-  ]);
-
-  const tagList = Array.isArray(aiMeta?.tags) && aiMeta!.tags!.length > 0
-    ? (aiMeta!.tags as string[]).slice(0, 12)
-    : [];
+  if (concepts.length > 0) {
+    contextLines.push("## Concepts in this document");
+    for (const c of concepts) {
+      const meta = c.concept_type ? ` _(${c.concept_type})_` : "";
+      contextLines.push(`- **${c.label}**${meta}`);
+      if (c.description) contextLines.push(`  ${c.description.split("\n")[0].slice(0, 200)}`);
+    }
+  }
+  if (relations.length > 0) {
+    contextLines.push("");
+    contextLines.push("## Concept relations (within this doc's concepts)");
+    for (const r of relations) {
+      const src = conceptLabelById.get(r.source_concept_id);
+      const tgt = conceptLabelById.get(r.target_concept_id);
+      if (!src || !tgt) continue;
+      contextLines.push(`- **${src}** ${(r.relation_label || "→").trim()} **${tgt}**`);
+    }
+  }
+  if (parentBundles.length > 0) {
+    contextLines.push("");
+    contextLines.push("## Bundles containing this document");
+    for (const b of parentBundles.slice(0, 10)) {
+      const t = (b.title || "Untitled bundle").replace(/[\r\n]+/g, " ");
+      contextLines.push(`- [${t}](https://memory.wiki/b/${b.id})`);
+      if (b.description) contextLines.push(`  > ${b.description.split("\n")[0].slice(0, 200)}`);
+    }
+  }
+  if (hubSlug) {
+    contextLines.push("");
+    contextLines.push(`_Hub canonical:_ https://memory.wiki/hub/${hubSlug}`);
+    contextLines.push(`_Concept digest:_ https://memory.wiki/raw/hub/${hubSlug}?digest=1&compact=1`);
+  }
+  const contextBlock = contextLines.length > 0 ? `\n\n---\n\n${contextLines.join("\n")}\n` : "";
 
   // Frontmatter first, then the raw markdown body. The body usually starts
   // with its own H1; we don't repeat the title to avoid duplicate headings.
   const frontmatter = [
     "---",
-    `mw_doc: 1`,
     `title: "${title}"`,
     `url: https://memory.wiki/${id}`,
     updated ? `updated: ${updated}` : null,
+    hubSlug ? `hub: https://memory.wiki/hub/${hubSlug}` : null,
+    parentBundles.length > 0 ? `bundle_count: ${parentBundles.length}` : null,
+    concepts.length > 0 ? `concept_count: ${concepts.length}` : null,
     `source: "${source}"`,
-    tagList.length > 0 ? `tags: [${tagList.map((t) => `"${t.replace(/"/g, '\\"')}"`).join(", ")}]` : null,
-    conceptsInDoc.length > 0 ? `concept_count: ${conceptsInDoc.length}` : null,
-    relationsInDoc.length > 0 ? `relation_count: ${relationsInDoc.length}` : null,
     "---",
     "",
   ].filter(Boolean).join("\n");
 
-  // Build the doc-level KG appendix the AI reader sees AFTER the body.
-  // Kept short on purpose — full concept records live at the hub-wide
-  // /raw/hub/<slug>/c/<concept> endpoint. Here we just expose what's
-  // useful for grounding an answer in this single doc.
-  function buildKgAppendix(): string {
-    if (conceptsInDoc.length === 0 && relationsInDoc.length === 0 && !aiMeta?.ai_summary) {
-      return "";
-    }
-    const parts: string[] = [""];
-    if (aiMeta?.ai_summary) {
-      parts.push("## AI summary", aiMeta.ai_summary.trim(), "");
-    }
-    if (conceptsInDoc.length > 0) {
-      parts.push("## Concepts (this doc)");
-      for (const c of conceptsInDoc) {
-        parts.push(c.description ? `- **${c.label}** — ${c.description}` : `- **${c.label}**`);
-      }
-      parts.push("");
-    }
-    if (relationsInDoc.length > 0) {
-      parts.push("## Concept relations (this doc)");
-      for (const r of relationsInDoc) {
-        const a = r.source_concept?.label;
-        const b = r.target_concept?.label;
-        if (!a || !b) continue;
-        parts.push(`- **${a}** → *${r.relation_label}* → **${b}**`);
-      }
-      parts.push("");
-    }
-    return parts.join("\n");
-  }
-
   const compact = isCompactRequested(request.url);
   const rawMarkdown = data.markdown || "";
   const md = compact ? compactMarkdown(rawMarkdown) : rawMarkdown;
-  // KG appendix is dropped in compact mode (token economy) and on the
-  // unauthed public path when there's nothing to add. Otherwise it
-  // sits below the body so the AI reads the body first, then sees the
-  // structured grounding signal.
-  const kg = compact ? "" : buildKgAppendix();
-  const body = `${frontmatter}\n${md}${kg}`;
+  const body = `${frontmatter}\n${md}${contextBlock}`;
 
   const sig = extractRequestSignals(request);
   logRawFetch({

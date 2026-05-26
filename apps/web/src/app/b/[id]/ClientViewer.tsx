@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
+import type { ReferencedBy as ReferencedByData } from "@/lib/queryBacklinks";
 
 function BundleLoading({ title }: { title: string | null }) {
   return (
@@ -51,6 +52,7 @@ interface ClientViewerProps {
   documentCount: number;
   showBadge?: boolean;
   layout?: string;
+  referencedBy?: ReferencedByData;
 }
 
 const BundleViewer = dynamic<ClientViewerProps>(() => import("./BundleViewer"), {

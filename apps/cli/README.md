@@ -150,7 +150,7 @@ Credentials stored in `~/.memory.wiki/config.json`. Edit tokens in `~/.memory.wi
 | [VS Code Extension](https://memory.wiki/plugins) | Download from Plugins page |
 | [Chrome Extension](https://memory.wiki/plugins) | Download from Plugins page |
 | [Mac Desktop App](https://memory.wiki/plugins) | Download from Plugins page |
-| [tmux Plugin](https://github.com/raymindai/mdcore/tree/main/apps/tmux) | Manual install |
+| [tmux Plugin](https://github.com/raymindai/memory-wiki/tree/main/apps/tmux) | Manual install |
 
 ## Environment Variables
 

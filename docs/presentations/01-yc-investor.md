@@ -325,4 +325,4 @@ Second engineer when revenue + roadmap demand clearly exceed solo capacity. Bar:
 
 <br>
 
-<span class="faint">hi@raymind.ai · github.com/raymindai/mdcore</span>
+<span class="faint">hi@raymind.ai · github.com/raymindai/memory-wiki</span>

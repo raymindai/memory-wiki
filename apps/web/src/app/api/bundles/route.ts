@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { nanoid } from "nanoid";
 import { getSupabaseClient } from "@/lib/supabase";
+import { syncBacklinks } from "@/lib/backlinks";
 import { rateLimit } from "@/lib/rate-limit";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { synthesizeBundle } from "@/lib/synthesize";
@@ -145,6 +146,9 @@ export async function POST(req: NextRequest) {
     console.error("Bundle insert error:", insertError);
     return NextResponse.json({ error: "Failed to create bundle" }, { status: 500 });
   }
+
+  // Self-wiring backlinks — extract refs from the bundle description.
+  void syncBacklinks(supabase, "bundle", id, description || null);
 
   // Insert bundle_documents
   const bundleDocs = documentIds.map((docId, i) => ({

@@ -1,9 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSupabaseClient } from "@/lib/supabase";
+import { getReferencedBy } from "@/lib/queryBacklinks";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
+import ReferencedBy from "@/components/ReferencedBy";
 import HubViewerV8 from "./HubViewerV8";
 import { Globe } from "lucide-react";
 
@@ -199,6 +201,19 @@ export default async function HubPage({ params, searchParams }: Props) {
   const hubUrl = `https://memory.wiki/hub/${slug}`;
   const atLabel = at ? at.toISOString().slice(0, 10) : null;
 
+  // Pull backlinks pointing AT this hub — docs / bundles / other hubs
+  // that reference it. Best-effort: if migration 045 isn't applied yet
+  // the query returns an empty shape and ReferencedBy renders nothing.
+  const supabaseForRefs = getSupabaseClient();
+  const referencedBy = supabaseForRefs
+    ? await getReferencedBy(supabaseForRefs, "hub", slug, 20).catch(() => ({
+        documents: [],
+        bundles: [],
+        hubs: [],
+        total: 0,
+      }))
+    : { documents: [], bundles: [], hubs: [], total: 0 };
+
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
       <ViewerHeader
@@ -221,6 +236,12 @@ export default async function HubPage({ params, searchParams }: Props) {
         atLabel={atLabel}
         anchor={anchor}
       />
+      {/* Self-wiring backlinks — docs / bundles / hubs that reference
+          this hub. Inline variant sits in the page flow above the
+          promo strip + footer. */}
+      <div className="max-w-3xl mx-auto px-6 pb-10">
+        <ReferencedBy data={referencedBy} variant="inline" />
+      </div>
       <ViewerPromoStrip />
       <ViewerFooter
         stats={

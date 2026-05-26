@@ -249,4 +249,4 @@ curl -X POST https://memory.wiki/api/hub/demo/recall \
 
 <br>
 
-<span class="muted">Engine MIT-licensed · Spec at /spec · Source at github.com/raymindai/mdcore</span>
+<span class="muted">Engine MIT-licensed · Spec at /spec · Source at github.com/raymindai/memory-wiki</span>

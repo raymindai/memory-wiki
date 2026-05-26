@@ -60,4 +60,11 @@ apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/project.xcworkspace/xcuserd
 apps/quicklook/MdfyQuickLook/MdfyQuickLook.xcodeproj/xcuserdata/
 
 # Adobe After Effects auto-save backups
+# macOS noise
+**/.DS_Store
+
+# Adobe Illustrator crash autosave / temp files
+assets/brand/~ai-*.tmp
+
+# Adobe After Effects auto-save crash recovery (regenerated)
 **/Adobe After Effects Auto-Save/

@@ -318,13 +318,13 @@ Memory.Wiki is a cross-platform document publishing system. All platforms share 
 |----------|-------------|---------|
 | **[Web Editor](https://memory.wiki)** | Full editor with WYSIWYG, image gallery, AI tools | [Memory.Wiki](https://memory.wiki) |
 | **VS Code** | Preview, publish, sync from your editor | You are here |
-| **[Mac Desktop](https://memory.wiki/plugins)** | Native app with sidebar, file import (PDF, DOCX, PPTX) | [Download DMG](https://github.com/raymindai/mdcore/releases) |
+| **[Mac Desktop](https://memory.wiki/plugins)** | Native app with sidebar, file import (PDF, DOCX, PPTX) | [Download DMG](https://github.com/raymindai/memory-wiki/releases) |
 | **[Chrome Extension](https://memory.wiki/plugins)** | Capture from ChatGPT, Claude, Gemini, GitHub | [Download](https://memory.wiki/plugins) |
 | **[CLI](https://www.npmjs.com/package/memory-wiki-cli)** | `Memory.Wiki publish`, pipe support, tmux capture | `npm i -g memory-wiki-cli` |
 | **[Hosted MCP](https://memory.wiki/docs/mcp)** | AI agents (Claude Web, Cursor) — 25 tools | URL: `https://memory.wiki/api/mcp` |
 | **[Local MCP](https://www.npmjs.com/package/memory-wiki-mcp)** | AI agents (Claude Desktop, Code) — 6 core tools | `npx memory-wiki-mcp` |
-| **[QuickLook](https://memory.wiki/plugins)** | Press Space on .md in Finder for rendered preview | [Download](https://github.com/raymindai/mdcore/releases) |
-| **tmux** | Capture pane output and publish | [Install guide](https://github.com/raymindai/mdcore/tree/main/apps/tmux) |
+| **[QuickLook](https://memory.wiki/plugins)** | Press Space on .md in Finder for rendered preview | [Download](https://github.com/raymindai/memory-wiki/releases) |
+| **tmux** | Capture pane output and publish | [Install guide](https://github.com/raymindai/memory-wiki/tree/main/apps/tmux) |
 
 ### The URL is the bridge
 
@@ -372,8 +372,8 @@ A: Yes. Paste any Memory.Wiki URL into Claude or ChatGPT and they can read the f
 - [Memory.Wiki](https://memory.wiki) -- Web editor
 - [Plugins page](https://memory.wiki/plugins) -- All platforms and downloads
 - [API Documentation](https://memory.wiki/docs) -- REST API reference
-- [GitHub](https://github.com/raymindai/mdcore) -- Source code
-- [Issues](https://github.com/raymindai/mdcore/issues) -- Bug reports and feature requests
+- [GitHub](https://github.com/raymindai/memory-wiki) -- Source code
+- [Issues](https://github.com/raymindai/memory-wiki/issues) -- Bug reports and feature requests
 
 ---
 
