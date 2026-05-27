@@ -31,6 +31,10 @@ struct AuthView: View {
     @State private var working = false
     @State private var appleNonce: String?
     @State private var appleCoordinator: AppleSignInCoordinator?
+    /// Drives the staggered fade-up on first paint. Flipped to
+    /// true in onAppear so all the .animation modifiers below
+    /// have a value to interpolate against.
+    @State private var appeared = false
 
     var body: some View {
         ZStack {
@@ -51,7 +55,9 @@ struct AuthView: View {
                     providerStack
                         .padding(.horizontal, 22)
                         .disabled(working)
-                        .opacity(working ? 0.5 : 1)
+                        .opacity(working ? 0.5 : (appeared ? 1 : 0))
+                        .offset(y: appeared ? 0 : 14)
+                        .animation(.easeOut(duration: 0.6).delay(0.45), value: appeared)
                     if let error {
                         Text(error)
                             .font(Brand.body(size: 11))
@@ -63,8 +69,19 @@ struct AuthView: View {
                     footer
                         .padding(.top, 18)
                         .padding(.bottom, 24)
+                        .opacity(appeared ? 1 : 0)
+                        .animation(.easeOut(duration: 0.5).delay(0.7), value: appeared)
                 }
                 .frame(width: proxy.size.width, height: proxy.size.height)
+            }
+        }
+        .onAppear {
+            // Tiny delay so the first frame paints the backdrop +
+            // canvas before the stagger kicks in — without it, the
+            // hero looks like it's mid-animation on the very first
+            // frame (jarring).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.04) {
+                appeared = true
             }
         }
         .sheet(isPresented: $emailSheet) {
@@ -78,14 +95,22 @@ struct AuthView: View {
     // MARK: - Hero (stacked: blob → wordmark → companion chip → tagline)
 
     private var hero: some View {
+        // Each layer fades + lifts in on its own delay so the
+        // surface feels like it's settling, not snapping.
         VStack(spacing: 8) {
             AnimatedBlob(size: 168, theme: .dark)
+                .opacity(appeared ? 1 : 0)
+                .scaleEffect(appeared ? 1 : 0.92)
+                .animation(.spring(response: 0.9, dampingFraction: 0.85).delay(0.0), value: appeared)
 
             VStack(spacing: 10) {
                 Text("memory.wiki")
                     .font(Brand.display(size: 36))
                     .foregroundStyle(Brand.textPrimary)
                     .tracking(0)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 10)
+                    .animation(.easeOut(duration: 0.6).delay(0.18), value: appeared)
 
                 Text("Your knowledge hub for the AI age.")
                     .font(Brand.body(size: 15))
@@ -93,9 +118,15 @@ struct AuthView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .padding(.horizontal, 36)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 10)
+                    .animation(.easeOut(duration: 0.6).delay(0.28), value: appeared)
 
                 CompanionChip()
                     .padding(.top, 6)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 8)
+                    .animation(.easeOut(duration: 0.55).delay(0.38), value: appeared)
             }
         }
     }
@@ -374,18 +405,52 @@ private struct ProviderButton<Logo: View>: View {
                 Text(label)
                     .font(Brand.body(size: 15, weight: .medium))
             }
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .frame(maxWidth: .infinity, minHeight: 52)
             .foregroundStyle(style == .prominent ? Brand.background : Brand.textPrimary)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(style == .prominent ? Brand.textPrimary : Brand.surface)
-            )
+            .background {
+                if style == .prominent {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Brand.textPrimary)
+                } else {
+                    // Glass — ultraThin material blurs whatever sits
+                    // behind (canvas + ambient blob), tinted with a
+                    // sliver of white-on-black for body so the buttons
+                    // float instead of staring blank. Highlight rim
+                    // catches the eye like a real piece of glass.
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white.opacity(0.03))
+                    }
+                }
+            }
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(style == .prominent ? .clear : Brand.borderDim, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: style == .prominent
+                                ? [Color.clear, Color.clear]
+                                : [Color.white.opacity(0.18), Color.white.opacity(0.04)],
+                            startPoint: .top, endPoint: .bottom
+                        ),
+                        lineWidth: 1
+                    )
             )
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(GlassButtonStyle())
+    }
+}
+
+/// Press feedback for the glass providers — subtle scale + brightness
+/// dip. No colour change so the brand chrome stays grayscale.
+private struct GlassButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .brightness(configuration.isPressed ? -0.04 : 0)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
