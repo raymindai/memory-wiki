@@ -71,6 +71,17 @@ interface BundleOverviewProps {
   /** Inline rename. When provided, the hero title becomes
    *  contentEditable for the owner; absent for read-only viewers. */
   onRenameBundle?: (next: string) => void;
+  /** v8 W4 — "Preparing this bundle for AI" status. Surfaces under
+   *  the hero description, in the same content frame the user is
+   *  already reading, instead of a fixed-position toast floating at
+   *  the page bottom. Renders only when at least one stage is still
+   *  in flight (the parent decides — absent prop = nothing shown). */
+  prepStatus?: {
+    graphReady: boolean;
+    embedReady: boolean;
+    hasMultipleDocs: boolean;
+    onDismiss: () => void;
+  } | null;
 }
 
 // Compact relative time. Mirrors HubEmbed's helper so freshness reads
@@ -104,6 +115,7 @@ function fmtCount(n: number): string {
 }
 
 export default function BundleOverview({
+  prepStatus,
   bundleId,
   bundleTitle,
   bundleDescription,
@@ -344,6 +356,63 @@ export default function BundleOverview({
               Intent: {bundleIntent}
             </p>
           )}
+          {/* v8 W4 — inline prep status. Renders in the hero frame
+              the user is already reading, instead of a fixed-position
+              toast at the page bottom. Mirrors the surface design
+              language (soft chip pattern, micro color dots, mono
+              ETA) rather than borrowing the toast/banner shape. */}
+          {prepStatus && (() => {
+            const { graphReady, embedReady, hasMultipleDocs, onDismiss } = prepStatus;
+            const showGraph = hasMultipleDocs;
+            const allDone = embedReady && (!showGraph || graphReady);
+            if (allDone) return null;
+            const Step = ({ label, ready, eta }: { label: string; ready: boolean; eta: string }) => (
+              <span className="inline-flex items-center gap-1.5 text-caption" style={{ color: ready ? "var(--text-secondary)" : "var(--text-muted)" }}>
+                <span
+                  aria-hidden
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: 999,
+                    background: ready ? "var(--micro-lime)" : "var(--micro-info)",
+                    animation: ready ? undefined : "bundlePrepInlinePulse 1.2s ease-in-out infinite",
+                  }}
+                />
+                <span style={{ fontWeight: 500 }}>{label}</span>
+                <span className="font-mono" style={{ color: "var(--text-faint)", fontSize: 10 }}>
+                  {ready ? "done" : eta}
+                </span>
+              </span>
+            );
+            return (
+              <div className="mt-5 mx-auto rounded-lg" style={{ maxWidth: 560, background: "var(--surface)", border: "1px solid var(--border-dim)", padding: "10px 14px" }}>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-caption font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+                      Preparing this bundle for AI
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap mb-1.5">
+                      <Step label="Vector embed" ready={embedReady} eta="~5s" />
+                      {showGraph && <Step label="Graph analysis" ready={graphReady} eta="~1 min" />}
+                    </div>
+                    <div className="text-caption" style={{ color: "var(--text-faint)", fontSize: 11, lineHeight: 1.4 }}>
+                      The bundle URL works immediately for direct sharing. Semantic recall
+                      {showGraph ? " and the concept graph become" : " becomes"} available once this finishes. You can keep editing in the meantime.
+                    </div>
+                  </div>
+                  <button
+                    onClick={onDismiss}
+                    className="shrink-0 -mt-1 -mr-1 w-6 h-6 inline-flex items-center justify-center rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                    style={{ color: "var(--text-faint)" }}
+                    aria-label="Dismiss"
+                  >
+                    <span style={{ fontSize: 12, lineHeight: 1 }}>×</span>
+                  </button>
+                </div>
+                <style>{`@keyframes bundlePrepInlinePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }`}</style>
+              </div>
+            );
+          })()}
           {/* Meta strip — neutral throughout. Color was reading as
               "everything here is important"; the meta row is just
               context, so all glyphs + text settle to text-faint. */}

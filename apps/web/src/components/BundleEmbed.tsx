@@ -1196,14 +1196,19 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     documents.length > 0 &&
     !prepBannerDismissed &&
     (!graphGeneratedAt || !embeddingUpdatedAt);
-  const prepBannerNode = showPrepBanner ? (
-    <BundlePrepBanner
-      graphReady={!!graphGeneratedAt}
-      embedReady={!!embeddingUpdatedAt}
-      hasMultipleDocs={documents.length >= 2}
-      onDismiss={() => setPrepBannerDismissed(true)}
-    />
-  ) : null;
+  // Banner now renders inline inside BundleOverview's hero (passed
+  // via prepStatus prop). The fixed-position floating toast was
+  // founder-flagged as out-of-place — the contextual hero slot reads
+  // as part of the same bundle surface the user is already looking
+  // at. Canvas + List views drop the banner entirely; they're
+  // working surfaces where the message would block the workflow.
+  const prepStatusProp = showPrepBanner ? {
+    graphReady: !!graphGeneratedAt,
+    embedReady: !!embeddingUpdatedAt,
+    hasMultipleDocs: documents.length >= 2,
+    onDismiss: () => setPrepBannerDismissed(true),
+  } : null;
+  const prepBannerNode = null;
 
   if (isLoading) {
     // Layout-aware skeleton — mirrors the eventual frame (List has a
@@ -1279,6 +1284,7 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     return (
       <>
         <BundleOverview
+          prepStatus={prepStatusProp}
           bundleId={bundleId}
           bundleTitle={bundleTitle}
           bundleDescription={bundleDescription}
