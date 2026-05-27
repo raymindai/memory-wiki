@@ -184,6 +184,67 @@ final class APIClient {
     /// AuthManager + Supabase SDK, not this URL.
     static var signInURL: URL { baseURL.appendingPathComponent("auth") }
 
+    // MARK: - Doc mutations
+
+    /// auto-save action — the same path the web editor uses. We
+    /// pass title only when the caller wants to change it.
+    func updateDocument(id: String, markdown: String, title: String? = nil) async throws {
+        struct Request: Encodable {
+            let action: String
+            let markdown: String
+            let title: String?
+        }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let body = try JSONEncoder().encode(Request(action: "auto-save", markdown: markdown, title: title))
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/docs/\(id)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        req.httpBody = body
+        try await perform(req)
+    }
+
+    func deleteDocument(id: String) async throws {
+        struct Request: Encodable { let action: String = "soft-delete" }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let body = try JSONEncoder().encode(Request())
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/docs/\(id)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        req.httpBody = body
+        try await perform(req)
+    }
+
+    func setDocumentVisibility(id: String, public makePublic: Bool) async throws {
+        struct Request: Encodable { let action: String }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let body = try JSONEncoder().encode(Request(action: makePublic ? "publish" : "unpublish"))
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/docs/\(id)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        req.httpBody = body
+        try await perform(req)
+    }
+
+    /// Fire-and-forget perform — used by mutations that don't
+    /// need a response body decoded. Throws on non-2xx.
+    private func perform(_ req: URLRequest) async throws {
+        var mutable = req
+        if mutable.httpBody == nil {
+            mutable.httpBody = "{}".data(using: .utf8)
+        }
+        let (data, response) = try await session.data(for: mutable)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            let raw = String(data: data, encoding: .utf8)
+            throw APIError.http((response as? HTTPURLResponse)?.statusCode ?? -1, raw)
+        }
+    }
+
     private func perform<T: Decodable>(_ req: URLRequest) async throws -> T {
         let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse else {

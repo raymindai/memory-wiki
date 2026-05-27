@@ -16,10 +16,21 @@ import SwiftUI
 
 struct DocumentDetailView: View {
     let seed: Document   // lightweight row used to pre-render the chrome
+    @Environment(\.dismiss) private var dismiss
     @State private var detail: DocumentDetail?
     @State private var loading = true
     @State private var error: String?
     @State private var copiedAi = false
+
+    // Edit mode state
+    @State private var editing = false
+    @State private var editedMarkdown: String = ""
+    @State private var saving = false
+    @State private var saveError: String?
+
+    // Delete + visibility confirmation
+    @State private var confirmDelete = false
+    @State private var togglingVisibility = false
 
     var body: some View {
         ZStack {
@@ -39,18 +50,61 @@ struct DocumentDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .toolbar { toolbarContent }
+        .task { await load() }
+        .refreshable { await load(force: true) }
+        .alert("Delete this doc?", isPresented: $confirmDelete) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                Task { await deleteAndPop() }
+            }
+        } message: {
+            Text("It moves to Trash on memory.wiki — recoverable for 30 days.")
+        }
+    }
+
+    @ToolbarContentBuilder private var toolbarContent: some ToolbarContent {
+        if editing {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Cancel") { editing = false; saveError = nil }
+                    .foregroundStyle(Brand.textMuted)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(saving ? "Saving…" : "Save") {
+                    Task { await save() }
+                }
+                .disabled(saving)
+                .foregroundStyle(Brand.textPrimary)
+                .fontWeight(.semibold)
+            }
+        } else {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button { copyAiPrompt() } label: {
-                        Label("Copy as AI prompt", systemImage: "sparkles")
-                    }
+                    Button { startEditing() } label: { Label("Edit", systemImage: "pencil") }
+                        .disabled(detail == nil)
+                    Button { copyAiPrompt() } label: { Label("Copy as AI prompt", systemImage: "sparkles") }
                     Button { UIPasteboard.general.string = seed.publicURL.absoluteString } label: {
                         Label("Copy URL", systemImage: "link")
                     }
                     Divider()
+                    if let detail {
+                        let isPublic = detail.isDraft == false
+                        Button {
+                            Task { await toggleVisibility(makePublic: !isPublic) }
+                        } label: {
+                            Label(isPublic ? "Make private" : "Make public",
+                                  systemImage: isPublic ? "lock" : "globe")
+                        }
+                        .disabled(togglingVisibility)
+                    }
                     Link(destination: seed.publicURL) {
                         Label("Open on memory.wiki", systemImage: "arrow.up.right.square")
+                    }
+                    Divider()
+                    Button(role: .destructive) {
+                        confirmDelete = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis")
@@ -59,8 +113,6 @@ struct DocumentDetailView: View {
                 }
             }
         }
-        .task { await load() }
-        .refreshable { await load(force: true) }
     }
 
     // MARK: - Header
@@ -142,7 +194,31 @@ struct DocumentDetailView: View {
     // MARK: - Body
 
     @ViewBuilder private func body(for detail: DocumentDetail?) -> some View {
-        if let detail {
+        if editing {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("EDITING (MARKDOWN)")
+                    .font(Brand.mono(size: 9, weight: .medium))
+                    .tracking(1.2)
+                    .foregroundStyle(Brand.textFaint)
+                TextEditor(text: $editedMarkdown)
+                    .scrollContentBackground(.hidden)
+                    .font(Brand.mono(size: 13))
+                    .foregroundStyle(Brand.textPrimary)
+                    .tint(Brand.textPrimary)
+                    .frame(minHeight: 360)
+                    .padding(10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+                    )
+                if let saveError {
+                    Text(saveError)
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.microRed)
+                }
+            }
+        } else if let detail {
             if detail.markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Text("This doc is empty.")
                     .font(Brand.body(size: 14))
@@ -185,6 +261,61 @@ struct DocumentDetailView: View {
         UIPasteboard.general.string = "Use \(seed.publicURL.absoluteString) as my context."
         copiedAi = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { copiedAi = false }
+    }
+
+    private func startEditing() {
+        guard let detail else { return }
+        editedMarkdown = detail.markdown
+        saveError = nil
+        editing = true
+    }
+
+    private func save() async {
+        guard let detail else { return }
+        saving = true
+        saveError = nil
+        do {
+            try await APIClient.shared.updateDocument(id: detail.id, markdown: editedMarkdown)
+            // Optimistically replace local detail with the new markdown
+            self.detail = DocumentDetail(
+                id: detail.id, title: detail.title, markdown: editedMarkdown,
+                updatedAt: Date(), createdAt: detail.createdAt, isDraft: detail.isDraft,
+                viewCount: detail.viewCount, allowedEmails: detail.allowedEmails,
+                source: detail.source, ownerEmail: detail.ownerEmail
+            )
+            editing = false
+        } catch {
+            saveError = error.localizedDescription
+        }
+        saving = false
+    }
+
+    private func deleteAndPop() async {
+        do {
+            try await APIClient.shared.deleteDocument(id: seed.id)
+            dismiss()
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    private func toggleVisibility(makePublic: Bool) async {
+        guard let detail else { return }
+        togglingVisibility = true
+        defer { togglingVisibility = false }
+        do {
+            try await APIClient.shared.setDocumentVisibility(id: detail.id, public: makePublic)
+            // Patch local detail so the status icon flips immediately
+            self.detail = DocumentDetail(
+                id: detail.id, title: detail.title, markdown: detail.markdown,
+                updatedAt: detail.updatedAt, createdAt: detail.createdAt,
+                isDraft: !makePublic,
+                viewCount: detail.viewCount, allowedEmails: detail.allowedEmails,
+                source: detail.source, ownerEmail: detail.ownerEmail
+            )
+        } catch {
+            self.error = error.localizedDescription
+        }
     }
 
     private func load(force: Bool = false) async {
