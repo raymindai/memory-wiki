@@ -7,7 +7,7 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var auth: AuthManager
-    @State private var selected: AppTab = .timeline
+    @EnvironmentObject private var router: AppRouter
 
     var body: some View {
         Group {
@@ -16,7 +16,7 @@ struct RootView: View {
                     Brand.background.ignoresSafeArea()
 
                     Group {
-                        switch selected {
+                        switch router.selectedTab {
                         case .timeline: TimelineView()
                         case .capture:  CaptureView()
                         case .profile:  ProfileView()
@@ -25,7 +25,7 @@ struct RootView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.bottom, 56) // tab-bar height
 
-                    BrandTabBar(selected: $selected)
+                    BrandTabBar(selected: $router.selectedTab)
                 }
             } else {
                 AuthView()

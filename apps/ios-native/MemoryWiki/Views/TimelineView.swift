@@ -48,18 +48,33 @@ final class TimelineModel: ObservableObject {
 }
 
 struct TimelineView: View {
+    @EnvironmentObject private var router: AppRouter
     @StateObject private var model = TimelineModel()
     @State private var showingSearch = false
     @FocusState private var searchFocused: Bool
 
     var body: some View {
-        ZStack {
-            Brand.background.ignoresSafeArea()
-            VStack(spacing: 0) {
-                header
-                if showingSearch { searchBar }
-                content
+        NavigationStack(path: $router.timelinePath) {
+            ZStack {
+                Brand.background.ignoresSafeArea()
+                VStack(spacing: 0) {
+                    header
+                    if showingSearch { searchBar }
+                    content
+                }
             }
+            .navigationDestination(for: TimelineRoute.self) { route in
+                switch route {
+                case .docDetail(let doc):
+                    DocumentDetailView(seed: doc)
+                case .docDetailById(let id):
+                    DocumentDetailView(seed: Document(
+                        id: id, title: nil, updatedAt: nil, createdAt: nil,
+                        isDraft: nil, viewCount: nil, allowedEmails: nil, source: nil
+                    ))
+                }
+            }
+            .toolbar(.hidden, for: .navigationBar)
         }
         .task { await model.load() }
     }
@@ -125,16 +140,7 @@ struct TimelineView: View {
 
     @ViewBuilder private var content: some View {
         if model.loading && model.documents.isEmpty {
-            VStack(spacing: 10) {
-                Spacer()
-                ProgressView().tint(Brand.textFaint)
-                Text("LOADING")
-                    .font(Brand.mono(size: 9, weight: .medium))
-                    .tracking(1)
-                    .foregroundStyle(Brand.textFaint)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
+            BrandLoader(variant: .inline)
         } else if let error = model.errorMessage, model.documents.isEmpty {
             EmptyState(title: "Couldn't load timeline", caption: error, glyph: "wifi.slash")
         } else if model.documents.isEmpty {
@@ -148,7 +154,10 @@ struct TimelineView: View {
                         Section {
                             VStack(spacing: 6) {
                                 ForEach(docs) { doc in
-                                    DocumentRow(doc: doc)
+                                    NavigationLink(value: TimelineRoute.docDetail(doc)) {
+                                        DocumentRow(doc: doc)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.horizontal, 14)

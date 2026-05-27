@@ -10,17 +10,22 @@ import SwiftUI
 @main
 struct MemoryWikiApp: App {
     @StateObject private var auth = AuthManager.shared
+    @StateObject private var router = AppRouter.shared
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(auth)
+                .environmentObject(router)
                 .onOpenURL { url in
-                    // memorywiki:// callback from the web sign-in
-                    // flow. AuthManager strips the token + writes
-                    // to the keychain; subsequent API calls pick
-                    // it up automatically.
-                    Task { await auth.handleCallback(url: url) }
+                    // memorywiki:// — two flavours:
+                    //   auth-callback → AuthManager
+                    //   doc/bundle/capture/profile → AppRouter
+                    if url.host == "auth-callback" {
+                        Task { await auth.handleCallback(url: url) }
+                    } else {
+                        router.handle(url: url)
+                    }
                 }
         }
     }

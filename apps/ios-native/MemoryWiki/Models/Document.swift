@@ -98,6 +98,42 @@ struct Document: Identifiable, Hashable, Decodable {
     }
 }
 
+/// Full doc payload — the body markdown plus the metadata the
+/// reader needs. Mirrors the Document value type but carries the
+/// markdown body; kept separate so the lightweight Document
+/// loaded into the Timeline list stays small.
+struct DocumentDetail: Identifiable, Hashable {
+    let id: String
+    let title: String?
+    let markdown: String
+    let updatedAt: Date?
+    let createdAt: Date?
+    let isDraft: Bool?
+    let viewCount: Int?
+    let allowedEmails: [String]?
+    let source: String?
+    let ownerEmail: String?
+
+    /// Projection so the DocStatusIcon view (which takes Document)
+    /// can render against a DocumentDetail without code duplication.
+    var asDocument: Document {
+        Document(
+            id: id,
+            title: title,
+            updatedAt: updatedAt,
+            createdAt: createdAt,
+            isDraft: isDraft,
+            viewCount: viewCount,
+            allowedEmails: allowedEmails,
+            source: source
+        )
+    }
+
+    var publicURL: URL { URL(string: "https://memory.wiki/\(id)")! }
+
+    var displayTitle: String { asDocument.displayTitle }
+}
+
 enum TimelineBucket: String, CaseIterable, Identifiable {
     case today, yesterday, thisWeek, thisMonth, earlier
     var id: String { rawValue }

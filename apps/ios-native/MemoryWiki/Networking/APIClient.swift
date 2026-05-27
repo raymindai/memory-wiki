@@ -59,6 +59,37 @@ final class APIClient {
 
     // MARK: - High-level calls
 
+    /// Full doc fetch for the reader. /api/docs/<id> returns
+    /// markdown + every metadata field; we project just what the
+    /// iOS detail view needs into a value type.
+    func document(id: String) async throws -> DocumentDetail {
+        struct Response: Decodable {
+            let id: String
+            let title: String?
+            let markdown: String?
+            let updated_at: Date?
+            let created_at: Date?
+            let is_draft: Bool?
+            let view_count: Int?
+            let allowed_emails: [String]?
+            let source: String?
+            let ownerEmail: String?
+        }
+        let response: Response = try await getJSON("/api/docs/\(id)")
+        return DocumentDetail(
+            id: response.id,
+            title: response.title,
+            markdown: response.markdown ?? "",
+            updatedAt: response.updated_at,
+            createdAt: response.created_at,
+            isDraft: response.is_draft,
+            viewCount: response.view_count,
+            allowedEmails: response.allowed_emails,
+            source: response.source,
+            ownerEmail: response.ownerEmail
+        )
+    }
+
     func userDocuments() async throws -> [Document] {
         struct Response: Decodable { let documents: [Document] }
         let response: Response = try await getJSON("/api/user/documents")
