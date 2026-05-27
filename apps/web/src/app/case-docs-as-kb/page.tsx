@@ -24,7 +24,7 @@ const data: CaseData = {
     },
     {
       step: "Share the one URL",
-      detail: "memory.wiki/hub/<your-team>. Put it in CLAUDE.md, .cursorrules, .codex-agents — wherever your team's AI loads context from. Each AI fetches and ingests the same way.",
+      detail: "memory.wiki/@<your-team>. Put it in CLAUDE.md, .cursorrules, .codex-agents — wherever your team's AI loads context from. Each AI fetches and ingests the same way.",
     },
     {
       step: "Let the lint surface drift",
@@ -38,7 +38,7 @@ const data: CaseData = {
     "No custom RAG to maintain. Token cost is visible (token-economy badge on the hub header) and tunable (?compact, ?digest).",
   ],
   example: {
-    title: "Example: 28-doc engineering KB on memory.wiki/hub/acme",
+    title: "Example: 28-doc engineering KB on memory.wiki/@acme",
     body: "Imported from GitHub (12 READMEs) + Notion (9 architecture docs) + URL ingest (7 vendor docs). Public hub, hub recall + reranker on. CLAUDE.md points at the hub URL. New devs paste the same URL into Cursor.",
   },
   related: [

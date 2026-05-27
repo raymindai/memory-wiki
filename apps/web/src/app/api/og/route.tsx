@@ -271,7 +271,7 @@ function renderHubCard({ slug, author, docCount, conceptCount, tokenCount }: Hub
           </div>
 
           <div style={{ display: "flex", marginTop: "12px", color: "#a1a1aa", fontSize: "22px" }}>
-            memory.wiki/hub/{slug}
+            memory.wiki/@{slug}
           </div>
 
           {/* Stat row */}

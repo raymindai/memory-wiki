@@ -155,7 +155,11 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     openGraph: {
       title,
       description,
-      url: `https://memory.wiki/hub/${slug}`,
+      // /@<slug> is the v8 canonical user URL; /hub/<slug> still
+      // serves the same page via vercel.json rewrite, but every
+      // outbound link (OG share preview, sitemap, share copy) uses
+      // the @-form so it propagates as the user-facing identity.
+      url: `https://memory.wiki/@${slug}`,
       siteName: "Memory.Wiki",
       type: "profile",
       images: [{ url: ogImage, width: 1200, height: 630 }],
@@ -167,8 +171,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       images: [ogImage],
     },
     alternates: {
-      canonical: `https://memory.wiki/hub/${slug}`,
-      types: { "text/markdown": `https://memory.wiki/hub/${slug}.md` },
+      canonical: `https://memory.wiki/@${slug}`,
+      types: { "text/markdown": `https://memory.wiki/@${slug}.md` },
     },
   };
 }
@@ -198,7 +202,7 @@ export default async function HubPage({ params, searchParams }: Props) {
     return updated >= sevenDaysAgo && updated <= anchor;
   });
   const olderDocs = hub.docs.filter(d => !recent.find(r => r.id === d.id));
-  const hubUrl = `https://memory.wiki/hub/${slug}`;
+  const hubUrl = `https://memory.wiki/@${slug}`;
   const atLabel = at ? at.toISOString().slice(0, 10) : null;
 
   // Pull backlinks pointing AT this hub — docs / bundles / other hubs

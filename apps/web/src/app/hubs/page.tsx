@@ -291,11 +291,11 @@ export default async function HubsPage() {
                     {item.title || (item.kind === "bundle" ? "Untitled Bundle" : "Untitled")}
                   </Link>
                   <Link
-                    href={`/hub/${item.owner.hub_slug}`}
+                    href={`/@${item.owner.hub_slug}`}
                     className="text-caption font-mono shrink-0 hover:underline"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    /hub/{item.owner.hub_slug}
+                    @{item.owner.hub_slug}
                   </Link>
                   <span className="text-caption shrink-0 tabular-nums" style={{ color: "var(--text-faint)" }}>
                     {fmtAgo(item.updated_at)}
@@ -335,11 +335,11 @@ export default async function HubsPage() {
                   </Link>
                   {item.hub_slug && (
                     <Link
-                      href={`/hub/${item.hub_slug}`}
+                      href={`/@${item.hub_slug}`}
                       className="text-caption font-mono shrink-0 hover:underline"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      /hub/{item.hub_slug}
+                      @{item.hub_slug}
                     </Link>
                   )}
                   <span
@@ -368,7 +368,7 @@ export default async function HubsPage() {
             {hubs.map(h => (
               <Link
                 key={h.id}
-                href={`/hub/${h.hub_slug}`}
+                href={`/@${h.hub_slug}`}
                 className="flex gap-3 p-4 rounded-lg transition-colors hover:bg-[var(--toggle-bg)]"
                 style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
               >

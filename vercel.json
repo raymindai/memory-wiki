@@ -160,6 +160,40 @@
       "destination": "/raw/bundle/:id"
     },
     {
+      "source": "/@:slug([a-z0-9_-]{3,32})/log.md",
+      "destination": "/raw/hub/:slug/log.md"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})/lint.md",
+      "destination": "/raw/hub/:slug/lint.md"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})/suggested-queries.md",
+      "destination": "/raw/hub/:slug/suggested-queries.md"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32}).md",
+      "destination": "/raw/hub/:slug"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32}).txt",
+      "destination": "/raw/hub/:slug"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})",
+      "has": [{ "type": "header", "key": "accept", "value": ".*text\\/(markdown|plain).*" }],
+      "destination": "/raw/hub/:slug"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})",
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|OAI-SearchBot|Claude-Web|ClaudeBot|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
+      "destination": "/raw/hub/:slug"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})",
+      "destination": "/hub/:slug"
+    },
+    {
       "source": "/hub/:slug([a-z0-9_-]{3,32})/log.md",
       "destination": "/raw/hub/:slug/log.md"
     },

@@ -202,7 +202,7 @@ The bundle carries its own graph (themes, insights, concept relations).`}
             </span>
           </div>
           <div className="pure-integrate-docs-row">
-            <code>memory.wiki/hub/&#123;you&#125;</code>
+            <code>memory.wiki/@&#123;you&#125;</code>
             <span className="pure-integrate-docs-row-tag mono">{isKo ? "전체 hub" : "whole hub"}</span>
             <span className="pure-integrate-docs-row-desc">
               {isKo

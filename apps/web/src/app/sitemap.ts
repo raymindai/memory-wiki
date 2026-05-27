@@ -18,7 +18,7 @@ async function getDynamicEntries(base: string): Promise<MetadataRoute.Sitemap> {
   for (const row of hubs || []) {
     if (!row.hub_slug) continue;
     out.push({
-      url: `${base}/hub/${row.hub_slug}`,
+      url: `${base}/@${row.hub_slug}`,
       lastModified: row.updated_at ? new Date(row.updated_at) : undefined,
       changeFrequency: "weekly",
       priority: 0.7,

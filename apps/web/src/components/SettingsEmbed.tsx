@@ -774,7 +774,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             <div className="min-w-0">
               <div style={{ color: "var(--text-primary)", fontSize: 14, fontWeight: 500 }}>Make my hub public</div>
               <div className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em" }}>
-                {hubPublic ? "Listed at memory.wiki/hub/<slug>" : "Only you can read your hub"}
+                {hubPublic ? "Listed at memory.wiki/@<slug>" : "Only you can read your hub"}
               </div>
             </div>
             <label className="relative inline-flex items-center shrink-0 cursor-pointer">
@@ -812,7 +812,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                     className="text-xs flex items-center px-3 shrink-0 font-mono"
                     style={{ color: "var(--text-faint)", borderRight: "1px solid var(--border-dim)", letterSpacing: "0.04em" }}
                   >
-                    memory.wiki/hub/
+                    memory.wiki/@
                   </span>
                   <input
                     type="text"
@@ -902,12 +902,12 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             </button>
             {hubPublic && hubSlug && /^[a-z0-9_-]{3,32}$/.test(hubSlug) && (
               <Link
-                href={`/hub/${hubSlug}`}
+                href={`/@${hubSlug}`}
                 className="inline-flex items-center gap-1 transition-colors hover:underline"
                 style={{ color: "var(--text-muted)", fontSize: 12 }}
                 target="_blank"
               >
-                View at memory.wiki/hub/{hubSlug}
+                View at memory.wiki/@{hubSlug}
               </Link>
             )}
           </div>

@@ -137,7 +137,7 @@ export default async function SharedBundlesPage() {
           <ul className="grid sm:grid-cols-2 gap-3">
             {bundles.map(b => {
               const ownerLabel = b.owner.display_name || b.owner.hub_slug || "anonymous";
-              const ownerHref = b.owner.hub_slug ? `/hub/${b.owner.hub_slug}` : null;
+              const ownerHref = b.owner.hub_slug ? `/@${b.owner.hub_slug}` : null;
               return (
                 <li key={b.id}>
                   <Link

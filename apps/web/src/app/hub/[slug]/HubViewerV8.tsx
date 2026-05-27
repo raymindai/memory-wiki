@@ -103,7 +103,7 @@ export default function HubViewerV8({
               Hub as of <strong>{atLabel}</strong>, with {docs.length} {docs.length === 1 ? "doc" : "docs"} and{" "}
               {bundles.length} {bundles.length === 1 ? "bundle" : "bundles"} that existed by then.
             </span>
-            <Link href={`/hub/${slug}`} className="vhub-time-back">
+            <Link href={`/@${slug}`} className="vhub-time-back">
               Back to now <ArrowRight size={11} strokeWidth={1.75} />
             </Link>
           </div>
@@ -133,7 +133,7 @@ export default function HubViewerV8({
             <p className="vhub-bio">{profile.hub_description}</p>
           ) : (
             <p className="vhub-bio vhub-bio-empty">
-              Memory.Wiki hub at memory.wiki/hub/{slug}
+              Memory.Wiki hub at memory.wiki/@{slug}
             </p>
           )}
 
