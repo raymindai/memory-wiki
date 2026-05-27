@@ -92,6 +92,13 @@ targets:
         # default is dark too. Users can override via system Light
         # Mode but the default matches the web canvas.
         UIUserInterfaceStyle: Dark
+        # Background fetch identifier registered in
+        # BackgroundRefresh.registerHandler(). iOS rejects
+        # scheduleAppRefresh calls for identifiers not listed here.
+        BGTaskSchedulerPermittedIdentifiers:
+          - wiki.memory.MemoryWiki.recent-refresh
+        UIBackgroundModes:
+          - fetch
         # Supabase config — substituted from Config/Secrets.xcconfig
         # at build time. The xcconfig is gitignored; the .example
         # template is checked in.

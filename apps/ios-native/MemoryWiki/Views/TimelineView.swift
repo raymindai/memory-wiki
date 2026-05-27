@@ -77,6 +77,9 @@ struct TimelineView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
         .task { await model.load() }
+        .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
+            Task { await model.load() }
+        }
     }
 
     // MARK: - Header

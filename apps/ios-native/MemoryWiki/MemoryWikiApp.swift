@@ -7,10 +7,17 @@
 
 import SwiftUI
 
+import WidgetKit
+
 @main
 struct MemoryWikiApp: App {
     @StateObject private var auth = AuthManager.shared
     @StateObject private var router = AppRouter.shared
+    @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        BackgroundRefresh.registerHandler()
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -27,6 +34,28 @@ struct MemoryWikiApp: App {
                         router.handle(url: url)
                     }
                 }
+                .onChange(of: scenePhase) { _, phase in
+                    switch phase {
+                    case .active:
+                        // Foreground arrival — refresh the widget +
+                        // bounce a NotificationCenter ping so the
+                        // active TimelineModel reloads. No spinner
+                        // (the existing data is shown first; the
+                        // fresh values just replace it on completion).
+                        WidgetCenter.shared.reloadAllTimelines()
+                        NotificationCenter.default.post(name: .mwForegroundRefresh, object: nil)
+                    case .background:
+                        BackgroundRefresh.scheduleNext()
+                    default: break
+                    }
+                }
         }
     }
+}
+
+extension Notification.Name {
+    /// Broadcast when the app foregrounds — TimelineModel +
+    /// BundlesModel listen so the list refreshes the moment the
+    /// user comes back without a spinner.
+    static let mwForegroundRefresh = Notification.Name("MWForegroundRefresh")
 }
