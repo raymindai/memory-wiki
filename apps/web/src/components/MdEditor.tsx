@@ -408,6 +408,7 @@ export default function MdEditor() {
     mergeSuggestions: { a: { id: string; title: string | null }; b: { id: string; title: string | null }; distance: number }[];
     rollupSuggestions: { concept: string; docIds: string[]; docCount: number }[];
     autoArchive: { id: string; title: string | null; updatedAt: string | null; ageDays: number }[];
+    bundleSuggestions: { clusterId: string; suggestedTitle: string; docIds: string[]; docCount: number }[];
     totalDocs: number;
   } | null>(null);
   const [lintLoading, setLintLoading] = useState(false);
@@ -423,7 +424,7 @@ export default function MdEditor() {
   // Track resolved findings within this session so they stay hidden
   // even if a re-scan returns them (backend concept-extraction is
   // async and can lag). Cleared on hard refresh.
-  const [lintResolved, setLintResolved] = useState<{ orphans: Set<string>; duplicates: Set<string>; titleMismatches: Set<string>; staleClaims: Set<string>; mergeSuggestions: Set<string>; rollupSuggestions: Set<string>; autoArchive: Set<string> }>({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set() });
+  const [lintResolved, setLintResolved] = useState<{ orphans: Set<string>; duplicates: Set<string>; titleMismatches: Set<string>; staleClaims: Set<string>; mergeSuggestions: Set<string>; rollupSuggestions: Set<string>; autoArchive: Set<string>; bundleSuggestions: Set<string> }>({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set(), bundleSuggestions: new Set() });
   // User's curator preferences — drives which lint categories show
   // up in Needs Review. Hydrated from localStorage on mount and
   // refreshed whenever Settings broadcasts a change so the section
@@ -469,7 +470,7 @@ export default function MdEditor() {
         if (res.ok) {
           const data = await res.json();
           if (data) {
-            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], totalDocs: data.totalDocs || 0 };
+            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], totalDocs: data.totalDocs || 0 };
             setLintReport(report);
           }
         }
@@ -1503,13 +1504,6 @@ export default function MdEditor() {
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mw-show-starred", String(showStarred));
   }, [showStarred]);
-  const [showAiBundles, setShowAiBundles] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem("mw-show-ai-bundles") !== "false";
-  });
-  useEffect(() => {
-    if (typeof window !== "undefined") localStorage.setItem("mw-show-ai-bundles", String(showAiBundles));
-  }, [showAiBundles]);
   const [_showSortMenu, _setShowSortMenu] = useState(false);
   const [_sharedSortMode, _setSharedSortMode] = useState<"newest" | "oldest" | "az" | "za">("newest");
   const [docFilter, setDocFilter] = useState<"all" | "private" | "shared" | "synced">(() => {
@@ -4164,7 +4158,7 @@ export default function MdEditor() {
       setLintLoading(true);
       fetch("/api/user/hub/lint", { headers: authHeaders })
         .then((r) => (r.ok ? r.json() : null))
-        .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], totalDocs: data.totalDocs || 0 }); })
+        .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], totalDocs: data.totalDocs || 0 }); })
         .catch(() => {})
         .finally(() => setLintLoading(false));
     }
@@ -7872,18 +7866,18 @@ ${clone.innerHTML}
                   now, which makes the global one redundant. */}
               {(() => {
                 const allFolders = folders;
-                const anyOpen = allFolders.some(f => !f.collapsed) || showRecent || showStarred || showMyBundles || showAiBundles || showMyDocs || showSharedDocs || showExamples || showTrash;
+                const anyOpen = allFolders.some(f => !f.collapsed) || showRecent || showStarred || showMyBundles || showMyDocs || showSharedDocs || showExamples || showTrash;
                 return (
                   <Tooltip text={anyOpen ? "Collapse all sections + folders" : "Expand all sections + folders"}>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         if (anyOpen) {
-                          setShowRecent(false); setShowStarred(false); setShowMyBundles(false); setShowAiBundles(false); setShowMyDocs(false); setShowSharedDocs(false); setShowExamples(false); setShowTrash(false);
+                          setShowRecent(false); setShowStarred(false); setShowMyBundles(false); setShowMyDocs(false); setShowSharedDocs(false); setShowExamples(false); setShowTrash(false);
                           setFolders(prev => prev.map(f => ({ ...f, collapsed: true })));
                           allFolders.forEach(f => { if (!f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: true }) }).catch(() => {}); });
                         } else {
-                          setShowRecent(true); setShowStarred(true); setShowMyBundles(true); setShowAiBundles(true); setShowMyDocs(true); setShowSharedDocs(true); setShowExamples(true); setShowTrash(true);
+                          setShowRecent(true); setShowStarred(true); setShowMyBundles(true); setShowMyDocs(true); setShowSharedDocs(true); setShowExamples(true); setShowTrash(true);
                           setFolders(prev => prev.map(f => ({ ...f, collapsed: false })));
                           allFolders.forEach(f => { if (f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: false }) }).catch(() => {}); });
                         }
@@ -8470,7 +8464,7 @@ ${clone.innerHTML}
                         className={`shrink-0 transition-transform ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                         style={{ transform: showMyBundles ? "rotate(0deg)" : "rotate(-90deg)" }}
                       />
-                      <span className={`flex-1 text-caption font-medium transition-colors ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>My Bundles</span>
+                      <span className={`flex-1 text-caption font-medium transition-colors ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>MD Bundles</span>
                       {showMyBundles && bundleFolders.length > 0 && (
                         <Tooltip text={anyBundleFolderExpanded ? "Collapse all bundle folders" : "Expand all bundle folders"}>
                           <button
@@ -8554,16 +8548,16 @@ ${clone.innerHTML}
                           </button>
                         </Tooltip>
                       )}
-                      <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{bundles.filter(b => b.creator_type !== "ai").length}</span>
+                      <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{bundles.length}</span>
                     </div>
                   );
                 })()}
-                {showMyBundles && bundles.filter(b => b.creator_type !== "ai").length === 0 && folders.filter(f => f.section === "bundles").length === 0 && (
+                {showMyBundles && bundles.length === 0 && folders.filter(f => f.section === "bundles").length === 0 && (
                   <div className="px-3 py-2 text-caption" style={{ color: "var(--text-faint)" }}>
                     No bundles yet
                   </div>
                 )}
-                {showMyBundles && (bundles.filter(b => b.creator_type !== "ai").length > 0 || folders.filter(f => f.section === "bundles").length > 0) && (
+                {showMyBundles && (bundles.length > 0 || folders.filter(f => f.section === "bundles").length > 0) && (
                   // Wrapper has `pr-2` on both sides so the per-row
                   // hover background gets a visible left + right
                   // gutter against the sidebar edge. The section
@@ -8579,7 +8573,7 @@ ${clone.innerHTML}
                         bundle-specific handlers. Folders with section="bundles" group bundles. */}
                     <SidebarFolderTree
                       folders={folders}
-                      tabs={bundles.filter(b => b.creator_type !== "ai").map(b => {
+                      tabs={bundles.map(b => {
                         const existingTab = tabs.find(t => t.kind === "bundle" && t.bundleId === b.id);
                         return {
                           id: `bundle-item-${b.id}`,
@@ -8802,77 +8796,6 @@ ${clone.innerHTML}
                   </div>
                 )}
               </div>
-
-            {/* ── Section: AI BUNDLES (v8 W3) ──
-                AI-promoted bundles live in their own namespace per
-                the v8 plan: background organize jobs auto-cluster
-                docs and promote >=5-doc clusters into a bundle with
-                creator_type = "ai". Section only renders when there
-                is at least one such bundle. The list is flat (no
-                folder support) because AI bundles are
-                machine-managed and the user shouldn't be reorganising
-                them by hand. Convert -> My Bundles via the bundle
-                context menu (W3 next step). */}
-            {(() => {
-              const aiBundles = bundles.filter(b => b.creator_type === "ai");
-              if (aiBundles.length === 0) return null;
-              return (
-                <div
-                  className="shrink-0 flex flex-col"
-                  onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setDocContextMenu(null); setFolderContextMenu(null); setBundleContextMenu(null); }}
-                >
-                  <div
-                    data-section-id="ai-bundles"
-                    className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
-                    style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
-                    onClick={() => setShowAiBundles(!showAiBundles)}
-                  >
-                    <ChevronDown
-                      width={10} height={10}
-                      className={`shrink-0 transition-transform ${showAiBundles ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
-                      style={{ transform: showAiBundles ? "rotate(0deg)" : "rotate(-90deg)" }}
-                    />
-                    <Sparkles width={11} height={11} style={{ color: "var(--micro-ai)" }} />
-                    <span className={`flex-1 text-caption font-medium transition-colors ${showAiBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>
-                      AI Bundles
-                    </span>
-                    <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{aiBundles.length}</span>
-                  </div>
-                  {showAiBundles && (
-                    <div className="px-2 pb-1 space-y-0.5">
-                      {aiBundles.map((b) => {
-                        const existingTab = tabs.find((t) => t.kind === "bundle" && t.bundleId === b.id);
-                        const isActive = !!existingTab && activeTabId === existingTab.id;
-                        const openBundle = () => {
-                          if (existingTab) { switchTab(existingTab.id); return; }
-                          const newId = `bundle-${b.id}-${Date.now()}`;
-                          const newTab: Tab = { id: newId, kind: "bundle", bundleId: b.id, title: b.title || "Untitled Bundle", markdown: "" };
-                          flushSync(() => { setTabs((prev) => [...prev, newTab]); });
-                          switchTab(newId);
-                        };
-                        return (
-                          <div
-                            key={b.id}
-                            onClick={openBundle}
-                            onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setBundleContextMenu({ x: e.clientX, y: e.clientY, bundleId: b.id }); }}
-                            className="flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)]"
-                            style={{
-                              background: isActive ? "var(--border)" : "transparent",
-                              color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
-                            }}
-                            title={b.title || "Untitled Bundle"}
-                          >
-                            <span className="shrink-0">{renderBundleStatusIcon(b.id, 14)}</span>
-                            <span className="flex-1 truncate text-body">{b.title || "Untitled Bundle"}</span>
-                            <span className="text-caption tabular-nums shrink-0" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{b.documentCount}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
 
             {/* ── Section 1: MY DOCUMENTS ── */}
             {(() => {
@@ -9697,7 +9620,7 @@ ${clone.innerHTML}
                     setLintLoading(true);
                     return fetch("/api/user/hub/lint", { headers: authHeaders })
                       .then((r) => (r.ok ? r.json() : null))
-                      .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], totalDocs: data.totalDocs || 0 }); })
+                      .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], totalDocs: data.totalDocs || 0 }); })
                       .catch(() => {})
                       .finally(() => setLintLoading(false));
                   };
@@ -9705,7 +9628,7 @@ ${clone.innerHTML}
                   // findings the backend still considers open come back.
                   // Available via long-press / shift-click on Re-scan
                   // (kept implicit so the default UX is forgiving).
-                  void (() => setLintResolved({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set() }));
+                  void (() => setLintResolved({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set(), bundleSuggestions: new Set() }));
                   const resolveOrphan = async (docId: string, docTitle: string | null) => {
                     // Orphan auto-fix: re-run concept extraction. The
                     // concept extractor pulls concepts from the doc;
@@ -11964,6 +11887,7 @@ ${clone.innerHTML}
                     curatorMergeEnabled={curatorSettings.merge}
                     curatorRollupEnabled={curatorSettings.rollup}
                     curatorAutoArchiveEnabled={curatorSettings["auto-archive"]}
+                    curatorBundleSuggestionEnabled={curatorSettings["bundle-suggestion"]}
                     onResolveStaleClaim={(docId) => {
                       setLintResolved((prev) => ({ ...prev, staleClaims: new Set([...prev.staleClaims, docId]) }));
                     }}
@@ -11976,6 +11900,41 @@ ${clone.innerHTML}
                     }}
                     onResolveAutoArchive={(docId) => {
                       setLintResolved((prev) => ({ ...prev, autoArchive: new Set([...prev.autoArchive, docId]) }));
+                    }}
+                    onAcceptBundleSuggestion={async (clusterId, title, docIds) => {
+                      if (!user?.id) return;
+                      // Dismiss locally up front so the card disappears
+                      // while the bundle creation runs in the background.
+                      setLintResolved((prev) => ({ ...prev, bundleSuggestions: new Set([...prev.bundleSuggestions, clusterId]) }));
+                      try {
+                        const res = await fetch("/api/bundles", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", ...authHeaders },
+                          body: JSON.stringify({
+                            title,
+                            documentIds: docIds,
+                            isDraft: true,
+                            sourceClusterId: clusterId,
+                          }),
+                        });
+                        if (!res.ok) {
+                          showToast("Couldn't create bundle", "error");
+                          return;
+                        }
+                        const data = await res.json();
+                        showToast(`Bundle "${title}" created`, "success");
+                        // Refresh bundles so the sidebar picks it up.
+                        fetch("/api/bundles", { headers: authHeaders })
+                          .then((r) => r.ok ? r.json() : null)
+                          .then((d) => { if (d?.bundles) setBundles(d.bundles); })
+                          .catch(() => {});
+                        void data;
+                      } catch {
+                        showToast("Couldn't create bundle", "error");
+                      }
+                    }}
+                    onDismissBundleSuggestion={(clusterId) => {
+                      setLintResolved((prev) => ({ ...prev, bundleSuggestions: new Set([...prev.bundleSuggestions, clusterId]) }));
                     }}
                     onResolveTitleMismatch={(docId) => {
                       // Renaming via AI isn't wired yet; opening the
@@ -14315,26 +14274,6 @@ ${clone.innerHTML}
             // Same ShareModal as docs, with bundle adapters that cascade to all included docs.
             setBundleShareModal({ bundleId: b.id });
           }},
-          // v8 W3 — AI bundle conversion. Only shown for AI-promoted
-          // bundles (creator_type === "ai"). Flipping to 'user' tells
-          // the background promoter it's now manually owned and
-          // freezes auto-edits on this bundle (the user has taken
-          // it over).
-          ...(b.creator_type === "ai" ? [{
-            label: "Convert to My Bundle",
-            action: () => {
-              const userId = user?.id;
-              if (!userId) return;
-              setBundles(prev => prev.map(x => x.id === b.id ? { ...x, creator_type: "user" as const } : x));
-              fetch(`/api/bundles/${b.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json", ...authHeaders },
-                body: JSON.stringify({ action: "convert-to-user", userId }),
-              })
-                .then((r) => r.ok ? showToast("Converted to My Bundles", "success") : showToast("Convert failed", "error"))
-                .catch(() => showToast("Convert failed", "error"));
-            },
-          }] : []),
           { label: "Delete bundle", danger: true, noClose: true, action: () => {
             setBundleContextMenu(prev => prev ? { ...prev, confirmDelete: true } : null);
           }},

@@ -106,6 +106,8 @@ interface HubLintResolved {
   /** Concept label — roll-up suggestions key on concept name. */
   rollupSuggestions: Set<string>;
   autoArchive: Set<string>;
+  /** Cluster slug — dismiss / accept removes it locally. */
+  bundleSuggestions: Set<string>;
 }
 
 interface HubEmbedProps {
@@ -133,6 +135,7 @@ interface HubEmbedProps {
   curatorMergeEnabled?: boolean;
   curatorRollupEnabled?: boolean;
   curatorAutoArchiveEnabled?: boolean;
+  curatorBundleSuggestionEnabled?: boolean;
   lintResolved?: HubLintResolved;
   onResolveOrphan?: (docId: string, docTitle: string | null) => void;
   onResolveDuplicate?: (aId: string, aTitle: string | null, bId: string, bTitle: string | null) => void;
@@ -141,6 +144,11 @@ interface HubEmbedProps {
   onResolveMergeSuggestion?: (aId: string, bId: string) => void;
   onResolveRollupSuggestion?: (concept: string) => void;
   onResolveAutoArchive?: (docId: string) => void;
+  /** Accept a bundle suggestion — caller creates the bundle and
+   *  marks the cluster as represented (bundle_ai_metadata.source_cluster_id)
+   *  so the suggestion doesn't reappear. */
+  onAcceptBundleSuggestion?: (clusterId: string, title: string, docIds: string[]) => void;
+  onDismissBundleSuggestion?: (clusterId: string) => void;
   /** Auto-management settings — drives the status panel above
    *  Needs Review. When omitted, the panel doesn't render. */
   autoLevel?: "off" | "conservative" | "standard" | "aggressive";
@@ -246,6 +254,7 @@ export default function HubEmbed({
   curatorMergeEnabled,
   curatorRollupEnabled,
   curatorAutoArchiveEnabled,
+  curatorBundleSuggestionEnabled,
   lintResolved,
   onResolveOrphan,
   onResolveDuplicate,
@@ -254,6 +263,8 @@ export default function HubEmbed({
   onResolveMergeSuggestion,
   onResolveRollupSuggestion,
   onResolveAutoArchive,
+  onAcceptBundleSuggestion,
+  onDismissBundleSuggestion,
   autoLevel,
   autoTrigger,
   onAutoResolveRun,
@@ -1660,6 +1671,7 @@ Memory.Wiki hub`;
             mergeSuggestions?: Array<{ a: { id: string; title: string | null }; b: { id: string; title: string | null }; distance: number }>;
             rollupSuggestions?: Array<{ concept: string; docIds: string[]; docCount: number }>;
             autoArchive?: Array<{ id: string; title: string | null; updatedAt: string | null; ageDays: number }>;
+            bundleSuggestions?: Array<{ clusterId: string; suggestedTitle: string; docIds: string[]; docCount: number }>;
           };
           const lr = lintReport as ExtendedLint;
           const visibleStaleClaims = curatorStaleEnabled
@@ -1674,6 +1686,9 @@ Memory.Wiki hub`;
           const visibleAutoArchive = curatorAutoArchiveEnabled
             ? (lr.autoArchive || []).filter((a) => !lintResolved?.autoArchive?.has(a.id))
             : [];
+          const visibleBundleSuggestions = curatorBundleSuggestionEnabled
+            ? (lr.bundleSuggestions || []).filter((b) => !lintResolved?.bundleSuggestions?.has(b.clusterId))
+            : [];
           const total =
             visibleOrphans.length +
             visibleDuplicates.length +
@@ -1681,7 +1696,8 @@ Memory.Wiki hub`;
             visibleStaleClaims.length +
             visibleMergeSuggestions.length +
             visibleRollupSuggestions.length +
-            visibleAutoArchive.length;
+            visibleAutoArchive.length +
+            visibleBundleSuggestions.length;
           if (total === 0) return null;
           return (
             <section className="mb-8">
@@ -1967,6 +1983,54 @@ Memory.Wiki hub`;
                       {onResolveRollupSuggestion && (
                         <button
                           onClick={() => onResolveRollupSuggestion(r.concept)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                        >
+                          Dismiss
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {visibleBundleSuggestions.map((b) => (
+                  <div
+                    key={`bundle-sug:${b.clusterId}`}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+                  >
+                    <span
+                      className="flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(181,255,26,0.14)", color: "var(--micro-lime)" }}
+                      title="Bundle suggestion — these docs share a topical cluster"
+                    >
+                      <Layers width={14} height={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
+                        <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {b.suggestedTitle}
+                        </span>
+                        <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>
+                          {b.docCount} docs
+                        </span>
+                      </div>
+                      <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        These docs share a topical cluster. Bundle them so you can paste one URL into any AI and have the whole group as context.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {onAcceptBundleSuggestion && (
+                        <button
+                          onClick={() => onAcceptBundleSuggestion(b.clusterId, b.suggestedTitle, b.docIds)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors"
+                          style={{ color: "var(--background)", background: "var(--text-primary)" }}
+                        >
+                          Bundle
+                        </button>
+                      )}
+                      {onDismissBundleSuggestion && (
+                        <button
+                          onClick={() => onDismissBundleSuggestion(b.clusterId)}
                           className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
                           style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
                         >

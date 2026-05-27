@@ -1556,12 +1556,12 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
  * something and queue another batch if there are more.
  */
 function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, string> }) {
-  const [phase, setPhase] = useState<"idle" | "enqueueing" | "draining" | "promoting">("idle");
+  const [phase, setPhase] = useState<"idle" | "enqueueing" | "draining">("idle");
   // Persist last completion summary across navigations so the user
   // can come back to Settings and still see what happened. Cleared
   // on a fresh click. Stored separately from `phase` because phase
   // is genuinely transient (it's only meaningful while running).
-  const [result, setResult] = useState<{ enqueued: number; drained: number; promoted: number } | null>(() => {
+  const [result, setResult] = useState<{ enqueued: number; drained: number } | null>(() => {
     if (typeof window === "undefined") return null;
     try {
       const raw = localStorage.getItem("mw-backfill-last-result");
@@ -1626,24 +1626,17 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
         if ((j.processed as number) === 0) break;
       }
 
-      // 3) Promote any newly-formed clusters into AI bundles.
-      setPhase("promoting");
-      let promoted = 0;
-      const prom = await fetch("/api/cron/promote-clusters", { method: "POST" }).catch(() => null);
-      if (prom && prom.ok) {
-        const pj = await prom.json().catch(() => null);
-        if (pj) promoted = (pj.promoted as number) || 0;
-      }
+      // (Promotion step removed in v8 W4 option B — clusters now
+      // surface as Bundle Suggestions in Needs Review, not as
+      // auto-created bundles.)
 
-      const next = { enqueued, drained, promoted };
+      const next = { enqueued, drained };
       setResult(next);
       try { localStorage.setItem("mw-backfill-last-result", JSON.stringify(next)); } catch { /* quota */ }
       showToast(
-        promoted > 0
-          ? `Filled ${drained} doc${drained === 1 ? "" : "s"}, promoted ${promoted} AI bundle${promoted === 1 ? "" : "s"}`
-          : drained > 0
-            ? `Filled ${drained} doc${drained === 1 ? "" : "s"}`
-            : enqueued > 0
+        drained > 0
+          ? `Filled ${drained} doc${drained === 1 ? "" : "s"} — bundle suggestions will appear in Needs Review`
+          : enqueued > 0
               ? `Enqueued ${enqueued} doc${enqueued === 1 ? "" : "s"}, drain in progress`
               : "All docs already have AI metadata",
         "success",
@@ -1657,7 +1650,6 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
   const running = phase !== "idle";
   const label = phase === "enqueueing" ? "Enqueueing"
     : phase === "draining" ? "Draining queue"
-    : phase === "promoting" ? "Promoting"
     : "Backfill now";
   // Friendly relative time for the lastBuiltAt timestamp.
   const lastBuiltLabel = (() => {
@@ -1687,7 +1679,7 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
         </button>
         {result && (
           <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-            Last run: {result.enqueued} enqueued, {result.drained} drained, {result.promoted} AI bundle{result.promoted === 1 ? "" : "s"} created
+            Last run: {result.enqueued} enqueued, {result.drained} drained
           </span>
         )}
       </div>

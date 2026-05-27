@@ -22,7 +22,8 @@ export type CuratorOptionId =
   | "citation-rot"
   | "rollup"
   | "merge"
-  | "auto-archive";
+  | "auto-archive"
+  | "bundle-suggestion";
 
 export interface CuratorOption {
   id: CuratorOptionId;
@@ -94,6 +95,13 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
     description: "Docs untouched for 90+ days that no other doc references move to an Archive folder automatically. Always restorable.",
     shipped: true,
     defaultEnabled: false,
+  },
+  {
+    id: "bundle-suggestion",
+    label: "Bundle suggestions",
+    description: "When 5+ docs share a topical cluster, Memory.Wiki suggests bundling them. You decide whether to accept — nothing is auto-created.",
+    shipped: true,
+    defaultEnabled: true,
   },
 ];
 

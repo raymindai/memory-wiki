@@ -30,6 +30,11 @@ export async function POST(req: NextRequest) {
     anonymousId?: string;
     isDraft?: boolean;
     folderId?: string | null;
+    /** v8 W4 option B — when this bundle was created by accepting a
+     *  bundle-suggestion lint card, the cluster slug that backed the
+     *  suggestion. Stored on bundle_ai_metadata.source_cluster_id so
+     *  the same cluster never produces another suggestion. */
+    sourceClusterId?: string;
   };
   try {
     body = await req.json();
@@ -162,6 +167,22 @@ export async function POST(req: NextRequest) {
     await supabase.from("bundles").delete().eq("id", id);
     console.error("Bundle documents insert error:", docsError);
     return NextResponse.json({ error: "Failed to add documents to bundle" }, { status: 500 });
+  }
+
+  // v8 W4 option B — if this bundle was created from accepting a
+  // bundle-suggestion, mark its source cluster so the same suggestion
+  // never reappears. The bundle stays creator_type='user' since the
+  // human explicitly accepted it; we only flag the cluster lineage.
+  if (body.sourceClusterId && userId) {
+    await supabase.from("bundle_ai_metadata").insert({
+      bundle_id: id,
+      creator_type: "user",
+      creator_agent: "user-accepted-suggestion",
+      triggered_by: "lint-bundle-suggestion",
+      source_cluster_id: body.sourceClusterId,
+    }).then(({ error }) => {
+      if (error) console.warn("bundle_ai_metadata insert (sourceClusterId) failed", JSON.stringify({ id, err: error.message }));
+    });
   }
 
   // Best-effort log entry.

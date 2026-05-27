@@ -87,6 +87,17 @@ export interface AutoArchiveCandidate {
   ageDays: number;
 }
 
+export interface BundleSuggestion {
+  /** Cluster slug from document_ai_metadata.cluster_id. */
+  clusterId: string;
+  /** Pretty title derived from the slug (kebab-case → Title case). */
+  suggestedTitle: string;
+  /** Doc ids that share the cluster, capped. */
+  docIds: string[];
+  /** True total participants (may exceed docIds.length when capped). */
+  docCount: number;
+}
+
 export interface LintReport {
   computedAt: string;
   totalDocs: number;
@@ -108,6 +119,11 @@ export interface LintReport {
   /** v8 W4-6 — docs untouched for ARCHIVE_AGE_DAYS+ and not referenced
    *  by anything. Safe to move to an Archive folder. */
   autoArchive: AutoArchiveCandidate[];
+  /** v8 W4 (option B) — clusters of >= BUNDLE_SUGGESTION_MIN_DOCS docs
+   *  the user could bundle. Surfaced as a suggestion the user accepts
+   *  rather than auto-creating an AI bundle, so My Bundles stays
+   *  intent-driven. */
+  bundleSuggestions: BundleSuggestion[];
 }
 
 const DUPLICATE_DISTANCE_THRESHOLD = 0.18; // cosine; tuned for "likely-overlapping content"
@@ -136,6 +152,12 @@ const ROLLUP_MIN_DOCS = 10;
 // "0 refs" condition (vs stale's ">= 2 refs") the two signals
 // partition the old-docs population.
 const ARCHIVE_AGE_DAYS = 90;
+
+// Bundle suggestions — how many docs need to share a cluster_id
+// before we offer to bundle them. Mirrors the deprecated auto-
+// promotion threshold so the affordance feels familiar; the
+// difference is the user accepts each one, nothing auto-creates.
+const BUNDLE_SUGGESTION_MIN_DOCS = 5;
 
 interface DocRow {
   id: string;
@@ -400,6 +422,45 @@ export async function computeLintReport(
   }
   autoArchive.sort((a, b) => b.ageDays - a.ageDays);
 
+  // Bundle suggestions — clusters of N+ docs the user could turn
+  // into a bundle. Dedupe against bundle_ai_metadata.source_cluster_id
+  // so already-accepted suggestions don't reappear.
+  const { data: metaRows } = await supabase
+    .from("document_ai_metadata")
+    .select("document_id, cluster_id")
+    .not("cluster_id", "is", null);
+  const SKIP_CLUSTERS = new Set(["misc", "uncategorized", ""]);
+  const clusterDocs = new Map<string, Set<string>>();
+  for (const r of ((metaRows as Array<{ document_id: string; cluster_id: string }>) ?? [])) {
+    if (!liveDocIds.has(r.document_id)) continue;
+    const c = (r.cluster_id || "").trim().toLowerCase();
+    if (!c || SKIP_CLUSTERS.has(c)) continue;
+    let set = clusterDocs.get(c);
+    if (!set) { set = new Set(); clusterDocs.set(c, set); }
+    set.add(r.document_id);
+  }
+  const { data: acceptedRows } = await supabase
+    .from("bundle_ai_metadata")
+    .select("source_cluster_id")
+    .not("source_cluster_id", "is", null);
+  const accepted = new Set<string>();
+  for (const r of (acceptedRows as Array<{ source_cluster_id: string }> | null) ?? []) {
+    if (r.source_cluster_id) accepted.add(r.source_cluster_id);
+  }
+  const bundleSuggestions: BundleSuggestion[] = [];
+  for (const [clusterId, ids] of clusterDocs) {
+    if (ids.size < BUNDLE_SUGGESTION_MIN_DOCS) continue;
+    if (accepted.has(clusterId)) continue;
+    const docIdsArr = Array.from(ids);
+    bundleSuggestions.push({
+      clusterId,
+      suggestedTitle: clusterId.split("-").filter(Boolean).map((w, i) => i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(" "),
+      docIds: docIdsArr.slice(0, 20),
+      docCount: docIdsArr.length,
+    });
+  }
+  bundleSuggestions.sort((a, b) => b.docCount - a.docCount);
+
   return {
     computedAt: new Date().toISOString(),
     totalDocs: liveDocs.length,
@@ -410,6 +471,7 @@ export async function computeLintReport(
     mergeSuggestions,
     rollupSuggestions,
     autoArchive,
+    bundleSuggestions,
   };
 }
 
