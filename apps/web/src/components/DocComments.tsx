@@ -10,6 +10,7 @@
  * on private / restricted / public docs and the server enforces.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/useAuth";
 
 type CommentAuthor = {
@@ -197,7 +198,6 @@ export default function DocComments({ docId }: { docId: string }) {
               <li key={c.id} style={{ display: "flex", gap: 10 }}>
                 <div style={{ flexShrink: 0, width: 28, height: 28, borderRadius: "50%", overflow: "hidden", background: "var(--toggle-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {c.author.avatar_url ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img src={c.author.avatar_url} alt="" width={28} height={28} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
                   ) : (
                     <span style={{ fontSize: 11, color: "var(--text-faint)", fontWeight: 600 }}>
@@ -208,9 +208,9 @@ export default function DocComments({ docId }: { docId: string }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 2 }}>
                     {profileHref ? (
-                      <a href={profileHref} style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", textDecoration: "none" }}>
+                      <Link href={profileHref} style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", textDecoration: "none" }}>
                         {displayName}
-                      </a>
+                      </Link>
                     ) : (
                       <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>{displayName}</span>
                     )}
@@ -304,7 +304,7 @@ export default function DocComments({ docId }: { docId: string }) {
         </div>
       ) : (
         <p style={{ fontSize: 12, color: "var(--text-faint)", margin: 0 }}>
-          <a href="/auth?next=/d/" style={{ color: "var(--text-primary)", textDecoration: "underline" }}>Sign in</a> to comment.
+          <Link href={`/auth?next=/d/${docId}`} style={{ color: "var(--text-primary)", textDecoration: "underline" }}>Sign in</Link> to comment.
         </p>
       )}
     </section>
