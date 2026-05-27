@@ -112,6 +112,17 @@ export default function BundleViewer({
     if (first) setAnalysisTab(first);
   }, [selectedNodeInfo]);
 
+  // Suppress the public-viewer flash for returning signed-in users.
+  // Mirrors the gate in DocumentViewer + HubViewerV8.
+  const [authFlashGate, setAuthFlashGate] = useState(false);
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && localStorage.getItem("mw-was-logged-in") === "1") {
+        setAuthFlashGate(true);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // Owner-aware redirect: if the signed-in user owns this bundle, send
   // them to the main editor with ?bundle=<id> so the bundle opens as an
   // editable tab. Mirrors the per-document behavior in /d/[id].
@@ -121,16 +132,18 @@ export default function BundleViewer({
         const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
         const supabase = getSupabaseBrowserClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) { setAuthFlashGate(false); return; }
         const res = await fetch(`/api/bundles/${id}`, {
           headers: { "x-user-id": user.id, "x-user-email": user.email || "" },
         });
-        if (!res.ok) return;
+        if (!res.ok) { setAuthFlashGate(false); return; }
         const data = await res.json();
         if (data.isOwner) {
           window.location.replace(`/?bundle=${id}`);
+          return;
         }
       } catch { /* not signed in or bundle not accessible — stay on viewer */ }
+      setAuthFlashGate(false);
     })();
   }, [id]);
 
@@ -459,13 +472,16 @@ export default function BundleViewer({
     );
   }
 
-  // ─── Loading ───
+  // ─── Loading ─── Same MW-blob loader the editor + doc viewer use,
+  // so the boot → viewer handoff reads as ONE moment.
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--canvas)" }}>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--accent)" }} />
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>Loading bundle...</span>
+          <MemoryWikiLogo size={64} variant="icon-only" />
+          <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+            Loading
+          </span>
         </div>
       </div>
     );
@@ -483,7 +499,20 @@ export default function BundleViewer({
   const showSummaryBand = documents.length >= 2 && (summaryText || isAnalyzing);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
+    <div className="min-h-screen flex flex-col relative" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
+      {/* Auth-flash gate — see DocumentViewer for rationale. */}
+      {authFlashGate && (
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-3"
+          style={{ background: "var(--canvas)" }}
+          aria-hidden
+        >
+          <MemoryWikiLogo size={64} variant="icon-only" />
+          <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+            Loading
+          </span>
+        </div>
+      )}
       <ViewerHeader
         bordered
         title={

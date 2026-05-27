@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Globe, Users } from "lucide-react";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import RelatedInHubPanel from "@/components/RelatedInHubPanel";
 import ReferencedBy from "@/components/ReferencedBy";
 import VisitorAskAI from "@/components/VisitorAskAI";
@@ -68,6 +69,21 @@ export default function DocumentViewer({
   // Defer the access gate UNTIL client-side auth check finishes — otherwise
   // owners see "You need access" flash for ~500ms before the redirect to /
   const [authChecked, setAuthChecked] = useState(!isRestricted);
+  // Suppress the public-viewer chrome flash for returning signed-in
+  // users. SSR renders public content; on mount we set this to true
+  // ONLY if localStorage says we've signed in before (mw-was-logged-in),
+  // and the ownership-check useEffect will flip it off (or redirect
+  // away) once auth resolves. First-time visitors never trigger it
+  // and see the public viewer immediately. Starts false on first
+  // render so SSR + hydration match.
+  const [authFlashGate, setAuthFlashGate] = useState(false);
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && localStorage.getItem("mw-was-logged-in") === "1") {
+        setAuthFlashGate(true);
+      }
+    } catch { /* ignore */ }
+  }, []);
   const [copied, setCopied] = useState(false);
   const [accessRevoked, setAccessRevoked] = useState(false);
   const [updateToast, setUpdateToast] = useState(false);
@@ -124,7 +140,10 @@ export default function DocumentViewer({
           setIsLoading(true);
         }
       } catch { /* no session or not authorized */ }
-      finally { setAuthChecked(true); }
+      finally {
+        setAuthChecked(true);
+        setAuthFlashGate(false);
+      }
     })();
   }, [id, isRestricted, unlocked]);
 
@@ -280,9 +299,26 @@ export default function DocumentViewer({
     // beyond the viewport so the page scrolls naturally and the article
     // takes its real content height instead of being clipped to 0.
     <div
-      className="flex flex-col min-h-screen"
+      className="flex flex-col min-h-screen relative"
       style={{ background: "var(--canvas)", color: "var(--foreground)" }}
     >
+      {/* Auth-flash gate — covers the public viewer chrome with the
+          MW-blob loader while the ownership check is in flight, so
+          returning signed-in owners don't see the "Sign in / Create
+          your own" CTAs flash for ~500ms before the redirect to /.
+          Public visitors (no mw-was-logged-in flag) never see this. */}
+      {authFlashGate && (
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-3"
+          style={{ background: "var(--canvas)" }}
+          aria-hidden
+        >
+          <MemoryWikiLogo size={64} variant="icon-only" />
+          <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+            Loading
+          </span>
+        </div>
+      )}
       <ViewerHeader
         title={title || "Untitled"}
         breadcrumb={
@@ -370,14 +406,13 @@ export default function DocumentViewer({
             </Link>
           </div>
         ) : isRestricted && !unlocked && !authChecked ? (
-          // Auth check still in flight — show neutral loading state instead of
-          // flashing the "You need access" gate to owners about to be redirected.
+          // Auth check still in flight — show the MW-blob loader so
+          // this matches the editor / boot loader (was an old circle
+          // SVG that read as a different product).
           <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3">
-            <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}>
-              <circle cx="8" cy="8" r="6" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round"/>
-            </svg>
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Loading...
+            <MemoryWikiLogo size={64} variant="icon-only" />
+            <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+              Loading
             </span>
           </div>
         ) : isRestricted && !unlocked ? (
@@ -455,11 +490,9 @@ export default function DocumentViewer({
           </div>
         ) : isLoading ? (
           <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3">
-            <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}>
-              <circle cx="8" cy="8" r="6" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round"/>
-            </svg>
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Loading...
+            <MemoryWikiLogo size={64} variant="icon-only" />
+            <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+              Loading
             </span>
           </div>
         ) : markdown ? (
