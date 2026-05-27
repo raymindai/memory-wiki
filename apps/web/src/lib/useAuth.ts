@@ -225,6 +225,11 @@ export function useAuth() {
     supabase.auth.getSession().then((res: { data: { session: { user: User; access_token?: string } | null } }) => {
       const session = res.data.session;
       if (session?.user) {
+        // Mark "this device has a logged-in user" so the pre-paint
+        // auth gate (layout.tsx inline script) knows to show the
+        // MW-blob loader instead of letting the public viewer chrome
+        // flash for ~500ms before the ownership-check redirect fires.
+        try { localStorage.setItem("mw-was-logged-in", "1"); } catch { /* ignore */ }
         setState((prev) => ({ ...prev, user: session.user, accessToken: session.access_token || null, loading: false }));
         fetchProfile(supabase, session.user.id, setState, session.access_token || null);
         // Already-signed-in path: SIGNED_IN event won't fire, so trigger

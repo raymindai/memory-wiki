@@ -68,14 +68,18 @@
 #mw-auth-pending-loader {
   display: none;
 }
+html[data-mw-auth-pending="1"] body {
+  background: var(--canvas) !important;
+  overflow: hidden !important;
+}
 html[data-mw-auth-pending="1"] body > *:not(#mw-auth-pending-loader) {
-  visibility: hidden;
+  display: none !important;
 }
 html[data-mw-auth-pending="1"] #mw-auth-pending-loader {
   position: fixed;
   inset: 0;
-  z-index: 99999;
-  display: flex;
+  z-index: 2147483647;
+  display: flex !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;

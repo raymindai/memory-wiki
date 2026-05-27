@@ -131,6 +131,7 @@ export default function BundleViewer({
         const supabase = getSupabaseBrowserClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { liftAuthGate(); return; }
+        try { localStorage.setItem("mw-was-logged-in", "1"); } catch { /* ignore */ }
         const res = await fetch(`/api/bundles/${id}`, {
           headers: { "x-user-id": user.id, "x-user-email": user.email || "" },
         });

@@ -108,6 +108,9 @@ export default function DocumentViewer({
           } catch { /* refresh failed — treat as logged out */ }
         }
         if (!user) return;
+        // Keep "we have a session on this device" flag in sync so a
+        // future refresh on any surface triggers the pre-paint gate.
+        try { localStorage.setItem("mw-was-logged-in", "1"); } catch { /* ignore */ }
 
         const res = await fetch(`/api/docs/${id}`, {
           headers: { "x-user-id": user.id, "x-user-email": user.email || "" },
