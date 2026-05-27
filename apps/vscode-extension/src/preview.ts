@@ -1069,7 +1069,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   <div id="toolbar">
     <a class="toolbar-logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><span style="color:var(--accent)">Memory</span><span style="color:var(--fg)">.Wiki</span></a>
     <div class="view-switcher" style="margin-left:6px">
-      <button class="view-btn active" data-view="live" title="Live preview"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5.5 6l2.5 2-2.5 2"/><line x1="9" y1="10" x2="11.5" y2="10"/></svg> Live</button>
+      <button class="view-btn active" data-view="live" title="MD preview"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5.5 6l2.5 2-2.5 2"/><line x1="9" y1="10" x2="11.5" y2="10"/></svg> MD</button>
       <button class="view-btn" data-view="split" title="Split view"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="8" y1="2" x2="8" y2="14"/></svg> Split</button>
       <button class="view-btn" data-view="source" title="Source view"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 3.5L1.5 6L4 8.5M12 3.5l2.5 2.5L12 8.5M9 2l-2 12"/></svg> Source</button>
     </div>
@@ -1080,7 +1080,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     <div id="live-pane">
       <!-- Live pane header: label + toggle icons (like Memory.Wiki) -->
       <div id="live-header" class="pane-header">
-        <span class="pane-label" style="color:var(--accent)">LIVE</span>
+        <span class="pane-label" style="color:var(--accent)">MD</span>
         <span style="flex:1"></span>
         <button id="btn-toggle-toolbar" class="pane-icon-btn active" title="Formatting toolbar">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 4h14M1 8h14M1 12h14"/><circle cx="5" cy="4" r="1.5" fill="currentColor"/><circle cx="10" cy="8" r="1.5" fill="currentColor"/><circle cx="7" cy="12" r="1.5" fill="currentColor"/></svg>

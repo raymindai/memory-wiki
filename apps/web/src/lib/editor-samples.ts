@@ -21,12 +21,12 @@ export const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
 
 1. **Type or paste** anything — Markdown, plain text, AI output, code
 2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
-3. **Edit** inline in the Live view, or use Source for raw Markdown
+3. **Edit** inline in the MD view, or use Source for raw Markdown
 4. **Share** with one click — generates a permanent URL like \`memory.wiki/abc123\`
 
 ## What You Can Do
 
-- **WYSIWYG editing** — click any text in the Live view and start typing
+- **WYSIWYG editing** — click any text in the MD view and start typing
 - **AI Tools** — Polish, Summary, TL;DR, Translate, Chat (right panel)
 - **Document Outline** — heading structure panel on the right
 - **Image Gallery** — upload, manage, and insert images (right panel)
@@ -509,7 +509,7 @@ export const SAMPLE_FEATURES = `# Key Features
 
 ## WYSIWYG Editing
 
-Click anywhere in the **Live** view to start editing. Format with the toolbar or keyboard shortcuts.
+Click anywhere in the **MD** view to start editing. Format with the toolbar or keyboard shortcuts.
 
 > No need to learn Markdown syntax — just type naturally.
 
@@ -945,7 +945,7 @@ export const SAMPLE_DESKTOP = `# Memory.Wiki for Mac
 
 ## Editing Modes
 
-- **Live** — WYSIWYG editing in rendered preview
+- **MD** — WYSIWYG editing in rendered preview
 - **Split** — Source on left, preview on right
 - **Source** — Raw Markdown with CodeMirror
 

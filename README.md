@@ -33,9 +33,9 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 ## Features
 
 ### Editor
-- **Live** — WYSIWYG editing on the rendered preview (TipTap / ProseMirror)
+- **MD** — WYSIWYG editing on the rendered preview (TipTap / ProseMirror)
 - **Source** — CodeMirror 6 with Markdown syntax highlighting
-- **Split** — side-by-side Live + Source
+- **Split** — side-by-side MD + Source
 - **Floating toolbar** — context-aware formatting on text selection
 - **Mermaid visual editor** — drag-and-drop flowchart canvas
 
@@ -172,7 +172,7 @@ mdcore/
 | ⌘Z / ⌘⇧Z | Undo / Redo |
 | ⌘\\ | Toggle view mode |
 | ⌘Enter | Exit block (quote/list/code) |
-| Alt+1/2/3 | Live / Split / Source |
+| Alt+1/2/3 | MD / Split / Source |
 | Dbl-click | Edit code/math/diagram/table |
 
 ## License

@@ -19,7 +19,7 @@ const data: CaseData = {
     },
     {
       step: "Intent 태깅",
-      detail: "각 문서를 note / decision / question으로 표시. Doc intent는 다음 concept refresh 후 자동 분류; 에디터 LIVE 바의 chip으로 override 가능.",
+      detail: "각 문서를 note / decision / question으로 표시. Doc intent는 다음 concept refresh 후 자동 분류; 에디터 MD 바의 chip으로 override 가능.",
     },
     {
       step: "프로젝트별로 번들",

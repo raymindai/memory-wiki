@@ -20,7 +20,7 @@ const data: CaseData = {
     },
     {
       step: "Tag with intent",
-      detail: "Mark each doc as note / decision / question. Doc intent is auto-classified after the next concept refresh; you can override with the chip in the editor's LIVE bar.",
+      detail: "Mark each doc as note / decision / question. Doc intent is auto-classified after the next concept refresh; you can override with the chip in the editor's MD bar.",
     },
     {
       step: "Bundle by project",

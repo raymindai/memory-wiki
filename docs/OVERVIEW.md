@@ -51,7 +51,7 @@ Auxiliary surfaces:
 ## 3. Feature inventory
 
 ### Editing & rendering
-- Tiptap (ProseMirror) **Live** tab — WYSIWYG over the same markdown-it parser the viewers use, so output is identical across editor / viewer / embed.
+- Tiptap (ProseMirror) **MD** tab — WYSIWYG over the same markdown-it parser the viewers use, so output is identical across editor / viewer / embed.
 - CodeMirror 6 **Source** tab — raw markdown editing with selection, paste, image-upload handlers.
 - **Split** view that wires Source ↔ Preview.
 - GFM tables, task lists, footnotes, KaTeX (`$..$`, `$$..$$`), Mermaid (dark/light aware), code highlighting (highlight.js), ASCII box-diagram detection.
@@ -66,10 +66,10 @@ Auxiliary surfaces:
 
 ### Real-time collaboration
 - Yjs CRDT over **Supabase Realtime broadcast** (`yjs-doc-{cloudId}` channel).
-- Storage shape is markdown-string Y.Text, not y-prosemirror — sync works the same whether you're on Live, Source, or Split.
+- Storage shape is markdown-string Y.Text, not y-prosemirror — sync works the same whether you're on MD, Source, or Split.
 - Remote cursor presence:
   - Source pane: line/col carets via a CM6 StateField.
-  - Live pane: ProseMirror Decoration plugin keyed on `pmPos` (both peers parse identical markdown to identical PM docs, so positions match across clients without y-prosemirror).
+  - MD pane: ProseMirror Decoration plugin keyed on `pmPos` (both peers parse identical markdown to identical PM docs, so positions match across clients without y-prosemirror).
 - Header presence avatars (`usePresence`): up to **5 collaborator avatars**, then an overflow `+N` chip. Self is filtered out. Per-user color from a stable 8-hue palette (`lib/user-color.ts`) so identity persists across reconnects/devices.
 
 ### Permissions
@@ -110,7 +110,7 @@ Auxiliary surfaces:
 
 ```text
                    ┌───────────────────────────────┐
-   typing ───────► │  Tiptap Live  (ProseMirror)   │
+   typing ───────► │  Tiptap MD    (ProseMirror)   │
                    │   ↕ tiptap-markdown serializer│
                    │  CodeMirror 6 Source pane     │
                    └──────────────┬────────────────┘

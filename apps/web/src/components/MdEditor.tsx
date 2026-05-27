@@ -7232,16 +7232,12 @@ ${clone.innerHTML}
           {/* View modes — own group, separate from the start-page pills.
               Describes how the current tab is rendered. Bundle tabs get
               [Bundle | Canvas | List]; everything else gets
-              [Live | Split | Source] so the toolbar slot count stays
+              [MD | Split | Source] so the toolbar slot count stays
               consistent across kinds. */}
-          {/* View-mode pill group. Galaxy owns the full content slot
-              and has no meaningful Live/Split/Source axis, so the
-              whole pill group is hidden while Galaxy is active —
-              keeps the toolbar to just identity + surface picks. */}
           {!showGalaxy && <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
           {/* View buttons — different per tab kind. Bundle tabs get
               [Canvas | List]; everything else (doc + hub + onboarding)
-              keeps [Live | Split | Source] so the toolbar layout stays
+              keeps [MD | Split | Source] so the toolbar layout stays
               identical when the user toggles Hub on/off. The view-mode
               choice persists for when the user returns to a doc tab. */}
           {activeTab?.kind === "bundle" ? (
@@ -7285,7 +7281,7 @@ ${clone.innerHTML}
             </>
           ) : (
           ([
-            { mode: "preview" as ViewMode, label: "Live", shortcut: "1", icon: (
+            { mode: "preview" as ViewMode, label: "MD", shortcut: "1", icon: (
               <Eye width={13} height={13} />
             )},
             { mode: "split" as ViewMode, label: "Split", shortcut: "2", icon: (
@@ -11505,7 +11501,7 @@ ${clone.innerHTML}
               style={{ color: "var(--text-muted)", borderBottom: "1px solid var(--border-dim)", cursor: "default", display: (activeTab?.kind === "bundle" || showHub || showGalaxy || showSettings || showOnboarding) ? "none" : undefined }}
             >
               <div className="flex items-center gap-2 shrink-0 min-w-0">
-                <span className="shrink-0" style={{ color: "var(--text-primary)" }}>LIVE</span>
+                <span className="shrink-0" style={{ color: "var(--text-primary)" }}>MD</span>
                 {/* Doc intent chip (Hermes Step 4 / page-type tag).
                     Shown for the doc owner only. No intent → faint
                     "+ Type" pill; intent set → coloured pill with X
