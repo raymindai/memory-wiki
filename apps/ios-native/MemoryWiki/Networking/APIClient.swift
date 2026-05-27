@@ -90,6 +90,38 @@ final class APIClient {
         )
     }
 
+    func userBundles() async throws -> [AppBundle] {
+        // /api/bundles GET is already scoped to the auth user
+        // (it eqs on user_id). No query needed — and never use
+        // a query here because appendingPathComponent percent-
+        // encodes the `?` and the URL falls into the catch-all
+        // rewrite (the homepage HTML, which the JSON decoder
+        // then chokes on with a confusing "Couldn't load…").
+        struct Response: Decodable { let bundles: [AppBundle] }
+        let response: Response = try await getJSON("/api/bundles")
+        return response.bundles
+    }
+
+    func bundle(id: String) async throws -> BundleDetail {
+        struct Response: Decodable {
+            let id: String
+            let title: String?
+            let description: String?
+            let is_draft: Bool?
+            let visibility: String?
+            let documents: [Document]?
+        }
+        let response: Response = try await getJSON("/api/bundles/\(id)")
+        return BundleDetail(
+            id: response.id,
+            title: response.title,
+            description: response.description,
+            isDraft: response.is_draft,
+            visibility: response.visibility,
+            documents: response.documents ?? []
+        )
+    }
+
     func userDocuments() async throws -> [Document] {
         struct Response: Decodable { let documents: [Document] }
         let response: Response = try await getJSON("/api/user/documents")

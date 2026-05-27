@@ -15,6 +15,7 @@ import SwiftUI
 final class AppRouter: ObservableObject {
     @Published var selectedTab: AppTab = .timeline
     @Published var timelinePath: [TimelineRoute] = []
+    @Published var bundlesPath: [BundlesRoute] = []
 
     static let shared = AppRouter()
 
@@ -28,6 +29,15 @@ final class AppRouter: ObservableObject {
                 selectedTab = .timeline
                 timelinePath = [.docDetailById(id)]
             }
+        case "bundle":
+            if let id = path.first, !id.isEmpty {
+                selectedTab = .bundles
+                bundlesPath = [.bundleDetailById(id)]
+            }
+        case "bundles":
+            selectedTab = .bundles
+        case "timeline":
+            selectedTab = .timeline
         case "capture":
             selectedTab = .capture
         case "profile":
@@ -45,4 +55,9 @@ final class AppRouter: ObservableObject {
 enum TimelineRoute: Hashable {
     case docDetail(Document)
     case docDetailById(String)
+}
+
+enum BundlesRoute: Hashable {
+    case bundleDetail(AppBundle)
+    case bundleDetailById(String)
 }

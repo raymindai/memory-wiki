@@ -18,6 +18,7 @@ struct RootView: View {
                     Group {
                         switch router.selectedTab {
                         case .timeline: TimelineView()
+                        case .bundles:  BundlesView()
                         case .capture:  CaptureView()
                         case .profile:  ProfileView()
                         }
@@ -36,11 +37,12 @@ struct RootView: View {
 }
 
 enum AppTab: String, CaseIterable {
-    case timeline, capture, profile
+    case timeline, bundles, capture, profile
 
     var label: String {
         switch self {
         case .timeline: return "Timeline"
+        case .bundles:  return "Bundles"
         case .capture:  return "Capture"
         case .profile:  return "Profile"
         }
@@ -52,6 +54,8 @@ enum AppTab: String, CaseIterable {
         switch self {
         case .timeline:
             Image(systemName: "list.bullet")
+        case .bundles:
+            Image(systemName: "square.stack.3d.up")
         case .capture:
             Image(systemName: "plus")
         case .profile:
