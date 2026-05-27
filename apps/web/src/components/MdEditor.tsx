@@ -1848,7 +1848,15 @@ export default function MdEditor() {
   // ask: Settings shouldn't open as a separate page navigation, it
   // should layer in-place. /settings still works for deep links but
   // the profile-menu entry now toggles this overlay instead.
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(() => {
+    // Deep-link support — if the URL is /settings (or /settings/anything)
+    // we boot with the overlay already open. Without this initial
+    // detection, hitting /settings rendered the full editor without
+    // Settings visible, because showSettings defaulted to false and
+    // only the profile-menu click could flip it on.
+    if (typeof window === "undefined") return false;
+    return window.location.pathname === "/settings" || window.location.pathname.startsWith("/settings/");
+  });
   // Browser URL mirrors the overlay surface so a paste/share of
   // the URL bar resolves to where the user actually IS — not the
   // tab sitting underneath. Hub → /hub/<slug>, Settings → /settings,
