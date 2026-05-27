@@ -1556,10 +1556,10 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
  * something and queue another batch if there are more.
  */
 function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, string> }) {
-  const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<{ enqueued: number; inspected: number } | null>(null);
+  const [phase, setPhase] = useState<"idle" | "enqueueing" | "draining" | "promoting">("idle");
+  const [result, setResult] = useState<{ enqueued: number; drained: number; promoted: number } | null>(null);
   const onClick = async () => {
-    setRunning(true);
+    setPhase("enqueueing");
     setResult(null);
     try {
       const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
@@ -1567,25 +1567,61 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
       const session = supabase ? (await supabase.auth.getSession()).data.session : null;
       const headers: Record<string, string> = { ...authHeaders };
       if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
-      const res = await fetch("/api/user/backfill-organize?limit=200", { method: "POST", headers });
-      const data = await res.json().catch(() => ({} as Record<string, unknown>));
-      if (!res.ok) {
-        showToast(typeof data.error === "string" ? data.error : `Backfill failed (${res.status})`, "error");
+
+      // 1) Enqueue organize jobs.
+      const enq = await fetch("/api/user/backfill-organize?limit=200", { method: "POST", headers });
+      const enqData = await enq.json().catch(() => ({} as Record<string, unknown>));
+      if (!enq.ok) {
+        showToast(typeof enqData.error === "string" ? enqData.error : `Backfill failed (${enq.status})`, "error");
         return;
       }
-      setResult({ enqueued: data.enqueued ?? 0, inspected: data.inspected ?? 0 });
+      const enqueued = (enqData.enqueued as number) ?? 0;
+
+      // 2) Drain the queue inline. On Vercel the /api/jobs/run cron
+      //    grinds at ~5 jobs/min; on local dev the cron isn't
+      //    active so we poll it ourselves until processed=0 (or a
+      //    safety cap). Each call drains up to 5 jobs.
+      setPhase("draining");
+      let drained = 0;
+      for (let i = 0; i < 60; i++) {
+        const r = await fetch("/api/jobs/run").catch(() => null);
+        const j = r && r.ok ? await r.json().catch(() => null) : null;
+        if (!j) break;
+        drained += (j.ok as number) || 0;
+        if ((j.processed as number) === 0) break;
+      }
+
+      // 3) Promote any newly-formed clusters into AI bundles.
+      setPhase("promoting");
+      let promoted = 0;
+      const prom = await fetch("/api/cron/promote-clusters", { method: "POST" }).catch(() => null);
+      if (prom && prom.ok) {
+        const pj = await prom.json().catch(() => null);
+        if (pj) promoted = (pj.promoted as number) || 0;
+      }
+
+      setResult({ enqueued, drained, promoted });
       showToast(
-        data.enqueued === 0
-          ? "All docs already have AI metadata"
-          : `Enqueued ${data.enqueued} doc${data.enqueued === 1 ? "" : "s"} for auto-organize`,
+        promoted > 0
+          ? `Filled ${drained} doc${drained === 1 ? "" : "s"}, promoted ${promoted} AI bundle${promoted === 1 ? "" : "s"}`
+          : drained > 0
+            ? `Filled ${drained} doc${drained === 1 ? "" : "s"}`
+            : enqueued > 0
+              ? `Enqueued ${enqueued} doc${enqueued === 1 ? "" : "s"}, drain in progress`
+              : "All docs already have AI metadata",
         "success",
       );
     } catch (err) {
       showToast(`Backfill failed: ${err instanceof Error ? err.message : String(err)}`, "error");
     } finally {
-      setRunning(false);
+      setPhase("idle");
     }
   };
+  const running = phase !== "idle";
+  const label = phase === "enqueueing" ? "Enqueueing"
+    : phase === "draining" ? "Draining queue"
+    : phase === "promoting" ? "Promoting"
+    : "Backfill now";
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <button
@@ -1598,12 +1634,11 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
           cursor: running ? "not-allowed" : "pointer",
         }}
       >
-        {running ? "Running" : "Backfill now"}
+        {label}
       </button>
       {result && (
         <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-          {result.enqueued} of {result.inspected} enqueued in this batch
-          {result.inspected === 200 ? ", press again for the next 200" : ""}
+          {result.enqueued} enqueued, {result.drained} drained, {result.promoted} AI bundle{result.promoted === 1 ? "" : "s"} created
         </span>
       )}
     </div>
