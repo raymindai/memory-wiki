@@ -58,34 +58,12 @@
 .text-heading  { font-size: var(--text-heading); line-height: 1.35; font-weight: 500; }
 .text-display  { font-size: var(--text-display); line-height: 1.2; font-weight: 500; }
 
-/* ─── Pre-paint auth-flash gate ─── Hides the rest of the body and
-   shows the MW-blob loader when localStorage says the user has been
-   logged in but auth hasn't resolved yet. The attribute is set by
-   the inline head script in layout.tsx BEFORE first paint, so
-   returning owners never glimpse the public viewer chrome before
-   the ownership-check redirect fires. Removed by the viewer's
-   useEffect once auth resolves. */
-#mw-auth-pending-loader {
-  display: none;
-}
-html[data-mw-auth-pending="1"] body {
-  background: var(--canvas) !important;
-  overflow: hidden !important;
-}
-html[data-mw-auth-pending="1"] body > *:not(#mw-auth-pending-loader) {
-  display: none !important;
-}
-html[data-mw-auth-pending="1"] #mw-auth-pending-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483647;
-  display: flex !important;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: var(--canvas);
-}
+/* ─── Pre-paint auth-flash gate (inner styling only) ───
+   Critical body-hide + loader-show rules live inline in layout.tsx
+   so they apply BEFORE this stylesheet finishes loading — the body
+   would otherwise flash for one frame while globals.css fetched.
+   This block only contains the loader's non-critical children
+   styling (img sizes, theme-swap, caption font). */
 #mw-auth-pending-loader img {
   width: 64px;
   height: 64px;

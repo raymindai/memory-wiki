@@ -101,6 +101,16 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        {/* Critical inline CSS for the pre-paint auth gate. Lives
+            here (not in globals.css) so the rule is applied BEFORE
+            body paints — globals.css loads asynchronously, leaving
+            a 1-frame window where the body content would otherwise
+            flash before the gate rule kicked in. */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `html[data-mw-auth-pending="1"] body{background:#15151a !important;overflow:hidden !important}html[data-mw-auth-pending="1"][data-theme="light"] body{background:#ffffff !important}html[data-mw-auth-pending="1"] body>*:not(#mw-auth-pending-loader){display:none !important}html[data-mw-auth-pending="1"] #mw-auth-pending-loader{position:fixed;inset:0;z-index:2147483647;display:flex !important;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#15151a}html[data-mw-auth-pending="1"][data-theme="light"] #mw-auth-pending-loader{background:#ffffff}#mw-auth-pending-loader{display:none}`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `try{var t=localStorage.getItem('mw-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#faf9f7'}var a=localStorage.getItem('mw-accent');if(a&&a!=='orange'){document.documentElement.setAttribute('data-accent',a)}var s=localStorage.getItem('mw-scheme');if(s&&s!=='default'){document.documentElement.setAttribute('data-scheme',s)}if(localStorage.getItem('mw-was-logged-in')==='1'){document.documentElement.setAttribute('data-mw-auth-pending','1');setTimeout(function(){document.documentElement.removeAttribute('data-mw-auth-pending')},3500)}}catch(e){}`,
