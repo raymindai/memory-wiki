@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono, Noto_Sans, Noto_Sans_KR } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -7,6 +8,24 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+// Cal Sans — self-hosted via next/font/local so mobile Safari
+// (and every other client) gets the brand display face
+// deterministically. The CDN @import we used before (jsdelivr →
+// MarcoBiedermann/cal-sans) returned 502s on a hot CDN node and
+// dropped users into the system font fallback. font-display:
+// swap means we still paint something immediately even on a
+// cold cache; the brand face arrives one repaint later.
+const calSans = localFont({
+  // The cal.com Cal Sans file ships a single non-variable weight.
+  // Declaring the "400 700" range lets CSS requests for 500/600
+  // (which the wordmark / headings ask for) resolve to this one
+  // file instead of falling back to the system font.
+  src: [{ path: "../fonts/CalSans-Regular.ttf", weight: "400 700", style: "normal" }],
+  variable: "--font-cal-sans",
+  display: "swap",
+  preload: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -90,7 +109,7 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${jetbrainsMono.variable} ${notoSans.variable} ${notoSansKR.variable}`}
+      className={`${geistSans.variable} ${jetbrainsMono.variable} ${notoSans.variable} ${notoSansKR.variable} ${calSans.variable}`}
       style={{ background: "#09090b" }}
     >
       <head>
