@@ -9050,7 +9050,15 @@ ${clone.innerHTML}
                         renderTabIcon={(tab, isActive) => {
                           const meta = tab.cloudId ? docAiMeta[tab.cloudId] : null;
                           const dot = meta ? clusterColor(meta.clusterId) : null;
-                          const tooltip = meta?.summary || null;
+                          // Tooltip combines the cluster label (so the
+                          // user can tell what the dot's color stands
+                          // for) and the AI summary. Plain newline
+                          // between them — browser-native title attrs
+                          // render \n as a soft break.
+                          const tooltipBits: string[] = [];
+                          if (meta?.clusterId && meta.clusterId !== "misc") tooltipBits.push(`Cluster: ${meta.clusterId}`);
+                          if (meta?.summary) tooltipBits.push(meta.summary);
+                          const tooltip = tooltipBits.length > 0 ? tooltipBits.join("\n\n") : null;
                           return (
                             <span className="inline-flex items-center gap-1.5 shrink-0" title={tooltip || undefined}>
                               <DocStatusIcon tab={tab} isActive={isActive} />
