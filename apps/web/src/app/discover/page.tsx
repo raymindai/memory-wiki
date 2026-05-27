@@ -108,7 +108,15 @@ export default function DiscoverPage() {
       markdown = markdown.trimEnd() + `\n\n---\n\n> Source: [${repoFullName}/${filePath}](https://github.com/${repoFullName}/blob/main/${filePath})\n`;
       const compressed = await compress(markdown);
       const url = `/#md=${compressed}`;
-      window.open(url.length <= 8000 ? url : "/", "_blank");
+      if (url.length <= 8000) {
+        window.open(url, "_blank");
+      } else {
+        // Markdown too big to round-trip through the URL hash —
+        // fall back to opening the raw file on GitHub instead of
+        // silently routing to an empty `/` which used to look like
+        // "the button did nothing".
+        window.open(`https://github.com/${repoFullName}/blob/main/${filePath}`, "_blank");
+      }
     } catch {
       window.open(`https://github.com/${repoFullName}/blob/main/${filePath}`, "_blank");
     }

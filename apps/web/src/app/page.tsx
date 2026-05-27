@@ -59,7 +59,15 @@ export default function Home() {
     try {
       const opened = localStorage.getItem("mw-editor-opened") === "1";
       const here = window.location.pathname;
-      if (!opened && here === "/") {
+      // Skip the /about redirect when the URL carries intent to use
+      // the editor: a hash payload (`#md=…` from /discover's Open in
+      // Memory.Wiki, `#file=…` from desktop, etc.) or any search
+      // param. Without this, "Open in Memory.Wiki" on /discover
+      // opened a new tab at /#md=<gzip>, the redirect fired before
+      // MdEditor could decode the hash, and the markdown was lost.
+      const hasHash = !!window.location.hash;
+      const hasSearch = !!window.location.search;
+      if (!opened && here === "/" && !hasHash && !hasSearch) {
         window.location.replace("/about");
         // Don't bother rendering — replace() unloads this page.
         return null;
