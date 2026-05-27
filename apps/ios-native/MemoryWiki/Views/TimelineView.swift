@@ -14,6 +14,42 @@ final class TimelineModel: ObservableObject {
     @Published private(set) var loading = false
     @Published var errorMessage: String?
     @Published var searchText: String = ""
+    @Published private(set) var semanticHits: [APIClient.SemanticHit] = []
+    @Published private(set) var semanticLoading = false
+    private var semanticTask: Task<Void, Never>?
+
+    /// Debounced (300ms) semantic search. Cancels any pending
+    /// previous request so only the latest query lands. The
+    /// title-match filter is local + instant; this enriches the
+    /// UI with body matches behind it.
+    func searchTextChanged(to query: String) {
+        searchText = query
+        semanticTask?.cancel()
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard q.count >= 3 else {
+            semanticHits = []
+            semanticLoading = false
+            return
+        }
+        semanticLoading = true
+        semanticTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            if Task.isCancelled { return }
+            do {
+                let hits = try await APIClient.shared.semanticSearch(query: q, limit: 8)
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    self?.semanticHits = hits
+                    self?.semanticLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self?.semanticHits = []
+                    self?.semanticLoading = false
+                }
+            }
+        }
+    }
 
     func load() async {
         loading = true
@@ -114,15 +150,23 @@ struct TimelineView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 13, weight: .regular))
                 .foregroundStyle(Brand.textFaint)
-            TextField("Search titles", text: $model.searchText)
+            TextField("Search titles or meaning", text: Binding(
+                get: { model.searchText },
+                set: { model.searchTextChanged(to: $0) }
+            ))
                 .focused($searchFocused)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .font(Brand.body(size: 14))
                 .foregroundStyle(Brand.textPrimary)
                 .tint(Brand.textPrimary)
+            if model.semanticLoading {
+                ProgressView()
+                    .scaleEffect(0.55)
+                    .tint(Brand.textFaint)
+            }
             if !model.searchText.isEmpty {
-                Button { model.searchText = "" } label: {
+                Button { model.searchTextChanged(to: "") } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 13))
                         .foregroundStyle(Brand.textFaint)
@@ -174,6 +218,9 @@ struct TimelineView: View {
                         } header: {
                             BucketHeader(bucket: bucket, count: docs.count)
                         }
+                    }
+                    if !model.semanticHits.isEmpty {
+                        SemanticSection(hits: model.semanticHits)
                     }
                 }
                 .padding(.bottom, 12)
@@ -297,6 +344,75 @@ private struct HeaderIconButton: View {
                 )
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Semantic results section — body matches behind the title-match
+/// bucketed list. Header is mono caption "BY MEANING"; rows reuse
+/// the glass card chrome but include a snippet line.
+private struct SemanticSection: View {
+    let hits: [APIClient.SemanticHit]
+
+    var body: some View {
+        Section {
+            VStack(spacing: 6) {
+                ForEach(hits) { hit in
+                    NavigationLink(value: TimelineRoute.docDetailById(hit.id)) {
+                        SemanticRow(hit: hit)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 14)
+        } header: {
+            HStack(alignment: .firstTextBaseline) {
+                Text("BY MEANING")
+                    .font(Brand.mono(size: 9, weight: .medium))
+                    .tracking(1.2)
+                    .foregroundStyle(Brand.textFaint)
+                Spacer()
+                Text("\(hits.count)")
+                    .font(Brand.mono(size: 10))
+                    .foregroundStyle(Brand.textFaint)
+            }
+            .padding(.horizontal, 20).padding(.vertical, 10)
+            .background(Brand.background)
+        }
+    }
+}
+
+private struct SemanticRow: View {
+    let hit: APIClient.SemanticHit
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 13))
+                .foregroundStyle(Brand.textFaint)
+                .frame(width: 24, alignment: .leading)
+                .padding(.top, 1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(hit.title.isEmpty ? "Untitled" : hit.title)
+                    .font(Brand.body(size: 14, weight: .medium))
+                    .foregroundStyle(Brand.textPrimary)
+                    .lineLimit(1)
+                if !hit.snippet.isEmpty {
+                    Text(hit.snippet.trimmingCharacters(in: .whitespacesAndNewlines))
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.textMuted)
+                        .lineLimit(2)
+                        .lineSpacing(2)
+                }
+            }
+            Spacer(minLength: 4)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 

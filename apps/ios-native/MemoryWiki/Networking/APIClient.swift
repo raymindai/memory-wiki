@@ -193,6 +193,35 @@ final class APIClient {
     /// AuthManager + Supabase SDK, not this URL.
     static var signInURL: URL { baseURL.appendingPathComponent("auth") }
 
+    /// Semantic search across the user's own docs. POSTs the
+    /// query string; the server embeds it + runs cosine similarity
+    /// against the caller's docs and returns ranked snippets.
+    /// Falls back to title-prefix on server error so the iOS UI
+    /// always has SOMETHING to render.
+    struct SemanticHit: Identifiable, Hashable, Decodable {
+        let id: String
+        let title: String
+        let snippet: String
+        let updated_at: Date?
+        let source: String?
+        let score: Double?
+    }
+
+    func semanticSearch(query: String, limit: Int = 12) async throws -> [SemanticHit] {
+        struct Request: Encodable { let query: String; let limit: Int }
+        struct Response: Decodable { let results: [SemanticHit] }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let body = try JSONEncoder().encode(Request(query: query, limit: limit))
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/search/semantic"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        req.httpBody = body
+        let response: Response = try await perform(req)
+        return response.results
+    }
+
     // MARK: - Doc mutations
 
     /// auto-save action — the same path the web editor uses. We
