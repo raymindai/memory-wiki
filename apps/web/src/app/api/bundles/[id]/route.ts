@@ -538,6 +538,34 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: true });
   }
 
+  // ─── Action: convert-to-user (v8 W3 — flip AI bundle to My) ───
+  // Upserts bundle_ai_metadata.creator_type = 'user' so the sidebar
+  // moves the row out of the AI Bundles section and into My Bundles,
+  // and the background promoter stops auto-touching it. The bundle
+  // row itself is unchanged; only attribution flips.
+  if (body.action === "convert-to-user") {
+    const requesterId = verified?.userId || (body as { userId?: string }).userId;
+    if (!requesterId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Verify ownership before flipping. AI bundles created by the
+    // promoter belong to the same user_id as the source docs.
+    const { data: bundleRow } = await supabase
+      .from("bundles").select("user_id").eq("id", id).single();
+    if (!bundleRow || bundleRow.user_id !== requesterId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    const { error: upErr } = await supabase
+      .from("bundle_ai_metadata")
+      .upsert({
+        bundle_id: id,
+        creator_type: "user",
+        // Stop auto AI from re-touching after conversion.
+        locked: true,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "bundle_id" });
+    if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
   // ─── Action: move-to-folder (mirrors documents API) ───
   if (body.action === "move-to-folder") {
     const folderId: string | null = (body as { folderId?: string | null }).folderId ?? null;

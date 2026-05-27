@@ -14276,6 +14276,26 @@ ${clone.innerHTML}
             // Same ShareModal as docs, with bundle adapters that cascade to all included docs.
             setBundleShareModal({ bundleId: b.id });
           }},
+          // v8 W3 — AI bundle conversion. Only shown for AI-promoted
+          // bundles (creator_type === "ai"). Flipping to 'user' tells
+          // the background promoter it's now manually owned and
+          // freezes auto-edits on this bundle (the user has taken
+          // it over).
+          ...(b.creator_type === "ai" ? [{
+            label: "Convert to My Bundle",
+            action: () => {
+              const userId = user?.id;
+              if (!userId) return;
+              setBundles(prev => prev.map(x => x.id === b.id ? { ...x, creator_type: "user" as const } : x));
+              fetch(`/api/bundles/${b.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", ...authHeaders },
+                body: JSON.stringify({ action: "convert-to-user", userId }),
+              })
+                .then((r) => r.ok ? showToast("Converted to My Bundles", "success") : showToast("Convert failed", "error"))
+                .catch(() => showToast("Convert failed", "error"));
+            },
+          }] : []),
           { label: "Delete bundle", danger: true, noClose: true, action: () => {
             setBundleContextMenu(prev => prev ? { ...prev, confirmDelete: true } : null);
           }},
