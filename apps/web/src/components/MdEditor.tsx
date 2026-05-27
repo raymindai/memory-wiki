@@ -567,7 +567,7 @@ export default function MdEditor() {
   const [_serverDocs, setServerDocs] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   // Hydrate bundles from localStorage so the sidebar section renders on first paint
   // (otherwise it pops in after the /api/bundles fetch resolves).
-  const [bundles, setBundles] = useState<Array<{ id: string; title: string; description: string | null; documentCount: number; updated_at: string; is_draft: boolean; has_password?: boolean; allowed_emails_count?: number; folder_id?: string | null }>>(() => {
+  const [bundles, setBundles] = useState<Array<{ id: string; title: string; description: string | null; documentCount: number; updated_at: string; is_draft: boolean; has_password?: boolean; allowed_emails_count?: number; folder_id?: string | null; visibility?: "public" | "unlisted" | "private" | "restricted"; creator_type?: "user" | "ai"; creator_agent?: string | null; user_edits_count?: number }>>(() => {
     if (typeof window === "undefined") return [];
     try {
       const raw = localStorage.getItem("mw-bundles");
@@ -1466,6 +1466,13 @@ export default function MdEditor() {
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mw-show-starred", String(showStarred));
   }, [showStarred]);
+  const [showAiBundles, setShowAiBundles] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("mw-show-ai-bundles") !== "false";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("mw-show-ai-bundles", String(showAiBundles));
+  }, [showAiBundles]);
   const [_showSortMenu, _setShowSortMenu] = useState(false);
   const [_sharedSortMode, _setSharedSortMode] = useState<"newest" | "oldest" | "az" | "za">("newest");
   const [docFilter, setDocFilter] = useState<"all" | "private" | "shared" | "synced">(() => {
@@ -7813,18 +7820,18 @@ ${clone.innerHTML}
                   now, which makes the global one redundant. */}
               {(() => {
                 const allFolders = folders;
-                const anyOpen = allFolders.some(f => !f.collapsed) || showRecent || showStarred || showMyBundles || showMyDocs || showSharedDocs || showExamples || showTrash;
+                const anyOpen = allFolders.some(f => !f.collapsed) || showRecent || showStarred || showMyBundles || showAiBundles || showMyDocs || showSharedDocs || showExamples || showTrash;
                 return (
                   <Tooltip text={anyOpen ? "Collapse all sections + folders" : "Expand all sections + folders"}>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         if (anyOpen) {
-                          setShowRecent(false); setShowStarred(false); setShowMyBundles(false); setShowMyDocs(false); setShowSharedDocs(false); setShowExamples(false); setShowTrash(false);
+                          setShowRecent(false); setShowStarred(false); setShowMyBundles(false); setShowAiBundles(false); setShowMyDocs(false); setShowSharedDocs(false); setShowExamples(false); setShowTrash(false);
                           setFolders(prev => prev.map(f => ({ ...f, collapsed: true })));
                           allFolders.forEach(f => { if (!f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: true }) }).catch(() => {}); });
                         } else {
-                          setShowRecent(true); setShowStarred(true); setShowMyBundles(true); setShowMyDocs(true); setShowSharedDocs(true); setShowExamples(true); setShowTrash(true);
+                          setShowRecent(true); setShowStarred(true); setShowMyBundles(true); setShowAiBundles(true); setShowMyDocs(true); setShowSharedDocs(true); setShowExamples(true); setShowTrash(true);
                           setFolders(prev => prev.map(f => ({ ...f, collapsed: false })));
                           allFolders.forEach(f => { if (f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: false }) }).catch(() => {}); });
                         }
@@ -8411,7 +8418,7 @@ ${clone.innerHTML}
                         className={`shrink-0 transition-transform ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
                         style={{ transform: showMyBundles ? "rotate(0deg)" : "rotate(-90deg)" }}
                       />
-                      <span className={`flex-1 text-caption font-medium transition-colors ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>MD Bundles</span>
+                      <span className={`flex-1 text-caption font-medium transition-colors ${showMyBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>My Bundles</span>
                       {showMyBundles && bundleFolders.length > 0 && (
                         <Tooltip text={anyBundleFolderExpanded ? "Collapse all bundle folders" : "Expand all bundle folders"}>
                           <button
@@ -8495,16 +8502,16 @@ ${clone.innerHTML}
                           </button>
                         </Tooltip>
                       )}
-                      <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{bundles.length}</span>
+                      <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{bundles.filter(b => b.creator_type !== "ai").length}</span>
                     </div>
                   );
                 })()}
-                {showMyBundles && bundles.length === 0 && folders.filter(f => f.section === "bundles").length === 0 && (
+                {showMyBundles && bundles.filter(b => b.creator_type !== "ai").length === 0 && folders.filter(f => f.section === "bundles").length === 0 && (
                   <div className="px-3 py-2 text-caption" style={{ color: "var(--text-faint)" }}>
                     No bundles yet
                   </div>
                 )}
-                {showMyBundles && (bundles.length > 0 || folders.filter(f => f.section === "bundles").length > 0) && (
+                {showMyBundles && (bundles.filter(b => b.creator_type !== "ai").length > 0 || folders.filter(f => f.section === "bundles").length > 0) && (
                   // Wrapper has `pr-2` on both sides so the per-row
                   // hover background gets a visible left + right
                   // gutter against the sidebar edge. The section
@@ -8520,7 +8527,7 @@ ${clone.innerHTML}
                         bundle-specific handlers. Folders with section="bundles" group bundles. */}
                     <SidebarFolderTree
                       folders={folders}
-                      tabs={bundles.map(b => {
+                      tabs={bundles.filter(b => b.creator_type !== "ai").map(b => {
                         const existingTab = tabs.find(t => t.kind === "bundle" && t.bundleId === b.id);
                         return {
                           id: `bundle-item-${b.id}`,
@@ -8743,6 +8750,77 @@ ${clone.innerHTML}
                   </div>
                 )}
               </div>
+
+            {/* ── Section: AI BUNDLES (v8 W3) ──
+                AI-promoted bundles live in their own namespace per
+                the v8 plan: background organize jobs auto-cluster
+                docs and promote >=5-doc clusters into a bundle with
+                creator_type = "ai". Section only renders when there
+                is at least one such bundle. The list is flat (no
+                folder support) because AI bundles are
+                machine-managed and the user shouldn't be reorganising
+                them by hand. Convert -> My Bundles via the bundle
+                context menu (W3 next step). */}
+            {(() => {
+              const aiBundles = bundles.filter(b => b.creator_type === "ai");
+              if (aiBundles.length === 0) return null;
+              return (
+                <div
+                  className="shrink-0 flex flex-col"
+                  onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setDocContextMenu(null); setFolderContextMenu(null); setBundleContextMenu(null); }}
+                >
+                  <div
+                    data-section-id="ai-bundles"
+                    className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
+                    style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
+                    onClick={() => setShowAiBundles(!showAiBundles)}
+                  >
+                    <ChevronDown
+                      width={10} height={10}
+                      className={`shrink-0 transition-transform ${showAiBundles ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
+                      style={{ transform: showAiBundles ? "rotate(0deg)" : "rotate(-90deg)" }}
+                    />
+                    <Sparkles width={11} height={11} style={{ color: "var(--micro-ai)" }} />
+                    <span className={`flex-1 text-caption font-medium transition-colors ${showAiBundles ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>
+                      AI Bundles
+                    </span>
+                    <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{aiBundles.length}</span>
+                  </div>
+                  {showAiBundles && (
+                    <div className="px-2 pb-1 space-y-0.5">
+                      {aiBundles.map((b) => {
+                        const existingTab = tabs.find((t) => t.kind === "bundle" && t.bundleId === b.id);
+                        const isActive = !!existingTab && activeTabId === existingTab.id;
+                        const openBundle = () => {
+                          if (existingTab) { switchTab(existingTab.id); return; }
+                          const newId = `bundle-${b.id}-${Date.now()}`;
+                          const newTab: Tab = { id: newId, kind: "bundle", bundleId: b.id, title: b.title || "Untitled Bundle", markdown: "" };
+                          flushSync(() => { setTabs((prev) => [...prev, newTab]); });
+                          switchTab(newId);
+                        };
+                        return (
+                          <div
+                            key={b.id}
+                            onClick={openBundle}
+                            onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setBundleContextMenu({ x: e.clientX, y: e.clientY, bundleId: b.id }); }}
+                            className="flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)]"
+                            style={{
+                              background: isActive ? "var(--border)" : "transparent",
+                              color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
+                            }}
+                            title={b.title || "Untitled Bundle"}
+                          >
+                            <span className="shrink-0">{renderBundleStatusIcon(b.id, 14)}</span>
+                            <span className="flex-1 truncate text-body">{b.title || "Untitled Bundle"}</span>
+                            <span className="text-caption tabular-nums shrink-0" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{b.documentCount}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* ── Section 1: MY DOCUMENTS ── */}
             {(() => {

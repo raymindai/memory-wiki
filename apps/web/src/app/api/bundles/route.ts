@@ -307,7 +307,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from("bundles")
-    .select("id, title, description, is_draft, password_hash, allowed_emails, edit_mode, view_count, layout, folder_id, created_at, updated_at")
+    .select("id, title, description, is_draft, password_hash, allowed_emails, edit_mode, view_count, layout, folder_id, visibility, created_at, updated_at")
     .order("updated_at", { ascending: false })
     .limit(100);
 
@@ -322,29 +322,39 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Failed to fetch bundles" }, { status: 500 });
   }
 
-  // Fetch document counts for each bundle
   const bundleIds = (data || []).map(b => b.id);
+  // Doc counts + attribution (sidecar) in parallel.
+  const [docCountRes, attrRes] = await Promise.all([
+    bundleIds.length > 0
+      ? supabase.from("bundle_documents").select("bundle_id").in("bundle_id", bundleIds)
+      : Promise.resolve({ data: [] as { bundle_id: string }[] }),
+    bundleIds.length > 0
+      ? supabase.from("bundle_ai_metadata").select("bundle_id, creator_type, creator_agent, user_edits_count").in("bundle_id", bundleIds)
+      : Promise.resolve({ data: [] as Array<{ bundle_id: string; creator_type: string; creator_agent: string | null; user_edits_count: number }> }),
+  ]);
+
   const docCounts: Record<string, number> = {};
-  if (bundleIds.length > 0) {
-    const { data: countData } = await supabase
-      .from("bundle_documents")
-      .select("bundle_id")
-      .in("bundle_id", bundleIds);
-    if (countData) {
-      for (const row of countData) {
-        docCounts[row.bundle_id] = (docCounts[row.bundle_id] || 0) + 1;
-      }
-    }
+  for (const row of (docCountRes.data || []) as { bundle_id: string }[]) {
+    docCounts[row.bundle_id] = (docCounts[row.bundle_id] || 0) + 1;
+  }
+  const attribution: Record<string, { creator_type: string; creator_agent: string | null; user_edits_count: number }> = {};
+  for (const row of (attrRes.data || []) as Array<{ bundle_id: string; creator_type: string; creator_agent: string | null; user_edits_count: number }>) {
+    attribution[row.bundle_id] = { creator_type: row.creator_type, creator_agent: row.creator_agent, user_edits_count: row.user_edits_count };
   }
 
   const bundles = (data || []).map(b => {
     const { password_hash, allowed_emails, ...rest } = b as { password_hash?: string | null; allowed_emails?: string[] | null } & Record<string, unknown>;
     const allowedCount = Array.isArray(allowed_emails) ? allowed_emails.length : 0;
+    const attr = attribution[b.id];
     return {
       ...rest,
       has_password: !!password_hash,
       allowed_emails_count: allowedCount,
       documentCount: docCounts[b.id] || 0,
+      // Default to 'user' when no sidecar row exists — absence = user-created.
+      creator_type: (attr?.creator_type ?? "user") as "user" | "ai",
+      creator_agent: attr?.creator_agent ?? null,
+      user_edits_count: attr?.user_edits_count ?? 0,
     };
   });
 
