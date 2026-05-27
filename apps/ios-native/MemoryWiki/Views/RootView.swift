@@ -44,7 +44,7 @@ enum AppTab: String, CaseIterable {
         case .timeline: return "Timeline"
         case .bundles:  return "Bundles"
         case .capture:  return "Capture"
-        case .profile:  return "Profile"
+        case .profile:  return "Settings"
         }
     }
 
