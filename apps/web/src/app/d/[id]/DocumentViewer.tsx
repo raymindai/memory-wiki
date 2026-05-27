@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Globe, Users } from "lucide-react";
+import { Globe, Users, Sparkles } from "lucide-react";
 import ViewerFooter from "@/components/ViewerFooter";
 import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
@@ -61,6 +61,7 @@ export default function DocumentViewer({
   const [isLoading, setIsLoading] = useState(false);
   const [theme, setThemeState] = useState<Theme>("dark");
   const [copiedMd, setCopiedMd] = useState(false);
+  const [copiedAi, setCopiedAi] = useState(false);
   // The viewer used to gate rendering behind a password OR a
   // restricted-email check. Password access mode was removed
   // (commits 5a056bc5 / 41a61ce5); the only remaining gate is
@@ -293,6 +294,23 @@ export default function DocumentViewer({
     } catch { /* clipboard denied */ }
   }, []);
 
+  // Copy as AI prompt — the v8 W8 paste-anywhere story in one button.
+  // The clipboard payload is a short natural-language instruction
+  // wrapping the canonical URL, so the user can drop it into Claude /
+  // ChatGPT / Cursor and the AI fetches via its native browse / web-
+  // fetch tool. Dual-response is already wired on the URL, so the AI
+  // gets clean markdown without the user passing an explicit .md.
+  const copyAiPrompt = useCallback(async () => {
+    try {
+      // Build the canonical URL from origin + id so query params
+      // (?at=) and hash fragments don't bleed into the prompt.
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://memory.wiki";
+      await navigator.clipboard.writeText(`Use ${origin}/${id} as my context.`);
+      setCopiedAi(true);
+      setTimeout(() => setCopiedAi(false), 2000);
+    } catch { /* clipboard denied */ }
+  }, [id]);
+
   return (
     // min-h-screen (not h-screen): the viewer used to be a fixed-height
     // app shell with the body internally scrolling, which worked when the
@@ -358,6 +376,23 @@ export default function DocumentViewer({
                 <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h10v10H3z"/><path d="M5 6h6M5 9h6M5 12h3"/></svg>
               )}
               <span className="hidden sm:inline">{copiedMd ? "Copied" : "MD"}</span>
+            </button>
+            <button
+              onClick={copyAiPrompt}
+              className={actionBtn}
+              style={{
+                background: copiedAi ? "rgba(181,255,26,0.12)" : "var(--toggle-bg)",
+                color: copiedAi ? "var(--micro-lime)" : "var(--text-muted)",
+              }}
+              title="Copy as a paste-ready AI prompt — drop into Claude / ChatGPT / Cursor"
+              aria-label="Copy as AI prompt"
+            >
+              {copiedAi ? (
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 8 7 11 12 5"/></svg>
+              ) : (
+                <Sparkles width={11} height={11} strokeWidth={1.6} />
+              )}
+              <span className="hidden sm:inline">{copiedAi ? "Copied" : "For AI"}</span>
             </button>
             <button
               onClick={toggleTheme}

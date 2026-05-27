@@ -7,6 +7,7 @@ import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import ViewerHeader from "@/components/ViewerHeader";
 import ReferencedBy from "@/components/ReferencedBy";
 import HubViewerV8 from "./HubViewerV8";
+import HubHeaderActions from "./HubHeaderActions";
 import { Globe } from "lucide-react";
 
 type Props = {
@@ -225,9 +226,10 @@ export default async function HubPage({ params, searchParams }: Props) {
         breadcrumb={
           <span className="inline-flex items-center gap-1.5">
             <Globe width={12} height={12} style={{ color: "#4ade80" }} aria-label="Public hub" />
-            <span>memory.wiki/hub/<span style={{ color: "var(--text-secondary)" }}>{slug}</span></span>
+            <span>memory.wiki/@<span style={{ color: "var(--text-secondary)" }}>{slug}</span></span>
           </span>
         }
+        actions={<HubHeaderActions hubUrl={hubUrl} />}
       />
       <HubViewerV8
         slug={slug}

@@ -89,6 +89,7 @@ export default function BundleViewer({
   const [passwordError, setPasswordError] = useState(false);
   const [unlocked, setUnlocked] = useState(!isProtected);
   const [copied, setCopied] = useState(false);
+  const [copiedAi, setCopiedAi] = useState(false);
   const [canvasHoveredNode, setCanvasHoveredNode] = useState<string | null>(null);
   const [contextCopied, setContextCopied] = useState(false);
   // Analysis side-panel tab state. Reset whenever the user picks a new
@@ -444,6 +445,18 @@ export default function BundleViewer({
     } catch { /* clipboard error */ }
   };
 
+  // Copy as AI prompt — v8 W8 paste-anywhere. Drop straight into
+  // Claude / ChatGPT / Cursor; the dual-response rewrite serves
+  // markdown to AI clients without needing the .md suffix.
+  const copyAiPrompt = async () => {
+    try {
+      const url = `${window.location.origin}/b/${id}`;
+      await navigator.clipboard.writeText(`Use ${url} as my context.`);
+      setCopiedAi(true);
+      setTimeout(() => setCopiedAi(false), 2000);
+    } catch { /* clipboard error */ }
+  };
+
   // ─── Password screen ───
   if (isProtected && !unlocked) {
     return (
@@ -552,6 +565,14 @@ export default function BundleViewer({
                 <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 8.5a3 3 0 004.24 0l2-2a3 3 0 00-4.24-4.24l-1 1"/><path d="M9 7.5a3 3 0 00-4.24 0l-2 2a3 3 0 004.24 4.24l1-1"/></svg>
               )}
               <span className="hidden sm:inline">{copied ? "Copied" : "Link"}</span>
+            </button>
+            <button onClick={copyAiPrompt} className={actionBtn} style={{ background: copiedAi ? "rgba(181,255,26,0.12)" : "var(--toggle-bg)", color: copiedAi ? "var(--micro-lime)" : "var(--text-muted)" }} title="Copy as a paste-ready AI prompt — drop into Claude / ChatGPT / Cursor" aria-label="Copy as AI prompt">
+              {copiedAi ? (
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="4 8 7 11 12 5"/></svg>
+              ) : (
+                <Sparkles width={11} height={11} strokeWidth={1.6} />
+              )}
+              <span className="hidden sm:inline">{copiedAi ? "Copied" : "For AI"}</span>
             </button>
           </>
         }
