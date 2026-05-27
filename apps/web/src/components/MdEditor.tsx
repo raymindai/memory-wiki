@@ -94,6 +94,7 @@ import type {
 import {
   FOLDER_FILTER_MY,
   FOLDER_FILTER_BUNDLES,
+  SYNCED_SOURCES,
 } from "@/lib/editor-types";
 import {
   SAMPLE_WELCOME,
@@ -1511,6 +1512,13 @@ export default function MdEditor() {
     if (typeof window === "undefined") return "all";
     return (localStorage.getItem("mw-doc-filter") as "all" | "private" | "shared" | "synced") || "all";
   });
+  // Per-section filter for MD Bundles. Bundles don't have a "source"
+  // axis (they're always created in-app), so the synced tab is
+  // omitted. visibility + is_draft drive the private/shared split.
+  const [bundleFilter, setBundleFilter] = useState<"all" | "private" | "shared">(() => {
+    if (typeof window === "undefined") return "all";
+    return (localStorage.getItem("mw-bundle-filter") as "all" | "private" | "shared") || "all";
+  });
   const [sidebarSearch, setSidebarSearch] = useState("");
   const sidebarSearchInputRef = useRef<HTMLInputElement>(null);
   // Scroll container for the sections list — used by IntersectionObserver to
@@ -2762,7 +2770,7 @@ export default function MdEditor() {
     const myTabs = docFilter === "all" ? allMyTabs
       : docFilter === "private" ? allMyTabs.filter(t => !t.isSharedByMe && !t.isRestricted)
       : docFilter === "shared" ? allMyTabs.filter(t => t.isSharedByMe || t.isRestricted)
-      : docFilter === "synced" ? allMyTabs.filter(t => t.source && ["vscode", "desktop", "cli", "mcp"].includes(t.source))
+      : docFilter === "synced" ? allMyTabs.filter(t => t.source && SYNCED_SOURCES.includes(t.source))
       : allMyTabs;
     const sortFn = (a: Tab, b: Tab) => {
       if (sortMode === "custom") return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
@@ -3853,9 +3861,14 @@ export default function MdEditor() {
               setViewMode("preview"); // readonly users get the rendered view
             }
 
-            const docIsSharedByMe = perm === "mine" && (
-              doc.editMode === "view" || doc.editMode === "public"
-            );
+            // "Shared by me" = the doc is published (visible to anyone
+            // with the URL), regardless of edit_mode. Matching the
+            // sidebar's bulk-load semantics: sharedDocIds is derived
+            // from is_draft===false. Earlier this checked editMode
+            // ("view"/"public"), which mis-flagged published-but-
+            // owner-edit docs as Private the moment the user opened
+            // them — Private filter then surfaced them incorrectly.
+            const docIsSharedByMe = perm === "mine" && doc.is_draft === false;
             const othersCount = doc.allowedEmails?.filter((e: string) => e.toLowerCase() !== (user?.email || "").toLowerCase()).length || 0;
             const tabProps = {
               markdown: doc.markdown,
@@ -4169,18 +4182,19 @@ export default function MdEditor() {
       .then(data => {
         if (data?.documents) {
           setServerDocs(data.documents); ingestDocAiMeta(data.documents);
-          // Mark tabs that have sharing enabled
-          const sharedDocIds = new Set(
-            data.documents
-              .filter((d: { edit_mode?: string }) => d.edit_mode === "view" || d.edit_mode === "public")
-              .map((d: { id: string }) => d.id)
-          );
-          // Sync isDraft + restricted from server
+          // "Shared by me" = published (is_draft===false). MUST match
+          // publishedIds — they are the same axis (read visibility),
+          // and the DocStatusIcon already keys off isDraft, so deriving
+          // isSharedByMe from edit_mode (a write-permission field)
+          // produced the bug where green-Globe published docs landed
+          // in the Private filter because their edit_mode stayed at
+          // "token" after publish.
           const publishedIds = new Set(
             data.documents
               .filter((d: { is_draft?: boolean }) => d.is_draft === false)
               .map((d: { id: string }) => d.id)
           );
+          const sharedDocIds = publishedIds;
           const ownerEmailLower = user?.email?.toLowerCase();
           const restrictedIds = new Set(
             data.documents
@@ -4542,17 +4556,17 @@ export default function MdEditor() {
             if (!data?.documents) return;
             setServerDocs(data.documents); ingestDocAiMeta(data.documents);
 
-            // Sync tab state from server (isDraft, isSharedByMe, isRestricted, source, folderId)
-            const sharedDocIds = new Set(
-              data.documents
-                .filter((d: { edit_mode?: string }) => d.edit_mode === "view" || d.edit_mode === "public")
-                .map((d: { id: string }) => d.id)
-            );
+            // Sync tab state from server (isDraft, isSharedByMe, isRestricted, source, folderId).
+            // Keep sharedDocIds === publishedIds — both express read
+            // visibility (is_draft). edit_mode is a write-perm axis and
+            // must not influence isSharedByMe (see the bulk loader for
+            // the bug this divergence caused in the Private filter).
             const publishedIds = new Set(
               data.documents
                 .filter((d: { is_draft?: boolean }) => d.is_draft === false)
                 .map((d: { id: string }) => d.id)
             );
+            const sharedDocIds = publishedIds;
             const ownerEmailLower2 = user?.email?.toLowerCase();
             const restrictedIds = new Set(
               data.documents
@@ -6054,7 +6068,11 @@ export default function MdEditor() {
             if (doc.allowedEmails) setAllowedEmailsState(doc.allowedEmails);
             if (doc.allowedEditors) setAllowedEditorsState(doc.allowedEditors);
             if (doc.editMode) { setDocEditMode(doc.editMode); setEditMode(doc.editMode); }
-            const hasSharing = doc.editMode === "view" || doc.editMode === "public";
+            // Drive isSharedByMe from is_draft (matches the bulk loader
+            // and the docs filter). editMode governs WHO can edit, not
+            // who can read — a published doc with editMode="token" is
+            // still publicly readable and should stay marked Shared.
+            const hasSharing = doc.is_draft === false;
             const shareOthersCount = doc.allowedEmails?.filter((e: string) => e.toLowerCase() !== (user?.email || "").toLowerCase()).length || 0;
             setTabs(prev => prev.map(t => t.id === activeTabIdRef.current ? {
               ...t,
@@ -6827,12 +6845,27 @@ ${clone.innerHTML}
     return docFilter === "all" ? allMyTabs
       : docFilter === "private" ? allMyTabs.filter(t => !t.isSharedByMe && !t.isRestricted)
       : docFilter === "shared" ? allMyTabs.filter(t => t.isSharedByMe || t.isRestricted)
-      : docFilter === "synced" ? allMyTabs.filter(t => t.source && ["vscode", "desktop", "cli", "mcp"].includes(t.source))
+      : docFilter === "synced" ? allMyTabs.filter(t => t.source && SYNCED_SOURCES.includes(t.source))
       : allMyTabs;
   }, [memoAllMyTabs, docFilter]);
 
   const memoPrivateCount = useMemo(() => memoAllMyTabs.filter(t => t.isDraft !== false).length, [memoAllMyTabs]);
   const memoSharedCount = useMemo(() => memoAllMyTabs.filter(t => t.isDraft === false).length, [memoAllMyTabs]);
+
+  // Bundle filter — mirrors the docs filter but only Private/Shared
+  // (bundles have no source axis, so Synced is omitted). A bundle is
+  // "shared" the moment it's published (visibility !== 'private') OR
+  // it has any allowed_emails entries — same semantics as the doc
+  // filter so the user's mental model stays consistent.
+  const memoFilteredBundles = useMemo(() => {
+    if (bundleFilter === "all") return bundles;
+    return bundles.filter(b => {
+      const isPublic = b.is_draft === false;
+      const hasRecipients = (b.allowed_emails_count ?? 0) > 0;
+      const isShared = isPublic || hasRecipients || (b.visibility && b.visibility !== "private");
+      return bundleFilter === "shared" ? isShared : !isShared;
+    });
+  }, [bundles, bundleFilter]);
 
   // Count of items matching the sidebar search across docs + bundles. Shown
   // as a small badge inside the search input. Title-match short-circuits.
@@ -8549,13 +8582,55 @@ ${clone.innerHTML}
                           </button>
                         </Tooltip>
                       )}
-                      <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{bundles.length}</span>
+                      <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
+                        {bundleFilter === "all" ? bundles.length : `${memoFilteredBundles.length} / ${bundles.length}`}
+                      </span>
                     </div>
                   );
                 })()}
                 {showMyBundles && bundles.length === 0 && folders.filter(f => f.section === "bundles").length === 0 && (
                   <div className="px-3 py-2 text-caption" style={{ color: "var(--text-faint)" }}>
                     No bundles yet
+                  </div>
+                )}
+                {showMyBundles && bundles.length > 0 && (
+                  // Filter pills — same UX as the MDs section. Bundles
+                  // only have Private/Shared (no source axis), so the
+                  // Synced tab from MDs is omitted here.
+                  <div className="shrink-0 px-2 pt-1.5 pb-1">
+                    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-md w-full" style={{ background: "var(--background)" }}>
+                      {(["all", "private", "shared"] as const).map((f) => {
+                        const tips: Record<string, string> = {
+                          all: "Show all bundles",
+                          private: "Only visible to you",
+                          shared: "Shared via public URL or invited people",
+                        };
+                        const labels: Record<string, string> = { all: "All", private: "Private", shared: "Shared" };
+                        const isActive = bundleFilter === f;
+                        return (
+                          <button
+                            key={f}
+                            onClick={() => { setBundleFilter(f); localStorage.setItem("mw-bundle-filter", f); }}
+                            title={tips[f]}
+                            className="flex-1 text-caption py-1 rounded transition-colors"
+                            style={{
+                              background: isActive ? "var(--border)" : "transparent",
+                              color: isActive ? "var(--text-primary)" : "var(--text-faint)",
+                              fontWeight: isActive ? 600 : 500,
+                            }}
+                            onMouseEnter={(e) => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = "var(--toggle-bg)"; (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)"; } }}
+                            onMouseLeave={(e) => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--text-faint)"; } }}
+                          >
+                            {labels[f]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {showMyBundles && bundles.length > 0 && memoFilteredBundles.length === 0 && (
+                  <div className="px-3 py-2 text-caption" style={{ color: "var(--text-faint)" }}>
+                    {bundleFilter === "private" ? "No private bundles" : bundleFilter === "shared" ? "No shared bundles" : "No bundles yet"}
                   </div>
                 )}
                 {showMyBundles && (bundles.length > 0 || folders.filter(f => f.section === "bundles").length > 0) && (
@@ -8574,15 +8649,20 @@ ${clone.innerHTML}
                         bundle-specific handlers. Folders with section="bundles" group bundles. */}
                     <SidebarFolderTree
                       folders={folders}
-                      tabs={bundles.map(b => {
-                        const existingTab = tabs.find(t => t.kind === "bundle" && t.bundleId === b.id);
+                      tabs={memoFilteredBundles.map(b => {
                         return {
                           id: `bundle-item-${b.id}`,
                           title: b.title || "Untitled Bundle",
                           folderId: b.folder_id || undefined,
-                          // Stash bundle id + active state via cloudId/lastOpenedAt for downstream lookups
+                          // Stash bundle id via cloudId for downstream lookups.
+                          // lastOpenedAt drives the "newest" sort — must come
+                          // from a STABLE value (bundle.updated_at), not
+                          // Date.now() keyed on activeTabId. Earlier we set
+                          // Date.now() only for the active bundle, which
+                          // promoted it to the top of "newest" on every click
+                          // and triggered a FLIP slide for every row below.
                           cloudId: b.id,
-                          lastOpenedAt: existingTab && activeTabId === existingTab.id ? Date.now() : undefined,
+                          lastOpenedAt: b.updated_at ? new Date(b.updated_at).getTime() : undefined,
                           kind: "bundle" as const,
                         };
                       })}
@@ -8596,7 +8676,7 @@ ${clone.innerHTML}
                       sidebarSearch={sidebarSearchDebounced}
                       sortMode={bundlesSortMode}
                       sidebarMode={sidebarMode}
-                      docFilter={"all"}
+                      docFilter={bundleFilter}
                       dragTabId={dragTabId}
                       dragFolderId={dragFolderId}
                       setDragTabId={setDragTabId}
@@ -8905,7 +8985,9 @@ ${clone.innerHTML}
                             <Plus width={12} height={12} />
                           </button>
                         </Tooltip>
-                        <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{myTabCount}</span>
+                        <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
+                          {docFilter === "all" ? myTabCount : `${myTabs.length} / ${myTabCount}`}
+                        </span>
                       </div>
                     );
                   })()}
@@ -14416,10 +14498,13 @@ ${clone.innerHTML}
           }}
           onEditModeChange={(mode) => {
             setDocEditMode(mode); setEditMode(mode);
-            // Publish (isDraft → false) when user explicitly changes sharing settings
+            // Publish (isDraft → false) when user explicitly changes sharing settings.
+            // isSharedByMe is tied to is_draft (= published-readable), NOT
+            // to the chosen edit mode — "owner" mode is still publicly
+            // READABLE, just owner-edit. Earlier code keyed off mode and
+            // mis-stamped restricted-edit publishes as Private.
             const curTabId = activeTabIdRef.current;
-            const isShared = mode !== "owner";
-            setTabs(prev => prev.map(t => t.id === curTabId ? { ...t, isDraft: false, isSharedByMe: isShared, editMode: mode } : t));
+            setTabs(prev => prev.map(t => t.id === curTabId ? { ...t, isDraft: false, isSharedByMe: true, editMode: mode } : t));
             const cid = docId || tabs.find(t => t.id === curTabId)?.cloudId;
             if (cid && user) {
               fetch(`/api/docs/${cid}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "publish", userId: user.id }) }).catch(() => {});

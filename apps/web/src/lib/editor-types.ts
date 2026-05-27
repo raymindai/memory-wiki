@@ -72,5 +72,14 @@ export interface Tab {
 export const FOLDER_FILTER_MY = (f: { section?: string }) => !f.section || f.section === "my";
 export const FOLDER_FILTER_BUNDLES = (f: { section?: string }) => f.section === "bundles";
 
+// Sources that count as "synced from an external client" for the
+// sidebar's Synced filter + DocStatusIcon badge. A doc with source
+// in this set was created in a companion app (VS Code, Desktop,
+// CLI, MCP, Chrome) and is kept in sync with the web. Sources NOT
+// in this list (web, api, github:..., AI provider names from
+// one-shot imports) are treated as "made here" — the badge stays
+// off and they fall under Private/Shared in the filter.
+export const SYNCED_SOURCES: readonly string[] = ["vscode", "desktop", "cli", "mcp", "chrome"];
+
 // Re-exported so consumers can build tabs without an extra import line.
 export { extractTitleFromMd };

@@ -3,6 +3,7 @@ import {
   Eye, Globe, Cloud, Users, FileIcon,
 } from "lucide-react";
 import Tooltip from "@/components/Tooltip";
+import { SYNCED_SOURCES } from "@/lib/editor-types";
 
 // Doc icon — communicates ACCESS state (who can READ this doc).
 // There are exactly THREE access states a doc can be in (matching
@@ -49,7 +50,7 @@ function DocStatusIcon({ tab, isActive }: {
 
   const isPublished = tab.isDraft === false;
   const hasEmailRestriction = (tab.sharedWithCount ?? 0) > 0 || tab.isRestricted === true;
-  const isSynced = tab.source && ["vscode", "desktop", "cli", "mcp"].includes(tab.source);
+  const isSynced = tab.source && SYNCED_SOURCES.includes(tab.source);
 
   let Icon: typeof Globe;
   let color: string;
