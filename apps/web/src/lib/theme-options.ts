@@ -66,7 +66,11 @@ export const ACCENT_COLORS: AccentColorOption[] = [
 ];
 
 export const COLOR_SCHEMES: ColorSchemeOption[] = [
-  { name: "default",   label: "Default",   preview: "#fb923c", darkBg: "#18181b", lightBg: "#fafaf9", desc: "Warm zinc + orange" },
+  // Default scheme — paired with lime (the app's root --accent). The
+  // preview dot + desc previously claimed orange, which leaked into
+  // the Key Color "Default (Lime)" row via SCHEME_ACCENT_MAP and
+  // rendered orange swatches under a lime label.
+  { name: "default",   label: "Default",   preview: "#B5FF1A", darkBg: "#18181b", lightBg: "#fafaf9", desc: "Warm zinc + lime" },
   { name: "nord",      label: "Nord",      preview: "#88c0d0", darkBg: "#2e3440", lightBg: "#eceff4", desc: "Arctic frost" },
   { name: "dracula",   label: "Dracula",   preview: "#bd93f9", darkBg: "#282a36", lightBg: "#f8f8f2", desc: "Dark purple" },
   { name: "solarized", label: "Solarized", preview: "#2aa198", darkBg: "#002b36", lightBg: "#fdf6e3", desc: "Warm teal" },
@@ -77,9 +81,11 @@ export const COLOR_SCHEMES: ColorSchemeOption[] = [
 ];
 
 /** Each scheme's natural accent color — used when toggling a scheme
- *  to pick a sensible accent unless the user has already overridden it. */
+ *  to pick a sensible accent unless the user has already overridden it.
+ *  Default → lime (matches CSS :root --accent and the "Default (Lime)"
+ *  row label in Settings). */
 export const SCHEME_ACCENT_MAP: Record<ColorScheme, AccentColor> = {
-  default: "orange",
+  default: "lime",
   nord: "teal",
   dracula: "purple",
   solarized: "teal",
