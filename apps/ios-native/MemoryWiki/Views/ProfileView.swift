@@ -56,18 +56,14 @@ struct ProfileView: View {
                                 if copied {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(Brand.microLime)
                                     Text("Copied")
                                         .font(Brand.body(size: 12, weight: .medium))
-                                        .foregroundStyle(Brand.microLime)
                                 } else {
-                                    // Tiny lime dot — micro-color, not fill.
-                                    Circle().fill(Brand.accent).frame(width: 5, height: 5)
                                     Text("Copy for AI")
                                         .font(Brand.body(size: 12, weight: .medium))
-                                        .foregroundStyle(Brand.textPrimary)
                                 }
                             }
+                            .foregroundStyle(Brand.textPrimary)
                             .padding(.horizontal, 14)
                         }
                         .buttonStyle(.plain)

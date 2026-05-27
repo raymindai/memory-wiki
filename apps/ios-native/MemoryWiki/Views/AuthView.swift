@@ -30,6 +30,7 @@ struct AuthView: View {
     @State private var emailSheet = false
     @State private var working = false
     @State private var appleNonce: String?
+    @State private var appleCoordinator: AppleSignInCoordinator?
 
     var body: some View {
         ZStack {
@@ -77,16 +78,14 @@ struct AuthView: View {
     // MARK: - Hero (stacked: blob → wordmark → companion chip → tagline)
 
     private var hero: some View {
-        VStack(spacing: 22) {
-            AnimatedBlob(size: 132, theme: .dark)
+        VStack(spacing: 8) {
+            AnimatedBlob(size: 168, theme: .dark)
 
-            VStack(spacing: 14) {
+            VStack(spacing: 10) {
                 Text("memory.wiki")
                     .font(Brand.display(size: 36))
                     .foregroundStyle(Brand.textPrimary)
                     .tracking(0)
-
-                CompanionChip()
 
                 Text("Your knowledge hub for the AI age.")
                     .font(Brand.body(size: 15))
@@ -94,7 +93,9 @@ struct AuthView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .padding(.horizontal, 36)
-                    .padding(.top, 4)
+
+                CompanionChip()
+                    .padding(.top, 6)
             }
         }
     }
@@ -102,19 +103,16 @@ struct AuthView: View {
     // MARK: - Provider stack
 
     private var providerStack: some View {
+        // Order: Google → GitHub → Email → Apple. App Store
+        // guideline 4.8 requires Apple to be offered equally
+        // prominent, not first. All four buttons render through
+        // ProviderButton so type / fill / corner radius / border
+        // match exactly — the previous Apple system button had a
+        // larger system label and a pure-#000 background that
+        // popped out against the zinc-900 of the others.
+        // SF Symbol "applelogo" is Apple's own glyph, so the
+        // custom button still complies with HIG.
         VStack(spacing: 10) {
-            SignInWithAppleButton(.continue) { request in
-                let nonce = randomNonce()
-                appleNonce = nonce
-                request.requestedScopes = [.fullName, .email]
-                request.nonce = sha256(nonce)
-            } onCompletion: { result in
-                Task { await handleApple(result: result) }
-            }
-            .signInWithAppleButtonStyle(.white)
-            .frame(height: 50)
-            .cornerRadius(10)
-
             ProviderButton(
                 label: "Continue with Google",
                 logo: { Image("google").resizable().renderingMode(.original).aspectRatio(contentMode: .fit).frame(width: 18, height: 18) },
@@ -136,7 +134,34 @@ struct AuthView: View {
             ) {
                 emailSheet = true
             }
+            ProviderButton(
+                label: "Continue with Apple",
+                logo: { Image(systemName: "applelogo").font(.system(size: 16, weight: .regular)).frame(width: 18, height: 18) },
+                style: .neutral
+            ) {
+                startApple()
+            }
         }
+    }
+
+    /// Manual ASAuthorizationController trigger — replaces the
+    /// system SignInWithAppleButton so the button visuals match
+    /// the other three providers exactly. Same nonce + token
+    /// handling as before.
+    private func startApple() {
+        let nonce = randomNonce()
+        appleNonce = nonce
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = sha256(nonce)
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        let coordinator = AppleSignInCoordinator { result in
+            Task { await handleApple(result: result) }
+        }
+        appleCoordinator = coordinator
+        controller.delegate = coordinator
+        controller.presentationContextProvider = coordinator
+        controller.performRequests()
     }
 
     // MARK: - Footer (mono version chip + parent-product link + terms)
@@ -144,8 +169,6 @@ struct AuthView: View {
     private var footer: some View {
         VStack(spacing: 10) {
             HStack(spacing: 8) {
-                // Micro-info dot
-                Circle().fill(Brand.microInfo).frame(width: 5, height: 5)
                 Text("iOS \(appVersion)")
                     .font(Brand.mono(size: 9, weight: .medium))
                     .tracking(0.6)
@@ -192,27 +215,56 @@ struct AuthView: View {
         do {
             try await action()
             error = nil
-        } catch is CancellationError {
         } catch {
-            self.error = error.localizedDescription
+            if isCanceledByUser(error) { return }
+            self.error = friendly(error)
         }
     }
 
     private func handleApple(result: Result<ASAuthorization, Error>) async {
         switch result {
         case .failure(let err):
-            if (err as? ASAuthorizationError)?.code == .canceled { return }
-            self.error = err.localizedDescription
+            if isCanceledByUser(err) { return }
+            self.error = friendly(err)
         case .success(let auth):
             guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
                   let tokenData = credential.identityToken,
                   let idToken = String(data: tokenData, encoding: .utf8),
                   let nonce = appleNonce else {
-                self.error = "Apple sign-in returned no identity token."
+                self.error = "Couldn't read Apple ID token. Try again."
                 return
             }
             await launch { try await self.auth.signInWithApple(idToken: idToken, nonce: nonce) }
         }
+    }
+
+    /// Cancellation arrives as one of four shapes depending on the
+    /// underlying flow — Apple cancel button (ASAuthorizationError
+    /// .canceled), ASWebAuthenticationSession close button
+    /// (.canceledLogin), Swift task cancel, or the SDK wrapping a
+    /// CancellationError. Treat all of them as a no-op so the
+    /// surface stays quiet when the user just backs out.
+    private func isCanceledByUser(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
+        if let ase = error as? ASAuthorizationError, ase.code == .canceled { return true }
+        let nsError = error as NSError
+        if nsError.domain == ASWebAuthenticationSessionErrorDomain,
+           nsError.code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+            return true
+        }
+        return false
+    }
+
+    /// Turn a raw error into a single human sentence. We never
+    /// surface error codes / framework names in the user-facing
+    /// banner — that copy felt like a stack trace.
+    private func friendly(_ error: Error) -> String {
+        let raw = error.localizedDescription
+        if raw.lowercased().contains("network") { return "Network unavailable. Check your connection and try again." }
+        if raw.lowercased().contains("invalid") || raw.lowercased().contains("incorrect") {
+            return "Couldn't sign you in. Double-check the credentials and try again."
+        }
+        return "Sign-in didn't complete. Try again."
     }
 
     private func randomNonce(length: Int = 32) -> String {
@@ -236,6 +288,29 @@ struct AuthView: View {
     }
 }
 
+// MARK: - Apple Sign-In coordinator
+//
+// ASAuthorizationController needs an NSObject delegate +
+// presentation provider. We keep the coordinator alive via the
+// owning view's @State to ensure it survives until the system
+// callback fires.
+private final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    let onResult: (Result<ASAuthorization, Error>) -> Void
+    init(onResult: @escaping (Result<ASAuthorization, Error>) -> Void) { self.onResult = onResult }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        onResult(.success(authorization))
+    }
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        onResult(.failure(error))
+    }
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first ?? ASPresentationAnchor()
+    }
+}
+
 // MARK: - Companion chip
 
 /// Tiny mono pill that reads "iOS COMPANION" with a warn-color
@@ -243,23 +318,20 @@ struct AuthView: View {
 /// to memory.wiki, not the canonical surface.
 private struct CompanionChip: View {
     var body: some View {
-        HStack(spacing: 7) {
-            Circle().fill(Brand.microWarn).frame(width: 5, height: 5)
-            Text("iOS COMPANION")
-                .font(Brand.mono(size: 10, weight: .medium))
-                .tracking(1.4)
-                .foregroundStyle(Brand.textMuted)
-        }
-        .padding(.horizontal, 11)
-        .padding(.vertical, 6)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Brand.surface)
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(Brand.borderDim, lineWidth: 1)
-                )
-        )
+        Text("iOS COMPANION")
+            .font(Brand.mono(size: 10, weight: .medium))
+            .tracking(1.4)
+            .foregroundStyle(Brand.textMuted)
+            .padding(.horizontal, 11)
+            .padding(.vertical, 6)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Brand.surface)
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .strokeBorder(Brand.borderDim, lineWidth: 1)
+                    )
+            )
     }
 }
 
@@ -277,10 +349,10 @@ private struct BrandBackdrop: View {
             // so the densest part of the blob sits behind the
             // hero. Opacity tuned to read as a watermark — barely
             // there but unmistakably the brand mark, not a smudge.
-            let dim = max(proxy.size.width, proxy.size.height) * 1.15
+            let dim = max(proxy.size.width, proxy.size.height) * 0.95
             AnimatedBlob(size: dim, theme: .dark)
-                .opacity(0.14)
-                .blur(radius: 6)
+                .opacity(0.07)
+                .blur(radius: 8)
                 .frame(width: proxy.size.width, height: proxy.size.height, alignment: .center)
         }
     }
@@ -297,13 +369,11 @@ private struct ProviderButton<Logo: View>: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 logo()
                 Text(label)
                     .font(Brand.body(size: 15, weight: .medium))
-                Spacer()
             }
-            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 50)
             .foregroundStyle(style == .prominent ? Brand.background : Brand.textPrimary)
             .background(

@@ -109,9 +109,11 @@ private struct SavedBanner: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // Tiny lime dot — the only color on the row. Status,
-            // not brand.
-            Circle().fill(Brand.accent).frame(width: 6, height: 6)
+            // Ink checkmark to signal "saved." No lime — Pure
+            // design keeps chrome grayscale.
+            Image(systemName: "checkmark")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(Brand.textPrimary)
             Text(url.absoluteString)
                 .font(Brand.mono(size: 11))
                 .foregroundStyle(Brand.textPrimary)

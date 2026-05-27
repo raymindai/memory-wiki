@@ -76,11 +76,12 @@ private struct BrandTabBar: View {
                             .font(Brand.mono(size: 9, weight: .medium))
                             .tracking(0.5)
                             .textCase(.uppercase)
-                        // Active indicator — the only lime in the
-                        // chrome. Tiny dot, ink elsewhere.
-                        Circle()
-                            .fill(selected == tab ? Brand.accent : Color.clear)
-                            .frame(width: 3, height: 3)
+                        // Active indicator — ink hairline, no lime.
+                        // Pure design: brand chrome stays grayscale,
+                        // accent only earns its keep for status.
+                        Rectangle()
+                            .fill(selected == tab ? Brand.textPrimary : Color.clear)
+                            .frame(width: 14, height: 1)
                     }
                     .foregroundStyle(selected == tab ? Brand.textPrimary : Brand.textFaint)
                     .frame(maxWidth: .infinity)
