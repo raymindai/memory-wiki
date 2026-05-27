@@ -92,8 +92,14 @@ final class TimelineModel: ObservableObject {
 struct TimelineView: View {
     @EnvironmentObject private var router: AppRouter
     @StateObject private var model = TimelineModel()
+    @StateObject private var pinned = PinnedStore.shared
     @State private var showingSearch = false
     @FocusState private var searchFocused: Bool
+
+    private var pinnedDocs: [Document] {
+        guard !pinned.docIds.isEmpty else { return [] }
+        return model.documents.filter { pinned.isPinned($0.id) }
+    }
 
     var body: some View {
         NavigationStack(path: $router.timelinePath) {
@@ -222,12 +228,33 @@ struct TimelineView: View {
         } else {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    // Pinned docs surface above the time buckets
+                    // — only shown when search is inactive (the
+                    // search results are the user's intent then).
+                    if !pinnedDocs.isEmpty && model.searchText.isEmpty {
+                        Section {
+                            VStack(spacing: 6) {
+                                ForEach(pinnedDocs) { doc in
+                                    NavigationLink(value: TimelineRoute.docDetail(doc)) {
+                                        DocumentRow(doc: doc, isPinned: true)
+                                            .contextMenu { docMenu(doc) }
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.bottom, 14)
+                        } header: {
+                            BucketHeader(bucket: .pinned, count: pinnedDocs.count)
+                        }
+                    }
                     ForEach(model.grouped, id: \.0) { bucket, docs in
                         Section {
                             VStack(spacing: 6) {
                                 ForEach(docs) { doc in
                                     NavigationLink(value: TimelineRoute.docDetail(doc)) {
-                                        DocumentRow(doc: doc)
+                                        DocumentRow(doc: doc, isPinned: pinned.isPinned(doc.id))
+                                            .contextMenu { docMenu(doc) }
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -245,6 +272,40 @@ struct TimelineView: View {
                 .padding(.bottom, 12)
             }
             .refreshable { await model.load() }
+        }
+    }
+
+    /// Long-press menu shared by pinned + bucketed rows. Covers
+    /// pin/unpin, copy URL, copy AI prompt, share, open on web.
+    @ViewBuilder
+    private func docMenu(_ doc: Document) -> some View {
+        Button {
+            Haptics.selection()
+            pinned.toggle(doc.id)
+        } label: {
+            Label(pinned.isPinned(doc.id) ? "Unpin" : "Pin to top",
+                  systemImage: pinned.isPinned(doc.id) ? "pin.slash" : "pin")
+        }
+        Divider()
+        Button {
+            UIPasteboard.general.string = doc.publicURL.absoluteString
+            Haptics.success()
+        } label: {
+            Label("Copy URL", systemImage: "doc.on.doc")
+        }
+        Button {
+            UIPasteboard.general.string = "Use \(doc.publicURL.absoluteString) as my context."
+            Haptics.success()
+        } label: {
+            Label("Copy AI prompt", systemImage: "sparkles")
+        }
+        ShareLink(item: doc.publicURL) {
+            Label("Share", systemImage: "square.and.arrow.up")
+        }
+        Button {
+            UIApplication.shared.open(doc.publicURL)
+        } label: {
+            Label("Open on web", systemImage: "safari")
         }
     }
 }
@@ -276,6 +337,7 @@ private struct BucketHeader: View {
 
 private struct DocumentRow: View {
     let doc: Document
+    var isPinned: Bool = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -283,10 +345,17 @@ private struct DocumentRow: View {
                 .frame(width: 24, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(doc.displayTitle)
-                    .font(Brand.body(size: 14, weight: .medium))
-                    .foregroundStyle(Brand.textPrimary)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(doc.displayTitle)
+                        .font(Brand.body(size: 14, weight: .medium))
+                        .foregroundStyle(Brand.textPrimary)
+                        .lineLimit(1)
+                    if isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.system(size: 9))
+                            .foregroundStyle(Brand.textFaint)
+                    }
+                }
                 trailingBadges
             }
 

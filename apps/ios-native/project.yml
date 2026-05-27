@@ -11,6 +11,10 @@ options:
   generateEmptyDirectories: true
   groupSortPosition: top
 
+# Locales bundled with the app. iOS picks based on the user's
+# language settings; English is the dev/source language so the
+# literal `Text("Save")` works as the key in Localizable.strings.
+
 settings:
   base:
     MARKETING_VERSION: "0.1.0"
@@ -56,6 +60,13 @@ targets:
       - path: MemoryWiki/Preview Content
       - path: MemoryWiki/Fonts
       - path: MemoryWiki/Resources
+        excludes:
+          - "**/*.lproj/**"
+      # Localised string bundles — listed explicitly so xcodegen
+      # creates variant groups in the project (which is how iOS
+      # picks the right one based on user locale).
+      - path: MemoryWiki/Resources/en.lproj/Localizable.strings
+      - path: MemoryWiki/Resources/ko.lproj/Localizable.strings
     info:
       path: MemoryWiki/Info.plist
       properties:
@@ -77,6 +88,8 @@ targets:
         # everything is https.
         NSCameraUsageDescription: "Memory.Wiki captures photos and screenshots as documents you can paste into any AI."
         NSPhotoLibraryAddUsageDescription: "Save Memory.Wiki documents back to Photos when exporting."
+        NSMicrophoneUsageDescription: "Voice dictation in the Capture editor — speak your note instead of typing."
+        NSSpeechRecognitionUsageDescription: "Voice dictation runs on-device whenever possible to convert speech into a markdown note."
         # Bundled brand fonts — Cal Sans (display, OFL), JetBrains
         # Mono (mono, OFL), Noto Sans (body, OFL). Same family the
         # web app loads via next/font + cdn so iOS chrome reads as a

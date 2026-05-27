@@ -1,0 +1,141 @@
+/* Memory.Wiki iOS — Korean (한국어) strings.
+
+   SwiftUI's Text("English") automatically looks up the English
+   string as a key here. Add new translations in the SAME order
+   they appear in the source so the file stays scannable.
+
+   Style rules:
+   - 반말 X — 짧고 정중. ("저장" not "저장합니다")
+   - SF 시스템 용어와 충돌 X (예: "공유" 단독으로)
+   - 마이크로 카피는 영어 단어 1-2개 정도면 그대로 둔다 (URL, AI 등)
+*/
+
+"_locale.tag" = "ko";
+
+/* ============ TAB BAR ============ */
+"Timeline"  = "타임라인";
+"Bundles"   = "번들";
+"Capture"   = "캡쳐";
+"Settings"  = "설정";
+
+/* ============ TIMELINE ============ */
+"Search titles or meaning" = "제목/의미로 검색";
+"Nothing captured yet"     = "아직 저장된 노트가 없어요";
+"Start with a quick note, paste a URL from your clipboard, or use the iOS Share Sheet from Safari." = "메모를 적거나, 클립보드의 URL을 붙이거나, Safari의 공유 시트를 사용해보세요.";
+"Capture your first note"  = "첫 노트 만들기";
+"Couldn't load timeline"   = "타임라인을 불러오지 못했어요";
+"Try again"                = "다시 시도";
+"No matches"               = "결과 없음";
+"Try a shorter query — meaning-based search needs at least 3 characters." = "더 짧은 검색어로 시도해보세요. 의미 기반 검색은 최소 3글자가 필요합니다.";
+"TODAY"      = "오늘";
+"YESTERDAY"  = "어제";
+"THIS WEEK"  = "이번 주";
+"THIS MONTH" = "이번 달";
+"EARLIER"    = "이전";
+"PINNED"     = "고정됨";
+"BY MEANING" = "의미 기반";
+
+/* ============ DOCUMENT ROW + DETAIL ============ */
+"Edit"             = "편집";
+"Copy URL"         = "URL 복사";
+"Copy AI prompt"   = "AI 프롬프트 복사";
+"Share"            = "공유";
+"Open on web"      = "웹에서 열기";
+"Pin to top"       = "상단에 고정";
+"Unpin"            = "고정 해제";
+"Make public"      = "공개로 전환";
+"Make private"     = "비공개로 전환";
+"Delete"           = "삭제";
+
+/* ============ BUNDLES ============ */
+"No bundles yet"   = "아직 번들이 없어요";
+"Bundles group docs that share a topic. Create one on memory.wiki — each bundle gets its own URL you can deploy to AI." = "번들은 주제별로 노트를 묶어요. memory.wiki에서 만들면 AI에 통째로 넘길 수 있는 URL이 생깁니다.";
+"What's a bundle?" = "번들이 뭐예요?";
+"Couldn't load bundles" = "번들을 불러오지 못했어요";
+"Search bundles"   = "번들 검색";
+"PUBLIC"     = "공개";
+"PRIVATE"    = "비공개";
+"RESTRICTED" = "제한됨";
+
+/* ============ CAPTURE ============ */
+"Paste anything. Markdown welcomed." = "무엇이든 붙여 넣으세요. 마크다운 환영.";
+"Save"                = "저장";
+"Saving…"             = "저장 중…";
+"FROM CLIPBOARD"      = "클립보드에서";
+"UNSAVED DRAFT"       = "저장 안 된 초안";
+"Restore"             = "복원";
+"LISTENING"           = "받아쓰는 중";
+"Korean + English"    = "한국어 + 영어";
+"Stop"                = "중지";
+"Add an image"        = "이미지 추가";
+"Take photo"          = "사진 촬영";
+"Choose from Library" = "보관함에서 선택";
+"On-device OCR turns the image into a new markdown doc. Original photo isn't uploaded in this version." = "기기 내 OCR로 이미지를 마크다운 노트로 변환합니다. 원본 사진은 업로드되지 않아요.";
+
+/* ============ SETTINGS / PROFILE ============ */
+"YOUR AI MEMORY URL"  = "내 AI 메모리 URL";
+"Copy for AI"         = "AI용으로 복사";
+"Copied"              = "복사됨";
+"Open my hub"         = "내 허브 열기";
+"Open memory.wiki"    = "memory.wiki 열기";
+"Paste into Claude, ChatGPT, or Cursor. The URL serves markdown to AI clients automatically." = "Claude, ChatGPT, Cursor에 붙여넣으세요. AI 클라이언트에 자동으로 마크다운을 전달합니다.";
+"Open memory.wiki on the web to claim your @username and unlock the cross-AI URL." = "memory.wiki에서 @username을 만들면 크로스 AI URL을 사용할 수 있어요.";
+
+"ACCOUNT"    = "계정";
+"APPEARANCE" = "테마";
+"LEARN"      = "도움말";
+"FEEDBACK"   = "피드백";
+"LEGAL"      = "법적 고지";
+"VERSION"    = "버전";
+
+"Email"           = "이메일";
+"Username"        = "사용자명";
+"Dark"            = "다크";
+"Light"           = "라이트";
+"System"          = "시스템";
+"Help & Shortcuts"     = "도움말 + 단축어";
+"Replay welcome tour"  = "환영 투어 다시 보기";
+"About Memory.Wiki"    = "Memory.Wiki 정보";
+"Send feedback"        = "피드백 보내기";
+"Manifesto"            = "선언문";
+"How it works"         = "사용 방법";
+"Terms"                = "이용 약관";
+"Privacy"              = "개인정보 처리방침";
+"iOS Companion"        = "iOS 컴패니언";
+"Sign out"             = "로그아웃";
+"Mail unavailable"     = "메일을 사용할 수 없어요";
+"Copy address"         = "주소 복사";
+"OK"                   = "확인";
+"Set up a Mail account in iOS Settings, or email hi@raymind.ai from any other app." = "iOS 설정에서 메일 계정을 추가하거나, 다른 앱에서 hi@raymind.ai로 보내주세요.";
+
+/* ============ ABOUT ============ */
+"Your knowledge hub for the AI age." = "AI 시대를 위한 지식 허브.";
+"iOS COMPANION"    = "iOS 컴패니언";
+"WHAT'S NEW"       = "새로운 기능";
+"On the web"       = "웹";
+"Across platforms" = "다양한 채널";
+"Legal"            = "법적 고지";
+"Built by Hyunsang + Claude." = "Hyunsang + Claude 제작.";
+
+/* ============ HELP ============ */
+"Help"        = "도움말";
+"Quick start" = "빠른 시작";
+"Capture anywhere → AI organises → paste one URL." = "어디서든 캡쳐 → AI 정리 → URL 한 줄을 붙여넣기.";
+"This companion app focuses on three things: fast capture, instant access to anything you've ever saved, and a one-tap URL you can paste into any AI." = "이 컴패니언 앱은 세 가지에 집중합니다 — 빠른 캡쳐, 저장한 모든 것에 즉시 접근, AI에 붙여넣을 수 있는 한 줄 URL.";
+"Still stuck?" = "여전히 막혔나요?";
+"Email hi@raymind.ai or visit memory.wiki/manifesto for the why." = "hi@raymind.ai로 메일 주시거나 memory.wiki/manifesto에서 배경을 확인하세요.";
+
+/* ============ OFFLINE BANNER ============ */
+"OFFLINE"             = "오프라인";
+"Showing cached data" = "캐시된 데이터 표시 중";
+
+/* ============ AUTH ============ */
+"Continue with Apple"  = "Apple로 계속하기";
+"Continue with Google" = "Google로 계속하기";
+"Continue with GitHub" = "GitHub로 계속하기";
+"Continue with Email"  = "이메일로 계속하기";
+
+/* ============ DICTATION / MIC ============ */
+"Enable Speech Recognition in iOS Settings → Memory.Wiki." = "iOS 설정 → Memory.Wiki에서 음성 인식을 허용해주세요.";
+"Enable Microphone in iOS Settings → Memory.Wiki." = "iOS 설정 → Memory.Wiki에서 마이크를 허용해주세요.";
+"Speech recognition is unavailable on this device." = "이 기기에서 음성 인식을 사용할 수 없어요.";

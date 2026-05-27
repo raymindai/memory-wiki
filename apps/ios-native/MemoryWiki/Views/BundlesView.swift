@@ -165,6 +165,7 @@ struct BundlesView: View {
                     ForEach(model.visible) { bundle in
                         NavigationLink(value: BundlesRoute.bundleDetail(bundle)) {
                             BundleRow(bundle: bundle)
+                                .contextMenu { bundleMenu(bundle) }
                         }
                         .buttonStyle(.plain)
                     }
@@ -173,6 +174,30 @@ struct BundlesView: View {
                 .padding(.bottom, 12)
             }
             .refreshable { await model.load() }
+        }
+    }
+
+    @ViewBuilder
+    private func bundleMenu(_ bundle: AppBundle) -> some View {
+        Button {
+            UIPasteboard.general.string = bundle.publicURL.absoluteString
+            Haptics.success()
+        } label: {
+            Label("Copy URL", systemImage: "doc.on.doc")
+        }
+        Button {
+            UIPasteboard.general.string = "Use \(bundle.publicURL.absoluteString) as my context bundle."
+            Haptics.success()
+        } label: {
+            Label("Copy AI prompt", systemImage: "sparkles")
+        }
+        ShareLink(item: bundle.publicURL) {
+            Label("Share", systemImage: "square.and.arrow.up")
+        }
+        Button {
+            UIApplication.shared.open(bundle.publicURL)
+        } label: {
+            Label("Open on web", systemImage: "safari")
         }
     }
 }

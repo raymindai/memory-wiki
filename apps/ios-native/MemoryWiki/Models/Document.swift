@@ -136,6 +136,10 @@ struct DocumentDetail: Identifiable, Hashable {
 
 enum TimelineBucket: String, CaseIterable, Identifiable {
     case today, yesterday, thisWeek, thisMonth, earlier
+    /// Synthetic bucket — rendered as a section above the time
+    /// buckets when there's at least one pinned doc. Never
+    /// returned from Document.bucket; only the view layer uses it.
+    case pinned
     var id: String { rawValue }
     var label: String {
         switch self {
@@ -144,6 +148,7 @@ enum TimelineBucket: String, CaseIterable, Identifiable {
         case .thisWeek: return "THIS WEEK"
         case .thisMonth: return "THIS MONTH"
         case .earlier: return "EARLIER"
+        case .pinned: return "PINNED"
         }
     }
 }

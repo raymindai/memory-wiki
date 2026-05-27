@@ -41,8 +41,12 @@
 	<string>$(MEMORY_WIKI_SUPABASE_URL)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Memory.Wiki captures photos and screenshots as documents you can paste into any AI.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Voice dictation in the Capture editor — speak your note instead of typing.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save Memory.Wiki documents back to Photos when exporting.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Voice dictation runs on-device whenever possible to convert speech into a markdown note.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>CalSans-Regular.ttf</string>

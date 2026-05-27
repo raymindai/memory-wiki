@@ -1,0 +1,9 @@
+/* Memory.Wiki iOS — English (base) strings.
+
+   Most of the UI uses Text("…") with the literal English as the
+   key. This file is intentionally short — it exists to mark
+   "en" as a supported locale so iOS doesn't fall back to a
+   missing-locale state on non-Korean devices.
+*/
+
+"_locale.tag" = "en";
