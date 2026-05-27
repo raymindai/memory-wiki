@@ -9,6 +9,7 @@ import ViewerPromoStrip from "@/components/ViewerPromoStrip";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import RelatedInHubPanel from "@/components/RelatedInHubPanel";
 import ReferencedBy from "@/components/ReferencedBy";
+import DocComments from "@/components/DocComments";
 import VisitorAskAI from "@/components/VisitorAskAI";
 import ViewerHeader from "@/components/ViewerHeader";
 import type { TiptapLiveEditorHandle } from "@/components/TiptapLiveEditor";
@@ -541,6 +542,13 @@ export default function DocumentViewer({
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px" }}>
           <ReferencedBy data={referencedBy} variant="inline" />
         </div>
+      )}
+
+      {/* v8 W8 Comments — flat thread under the doc body. Component
+          self-fetches; API enforces the same access model as the
+          doc so this stays empty on unauthorized fetches. */}
+      {unlocked && !isExpired && !accessRevoked && (
+        <DocComments docId={id} />
       )}
 
       {/* Viewer-wide promote strip — only when the visitor isn't the
