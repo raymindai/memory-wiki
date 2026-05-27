@@ -3720,10 +3720,23 @@ export default function MdEditor() {
       // Without this, the page mounts blank because no loader fires,
       // even though the stats bar shows the markdown length (the
       // markdown bleeds in from sidebar click but Tiptap never paints).
+      //
+      // RESERVED_PATHS guards against the 8-char "settings" collision
+      // (the {6,16} length window happily matched any app-route name)
+      // — without it /settings, /galaxy, /discover etc. all 404'd
+      // through /api/docs/<route-name> and surfaced "Document Not
+      // Found" on top of what should be the overlay.
+      const RESERVED_PATHS = new Set([
+        "settings", "galaxy", "discover", "install", "shared",
+        "hubs", "manifesto", "plugins", "spec", "privacy", "terms",
+        "about", "auth", "admin", "trending", "bookmarklet",
+      ]);
       const pathnameMatch = !docParam
         ? window.location.pathname.match(/^\/([A-Za-z0-9_-]{6,16})$/)
         : null;
-      const pathDocId = pathnameMatch ? pathnameMatch[1] : null;
+      const pathDocId = pathnameMatch && !RESERVED_PATHS.has(pathnameMatch[1].toLowerCase())
+        ? pathnameMatch[1]
+        : null;
       const candidate = docParam || pathDocId;
       // Validate doc ID: only allow alphanumeric, hyphen, underscore (nanoid charset)
       const fromId = candidate && /^[\w-]+$/.test(candidate) ? candidate : null;
