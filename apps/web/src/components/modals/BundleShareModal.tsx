@@ -293,11 +293,11 @@ export default function BundleShareModal({
                     <div
                       className="w-4 h-4 rounded shrink-0 flex items-center justify-center"
                       style={{
-                        background: isSelected ? "var(--text-primary)" : "transparent",
-                        border: `1px solid ${isSelected ? "var(--text-primary)" : "var(--border)"}`,
+                        background: isSelected ? "var(--micro-lime)" : "transparent",
+                        border: `1px solid ${isSelected ? "var(--micro-lime)" : "var(--border)"}`,
                       }}
                     >
-                      {isSelected && <Check width={10} height={10} style={{ color: "#fff" }} />}
+                      {isSelected && <Check width={11} height={11} strokeWidth={3} style={{ color: "#0a0a0f" }} />}
                     </div>
                     <span className="flex-1 truncate">{d.title || "Untitled"}</span>
                     <span className="shrink-0 text-caption" style={{ color: status.color }}>{status.label}</span>

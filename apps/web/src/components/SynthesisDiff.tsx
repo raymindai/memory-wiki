@@ -277,7 +277,7 @@ export default function SynthesisDiff({ docId, auth, onClose, onAccepted }: Prop
               borderRadius: 8,
               border: "1px solid var(--text-primary)",
               background: "var(--text-primary)",
-              color: "#000",
+              color: "var(--background)",
               fontSize: 13,
               fontWeight: 600,
               cursor:

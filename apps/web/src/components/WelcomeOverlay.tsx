@@ -318,7 +318,7 @@ export default function WelcomeOverlay() {
               style={{
                 flex: 1,
                 background: "var(--text-primary)",
-                color: "#000",
+                color: "var(--background)",
                 border: "none",
                 padding: "13px 28px",
                 borderRadius: 10,

@@ -373,6 +373,49 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     setIsEmbedding(false);
   }, [bundleId, bundleIsOwner, parentAuthHeaders]);
 
+  // Track when the user explicitly dismisses the prep banner so we don't
+  // re-show it after the user has acknowledged the in-progress pipeline.
+  const [prepBannerDismissed, setPrepBannerDismissed] = useState(false);
+
+  // Poll /api/bundles/[id] while the auto-analyze + auto-embed kicked
+  // off server-side in /api/bundles POST (and the client-side auto-graph
+  // in the load effect above) are still in flight. Without this, a
+  // freshly-created bundle would show "Not yet" on the embed pill
+  // forever — the server completes the embed via after() but never
+  // notifies the client. Owner-only. Stops as soon as both timestamps
+  // are populated, or after a 3-minute ceiling, whichever comes first.
+  useEffect(() => {
+    if (!bundleIsOwner) return;
+    if (isLoading) return;
+    if (graphGeneratedAt && embeddingUpdatedAt) return;
+    const headers: Record<string, string> = {};
+    if (parentAuthHeaders) Object.assign(headers, parentAuthHeaders);
+    else {
+      try {
+        const anonId = localStorage.getItem("mw-anonymous-id");
+        if (anonId) headers["x-anonymous-id"] = anonId;
+        const userId = localStorage.getItem("mw-user-id");
+        if (userId) headers["x-user-id"] = userId;
+      } catch { /* ignore */ }
+    }
+    const started = Date.now();
+    const MAX_MS = 3 * 60 * 1000;
+    const tick = async () => {
+      try {
+        const r = await fetch(`/api/bundles/${bundleId}`, { headers });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d.graph_generated_at) setGraphGeneratedAt(d.graph_generated_at);
+        if (d.embedding_updated_at) setEmbeddingUpdatedAt(d.embedding_updated_at);
+      } catch { /* network blip — retry on next tick */ }
+    };
+    const id = setInterval(() => {
+      if (Date.now() - started > MAX_MS) { clearInterval(id); return; }
+      void tick();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [bundleId, bundleIsOwner, isLoading, graphGeneratedAt, embeddingUpdatedAt, parentAuthHeaders]);
+
   // Build auth headers for bundle PATCH (uses anonymousId or userId/email)
   // Mutual exclusivity with AI chat panel: when the parent opens the AI chat,
   // close our NodeInfoPanel so the right side doesn't show two stacked panels.
@@ -1142,6 +1185,26 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     ? aiGraph.summary.trim() || null
     : null;
 
+  // Whether the bundle's auto-pipeline (graph analysis + vector embed,
+  // both kicked from /api/bundles POST `after()`) is still in flight.
+  // Banner is owner-only because viewers shouldn't see private prep state,
+  // and only when the bundle actually has members (an empty bundle has
+  // nothing to embed).
+  const showPrepBanner =
+    bundleIsOwner &&
+    !isLoading &&
+    documents.length > 0 &&
+    !prepBannerDismissed &&
+    (!graphGeneratedAt || !embeddingUpdatedAt);
+  const prepBannerNode = showPrepBanner ? (
+    <BundlePrepBanner
+      graphReady={!!graphGeneratedAt}
+      embedReady={!!embeddingUpdatedAt}
+      hasMultipleDocs={documents.length >= 2}
+      onDismiss={() => setPrepBannerDismissed(true)}
+    />
+  ) : null;
+
   if (isLoading) {
     // Layout-aware skeleton — mirrors the eventual frame (List has a
     // Contents rail + doc column; Overview has a centered hero) so
@@ -1214,60 +1277,67 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
 
   if (view === "overview") {
     return (
-      <BundleOverview
-        bundleId={bundleId}
-        bundleTitle={bundleTitle}
-        bundleDescription={bundleDescription}
-        bundleSummary={bundleSummary}
-        bundleIntent={bundleIntent}
-        bundleIsDraft={bundleIsDraft}
-        bundleAllowedEmails={bundleAllowedEmails}
-        documents={documents.map(d => ({
-          id: d.id,
-          title: d.title,
-          markdown: d.markdown,
-          updated_at: d.updated_at,
-          annotation: d.annotation ?? null,
-        }))}
-        hasDiscoveries={!!aiGraph && (aiGraph.themes?.length > 0 || aiGraph.insights?.length > 0)}
-        hasGraph={!!aiGraph}
-        isAnalysisStale={isAnalysisStale}
-        themeCount={Array.isArray(aiGraph?.themes) ? aiGraph.themes.length : 0}
-        insightCount={Array.isArray(aiGraph?.insights) ? aiGraph.insights.length : 0}
-        lastUpdatedAt={(() => {
-          const stamps = documents
-            .map(d => (d.updated_at ? new Date(d.updated_at).getTime() : 0))
-            .filter(t => t > 0);
-          if (stamps.length === 0) return null;
-          return new Date(Math.max(...stamps)).toISOString();
-        })()}
-        onOpenDoc={onOpenDoc}
-        onSwitchToCanvas={() => onChangeView?.("canvas")}
-        onSwitchToList={() => onChangeView?.("list")}
-        onRenameBundle={bundleIsOwner ? saveBundleTitle : undefined}
-      />
+      <>
+        <BundleOverview
+          bundleId={bundleId}
+          bundleTitle={bundleTitle}
+          bundleDescription={bundleDescription}
+          bundleSummary={bundleSummary}
+          bundleIntent={bundleIntent}
+          bundleIsDraft={bundleIsDraft}
+          bundleAllowedEmails={bundleAllowedEmails}
+          documents={documents.map(d => ({
+            id: d.id,
+            title: d.title,
+            markdown: d.markdown,
+            updated_at: d.updated_at,
+            annotation: d.annotation ?? null,
+          }))}
+          hasDiscoveries={!!aiGraph && (aiGraph.themes?.length > 0 || aiGraph.insights?.length > 0)}
+          hasGraph={!!aiGraph}
+          isAnalysisStale={isAnalysisStale}
+          themeCount={Array.isArray(aiGraph?.themes) ? aiGraph.themes.length : 0}
+          insightCount={Array.isArray(aiGraph?.insights) ? aiGraph.insights.length : 0}
+          lastUpdatedAt={(() => {
+            const stamps = documents
+              .map(d => (d.updated_at ? new Date(d.updated_at).getTime() : 0))
+              .filter(t => t > 0);
+            if (stamps.length === 0) return null;
+            return new Date(Math.max(...stamps)).toISOString();
+          })()}
+          onOpenDoc={onOpenDoc}
+          onSwitchToCanvas={() => onChangeView?.("canvas")}
+          onSwitchToList={() => onChangeView?.("list")}
+          onRenameBundle={bundleIsOwner ? saveBundleTitle : undefined}
+        />
+        {prepBannerNode}
+      </>
     );
   }
 
   if (view === "list") {
     return (
-      <BundleListView
-        documents={documents}
-        bundleId={bundleId}
-        bundleTitle={bundleTitle}
-        bundleDescription={bundleDescription}
-        authHeaders={parentAuthHeaders}
-        canEdit={bundleIsOwner}
-        onOpenDoc={onOpenDoc}
-        onSwitchToBundle={() => onChangeView?.("overview")}
-        onAnnotationSaved={(docId, annotation) => {
-          setDocuments(prev => prev.map(d => d.id === docId ? { ...d, annotation } : d));
-        }}
-      />
+      <>
+        <BundleListView
+          documents={documents}
+          bundleId={bundleId}
+          bundleTitle={bundleTitle}
+          bundleDescription={bundleDescription}
+          authHeaders={parentAuthHeaders}
+          canEdit={bundleIsOwner}
+          onOpenDoc={onOpenDoc}
+          onSwitchToBundle={() => onChangeView?.("overview")}
+          onAnnotationSaved={(docId, annotation) => {
+            setDocuments(prev => prev.map(d => d.id === docId ? { ...d, annotation } : d));
+          }}
+        />
+        {prepBannerNode}
+      </>
     );
   }
 
   return (
+    <>
     <BundleCanvasLayout
       selectedNodeInfo={selectedNodeInfo}
       onCloseNodeInfo={() => setSelectedNodeInfo(null)}
@@ -1510,6 +1580,94 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         />
       )}
     />
+    {prepBannerNode}
+    </>
+  );
+}
+
+/**
+ * Floating prep banner — owner-only, bottom-center, sticks until the
+ * server-side auto-pipeline (graph analysis + vector embed) lands or
+ * the user dismisses it. Pure design: warm zinc surface, small micro
+ * dots for status, no progress bars (the work is bounded but variable
+ * — a fake percentage would lie). The point is to close the gap where
+ * a fresh bundle's URL exists but isn't yet useful to external AIs.
+ */
+function BundlePrepBanner({
+  graphReady,
+  embedReady,
+  hasMultipleDocs,
+  onDismiss,
+}: {
+  graphReady: boolean;
+  embedReady: boolean;
+  hasMultipleDocs: boolean;
+  onDismiss: () => void;
+}) {
+  // Graph analysis only runs when there are 2+ docs (server-side
+  // condition in /api/bundles POST after()). For single-doc bundles
+  // there's no graph stage at all — drop it from the strip to avoid
+  // confusing the user with a step that will never tick.
+  const showGraph = hasMultipleDocs;
+  const allDone = embedReady && (!showGraph || graphReady);
+  if (allDone) return null;
+  const Step = ({ label, ready, eta }: { label: string; ready: boolean; eta: string }) => (
+    <span className="inline-flex items-center gap-1.5 text-caption" style={{ color: ready ? "var(--text-secondary)" : "var(--text-muted)" }}>
+      <span
+        aria-hidden
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: 999,
+          background: ready ? "var(--micro-lime)" : "var(--micro-info)",
+          animation: ready ? undefined : "bundlePrepPulse 1.2s ease-in-out infinite",
+        }}
+      />
+      <span style={{ fontWeight: 500 }}>{label}</span>
+      <span className="font-mono" style={{ color: "var(--text-faint)", fontSize: 10 }}>
+        {ready ? "done" : eta}
+      </span>
+    </span>
+  );
+  return (
+    <div
+      className="fixed left-1/2 -translate-x-1/2 z-[80] rounded-lg shadow-lg"
+      style={{
+        bottom: 20,
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border)",
+        padding: "10px 14px",
+        maxWidth: "min(640px, calc(100vw - 32px))",
+      }}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="text-caption font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+            Preparing this bundle for AI
+          </div>
+          <div className="flex items-center gap-3 flex-wrap mb-1.5">
+            <Step label="Vector embed" ready={embedReady} eta="~5s" />
+            {showGraph && <Step label="Graph analysis" ready={graphReady} eta="~1 min" />}
+          </div>
+          <div className="text-caption" style={{ color: "var(--text-faint)", fontSize: 11, lineHeight: 1.4 }}>
+            The bundle URL works immediately for direct sharing. Semantic recall
+            {showGraph ? " and the concept graph become" : " becomes"} available
+            once this finishes — you can keep editing in the meantime.
+          </div>
+        </div>
+        <button
+          onClick={onDismiss}
+          className="shrink-0 -mt-1 -mr-1 w-6 h-6 inline-flex items-center justify-center rounded transition-colors hover:bg-[var(--toggle-bg)]"
+          style={{ color: "var(--text-faint)" }}
+          aria-label="Dismiss"
+        >
+          <XIcon width={12} height={12} />
+        </button>
+      </div>
+      <style>{`@keyframes bundlePrepPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }`}</style>
+    </div>
   );
 }
 

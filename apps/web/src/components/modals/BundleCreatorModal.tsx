@@ -11,7 +11,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, ChevronUp, Loader2, Sparkles } from "lucide-react";
+import { Check, ChevronDown, GripVertical, Loader2, Sparkles } from "lucide-react";
 import { suggestBundleTitle } from "@/lib/editor-helpers";
 
 export default function BundleCreatorModal({
@@ -170,15 +170,26 @@ export default function BundleCreatorModal({
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
-  const move = (id: string, dir: -1 | 1) => {
+  // HTML5 drag-reorder. The drop indicator is a thin line BETWEEN rows,
+  // not a fill on the target row — readers expect a "this is where it
+  // will land" insertion line, not a "this row will be replaced" hover.
+  // dragOverPosition is the cursor's half of the hovered row ("before"
+  // / "after"), which decides which edge the line snaps to.
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [dragOverPosition, setDragOverPosition] = useState<"before" | "after">("before");
+  const reorder = (fromId: string, toId: string, position: "before" | "after") => {
+    if (fromId === toId) return;
     setSelectedIds(prev => {
-      const idx = prev.indexOf(id);
-      if (idx < 0) return prev;
-      const next = idx + dir;
-      if (next < 0 || next >= prev.length) return prev;
-      const copy = [...prev];
-      [copy[idx], copy[next]] = [copy[next], copy[idx]];
-      return copy;
+      const fromIdx = prev.indexOf(fromId);
+      if (fromIdx < 0) return prev;
+      const without = prev.filter(x => x !== fromId);
+      const toIdx = without.indexOf(toId);
+      // Unselected target → append to the end. Selected target → insert
+      // either before or after based on which half of the row the cursor
+      // was over when the drop landed.
+      const insertAt = toIdx < 0 ? without.length : (position === "after" ? toIdx + 1 : toIdx);
+      return [...without.slice(0, insertAt), fromId, ...without.slice(insertAt)];
     });
   };
 
@@ -264,7 +275,7 @@ export default function BundleCreatorModal({
               className="flex items-center gap-1 px-3 text-caption font-semibold shrink-0 transition-colors"
               style={{
                 background: !aiPrompt.trim() || aiGenerating ? "transparent" : "var(--text-primary)",
-                color: !aiPrompt.trim() || aiGenerating ? "var(--text-faint)" : "#fff",
+                color: !aiPrompt.trim() || aiGenerating ? "var(--text-faint)" : "var(--background)",
                 cursor: !aiPrompt.trim() || aiGenerating ? "not-allowed" : "pointer",
                 borderLeft: "1px solid var(--border-dim)",
               }}
@@ -408,12 +419,12 @@ export default function BundleCreatorModal({
             >
               {suggestingTitle ? (
                 <>
-                  <Loader2 width={11} height={11} className="animate-spin" />
+                  <Loader2 width={11} height={11} className="animate-spin" style={{ color: "var(--micro-ai)" }} />
                   <span>Thinking</span>
                 </>
               ) : (
                 <>
-                  <Sparkles width={11} height={11} />
+                  <Sparkles width={11} height={11} style={{ color: selectedIds.length === 0 ? "var(--text-faint)" : "var(--micro-ai)" }} />
                   <span>AI</span>
                 </>
               )}
@@ -461,13 +472,69 @@ export default function BundleCreatorModal({
                   <div
                     key={doc.id}
                     onClick={() => toggle(doc.id)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-caption cursor-pointer transition-colors hover:bg-[var(--border)]"
+                    draggable={isSelected}
+                    onDragStart={(e) => {
+                      if (!isSelected) { e.preventDefault(); return; }
+                      setDragId(doc.id);
+                      e.dataTransfer.effectAllowed = "move";
+                      // Required for Firefox to actually fire the drag.
+                      e.dataTransfer.setData("text/plain", doc.id);
+                    }}
+                    onDragOver={(e) => {
+                      if (!dragId || dragId === doc.id) return;
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const pos: "before" | "after" = e.clientY < rect.top + rect.height / 2 ? "before" : "after";
+                      if (dragOverId !== doc.id || dragOverPosition !== pos) {
+                        setDragOverId(doc.id);
+                        setDragOverPosition(pos);
+                      }
+                    }}
+                    onDragLeave={(e) => {
+                      // dragleave fires when entering child elements too —
+                      // only clear when truly leaving the row, not on
+                      // every internal node transition.
+                      const next = e.relatedTarget as Node | null;
+                      if (next && e.currentTarget.contains(next)) return;
+                      if (dragOverId === doc.id) setDragOverId(null);
+                    }}
+                    onDrop={(e) => {
+                      if (!dragId) return;
+                      e.preventDefault();
+                      reorder(dragId, doc.id, dragOverPosition);
+                      setDragId(null);
+                      setDragOverId(null);
+                    }}
+                    onDragEnd={() => { setDragId(null); setDragOverId(null); }}
+                    className="group relative flex items-center gap-2 px-2.5 py-1.5 rounded-md text-caption transition-colors hover:bg-[var(--border-dim)]"
                     style={{
-                      background: isSelected ? "var(--border)" : "var(--background)",
+                      background: isSelected ? "var(--surface)" : "transparent",
                       color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
-                      border: `1px solid ${isSelected ? "var(--border)" : "var(--border-dim)"}`,
+                      border: `1px solid ${isSelected ? "var(--border)" : "transparent"}`,
+                      cursor: isSelected ? (dragId === doc.id ? "grabbing" : "grab") : "pointer",
+                      opacity: dragId === doc.id ? 0.4 : 1,
                     }}
                   >
+                    {/* Insertion-line drop indicator. Renders on the edge
+                        of the hovered row that matches the cursor half,
+                        so the user reads "drop here will land at this
+                        slot" rather than "this row will be replaced". */}
+                    {dragId && dragId !== doc.id && dragOverId === doc.id && (
+                      <div
+                        aria-hidden
+                        style={{
+                          position: "absolute",
+                          left: 4,
+                          right: 4,
+                          height: 2,
+                          background: "var(--text-primary)",
+                          borderRadius: 999,
+                          pointerEvents: "none",
+                          [dragOverPosition === "before" ? "top" : "bottom"]: -3,
+                        }}
+                      />
+                    )}
                     <div
                       className="w-4 h-4 rounded shrink-0 flex items-center justify-center"
                       style={{
@@ -475,41 +542,45 @@ export default function BundleCreatorModal({
                         border: `1px solid ${isSelected ? "var(--text-primary)" : "var(--border)"}`,
                       }}
                     >
-                      {isSelected && <Check width={10} height={10} style={{ color: "#fff" }} />}
+                      {isSelected && <Check width={11} height={11} strokeWidth={3} style={{ color: "var(--background)" }} />}
                     </div>
-                    {isSelected && (
-                      <span className="text-caption font-mono shrink-0" style={{ color: "var(--text-primary)" }}>{order + 1}</span>
-                    )}
                     <div className="flex-1 min-w-0">
                       <div className="truncate">{doc.title}</div>
                       {isSelected && aiAnnotations[doc.id] && (
-                        <div className="text-caption truncate mt-0.5 inline-flex items-center gap-1" style={{ color: "var(--text-primary)", opacity: 0.85 }}>
-                          <Sparkles width={10} height={10} className="shrink-0" aria-hidden /> {aiAnnotations[doc.id]}
+                        <div className="text-caption mt-0.5 flex items-center gap-1 min-w-0" style={{ color: "var(--text-secondary)" }}>
+                          <Sparkles width={10} height={10} className="shrink-0" aria-hidden style={{ color: "var(--micro-ai)" }} />
+                          <span className="truncate min-w-0">{aiAnnotations[doc.id]}</span>
                         </div>
                       )}
                     </div>
-                    {isSelected && (
-                      <div className="flex gap-0.5 shrink-0">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); move(doc.id, -1); }}
-                          disabled={order === 0}
-                          className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)] disabled:opacity-30"
-                          style={{ color: "var(--text-faint)" }}
-                          title="Move up"
-                        >
-                          <ChevronUp width={11} height={11} />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); move(doc.id, 1); }}
-                          disabled={order === selectedIds.length - 1}
-                          className="w-5 h-5 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)] disabled:opacity-30"
-                          style={{ color: "var(--text-faint)" }}
-                          title="Move down"
-                        >
-                          <ChevronDown width={11} height={11} />
-                        </button>
-                      </div>
-                    )}
+                    {/* Quiet mono order index — followed by a drag-handle
+                        sat to its right. Together they read "row N, grab to
+                        reorder". The number stays faint so it doesn't
+                        dominate; the grip is the affordance. */}
+                    <span
+                      aria-hidden
+                      className="font-mono shrink-0 tabular-nums text-right"
+                      style={{
+                        width: "1.5rem",
+                        color: "var(--text-faint)",
+                        fontSize: "0.65rem",
+                        letterSpacing: "0.04em",
+                        opacity: isSelected ? 1 : 0,
+                      }}
+                    >
+                      {isSelected ? String(order + 1).padStart(2, "0") : ""}
+                    </span>
+                    <span
+                      aria-hidden
+                      className="shrink-0 inline-flex items-center justify-center"
+                      style={{
+                        width: "0.9rem",
+                        color: "var(--text-faint)",
+                        opacity: isSelected ? 0.6 : 0,
+                      }}
+                    >
+                      {isSelected && <GripVertical width={12} height={12} />}
+                    </span>
                   </div>
                 );
               })}
@@ -540,11 +611,10 @@ export default function BundleCreatorModal({
               }
             }}
             disabled={!canCreate}
-            className="px-4 py-1.5 rounded-md text-caption font-medium transition-opacity"
+            className="px-4 py-1.5 rounded-md text-caption font-medium transition-colors"
             style={{
-              background: "var(--text-primary)",
-              color: "#fff",
-              opacity: canCreate ? 1 : 0.4,
+              background: canCreate ? "var(--text-primary)" : "var(--border-dim)",
+              color: canCreate ? "var(--background)" : "var(--text-faint)",
               cursor: canCreate ? "pointer" : "not-allowed",
             }}
           >

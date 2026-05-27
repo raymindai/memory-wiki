@@ -1423,10 +1423,7 @@ Memory.Wiki hub`;
                 className="text-caption px-3 py-1.5 rounded shrink-0 transition-colors"
                 style={{
                   background: "var(--text-primary)",
-                  // Matches every other accent-fill button in Settings /
-                  // BundleOverview / Hub — black text on the accent
-                  // works in both light + dark across the eight schemes.
-                  color: "#000",
+                  color: "var(--background)",
                   opacity: ontologyBuilding ? 0.5 : 1,
                   cursor: ontologyBuilding ? "not-allowed" : "pointer",
                 }}

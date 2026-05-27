@@ -1374,7 +1374,7 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
     >
       {dropActive && (
         <div className="absolute inset-0 z-[50] pointer-events-none flex items-center justify-center" style={{ background: "rgba(251,146,60,0.06)", border: "2px dashed var(--text-primary)", borderRadius: 8 }}>
-          <div className="px-4 py-2 rounded-lg text-body font-semibold" style={{ background: "var(--text-primary)", color: "#000" }}>
+          <div className="px-4 py-2 rounded-lg text-body font-semibold" style={{ background: "var(--text-primary)", color: "var(--background)" }}>
             Drop to add to bundle
           </div>
         </div>
@@ -1540,7 +1540,7 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
                 <button
                   onClick={onCollapseDoc}
                   className="inline-flex items-center text-caption font-semibold h-full hover:brightness-110 transition-all"
-                  style={{ background: "var(--text-primary)", color: "#000", padding: "0 var(--space-3)", gap: "var(--space-2)" }}
+                  style={{ background: "var(--text-primary)", color: "var(--background)", padding: "0 var(--space-3)", gap: "var(--space-2)" }}
                 >
                   <Check width={11} height={11} strokeWidth={2.5} />
                   Done
