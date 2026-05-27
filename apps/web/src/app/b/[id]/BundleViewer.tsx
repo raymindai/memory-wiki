@@ -138,6 +138,10 @@ export default function BundleViewer({
         if (!res.ok) { liftAuthGate(); return; }
         const data = await res.json();
         if (data.isOwner) {
+          // KEEP the auth gate up across the navigation — editor's
+          // own boot loader takes over after replace fires. Lifting
+          // here would briefly expose the public viewer chrome and
+          // read as "loader cut and restarted."
           window.location.replace(`/?bundle=${id}`);
           return;
         }

@@ -126,6 +126,11 @@ export default function DocumentViewer({
         // user who was explicitly invited as an Editor would be a dead
         // end.
         if (doc.isOwner || doc.isEditor) {
+          // KEEP the auth gate up — we're navigating away, the
+          // editor will paint its own boot loader after the
+          // window.location.replace fires. Lifting here would briefly
+          // expose the public viewer chrome between gate-removal and
+          // navigation, which read as "loader cuts and restarts."
           window.location.replace(`/?from=${id}`);
           return;
         }
@@ -138,10 +143,11 @@ export default function DocumentViewer({
           setIsLoading(true);
         }
       } catch { /* no session or not authorized */ }
-      finally {
-        setAuthChecked(true);
-        liftAuthGate();
-      }
+      // Reached only when staying on this page (non-owner / public /
+      // failed auth). Owner branch returned above without lifting so
+      // the gate covers the navigation.
+      setAuthChecked(true);
+      liftAuthGate();
     })();
   }, [id, isRestricted, unlocked]);
 

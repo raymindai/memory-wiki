@@ -288,6 +288,12 @@ export default function MdEditor() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try { localStorage.setItem("mw-editor-opened", "1"); } catch { /* private mode */ }
+    // Lift the pre-paint auth-flash gate (data-mw-auth-pending on
+    // <html>) as soon as MdEditor mounts. The viewer's auth-check
+    // keeps the gate up across the window.location.replace into the
+    // editor, so the editor itself owns releasing it — otherwise the
+    // gate would sit until the 3.5s fallback timeout in layout.tsx.
+    document.documentElement.removeAttribute("data-mw-auth-pending");
   }, []);
   const isMobile = useIsMobile();
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
