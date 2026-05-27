@@ -1304,6 +1304,24 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
           </p>
         </section>
 
+        {/* v8 W4 — Backfill auto-organize. New docs get tags / cluster /
+            summary / entities the moment they're saved; this button
+            walks every existing doc that doesn't yet have AI metadata
+            and enqueues it. Background worker drains at ~5/min so a
+            big library takes a few minutes after the click. Safe to
+            press repeatedly; already-organized docs are skipped. */}
+        <section className="mb-10">
+          <h3 className="mb-2" style={{ color: "var(--text-secondary)", fontSize: 13, fontWeight: 500, fontFamily: "var(--font-mono)", letterSpacing: "0.04em" }}>
+            Backfill existing library
+          </h3>
+          <p className="text-caption mb-3" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.55 }}>
+            Tags, clusters, and summaries are filled automatically for new docs. Run this once to fold every existing doc into the same metadata layer. Background worker processes them at about 5 per minute.
+          </p>
+          <BackfillOrganizeButton authHeaders={{
+            ...(user?.id ? { "x-user-id": user.id } : {}),
+          }} />
+        </section>
+
         </>)}
 
         {/* Plan lives at the bottom of Profile (since it's identity-
@@ -1526,6 +1544,68 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
 
         </>)}
       </div>
+    </div>
+  );
+}
+
+/**
+ * One-shot backfill trigger for v8 Type 1 auto-organize. Hits
+ * /api/user/backfill-organize which walks the user's docs missing
+ * document_ai_metadata and enqueues a doc_organize job per row.
+ * Shows pre/post counts so the user can verify the run actually did
+ * something and queue another batch if there are more.
+ */
+function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, string> }) {
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<{ enqueued: number; inspected: number } | null>(null);
+  const onClick = async () => {
+    setRunning(true);
+    setResult(null);
+    try {
+      const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+      const supabase = getSupabaseBrowserClient();
+      const session = supabase ? (await supabase.auth.getSession()).data.session : null;
+      const headers: Record<string, string> = { ...authHeaders };
+      if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+      const res = await fetch("/api/user/backfill-organize?limit=200", { method: "POST", headers });
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) {
+        showToast(typeof data.error === "string" ? data.error : `Backfill failed (${res.status})`, "error");
+        return;
+      }
+      setResult({ enqueued: data.enqueued ?? 0, inspected: data.inspected ?? 0 });
+      showToast(
+        data.enqueued === 0
+          ? "All docs already have AI metadata"
+          : `Enqueued ${data.enqueued} doc${data.enqueued === 1 ? "" : "s"} for auto-organize`,
+        "success",
+      );
+    } catch (err) {
+      showToast(`Backfill failed: ${err instanceof Error ? err.message : String(err)}`, "error");
+    } finally {
+      setRunning(false);
+    }
+  };
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <button
+        onClick={onClick}
+        disabled={running}
+        className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        style={{
+          background: running ? "var(--border-dim)" : "var(--text-primary)",
+          color: running ? "var(--text-faint)" : "var(--background)",
+          cursor: running ? "not-allowed" : "pointer",
+        }}
+      >
+        {running ? "Running" : "Backfill now"}
+      </button>
+      {result && (
+        <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+          {result.enqueued} of {result.inspected} enqueued in this batch
+          {result.inspected === 200 ? ", press again for the next 200" : ""}
+        </span>
+      )}
     </div>
   );
 }
