@@ -98,6 +98,14 @@ export interface BundleSuggestion {
   docCount: number;
 }
 
+export interface CitationRotItem {
+  docId: string;
+  docTitle: string | null;
+  url: string;
+  statusCode: number | null;
+  firstFailedAt: string | null;
+}
+
 export interface LintReport {
   computedAt: string;
   totalDocs: number;
@@ -124,6 +132,10 @@ export interface LintReport {
    *  rather than auto-creating an AI bundle, so My Bundles stays
    *  intent-driven. */
   bundleSuggestions: BundleSuggestion[];
+  /** v8 W4-6 — external URLs the citation-rot cron has confirmed
+   *  4xx/5xx (after CONSECUTIVE_FAIL_THRESHOLD probes), grouped per
+   *  doc that references them. */
+  citationRot: CitationRotItem[];
 }
 
 const DUPLICATE_DISTANCE_THRESHOLD = 0.18; // cosine; tuned for "likely-overlapping content"
@@ -461,6 +473,12 @@ export async function computeLintReport(
   }
   bundleSuggestions.sort((a, b) => b.docCount - a.docCount);
 
+  // Citation rot — delegated to the dedicated lib so this file
+  // doesn't grow another DB-join block. findCitationRot reads the
+  // HEAD-check cache populated by the daily cron.
+  const { findCitationRot } = await import("@/lib/citation-rot");
+  const citationRot = await findCitationRot(supabase, userId, 50);
+
   return {
     computedAt: new Date().toISOString(),
     totalDocs: liveDocs.length,
@@ -472,6 +490,7 @@ export async function computeLintReport(
     rollupSuggestions,
     autoArchive,
     bundleSuggestions,
+    citationRot,
   };
 }
 

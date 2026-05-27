@@ -72,7 +72,7 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
     id: "citation-rot",
     label: "Citation rot",
     description: "External links in your docs that return 4xx/5xx. Surfaced so you can replace or remove.",
-    shipped: false,
+    shipped: true,
     defaultEnabled: false,
   },
   {

@@ -409,6 +409,7 @@ export default function MdEditor() {
     rollupSuggestions: { concept: string; docIds: string[]; docCount: number }[];
     autoArchive: { id: string; title: string | null; updatedAt: string | null; ageDays: number }[];
     bundleSuggestions: { clusterId: string; suggestedTitle: string; docIds: string[]; docCount: number }[];
+    citationRot: { docId: string; docTitle: string | null; url: string; statusCode: number | null; firstFailedAt: string | null }[];
     totalDocs: number;
   } | null>(null);
   const [lintLoading, setLintLoading] = useState(false);
@@ -424,7 +425,7 @@ export default function MdEditor() {
   // Track resolved findings within this session so they stay hidden
   // even if a re-scan returns them (backend concept-extraction is
   // async and can lag). Cleared on hard refresh.
-  const [lintResolved, setLintResolved] = useState<{ orphans: Set<string>; duplicates: Set<string>; titleMismatches: Set<string>; staleClaims: Set<string>; mergeSuggestions: Set<string>; rollupSuggestions: Set<string>; autoArchive: Set<string>; bundleSuggestions: Set<string> }>({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set(), bundleSuggestions: new Set() });
+  const [lintResolved, setLintResolved] = useState<{ orphans: Set<string>; duplicates: Set<string>; titleMismatches: Set<string>; staleClaims: Set<string>; mergeSuggestions: Set<string>; rollupSuggestions: Set<string>; autoArchive: Set<string>; bundleSuggestions: Set<string>; citationRot: Set<string> }>({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set(), bundleSuggestions: new Set(), citationRot: new Set() });
   // User's curator preferences — drives which lint categories show
   // up in Needs Review. Hydrated from localStorage on mount and
   // refreshed whenever Settings broadcasts a change so the section
@@ -470,7 +471,7 @@ export default function MdEditor() {
         if (res.ok) {
           const data = await res.json();
           if (data) {
-            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], totalDocs: data.totalDocs || 0 };
+            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], citationRot: data.citationRot || [], totalDocs: data.totalDocs || 0 };
             setLintReport(report);
           }
         }
@@ -4158,7 +4159,7 @@ export default function MdEditor() {
       setLintLoading(true);
       fetch("/api/user/hub/lint", { headers: authHeaders })
         .then((r) => (r.ok ? r.json() : null))
-        .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], totalDocs: data.totalDocs || 0 }); })
+        .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], citationRot: data.citationRot || [], totalDocs: data.totalDocs || 0 }); })
         .catch(() => {})
         .finally(() => setLintLoading(false));
     }
@@ -9620,7 +9621,7 @@ ${clone.innerHTML}
                     setLintLoading(true);
                     return fetch("/api/user/hub/lint", { headers: authHeaders })
                       .then((r) => (r.ok ? r.json() : null))
-                      .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], totalDocs: data.totalDocs || 0 }); })
+                      .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], mergeSuggestions: data.mergeSuggestions || [], rollupSuggestions: data.rollupSuggestions || [], autoArchive: data.autoArchive || [], bundleSuggestions: data.bundleSuggestions || [], citationRot: data.citationRot || [], totalDocs: data.totalDocs || 0 }); })
                       .catch(() => {})
                       .finally(() => setLintLoading(false));
                   };
@@ -9628,7 +9629,7 @@ ${clone.innerHTML}
                   // findings the backend still considers open come back.
                   // Available via long-press / shift-click on Re-scan
                   // (kept implicit so the default UX is forgiving).
-                  void (() => setLintResolved({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set(), bundleSuggestions: new Set() }));
+                  void (() => setLintResolved({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set(), mergeSuggestions: new Set(), rollupSuggestions: new Set(), autoArchive: new Set(), bundleSuggestions: new Set(), citationRot: new Set() }));
                   const resolveOrphan = async (docId: string, docTitle: string | null) => {
                     // Orphan auto-fix: re-run concept extraction. The
                     // concept extractor pulls concepts from the doc;
@@ -11888,6 +11889,7 @@ ${clone.innerHTML}
                     curatorRollupEnabled={curatorSettings.rollup}
                     curatorAutoArchiveEnabled={curatorSettings["auto-archive"]}
                     curatorBundleSuggestionEnabled={curatorSettings["bundle-suggestion"]}
+                    curatorCitationRotEnabled={curatorSettings["citation-rot"]}
                     onResolveStaleClaim={(docId) => {
                       setLintResolved((prev) => ({ ...prev, staleClaims: new Set([...prev.staleClaims, docId]) }));
                     }}
@@ -11935,6 +11937,9 @@ ${clone.innerHTML}
                     }}
                     onDismissBundleSuggestion={(clusterId) => {
                       setLintResolved((prev) => ({ ...prev, bundleSuggestions: new Set([...prev.bundleSuggestions, clusterId]) }));
+                    }}
+                    onDismissCitationRot={(docId, url) => {
+                      setLintResolved((prev) => ({ ...prev, citationRot: new Set([...prev.citationRot, `${docId}|${url}`]) }));
                     }}
                     onResolveTitleMismatch={(docId) => {
                       // Renaming via AI isn't wired yet; opening the

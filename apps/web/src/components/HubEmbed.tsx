@@ -108,6 +108,8 @@ interface HubLintResolved {
   autoArchive: Set<string>;
   /** Cluster slug — dismiss / accept removes it locally. */
   bundleSuggestions: Set<string>;
+  /** Composite "docId|url" — citation rot rows the user dismissed. */
+  citationRot: Set<string>;
 }
 
 interface HubEmbedProps {
@@ -136,6 +138,7 @@ interface HubEmbedProps {
   curatorRollupEnabled?: boolean;
   curatorAutoArchiveEnabled?: boolean;
   curatorBundleSuggestionEnabled?: boolean;
+  curatorCitationRotEnabled?: boolean;
   lintResolved?: HubLintResolved;
   onResolveOrphan?: (docId: string, docTitle: string | null) => void;
   onResolveDuplicate?: (aId: string, aTitle: string | null, bId: string, bTitle: string | null) => void;
@@ -149,6 +152,7 @@ interface HubEmbedProps {
    *  so the suggestion doesn't reappear. */
   onAcceptBundleSuggestion?: (clusterId: string, title: string, docIds: string[]) => void;
   onDismissBundleSuggestion?: (clusterId: string) => void;
+  onDismissCitationRot?: (docId: string, url: string) => void;
   /** Auto-management settings — drives the status panel above
    *  Needs Review. When omitted, the panel doesn't render. */
   autoLevel?: "off" | "conservative" | "standard" | "aggressive";
@@ -255,6 +259,7 @@ export default function HubEmbed({
   curatorRollupEnabled,
   curatorAutoArchiveEnabled,
   curatorBundleSuggestionEnabled,
+  curatorCitationRotEnabled,
   lintResolved,
   onResolveOrphan,
   onResolveDuplicate,
@@ -265,6 +270,7 @@ export default function HubEmbed({
   onResolveAutoArchive,
   onAcceptBundleSuggestion,
   onDismissBundleSuggestion,
+  onDismissCitationRot,
   autoLevel,
   autoTrigger,
   onAutoResolveRun,
@@ -1672,6 +1678,7 @@ Memory.Wiki hub`;
             rollupSuggestions?: Array<{ concept: string; docIds: string[]; docCount: number }>;
             autoArchive?: Array<{ id: string; title: string | null; updatedAt: string | null; ageDays: number }>;
             bundleSuggestions?: Array<{ clusterId: string; suggestedTitle: string; docIds: string[]; docCount: number }>;
+            citationRot?: Array<{ docId: string; docTitle: string | null; url: string; statusCode: number | null; firstFailedAt: string | null }>;
           };
           const lr = lintReport as ExtendedLint;
           const visibleStaleClaims = curatorStaleEnabled
@@ -1689,6 +1696,9 @@ Memory.Wiki hub`;
           const visibleBundleSuggestions = curatorBundleSuggestionEnabled
             ? (lr.bundleSuggestions || []).filter((b) => !lintResolved?.bundleSuggestions?.has(b.clusterId))
             : [];
+          const visibleCitationRot = curatorCitationRotEnabled
+            ? (lr.citationRot || []).filter((c) => !lintResolved?.citationRot?.has(`${c.docId}|${c.url}`))
+            : [];
           const total =
             visibleOrphans.length +
             visibleDuplicates.length +
@@ -1697,7 +1707,8 @@ Memory.Wiki hub`;
             visibleMergeSuggestions.length +
             visibleRollupSuggestions.length +
             visibleAutoArchive.length +
-            visibleBundleSuggestions.length;
+            visibleBundleSuggestions.length +
+            visibleCitationRot.length;
           if (total === 0) return null;
           return (
             <section className="mb-8">
@@ -1983,6 +1994,56 @@ Memory.Wiki hub`;
                       {onResolveRollupSuggestion && (
                         <button
                           onClick={() => onResolveRollupSuggestion(r.concept)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                        >
+                          Dismiss
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {visibleCitationRot.map((c) => (
+                  <div
+                    key={`cite:${c.docId}|${c.url}`}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+                  >
+                    <span
+                      className="flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(239,68,68,0.12)", color: "var(--micro-red)" }}
+                      title="Citation rot — external link is dead"
+                    >
+                      <ExternalLink width={14} height={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
+                        <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {c.docTitle || "Untitled"}
+                        </span>
+                        {c.statusCode !== null && (
+                          <span className="font-mono text-caption" style={{ color: "var(--micro-red)" }}>
+                            {c.statusCode}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-caption leading-relaxed truncate" style={{ color: "var(--text-secondary)" }}>
+                        <a href={c.url} target="_blank" rel="noopener noreferrer" className="font-mono hover:underline">
+                          {c.url}
+                        </a>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => onOpenDoc?.(c.docId)}
+                        className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                      >
+                        Open
+                      </button>
+                      {onDismissCitationRot && (
+                        <button
+                          onClick={() => onDismissCitationRot(c.docId, c.url)}
                           className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
                           style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
                         >

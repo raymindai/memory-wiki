@@ -352,6 +352,14 @@ export async function POST(req: NextRequest) {
             console.warn("Organize-doc enqueue failed:", err);
           }
         }
+        // v8 W4-6 Citation rot — index this doc's external URLs so the
+        // daily HEAD-check cron has something to walk.
+        try {
+          const { refreshDocExternalLinks } = await import("@/lib/citation-rot");
+          await refreshDocExternalLinks(supabase, id, docMarkdown);
+        } catch (err) {
+          console.warn("refreshDocExternalLinks failed:", err);
+        }
       });
     }
   }

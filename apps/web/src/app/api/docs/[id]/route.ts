@@ -703,6 +703,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         } catch (err) {
           console.warn("Organize-doc enqueue failed (auto-save):", err);
         }
+        // v8 W4-6 Citation rot — rewrite the external URL index so
+        // the next cron tick only checks URLs the user still references.
+        try {
+          const { refreshDocExternalLinks } = await import("@/lib/citation-rot");
+          await refreshDocExternalLinks(supabase, id, newMarkdown);
+        } catch (err) {
+          console.warn("refreshDocExternalLinks failed (auto-save):", err);
+        }
       });
     }
 
