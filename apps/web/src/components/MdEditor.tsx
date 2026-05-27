@@ -1720,7 +1720,14 @@ export default function MdEditor() {
   // Galaxy overlay — owner's full hub as a force-laid-out graph.
   // Same overlay slot as Hub / Bundle; mutually exclusive with the
   // other surface overlays. Opens via the Atom pill next to Hub.
-  const [showGalaxy, setShowGalaxy] = useState(false);
+  // Deep-link support: if the URL starts at /galaxy, boot with the
+  // overlay open so a refresh / direct hit preserves the editor
+  // chrome (sidebar + toolbar) instead of stripping to a bare
+  // canvas like the old standalone /galaxy/page.tsx did.
+  const [showGalaxy, setShowGalaxy] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.location.pathname === "/galaxy" || window.location.pathname.startsWith("/galaxy/");
+  });
   // Per-section fold state for the Start screen. Hot sections
   // (Recent, Create, Drop, Deploy) stay open by default; learning
   // sections (Cases, Guides, Explore) collapse so the surface stops
