@@ -137,7 +137,7 @@ export default function HubViewerV8({
             </p>
           )}
 
-          <form action={`/hub/${slug}/search`} method="get" className="vhub-search">
+          <form action={`/@${slug}/search`} method="get" className="vhub-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="vhub-search-icon">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
@@ -223,13 +223,13 @@ export default function HubViewerV8({
 
           <div className="vhub-deploy-manifest mono">
             <span className="vhub-deploy-manifest-label">Wiki</span>
-            <Link href={`/hub/${slug}/index.md`} target="_blank" className="vhub-deploy-link">index.md</Link>
-            <Link href={`/hub/${slug}/SCHEMA.md`} target="_blank" className="vhub-deploy-link">SCHEMA.md</Link>
-            <Link href={`/hub/${slug}/log.md`} target="_blank" className="vhub-deploy-link">log.md</Link>
+            <Link href={`/@${slug}/index.md`} target="_blank" className="vhub-deploy-link">index.md</Link>
+            <Link href={`/@${slug}/SCHEMA.md`} target="_blank" className="vhub-deploy-link">SCHEMA.md</Link>
+            <Link href={`/@${slug}/log.md`} target="_blank" className="vhub-deploy-link">log.md</Link>
             <span className="vhub-deploy-manifest-sep">/</span>
             <span className="vhub-deploy-manifest-label">For AI</span>
-            <Link href={`/hub/${slug}/llms.txt`} target="_blank" className="vhub-deploy-link">llms.txt</Link>
-            <Link href={`/hub/${slug}/llms-full.txt`} target="_blank" className="vhub-deploy-link">llms-full.txt</Link>
+            <Link href={`/@${slug}/llms.txt`} target="_blank" className="vhub-deploy-link">llms.txt</Link>
+            <Link href={`/@${slug}/llms-full.txt`} target="_blank" className="vhub-deploy-link">llms-full.txt</Link>
           </div>
         </div>
 

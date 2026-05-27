@@ -181,6 +181,26 @@
       "destination": "/raw/hub/:slug/suggested-queries.md"
     },
     {
+      "source": "/@:slug([a-z0-9_-]{3,32})/index.md",
+      "destination": "/hub/:slug/index.md"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})/SCHEMA.md",
+      "destination": "/hub/:slug/SCHEMA.md"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})/llms.txt",
+      "destination": "/hub/:slug/llms.txt"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})/llms-full.txt",
+      "destination": "/hub/:slug/llms-full.txt"
+    },
+    {
+      "source": "/@:slug([a-z0-9_-]{3,32})/search",
+      "destination": "/hub/:slug/search"
+    },
+    {
       "source": "/@:slug([a-z0-9_-]{3,32}).md",
       "destination": "/raw/hub/:slug"
     },
