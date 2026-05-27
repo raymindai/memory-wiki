@@ -26,15 +26,12 @@ struct MemoryWikiLogo: View {
 
     private var gap: CGFloat { max(6, size * 0.35) }
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         HStack(spacing: gap) {
             if variant != .textOnly {
-                Image("mwblob")
-                    .resizable()
-                    .renderingMode(.original)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: iconSize, height: iconSize)
-                    .accessibilityHidden(true)
+                AnimatedBlob(size: iconSize, theme: colorScheme == .light ? .light : .dark)
             }
             if variant != .iconOnly {
                 Text("memory.wiki")

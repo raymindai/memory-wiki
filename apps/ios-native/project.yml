@@ -46,6 +46,7 @@ targets:
       - path: MemoryWiki/Assets.xcassets
       - path: MemoryWiki/Preview Content
       - path: MemoryWiki/Fonts
+      - path: MemoryWiki/Resources
     info:
       path: MemoryWiki/Info.plist
       properties:
