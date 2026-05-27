@@ -7197,7 +7197,7 @@ ${clone.innerHTML}
             return (
               <>
                 <div style={{ width: 1, height: 14, background: "var(--border-dim)" }} />
-                <Tooltip text="Open My Hub — public knowledge base" position="bottom">
+                <Tooltip text="Open My Hub" position="bottom">
                   <button
                     onClick={() => {
                       if (isHubActive) return;
