@@ -12,6 +12,10 @@
     {
       "path": "/api/jobs/run",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/promote-clusters",
+      "schedule": "0 5 * * *"
     }
   ],
   "buildCommand": "cd apps/web && npm run build",
