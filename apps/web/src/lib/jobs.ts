@@ -16,6 +16,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type JobKind =
   | "doc_ontology"
+  | "doc_organize"
   | "bundle_graph"
   | "concept_embeddings"
   | "bundle_embedding"

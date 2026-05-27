@@ -691,6 +691,18 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         } catch (err) {
           console.warn("Ontology refresh failed (auto-save):", err);
         }
+        // v8 W4 — refresh auto-organize metadata. 12h per-doc cool-down
+        // inside enqueueOrganizeDoc damps autosave bursts.
+        try {
+          const { enqueueOrganizeDoc } = await import("@/lib/organize-doc");
+          await enqueueOrganizeDoc({
+            supabase, userId: ownerId, docId: id,
+            title: newTitle || "Untitled",
+            markdown: newMarkdown,
+          });
+        } catch (err) {
+          console.warn("Organize-doc enqueue failed (auto-save):", err);
+        }
       });
     }
 

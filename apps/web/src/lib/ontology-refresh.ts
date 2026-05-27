@@ -204,7 +204,15 @@ export async function runQueuedJobNow(
     .select("*")
     .single();
   if (error || !claimed) return; // worker already has it, or row vanished
-  await runOntologyJob(supabase, claimed as JobRow);
+  const job = claimed as JobRow;
+  if (job.kind === "doc_ontology") {
+    await runOntologyJob(supabase, job);
+  } else if (job.kind === "doc_organize") {
+    const { runOrganizeDocJob } = await import("@/lib/organize-doc");
+    await runOrganizeDocJob(supabase, job);
+  }
+  // Other kinds fall through — the cron worker's drainJobs will handle
+  // them (or mark failed). Inline fast-path is owner-doc-only today.
 }
 
 /** Used by the cron worker — process up to `max` ready jobs. */
@@ -220,6 +228,9 @@ export async function drainJobs(
     const before = await snapshotStatus(supabase, job.id);
     if (job.kind === "doc_ontology") {
       await runOntologyJob(supabase, job);
+    } else if (job.kind === "doc_organize") {
+      const { runOrganizeDocJob } = await import("@/lib/organize-doc");
+      await runOrganizeDocJob(supabase, job);
     } else {
       // Other kinds aren't handled yet — mark failed so they don't
       // sit pending forever.

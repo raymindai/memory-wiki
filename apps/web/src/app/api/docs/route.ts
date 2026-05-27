@@ -334,6 +334,24 @@ export async function POST(req: NextRequest) {
         } catch (err) {
           console.warn("Ontology refresh failed:", err);
         }
+        // v8 W4 — auto-organize Type 1 metadata (tags / cluster /
+        // summary / entities) for the new doc. Fire-and-forget; the
+        // enqueue helper handles per-doc cool-down + lock checks
+        // so this is safe to call on every create. Owner-only — we
+        // only do this for authenticated users so anonymous capture
+        // doesn't run up LLM cost on docs the user never claims.
+        if (ownerId) {
+          try {
+            const { enqueueOrganizeDoc } = await import("@/lib/organize-doc");
+            await enqueueOrganizeDoc({
+              supabase, userId: ownerId, docId: id,
+              title: docTitle || "Untitled",
+              markdown: docMarkdown,
+            });
+          } catch (err) {
+            console.warn("Organize-doc enqueue failed:", err);
+          }
+        }
       });
     }
   }
