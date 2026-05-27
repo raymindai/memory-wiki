@@ -8,6 +8,10 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject private var auth: AuthManager
     @EnvironmentObject private var router: AppRouter
+    /// One-shot first-launch onboarding flag — set true the first
+    /// time the user dismisses OnboardingView.
+    @AppStorage("mw.onboarded") private var onboarded: Bool = false
+    @State private var onboardingDone: Bool = false
 
     var body: some View {
         Group {
@@ -33,6 +37,21 @@ struct RootView: View {
             }
         }
         .animation(.snappy(duration: 0.22), value: auth.isSignedIn)
+        // Onboarding overlay — first signed-in launch only.
+        .fullScreenCover(isPresented: shouldShowOnboarding) {
+            OnboardingView(done: $onboardingDone)
+                .onChange(of: onboardingDone) { _, new in
+                    if new { onboarded = true; onboardingDone = false }
+                }
+                .preferredColorScheme(.dark)
+        }
+    }
+
+    private var shouldShowOnboarding: Binding<Bool> {
+        Binding(
+            get: { auth.isSignedIn && !onboarded },
+            set: { _ in }
+        )
     }
 }
 
