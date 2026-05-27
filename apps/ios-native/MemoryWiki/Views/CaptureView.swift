@@ -19,6 +19,7 @@ struct CaptureView: View {
     @State private var savedURL: URL?
     @State private var errorMessage: String?
     @State private var clipboardURL: URL?
+    @State private var showPhotoPicker = false
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -57,6 +58,17 @@ struct CaptureView: View {
         .onChange(of: focused) { _, isFocused in
             if isFocused { refreshClipboard() }
         }
+        .sheet(isPresented: $showPhotoPicker) {
+            PhotoCaptureSheet(isPresented: $showPhotoPicker) { ocrText, _ in
+                // Drop OCR'd text into the draft; user can edit
+                // + tap Save. Pre-fills a heading so the user
+                // sees a proper title in their timeline.
+                let title = "Photo capture · \(Date().formatted(date: .abbreviated, time: .shortened))"
+                draft = "# \(title)\n\n\(ocrText)"
+            }
+            .presentationDetents([.medium])
+            .preferredColorScheme(.dark)
+        }
     }
 
     // MARK: - Chrome
@@ -67,6 +79,18 @@ struct CaptureView: View {
                 .font(Brand.display(size: 26))
                 .foregroundStyle(Brand.textPrimary)
             Spacer()
+            Button { showPhotoPicker = true } label: {
+                Image(systemName: "camera")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(Brand.textMuted)
+                    .frame(width: 34, height: 34)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                            .overlay(Circle().strokeBorder(Brand.borderDim, lineWidth: 1))
+                    )
+            }
+            .buttonStyle(.plain)
             Button { Task { await saveDraft() } } label: {
                 Text(saving ? "Saving…" : "Save")
                     .font(Brand.body(size: 13, weight: .medium))
