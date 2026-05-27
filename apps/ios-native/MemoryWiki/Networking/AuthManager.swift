@@ -79,6 +79,7 @@ final class AuthManager: NSObject, ObservableObject {
     func signOut() async {
         try? await client.auth.signOut()
         session = nil
+        SharedSessionStore.clear()
     }
 
     /// memorywiki://auth-callback — invoked from MemoryWikiApp.onOpenURL
@@ -125,6 +126,15 @@ final class AuthManager: NSObject, ObservableObject {
             hubSlug: hubSlug,
             accessToken: auth.accessToken
         )
+        // Mirror the access token + identity into the App Group
+        // Keychain so the Share Extension (different process) can
+        // POST /api/docs without re-doing the OAuth round-trip.
+        SharedSessionStore.save(SharedSession(
+            userId: auth.user.id.uuidString.lowercased(),
+            accessToken: auth.accessToken,
+            email: auth.user.email,
+            hubSlug: hubSlug
+        ))
     }
 
     /// ASWebAuthenticationSession launcher used by the Supabase

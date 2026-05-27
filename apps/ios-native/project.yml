@@ -38,8 +38,14 @@ targets:
     dependencies:
       - package: Supabase
         product: Supabase
+      - target: ShareExtension
+        embed: true
+        codeSign: true
     sources:
       - path: MemoryWiki
+        excludes:
+          - "**/.DS_Store"
+      - path: Shared
         excludes:
           - "**/.DS_Store"
     resources:
@@ -99,6 +105,15 @@ targets:
         # lives on the Apple Developer portal.
         com.apple.developer.applesignin:
           - Default
+        # App Group so the Share Extension can hand captured
+        # content back to the main app + read the shared session
+        # the main app wrote to Keychain.
+        com.apple.security.application-groups:
+          - group.wiki.memory.MemoryWiki
+        # Shared keychain access group so SharedSessionStore can
+        # be read from both the main app and the extension.
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)group.wiki.memory.MemoryWiki
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: wiki.memory.MemoryWiki
@@ -111,3 +126,53 @@ targets:
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: MemoryWiki/MemoryWiki.entitlements
+
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    configFiles:
+      Debug: Config/Secrets.xcconfig
+      Release: Config/Secrets.xcconfig
+    sources:
+      - path: ShareExtension
+        excludes:
+          - "**/.DS_Store"
+          - "**/Info.plist"
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Memory.Wiki
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Standard Share Extension activation rules + view
+        # controller wiring. We accept any number of URLs +
+        # plain text. Image / file capture lands in a follow-up
+        # commit (camera + photo picker on the main app).
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebURLWithMaxCount: 5
+              NSExtensionActivationSupportsText: true
+        # MWBaseURL — read by SharedAPI so iOS staging vs prod
+        # is a build-config toggle, not a code change.
+        MWBaseURL: https://memory.wiki
+    entitlements:
+      path: ShareExtension/ShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.wiki.memory.MemoryWiki
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)group.wiki.memory.MemoryWiki
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: wiki.memory.MemoryWiki.Share
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_EMIT_LOC_STRINGS: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/ShareExtension.entitlements
