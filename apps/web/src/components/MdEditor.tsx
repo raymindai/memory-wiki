@@ -9048,26 +9048,21 @@ ${clone.innerHTML}
                         setDragTabId={setDragTabId}
                         setDragFolderId={setDragFolderId}
                         renderTabIcon={(tab, isActive) => {
+                          // Cluster color dots were dropped — random
+                          // HSL hash didn't scale past ~6 clusters
+                          // (everything converged to greenish/blueish
+                          // twins) and the real grouping signal is
+                          // the AI Bundles section, not row colour.
+                          // We keep the tooltip so the cluster label
+                          // + ai_summary still surface on demand.
                           const meta = tab.cloudId ? docAiMeta[tab.cloudId] : null;
-                          const dot = meta ? clusterColor(meta.clusterId) : null;
-                          // Tooltip combines the cluster label (so the
-                          // user can tell what the dot's color stands
-                          // for) and the AI summary. Plain newline
-                          // between them — browser-native title attrs
-                          // render \n as a soft break.
                           const tooltipBits: string[] = [];
                           if (meta?.clusterId && meta.clusterId !== "misc") tooltipBits.push(`Cluster: ${meta.clusterId}`);
                           if (meta?.summary) tooltipBits.push(meta.summary);
                           const tooltip = tooltipBits.length > 0 ? tooltipBits.join("\n\n") : null;
                           return (
-                            <span className="inline-flex items-center gap-1.5 shrink-0" title={tooltip || undefined}>
+                            <span className="shrink-0" title={tooltip || undefined}>
                               <DocStatusIcon tab={tab} isActive={isActive} />
-                              {dot && (
-                                <span
-                                  aria-hidden
-                                  style={{ width: 6, height: 6, borderRadius: 999, background: dot, flexShrink: 0 }}
-                                />
-                              )}
                             </span>
                           );
                         }}
