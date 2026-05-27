@@ -8,6 +8,7 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject private var auth: AuthManager
     @EnvironmentObject private var router: AppRouter
+    @StateObject private var reachability = Reachability.shared
     /// One-shot first-launch onboarding flag — set true the first
     /// time the user dismisses OnboardingView.
     @AppStorage("mw.onboarded") private var onboarded: Bool = false
@@ -30,7 +31,14 @@ struct RootView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.bottom, 56) // tab-bar height
 
-                    BrandTabBar(selected: $router.selectedTab)
+                    VStack(spacing: 0) {
+                        if !reachability.isOnline {
+                            OfflineBanner()
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
+                        BrandTabBar(selected: $router.selectedTab)
+                    }
+                    .animation(.snappy(duration: 0.22), value: reachability.isOnline)
                 }
             } else {
                 AuthView()
@@ -122,6 +130,33 @@ private struct BrandTabBar: View {
                         .frame(height: 1)
                 }
         )
+    }
+}
+
+/// Thin status strip above the tab bar — only visible when
+/// NWPathMonitor reports a downed network. Informational, not a
+/// blocker: the app keeps reading cached data, saves are queued
+/// by URLSession + retried on reconnect.
+private struct OfflineBanner: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Brand.textMuted)
+            Text("OFFLINE")
+                .font(Brand.mono(size: 9, weight: .medium))
+                .tracking(1.0)
+                .foregroundStyle(Brand.textMuted)
+            Text("Showing cached data")
+                .font(Brand.body(size: 11))
+                .foregroundStyle(Brand.textFaint)
+            Spacer()
+        }
+        .padding(.horizontal, 14).padding(.vertical, 7)
+        .background(Brand.surface)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Brand.borderDim).frame(height: 1)
+        }
     }
 }
 

@@ -17,6 +17,7 @@
 // understands **bold**, *italic*, `code`, [text](url).
 
 import SwiftUI
+import UIKit
 
 struct MarkdownBody: View {
     let markdown: String
@@ -43,6 +44,10 @@ enum MarkdownBlock: Hashable {
     case bulletList([String])
     case orderedList([String])
     case thematicBreak
+    /// Standalone image: a paragraph that's just `![alt](url)`.
+    /// Pulled out of the paragraph stream so the renderer can
+    /// give it its own AsyncImage with a brand-styled frame.
+    case image(alt: String, url: String)
 
     static func parse(_ input: String) -> [MarkdownBlock] {
         var blocks: [MarkdownBlock] = []
@@ -123,6 +128,17 @@ enum MarkdownBlock: Hashable {
                 continue
             }
 
+            // Standalone image line: ![alt](url) — only when the
+            // line IS the image (with optional surrounding ws).
+            // Inline images inside prose still fall through to
+            // InlineMarkdown / AttributedString.
+            if let image = parseStandaloneImage(trimmed) {
+                flushAll()
+                blocks.append(.image(alt: image.alt, url: image.url))
+                i += 1
+                continue
+            }
+
             // Blockquote
             if trimmed.hasPrefix(">") {
                 flushParagraph(); flushBullets(); flushOrdered()
@@ -161,6 +177,19 @@ enum MarkdownBlock: Hashable {
         }
         flushAll()
         return blocks
+    }
+
+    /// `![alt](url)` on a line by itself — returns nil otherwise.
+    private static func parseStandaloneImage(_ s: String) -> (alt: String, url: String)? {
+        guard s.hasPrefix("![") else { return nil }
+        guard let altClose = s.firstIndex(of: "]") else { return nil }
+        let after = s.index(after: altClose)
+        guard after < s.endIndex, s[after] == "(" else { return nil }
+        guard let urlClose = s.lastIndex(of: ")"), urlClose > after else { return nil }
+        let alt = String(s[s.index(s.startIndex, offsetBy: 2)..<altClose])
+        let url = String(s[s.index(after: after)..<urlClose])
+        guard !url.isEmpty else { return nil }
+        return (alt, url)
     }
 
     private static func headingLevel(_ s: String) -> Int? {
@@ -244,6 +273,64 @@ private struct MarkdownBlockView: View {
                 .fill(Brand.borderDim)
                 .frame(height: 1)
                 .padding(.vertical, 8)
+        case .image(let alt, let url):
+            MarkdownImage(alt: alt, urlString: url)
+        }
+    }
+}
+
+// MARK: - Image block
+
+private struct MarkdownImage: View {
+    let alt: String
+    let urlString: String
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let url = URL(string: urlString) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        Rectangle()
+                            .fill(Brand.surface)
+                            .overlay(
+                                ProgressView().scaleEffect(0.6).tint(Brand.textFaint)
+                            )
+                            .frame(maxWidth: .infinity, minHeight: 140)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                    case .failure:
+                        Rectangle()
+                            .fill(Brand.surface)
+                            .overlay(
+                                VStack(spacing: 4) {
+                                    Image(systemName: "photo.badge.exclamationmark")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(Brand.textFaint)
+                                    Text("Couldn't load image")
+                                        .font(Brand.mono(size: 10))
+                                        .foregroundStyle(Brand.textFaint)
+                                }
+                            )
+                            .frame(maxWidth: .infinity, minHeight: 100)
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Brand.borderDim, lineWidth: 1)
+                )
+            }
+            if !alt.isEmpty {
+                Text(alt)
+                    .font(Brand.body(size: 11))
+                    .foregroundStyle(Brand.textFaint)
+                    .italic()
+            }
         }
     }
 }
@@ -280,16 +367,48 @@ private struct HeadingView: View {
 private struct CodeBlockView: View {
     let lang: String?
     let source: String
+    @State private var copied = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if let lang, !lang.isEmpty {
-                Text(lang.uppercased())
-                    .font(Brand.mono(size: 9, weight: .medium))
-                    .tracking(0.6)
-                    .foregroundStyle(Brand.textFaint)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+            // Header strip — language label on the left, copy
+            // button on the right. Always rendered (no lang label
+            // when missing, but we keep the copy affordance).
+            HStack(spacing: 0) {
+                if let lang, !lang.isEmpty {
+                    Text(lang.uppercased())
+                        .font(Brand.mono(size: 9, weight: .medium))
+                        .tracking(0.6)
+                        .foregroundStyle(Brand.textFaint)
+                } else {
+                    Text("CODE")
+                        .font(Brand.mono(size: 9, weight: .medium))
+                        .tracking(0.6)
+                        .foregroundStyle(Brand.textFaint)
+                }
+                Spacer()
+                Button {
+                    UIPasteboard.general.string = source
+                    Haptics.success()
+                    copied = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { copied = false }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 10, weight: .medium))
+                        Text(copied ? "COPIED" : "COPY")
+                            .font(Brand.mono(size: 9, weight: .medium))
+                            .tracking(0.6)
+                    }
+                    .foregroundStyle(Brand.textMuted)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(Brand.canvas)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(Brand.borderDim).frame(height: 1)
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 Text(source)

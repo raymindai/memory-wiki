@@ -57,6 +57,35 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeCompose</string>
+			<key>UIApplicationShortcutItemSubtitle</key>
+			<string>Type, paste, or photo</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>New Capture</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>wiki.memory.MemoryWiki.capture</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeSearch</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Search Timeline</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>wiki.memory.MemoryWiki.search</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeShare</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Settings</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>wiki.memory.MemoryWiki.hub</string>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

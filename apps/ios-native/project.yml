@@ -104,6 +104,20 @@ targets:
         # template is checked in.
         MWSupabaseURL: $(MEMORY_WIKI_SUPABASE_URL)
         MWSupabaseAnonKey: $(MEMORY_WIKI_SUPABASE_ANON_KEY)
+        # Home-screen Quick Actions — long-press the app icon to
+        # jump directly into Capture or Search. Type matched in
+        # MemoryWikiApp's onAppear/handleShortcut.
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: wiki.memory.MemoryWiki.capture
+            UIApplicationShortcutItemTitle: New Capture
+            UIApplicationShortcutItemSubtitle: Type, paste, or photo
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeCompose
+          - UIApplicationShortcutItemType: wiki.memory.MemoryWiki.search
+            UIApplicationShortcutItemTitle: Search Timeline
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeSearch
+          - UIApplicationShortcutItemType: wiki.memory.MemoryWiki.hub
+            UIApplicationShortcutItemTitle: Settings
+            UIApplicationShortcutItemIconType: UIApplicationShortcutIconTypeShare
     entitlements:
       path: MemoryWiki/MemoryWiki.entitlements
       properties:

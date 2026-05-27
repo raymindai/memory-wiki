@@ -132,7 +132,55 @@ struct CaptureView: View {
                 .font(Brand.body(size: 15))
                 .foregroundStyle(Brand.textPrimary)
                 .tint(Brand.textPrimary)
+                .toolbar {
+                    if focused { markdownToolbar }
+                }
         }
+    }
+
+    /// Keyboard accessory bar exposing the most-used markdown
+    /// scaffolds. Each button appends at the cursor (or wraps
+    /// the trailing whitespace if there is one) — TextEditor on
+    /// iOS doesn't expose selection range without a UIKit bridge,
+    /// so this is the pragmatic version.
+    @ToolbarContentBuilder
+    private var markdownToolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .keyboard) {
+            MdToolButton(label: "H1") { insert(scaffold: "\n# ") }
+            MdToolButton(label: "H2") { insert(scaffold: "\n## ") }
+            MdToolButton(systemImage: "bold") { wrap(with: "**") }
+            MdToolButton(systemImage: "italic") { wrap(with: "*") }
+            MdToolButton(systemImage: "list.bullet") { insert(scaffold: "\n- ") }
+            MdToolButton(systemImage: "number") { insert(scaffold: "\n1. ") }
+            MdToolButton(systemImage: "chevron.left.forwardslash.chevron.right") { insert(scaffold: "\n```\n\n```\n") }
+            MdToolButton(systemImage: "link") { insertLink() }
+            Spacer()
+            Button {
+                focused = false
+            } label: {
+                Image(systemName: "keyboard.chevron.compact.down")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Brand.textMuted)
+            }
+        }
+    }
+
+    private func insert(scaffold: String) {
+        Haptics.tap()
+        draft += scaffold
+    }
+
+    private func wrap(with token: String) {
+        Haptics.tap()
+        // No selection API on TextEditor — append paired tokens
+        // with a single space between so the cursor lands on the
+        // inside on next keystroke.
+        draft += "\(token)\(token)"
+    }
+
+    private func insertLink() {
+        Haptics.tap()
+        draft += "[text](https://)"
     }
 
     // MARK: - Clipboard
@@ -188,6 +236,41 @@ struct CaptureView: View {
         defer { saving = false }
         do { try await action() }
         catch { errorMessage = error.localizedDescription }
+    }
+}
+
+/// Compact button for the keyboard toolbar — single label OR a
+/// SF Symbol. Quiet ink-on-clear; never lime so the editor
+/// chrome stays out of the way.
+private struct MdToolButton: View {
+    var label: String?
+    var systemImage: String?
+    var onTap: () -> Void
+    init(label: String, onTap: @escaping () -> Void) {
+        self.label = label
+        self.systemImage = nil
+        self.onTap = onTap
+    }
+    init(systemImage: String, onTap: @escaping () -> Void) {
+        self.label = nil
+        self.systemImage = systemImage
+        self.onTap = onTap
+    }
+    var body: some View {
+        Button(action: onTap) {
+            if let label {
+                Text(label)
+                    .font(Brand.mono(size: 11, weight: .medium))
+                    .tracking(0.4)
+                    .foregroundStyle(Brand.textPrimary)
+                    .frame(minWidth: 28)
+            } else if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Brand.textPrimary)
+                    .frame(minWidth: 28)
+            }
+        }
     }
 }
 

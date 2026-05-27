@@ -122,6 +122,10 @@ struct TimelineView: View {
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
             Task { await model.load() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .mwOpenSearch)) { _ in
+            withAnimation(.snappy(duration: 0.22)) { showingSearch = true }
+            searchFocused = true
+        }
     }
 
     // MARK: - Header
@@ -195,11 +199,26 @@ struct TimelineView: View {
         if model.loading && model.documents.isEmpty {
             BrandLoader(variant: .inline)
         } else if let error = model.errorMessage, model.documents.isEmpty {
-            EmptyState(title: "Couldn't load timeline", caption: error, glyph: "wifi.slash")
+            EmptyState(
+                title: "Couldn't load timeline",
+                caption: error,
+                glyph: "wifi.slash",
+                action: ("Try again", { Task { await model.load() } })
+            )
         } else if model.documents.isEmpty {
-            EmptyState(title: "Nothing captured yet", caption: "Use the Capture tab or the iOS Share Sheet to add your first doc.", glyph: "tray")
-        } else if model.grouped.isEmpty {
-            EmptyState(title: "No matches", caption: "Try a different search.", glyph: "magnifyingglass")
+            EmptyState(
+                title: "Nothing captured yet",
+                caption: "Start with a quick note, paste a URL from your clipboard, or use the iOS Share Sheet from Safari.",
+                glyph: "tray",
+                action: ("Capture your first note", { Haptics.tap(); router.selectedTab = .capture })
+            )
+        } else if model.grouped.isEmpty && model.semanticHits.isEmpty {
+            EmptyState(
+                title: "No matches",
+                caption: "Try a shorter query — meaning-based search needs at least 3 characters.",
+                glyph: "magnifyingglass",
+                action: nil
+            )
         } else {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
@@ -420,9 +439,12 @@ private struct EmptyState: View {
     let title: String
     let caption: String
     let glyph: String
+    /// Optional CTA — first-launch empty state surfaces a route
+    /// out (Capture tab); error states surface a retry.
+    let action: (String, () -> Void)?
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Spacer()
             Image(systemName: glyph)
                 .font(.system(size: 28, weight: .light))
@@ -434,7 +456,19 @@ private struct EmptyState: View {
                 .font(Brand.body(size: 13))
                 .foregroundStyle(Brand.textMuted)
                 .multilineTextAlignment(.center)
+                .lineSpacing(3)
                 .padding(.horizontal, 40)
+            if let (label, run) = action {
+                Button(action: run) {
+                    Text(label)
+                        .font(Brand.body(size: 13, weight: .medium))
+                        .foregroundStyle(Brand.background)
+                        .padding(.horizontal, 18).padding(.vertical, 10)
+                        .background(Capsule().fill(Brand.textPrimary))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity)

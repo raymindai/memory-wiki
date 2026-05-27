@@ -134,11 +134,31 @@ struct BundlesView: View {
         if model.loading && model.bundles.isEmpty {
             BrandLoader(variant: .inline)
         } else if let err = model.errorMessage, model.bundles.isEmpty {
-            EmptyBundleState(title: "Couldn't load bundles", caption: err, glyph: "wifi.slash")
+            EmptyBundleState(
+                title: "Couldn't load bundles",
+                caption: err,
+                glyph: "wifi.slash",
+                action: ("Try again", { Task { await model.load() } })
+            )
         } else if model.bundles.isEmpty {
-            EmptyBundleState(title: "No bundles yet", caption: "Create one on memory.wiki — bundles group docs that share a topic.", glyph: "square.stack.3d.up")
+            EmptyBundleState(
+                title: "No bundles yet",
+                caption: "Bundles group docs that share a topic. Create one on memory.wiki — each bundle gets its own URL you can deploy to AI.",
+                glyph: "square.stack.3d.up",
+                action: ("What's a bundle?", {
+                    Haptics.tap()
+                    if let url = URL(string: "https://memory.wiki/how#bundles") {
+                        UIApplication.shared.open(url)
+                    }
+                })
+            )
         } else if model.visible.isEmpty {
-            EmptyBundleState(title: "No matches", caption: "Try a different search.", glyph: "magnifyingglass")
+            EmptyBundleState(
+                title: "No matches",
+                caption: "Try a different search.",
+                glyph: "magnifyingglass",
+                action: nil
+            )
         } else {
             ScrollView {
                 LazyVStack(spacing: 6) {
@@ -237,8 +257,9 @@ private struct EmptyBundleState: View {
     let title: String
     let caption: String
     let glyph: String
+    let action: (String, () -> Void)?
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Spacer()
             Image(systemName: glyph)
                 .font(.system(size: 28, weight: .light))
@@ -250,7 +271,19 @@ private struct EmptyBundleState: View {
                 .font(Brand.body(size: 13))
                 .foregroundStyle(Brand.textMuted)
                 .multilineTextAlignment(.center)
+                .lineSpacing(3)
                 .padding(.horizontal, 40)
+            if let (label, run) = action {
+                Button(action: run) {
+                    Text(label)
+                        .font(Brand.body(size: 13, weight: .medium))
+                        .foregroundStyle(Brand.background)
+                        .padding(.horizontal, 18).padding(.vertical, 10)
+                        .background(Capsule().fill(Brand.textPrimary))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity)

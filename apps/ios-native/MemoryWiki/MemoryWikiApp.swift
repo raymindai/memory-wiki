@@ -9,12 +9,14 @@ import SwiftUI
 
 import WidgetKit
 import CoreSpotlight
+import UIKit
 
 @main
 struct MemoryWikiApp: App {
     @StateObject private var auth = AuthManager.shared
     @StateObject private var router = AppRouter.shared
     @Environment(\.scenePhase) private var scenePhase
+    @UIApplicationDelegateAdaptor(MWAppDelegate.self) private var appDelegate
 
     init() {
         BackgroundRefresh.registerHandler()
@@ -52,6 +54,10 @@ struct MemoryWikiApp: App {
                         // fresh values just replace it on completion).
                         WidgetCenter.shared.reloadAllTimelines()
                         NotificationCenter.default.post(name: .mwForegroundRefresh, object: nil)
+                        // Drain any quick-action queued during cold
+                        // launch — the delegate stashes it; we apply
+                        // it here once SwiftUI scene + router are up.
+                        MWAppDelegate.flushPendingShortcut(to: router)
                     case .background:
                         BackgroundRefresh.scheduleNext()
                     default: break
@@ -66,4 +72,72 @@ extension Notification.Name {
     /// BundlesModel listen so the list refreshes the moment the
     /// user comes back without a spinner.
     static let mwForegroundRefresh = Notification.Name("MWForegroundRefresh")
+}
+
+/// UIKit lifecycle bridge for Home-screen Quick Actions
+/// (UIApplicationShortcutItem). SwiftUI's App scene doesn't
+/// expose performActionFor:shortcutItem; we keep a tiny
+/// AppDelegate just for this single hook.
+final class MWAppDelegate: NSObject, UIApplicationDelegate {
+    /// Stashed shortcut from cold-launch — applied once the
+    /// SwiftUI scene transitions to .active so the router is
+    /// guaranteed alive.
+    private static var pending: UIApplicationShortcutItem?
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        if let shortcut = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem {
+            Self.pending = shortcut
+            return false   // don't perform now; we'll route on scene .active
+        }
+        return true
+    }
+
+    func application(_ application: UIApplication,
+                     performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        // Warm-launch path — the scene is already active, route
+        // immediately. Fall back to stash if for any reason
+        // routing fails.
+        Task { @MainActor in
+            let routed = Self.route(shortcut: shortcutItem, on: AppRouter.shared)
+            if !routed { Self.pending = shortcutItem }
+            completionHandler(routed)
+        }
+    }
+
+    @MainActor
+    static func flushPendingShortcut(to router: AppRouter) {
+        guard let p = pending else { return }
+        _ = route(shortcut: p, on: router)
+        pending = nil
+    }
+
+    @MainActor
+    static func route(shortcut: UIApplicationShortcutItem, on router: AppRouter) -> Bool {
+        switch shortcut.type {
+        case "wiki.memory.MemoryWiki.capture":
+            router.selectedTab = .capture
+            Haptics.tap()
+            return true
+        case "wiki.memory.MemoryWiki.search":
+            router.selectedTab = .timeline
+            NotificationCenter.default.post(name: .mwOpenSearch, object: nil)
+            Haptics.tap()
+            return true
+        case "wiki.memory.MemoryWiki.hub":
+            router.selectedTab = .profile
+            Haptics.tap()
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+extension Notification.Name {
+    /// Posted when the user picks the "Search" Quick Action so the
+    /// Timeline can auto-focus the search bar without a binding
+    /// hop through the router.
+    static let mwOpenSearch = Notification.Name("MWOpenSearch")
 }
