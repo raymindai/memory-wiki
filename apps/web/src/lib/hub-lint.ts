@@ -60,6 +60,33 @@ export interface StaleClaim {
   referenceCount: number;
 }
 
+export interface MergeSuggestion {
+  /** Older / fewer-words doc. */
+  a: { id: string; title: string | null };
+  /** Newer / longer-words doc. */
+  b: { id: string; title: string | null };
+  /** Cosine distance (0 = identical, 2 = opposite). Looser than the
+   *  duplicate threshold — overlap is real but not so close that
+   *  one supersedes the other. The user should decide. */
+  distance: number;
+}
+
+export interface RollupSuggestion {
+  /** Concept label that ties the docs together. */
+  concept: string;
+  /** Doc ids participating in the concept (capped). */
+  docIds: string[];
+  /** Total participants — may exceed docIds.length when capped. */
+  docCount: number;
+}
+
+export interface AutoArchiveCandidate {
+  id: string;
+  title: string | null;
+  updatedAt: string | null;
+  ageDays: number;
+}
+
 export interface LintReport {
   computedAt: string;
   totalDocs: number;
@@ -70,6 +97,17 @@ export interface LintReport {
    *  Surfaced as Needs Review so the user can re-read + confirm the
    *  claim still holds. Empty when no candidates. */
   staleClaims: StaleClaim[];
+  /** v8 W4-6 — embedding-similar doc pairs that aren't close enough
+   *  to be duplicates (those go to .duplicates) but overlap enough
+   *  that merging them might consolidate the user's library. */
+  mergeSuggestions: MergeSuggestion[];
+  /** v8 W4-6 — concepts that gather ROLLUP_MIN_DOCS+ docs. Hint that
+   *  the user might want to synthesise a single summary doc covering
+   *  all of them. */
+  rollupSuggestions: RollupSuggestion[];
+  /** v8 W4-6 — docs untouched for ARCHIVE_AGE_DAYS+ and not referenced
+   *  by anything. Safe to move to an Archive folder. */
+  autoArchive: AutoArchiveCandidate[];
 }
 
 const DUPLICATE_DISTANCE_THRESHOLD = 0.18; // cosine; tuned for "likely-overlapping content"
@@ -82,6 +120,22 @@ const DUPLICATE_NEIGHBORS = 3; // check top-N neighbors per doc
 // user wants to confirm it's still true.
 const STALE_AGE_DAYS = 90;
 const STALE_MIN_REFERENCES = 2;
+
+// Merge suggestions live in the "between duplicate and stranger"
+// band — close enough to overlap, far enough that one isn't
+// strictly newer. 0.18-0.30 is empirical on real corpora.
+const MERGE_DISTANCE_MIN = 0.18;
+const MERGE_DISTANCE_MAX = 0.30;
+
+// Roll-up — a concept shared by this many docs is a good synthesis
+// target. 10 is the plan's stated threshold ("when 10+ docs share").
+const ROLLUP_MIN_DOCS = 10;
+
+// Auto-archive — docs untouched for this long with zero references
+// anywhere. 90 days mirrors the stale threshold; combined with the
+// "0 refs" condition (vs stale's ">= 2 refs") the two signals
+// partition the old-docs population.
+const ARCHIVE_AGE_DAYS = 90;
 
 interface DocRow {
   id: string;
@@ -286,6 +340,66 @@ export async function computeLintReport(
   // re-verification targets.
   staleClaims.sort((a, b) => b.referenceCount - a.referenceCount || b.ageDays - a.ageDays);
 
+  // Merge suggestions — second pass through the same embedding
+  // matches we already pulled for duplicates. Skip pairs already
+  // counted as duplicates so we don't surface the same pair twice
+  // in different sections.
+  const mergeSuggestions: MergeSuggestion[] = [];
+  const seenMergePairs = new Set<string>(seenPairs);
+  for (const doc of embeddings) {
+    const { data: matches } = await supabase.rpc("match_documents_by_embedding", {
+      query_embedding: doc.embedding,
+      match_count: DUPLICATE_NEIGHBORS + 1,
+      p_user_id: userId,
+      p_anonymous_id: null,
+    });
+    for (const m of (matches as MatchRow[] | null ?? [])) {
+      if (m.id === doc.id) continue;
+      if (m.distance < MERGE_DISTANCE_MIN || m.distance > MERGE_DISTANCE_MAX) continue;
+      const pairKey = [doc.id, m.id].sort().join("|");
+      if (seenMergePairs.has(pairKey)) continue;
+      seenMergePairs.add(pairKey);
+      const [olderId, newerId] = [doc.id, m.id].sort();
+      const olderTitle = olderId === doc.id ? doc.title : m.title;
+      const newerTitle = newerId === doc.id ? doc.title : m.title;
+      mergeSuggestions.push({
+        a: { id: olderId, title: olderTitle },
+        b: { id: newerId, title: newerTitle },
+        distance: m.distance,
+      });
+    }
+  }
+  mergeSuggestions.sort((p, q) => p.distance - q.distance);
+
+  // Roll-up — concepts shared by >= ROLLUP_MIN_DOCS docs. concept_index
+  // rows already pulled above; just gather the high-fan-out ones.
+  const rollupSuggestions: RollupSuggestion[] = [];
+  for (const row of conceptRows) {
+    const ids = (row.doc_ids || []).filter((id) => liveDocIds.has(id));
+    if (ids.length < ROLLUP_MIN_DOCS) continue;
+    rollupSuggestions.push({
+      concept: row.label,
+      docIds: ids.slice(0, 20),
+      docCount: ids.length,
+    });
+  }
+  rollupSuggestions.sort((a, b) => b.docCount - a.docCount);
+
+  // Auto-archive — old AND nothing references this doc. Mirror image
+  // of stale: we want untouched dead-weight, not heavily-referenced
+  // load-bearing.
+  const autoArchive: AutoArchiveCandidate[] = [];
+  for (const d of liveDocs) {
+    if (!d.updated_at) continue;
+    const ageMs = nowMs - new Date(d.updated_at).getTime();
+    const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+    if (ageDays < ARCHIVE_AGE_DAYS) continue;
+    const refs = refCountByDoc.get(d.id) || 0;
+    if (refs > 0) continue;
+    autoArchive.push({ id: d.id, title: d.title, updatedAt: d.updated_at, ageDays });
+  }
+  autoArchive.sort((a, b) => b.ageDays - a.ageDays);
+
   return {
     computedAt: new Date().toISOString(),
     totalDocs: liveDocs.length,
@@ -293,6 +407,9 @@ export async function computeLintReport(
     duplicates,
     titleMismatches,
     staleClaims,
+    mergeSuggestions,
+    rollupSuggestions,
+    autoArchive,
   };
 }
 

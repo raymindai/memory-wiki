@@ -18,6 +18,7 @@ import {
   Layers, Copy, Check, ExternalLink, Globe, Eye, Cloud, Users,
   ShieldAlert, Sparkles, ArrowUpRight, Lightbulb, FileWarning,
   Network, Clock, FolderClosed, Atom, FileText, Image as ImageIcon,
+  GitBranch,
 } from "lucide-react";
 import DocStatusIcon from "@/components/DocStatusIcon";
 import MediaLightbox from "@/components/MediaLightbox";
@@ -100,6 +101,11 @@ interface HubLintResolved {
   duplicates: Set<string>;
   titleMismatches: Set<string>;
   staleClaims: Set<string>;
+  /** Pair key "aId|bId" — merge suggestions reuse the duplicate pair shape. */
+  mergeSuggestions: Set<string>;
+  /** Concept label — roll-up suggestions key on concept name. */
+  rollupSuggestions: Set<string>;
+  autoArchive: Set<string>;
 }
 
 interface HubEmbedProps {
@@ -124,11 +130,17 @@ interface HubEmbedProps {
   curatorDuplicateEnabled?: boolean;
   curatorTitleMismatchEnabled?: boolean;
   curatorStaleEnabled?: boolean;
+  curatorMergeEnabled?: boolean;
+  curatorRollupEnabled?: boolean;
+  curatorAutoArchiveEnabled?: boolean;
   lintResolved?: HubLintResolved;
   onResolveOrphan?: (docId: string, docTitle: string | null) => void;
   onResolveDuplicate?: (aId: string, aTitle: string | null, bId: string, bTitle: string | null) => void;
   onResolveTitleMismatch?: (docId: string, docTitle: string | null, suggestedConcept: string) => void;
   onResolveStaleClaim?: (docId: string) => void;
+  onResolveMergeSuggestion?: (aId: string, bId: string) => void;
+  onResolveRollupSuggestion?: (concept: string) => void;
+  onResolveAutoArchive?: (docId: string) => void;
   /** Auto-management settings — drives the status panel above
    *  Needs Review. When omitted, the panel doesn't render. */
   autoLevel?: "off" | "conservative" | "standard" | "aggressive";
@@ -231,11 +243,17 @@ export default function HubEmbed({
   curatorDuplicateEnabled,
   curatorTitleMismatchEnabled,
   curatorStaleEnabled,
+  curatorMergeEnabled,
+  curatorRollupEnabled,
+  curatorAutoArchiveEnabled,
   lintResolved,
   onResolveOrphan,
   onResolveDuplicate,
   onResolveTitleMismatch,
   onResolveStaleClaim,
+  onResolveMergeSuggestion,
+  onResolveRollupSuggestion,
+  onResolveAutoArchive,
   autoLevel,
   autoTrigger,
   onAutoResolveRun,
@@ -1637,10 +1655,33 @@ Memory.Wiki hub`;
           const visibleTitleMismatches = curatorTitleMismatchEnabled
             ? (lintReport.titleMismatches || []).filter((m) => !lintResolved?.titleMismatches.has(m.id))
             : [];
+          type ExtendedLint = HubLintReport & {
+            staleClaims?: Array<{ id: string; title: string | null; updatedAt: string | null; ageDays: number; referenceCount: number }>;
+            mergeSuggestions?: Array<{ a: { id: string; title: string | null }; b: { id: string; title: string | null }; distance: number }>;
+            rollupSuggestions?: Array<{ concept: string; docIds: string[]; docCount: number }>;
+            autoArchive?: Array<{ id: string; title: string | null; updatedAt: string | null; ageDays: number }>;
+          };
+          const lr = lintReport as ExtendedLint;
           const visibleStaleClaims = curatorStaleEnabled
-            ? ((lintReport as HubLintReport & { staleClaims?: Array<{ id: string; title: string | null; updatedAt: string | null; ageDays: number; referenceCount: number }> }).staleClaims || []).filter((s) => !lintResolved?.staleClaims?.has(s.id))
+            ? (lr.staleClaims || []).filter((s) => !lintResolved?.staleClaims?.has(s.id))
             : [];
-          const total = visibleOrphans.length + visibleDuplicates.length + visibleTitleMismatches.length + visibleStaleClaims.length;
+          const visibleMergeSuggestions = curatorMergeEnabled
+            ? (lr.mergeSuggestions || []).filter((p) => !lintResolved?.mergeSuggestions?.has(`${p.a.id}|${p.b.id}`))
+            : [];
+          const visibleRollupSuggestions = curatorRollupEnabled
+            ? (lr.rollupSuggestions || []).filter((r) => !lintResolved?.rollupSuggestions?.has(r.concept))
+            : [];
+          const visibleAutoArchive = curatorAutoArchiveEnabled
+            ? (lr.autoArchive || []).filter((a) => !lintResolved?.autoArchive?.has(a.id))
+            : [];
+          const total =
+            visibleOrphans.length +
+            visibleDuplicates.length +
+            visibleTitleMismatches.length +
+            visibleStaleClaims.length +
+            visibleMergeSuggestions.length +
+            visibleRollupSuggestions.length +
+            visibleAutoArchive.length;
           if (total === 0) return null;
           return (
             <section className="mb-8">
@@ -1837,6 +1878,142 @@ Memory.Wiki hub`;
                           style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
                         >
                           Confirmed
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {visibleMergeSuggestions.map((p) => (
+                  <div
+                    key={`merge:${p.a.id}|${p.b.id}`}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+                  >
+                    <span
+                      className="flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(167,139,250,0.14)", color: "var(--micro-ai)" }}
+                      title="Merge suggestion — embeddings overlap, you may want to consolidate"
+                    >
+                      <GitBranch width={14} height={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
+                        <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {p.a.title || "Untitled"}
+                        </span>
+                        <span className="font-mono text-caption" style={{ color: "var(--text-faint)" }}>+</span>
+                        <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {p.b.title || "Untitled"}
+                        </span>
+                      </div>
+                      <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        Embeddings overlap (distance {p.distance.toFixed(2)}). Decide whether to merge into one canonical doc.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => onOpenDoc?.(p.a.id)}
+                        className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                      >
+                        Open A
+                      </button>
+                      <button
+                        onClick={() => onOpenDoc?.(p.b.id)}
+                        className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                      >
+                        Open B
+                      </button>
+                      {onResolveMergeSuggestion && (
+                        <button
+                          onClick={() => onResolveMergeSuggestion(p.a.id, p.b.id)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                        >
+                          Dismiss
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {visibleRollupSuggestions.map((r) => (
+                  <div
+                    key={`rollup:${r.concept}`}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+                  >
+                    <span
+                      className="flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(181,255,26,0.14)", color: "var(--micro-lime)" }}
+                      title="Roll-up suggestion — many docs share this concept"
+                    >
+                      <Sparkles width={14} height={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
+                        <span className="font-mono text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {r.concept}
+                        </span>
+                        <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>
+                          {r.docCount} docs
+                        </span>
+                      </div>
+                      <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        Consider synthesising these into a single summary doc you can cite from one URL.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {onResolveRollupSuggestion && (
+                        <button
+                          onClick={() => onResolveRollupSuggestion(r.concept)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                        >
+                          Dismiss
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {visibleAutoArchive.map((a) => (
+                  <div
+                    key={`archive:${a.id}`}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+                  >
+                    <span
+                      className="flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(161,161,170,0.18)", color: "var(--text-muted)" }}
+                      title="Auto-archive candidate — old and unreferenced"
+                    >
+                      <FolderClosed width={14} height={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
+                        <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {a.title || "Untitled"}
+                        </span>
+                      </div>
+                      <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        Untouched for {a.ageDays} days, not referenced anywhere. Safe to archive (still restorable).
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => onOpenDoc?.(a.id)}
+                        className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                      >
+                        Open
+                      </button>
+                      {onResolveAutoArchive && (
+                        <button
+                          onClick={() => onResolveAutoArchive(a.id)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                        >
+                          Keep
                         </button>
                       )}
                     </div>
