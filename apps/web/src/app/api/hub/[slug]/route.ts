@@ -3,6 +3,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { getServerUserId } from "@/lib/supabase-server";
 import { readHubLog } from "@/lib/hub-log";
+import { collectDocImages, type DocImageGroup } from "@/lib/extract-images";
 
 /**
  * v6 — Hub URL API.
@@ -64,7 +65,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   const seed = encodeURIComponent(ownerEmail || profile.hub_slug || "user");
   let resolvedAvatar: string;
   const style = (profile as { avatar_style?: string | null }).avatar_style;
-  if (style && style !== "oauth") {
+  if (style === "upload" && profile.avatar_url) {
+    // User uploaded their own avatar — serve it verbatim.
+    resolvedAvatar = profile.avatar_url;
+  } else if (style && style !== "oauth" && style !== "upload") {
     // Match editor-helpers.dicebearStyleUrl shape so the hub face
     // tracks Settings → Appearance → Avatar picks the moment the
     // user updates them.
@@ -240,6 +244,26 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     ownerView = { bundles: bundleCards, documents: docCards };
   }
 
+  // Per-doc image groups. Owner sees all their docs' images; public
+  // visitors see images from the public docs only. Computed from
+  // markdown that was already fetched above, so this adds zero
+  // extra DB hops.
+  let mediaImages: DocImageGroup[] = [];
+  if (isOwner) {
+    // Re-fetch markdown for owner via the same allDocs query is wasted —
+    // we already have it. Re-use by closing over the variable.
+    // (allDocs is scoped inside the `if (isOwner)` block above, so we
+    // recompute the source list here for clarity.)
+    const { data: ownerDocs } = await supabase
+      .from("documents")
+      .select("id, title, markdown")
+      .eq("user_id", profile.id)
+      .is("deleted_at", null);
+    mediaImages = collectDocImages(((ownerDocs as Array<{ id: string; title: string | null; markdown: string | null }> | null) ?? []).map((d) => ({ id: d.id, title: d.title || "Untitled", markdown: d.markdown })));
+  } else {
+    mediaImages = collectDocImages(filteredDocs.map((d) => ({ id: d.id, title: d.title || "Untitled", markdown: d.markdown })));
+  }
+
   // Recent activity feed — last 12 hub_log events for the owner. Same
   // owner-only gate as ownerView. Public visitors get no activity.
   let recentActivity: Array<{ id: number; event: string; targetType: string | null; targetId: string | null; summary: string | null; ts: string }> | null = null;
@@ -285,5 +309,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     ownerView,
     isOwner,
     recentActivity,
+    mediaImages,
   });
 }

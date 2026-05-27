@@ -48,6 +48,12 @@ export function resolveAvatar(
 ): string {
   const seed = user?.email || "user";
   const style = profile?.avatar_style;
+  // "upload" is the marker the user picked their own uploaded image —
+  // serve avatar_url verbatim. Falls back to OAuth/dicebear only if
+  // the upload row got cleared somehow.
+  if (style === "upload") {
+    return profile?.avatar_url || user?.user_metadata?.avatar_url || dicebearUrl(seed, size);
+  }
   if (style && style !== "oauth") {
     return dicebearStyleUrl(style, seed, size);
   }

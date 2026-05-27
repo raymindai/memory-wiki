@@ -202,7 +202,7 @@ export default function HubViewerV8({
               CTA. Right-aligned muted text-link with leading icon. */}
           <div className="vhub-deploy-utilrow">
             <Link
-              href={`/hub/${slug}.md`}
+              href={`/raw/hub/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="vhub-deploy-util"

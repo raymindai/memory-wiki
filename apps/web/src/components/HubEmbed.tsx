@@ -17,9 +17,10 @@ import Link from "next/link";
 import {
   Layers, Copy, Check, ExternalLink, Globe, Eye, Cloud, Users,
   ShieldAlert, Sparkles, ArrowUpRight, Lightbulb, FileWarning,
-  Network, Clock, FolderClosed, Atom,
+  Network, Clock, FolderClosed, Atom, FileText, Image as ImageIcon,
 } from "lucide-react";
 import DocStatusIcon from "@/components/DocStatusIcon";
+import MediaLightbox from "@/components/MediaLightbox";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 import { ProviderIcon, type ProviderBrand } from "@/components/pure";
 
@@ -73,6 +74,7 @@ interface HubData {
     summary: string | null;
     ts: string;
   }> | null;
+  mediaImages?: Array<{ docId: string; docTitle: string; urls: string[] }>;
 }
 
 interface PromoteSuggestion { type: "promote"; docId: string; title: string; sharedConcepts: string[] }
@@ -253,6 +255,18 @@ export default function HubEmbed({
   const [runNowState, setRunNowState] = useState<"idle" | "running" | "done">("idle");
   const [needsReviewCollapsed, setNeedsReviewCollapsed] = useState(autoOn);
   const [suggestionsCollapsed, setSuggestionsCollapsed] = useState(autoOn);
+  // Per-tier fold state for the Public / Shared / Private sections.
+  // Defaults open — these are the user's own content, not auto-managed
+  // findings, so they should be visible on first paint.
+  const [tierCollapsed, setTierCollapsed] = useState<Record<"public" | "shared" | "private", boolean>>({
+    public: false,
+    shared: false,
+    private: false,
+  });
+  const [recentCollapsed, setRecentCollapsed] = useState(false);
+  const [mediaCollapsed, setMediaCollapsed] = useState(true);
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   // Re-evaluate the default whenever the level flips between off
   // and on. Doesn't fight a deliberate user toggle within a
   // session because we only nudge when level itself changes.
@@ -1323,7 +1337,7 @@ Memory.Wiki hub`;
               View as visitor
             </Link>
             <Link
-              href={`/hub/${slug}.md`}
+              href={`/raw/hub/${slug}`}
               target="_blank"
               className="inline-flex items-center gap-1 transition-colors hover:underline"
               title="Raw .md payload, exactly what an AI fetching this URL receives"
@@ -2080,7 +2094,12 @@ Memory.Wiki hub`;
         {/* ── Recent activity (last 12 events from hub_log) ── */}
         {data.recentActivity && data.recentActivity.length > 0 && (
           <section className="mb-8">
-            <div className="flex items-center gap-2 mb-3">
+            <button
+              type="button"
+              onClick={() => setRecentCollapsed((v) => !v)}
+              className="w-full flex items-center gap-2 mb-3 text-left transition-opacity hover:opacity-90"
+              aria-expanded={!recentCollapsed}
+            >
               <span
                 className="flex items-center justify-center shrink-0"
                 style={{ width: 22, height: 22, borderRadius: 6, background: "var(--toggle-bg)", color: "var(--text-muted)" }}
@@ -2088,10 +2107,22 @@ Memory.Wiki hub`;
                 <Eye width={12} height={12} />
               </span>
               <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Recent activity</h2>
-              <span className="text-caption ml-auto" style={{ color: "var(--text-faint)" }}>
-                Last {data.recentActivity.length} events
+              <span className="text-caption ml-auto flex items-center gap-2" style={{ color: "var(--text-faint)" }}>
+                <span>Last {data.recentActivity.length} events</span>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{ transform: recentCollapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5" />
+                </svg>
               </span>
-            </div>
+            </button>
+            {!recentCollapsed && (
             <ul className="space-y-0.5">
               {data.recentActivity.map((evt) => {
                 const labels: Record<string, string> = {
@@ -2138,8 +2169,104 @@ Memory.Wiki hub`;
                 );
               })}
             </ul>
+            )}
           </section>
         )}
+
+        {(() => {
+          const rawGroups = data.mediaImages || [];
+          const groups = rawGroups
+            .map((g) => ({ ...g, urls: g.urls.filter((u) => !brokenImages.has(u)) }))
+            .filter((g) => g.urls.length > 0);
+          const total = groups.reduce((s, g) => s + g.urls.length, 0);
+          if (total === 0) return null;
+          const flatUrls = groups.flatMap((g) => g.urls);
+          return (
+            <section className="mb-8">
+              <button
+                type="button"
+                onClick={() => setMediaCollapsed((v) => !v)}
+                className="w-full flex items-center gap-2 mb-3 text-left transition-opacity hover:opacity-90"
+                aria-expanded={!mediaCollapsed}
+              >
+                <span
+                  className="flex items-center justify-center shrink-0"
+                  style={{ width: 22, height: 22, borderRadius: 6, background: "var(--toggle-bg)", color: "var(--text-muted)" }}
+                >
+                  <ImageIcon width={12} height={12} />
+                </span>
+                <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Media</h2>
+                <span className="text-caption font-mono tabular-nums" style={{ color: "var(--text-faint)" }}>
+                  {total}
+                </span>
+                <span className="text-caption ml-auto flex items-center gap-2" style={{ color: "var(--text-faint)" }}>
+                  <span>Across {groups.length} {groups.length === 1 ? "doc" : "docs"}</span>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    style={{ transform: mediaCollapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
+                  >
+                    <path d="M3 4.5L6 7.5L9 4.5" />
+                  </svg>
+                </span>
+              </button>
+              {!mediaCollapsed && (
+                <div className="space-y-4">
+                  {groups.map((g) => (
+                    <div key={g.docId}>
+                      <button
+                        onClick={() => onOpenDoc?.(g.docId)}
+                        className="text-caption font-medium mb-1.5 inline-flex items-center gap-1 transition-colors hover:underline"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        <FileText width={11} height={11} />
+                        <span className="truncate" style={{ maxWidth: 320 }}>{g.docTitle}</span>
+                        <span className="font-mono" style={{ color: "var(--text-faint)" }}>· {g.urls.length}</span>
+                      </button>
+                      <div
+                        className="grid gap-1.5"
+                        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(70px, 1fr))" }}
+                      >
+                        {g.urls.map((url) => {
+                          const flatIdx = flatUrls.indexOf(url);
+                          return (
+                            <button
+                              key={url}
+                              type="button"
+                              onClick={() => { if (flatIdx >= 0) setLightboxIndex(flatIdx); }}
+                              className="block rounded-md overflow-hidden transition-opacity hover:opacity-90 p-0"
+                              style={{ aspectRatio: "1 / 1", background: "var(--surface)", border: "1px solid var(--border-dim)", cursor: "zoom-in" }}
+                              title={url}
+                              aria-label="Open image"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={url}
+                                alt=""
+                                loading="lazy"
+                                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                onError={() => setBrokenImages((prev) => {
+                                  if (prev.has(url)) return prev;
+                                  const next = new Set(prev);
+                                  next.add(url);
+                                  return next;
+                                })}
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
         {/* ── Owner view — three sections by access tier, bundles
               above docs in each section. Non-owner falls through to
@@ -2150,11 +2277,18 @@ Memory.Wiki hub`;
           const docs = ov.documents[tier];
           if (bundles.length === 0 && docs.length === 0) return null;
           const Icon = t.icon;
+          const collapsed = tierCollapsed[tier];
           return (
             <section key={tier} className="mb-10">
-              <div className="flex items-baseline gap-2 mb-3 pb-2" style={{ borderBottom: `1px solid ${t.bg}` }}>
+              <button
+                type="button"
+                onClick={() => setTierCollapsed((prev) => ({ ...prev, [tier]: !prev[tier] }))}
+                className="w-full flex items-baseline gap-2 mb-3 pb-2 text-left transition-opacity hover:opacity-90"
+                style={{ borderBottom: `1px solid ${t.bg}` }}
+                aria-expanded={!collapsed}
+              >
                 <span
-                  className="flex items-center justify-center shrink-0"
+                  className="flex items-center justify-center shrink-0 self-center"
                   style={{ width: 22, height: 22, borderRadius: 6, background: t.bg, color: t.color }}
                 >
                   <Icon width={12} height={12} />
@@ -2163,9 +2297,23 @@ Memory.Wiki hub`;
                 <span className="text-caption font-mono tabular-nums" style={{ color: "var(--text-faint)" }}>
                   {bundles.length + docs.length}
                 </span>
-                <span className="text-caption ml-auto" style={{ color: "var(--text-faint)" }}>{t.desc}</span>
-              </div>
+                <span className="text-caption ml-auto flex items-center gap-2" style={{ color: "var(--text-faint)" }}>
+                  <span>{t.desc}</span>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    style={{ transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
+                  >
+                    <path d="M3 4.5L6 7.5L9 4.5" />
+                  </svg>
+                </span>
+              </button>
 
+              {!collapsed && (<>
               {/* Bundles first — workspace primitive comes above docs */}
               {bundles.length > 0 && (
                 <div className="mb-4">
@@ -2245,6 +2393,7 @@ Memory.Wiki hub`;
                   )}
                 </div>
               )}
+              </>)}
             </section>
           );
         })}
@@ -2291,6 +2440,15 @@ Memory.Wiki hub`;
         )}
       </div>
       </div>
+      <MediaLightbox
+        urls={(data.mediaImages || [])
+          .map((g) => ({ ...g, urls: g.urls.filter((u) => !brokenImages.has(u)) }))
+          .filter((g) => g.urls.length > 0)
+          .flatMap((g) => g.urls)}
+        index={lightboxIndex}
+        onChange={(n) => setLightboxIndex(n)}
+        onClose={() => setLightboxIndex(null)}
+      />
     </div>
   );
 }

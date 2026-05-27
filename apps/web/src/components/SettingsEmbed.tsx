@@ -196,40 +196,41 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
     }
   }, [profile]);
   const toggleCurator = <K extends keyof CuratorSettings>(id: K, next: CuratorSettings[K]) => {
-    setCuratorSettings((prev) => {
-      const updated = { ...prev, [id]: next } as CuratorSettings;
-      saveCuratorSettings(updated);
-      try { window.dispatchEvent(new CustomEvent("mw-curator-settings-changed", { detail: updated })); } catch { /* ignore */ }
-      // Server sync. Surfaces visible feedback (toast) and logs hard
-      // failures so the user sees that the toggle actually persisted
-      // (the previous silent-fail path made it look like nothing
-      // happened when the DB write returned an error).
-      if (user) {
-        (async () => {
-          try {
-            const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
-            const supabase = getSupabaseBrowserClient();
-            if (!supabase) {
-              showToast("Saved locally — sign-in required to sync across devices", "info");
-              return;
-            }
-            const { error } = await supabase.from("profiles").update({ curator_settings: updated }).eq("id", user.id);
-            if (error) {
-              console.error("Curator settings save failed:", error);
-              showToast(`Couldn't sync to server: ${error.message}`, "error");
-              return;
-            }
-            showToast("Auto-management settings saved", "success");
-          } catch (err) {
-            console.error("Curator settings save threw:", err);
-            showToast("Couldn't sync settings — saved locally", "error");
+    // Side effects (dispatch, localStorage, toast, server sync) live
+    // OUTSIDE the setState updater. React may invoke the updater twice
+    // in StrictMode / concurrent rendering — running side effects in
+    // there fired every toast twice and tripped a "setState during
+    // render" warning because the dispatched event scheduled a
+    // setState in MdEditor's listener while SettingsEmbed was still
+    // rendering.
+    const updated = { ...curatorSettings, [id]: next } as CuratorSettings;
+    setCuratorSettings(updated);
+    saveCuratorSettings(updated);
+    try { window.dispatchEvent(new CustomEvent("mw-curator-settings-changed", { detail: updated })); } catch { /* ignore */ }
+    if (user) {
+      (async () => {
+        try {
+          const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+          const supabase = getSupabaseBrowserClient();
+          if (!supabase) {
+            showToast("Saved locally — sign-in required to sync across devices", "info");
+            return;
           }
-        })();
-      } else {
-        showToast("Saved locally — sign in to sync across devices", "info");
-      }
-      return updated;
-    });
+          const { error } = await supabase.from("profiles").update({ curator_settings: updated }).eq("id", user.id);
+          if (error) {
+            console.error("Curator settings save failed:", error);
+            showToast(`Couldn't sync to server: ${error.message}`, "error");
+            return;
+          }
+          showToast("Auto-management settings saved", "success");
+        } catch (err) {
+          console.error("Curator settings save threw:", err);
+          showToast("Couldn't sync settings — saved locally", "error");
+        }
+      })();
+    } else {
+      showToast("Saved locally — sign in to sync across devices", "info");
+    }
   };
 
   const [hubSlug, setHubSlug] = useState("");
@@ -247,6 +248,54 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
     if (p?.hub_description) setHubDescription(p.hub_description);
     if (p?.avatar_style) setAvatarStyle(p.avatar_style);
   }, [profile]);
+
+  // Upload a custom avatar image. Reuses /api/upload (same path as
+  // doc image uploads), then patches the profile row with the returned
+  // URL and the special `avatar_style = "upload"` marker so
+  // resolveAvatar knows to serve `avatar_url` verbatim instead of
+  // mistakenly building a dicebear URL for "upload".
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const handleAvatarUpload = useCallback(async (file: File) => {
+    if (!user) { showToast("Sign in to upload an avatar", "info"); return; }
+    if (!file.type.startsWith("image/")) { showToast("Pick an image file", "error"); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast("Image too large (5MB max)", "error"); return; }
+    setAvatarUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+      const supabase = getSupabaseBrowserClient();
+      const session = supabase ? (await supabase.auth.getSession()).data.session : null;
+      const headers: Record<string, string> = {};
+      if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+      else headers["x-user-id"] = user.id;
+      const res = await fetch("/api/upload", { method: "POST", headers, body: fd });
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) {
+        showToast(typeof data.error === "string" ? data.error : `Upload failed (${res.status})`, "error");
+        return;
+      }
+      const url = typeof data.url === "string" ? data.url : null;
+      if (!url) { showToast("Upload returned no URL", "error"); return; }
+      if (!supabase) return;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_style: "upload", avatar_url: url })
+        .eq("id", user.id);
+      if (error) { showToast(`Couldn't save avatar: ${error.message}`, "error"); return; }
+      setAvatarStyle("upload");
+      // Force resolveAvatar callers to see the new URL — useAuth keeps
+      // `profile` in its own state, so we patch it through the same
+      // dispatch channel the dicebear picker uses.
+      try { window.dispatchEvent(new CustomEvent("mw-profile-changed")); } catch { /* ignore */ }
+      showToast("Avatar uploaded", "success");
+      setAvatarPickerOpen(false);
+    } catch (err) {
+      showToast(`Upload failed: ${err instanceof Error ? err.message : String(err)}`, "error");
+    } finally {
+      setAvatarUploading(false);
+    }
+  }, [user]);
 
   const selectAvatarStyle = useCallback(async (style: string) => {
     setAvatarStyle(style);
@@ -620,6 +669,58 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                     </button>
                   );
                 })}
+                {/* Custom upload — sits next to Photo + Identicon.
+                    Clicking the tile opens the file picker; the chosen
+                    image is uploaded to the document-images bucket and
+                    stored as profile.avatar_url with style="upload". */}
+                {(() => {
+                  const active = avatarStyle === "upload";
+                  const uploadedPreview = active && profile?.avatar_url ? profile.avatar_url : null;
+                  return (
+                    <label
+                      className="flex flex-col items-center gap-2 p-3 rounded-md transition-colors cursor-pointer"
+                      style={{
+                        background: active ? "var(--toggle-bg)" : "transparent",
+                        border: `1px solid ${active ? "var(--border)" : "var(--border-dim)"}`,
+                        opacity: avatarUploading ? 0.6 : 1,
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        disabled={avatarUploading}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void handleAvatarUpload(f);
+                          // Allow picking the same file again.
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                      {uploadedPreview ? (
+                        <img src={uploadedPreview} alt="" className="rounded-full" style={{ width: 40, height: 40, border: "1px solid var(--border-dim)", objectFit: "cover" }} />
+                      ) : (
+                        <span
+                          className="rounded-full flex items-center justify-center"
+                          style={{ width: 40, height: 40, border: "1px dashed var(--border)", color: "var(--text-muted)" }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                          </svg>
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1.5" style={{ color: "var(--text-primary)", fontSize: 12, fontWeight: 500 }}>
+                        <span
+                          aria-hidden
+                          style={{ width: 6, height: 6, borderRadius: "50%", background: active ? "var(--micro-lime)" : "var(--border)" }}
+                        />
+                        {avatarUploading ? "Uploading…" : "Upload"}
+                      </span>
+                    </label>
+                  );
+                })()}
               </div>
             </div>
           )}

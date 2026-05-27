@@ -131,3 +131,68 @@ export async function getReferencedBy(
     total: documents.length + bundles.length + hubs.length,
   };
 }
+
+/**
+ * Owner-side version: returns every backlink whose SOURCE belongs to
+ * `ownerUserId`, regardless of draft / private / password status. Used
+ * by the in-editor backlink panel where the owner is managing their
+ * own library and needs to see "which of MY docs reference this one"
+ * even when those sources are drafts or restricted.
+ */
+export async function getOwnerBacklinks(
+  supabase: SupabaseClient,
+  target_type: BacklinkEntityType,
+  target_id: string,
+  ownerUserId: string,
+  limit = 50,
+): Promise<ReferencedBy> {
+  const { data: rows, error } = await supabase
+    .from("backlinks")
+    .select("source_type, source_id, context")
+    .eq("target_type", target_type)
+    .eq("target_id", target_id)
+    .order("created_at", { ascending: false })
+    .limit(limit * 3);
+  if (error || !rows || rows.length === 0) return EMPTY;
+
+  const docIds: string[] = [];
+  const bundleIds: string[] = [];
+  const hubSlugs: string[] = [];
+  const ctxByKey = new Map<string, string | null>();
+  for (const r of rows) {
+    const key = `${r.source_type}:${r.source_id}`;
+    ctxByKey.set(key, r.context ?? null);
+    if (r.source_type === "document") docIds.push(r.source_id);
+    else if (r.source_type === "bundle") bundleIds.push(r.source_id);
+    else if (r.source_type === "hub") hubSlugs.push(r.source_id);
+  }
+
+  const [docsRes, bundlesRes, hubsRes] = await Promise.all([
+    docIds.length
+      ? supabase.from("documents").select("id, title, user_id, deleted_at").in("id", docIds).eq("user_id", ownerUserId)
+      : Promise.resolve({ data: [], error: null }),
+    bundleIds.length
+      ? supabase.from("bundles").select("id, title, user_id").in("id", bundleIds).eq("user_id", ownerUserId)
+      : Promise.resolve({ data: [], error: null }),
+    hubSlugs.length
+      ? supabase.from("profiles").select("hub_slug, display_name, id").in("hub_slug", hubSlugs).eq("id", ownerUserId)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  const documents: BacklinkSource[] = ((docsRes.data || []) as Array<{ id: string; title: string | null; deleted_at: string | null }>)
+    .filter((d) => !d.deleted_at)
+    .map((d) => ({ id: d.id, title: d.title, context: ctxByKey.get(`document:${d.id}`) ?? null }));
+
+  const bundles: BacklinkSource[] = ((bundlesRes.data || []) as Array<{ id: string; title: string | null }>)
+    .map((b) => ({ id: b.id, title: b.title, context: ctxByKey.get(`bundle:${b.id}`) ?? null }));
+
+  const hubs: BacklinkSource[] = ((hubsRes.data || []) as Array<{ hub_slug: string; display_name: string | null }>)
+    .map((h) => ({ id: h.hub_slug, title: h.display_name ?? h.hub_slug, context: ctxByKey.get(`hub:${h.hub_slug}`) ?? null }));
+
+  return {
+    documents: documents.slice(0, limit),
+    bundles: bundles.slice(0, limit),
+    hubs: hubs.slice(0, limit),
+    total: documents.length + bundles.length + hubs.length,
+  };
+}

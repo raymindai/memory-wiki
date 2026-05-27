@@ -66,6 +66,7 @@ import { useCollaboration } from "@/lib/useCollaboration";
 import { getAnonymousId, ensureAnonymousId, clearAnonymousId } from "@/lib/anonymous-id";
 import TiptapLiveEditor from "@/components/TiptapLiveEditor";
 import type { TiptapLiveEditorHandle } from "@/components/TiptapLiveEditor";
+import BacklinksPanel from "@/components/BacklinksPanel";
 import {
   createShareUrl,
   createShortUrl,
@@ -11877,6 +11878,33 @@ ${clone.innerHTML}
                     switchTab(newId);
                   }}
                 />
+                {/* Backlinks — owner-side "what of mine references
+                    this doc". Lives under the body so it's a passive
+                    discovery surface, not a CTA. Click → opens the
+                    referencing entity as a new tab. */}
+                {activeTab?.cloudId && (!activeTab.permission || activeTab.permission === "mine") && (
+                  <BacklinksPanel
+                    type="document"
+                    id={activeTab.cloudId}
+                    authHeaders={authHeaders}
+                    onOpenDoc={(docId) => {
+                      const existing = tabs.find((t) => t.cloudId === docId && !t.deleted);
+                      if (existing) { switchTab(existing.id); return; }
+                      const newId = `tab-${Date.now()}`;
+                      const newTab: Tab = { id: newId, title: "Loading…", markdown: "", cloudId: docId, permission: "mine" };
+                      setTabs((prev) => [...prev, newTab]);
+                      switchTab(newId);
+                    }}
+                    onOpenBundle={(bundleId) => {
+                      const existing = tabs.find((t) => t.kind === "bundle" && t.bundleId === bundleId);
+                      if (existing) { switchTab(existing.id); return; }
+                      const newId = `bundle-${bundleId}-${Date.now()}`;
+                      const newTab: Tab = { id: newId, kind: "bundle", bundleId, title: "Bundle", markdown: "" };
+                      setTabs((prev) => [...prev, newTab]);
+                      switchTab(newId);
+                    }}
+                  />
+                )}
               </div>{/* end scrollable preview */}
               {/* ─── AI Panel (side-by-side) ─── */}
               {showAIPanel && (canEdit || activeTab?.kind === "bundle" || showHub || (aiPanelMode === "hub" && hubSlug)) && (() => {

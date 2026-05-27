@@ -767,9 +767,35 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
 
   return (
     <div ref={treeRef}>
-      {/* Root-level tabs (no folder) — rendered ABOVE folders so loose items
-          surface first (matches the long-standing docs-section UX). Sections that
-          render their own root list separately set includeRootTabs={false}. */}
+      {/* Folders first — matches Finder / VS Code / Notion / Obsidian
+          convention. Containers scan first; loose items below. */}
+      {sortedRoots.map(folder => (
+        <FolderNode
+          key={folder.id}
+          folder={folder}
+          depth={0}
+          tree={tree}
+          folders={folders}
+          handlers={props.handlers}
+          activeTabId={props.activeTabId}
+          selectedTabIds={props.selectedTabIds}
+          activeBundleDocIds={props.activeBundleDocIds}
+          sidebarSearch={sidebarSearch}
+          sortMode={sortMode}
+          sidebarMode={props.sidebarMode}
+          docFilter={props.docFilter}
+          dragTabId={props.dragTabId}
+          dragFolderId={props.dragFolderId}
+          setDragTabId={props.setDragTabId}
+          setDragFolderId={props.setDragFolderId}
+          renderTabIcon={props.renderTabIcon}
+          renderTabMeta={props.renderTabMeta}
+          renderTabBadge={props.renderTabBadge}
+        />
+      ))}
+      {/* Root-level tabs (no folder) — rendered AFTER folders so the
+          containers scan first. Sections that render their own root
+          list separately set includeRootTabs={false}. */}
       {(props.includeRootTabs !== false) && sortTabs(tree.rootTabs, sortMode).map(tab => {
         const inActiveBundle = props.activeBundleDocIds.size > 0 && !!tab.cloudId && props.activeBundleDocIds.has(tab.cloudId);
         const isSelected = props.selectedTabIds.has(tab.id) || tab.id === props.activeTabId || inActiveBundle;
@@ -800,31 +826,6 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
           </div>
         );
       })}
-      {/* Folders below root tabs */}
-      {sortedRoots.map(folder => (
-        <FolderNode
-          key={folder.id}
-          folder={folder}
-          depth={0}
-          tree={tree}
-          folders={folders}
-          handlers={props.handlers}
-          activeTabId={props.activeTabId}
-          selectedTabIds={props.selectedTabIds}
-          activeBundleDocIds={props.activeBundleDocIds}
-          sidebarSearch={sidebarSearch}
-          sortMode={sortMode}
-          sidebarMode={props.sidebarMode}
-          docFilter={props.docFilter}
-          dragTabId={props.dragTabId}
-          dragFolderId={props.dragFolderId}
-          setDragTabId={props.setDragTabId}
-          setDragFolderId={props.setDragFolderId}
-          renderTabIcon={props.renderTabIcon}
-          renderTabMeta={props.renderTabMeta}
-          renderTabBadge={props.renderTabBadge}
-        />
-      ))}
       {/* Visible "Move to root" drop slot — only while dragging a non-root item */}
       {showRootSlot && (
         <div

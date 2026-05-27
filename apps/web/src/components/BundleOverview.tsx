@@ -16,9 +16,11 @@
 //   - Suggestions (TODO once we have a /api/bundles/[id]/suggestions surface)
 
 import { useEffect, useState, useMemo } from "react";
-import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, Network, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Layers, Copy, Check, ExternalLink, FileText, Globe, Cloud, Users, Sparkles, AlertTriangle, Clock, Network, ArrowUpRight, ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react";
 import { ProviderIcon, type ProviderBrand } from "@/components/pure";
 import DocStatusIcon from "@/components/DocStatusIcon";
+import { collectDocImages } from "@/lib/extract-images";
+import MediaLightbox from "@/components/MediaLightbox";
 
 interface BundleDoc {
   id: string;
@@ -149,6 +151,29 @@ export default function BundleOverview({
 
   const tokens = useMemo(() => estimateBundleTokens(documents), [documents]);
   const totalWords = useMemo(() => documents.reduce((s, d) => s + (d.markdown || "").split(/\s+/).filter(Boolean).length, 0), [documents]);
+  const imageGroups = useMemo(
+    () => collectDocImages(documents.map((d) => ({ id: d.id, title: d.title || "Untitled", markdown: d.markdown }))),
+    [documents],
+  );
+  // Track URLs that fail to load so the gallery hides them entirely
+  // (count, thumbnail tile, the lot). A dimmed broken-image tile reads
+  // as "your stuff is broken" — silent hiding is what the user wants.
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
+  const visibleImageGroups = useMemo(
+    () => imageGroups
+      .map((g) => ({ ...g, urls: g.urls.filter((u) => !brokenImages.has(u)) }))
+      .filter((g) => g.urls.length > 0),
+    [imageGroups, brokenImages],
+  );
+  const totalImages = useMemo(() => visibleImageGroups.reduce((s, g) => s + g.urls.length, 0), [visibleImageGroups]);
+  // Flat list of all visible image URLs in display order — the
+  // lightbox needs a single index space for prev/next navigation.
+  const flatImageUrls = useMemo(
+    () => visibleImageGroups.flatMap((g) => g.urls),
+    [visibleImageGroups],
+  );
+  const [mediaCollapsed, setMediaCollapsed] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const accessIcon = accessKind === "public" ? <Globe width={14} height={14} /> : accessKind === "shared" ? <Users width={14} height={14} /> : <Cloud width={14} height={14} />;
   const accessLabel = accessKind === "public" ? "PUBLIC" : accessKind === "shared" ? "SHARED" : "PRIVATE";
@@ -364,7 +389,11 @@ export default function BundleOverview({
           const digestTokens = 50 + documents.length * 35;
           const fullTokens = Math.max(tokens, digestTokens);
           const activeUrl = urlVariant === "full" ? `${bundleUrl}?full=1` : bundleUrl;
-          const rawHref = urlVariant === "full" ? `/b/${bundleId}.md?full=1` : `/b/${bundleId}.md`;
+          // Point at the canonical raw route directly. The /b/{id}.md
+          // alias is a Vercel rewrite that does NOT exist in `next dev`,
+          // so this button 404'd locally. The canonical route works on
+          // both dev and prod.
+          const rawHref = urlVariant === "full" ? `/raw/bundle/${bundleId}?full=1` : `/raw/bundle/${bundleId}`;
 
           const projCtx = `# Project context
 
@@ -945,8 +974,101 @@ Memory.Wiki search "topic"`;
             </ul>
           )}
         </section>
+
+        {totalImages > 0 && (
+          <section className="mb-10">
+            <button
+              type="button"
+              onClick={() => setMediaCollapsed((v) => !v)}
+              className="w-full flex items-baseline gap-2 mb-3 pb-2 text-left transition-opacity hover:opacity-90"
+              style={{ borderBottom: "1px solid var(--border-dim)" }}
+              aria-expanded={!mediaCollapsed}
+            >
+              <span
+                className="flex items-center justify-center shrink-0 self-center"
+                style={{ width: 22, height: 22, borderRadius: 6, background: "var(--toggle-bg)", color: "var(--text-muted)" }}
+              >
+                <ImageIcon width={12} height={12} />
+              </span>
+              <h2 style={{ color: "var(--text-primary)", margin: 0, fontSize: 22, lineHeight: 1.25, fontWeight: 500 }}>Media</h2>
+              <span className="text-caption font-mono tabular-nums" style={{ color: "var(--text-faint)" }}>
+                {totalImages}
+              </span>
+              <span className="text-caption ml-auto flex items-center gap-2" style={{ color: "var(--text-faint)" }}>
+                <span>All images across {visibleImageGroups.length} {visibleImageGroups.length === 1 ? "doc" : "docs"}</span>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{ transform: mediaCollapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 0.15s" }}
+                >
+                  <path d="M3 4.5L6 7.5L9 4.5" />
+                </svg>
+              </span>
+            </button>
+            {!mediaCollapsed && (
+              <div className="space-y-4">
+                {visibleImageGroups.map((g) => (
+                  <div key={g.docId}>
+                    <button
+                      onClick={() => onOpenDoc?.(g.docId)}
+                      className="text-caption font-medium mb-1.5 inline-flex items-center gap-1 transition-colors hover:underline"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      <FileText width={11} height={11} />
+                      <span className="truncate" style={{ maxWidth: 320 }}>{g.docTitle}</span>
+                      <span className="font-mono" style={{ color: "var(--text-faint)" }}>· {g.urls.length}</span>
+                    </button>
+                    <div
+                      className="grid gap-1.5"
+                      style={{ gridTemplateColumns: "repeat(auto-fill, minmax(70px, 1fr))" }}
+                    >
+                      {g.urls.map((url) => {
+                        const flatIdx = flatImageUrls.indexOf(url);
+                        return (
+                          <button
+                            key={url}
+                            type="button"
+                            onClick={() => { if (flatIdx >= 0) setLightboxIndex(flatIdx); }}
+                            className="block rounded-md overflow-hidden transition-opacity hover:opacity-90 p-0"
+                            style={{ aspectRatio: "1 / 1", background: "var(--surface)", border: "1px solid var(--border-dim)", cursor: "zoom-in" }}
+                            title={url}
+                            aria-label="Open image"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={url}
+                              alt=""
+                              loading="lazy"
+                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                              onError={() => setBrokenImages((prev) => {
+                                if (prev.has(url)) return prev;
+                                const next = new Set(prev);
+                                next.add(url);
+                                return next;
+                              })}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
       </div>
+      <MediaLightbox
+        urls={flatImageUrls}
+        index={lightboxIndex}
+        onChange={(n) => setLightboxIndex(n)}
+        onClose={() => setLightboxIndex(null)}
+      />
     </div>
   );
 }
