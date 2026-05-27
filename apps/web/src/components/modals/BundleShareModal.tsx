@@ -13,10 +13,24 @@
  * Extracted from MdEditor.tsx.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ShieldAlert } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Check, ShieldAlert, Globe, Lock, EyeOff, Users } from "lucide-react";
 import ShareModal from "@/components/ShareModal";
 import { showToast } from "@/components/Toast";
+
+type BundleVisibility = "private" | "restricted" | "unlisted" | "public";
+
+const VISIBILITY_OPTIONS: Array<{
+  id: BundleVisibility;
+  label: string;
+  hint: string;
+  Icon: typeof Globe;
+}> = [
+  { id: "private",    label: "Private",    hint: "Only you can open this bundle.",                                   Icon: Lock },
+  { id: "restricted", label: "Restricted", hint: "Specific people you invite by email can open it.",                 Icon: Users },
+  { id: "unlisted",   label: "Unlisted",   hint: "Anyone with the link can open it. Not shown on your profile.",   Icon: EyeOff },
+  { id: "public",     label: "Public",     hint: "Anyone with the link, and listed on your profile / discover feed.", Icon: Globe },
+];
 
 type BundleDocStatus = {
   id: string;
@@ -71,6 +85,11 @@ export default function BundleShareModal({
   // to "anyone" (no emails set, no isPrivate signal) even though
   // /b/<id> still 404'd for everyone but the owner.
   const [bundleIsDraft, setBundleIsDraft] = useState<boolean>(true);
+  // v8 W3 — user-picked 4-state visibility. Loaded from the bundle
+  // row; mutating it calls the atomic set-visibility action which
+  // also reconciles is_draft / is_discoverable / allowed_emails.
+  const [visibility, setVisibility] = useState<BundleVisibility>("private");
+  const [visibilityPending, setVisibilityPending] = useState(false);
   // Readiness for cross-AI fetch: graph_data + embedding pipeline.
   // Surfaces in the Share modal so the user sees "Ready / Pending"
   // before they hand the URL to Claude / Cursor / ChatGPT.
@@ -120,6 +139,21 @@ export default function BundleShareModal({
         // freshly-created bundle, not "Anyone with link").
         if (typeof data.is_draft === "boolean") {
           setBundleIsDraft(data.is_draft);
+        }
+        // Visibility column is authoritative. Fall back to the
+        // derived value when an older bundle row predates migration
+        // 053 (UPDATE filled most, but be defensive).
+        if (data.visibility === "private" || data.visibility === "restricted"
+            || data.visibility === "unlisted" || data.visibility === "public") {
+          setVisibility(data.visibility);
+        } else if (data.is_draft) {
+          setVisibility("private");
+        } else if (Array.isArray(data.allowed_emails) && data.allowed_emails.length > 0) {
+          setVisibility("restricted");
+        } else if (data.is_discoverable) {
+          setVisibility("public");
+        } else {
+          setVisibility("unlisted");
         }
         setBundleAiReady({
           hasGraph: !!data.hasGraph,
@@ -196,6 +230,43 @@ export default function BundleShareModal({
       }).catch(() => {});
     }));
   }, [docs, bundleId, authHeaders, onBundleUpdated]);
+
+  // Atomic visibility setter — calls the v8 set-visibility action
+  // which reconciles is_draft / is_discoverable / allowed_emails in
+  // a single write and cascades to member docs the same way
+  // publish/unpublish do.
+  const setVisibilityRemote = useCallback(async (next: BundleVisibility) => {
+    if (next === visibility || visibilityPending) return;
+    setVisibilityPending(true);
+    const prev = visibility;
+    setVisibility(next);
+    try {
+      const res = await fetch(`/api/bundles/${bundleId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify({ userId, action: "set-visibility", visibility: next }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const goingPrivate = next === "private";
+      setBundleIsDraft(goingPrivate);
+      // "unlisted" / "public" wipe allowed_emails server-side; keep
+      // local state in sync so the email chip list under "Restricted"
+      // doesn't show stale entries after toggling away and back.
+      if (next === "unlisted" || next === "public" || next === "private") {
+        setAllowedEmails([]);
+      }
+      onBundleUpdated({
+        is_draft: goingPrivate,
+        allowed_emails_count: (next === "restricted") ? allowedEmails.length : 0,
+      });
+      showToast(`Visibility set to ${next}.`, "success");
+    } catch {
+      setVisibility(prev);
+      showToast("Could not update visibility. Try again.", "error");
+    } finally {
+      setVisibilityPending(false);
+    }
+  }, [visibility, visibilityPending, bundleId, userId, authHeaders, allowedEmails.length, onBundleUpdated]);
 
   const handleMakePrivate = useCallback(() => {
     // Open per-doc revert picker. Default-select every doc that's currently published.
@@ -328,7 +399,54 @@ export default function BundleShareModal({
     );
   }
 
-  // One-line cascade hint — short enough to read at a glance.
+  // v8 W3 — 4-state visibility picker. Rendered at the top of the
+  // modal as the primary intent control. The cascade-warning banner
+  // sits separately below the access section.
+  const visibilityPicker = (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-caption font-medium" style={{ color: "var(--text-primary)" }}>Bundle visibility</p>
+        {visibilityPending && (
+          <span className="text-caption" style={{ color: "var(--text-faint)" }}>Saving…</span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        {VISIBILITY_OPTIONS.map((opt) => {
+          const active = opt.id === visibility;
+          const Icon = opt.Icon;
+          return (
+            <button
+              key={opt.id}
+              onClick={() => setVisibilityRemote(opt.id)}
+              disabled={visibilityPending}
+              className="text-left rounded-md px-2.5 py-2 transition-colors"
+              style={{
+                background: active ? "var(--border)" : "var(--background)",
+                border: `1px solid ${active ? "var(--border)" : "var(--border-dim)"}`,
+                color: active ? "var(--text-primary)" : "var(--text-secondary)",
+                opacity: visibilityPending && !active ? 0.5 : 1,
+                cursor: visibilityPending ? "wait" : "pointer",
+              }}
+              onMouseEnter={(e) => { if (!active && !visibilityPending) (e.currentTarget as HTMLElement).style.background = "var(--toggle-bg)"; }}
+              onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.background = "var(--background)"; }}
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Icon width={12} height={12} style={{ color: active ? "var(--text-primary)" : "var(--text-faint)" }} />
+                <span className="text-caption font-medium">{opt.label}</span>
+              </div>
+              <p className="text-caption" style={{ color: "var(--text-faint)", lineHeight: 1.35 }}>{opt.hint}</p>
+            </button>
+          );
+        })}
+      </div>
+      {visibility === "restricted" && (
+        <p className="text-caption mt-2" style={{ color: "var(--text-faint)" }}>
+          Add the people you want to invite below — only those emails + you can open the bundle.
+        </p>
+      )}
+    </div>
+  );
+
   const banner = (
     <div className="rounded-lg px-3 py-2" style={{ background: "var(--toggle-bg)", border: "1px solid var(--border-dim)" }}>
       <div className="flex items-center gap-2">
@@ -413,6 +531,8 @@ export default function BundleShareModal({
         setTimeout(poll, 5_000);
       }}
       banner={banner}
+      topBanner={visibilityPicker}
+      hideAccessPicker
     />
   );
 }

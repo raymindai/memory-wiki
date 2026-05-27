@@ -38,6 +38,15 @@ interface ShareModalProps {
   // Banner rendered between "People with access" and "General access" — used by bundle
   // share to surface the cascade warning and per-doc list.
   banner?: ReactNode;
+  // Banner rendered at the TOP of the modal body, above the tab strip.
+  // Used by BundleShareModal for the v8 4-state visibility picker so
+  // the user's primary intent control sits above everything else.
+  topBanner?: ReactNode;
+  // When true, hides the built-in 3-state "Who can read" radio inside
+  // the People tab. Used by callers that own their own visibility
+  // model (BundleShareModal renders the 4-state picker via topBanner
+  // and the 3-state would be redundant + confusing).
+  hideAccessPicker?: boolean;
   // Title for the dialog header. Defaults to `Share "<title>"`.
   headerTitle?: string;
   /** Owner-scoped edit token. When present, renders a small
@@ -92,6 +101,8 @@ function ShareModal({
   changeEditModeOverride,
   shareUrlOverride,
   banner,
+  topBanner,
+  hideAccessPicker = false,
   headerTitle,
   loading = false,
   editToken,
@@ -330,6 +341,13 @@ function ShareModal({
       }
     >
       <div>
+        {/* Top banner — modal-wide context that sits above the tab
+            strip. Used by BundleShareModal for the 4-state visibility
+            picker (the user's primary intent control). Rendered only
+            after loading so it doesn't pop in above a skeleton. */}
+        {!loading && topBanner && (
+          <div className="mb-4">{topBanner}</div>
+        )}
         {/* Loading skeleton sits ABOVE everything so the tab bar
             doesn't flash with stale values before the parent
             rehydrates. */}
@@ -759,7 +777,7 @@ function ShareModal({
             it.
             (Cascade banner that used to sit here has moved above the
             tab bar since it applies modal-wide.) */}
-        {!loading && activeTab === "people" && <div className="pb-4">
+        {!loading && activeTab === "people" && !hideAccessPicker && <div className="pb-4">
           <label className="text-caption font-medium mb-2 block" style={{ color: "var(--text-muted)" }}>
             Who can read
           </label>

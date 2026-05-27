@@ -405,6 +405,92 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: true });
   }
 
+  // ─── Action: set-visibility ───
+  // v8 Plan W3 — atomic 4-state visibility setter. Replaces the
+  // separate publish/unpublish/set-discoverable flips with a single
+  // user-intent write.
+  //
+  //   private    → is_draft=true,  is_discoverable=false (cascade unpub)
+  //   restricted → is_draft=false, is_discoverable=false (allowed_emails kept;
+  //                                 caller manages via set-allowed-emails)
+  //   unlisted   → is_draft=false, is_discoverable=false (allowed_emails cleared)
+  //   public     → is_draft=false, is_discoverable=true  (allowed_emails cleared)
+  //
+  // The `visibility` column is the user-picked intent. The derived
+  // flags (is_draft / is_discoverable / allowed_emails) continue to
+  // gate the runtime checks, so existing endpoints + RLS keep working
+  // without rewrites.
+  if (body.action === "set-visibility") {
+    const next = (body as { visibility?: string }).visibility;
+    if (next !== "private" && next !== "restricted" && next !== "unlisted" && next !== "public") {
+      return NextResponse.json({ error: "Invalid visibility" }, { status: 400 });
+    }
+    const updates: Record<string, unknown> = {
+      visibility: next,
+      updated_at: new Date().toISOString(),
+    };
+    if (next === "private") {
+      updates.is_draft = true;
+      updates.is_discoverable = false;
+      updates.allowed_emails = [];
+      updates.allowed_editors = [];
+      updates.edit_mode = "owner";
+    } else if (next === "restricted") {
+      updates.is_draft = false;
+      updates.is_discoverable = false;
+    } else if (next === "unlisted") {
+      updates.is_draft = false;
+      updates.is_discoverable = false;
+      updates.allowed_emails = [];
+    } else {
+      updates.is_draft = false;
+      updates.is_discoverable = true;
+      updates.allowed_emails = [];
+    }
+    const { error: updErr } = await supabase.from("bundles").update(updates).eq("id", id);
+    if (updErr) return NextResponse.json({ error: "Failed to set visibility" }, { status: 500 });
+
+    // Cascade member docs to match (mirrors publish/unpublish behaviour).
+    const { data: members } = await supabase
+      .from("bundle_documents")
+      .select("document_id")
+      .eq("bundle_id", id);
+    const memberIds = (members || []).map((m) => m.document_id);
+    if (memberIds.length > 0) {
+      if (next === "private") {
+        // Same caution as unpublish: only unpublish a member doc when
+        // no OTHER published bundle keeps it visible.
+        const { data: otherMemberships } = await supabase
+          .from("bundle_documents")
+          .select("document_id, bundles!inner(id, is_draft)")
+          .in("document_id", memberIds)
+          .neq("bundle_id", id);
+        const stillPublishedElsewhere = new Set<string>();
+        type Row = { document_id: string; bundles: { is_draft: boolean } | { is_draft: boolean }[] | null };
+        for (const r of (otherMemberships || []) as Row[]) {
+          const b = Array.isArray(r.bundles) ? r.bundles[0] : r.bundles;
+          if (b && !b.is_draft) stillPublishedElsewhere.add(r.document_id);
+        }
+        const idsToUnpublish = memberIds.filter((m) => !stillPublishedElsewhere.has(m));
+        if (idsToUnpublish.length > 0) {
+          await supabase
+            .from("documents")
+            .update({ is_draft: true, updated_at: new Date().toISOString() })
+            .in("id", idsToUnpublish)
+            .is("deleted_at", null);
+        }
+      } else {
+        await supabase
+          .from("documents")
+          .update({ is_draft: false, updated_at: new Date().toISOString() })
+          .in("id", memberIds)
+          .eq("is_draft", true)
+          .is("deleted_at", null);
+      }
+    }
+    return NextResponse.json({ ok: true, visibility: next });
+  }
+
   // ─── Action: set-intent ───
   // Bundle intent is the North Star for AI analysis. Stored as plain text;
   // empty string / null clears it (bundle reverts to whole-bundle analysis).
