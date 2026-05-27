@@ -324,6 +324,9 @@
 [data-accent="orange"] { --accent: #fb923c; --accent-dim: rgba(251, 146, 60, 0.15); --surface-hover: rgba(251, 146, 60, 0.03); --badge-bg: rgba(251, 146, 60, 0.15); }
 [data-accent="orange"][data-theme="light"] { --accent: #ea580c; --accent-dim: rgba(234, 88, 12, 0.10); --surface-hover: rgba(234, 88, 12, 0.04); --badge-bg: rgba(234, 88, 12, 0.10); }
 
+[data-accent="gray"] { --accent: #a1a1aa; --accent-dim: rgba(161, 161, 170, 0.15); --surface-hover: rgba(161, 161, 170, 0.04); --badge-bg: rgba(161, 161, 170, 0.15); }
+[data-accent="gray"][data-theme="light"] { --accent: #52525b; --accent-dim: rgba(82, 82, 91, 0.10); --surface-hover: rgba(82, 82, 91, 0.04); --badge-bg: rgba(82, 82, 91, 0.10); }
+
 /* Blue */
 [data-accent="blue"] { --accent: #60a5fa; --accent-dim: rgba(96, 165, 250, 0.15); --surface-hover: rgba(96, 165, 250, 0.03); --badge-bg: rgba(96, 165, 250, 0.15); }
 [data-accent="blue"][data-theme="light"] { --accent: #2563eb; --accent-dim: rgba(37, 99, 235, 0.1); --surface-hover: rgba(37, 99, 235, 0.04); --badge-bg: rgba(37, 99, 235, 0.1); }

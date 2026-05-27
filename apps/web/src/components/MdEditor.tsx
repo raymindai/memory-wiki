@@ -55,7 +55,7 @@ import {
   FolderPlus, Folder, FolderOpen, File as FileIcon, MoreHorizontal,
   User, Users, Search, X, Trash2, RefreshCw, Lock, ShieldAlert, FileX,
   LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus, Wand2, Atom,
-  ChevronsDownUp, ChevronsUpDown, ArrowUpRight,
+  ChevronsDownUp, ChevronsUpDown, ArrowUpRight, Star,
 } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
 import { buildAuthHeaders } from "@/lib/auth-fetch";
@@ -759,22 +759,39 @@ export default function MdEditor() {
   })();
 
   // Track active bundle's document IDs for sidebar highlighting.
-  // Uses full authHeaders (Bearer token + anonymous id) so the server recognises
-  // the requester as owner — otherwise draft bundles 404 for their own owner.
+  // Root-cause cleanup: when the server returns 404/403 we drop the
+  // stale tab from tabs[] (and switch off it if it was active). That
+  // way a deleted/inaccessible bundle id triggers AT MOST ONE 404
+  // per session — after the tab is gone, this effect doesn't run for
+  // it again. We can't pre-gate on `bundles[]` membership because
+  // shared / anonymous-editToken bundles aren't in /api/bundles
+  // listing yet still have legitimate access (see comment near
+  // /api/bundles load below).
   useEffect(() => {
-    if (activeTab?.kind === "bundle" && activeTab.bundleId) {
-      fetch(`/api/bundles/${activeTab.bundleId}`, { headers: authHeadersRef.current })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data?.documents) {
-            setActiveBundleDocIds(new Set(data.documents.map((d: { id: string }) => d.id)));
-          }
-        })
-        .catch(() => {});
-    } else {
+    if (activeTab?.kind !== "bundle" || !activeTab.bundleId) {
       setActiveBundleDocIds(new Set());
+      return;
     }
-  }, [activeTab?.kind, activeTab?.bundleId]);
+    const bid = activeTab.bundleId;
+    const tabId = activeTab.id;
+    fetch(`/api/bundles/${bid}`, { headers: authHeadersRef.current })
+      .then(async (r) => {
+        if (r.status === 404 || r.status === 403) {
+          // Stale tab — bundle no longer exists or no access. Drop
+          // it from tabs[] so subsequent renders don't keep probing
+          // and BundleEmbed never mounts against a dead reference.
+          setTabs((prev) => prev.filter((t) => t.id !== tabId));
+          return null;
+        }
+        return r.ok ? r.json() : null;
+      })
+      .then((data) => {
+        if (data?.documents) {
+          setActiveBundleDocIds(new Set(data.documents.map((d: { id: string }) => d.id)));
+        }
+      })
+      .catch(() => {});
+  }, [activeTab?.kind, activeTab?.bundleId, activeTab?.id]);
 
   // Persist bundles to localStorage so the sidebar section is hydrated instantly on next load
   useEffect(() => {
@@ -1195,6 +1212,27 @@ export default function MdEditor() {
   // "Rename" entries (which call setRenamingItem instead of opening
   // the bottom prompt).
   const [renamingItem, setRenamingItem] = useState<{ kind: "folder" | "tab"; id: string } | null>(null);
+  // Starred / pinned items — flat list of {kind, id}. Surfaced as a
+  // dedicated "Starred" section at the top of the sidebar so the user
+  // can pin frequent docs/bundles for quick recall without burying
+  // them in folders.
+  const [pins, setPins] = useState<Array<{ kind: "document" | "bundle"; id: string }>>([]);
+  const pinKeySet = useMemo(() => new Set(pins.map((p) => `${p.kind}:${p.id}`)), [pins]);
+  const isPinned = useCallback((kind: "document" | "bundle", id: string) => pinKeySet.has(`${kind}:${id}`), [pinKeySet]);
+  const togglePin = useCallback(async (kind: "document" | "bundle", id: string) => {
+    const key = `${kind}:${id}`;
+    const wasPinned = pinKeySet.has(key);
+    // Optimistic update. New pins land at the FRONT so the most recent
+    // star sits on top of the Starred section.
+    setPins((prev) => wasPinned ? prev.filter((p) => `${p.kind}:${p.id}` !== key) : [{ kind, id }, ...prev]);
+    try {
+      if (wasPinned) {
+        await fetch(`/api/user/pins?kind=${kind}&id=${encodeURIComponent(id)}`, { method: "DELETE", headers: authHeadersRef.current });
+      } else {
+        await fetch("/api/user/pins", { method: "POST", headers: { "Content-Type": "application/json", ...authHeadersRef.current }, body: JSON.stringify({ kind, id }) });
+      }
+    } catch { /* swallow — optimistic state stays */ }
+  }, [pinKeySet]);
   const [docId, setDocId] = useState<string | null>(null);
   // Presence: track other editors on the same document
   const presenceUser = useMemo(() => user ? { id: user.id, email: user.email, displayName: profile?.display_name || user.email, avatarUrl: profile?.avatar_url || user.user_metadata?.avatar_url || null } : null, [user, profile]);
@@ -1421,6 +1459,13 @@ export default function MdEditor() {
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mw-show-recent", String(showRecent));
   }, [showRecent]);
+  const [showStarred, setShowStarred] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("mw-show-starred") !== "false";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("mw-show-starred", String(showStarred));
+  }, [showStarred]);
   const [_showSortMenu, _setShowSortMenu] = useState(false);
   const [_sharedSortMode, _setSharedSortMode] = useState<"newest" | "oldest" | "az" | "za">("newest");
   const [docFilter, setDocFilter] = useState<"all" | "private" | "shared" | "synced">(() => {
@@ -1637,9 +1682,9 @@ export default function MdEditor() {
   // sections (Cases, Guides, Explore) collapse so the surface stops
   // feeling like a card farm. localStorage-backed so user toggles
   // survive reloads.
-  type StartSectionKey = "recent" | "create" | "deploy" | "cases" | "guides" | "explore";
+  type StartSectionKey = "starred" | "recent" | "create" | "deploy" | "cases" | "guides" | "explore";
   const START_SECTION_DEFAULTS: Record<StartSectionKey, boolean> = {
-    recent: true, create: true, deploy: true,
+    starred: true, recent: true, create: true, deploy: true,
     cases: false, guides: false, explore: false,
   };
   const [startSections, setStartSections] = useState<Record<StartSectionKey, boolean>>(() => {
@@ -2582,6 +2627,45 @@ export default function MdEditor() {
     }
     setNavTick(t => t + 1);
   }, [activeTabId, showOnboarding]);
+
+  // Reveal active tab in sidebar — auto-expand the parent folder and
+  // scroll the row into view whenever activeTabId changes. Refs are
+  // used for the tabs + folders lookups so manually toggling a
+  // folder open/closed (which mutates `folders`) does NOT re-fire
+  // this effect and trigger a phantom scrollIntoView on the active
+  // tab. Only an actual activeTabId change should reveal.
+  const tabsRefForReveal = useRef(tabs);
+  const foldersRefForReveal = useRef(folders);
+  tabsRefForReveal.current = tabs;
+  foldersRefForReveal.current = folders;
+  useEffect(() => {
+    if (!activeTabId) return;
+    const tab = tabsRefForReveal.current.find((t) => t.id === activeTabId);
+    if (!tab) return;
+    if (tab.folderId) {
+      const expandAncestors = (fid: string | undefined | null) => {
+        if (!fid) return;
+        const f = foldersRefForReveal.current.find((x) => x.id === fid);
+        if (!f) return;
+        if (f.collapsed) {
+          setFolders((prev) => prev.map((x) => x.id === fid ? { ...x, collapsed: false } : x));
+          fetch("/api/user/folders", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", ...authHeadersRef.current },
+            body: JSON.stringify({ id: fid, collapsed: false }),
+          }).catch(() => {});
+        }
+        expandAncestors(f.parentId ?? null);
+      };
+      expandAncestors(tab.folderId);
+    }
+    const t = setTimeout(() => {
+      const row = document.querySelector<HTMLElement>(`[data-sidebar-tab-id="${CSS.escape(activeTabId)}"]`);
+      if (!row) return;
+      row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [activeTabId]);
 
   // Track Home (dashboard) entries into nav history. Fires when
   // showOnboarding flips true via the Home button or Alt+H.
@@ -4134,6 +4218,19 @@ export default function MdEditor() {
         }
       })
       .catch(() => {});
+    // Fetch starred pins. Owner-only; no anonymous pin support.
+    if (user?.id) {
+      fetch("/api/user/pins", { headers: authHeaders })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d?.pins && Array.isArray(d.pins)) {
+            setPins(d.pins.map((p: { kind: "document" | "bundle"; id: string }) => ({ kind: p.kind, id: p.id })));
+          }
+        })
+        .catch(() => {});
+    }
+    // (reveal-active sidebar effect lives in its own effect below — see
+    // "Reveal active tab in sidebar" further down in this component.)
     // Fetch server folders and merge with local (skip Examples folder)
     if (user?.id) fetch("/api/user/folders", { headers: authHeaders })
       .then(res => res.ok ? res.json() : null)
@@ -7716,18 +7813,18 @@ ${clone.innerHTML}
                   now, which makes the global one redundant. */}
               {(() => {
                 const allFolders = folders;
-                const anyOpen = allFolders.some(f => !f.collapsed) || showRecent || showMyBundles || showMyDocs || showSharedDocs || showTrash;
+                const anyOpen = allFolders.some(f => !f.collapsed) || showRecent || showStarred || showMyBundles || showMyDocs || showSharedDocs || showExamples || showTrash;
                 return (
                   <Tooltip text={anyOpen ? "Collapse all sections + folders" : "Expand all sections + folders"}>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         if (anyOpen) {
-                          setShowRecent(false); setShowMyBundles(false); setShowMyDocs(false); setShowSharedDocs(false); setShowTrash(false);
+                          setShowRecent(false); setShowStarred(false); setShowMyBundles(false); setShowMyDocs(false); setShowSharedDocs(false); setShowExamples(false); setShowTrash(false);
                           setFolders(prev => prev.map(f => ({ ...f, collapsed: true })));
                           allFolders.forEach(f => { if (!f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: true }) }).catch(() => {}); });
                         } else {
-                          setShowRecent(true); setShowMyBundles(true); setShowMyDocs(true); setShowSharedDocs(true); setShowTrash(true);
+                          setShowRecent(true); setShowStarred(true); setShowMyBundles(true); setShowMyDocs(true); setShowSharedDocs(true); setShowExamples(true); setShowTrash(true);
                           setFolders(prev => prev.map(f => ({ ...f, collapsed: false })));
                           allFolders.forEach(f => { if (f.collapsed) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: false }) }).catch(() => {}); });
                         }
@@ -8047,6 +8144,102 @@ ${clone.innerHTML}
             setFolderContextMenu(null);
             setSidebarContextMenu({ x: e.clientX, y: e.clientY });
           }}>
+            {/* ── Section: STARRED (top, above Recent) ─────────────
+                Owner-only pin list. Renders only when there's at
+                least one pin so the sidebar doesn't grow an empty
+                header. Sits above Recent because "starred" is
+                deliberate recall, not history. Title is plain mixed
+                case (not the SCREAMING uppercase used elsewhere) per
+                founder ask. */}
+            {pins.length > 0 && (
+              <div className="shrink-0 flex flex-col">
+                <div
+                  data-section-id="starred"
+                  className="flex items-center gap-1.5 px-3 h-7 cursor-pointer select-none group/sec hover:bg-[var(--toggle-bg)]"
+                  style={{ background: "var(--background)", borderTop: "1px solid var(--border)", borderBottom: "none", position: "sticky", top: 0, zIndex: 10 }}
+                  onClick={() => setShowStarred(!showStarred)}
+                >
+                  <ChevronDown
+                    width={10} height={10}
+                    className={`shrink-0 transition-transform ${showStarred ? "text-[var(--text-primary)]" : "text-[var(--text-faint)] group-hover/sec:text-[var(--text-primary)]"}`}
+                    style={{ transform: showStarred ? "rotate(0deg)" : "rotate(-90deg)" }}
+                  />
+                  <Star width={11} height={11} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} />
+                  <span className={`flex-1 text-caption font-medium transition-colors ${showStarred ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>
+                    Starred
+                  </span>
+                  <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
+                    {pins.length}
+                  </span>
+                </div>
+                {showStarred && (
+                <div className="px-2 pb-1 space-y-0.5">
+                  {pins.map((p) => {
+                    let title = "Untitled";
+                    let onOpen: (() => void) | null = null;
+                    // Match the icon to the source section — docs use
+                    // DocStatusIcon (private/restricted/draft glyphs),
+                    // bundles use renderBundleStatusIcon (the same
+                    // Layers + colored dot the MD Bundles section
+                    // renders). Generic FileIcon/Layers fallbacks
+                    // only fire when the underlying tab/bundle row
+                    // hasn't been loaded yet.
+                    let iconNode: React.ReactNode = null;
+                    if (p.kind === "document") {
+                      const t = memoAllMyTabs.find((x) => x.cloudId === p.id);
+                      if (t) {
+                        title = t.title || "Untitled";
+                        iconNode = <DocStatusIcon tab={t} isActive={false} />;
+                      } else {
+                        iconNode = <FileIcon width={12} height={12} className="shrink-0" style={{ color: "var(--text-faint)" }} />;
+                      }
+                      onOpen = () => {
+                        const existing = tabs.find((x) => x.cloudId === p.id && !x.deleted);
+                        if (existing) { switchTab(existing.id); return; }
+                        const newId = `tab-${tabIdCounter++}`;
+                        const newTab: Tab = { id: newId, title, markdown: "", cloudId: p.id, permission: "mine" };
+                        setTabs((prev) => [...prev, newTab]);
+                        switchTab(newId);
+                      };
+                    } else {
+                      const b = bundles.find((x) => x.id === p.id);
+                      if (b) title = b.title || "Untitled Bundle";
+                      iconNode = renderBundleStatusIcon(p.id, 14);
+                      onOpen = () => {
+                        const existing = tabs.find((x) => x.kind === "bundle" && x.bundleId === p.id);
+                        if (existing) { switchTab(existing.id); return; }
+                        const newId = `bundle-${p.id}-${Date.now()}`;
+                        const newTab: Tab = { id: newId, kind: "bundle", bundleId: p.id, title, markdown: "" };
+                        setTabs((prev) => [...prev, newTab]);
+                        switchTab(newId);
+                      };
+                    }
+                    return (
+                      <div
+                        key={`${p.kind}:${p.id}`}
+                        onClick={onOpen}
+                        className="flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)] group/pin"
+                        style={{ color: "var(--text-secondary)" }}
+                        title={title}
+                      >
+                        <span className="shrink-0">{iconNode}</span>
+                        <span className="flex-1 truncate text-body">{title}</span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); void togglePin(p.kind, p.id); }}
+                          className="shrink-0 w-4 h-4 rounded flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity hover:bg-[var(--border)]"
+                          style={{ color: "var(--text-faint)" }}
+                          title="Unstar"
+                        >
+                          <Star width={10} height={10} style={{ fill: "currentColor" }} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                )}
+              </div>
+            )}
+
             {/* ── Section: RECENT (top) — last 7 visited tabs, separate from main tree ──
                 Each entry can come from one of three sources:
                   1. Existing local Tab (id matches a tab) — normal case.
@@ -8358,12 +8551,18 @@ ${clone.innerHTML}
                       renderTabBadge={(item) => {
                         const bundle = bundles.find(b => b.id === item.cloudId);
                         if (!bundle) return null;
+                        const starred = isPinned("bundle", bundle.id);
                         return (
-                          <Tooltip text={`${bundle.documentCount} document${bundle.documentCount === 1 ? "" : "s"} in this bundle`}>
-                            <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
-                              {bundle.documentCount}
-                            </span>
-                          </Tooltip>
+                          <span className="inline-flex items-center gap-1.5">
+                            {starred && (
+                              <Star width={10} height={10} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                            )}
+                            <Tooltip text={`${bundle.documentCount} document${bundle.documentCount === 1 ? "" : "s"} in this bundle`}>
+                              <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
+                                {bundle.documentCount}
+                              </span>
+                            </Tooltip>
+                          </span>
                         );
                       }}
                       renamingItem={renamingItem}
@@ -8725,6 +8924,9 @@ ${clone.innerHTML}
                           <span className="text-caption font-mono" style={{ color: "var(--text-faint)", opacity: 0.5 }}>
                             {relativeTime(new Date(tab.lastOpenedAt).toISOString())}{(tab.viewCount ?? 0) > 0 && ` \u00b7 ${tab.viewCount}`}
                           </span>
+                        ) : null}
+                        renderTabBadge={(tab) => (tab.cloudId && isPinned("document", tab.cloudId)) ? (
+                          <Star width={10} height={10} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
                         ) : null}
                         renamingItem={renamingItem}
                         setRenamingItem={setRenamingItem}
@@ -10635,6 +10837,111 @@ ${clone.innerHTML}
                     {conceptIndex.stats.crossLinkedConcepts > 0 && (
                       <div className="mt-2 text-caption" style={{ color: "var(--text-muted)" }}>
                         {conceptIndex.stats.crossLinkedConcepts} {conceptIndex.stats.crossLinkedConcepts === 1 ? "concept connects" : "concepts connect"} multiple docs in your library.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Starred — mirrors Recent's Start-surface treatment
+                    end-to-end: uppercase mono header, chevron-toggle
+                    via toggleStartSection("starred"), Clear-all action
+                    on the right, card-shaped row container, same per-
+                    row chrome (icon + title + relative time on right).
+                    Only renders when there's at least one pin. */}
+                {pins.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <button
+                        onClick={() => toggleStartSection("starred")}
+                        className="flex items-center gap-1.5 text-caption font-mono uppercase tracking-wider cursor-pointer"
+                        style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
+                      >
+                        <ChevronDown width={11} height={11} style={{ transform: startSections.starred ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+                        Starred
+                      </button>
+                      {startSections.starred && (
+                        <button
+                          onClick={() => {
+                            // Optimistic clear-all. Snapshot first so a
+                            // network failure can revert.
+                            const snapshot = pins;
+                            setPins([]);
+                            Promise.all(snapshot.map((p) =>
+                              fetch(`/api/user/pins?kind=${p.kind}&id=${encodeURIComponent(p.id)}`, {
+                                method: "DELETE",
+                                headers: authHeadersRef.current,
+                              }).catch(() => null),
+                            )).catch(() => { /* best-effort */ });
+                          }}
+                          className="text-caption cursor-pointer"
+                          style={{ color: "var(--text-faint)", background: "none", border: "none", padding: "2px 6px", opacity: 0.6 }}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    {startSections.starred && (
+                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+                        {pins.map((p, i) => {
+                          let title = "Untitled";
+                          let onOpen: (() => void) | null = null;
+                          let tsIso: string | null = null;
+                          let iconNode: React.ReactNode = null;
+                          if (p.kind === "document") {
+                            const t = memoAllMyTabs.find((x) => x.cloudId === p.id);
+                            if (t) {
+                              title = t.title || "Untitled";
+                              if (t.lastOpenedAt) tsIso = new Date(t.lastOpenedAt).toISOString();
+                              iconNode = <DocStatusIcon tab={t} isActive={false} />;
+                            } else {
+                              iconNode = <FileIcon width={14} height={14} style={{ color: "var(--text-faint)" }} />;
+                            }
+                            onOpen = () => {
+                              setShowOnboarding(false);
+                              try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+                              const existing = tabs.find((x) => x.cloudId === p.id && !x.deleted);
+                              if (existing) { switchTab(existing.id); return; }
+                              const newId = `tab-${tabIdCounter++}`;
+                              const newTab: Tab = { id: newId, title, markdown: "", cloudId: p.id, permission: "mine" };
+                              setTabs((prev) => [...prev, newTab]);
+                              switchTab(newId);
+                            };
+                          } else {
+                            const b = bundles.find((x) => x.id === p.id);
+                            if (b) {
+                              title = b.title || "Untitled Bundle";
+                              tsIso = b.updated_at || null;
+                            }
+                            iconNode = renderBundleStatusIcon(p.id, 14);
+                            onOpen = () => {
+                              setShowOnboarding(false);
+                              try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+                              const existing = tabs.find((x) => x.kind === "bundle" && x.bundleId === p.id);
+                              if (existing) { switchTab(existing.id); return; }
+                              const newId = `bundle-${p.id}-${Date.now()}`;
+                              const newTab: Tab = { id: newId, kind: "bundle", bundleId: p.id, title, markdown: "" };
+                              flushSync(() => { setTabs((prev) => [...prev, newTab]); });
+                              switchTab(newId);
+                            };
+                          }
+                          return (
+                            <button
+                              key={`${p.kind}:${p.id}`}
+                              onClick={onOpen}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-body text-left cursor-pointer"
+                              style={{ color: "var(--text-secondary)", background: "var(--surface)", transition: "all 0.12s", borderTop: i > 0 ? "1px solid var(--border-dim)" : "none" }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--menu-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = "var(--surface)"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+                            >
+                              {iconNode}
+                              <span className="flex-1 truncate">{title}</span>
+                              <Star width={11} height={11} className="shrink-0" style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                              {tsIso && (
+                                <span className="shrink-0 text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>{relativeTime(tsIso)}</span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -13193,6 +13500,15 @@ ${clone.innerHTML}
                 // mount) updates tab title + splices the body H1.
                 setRenamingItem({ kind: "tab", id: tab.id });
               }},
+              ...(() => {
+                const tab = tabs.find(t => t.id === docContextMenu.tabId);
+                if (!tab?.cloudId) return [];
+                const pinned = isPinned("document", tab.cloudId);
+                return [{
+                  label: pinned ? "Unstar" : "Star",
+                  action: () => { void togglePin("document", tab.cloudId!); },
+                }];
+              })(),
               { label: "Duplicate", action: () => {
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
                 if (tab) {
@@ -13819,6 +14135,9 @@ ${clone.innerHTML}
           }},
           { label: "Open in new tab", action: () => {
             window.open(`/b/${b.id}`, "_blank", "noopener");
+          }},
+          { label: isPinned("bundle", b.id) ? "Unstar" : "Star", action: () => {
+            void togglePin("bundle", b.id);
           }},
           { label: "Rename", action: () => {
             // Sidebar bundle rows use the `bundle-item-<id>` synthetic

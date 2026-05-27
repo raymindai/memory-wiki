@@ -13,7 +13,8 @@ export type AccentColor =
   | "green"
   | "teal"
   | "red"
-  | "yellow";
+  | "yellow"
+  | "gray";
 
 export type ColorScheme =
   | "default"
@@ -58,6 +59,10 @@ export const ACCENT_COLORS: AccentColorOption[] = [
   { name: "teal",   label: "Teal",   dark: "#2dd4bf", light: "#0d9488" },
   { name: "red",    label: "Red",    dark: "#f87171", light: "#dc2626" },
   { name: "yellow", label: "Yellow", dark: "#fbbf24", light: "#d97706" },
+  // Neutral gray — accent essentially turned off. Useful when the
+  // user wants a monochrome editor where links + blockquotes don't
+  // pull the eye away from body text.
+  { name: "gray",   label: "Gray",   dark: "#a1a1aa", light: "#52525b" },
 ];
 
 export const COLOR_SCHEMES: ColorSchemeOption[] = [

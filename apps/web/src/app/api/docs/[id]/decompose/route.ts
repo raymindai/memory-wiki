@@ -115,7 +115,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   }
 
   if (!doc.semantic_chunks) {
-    return NextResponse.json({ error: "No decomposition cached" }, { status: 404 });
+    // 200 + null payload instead of 404. The bundle viewer's discovery
+    // loader fires this against every member doc; a 404 there is a
+    // silent "no cache yet" but DevTools shows it as a red error,
+    // polluting the console. Caller already gates on `semanticChunks`,
+    // so no behavior change.
+    return NextResponse.json({ semanticChunks: null, cached: false });
   }
   // Re-verify each cached chunk against the CURRENT markdown — the cached
   // `found` flag was computed at decomposition time. If the user has since

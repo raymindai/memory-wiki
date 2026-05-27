@@ -473,15 +473,23 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
         )}
         {p.sidebarMode === "detailed" && p.renderTabMeta?.(p.tab)}
       </div>
-      {p.renderTabBadge && (
-        // Align the trailing count with the section-header count above.
-        // Header sits inside `px-3` (right padding = 12). The row's
-        // right side is: paddingRight (6) + gap (6) before the
-        // hidden kebab + kebab width (0 when not hovering) = 12px.
-        // So no extra marginRight is needed — the badge naturally
-        // sits 12px from the row's right edge, matching the header.
-        <span className="shrink-0 text-right tabular-nums group-hover/tab:hidden" style={{ minWidth: 20 }}>{p.renderTabBadge(p.tab)}</span>
-      )}
+      {(() => {
+        // Only reserve the right-side slot when the badge actually
+        // renders something. Empty badges (e.g. unstarred docs whose
+        // renderTabBadge returns null) used to leave a 20px gap that
+        // truncated long file names; now the title gets the full
+        // remaining width whenever no badge content exists. Position
+        // (right-aligned, hidden on hover) matches folder/bundle
+        // count headers above so a star here lands at the same x.
+        if (!p.renderTabBadge) return null;
+        const badgeNode = p.renderTabBadge(p.tab);
+        if (!badgeNode) return null;
+        return (
+          <span className="shrink-0 inline-flex items-center justify-end tabular-nums group-hover/tab:hidden" style={{ minWidth: 20 }}>
+            {badgeNode}
+          </span>
+        );
+      })()}
       <Tooltip text="More options (rename, share, delete…)">
         <button
           onClick={(e) => {
@@ -853,8 +861,27 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
     const orderKey = rows.map(r => r.dataset.sidebarTabId).join("|");
     const isFirstPaint = lastOrderRef.current === "";
     const changed = !isFirstPaint && orderKey !== lastOrderRef.current;
+    // Fast path — when nothing about the row set / order changed, the
+    // expensive getBoundingClientRect() loop below is pure waste (it
+    // forces a layout pass on every commit, which on the editor's
+    // ~16K-LoC parent re-renders pegs the scheduler with 200-300ms
+    // "long task" violations). lastRectsRef stays consistent because
+    // the visual layout also didn't change.
+    if (!isFirstPaint && !changed) return;
+    // The FLIP animation is for REORDERING (sort flip, rename moves
+    // a doc into a different alphabetical slot). Folder expand/
+    // collapse adds or removes child rows — same parent siblings
+    // shift to make room, but that's container chrome, not reorder.
+    // If the set of ids changed (any add or remove), skip the FLIP
+    // pass — otherwise every folder toggle bounces all rows below
+    // it through a 280ms slide.
+    const prevIds = new Set(lastOrderRef.current.split("|"));
+    const nextIds = new Set(rows.map((r) => r.dataset.sidebarTabId || ""));
+    let setEqual = prevIds.size === nextIds.size;
+    if (setEqual) for (const id of nextIds) if (!prevIds.has(id)) { setEqual = false; break; }
+    const shouldFlip = changed && setEqual;
 
-    if (changed) {
+    if (shouldFlip) {
       const prev = lastRectsRef.current;
       for (const el of rows) {
         const id = el.dataset.sidebarTabId;
