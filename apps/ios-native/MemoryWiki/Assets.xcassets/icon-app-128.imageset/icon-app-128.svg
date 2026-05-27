@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128">
+  <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #09090b;
+      }
+
+      .st1 {
+        fill: #fafafa;
+      }
+
+      .st2 {
+        font-family: Pretendard-Bold-KSCpc-EUC-H, Pretendard;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .st3 {
+        fill: #fb923c;
+      }
+
+      .st4 {
+        fill: #737373;
+      }
+    </style>
+  </defs>
+  <rect class="st0" width="128" height="128" rx="24" ry="24"/>
+  <text class="st2" transform="translate(26.62 106.38)"><tspan class="st3" x="0" y="0">Memory</tspan><tspan class="st4" x="46.54" y="0">.</tspan><tspan class="st1" x="49.92" y="0">Wiki</tspan></text>
+  <g>
+    <path class="st3" d="M26.29,39.97l9.39,22.76h.43l9.34-22.76h12.83v39.18h-10.07v-23.05h-.32l-8.9,22.75h-6.17l-8.9-22.86h-.32v23.16h-10.07v-39.18h12.77Z"/>
+    <path class="st1" d="M61.85,39.97h11.44l5.52,24.52h.32l6.44-24.52h9.15l6.47,24.62h.33l5.49-24.62h11.47l-11.47,39.18h-9.96l-6.74-22.43h-.3l-6.77,22.43h-9.88l-11.53-39.18Z"/>
+  </g>
+  <circle class="st4" cx="65.68" cy="77" r="2.98"/>
+</svg>

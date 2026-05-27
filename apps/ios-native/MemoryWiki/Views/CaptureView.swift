@@ -1,7 +1,6 @@
-// CaptureView — quick-capture tab. Plain text field that POSTs to
-// /api/docs and returns the new doc's permanent URL. The Share
-// Extension covers the "from any other app" path; this is the
-// in-app fast lane (paste from clipboard, write a thought, etc.).
+// CaptureView — quick draft → POST /api/docs. Matches the web
+// editor's stripped Source pane: dark zinc canvas, mono caret-
+// friendly typography for the text area, quiet save chrome.
 
 import SwiftUI
 
@@ -13,49 +12,79 @@ struct CaptureView: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 0) {
-                TextEditor(text: $draft)
-                    .focused($focused)
-                    .scrollContentBackground(.hidden)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                    .font(.body)
-                    .overlay(alignment: .topLeading) {
-                        if draft.isEmpty {
-                            Text("Paste anything. Markdown welcomed.")
-                                .foregroundStyle(.tertiary)
-                                .padding(.horizontal, 18)
-                                .padding(.top, 16)
-                                .allowsHitTesting(false)
-                        }
+        ZStack {
+            Brand.background.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                header
+
+                ZStack(alignment: .topLeading) {
+                    if draft.isEmpty {
+                        Text("Paste anything. Markdown welcomed.")
+                            .font(Brand.body(size: 15))
+                            .foregroundStyle(Brand.textFaint)
+                            .padding(.horizontal, 22)
+                            .padding(.top, 18)
+                            .allowsHitTesting(false)
                     }
+                    TextEditor(text: $draft)
+                        .focused($focused)
+                        .scrollContentBackground(.hidden)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 10)
+                        .font(Brand.body(size: 15))
+                        .foregroundStyle(Brand.textPrimary)
+                        .tint(Brand.textPrimary)
+                }
+
                 if let url = savedURL {
-                    HStack(spacing: 10) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                        Text(url.absoluteString).font(.footnote.monospaced()).lineLimit(1).truncationMode(.middle)
-                        Spacer()
-                        ShareLink(item: url) { Image(systemName: "square.and.arrow.up") }
-                    }
-                    .padding(12)
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                    .padding(12)
+                    SavedBanner(url: url) { savedURL = nil }
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, 10)
                 }
                 if let error = errorMessage {
-                    Text(error).font(.caption).foregroundStyle(.red).padding(.horizontal, 16).padding(.bottom, 8)
+                    Text(error)
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.microRed)
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 8)
                 }
             }
-            .navigationTitle("Capture")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") { Task { await save() } }
-                        .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || saving)
-                }
-            }
-            .onAppear { focused = true }
         }
+        .onAppear { focused = true }
+    }
+
+    private var header: some View {
+        HStack {
+            Text("Capture")
+                .font(Brand.display(size: 26))
+                .foregroundStyle(Brand.textPrimary)
+            Spacer()
+            Button { Task { await save() } } label: {
+                Text(saving ? "Saving…" : "Save")
+                    .font(Brand.body(size: 13, weight: .medium))
+                    .foregroundStyle(canSave ? Brand.background : Brand.textFaint)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 7)
+                    .background(
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(canSave ? Brand.textPrimary : Brand.surface)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .strokeBorder(canSave ? .clear : Brand.borderDim, lineWidth: 1)
+                    )
+            }
+            .disabled(!canSave)
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 18)
+        .padding(.bottom, 12)
+    }
+
+    private var canSave: Bool {
+        !saving && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private func save() async {
@@ -71,6 +100,46 @@ struct CaptureView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+private struct SavedBanner: View {
+    let url: URL
+    var onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            // Tiny lime dot — the only color on the row. Status,
+            // not brand.
+            Circle().fill(Brand.accent).frame(width: 6, height: 6)
+            Text(url.absoluteString)
+                .font(Brand.mono(size: 11))
+                .foregroundStyle(Brand.textPrimary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer()
+            ShareLink(item: url) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(Brand.textFaint)
+            }
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Brand.textFaint)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Brand.surface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Brand.borderDim, lineWidth: 1)
+                )
+        )
     }
 }
 

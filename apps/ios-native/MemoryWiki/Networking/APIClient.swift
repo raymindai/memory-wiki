@@ -38,12 +38,6 @@ final class APIClient {
         return URL(string: "https://memory.wiki")!
     }()
 
-    /// memorywiki:// is the registered scheme; the web sign-in
-    /// page will redirect here with the Supabase session in the
-    /// URL fragment / query.
-    static let signInURL = baseURL.appendingPathComponent("auth")
-        .appending(queryItems: [URLQueryItem(name: "next", value: "memorywiki://auth-callback")])
-
     private let session: URLSession
     private let decoder: JSONDecoder
 
@@ -111,6 +105,12 @@ final class APIClient {
         if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
         return req
     }
+
+    /// Convenience: pull the canonical sign-in URL only when the
+    /// app needs to send the user out (e.g. linking from a
+    /// secondary surface). Day-to-day auth runs through
+    /// AuthManager + Supabase SDK, not this URL.
+    static var signInURL: URL { baseURL.appendingPathComponent("auth") }
 
     private func perform<T: Decodable>(_ req: URLRequest) async throws -> T {
         let (data, response) = try await session.data(for: req)

@@ -31,10 +31,23 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>MWSupabaseAnonKey</key>
+	<string>$(MEMORY_WIKI_SUPABASE_ANON_KEY)</string>
+	<key>MWSupabaseURL</key>
+	<string>$(MEMORY_WIKI_SUPABASE_URL)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Memory.Wiki captures photos and screenshots as documents you can paste into any AI.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save Memory.Wiki documents back to Photos when exporting.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>CalSans-Regular.ttf</string>
+		<string>JetBrainsMono-Regular.ttf</string>
+		<string>JetBrainsMono-Medium.ttf</string>
+		<string>NotoSans-Regular.ttf</string>
+		<string>NotoSans-Medium.ttf</string>
+		<string>NotoSans-SemiBold.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -45,5 +58,7 @@
 		<key>UIColorName</key>
 		<string>AccentColor</string>
 	</dict>
+	<key>UIUserInterfaceStyle</key>
+	<string>Dark</string>
 </dict>
 </plist>

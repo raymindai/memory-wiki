@@ -2,6 +2,10 @@
 # `xcodegen generate` instead of committing a hand-edited project.
 *.xcodeproj/
 
+# Local secrets — the .example template is committed; the real
+# values live in Secrets.xcconfig and stay out of git.
+Config/Secrets.xcconfig
+
 # Xcode user state
 *.xcworkspace/xcuserdata/
 xcuserdata/

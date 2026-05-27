@@ -23,10 +23,21 @@ settings:
     # Signing & Capabilities — kept out of the spec so the repo
     # has no per-developer state.
 
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.20.0"
+
 targets:
   MemoryWiki:
     type: application
     platform: iOS
+    configFiles:
+      Debug: Config/Secrets.xcconfig
+      Release: Config/Secrets.xcconfig
+    dependencies:
+      - package: Supabase
+        product: Supabase
     sources:
       - path: MemoryWiki
         excludes:
@@ -34,6 +45,7 @@ targets:
     resources:
       - path: MemoryWiki/Assets.xcassets
       - path: MemoryWiki/Preview Content
+      - path: MemoryWiki/Fonts
     info:
       path: MemoryWiki/Info.plist
       properties:
@@ -55,6 +67,26 @@ targets:
         # everything is https.
         NSCameraUsageDescription: "Memory.Wiki captures photos and screenshots as documents you can paste into any AI."
         NSPhotoLibraryAddUsageDescription: "Save Memory.Wiki documents back to Photos when exporting."
+        # Bundled brand fonts — Cal Sans (display, OFL), JetBrains
+        # Mono (mono, OFL), Noto Sans (body, OFL). Same family the
+        # web app loads via next/font + cdn so iOS chrome reads as a
+        # continuation of memory.wiki, not a stock SwiftUI shell.
+        UIAppFonts:
+          - CalSans-Regular.ttf
+          - JetBrainsMono-Regular.ttf
+          - JetBrainsMono-Medium.ttf
+          - NotoSans-Regular.ttf
+          - NotoSans-Medium.ttf
+          - NotoSans-SemiBold.ttf
+        # Force the brand's dark zinc treatment at launch — web app
+        # default is dark too. Users can override via system Light
+        # Mode but the default matches the web canvas.
+        UIUserInterfaceStyle: Dark
+        # Supabase config — substituted from Config/Secrets.xcconfig
+        # at build time. The xcconfig is gitignored; the .example
+        # template is checked in.
+        MWSupabaseURL: $(MEMORY_WIKI_SUPABASE_URL)
+        MWSupabaseAnonKey: $(MEMORY_WIKI_SUPABASE_ANON_KEY)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: wiki.memory.MemoryWiki
