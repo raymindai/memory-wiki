@@ -41,6 +41,9 @@ targets:
       - target: ShareExtension
         embed: true
         codeSign: true
+      - target: MemoryWikiWidget
+        embed: true
+        codeSign: true
     sources:
       - path: MemoryWiki
         excludes:
@@ -126,6 +129,45 @@ targets:
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: MemoryWiki/MemoryWiki.entitlements
+
+  MemoryWikiWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widget
+        excludes:
+          - "**/.DS_Store"
+          - "**/Info.plist"
+      - path: Shared
+        excludes:
+          - "**/.DS_Store"
+    info:
+      path: Widget/Info.plist
+      properties:
+        CFBundleDisplayName: Memory.Wiki
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        MWBaseURL: https://memory.wiki
+    entitlements:
+      path: Widget/MemoryWikiWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.wiki.memory.MemoryWiki
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)group.wiki.memory.MemoryWiki
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: wiki.memory.MemoryWiki.Widget
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_EMIT_LOC_STRINGS: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Widget/MemoryWikiWidget.entitlements
 
   ShareExtension:
     type: app-extension

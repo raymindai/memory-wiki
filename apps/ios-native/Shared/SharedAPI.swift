@@ -22,6 +22,46 @@ public enum SharedAPI {
         return URL(string: "https://memory.wiki")!
     }
 
+    /// Compact doc shape — just what the widget needs to render
+    /// a row. Mirrors enough fields for the same status-icon
+    /// vocabulary (Cloud / Globe) and relative-time chip.
+    public struct CompactDoc: Codable, Identifiable, Hashable {
+        public let id: String
+        public let title: String?
+        public let updatedAt: Date?
+        public let isDraft: Bool?
+
+        enum CodingKeys: String, CodingKey {
+            case id, title
+            case updatedAt = "updated_at"
+            case isDraft = "is_draft"
+        }
+
+        public var publicURL: URL { URL(string: "https://memory.wiki/\(id)")! }
+        public var displayTitle: String {
+            let t = (title ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            return t.isEmpty ? "Untitled" : t
+        }
+    }
+
+    /// Last `limit` docs the signed-in user owns. Widget calls
+    /// this on every timeline reload (~every 30 minutes). Returns
+    /// an empty list when there's no session; the widget renders
+    /// a "Sign in on Memory.Wiki" placeholder in that case.
+    public static func recentDocs(limit: Int = 5) async throws -> [CompactDoc] {
+        guard let session = SharedSessionStore.load() else { return [] }
+        struct Response: Decodable { let documents: [CompactDoc] }
+        var req = URLRequest(url: baseURL.appendingPathComponent("/api/user/documents"))
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+        let (data, _) = try await URLSession.shared.data(for: req)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let parsed = try decoder.decode(Response.self, from: data)
+        return Array(parsed.documents.prefix(limit))
+    }
+
     /// Creates a doc and returns the canonical public URL. Used
     /// by the Share Extension to capture the highlighted page /
     /// text into the user's hub.

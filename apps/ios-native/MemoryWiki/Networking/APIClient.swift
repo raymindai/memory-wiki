@@ -8,6 +8,7 @@
 // elsewhere in the app picks up without re-creating the client.
 
 import Foundation
+import WidgetKit
 
 enum APIError: Error, LocalizedError {
     case notAuthenticated
@@ -128,6 +129,14 @@ final class APIClient {
         return response.documents
     }
 
+    /// Trigger the home-screen widget to re-fetch. Called after
+    /// any mutation (create, edit, delete, visibility) so the
+    /// "Recent" widget stays in sync without the user opening
+    /// the app.
+    private func bumpWidget() {
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
     func createDocument(markdown: String, title: String? = nil) async throws -> Document {
         struct Request: Encodable {
             let markdown: String
@@ -203,6 +212,7 @@ final class APIClient {
         req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
         req.httpBody = body
         try await perform(req)
+        bumpWidget()
     }
 
     func deleteDocument(id: String) async throws {
@@ -216,6 +226,7 @@ final class APIClient {
         req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
         req.httpBody = body
         try await perform(req)
+        bumpWidget()
     }
 
     func setDocumentVisibility(id: String, public makePublic: Bool) async throws {
@@ -229,6 +240,7 @@ final class APIClient {
         req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
         req.httpBody = body
         try await perform(req)
+        bumpWidget()
     }
 
     /// Fire-and-forget perform — used by mutations that don't
