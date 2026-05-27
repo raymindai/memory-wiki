@@ -67,15 +67,16 @@ export async function getEditorHTML(page: Page): Promise<string> {
 /**
  * View-mode buttons — match by both visible text AND the icon-only fallback.
  * In the current build, view-mode toggles use icon buttons inside the toolbar
- * with `title` attributes ("Live", "Split", "Source").
+ * with `title` attributes ("MD", "Split", "Source"). The WYSIWYG pane was
+ * relabelled from "Live" → "MD" in 1ace7945; tests now select "MD".
  */
-export async function clickView(page: Page, mode: "Live" | "Split" | "Source") {
-  // Buttons have title="Live (Alt+1)" etc. — prefix match against the title attr.
+export async function clickView(page: Page, mode: "MD" | "Split" | "Source") {
+  // Buttons have title="MD (Alt+1)" etc. — prefix match against the title attr.
   await page.locator(`button[title^="${mode}"]`).first().click();
   await page.waitForTimeout(250);
 }
 
-/** Set markdown via the Source (CM6) editor, then switch back to LIVE. */
+/** Set markdown via the Source (CM6) editor, then switch back to the MD pane. */
 export async function setViaSource(page: Page, md: string) {
   await clickView(page, "Source");
   await page.waitForTimeout(300);
@@ -83,6 +84,6 @@ export async function setViaSource(page: Page, md: string) {
   await cm.click();
   await page.keyboard.press("ControlOrMeta+a");
   await page.keyboard.type(md, { delay: 0 });
-  await clickView(page, "Live");
+  await clickView(page, "MD");
   await page.waitForTimeout(1500);
 }

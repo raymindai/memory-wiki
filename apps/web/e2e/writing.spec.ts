@@ -104,7 +104,7 @@ test.describe("Source ↔ LIVE Sync", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("# From Source\n\nSync OK");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(1000);
     expect(await getEditorText(page)).toContain("From Source");
   });
@@ -152,7 +152,7 @@ test.describe("Content Preservation", () => {
       dt.setData("text/plain", text);
       document.activeElement?.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
     }, lines.join("\n\n"));
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(1500);
     const live = await getEditorText(page);
     expect(live).toContain("Para 1");
@@ -175,7 +175,7 @@ test.describe("Math (KaTeX)", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("The equation $E=mc^2$ is famous.");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(2000);
     const html = await page.locator(".ProseMirror").first().innerHTML();
     expect(html).toMatch(/katex|tiptap-math/);
@@ -187,7 +187,7 @@ test.describe("Math (KaTeX)", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("$$\\frac{a}{b}$$");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(2000);
     const html = await page.locator(".ProseMirror").first().innerHTML();
     expect(html).toMatch(/katex|tiptap-math/);
@@ -204,7 +204,7 @@ test.describe("Mermaid", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("```mermaid\ngraph TD\n    A-->B\n```");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     // Wait for mermaid CDN load + render (NodeView has retry logic up to ~6s)
     await page.waitForTimeout(7000);
     const html = await page.locator(".ProseMirror").first().innerHTML();
@@ -222,7 +222,7 @@ test.describe("Code blocks", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("```js\nconst x = 1;\n```");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(800);
     // Header should appear
     await expect(page.locator(".tiptap-codeblock-lang").first()).toBeVisible();
@@ -239,7 +239,7 @@ test.describe("Code blocks", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("```\nline1\nline2\nline3\n```");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(800);
     const linenos = page.locator(".tiptap-codeblock-lineno");
     expect(await linenos.count()).toBeGreaterThanOrEqual(3);

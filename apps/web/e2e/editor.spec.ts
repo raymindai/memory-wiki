@@ -14,13 +14,13 @@ test.describe("Editor — Core Writing Experience", () => {
     await cm.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type("# Hello World\n\nThis is a test.");
-    await clickView(page, "Live");
+    await clickView(page, "MD");
     await page.waitForTimeout(800);
     expect(await getEditorText(page)).toContain("Hello World");
   });
 
-  test("can switch between Live, Split, and Source views", async ({ page }) => {
-    for (const mode of ["Split", "Source", "Live"] as const) {
+  test("can switch between MD, Split, and Source views", async ({ page }) => {
+    for (const mode of ["Split", "Source", "MD"] as const) {
       await clickView(page, mode);
     }
     await expect(page.locator(".ProseMirror").first()).toBeVisible();
