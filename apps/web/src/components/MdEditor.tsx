@@ -175,7 +175,13 @@ function useTheme() {
   }, [theme]);
 
   useEffect(() => {
-    if (accentColor === "orange") {
+    // Lime is the root default (CSS :root --accent), so removing
+    // the data-accent attribute lets the root value apply. The old
+    // literal "orange" here mismatched SettingsEmbed (which writes
+    // data-accent="orange" on click), causing this effect to undo
+    // the SettingsEmbed write on every accent change — the user
+    // had to click twice for the preview to stick.
+    if (accentColor === "lime") {
       document.documentElement.removeAttribute("data-accent");
     } else {
       document.documentElement.setAttribute("data-accent", accentColor);

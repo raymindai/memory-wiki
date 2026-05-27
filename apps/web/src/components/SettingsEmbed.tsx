@@ -996,19 +996,32 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
           <p className="leading-relaxed mb-3" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.55 }}>
             Pick a scheme. Each row offers dark and light variants.
           </p>
+          {/* Quiet picker — modal-picker convention:
+              - faint mono "01 02 03" prefix in fixed left slot
+              - swatches keep neutral --border-dim outline (no accent)
+              - selected variant gets the surface lift + ink check on the right
+              - active swatch carries a slight ink ring (not accent) so the
+                user can tell dark vs light variant of the selected row */}
           <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
             {COLOR_SCHEMES.map((s, idx) => {
               const isSchemeSelected = skinScheme === s.name;
               const isLast = idx === COLOR_SCHEMES.length - 1;
+              const order = String(idx + 1).padStart(2, "0");
               return (
                 <div
                   key={s.name}
                   className="flex items-center gap-3 px-3 py-2.5"
                   style={{
                     borderBottom: isLast ? "none" : "1px solid var(--border-dim)",
-                    background: isSchemeSelected ? "var(--toggle-bg)" : "transparent",
+                    background: isSchemeSelected ? "var(--surface)" : "transparent",
                   }}
                 >
+                  <span
+                    className="font-mono shrink-0"
+                    style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", width: 22, opacity: 0.7 }}
+                  >
+                    {order}
+                  </span>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {(["dark", "light"] as const).map((mode) => {
                       const active = isSchemeSelected && theme === mode;
@@ -1022,7 +1035,9 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                             width: 28,
                             height: 28,
                             background: bg,
-                            border: active ? `1.5px solid var(--micro-lime)` : "1px solid var(--border-dim)",
+                            border: active
+                              ? "1.5px solid var(--text-primary)"
+                              : "1px solid var(--border-dim)",
                           }}
                           title={`${s.label}, ${mode}`}
                         >
@@ -1036,9 +1051,12 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                     <div className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em" }}>{s.desc}</div>
                   </div>
                   {isSchemeSelected && (
-                    <span
+                    <Check
+                      width={14}
+                      height={14}
+                      strokeWidth={2.25}
                       aria-hidden
-                      style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--micro-lime)" }}
+                      style={{ color: "var(--text-primary)" }}
                     />
                   )}
                 </div>
@@ -1078,6 +1096,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             {ACCENT_COLORS.map((c, idx) => {
               const isSelected = keyColor === c.name;
               const isLast = idx === ACCENT_COLORS.length - 1;
+              const order = String(idx + 1).padStart(2, "0");
               // Lime is the implicit scheme-default — selecting it
               // removes the data-accent override so the root value
               // applies. The row's swatches mirror the current
@@ -1096,9 +1115,15 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors"
                   style={{
                     borderBottom: isLast ? "none" : "1px solid var(--border-dim)",
-                    background: isSelected ? "var(--toggle-bg)" : "transparent",
+                    background: isSelected ? "var(--surface)" : "transparent",
                   }}
                 >
+                  <span
+                    className="font-mono shrink-0"
+                    style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", width: 22, opacity: 0.7 }}
+                  >
+                    {order}
+                  </span>
                   <span className="flex items-center gap-1 shrink-0" title={`${showLabel} dark / light`}>
                     <span
                       className="rounded-md"
@@ -1116,9 +1141,12 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                     </div>
                   </div>
                   {isSelected && (
-                    <span
+                    <Check
+                      width={14}
+                      height={14}
+                      strokeWidth={2.25}
                       aria-hidden
-                      style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--micro-lime)" }}
+                      style={{ color: "var(--text-primary)" }}
                     />
                   )}
                 </button>
