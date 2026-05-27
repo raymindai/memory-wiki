@@ -78,7 +78,16 @@ final class APIClient {
         }
         let body = try JSONEncoder().encode(Request(markdown: markdown, title: title))
         let response: Response = try await postJSON("/api/docs", body: body)
-        return Document(id: response.id, title: response.title, updatedAt: response.updated_at, isDraft: true)
+        return Document(
+            id: response.id,
+            title: response.title,
+            updatedAt: response.updated_at,
+            createdAt: response.updated_at,
+            isDraft: true,
+            viewCount: 0,
+            allowedEmails: nil,
+            source: "ios"
+        )
     }
 
     // MARK: - Low-level
