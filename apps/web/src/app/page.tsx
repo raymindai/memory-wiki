@@ -78,12 +78,12 @@ export default function Home() {
     <>
       <noscript>
         <div style={{ padding: "60px 24px", maxWidth: 800, margin: "0 auto", fontFamily: "system-ui, sans-serif", color: "#fafafa", background: "#09090b" }}>
-          <h1>Memory.Wiki — Your AI memory, deployable to any AI</h1>
-          <p>Create, edit, and share beautiful documents instantly. WYSIWYG Markdown editor with AI conversation capture, cross-platform sync, and a developer-friendly API. No login required — paste or type, get a permanent URL in seconds.</p>
+          <h1>Memory.Wiki — Stop re-explaining your context to every AI</h1>
+          <p>Put your knowledge in one URL every AI can read. Capture from anywhere, AI organizes in the background, paste the URL into Claude / ChatGPT / Cursor and it knows you. No login required — paste or type, get a permanent URL in seconds.</p>
           <h2>Features</h2>
           <ul>
-            <li>WYSIWYG Markdown editor powered by a Rust/WASM engine</li>
-            <li>AI conversation capture from ChatGPT, Claude, and Gemini</li>
+            <li>One URL, every AI: paste memory.wiki/@you into Claude, ChatGPT, Cursor — they all read it as markdown</li>
+            <li>WYSIWYG Markdown editor with AI conversation capture from ChatGPT, Claude, and Gemini</li>
             <li>Code syntax highlighting, KaTeX math, and Mermaid diagrams</li>
             <li>Permanent shareable URLs with OG previews and QR codes</li>
             <li>Cross-platform: VS Code extension, Chrome extension, CLI, MCP server, Mac desktop app</li>

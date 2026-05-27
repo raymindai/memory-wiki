@@ -28,7 +28,7 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "Memory.Wiki — Your AI memory, deployable to any AI.",
+  title: "Memory.Wiki — Stop re-explaining your context to every AI",
   description:
     "One URL, every AI. Capture from ChatGPT, Claude, Notion, GitHub, Obsidian — your knowledge becomes a citable URL that Claude, ChatGPT, Cursor, and Codex all fetch the same way. You set the direction; Memory.Wiki structures the URL.",
   keywords: [
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Memory.Wiki", url: "https://memory.wiki" }],
   metadataBase: new URL("https://memory.wiki"),
   openGraph: {
-    title: "Memory.Wiki — Your AI memory, deployable to any AI.",
+    title: "Memory.Wiki — Stop re-explaining your context to every AI",
     description:
       "One URL, every AI. Capture, bundle, deploy. The personal knowledge hub for the AI era.",
     url: "https://memory.wiki",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Memory.Wiki — Your AI memory, deployable to any AI.",
+    title: "Memory.Wiki — Stop re-explaining your context to every AI",
     description:
       "One URL, every AI. Your memory, deployable to Claude, ChatGPT, Cursor, Codex — same way.",
     images: ["/api/og"],
@@ -113,7 +113,7 @@ export default function RootLayout({
         />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('mw-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#faf9f7'}var a=localStorage.getItem('mw-accent');if(a&&a!=='orange'){document.documentElement.setAttribute('data-accent',a)}var s=localStorage.getItem('mw-scheme');if(s&&s!=='default'){document.documentElement.setAttribute('data-scheme',s)}if(localStorage.getItem('mw-was-logged-in')==='1'){document.documentElement.setAttribute('data-mw-auth-pending','1');setTimeout(function(){document.documentElement.removeAttribute('data-mw-auth-pending')},3500)}}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('mw-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#faf9f7'}var a=localStorage.getItem('mw-accent');if(a&&a!=='lime'){document.documentElement.setAttribute('data-accent',a)}var s=localStorage.getItem('mw-scheme');if(s&&s!=='default'){document.documentElement.setAttribute('data-scheme',s)}if(localStorage.getItem('mw-was-logged-in')==='1'){document.documentElement.setAttribute('data-mw-auth-pending','1');setTimeout(function(){document.documentElement.removeAttribute('data-mw-auth-pending')},3500)}}catch(e){}`,
           }}
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -121,7 +121,7 @@ export default function RootLayout({
           "@type": "WebSite",
           "name": "Memory.Wiki",
           "url": "https://memory.wiki",
-          "description": "Create, edit, and share beautiful documents instantly. WYSIWYG Markdown editor with AI tools, cross-platform sync, and developer API. No login required.",
+          "description": "Stop re-explaining your context to every AI. Put your knowledge in one URL Claude, ChatGPT, Cursor and Codex all read the same way. WYSIWYG editor, AI capture from chat surfaces, cross-platform sync, developer API. No login required.",
           "publisher": {
             "@type": "Organization",
             "name": "Raymind AI",
@@ -141,7 +141,7 @@ export default function RootLayout({
           "operatingSystem": "Web, macOS, VS Code, Chrome",
           "url": "https://memory.wiki",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-          "description": "Markdown publishing tool with WYSIWYG editing, AI conversation capture, and permanent shareable URLs."
+          "description": "Cross-AI knowledge URLs. WYSIWYG editing, AI conversation capture, permanent shareable URLs that every AI reads as markdown."
         })}} />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-V3LTDKKHTS" />
         <script
