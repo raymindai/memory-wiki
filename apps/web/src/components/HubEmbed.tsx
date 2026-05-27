@@ -99,6 +99,7 @@ interface HubLintResolved {
   /** Pair key encoded as "aId|bId". */
   duplicates: Set<string>;
   titleMismatches: Set<string>;
+  staleClaims: Set<string>;
 }
 
 interface HubEmbedProps {
@@ -122,10 +123,12 @@ interface HubEmbedProps {
   curatorOrphanEnabled?: boolean;
   curatorDuplicateEnabled?: boolean;
   curatorTitleMismatchEnabled?: boolean;
+  curatorStaleEnabled?: boolean;
   lintResolved?: HubLintResolved;
   onResolveOrphan?: (docId: string, docTitle: string | null) => void;
   onResolveDuplicate?: (aId: string, aTitle: string | null, bId: string, bTitle: string | null) => void;
   onResolveTitleMismatch?: (docId: string, docTitle: string | null, suggestedConcept: string) => void;
+  onResolveStaleClaim?: (docId: string) => void;
   /** Auto-management settings — drives the status panel above
    *  Needs Review. When omitted, the panel doesn't render. */
   autoLevel?: "off" | "conservative" | "standard" | "aggressive";
@@ -227,10 +230,12 @@ export default function HubEmbed({
   curatorOrphanEnabled,
   curatorDuplicateEnabled,
   curatorTitleMismatchEnabled,
+  curatorStaleEnabled,
   lintResolved,
   onResolveOrphan,
   onResolveDuplicate,
   onResolveTitleMismatch,
+  onResolveStaleClaim,
   autoLevel,
   autoTrigger,
   onAutoResolveRun,
@@ -1632,7 +1637,10 @@ Memory.Wiki hub`;
           const visibleTitleMismatches = curatorTitleMismatchEnabled
             ? (lintReport.titleMismatches || []).filter((m) => !lintResolved?.titleMismatches.has(m.id))
             : [];
-          const total = visibleOrphans.length + visibleDuplicates.length + visibleTitleMismatches.length;
+          const visibleStaleClaims = curatorStaleEnabled
+            ? ((lintReport as HubLintReport & { staleClaims?: Array<{ id: string; title: string | null; updatedAt: string | null; ageDays: number; referenceCount: number }> }).staleClaims || []).filter((s) => !lintResolved?.staleClaims?.has(s.id))
+            : [];
+          const total = visibleOrphans.length + visibleDuplicates.length + visibleTitleMismatches.length + visibleStaleClaims.length;
           if (total === 0) return null;
           return (
             <section className="mb-8">
@@ -1788,6 +1796,49 @@ Memory.Wiki hub`;
                       >
                         Open
                       </button>
+                    </div>
+                  </div>
+                ))}
+                {visibleStaleClaims.map((s) => (
+                  <div
+                    key={`stale:${s.id}`}
+                    className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: "var(--surface)", border: "1px solid var(--border-dim)" }}
+                  >
+                    <span
+                      className="flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ width: 24, height: 24, borderRadius: 6, background: "rgba(96,165,250,0.12)", color: "var(--micro-info)" }}
+                      title="Stale claim — doc is old but still load-bearing"
+                    >
+                      <Clock width={14} height={14} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 min-w-0">
+                        <span className="truncate text-body font-medium" style={{ color: "var(--text-primary)" }}>
+                          {s.title || "Untitled"}
+                        </span>
+                      </div>
+                      <p className="text-caption leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                        Last edited {s.ageDays} days ago, still referenced from {s.referenceCount} place{s.referenceCount === 1 ? "" : "s"}. Re-read and confirm the claim still holds.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => onOpenDoc?.(s.id)}
+                        className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                      >
+                        Open
+                      </button>
+                      {onResolveStaleClaim && (
+                        <button
+                          onClick={() => onResolveStaleClaim(s.id)}
+                          className="text-caption px-2.5 py-1 rounded transition-colors hover:bg-[var(--toggle-bg)]"
+                          style={{ color: "var(--text-muted)", border: "1px solid var(--border-dim)" }}
+                        >
+                          Confirmed
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

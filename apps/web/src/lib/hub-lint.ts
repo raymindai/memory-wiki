@@ -47,16 +47,41 @@ export interface TitleMismatch {
   concepts: string[];
 }
 
+export interface StaleClaim {
+  id: string;
+  title: string | null;
+  /** ISO timestamp of the doc's last update. */
+  updatedAt: string | null;
+  /** Days since last update. */
+  ageDays: number;
+  /** Count of other docs that reference this one — bundles + raw
+   *  markdown link mentions. Heavy references = "this is load-
+   *  bearing, please re-verify it's still true." */
+  referenceCount: number;
+}
+
 export interface LintReport {
   computedAt: string;
   totalDocs: number;
   orphans: OrphanDoc[];
   duplicates: DuplicatePair[];
   titleMismatches: TitleMismatch[];
+  /** v8 W4-6 — docs >= STALE_AGE_DAYS old but still heavily referenced.
+   *  Surfaced as Needs Review so the user can re-read + confirm the
+   *  claim still holds. Empty when no candidates. */
+  staleClaims: StaleClaim[];
 }
 
 const DUPLICATE_DISTANCE_THRESHOLD = 0.18; // cosine; tuned for "likely-overlapping content"
 const DUPLICATE_NEIGHBORS = 3; // check top-N neighbors per doc
+
+// Stale-claims thresholds. A doc must be at least N days old AND
+// referenced from M or more other surfaces (bundles + markdown
+// links) before it counts as a stale claim worth re-verifying.
+// Heavier references => more "load-bearing" => higher chance the
+// user wants to confirm it's still true.
+const STALE_AGE_DAYS = 90;
+const STALE_MIN_REFERENCES = 2;
 
 interface DocRow {
   id: string;
@@ -234,12 +259,40 @@ export async function computeLintReport(
 
   duplicates.sort((p, q) => p.distance - q.distance);
 
+  // Stale claims — reuse the inBundle + referenced sets already
+  // computed above so this pass is O(liveDocs) with no extra DB
+  // hits. A doc qualifies when it's old AND load-bearing.
+  const nowMs = Date.now();
+  const refCountByDoc = new Map<string, number>();
+  for (const id of inBundle) refCountByDoc.set(id, (refCountByDoc.get(id) || 0) + 1);
+  for (const id of referenced) refCountByDoc.set(id, (refCountByDoc.get(id) || 0) + 1);
+  const staleClaims: StaleClaim[] = [];
+  for (const d of liveDocs) {
+    if (!d.updated_at) continue;
+    const ageMs = nowMs - new Date(d.updated_at).getTime();
+    const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+    if (ageDays < STALE_AGE_DAYS) continue;
+    const refs = refCountByDoc.get(d.id) || 0;
+    if (refs < STALE_MIN_REFERENCES) continue;
+    staleClaims.push({
+      id: d.id,
+      title: d.title,
+      updatedAt: d.updated_at,
+      ageDays,
+      referenceCount: refs,
+    });
+  }
+  // Most-referenced first — those are the highest-value
+  // re-verification targets.
+  staleClaims.sort((a, b) => b.referenceCount - a.referenceCount || b.ageDays - a.ageDays);
+
   return {
     computedAt: new Date().toISOString(),
     totalDocs: liveDocs.length,
     orphans,
     duplicates,
     titleMismatches,
+    staleClaims,
   };
 }
 

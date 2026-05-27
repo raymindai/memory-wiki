@@ -404,6 +404,7 @@ export default function MdEditor() {
     orphans: { id: string; title: string | null }[];
     duplicates: { a: { id: string; title: string | null }; b: { id: string; title: string | null }; distance: number }[];
     titleMismatches: { id: string; title: string | null; topConcept: string; concepts: string[] }[];
+    staleClaims: { id: string; title: string | null; updatedAt: string | null; ageDays: number; referenceCount: number }[];
     totalDocs: number;
   } | null>(null);
   const [lintLoading, setLintLoading] = useState(false);
@@ -419,7 +420,7 @@ export default function MdEditor() {
   // Track resolved findings within this session so they stay hidden
   // even if a re-scan returns them (backend concept-extraction is
   // async and can lag). Cleared on hard refresh.
-  const [lintResolved, setLintResolved] = useState<{ orphans: Set<string>; duplicates: Set<string>; titleMismatches: Set<string> }>({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set() });
+  const [lintResolved, setLintResolved] = useState<{ orphans: Set<string>; duplicates: Set<string>; titleMismatches: Set<string>; staleClaims: Set<string> }>({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set() });
   // User's curator preferences — drives which lint categories show
   // up in Needs Review. Hydrated from localStorage on mount and
   // refreshed whenever Settings broadcasts a change so the section
@@ -465,7 +466,7 @@ export default function MdEditor() {
         if (res.ok) {
           const data = await res.json();
           if (data) {
-            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], totalDocs: data.totalDocs || 0 };
+            report = { orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], totalDocs: data.totalDocs || 0 };
             setLintReport(report);
           }
         }
@@ -4145,7 +4146,7 @@ export default function MdEditor() {
       setLintLoading(true);
       fetch("/api/user/hub/lint", { headers: authHeaders })
         .then((r) => (r.ok ? r.json() : null))
-        .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], totalDocs: data.totalDocs || 0 }); })
+        .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], totalDocs: data.totalDocs || 0 }); })
         .catch(() => {})
         .finally(() => setLintLoading(false));
     }
@@ -9675,7 +9676,7 @@ ${clone.innerHTML}
                     setLintLoading(true);
                     return fetch("/api/user/hub/lint", { headers: authHeaders })
                       .then((r) => (r.ok ? r.json() : null))
-                      .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], totalDocs: data.totalDocs || 0 }); })
+                      .then((data) => { if (data) setLintReport({ orphans: data.orphans || [], duplicates: data.duplicates || [], titleMismatches: data.titleMismatches || [], staleClaims: data.staleClaims || [], totalDocs: data.totalDocs || 0 }); })
                       .catch(() => {})
                       .finally(() => setLintLoading(false));
                   };
@@ -9683,7 +9684,7 @@ ${clone.innerHTML}
                   // findings the backend still considers open come back.
                   // Available via long-press / shift-click on Re-scan
                   // (kept implicit so the default UX is forgiving).
-                  void (() => setLintResolved({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set() }));
+                  void (() => setLintResolved({ orphans: new Set(), duplicates: new Set(), titleMismatches: new Set(), staleClaims: new Set() }));
                   const resolveOrphan = async (docId: string, docTitle: string | null) => {
                     // Orphan auto-fix: re-run concept extraction. The
                     // concept extractor pulls concepts from the doc;
@@ -11938,6 +11939,10 @@ ${clone.innerHTML}
                     curatorOrphanEnabled={curatorSettings.orphan}
                     curatorDuplicateEnabled={curatorSettings.duplicate}
                     curatorTitleMismatchEnabled={curatorSettings["title-mismatch"]}
+                    curatorStaleEnabled={curatorSettings.stale}
+                    onResolveStaleClaim={(docId) => {
+                      setLintResolved((prev) => ({ ...prev, staleClaims: new Set([...prev.staleClaims, docId]) }));
+                    }}
                     onResolveTitleMismatch={(docId) => {
                       // Renaming via AI isn't wired yet; opening the
                       // doc lets the user edit the H1 manually, which

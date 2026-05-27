@@ -56,8 +56,8 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
   {
     id: "stale",
     label: "Stale claims",
-    description: "Docs older than 90 days that are still heavily referenced — flagged so you can re-read and confirm they're still true.",
-    shipped: false,
+    description: "Docs older than 90 days that are still heavily referenced, flagged so you can re-read and confirm they're still true.",
+    shipped: true,
     defaultEnabled: false,
   },
   {
