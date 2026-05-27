@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { getServerUserId } from "@/lib/supabase-server";
-import { hasPendingOntology } from "@/lib/jobs";
+import { hasPendingOntology, countJobsByStatus, type JobKind } from "@/lib/jobs";
 
 export const runtime = "nodejs";
 
@@ -22,11 +22,15 @@ export async function GET(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const kind = req.nextUrl.searchParams.get("kind") || "doc_ontology";
-  if (kind !== "doc_ontology") {
-    // Other kinds aren't surfaced yet — extend hasPendingOntology
-    // (or generalize it) when we wire bundle_graph etc.
+  const KNOWN: ReadonlyArray<JobKind> = [
+    "doc_ontology", "doc_organize", "bundle_graph",
+    "concept_embeddings", "bundle_embedding", "doc_embedding",
+  ];
+  if (!KNOWN.includes(kind as JobKind)) {
     return NextResponse.json({ pending: 0, running: 0, failed: 0, lastBuiltAt: null });
   }
-  const status = await hasPendingOntology(supabase, userId);
+  const status = kind === "doc_ontology"
+    ? await hasPendingOntology(supabase, userId)
+    : await countJobsByStatus(supabase, userId, kind as JobKind);
   return NextResponse.json(status);
 }

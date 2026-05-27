@@ -1557,7 +1557,42 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
  */
 function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, string> }) {
   const [phase, setPhase] = useState<"idle" | "enqueueing" | "draining" | "promoting">("idle");
-  const [result, setResult] = useState<{ enqueued: number; drained: number; promoted: number } | null>(null);
+  // Persist last completion summary across navigations so the user
+  // can come back to Settings and still see what happened. Cleared
+  // on a fresh click. Stored separately from `phase` because phase
+  // is genuinely transient (it's only meaningful while running).
+  const [result, setResult] = useState<{ enqueued: number; drained: number; promoted: number } | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("mw-backfill-last-result");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  // Live job-queue status. Polls every 3s while the panel is open so
+  // the user always sees a heartbeat instead of wondering "is anything
+  // happening?". Independent of the click cycle — even if they
+  // navigated away mid-run, returning to Settings re-acquires the
+  // status from the server.
+  const [liveStatus, setLiveStatus] = useState<{ pending: number; running: number; failed: number; lastBuiltAt: string | null } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+        const supabase = getSupabaseBrowserClient();
+        const session = supabase ? (await supabase.auth.getSession()).data.session : null;
+        const headers: Record<string, string> = { ...authHeaders };
+        if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
+        const r = await fetch("/api/user/jobs/status?kind=doc_organize", { headers, cache: "no-store" });
+        if (!r.ok) return;
+        const j = await r.json();
+        if (!cancelled) setLiveStatus(j);
+      } catch { /* network blip */ }
+    };
+    void tick();
+    const id = setInterval(tick, 3000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [authHeaders]);
   const onClick = async () => {
     setPhase("enqueueing");
     setResult(null);
@@ -1600,7 +1635,9 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
         if (pj) promoted = (pj.promoted as number) || 0;
       }
 
-      setResult({ enqueued, drained, promoted });
+      const next = { enqueued, drained, promoted };
+      setResult(next);
+      try { localStorage.setItem("mw-backfill-last-result", JSON.stringify(next)); } catch { /* quota */ }
       showToast(
         promoted > 0
           ? `Filled ${drained} doc${drained === 1 ? "" : "s"}, promoted ${promoted} AI bundle${promoted === 1 ? "" : "s"}`
@@ -1622,25 +1659,64 @@ function BackfillOrganizeButton({ authHeaders }: { authHeaders: Record<string, s
     : phase === "draining" ? "Draining queue"
     : phase === "promoting" ? "Promoting"
     : "Backfill now";
+  // Friendly relative time for the lastBuiltAt timestamp.
+  const lastBuiltLabel = (() => {
+    if (!liveStatus?.lastBuiltAt) return null;
+    const diff = Date.now() - new Date(liveStatus.lastBuiltAt).getTime();
+    const m = Math.round(diff / 60_000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m}m ago`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.round(h / 24)}d ago`;
+  })();
   return (
-    <div className="flex items-center gap-3 flex-wrap">
-      <button
-        onClick={onClick}
-        disabled={running}
-        className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        style={{
-          background: running ? "var(--border-dim)" : "var(--text-primary)",
-          color: running ? "var(--text-faint)" : "var(--background)",
-          cursor: running ? "not-allowed" : "pointer",
-        }}
-      >
-        {label}
-      </button>
-      {result && (
-        <span className="text-caption" style={{ color: "var(--text-faint)" }}>
-          {result.enqueued} enqueued, {result.drained} drained, {result.promoted} AI bundle{result.promoted === 1 ? "" : "s"} created
-        </span>
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          onClick={onClick}
+          disabled={running}
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          style={{
+            background: running ? "var(--border-dim)" : "var(--text-primary)",
+            color: running ? "var(--text-faint)" : "var(--background)",
+            cursor: running ? "not-allowed" : "pointer",
+          }}
+        >
+          {label}
+        </button>
+        {result && (
+          <span className="text-caption" style={{ color: "var(--text-faint)" }}>
+            Last run: {result.enqueued} enqueued, {result.drained} drained, {result.promoted} AI bundle{result.promoted === 1 ? "" : "s"} created
+          </span>
+        )}
+      </div>
+      {liveStatus && (liveStatus.pending > 0 || liveStatus.running > 0 || liveStatus.failed > 0 || lastBuiltLabel) && (
+        <div className="flex items-center gap-2 text-caption font-mono" style={{ color: "var(--text-faint)" }}>
+          {liveStatus.running > 0 && (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden style={{ width: 6, height: 6, borderRadius: 999, background: "var(--micro-lime)", animation: "mwOrganizeStatusPulse 1.2s ease-in-out infinite" }} />
+              <span>{liveStatus.running} running</span>
+            </span>
+          )}
+          {liveStatus.pending > 0 && (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden style={{ width: 6, height: 6, borderRadius: 999, background: "var(--micro-info)" }} />
+              <span>{liveStatus.pending} pending</span>
+            </span>
+          )}
+          {liveStatus.failed > 0 && (
+            <span className="inline-flex items-center gap-1.5" style={{ color: "var(--micro-red)" }}>
+              <span aria-hidden style={{ width: 6, height: 6, borderRadius: 999, background: "var(--micro-red)" }} />
+              <span>{liveStatus.failed} failed</span>
+            </span>
+          )}
+          {lastBuiltLabel && liveStatus.pending === 0 && liveStatus.running === 0 && (
+            <span>Last filled {lastBuiltLabel}</span>
+          )}
+        </div>
       )}
+      <style>{`@keyframes mwOrganizeStatusPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }`}</style>
     </div>
   );
 }

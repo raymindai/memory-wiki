@@ -169,11 +169,27 @@ export async function hasPendingOntology(supabase: SupabaseClient, userId: strin
   failed: number;
   lastBuiltAt: string | null;
 }> {
+  return countJobsByStatus(supabase, userId, "doc_ontology");
+}
+
+/** Generic version — accepts any JobKind. Used by Settings to surface
+ *  the live doc_organize backfill state so the user knows whether the
+ *  Backfill button's queue is actually draining. */
+export async function countJobsByStatus(
+  supabase: SupabaseClient,
+  userId: string,
+  kind: JobKind,
+): Promise<{
+  pending: number;
+  running: number;
+  failed: number;
+  lastBuiltAt: string | null;
+}> {
   const { data } = await supabase
     .from("extraction_jobs")
     .select("status, finished_at")
     .eq("user_id", userId)
-    .eq("kind", "doc_ontology");
+    .eq("kind", kind);
   const rows = data || [];
   let pending = 0, running = 0, failed = 0;
   let lastBuiltAt: string | null = null;
