@@ -53,6 +53,7 @@ function dicebearStyleUrl(style: string, seed: string, size = 80): string {
 // everywhere as soon as the user changes Settings → Profile.
 import { dicebearUrl, resolveAvatar } from "@/lib/editor-helpers";
 import { showToast } from "@/components/Toast";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 type SettingsSection = "profile" | "appearance" | "auto-management" | "hub" | "danger";
 
@@ -449,8 +450,11 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
 
   if (authLoading) {
     return (
-      <div className="h-full flex items-center justify-center" style={{ background: "var(--background)" }}>
-        <Loader2 className="animate-spin" width={24} height={24} style={{ color: "var(--text-primary)" }} />
+      <div className="h-full flex flex-col items-center justify-center gap-3" style={{ background: "var(--canvas)" }}>
+        <MemoryWikiLogo size={64} variant="icon-only" />
+        <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+          Loading
+        </span>
       </div>
     );
   }

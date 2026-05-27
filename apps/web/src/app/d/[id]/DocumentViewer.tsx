@@ -69,21 +69,16 @@ export default function DocumentViewer({
   // Defer the access gate UNTIL client-side auth check finishes — otherwise
   // owners see "You need access" flash for ~500ms before the redirect to /
   const [authChecked, setAuthChecked] = useState(!isRestricted);
-  // Suppress the public-viewer chrome flash for returning signed-in
-  // users. SSR renders public content; on mount we set this to true
-  // ONLY if localStorage says we've signed in before (mw-was-logged-in),
-  // and the ownership-check useEffect will flip it off (or redirect
-  // away) once auth resolves. First-time visitors never trigger it
-  // and see the public viewer immediately. Starts false on first
-  // render so SSR + hydration match.
-  const [authFlashGate, setAuthFlashGate] = useState(false);
-  useEffect(() => {
-    try {
-      if (typeof window !== "undefined" && localStorage.getItem("mw-was-logged-in") === "1") {
-        setAuthFlashGate(true);
-      }
-    } catch { /* ignore */ }
-  }, []);
+  // Auth-flash suppression is handled pre-paint by the inline head
+  // script in layout.tsx: it sets data-mw-auth-pending on <html>
+  // before React paints, and the css in globals.css hides body
+  // contents + shows the MW-blob loader. We lift the attribute
+  // (and therefore the gate) below once the ownership-check resolves.
+  const liftAuthGate = () => {
+    if (typeof document !== "undefined") {
+      document.documentElement.removeAttribute("data-mw-auth-pending");
+    }
+  };
   const [copied, setCopied] = useState(false);
   const [accessRevoked, setAccessRevoked] = useState(false);
   const [updateToast, setUpdateToast] = useState(false);
@@ -142,7 +137,7 @@ export default function DocumentViewer({
       } catch { /* no session or not authorized */ }
       finally {
         setAuthChecked(true);
-        setAuthFlashGate(false);
+        liftAuthGate();
       }
     })();
   }, [id, isRestricted, unlocked]);
@@ -302,23 +297,10 @@ export default function DocumentViewer({
       className="flex flex-col min-h-screen relative"
       style={{ background: "var(--canvas)", color: "var(--foreground)" }}
     >
-      {/* Auth-flash gate — covers the public viewer chrome with the
-          MW-blob loader while the ownership check is in flight, so
-          returning signed-in owners don't see the "Sign in / Create
-          your own" CTAs flash for ~500ms before the redirect to /.
-          Public visitors (no mw-was-logged-in flag) never see this. */}
-      {authFlashGate && (
-        <div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-3"
-          style={{ background: "var(--canvas)" }}
-          aria-hidden
-        >
-          <MemoryWikiLogo size={64} variant="icon-only" />
-          <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
-            Loading
-          </span>
-        </div>
-      )}
+      {/* Auth-flash gate now lives in layout.tsx as a pre-paint
+          inline HTML loader + CSS rule keyed on
+          data-mw-auth-pending. liftAuthGate() above removes the
+          attribute once the ownership-check resolves. */}
       <ViewerHeader
         title={title || "Untitled"}
         breadcrumb={

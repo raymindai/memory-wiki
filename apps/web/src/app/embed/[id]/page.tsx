@@ -98,7 +98,13 @@ export default function EmbedPage() {
     <div style={{ background: "var(--background)", color: "var(--foreground)", minHeight: "100vh" }}>
       <div ref={previewRef}>
         {isLoading ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-faint)" }}>Loading...</div>
+          <div style={{ padding: "3rem", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <img src="/brand/mwblob_morph.svg" alt="" width={48} height={48} className="mw-logo-darktheme" />
+            <img src="/brand/mwblob_morph_dark.svg" alt="" width={48} height={48} className="mw-logo-lighttheme" />
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: 1, textTransform: "uppercase", color: "var(--text-faint)" }}>
+              Loading
+            </span>
+          </div>
         ) : isPasswordProtected ? (
           <div style={{ padding: "3rem", textAlign: "center" }}>
             <div style={{ fontSize: "1.25rem", marginBottom: "0.75rem", color: "var(--foreground)" }}>

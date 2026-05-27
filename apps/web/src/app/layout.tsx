@@ -103,7 +103,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('mw-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#faf9f7'}var a=localStorage.getItem('mw-accent');if(a&&a!=='orange'){document.documentElement.setAttribute('data-accent',a)}var s=localStorage.getItem('mw-scheme');if(s&&s!=='default'){document.documentElement.setAttribute('data-scheme',s)}}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('mw-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#faf9f7'}var a=localStorage.getItem('mw-accent');if(a&&a!=='orange'){document.documentElement.setAttribute('data-accent',a)}var s=localStorage.getItem('mw-scheme');if(s&&s!=='default'){document.documentElement.setAttribute('data-scheme',s)}if(localStorage.getItem('mw-was-logged-in')==='1'){document.documentElement.setAttribute('data-mw-auth-pending','1');setTimeout(function(){document.documentElement.removeAttribute('data-mw-auth-pending')},3500)}}catch(e){}`,
           }}
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -153,6 +153,20 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        {/* Pre-paint auth-flash gate. The inline head script sets
+            data-mw-auth-pending on <html> SYNCHRONOUSLY (before
+            React or first paint) whenever localStorage says the
+            user has been logged in. CSS in globals.css then hides
+            the rest of <body> and shows this loader, so returning
+            owners never see the public viewer chrome flash. The
+            DocumentViewer / BundleViewer ownership-check useEffect
+            calls document.documentElement.removeAttribute(...) to
+            lift the gate once auth resolves. */}
+        <div id="mw-auth-pending-loader" aria-hidden>
+          <img src="/brand/mwblob_morph.svg" alt="" className="mw-logo-darktheme" draggable={false} />
+          <img src="/brand/mwblob_morph_dark.svg" alt="" className="mw-logo-lighttheme" draggable={false} />
+          <span>Loading</span>
+        </div>
         {children}
         <Analytics />
         <SpeedInsights />

@@ -2380,10 +2380,12 @@ function SynthesisModal({ kind, isLoading, markdown, onClose, onSaveAsDoc, onCop
       }
     >
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-12 gap-2" style={{ color: "var(--text-faint)" }}>
-          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--text-primary)" }} />
-          <span className="text-caption">AI is synthesizing the bundle…</span>
-          <span className="text-caption">This usually takes 5-15 seconds.</span>
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
+          <MemoryWikiLogo size={48} variant="icon-only" />
+          <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+            Synthesizing
+          </span>
+          <span className="text-caption" style={{ color: "var(--text-faint)" }}>Usually 5–15 seconds</span>
         </div>
       ) : (
         <pre className="text-body whitespace-pre-wrap font-sans" style={{ color: "var(--text-primary)", lineHeight: 1.6 }}>{markdown}</pre>
@@ -3162,10 +3164,12 @@ function DecomposeListPane({ bridge }: { bridge: DecomposeBridge }) {
   const decomp = bridge.decomposition;
   if (bridge.isDecomposing && !decomp) {
     return (
-      <div className="flex-1 flex items-center justify-center" style={{ color: "var(--text-faint)" }}>
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "var(--border)", borderTopColor: "var(--text-primary)" }} />
-          <span className="text-caption">Analyzing document…</span>
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <MemoryWikiLogo size={48} variant="icon-only" />
+          <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: 1, color: "var(--text-faint)" }}>
+            Analyzing
+          </span>
         </div>
       </div>
     );

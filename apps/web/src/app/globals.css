@@ -58,6 +58,47 @@
 .text-heading  { font-size: var(--text-heading); line-height: 1.35; font-weight: 500; }
 .text-display  { font-size: var(--text-display); line-height: 1.2; font-weight: 500; }
 
+/* ─── Pre-paint auth-flash gate ─── Hides the rest of the body and
+   shows the MW-blob loader when localStorage says the user has been
+   logged in but auth hasn't resolved yet. The attribute is set by
+   the inline head script in layout.tsx BEFORE first paint, so
+   returning owners never glimpse the public viewer chrome before
+   the ownership-check redirect fires. Removed by the viewer's
+   useEffect once auth resolves. */
+#mw-auth-pending-loader {
+  display: none;
+}
+html[data-mw-auth-pending="1"] body > *:not(#mw-auth-pending-loader) {
+  visibility: hidden;
+}
+html[data-mw-auth-pending="1"] #mw-auth-pending-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--canvas);
+}
+#mw-auth-pending-loader img {
+  width: 64px;
+  height: 64px;
+  display: none;
+}
+#mw-auth-pending-loader img.mw-logo-darktheme { display: block; }
+#mw-auth-pending-loader img.mw-logo-lighttheme { display: none; }
+[data-theme="light"] #mw-auth-pending-loader img.mw-logo-darktheme { display: none; }
+[data-theme="light"] #mw-auth-pending-loader img.mw-logo-lighttheme { display: block; }
+#mw-auth-pending-loader span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
 /* ─── Viewer header glass ─── Sticky header with a translucent glass
    backdrop that mask-fades to transparent on the bottom edge, so the
    nav dissolves into the page instead of cutting a horizontal line.
