@@ -565,6 +565,39 @@ export default function MdEditor() {
   // Cloud docs section removed — all docs auto-save to cloud
   const [recentDocs, setRecentDocs] = useState<{ id: string; title: string; visitedAt: string; isOwner: boolean; editMode: string }[]>([]);
   const [_serverDocs, setServerDocs] = useState<{ id: string; title: string; createdAt: string }[]>([]);
+  // v8 W4 — auto-organize metadata mirror keyed by doc id. Populated
+  // from /api/user/documents responses (which JOIN
+  // document_ai_metadata). Sidebar reads it inside renderTabIcon to
+  // show a tiny cluster-color dot + ai_summary tooltip on hover,
+  // without round-tripping per row or extending the Tab type.
+  const [docAiMeta, setDocAiMeta] = useState<Record<string, { clusterId: string | null; summary: string | null; tags: string[] }>>({});
+  const ingestDocAiMeta = useCallback((docs: unknown) => {
+    if (!Array.isArray(docs)) return;
+    const next: Record<string, { clusterId: string | null; summary: string | null; tags: string[] }> = {};
+    let any = false;
+    for (const d of docs as Array<Record<string, unknown>>) {
+      const id = typeof d.id === "string" ? d.id : null;
+      if (!id) continue;
+      const cluster = typeof d.ai_cluster_id === "string" ? d.ai_cluster_id : null;
+      const summary = typeof d.ai_summary === "string" ? d.ai_summary : null;
+      const tags = Array.isArray(d.ai_tags) ? (d.ai_tags as string[]) : [];
+      if (cluster || summary || tags.length > 0) {
+        next[id] = { clusterId: cluster, summary, tags };
+        any = true;
+      }
+    }
+    if (any) setDocAiMeta((prev) => ({ ...prev, ...next }));
+  }, []);
+  // Deterministic HSL color per cluster slug — same slug renders the
+  // same dot color across the sidebar so the user can scan visually
+  // for grouped docs. Hash collapses to a single hue; saturation +
+  // lightness tuned to read against both dark and light backgrounds.
+  const clusterColor = useCallback((slug: string | null | undefined): string | null => {
+    if (!slug || slug === "misc") return null;
+    let h = 0;
+    for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
+    return `hsl(${h % 360} 60% 55%)`;
+  }, []);
   // Hydrate bundles from localStorage so the sidebar section renders on first paint
   // (otherwise it pops in after the /api/bundles fetch resolves).
   const [bundles, setBundles] = useState<Array<{ id: string; title: string; description: string | null; documentCount: number; updated_at: string; is_draft: boolean; has_password?: boolean; allowed_emails_count?: number; folder_id?: string | null; visibility?: "public" | "unlisted" | "private" | "restricted"; creator_type?: "user" | "ai"; creator_agent?: string | null; user_edits_count?: number }>>(() => {
@@ -960,7 +993,7 @@ export default function MdEditor() {
           // newly-created doc without a page reload.
           fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
             .then((r) => (r.ok ? r.json() : null))
-            .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+            .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
             .catch(() => {});
         });
       }
@@ -3528,7 +3561,7 @@ export default function MdEditor() {
       // Pull the fresh list so claimed items render right away.
       fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
         .then((r) => (r.ok ? r.json() : null))
-        .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+        .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
         .catch(() => {});
     };
     window.addEventListener("mw-anon-claimed", handler as EventListener);
@@ -4121,7 +4154,7 @@ export default function MdEditor() {
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data?.documents) {
-          setServerDocs(data.documents);
+          setServerDocs(data.documents); ingestDocAiMeta(data.documents);
           // Mark tabs that have sharing enabled
           const sharedDocIds = new Set(
             data.documents
@@ -4493,7 +4526,7 @@ export default function MdEditor() {
             if (!res.ok) return;
             const data = await res.json();
             if (!data?.documents) return;
-            setServerDocs(data.documents);
+            setServerDocs(data.documents); ingestDocAiMeta(data.documents);
 
             // Sync tab state from server (isDraft, isSharedByMe, isRestricted, source, folderId)
             const sharedDocIds = new Set(
@@ -5663,7 +5696,7 @@ export default function MdEditor() {
               // user refreshes — same fix as the modal flow above.
               fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
                 .then((r) => (r.ok ? r.json() : null))
-                .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+                .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
                 .catch(() => {});
             }
           });
@@ -7875,7 +7908,7 @@ ${clone.innerHTML}
                       .then(res => res.ok ? res.json() : null)
                       .then(data => {
                         if (data?.documents) {
-                          setServerDocs(data.documents);
+                          setServerDocs(data.documents); ingestDocAiMeta(data.documents);
                           const sm = new Map(data.documents.map((d: { id: string; source?: string }) => [d.id, d.source]));
                           setTabs(prev => {
                             const ids = new Set(prev.filter(t => t.cloudId).map(t => t.cloudId!));
@@ -8001,7 +8034,7 @@ ${clone.innerHTML}
                 showToast(parts.length > 0 ? parts.join(", ") : "Nothing to import", "success");
                 fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
                   .then((r) => (r.ok ? r.json() : null))
-                  .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+                  .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
                   .catch(() => {});
               } catch { showToast("Import failed", "error"); }
             }}
@@ -8056,7 +8089,7 @@ ${clone.innerHTML}
                       // reflects the import without a page reload.
                       fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
                         .then((r) => (r.ok ? r.json() : null))
-                        .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+                        .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
                         .catch(() => {});
                     }
                   });
@@ -8995,9 +9028,22 @@ ${clone.innerHTML}
                         dragFolderId={dragFolderId}
                         setDragTabId={setDragTabId}
                         setDragFolderId={setDragFolderId}
-                        renderTabIcon={(tab, isActive) => (
-                          <DocStatusIcon tab={tab} isActive={isActive} />
-                        )}
+                        renderTabIcon={(tab, isActive) => {
+                          const meta = tab.cloudId ? docAiMeta[tab.cloudId] : null;
+                          const dot = meta ? clusterColor(meta.clusterId) : null;
+                          const tooltip = meta?.summary || null;
+                          return (
+                            <span className="inline-flex items-center gap-1.5 shrink-0" title={tooltip || undefined}>
+                              <DocStatusIcon tab={tab} isActive={isActive} />
+                              {dot && (
+                                <span
+                                  aria-hidden
+                                  style={{ width: 6, height: 6, borderRadius: 999, background: dot, flexShrink: 0 }}
+                                />
+                              )}
+                            </span>
+                          );
+                        }}
                         renderTabMeta={(tab) => tab.lastOpenedAt ? (
                           <span className="text-caption font-mono" style={{ color: "var(--text-faint)", opacity: 0.5 }}>
                             {relativeTime(new Date(tab.lastOpenedAt).toISOString())}{(tab.viewCount ?? 0) > 0 && ` \u00b7 ${tab.viewCount}`}
@@ -12611,7 +12657,7 @@ ${clone.innerHTML}
                         // waiting for the next manual refresh.
                         fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
                           .then((r) => (r.ok ? r.json() : null))
-                          .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+                          .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
                           .catch(() => {});
                         void docId;
                       }}
@@ -14326,7 +14372,7 @@ ${clone.innerHTML}
                 if (data?.bundles) setBundles(data.bundles);
               }).catch(() => {});
               fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders }).then(r => r.ok ? r.json() : null).then(data => {
-                if (data?.documents) setServerDocs(data.documents);
+                if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents);
               }).catch(() => {});
             }}
           />
@@ -15463,7 +15509,7 @@ ${clone.innerHTML}
           // the new import immediately (without a page reload).
           fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
             .then((r) => (r.ok ? r.json() : null))
-            .then((data) => { if (data?.documents) setServerDocs(data.documents); })
+            .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
             .catch(() => {});
           // Auto-open the freshly imported doc IN PLACE. Used to do
           // window.location.href = `/${docId}` which forced a full
