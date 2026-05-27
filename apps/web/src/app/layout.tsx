@@ -108,7 +108,7 @@ export default function RootLayout({
             flash before the gate rule kicked in. */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `html[data-mw-auth-pending="1"] body{background:#15151a !important;overflow:hidden !important}html[data-mw-auth-pending="1"][data-theme="light"] body{background:#ffffff !important}html[data-mw-auth-pending="1"] body>*:not(#mw-auth-pending-loader){display:none !important}html[data-mw-auth-pending="1"] #mw-auth-pending-loader{position:fixed;inset:0;z-index:2147483647;display:flex !important;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#15151a}html[data-mw-auth-pending="1"][data-theme="light"] #mw-auth-pending-loader{background:#ffffff}#mw-auth-pending-loader{display:none}`,
+            __html: `html[data-mw-auth-pending="1"]{background:#15151a !important}html[data-mw-auth-pending="1"][data-theme="light"]{background:#ffffff !important}html[data-mw-auth-pending="1"] body{background:#15151a !important;overflow:hidden !important;visibility:hidden !important}html[data-mw-auth-pending="1"][data-theme="light"] body{background:#ffffff !important}html[data-mw-auth-pending="1"] body>*:not(#mw-auth-pending-loader){display:none !important}html[data-mw-auth-pending="1"] #mw-auth-pending-loader{visibility:visible !important;position:fixed;inset:0;z-index:2147483647;display:flex !important;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#15151a}html[data-mw-auth-pending="1"][data-theme="light"] #mw-auth-pending-loader{background:#ffffff}#mw-auth-pending-loader{display:none}`,
           }}
         />
         <script

@@ -1,5 +1,7 @@
 // Memory.Wiki Service Worker — Offline caching + Share Target
-const CACHE_NAME = "mw-v1";
+// Bump CACHE_NAME whenever a ship needs to invalidate cached HTML
+// (the activate handler deletes any cache that isn't this name).
+const CACHE_NAME = "mw-v2-auth-gate";
 const STATIC_ASSETS = ["/", "/manifest.json"];
 
 // Install: cache app shell
