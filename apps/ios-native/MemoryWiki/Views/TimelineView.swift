@@ -22,6 +22,12 @@ final class TimelineModel: ObservableObject {
             let raw = try await APIClient.shared.userDocuments()
             documents = raw.sorted { $0.sortDate > $1.sortDate }
             errorMessage = nil
+            // Push latest snapshot into iOS Spotlight so the
+            // system search across docs stays in sync. Detached
+            // because failures are non-fatal and the user has
+            // already seen the timeline by this point.
+            let docsSnapshot = documents
+            Task.detached { await SpotlightIndexer.sync(docsSnapshot) }
         } catch {
             errorMessage = error.localizedDescription
         }

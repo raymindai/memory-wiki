@@ -8,6 +8,7 @@
 import SwiftUI
 
 import WidgetKit
+import CoreSpotlight
 
 @main
 struct MemoryWikiApp: App {
@@ -33,6 +34,13 @@ struct MemoryWikiApp: App {
                     } else {
                         router.handle(url: url)
                     }
+                }
+                .onContinueUserActivity(CSSearchableItemActionType) { activity in
+                    // User tapped a Spotlight result for one of
+                    // our docs. uniqueIdentifier is the doc id.
+                    guard let id = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+                          let url = URL(string: "memorywiki://doc/\(id)") else { return }
+                    router.handle(url: url)
                 }
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {
