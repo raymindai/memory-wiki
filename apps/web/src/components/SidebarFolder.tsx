@@ -58,6 +58,13 @@ export interface SidebarTabItem {
 export interface SidebarFolderHandlers {
   onToggleCollapsed: (folderId: string) => void;
   onRename: (folderId: string, currentName: string) => void;
+  /** Optional inline-rename commits. When provided, double-click on a
+   *  row + the parent's "Rename" menu entries flip the row into an
+   *  in-place input; pressing Enter (or blurring) calls this with the
+   *  trimmed value. Falls back to the legacy onRename prompt when
+   *  absent, so older callers keep working. */
+  onCommitFolderRename?: (folderId: string, newName: string) => void;
+  onCommitTabRename?: (tabId: string, newName: string) => void;
   onCreateDocInFolder: (folderId: string) => void;
   onCreateSubfolder: (folderId: string) => void;
   onChangeEmoji: (folderId: string) => void;
@@ -102,6 +109,11 @@ export interface SidebarFolderTreeProps {
   // sections (like "MDs") that render root-level docs in their own block above the tree.
   // Defaults to true so callers like the bundles section see all items.
   includeRootTabs?: boolean;
+  /** Controlled inline-rename. When set, the matching row renders an
+   *  in-place input. Parent updates this in response to the "Rename"
+   *  context menu entries OR the sidebar's own double-click trigger. */
+  renamingItem?: { kind: "folder" | "tab"; id: string } | null;
+  setRenamingItem?: (next: { kind: "folder" | "tab"; id: string } | null) => void;
 }
 
 interface PrecomputedTree {
@@ -251,6 +263,69 @@ interface TabRowProps {
   onContextMenu: (e: React.MouseEvent) => void;
   onKebab: (rect: DOMRect) => void;
   onReorderTab?: SidebarFolderHandlers["onReorderTab"];
+  isRenaming?: boolean;
+  onCommitRename?: (value: string) => void;
+  onCancelRename?: () => void;
+  onStartRename?: () => void;
+}
+
+/**
+ * Inline rename input — used for both tabs and folders. Autofocus +
+ * select-all on mount, Enter commits, Escape cancels, blur commits.
+ * Click is stopped from bubbling so the surrounding row's click
+ * handler (which would activate/toggle the row) doesn't fire while
+ * the user is typing.
+ */
+function InlineNameInput({
+  defaultValue,
+  onCommit,
+  onCancel,
+  className,
+  style,
+}: {
+  defaultValue: string;
+  onCommit: (value: string) => void;
+  onCancel: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <input
+      autoFocus
+      defaultValue={defaultValue}
+      onFocus={(e) => e.currentTarget.select()}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const v = e.currentTarget.value.trim();
+          if (v) onCommit(v); else onCancel();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          onCancel();
+        }
+      }}
+      onBlur={(e) => {
+        const v = e.currentTarget.value.trim();
+        if (v && v !== defaultValue) onCommit(v); else onCancel();
+      }}
+      className={className}
+      style={{
+        background: "var(--background)",
+        color: "var(--text-primary)",
+        border: "1px solid var(--text-primary)",
+        borderRadius: 4,
+        padding: "1px 4px",
+        outline: "none",
+        font: "inherit",
+        width: "100%",
+        minWidth: 0,
+        ...style,
+      }}
+    />
+  );
 }
 
 const TabRow = memo(function TabRow(p: TabRowProps) {
@@ -359,6 +434,12 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
       }}
       onClick={p.onClick}
       onContextMenu={p.onContextMenu}
+      onDoubleClick={(e) => {
+        if (!p.onStartRename) return;
+        e.preventDefault();
+        e.stopPropagation();
+        p.onStartRename();
+      }}
     >
       {zone === "above" && (
         <div aria-hidden className="absolute left-1 right-1 -top-px h-0.5 rounded" style={{ background: "var(--text-primary)" }} />
@@ -380,7 +461,16 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
       )}
       {p.renderTabIcon(p.tab, p.isActive)}
       <div className="truncate flex-1 min-w-0">
-        <span className="truncate block text-body">{p.tab.title || "Untitled"}</span>
+        {p.isRenaming && p.onCommitRename && p.onCancelRename ? (
+          <InlineNameInput
+            defaultValue={p.tab.title || ""}
+            onCommit={p.onCommitRename}
+            onCancel={p.onCancelRename}
+            className="text-body"
+          />
+        ) : (
+          <span className="truncate block text-body">{p.tab.title || "Untitled"}</span>
+        )}
         {p.sidebarMode === "detailed" && p.renderTabMeta?.(p.tab)}
       </div>
       {p.renderTabBadge && (
@@ -429,6 +519,12 @@ interface FolderNodeProps {
   renderTabIcon: (tab: SidebarTabItem, isActive: boolean) => ReactNode;
   renderTabMeta?: (tab: SidebarTabItem) => ReactNode;
   renderTabBadge?: (tab: SidebarTabItem) => ReactNode;
+  /** Controlled inline-rename state, threaded from the tree root. */
+  renamingItem?: { kind: "folder" | "tab"; id: string } | null;
+  setRenamingItem?: (next: { kind: "folder" | "tab"; id: string } | null) => void;
+  isRenaming?: boolean;
+  onCommitRename?: (value: string) => void;
+  onCancelRename?: () => void;
 }
 
 function FolderNode(props: FolderNodeProps) {
@@ -511,7 +607,14 @@ function FolderNode(props: FolderNodeProps) {
           outline: dropZone === "into" && !wouldCreateCycle ? "1px solid var(--text-primary)" : "none",
         }}
         onClick={() => handlers.onToggleCollapsed(folder.id)}
-        onDoubleClick={(e) => { e.stopPropagation(); handlers.onRename(folder.id, folder.name); }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          if (handlers.onCommitFolderRename && props.setRenamingItem) {
+            props.setRenamingItem({ kind: "folder", id: folder.id });
+            return;
+          }
+          handlers.onRename(folder.id, folder.name);
+        }}
         onDragOver={(e) => {
           // ALWAYS preventDefault — matches the old working pattern. Gating on
           // ref/state and returning without preventDefault makes Chrome mark
@@ -594,7 +697,17 @@ function FolderNode(props: FolderNodeProps) {
             )}
           </button>
         </Tooltip>
-        <span className="truncate flex-1">{folder.name}</span>
+        {props.isRenaming && props.onCommitRename && props.onCancelRename ? (
+          <div className="flex-1 min-w-0">
+            <InlineNameInput
+              defaultValue={folder.name}
+              onCommit={props.onCommitRename}
+              onCancel={props.onCancelRename}
+            />
+          </div>
+        ) : (
+          <span className="truncate flex-1">{folder.name}</span>
+        )}
         {/* Right cluster — wrap count + action buttons with same gap-1.5 used
             inside TabRow so trailing counts line up at exactly the same x. */}
         <div className="shrink-0 flex items-center gap-1.5">
@@ -648,13 +761,27 @@ function FolderNode(props: FolderNodeProps) {
           using View Transitions or per-item slide instead of clip. */}
       {expanded && (
         <>
-          {sortedSubfolders.map(sub => (
-            <FolderNode key={sub.id} {...props} folder={sub} depth={depth + 1} />
-          ))}
+          {sortedSubfolders.map(sub => {
+            const subRenaming = props.renamingItem?.kind === "folder" && props.renamingItem.id === sub.id;
+            return (
+              <FolderNode
+                key={sub.id}
+                {...props}
+                folder={sub}
+                depth={depth + 1}
+                isRenaming={subRenaming}
+                onCommitRename={subRenaming && handlers.onCommitFolderRename
+                  ? (v) => { handlers.onCommitFolderRename?.(sub.id, v); props.setRenamingItem?.(null); }
+                  : undefined}
+                onCancelRename={subRenaming ? () => props.setRenamingItem?.(null) : undefined}
+              />
+            );
+          })}
           {sortedTabs.map(tab => {
             const inActiveBundle = activeBundleDocIds.size > 0 && !!tab.cloudId && activeBundleDocIds.has(tab.cloudId);
             const isSelected = selectedTabIds.has(tab.id) || tab.id === activeTabId || inActiveBundle;
             const tabIndent = (depth + 1) * 12;
+            const tabRenaming = props.renamingItem?.kind === "tab" && props.renamingItem.id === tab.id;
             return (
               <TabRow
                 key={tab.id}
@@ -676,6 +803,14 @@ function FolderNode(props: FolderNodeProps) {
                 onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); handlers.onTabContextMenu(tab.id, e.clientX, e.clientY); }}
                 onKebab={(rect) => handlers.onTabKebab(tab.id, rect)}
                 onReorderTab={handlers.onReorderTab}
+                isRenaming={tabRenaming}
+                onStartRename={handlers.onCommitTabRename && props.setRenamingItem
+                  ? () => props.setRenamingItem?.({ kind: "tab", id: tab.id })
+                  : undefined}
+                onCommitRename={tabRenaming && handlers.onCommitTabRename
+                  ? (v) => { handlers.onCommitTabRename?.(tab.id, v); props.setRenamingItem?.(null); }
+                  : undefined}
+                onCancelRename={tabRenaming ? () => props.setRenamingItem?.(null) : undefined}
               />
             );
           })}
@@ -769,36 +904,47 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
     <div ref={treeRef}>
       {/* Folders first — matches Finder / VS Code / Notion / Obsidian
           convention. Containers scan first; loose items below. */}
-      {sortedRoots.map(folder => (
-        <FolderNode
-          key={folder.id}
-          folder={folder}
-          depth={0}
-          tree={tree}
-          folders={folders}
-          handlers={props.handlers}
-          activeTabId={props.activeTabId}
-          selectedTabIds={props.selectedTabIds}
-          activeBundleDocIds={props.activeBundleDocIds}
-          sidebarSearch={sidebarSearch}
-          sortMode={sortMode}
-          sidebarMode={props.sidebarMode}
-          docFilter={props.docFilter}
-          dragTabId={props.dragTabId}
-          dragFolderId={props.dragFolderId}
-          setDragTabId={props.setDragTabId}
-          setDragFolderId={props.setDragFolderId}
-          renderTabIcon={props.renderTabIcon}
-          renderTabMeta={props.renderTabMeta}
-          renderTabBadge={props.renderTabBadge}
-        />
-      ))}
+      {sortedRoots.map(folder => {
+        const isRen = props.renamingItem?.kind === "folder" && props.renamingItem.id === folder.id;
+        return (
+          <FolderNode
+            key={folder.id}
+            folder={folder}
+            depth={0}
+            tree={tree}
+            folders={folders}
+            handlers={props.handlers}
+            activeTabId={props.activeTabId}
+            selectedTabIds={props.selectedTabIds}
+            activeBundleDocIds={props.activeBundleDocIds}
+            sidebarSearch={sidebarSearch}
+            sortMode={sortMode}
+            sidebarMode={props.sidebarMode}
+            docFilter={props.docFilter}
+            dragTabId={props.dragTabId}
+            dragFolderId={props.dragFolderId}
+            setDragTabId={props.setDragTabId}
+            setDragFolderId={props.setDragFolderId}
+            renderTabIcon={props.renderTabIcon}
+            renderTabMeta={props.renderTabMeta}
+            renderTabBadge={props.renderTabBadge}
+            renamingItem={props.renamingItem}
+            setRenamingItem={props.setRenamingItem}
+            isRenaming={isRen}
+            onCommitRename={isRen && props.handlers.onCommitFolderRename
+              ? (v) => { props.handlers.onCommitFolderRename?.(folder.id, v); props.setRenamingItem?.(null); }
+              : undefined}
+            onCancelRename={isRen ? () => props.setRenamingItem?.(null) : undefined}
+          />
+        );
+      })}
       {/* Root-level tabs (no folder) — rendered AFTER folders so the
           containers scan first. Sections that render their own root
           list separately set includeRootTabs={false}. */}
       {(props.includeRootTabs !== false) && sortTabs(tree.rootTabs, sortMode).map(tab => {
         const inActiveBundle = props.activeBundleDocIds.size > 0 && !!tab.cloudId && props.activeBundleDocIds.has(tab.cloudId);
         const isSelected = props.selectedTabIds.has(tab.id) || tab.id === props.activeTabId || inActiveBundle;
+        const tabRenaming = props.renamingItem?.kind === "tab" && props.renamingItem.id === tab.id;
         return (
           // Wrap in mt-0.5 div to match FolderNode's outer structure. Without this
           // wrapper, root tabs rendered as direct children of SidebarFolderTree's
@@ -822,6 +968,14 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
               onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); props.handlers.onTabContextMenu(tab.id, e.clientX, e.clientY); }}
               onKebab={(rect) => props.handlers.onTabKebab(tab.id, rect)}
               onReorderTab={props.handlers.onReorderTab}
+              isRenaming={tabRenaming}
+              onStartRename={props.handlers.onCommitTabRename && props.setRenamingItem
+                ? () => props.setRenamingItem?.({ kind: "tab", id: tab.id })
+                : undefined}
+              onCommitRename={tabRenaming && props.handlers.onCommitTabRename
+                ? (v) => { props.handlers.onCommitTabRename?.(tab.id, v); props.setRenamingItem?.(null); }
+                : undefined}
+              onCancelRename={tabRenaming ? () => props.setRenamingItem?.(null) : undefined}
             />
           </div>
         );

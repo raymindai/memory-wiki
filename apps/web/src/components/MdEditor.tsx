@@ -1189,6 +1189,12 @@ export default function MdEditor() {
   // Folder id whose emoji is currently being edited via the picker modal
   const [emojiPickerFolderId, setEmojiPickerFolderId] = useState<string | null>(null);
   const [inlineInput, setInlineInput] = useState<{ label: string; defaultValue?: string; onSubmit: (v: string) => void; position?: { x: number; y: number } } | null>(null);
+  // Inline rename state for the sidebar. When non-null, the matching
+  // row in <SidebarFolderTree> swaps its title for an in-place input.
+  // Driven by double-click on the row OR the kebab/context-menu
+  // "Rename" entries (which call setRenamingItem instead of opening
+  // the bottom prompt).
+  const [renamingItem, setRenamingItem] = useState<{ kind: "folder" | "tab"; id: string } | null>(null);
   const [docId, setDocId] = useState<string | null>(null);
   // Presence: track other editors on the same document
   const presenceUser = useMemo(() => user ? { id: user.id, email: user.email, displayName: profile?.display_name || user.email, avatarUrl: profile?.avatar_url || user.user_metadata?.avatar_url || null } : null, [user, profile]);
@@ -8360,6 +8366,8 @@ ${clone.innerHTML}
                           </Tooltip>
                         );
                       }}
+                      renamingItem={renamingItem}
+                      setRenamingItem={setRenamingItem}
                       handlers={{
                         onToggleCollapsed: (folderId) => {
                           const target = folders.find(f => f.id === folderId);
@@ -8377,6 +8385,28 @@ ${clone.innerHTML}
                               setInlineInput(null);
                             },
                           });
+                        },
+                        onCommitFolderRename: (folderId, name) => {
+                          setFolders(prev => prev.map(f => f.id === folderId ? { ...f, name } : f));
+                          fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: folderId, name }) }).catch(() => {});
+                        },
+                        onCommitTabRename: (itemId, name) => {
+                          // Bundle items use `bundle-item-<id>` ids; strip
+                          // the prefix to find the underlying bundle row.
+                          const bundleId = itemId.replace(/^bundle-item-/, "");
+                          const b = bundles.find(x => x.id === bundleId);
+                          if (!b) return;
+                          setBundles(prev => prev.map(x => x.id === bundleId ? { ...x, title: name } : x));
+                          setTabs(prev => prev.map(t => (t.kind === "bundle" && t.bundleId === bundleId) ? { ...t, title: name } : t));
+                          fetch(`/api/bundles/${bundleId}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json", ...authHeaders },
+                            body: JSON.stringify({
+                              userId: user?.id,
+                              anonymousId: !user?.id ? getAnonymousId() : undefined,
+                              title: name,
+                            }),
+                          }).catch(() => {});
                         },
                         onCreateDocInFolder: (folderId) => {
                           // For bundles section, "+" creates a new bundle inside this folder
@@ -8696,6 +8726,8 @@ ${clone.innerHTML}
                             {relativeTime(new Date(tab.lastOpenedAt).toISOString())}{(tab.viewCount ?? 0) > 0 && ` \u00b7 ${tab.viewCount}`}
                           </span>
                         ) : null}
+                        renamingItem={renamingItem}
+                        setRenamingItem={setRenamingItem}
                         handlers={{
                           onToggleCollapsed: (folderId) => {
                             const target = folders.find(f => f.id === folderId);
@@ -8713,6 +8745,38 @@ ${clone.innerHTML}
                                 setInlineInput(null);
                               },
                             });
+                          },
+                          onCommitFolderRename: (folderId, name) => {
+                            setFolders(prev => prev.map(f => f.id === folderId ? { ...f, name } : f));
+                            fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: folderId, name }) }).catch(() => {});
+                          },
+                          onCommitTabRename: (tabId, name) => {
+                            const tab = tabs.find(t => t.id === tabId);
+                            if (!tab) return;
+                            setTabs(prev => prev.map(t => t.id === tabId ? { ...t, title: name } : t));
+                            // If active tab → splice the H1 in the visible
+                            // body so the editor reflects the rename
+                            // instantly; the standard autoSave then PATCHes
+                            // both markdown + title and the server-side
+                            // title invariant keeps DB.title aligned.
+                            if (tabId === activeTabIdRef.current) {
+                              const md = markdownRef.current;
+                              const lines = md.split("\n");
+                              const h1Idx = lines.findIndex(l => /^#\s+/.test(l));
+                              if (h1Idx >= 0) lines[h1Idx] = `# ${name}`;
+                              else lines.unshift(`# ${name}`, "");
+                              const next = lines.join("\n");
+                              if (next !== md) setMarkdown(next);
+                            } else if (tab.cloudId) {
+                              // Background-tab rename: PATCH directly so
+                              // the server picks up the title even without
+                              // the editor view's autoSave hook.
+                              fetch(`/api/docs/${tab.cloudId}`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json", ...authHeaders },
+                                body: JSON.stringify({ title: name, userId: user?.id, editToken: tab.editToken }),
+                              }).catch(() => {});
+                            }
                           },
                           onCreateDocInFolder: (folderId) => {
                             setPendingNewDocFolderId(folderId);
@@ -13124,51 +13188,10 @@ ${clone.innerHTML}
               { label: "Rename", action: () => {
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
                 if (!tab) return;
-                setInlineInput({
-                  label: "Document name",
-                  defaultValue: tab.title,
-                  onSubmit: (trimmed) => {
-                    setTabs(prev => prev.map(t => t.id === tab.id ? { ...t, title: trimmed } : t));
-                    if (tab.id === activeTabIdRef.current) {
-                      // Active tab: splice the H1 in the visible body so
-                      // the editor reflects the rename instantly. The
-                      // standard autoSave flow then PATCHes both
-                      // markdown + title; the server-side title
-                      // invariant keeps DB.title aligned with the H1.
-                      const md = markdownRef.current;
-                      const lines = md.split("\n");
-                      const h1Idx = lines.findIndex(l => /^#\s+/.test(l));
-                      if (h1Idx >= 0) { lines[h1Idx] = `# ${trimmed}`; }
-                      else { lines.unshift(`# ${trimmed}`, ""); }
-                      const newMd = lines.join("\n");
-                      setMarkdown(newMd);
-                      doRender(newMd);
-                      cmSetDocRef.current?.(newMd);
-                      setTitle(trimmed);
-                    } else if (tab.cloudId) {
-                      // Non-active cloud tab: client doesn't have the
-                      // body loaded, so it can't splice locally. Send a
-                      // pure title PATCH — the server splices the H1
-                      // into the existing markdown so body and column
-                      // stay in lockstep, and the next loadTab won't
-                      // "snap" to a different title.
-                      const headers: Record<string, string> = { "Content-Type": "application/json", ...authHeadersRef.current };
-                      fetch(`/api/docs/${tab.cloudId}`, {
-                        method: "PATCH",
-                        headers,
-                        body: JSON.stringify({
-                          action: "auto-save",
-                          title: trimmed,
-                          userId: user?.id,
-                          userEmail: user?.email,
-                          anonymousId,
-                          editToken: tab.editToken,
-                        }),
-                      }).catch(() => {});
-                    }
-                    setInlineInput(null);
-                  },
-                });
+                // Flip the matching sidebar row into inline-edit mode.
+                // The commit handler (in the docs <SidebarFolderTree>
+                // mount) updates tab title + splices the body H1.
+                setRenamingItem({ kind: "tab", id: tab.id });
               }},
               { label: "Duplicate", action: () => {
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
@@ -13691,11 +13714,7 @@ ${clone.innerHTML}
               ...(folderContextMenu.folderId !== EXAMPLES_FOLDER_ID ? [{ label: "Rename", action: () => {
                 const folder = folders.find(f => f.id === folderContextMenu.folderId);
                 if (!folder) return;
-                setInlineInput({ label: "Folder name", defaultValue: folder.name, onSubmit: (name) => {
-                  setFolders(prev => prev.map(f => f.id === folder.id ? { ...f, name } : f));
-                  fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: folder.id, name }) }).catch(() => {});
-                  setInlineInput(null);
-                }});
+                setRenamingItem({ kind: "folder", id: folder.id });
               }}] : []),
               ...(folderContextMenu.folderId !== EXAMPLES_FOLDER_ID ? [{ label: "Change icon...", action: () => {
                 setEmojiPickerFolderId(folderContextMenu.folderId);
@@ -13802,20 +13821,9 @@ ${clone.innerHTML}
             window.open(`/b/${b.id}`, "_blank", "noopener");
           }},
           { label: "Rename", action: () => {
-            setInlineInput({
-              label: "Bundle name",
-              defaultValue: b.title || "",
-              onSubmit: (trimmed) => {
-                setBundles(prev => prev.map(x => x.id === b.id ? { ...x, title: trimmed } : x));
-                setTabs(prev => prev.map(t => (t.kind === "bundle" && t.bundleId === b.id) ? { ...t, title: trimmed } : t));
-                fetch(`/api/bundles/${b.id}`, {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json", ...authHeaders },
-                  body: JSON.stringify(ownerBody({ title: trimmed })),
-                }).catch(() => {});
-                setInlineInput(null);
-              },
-            });
+            // Sidebar bundle rows use the `bundle-item-<id>` synthetic
+            // tabId — match the SidebarFolderTree mount.
+            setRenamingItem({ kind: "tab", id: `bundle-item-${b.id}` });
           }},
           { label: "Copy link", action: () => {
             const url = `${window.location.origin}/b/${b.id}`;

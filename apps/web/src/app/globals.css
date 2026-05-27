@@ -1580,19 +1580,19 @@ textarea::placeholder {
   color: var(--editor-placeholder) !important;
 }
 
-/* Text selection — soft lime tied to the Pure brand instead of the
-   orange `accent-dim` we used to use everywhere. Applies globally
-   so editor / viewer / settings / marketing all read the same way
-   when the user drags to select text. */
+/* Text selection — inverted ink. Selection fills with the current
+   text color, text reads as the canvas color. Matches macOS / Word
+   "selected text is reversed video" intuition and avoids the tinted
+   highlight reading as a UI accent. */
 ::selection,
 textarea::selection {
-  background: rgba(181, 255, 26, 0.22);  /* micro-lime @ 22% */
-  color: var(--text-primary);
+  background: var(--text-primary);
+  color: var(--background);
 }
 [data-theme="light"] ::selection,
 [data-theme="light"] textarea::selection {
-  background: rgba(91, 199, 0, 0.20);    /* micro-lime light variant */
-  color: var(--text-primary);
+  background: var(--text-primary);
+  color: var(--background);
 }
 
 /* ========================================
