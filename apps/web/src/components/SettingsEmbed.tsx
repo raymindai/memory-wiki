@@ -38,12 +38,29 @@ import {
 // Avatar styles offered to the user. Founder direction: keep it
 // to two — the OAuth photo (whatever Google/GitHub passed through
 // user_metadata.avatar_url; the user changes it on that platform,
-// not here) and a deterministic Identicon (DiceBear). The earlier
-// roster of 8 DiceBear styles was decision-fatigue.
+// not here) and a deterministic generated avatar (DiceBear shapes).
+//
+// "shapes" replaces the earlier "identicon" style which DiceBear v9
+// renders in a muted brown palette that read as dull. Existing
+// profiles with avatar_style = "identicon" continue to work — see
+// resolveAvatar for the in-place mapping.
 const AVATAR_STYLES: { id: string; label: string; dicebearStyle?: string }[] = [
-  { id: "oauth",     label: "Photo" },
-  { id: "identicon", label: "Identicon", dicebearStyle: "identicon" },
+  { id: "oauth",  label: "Photo" },
+  { id: "shapes", label: "Shapes", dicebearStyle: "shapes" },
 ];
+
+// Heuristic for Google's stock initial avatar — a coloured circle
+// with the user's first letter, served when the account has no real
+// profile photo. The Photo tile is suppressed for these because it
+// duplicates the Shapes tile (both are generated initials) and
+// implies the user has a real photo when they don't.
+function isStockOAuthAvatar(url: string | null | undefined): boolean {
+  if (!url) return true;
+  if (url.includes("/default-user")) return true;            // lh3.googleusercontent.com/a/default-user=…
+  if (url.includes("=s96-c") && url.includes("/a/")) return true; // letter-default variants
+  if (url.startsWith("data:image/")) return true;            // inline SVG initial fallbacks
+  return false;
+}
 
 function dicebearStyleUrl(style: string, seed: string, size = 80): string {
   return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
@@ -643,7 +660,14 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                 Pick a style
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {AVATAR_STYLES.map((s) => {
+                {AVATAR_STYLES.filter((s) => {
+                  // Hide the Photo tile when the OAuth provider gave us
+                  // a stock initial avatar — it duplicates the Shapes
+                  // tile (both generated) and implies a real photo
+                  // exists when it doesn't.
+                  if (s.id !== "oauth") return true;
+                  return !isStockOAuthAvatar(user?.user_metadata?.avatar_url);
+                }).map((s) => {
                   const active = avatarStyle === s.id;
                   const previewUrl = s.id === "oauth"
                     ? (user?.user_metadata?.avatar_url || dicebearUrl(user?.email || "user", 48))

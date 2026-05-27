@@ -17,14 +17,18 @@ export function truncateTitle(title: string, max: number): string {
   return title.slice(0, max) + "...";
 }
 
-/** Shared DiceBear style → URL helper. */
+/** Shared DiceBear style → URL helper. The "identicon" style stored
+ *  on old profile rows is silently upgraded to "shapes" — the new
+ *  default — so existing users get the brighter look without a DB
+ *  migration. */
 function dicebearStyleUrl(style: string, seed: string, size: number): string {
-  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
+  const effective = style === "identicon" ? "shapes" : style;
+  return `https://api.dicebear.com/9.x/${effective}/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
 }
 
-/** DiceBear identicon — default avatar fallback. */
+/** DiceBear shapes — default avatar fallback. */
 export function dicebearUrl(seed: string, size = 40): string {
-  return dicebearStyleUrl("identicon", seed, size);
+  return dicebearStyleUrl("shapes", seed, size);
 }
 
 /**

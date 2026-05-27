@@ -64,10 +64,13 @@ async function getHub(slug: string, at: Date | null): Promise<HubData | null> {
     if (meta.avatar_url) oauthAvatar = meta.avatar_url;
   } catch { /* admin lookup unavailable */ }
   const seed = encodeURIComponent(ownerEmail || profile.hub_slug || "user");
-  const style = (profile as { avatar_style?: string | null }).avatar_style;
+  const rawStyle = (profile as { avatar_style?: string | null }).avatar_style;
+  // Match the same upgrade resolveAvatar does — older rows with
+  // avatar_style="identicon" render the new "shapes" style.
+  const style = rawStyle === "identicon" ? "shapes" : rawStyle;
   let resolvedAvatar: string;
   if (style && style !== "oauth") {
-    resolvedAvatar = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
+    resolvedAvatar = `https://api.dicebear.com/9.x/${style}/svg?seed=${seed}`;
   } else if (profile.avatar_url) {
     resolvedAvatar = profile.avatar_url;
   } else if (oauthAvatar) {
