@@ -9,6 +9,18 @@ export function middleware(request: NextRequest) {
   try {
     const { pathname, searchParams } = request.nextUrl;
 
+    // /@<slug> → rewrite to /hub/<slug> internally so the
+    // canonical "human" URL (memory.wiki/@you) renders the hub
+    // page without needing a public-facing redirect. iOS,
+    // marketing copy, and old social links all point at /@
+    // — this is the route that makes them resolve.
+    const atMatch = pathname.match(/^\/@([a-z0-9_-]{3,32})$/);
+    if (atMatch) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/hub/${atMatch[1]}`;
+      return NextResponse.rewrite(url);
+    }
+
     // /?doc=ID → redirect to /{id} (backwards compat)
     if (pathname === "/" && searchParams.has("doc")) {
       const docId = searchParams.get("doc");
@@ -67,6 +79,8 @@ export const config = {
     "/docs",
     "/plugins",
     "/ko/:path*",
+    // /@<slug> hub URL — rewritten internally to /hub/<slug>.
+    "/@:slug",
     // /d/:path*, /b/:path*, /hub/:path* intentionally NOT in middleware:
     // middleware match forces the page off the static prerender path,
     // and Vercel then emits `cache-control: private, no-store` — which
