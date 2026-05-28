@@ -50,6 +50,24 @@ struct ShareSheetView: View {
                         } else if let sel = initial.selection, !sel.isEmpty {
                             preview(label: "SELECTION", text: sel)
                         }
+                        // Diagnostic disclosure — shows what iOS
+                        // handed us. Helps root-cause "body not
+                        // captured" without device logs.
+                        if !initial.debug.isEmpty {
+                            DisclosureGroup {
+                                Text(initial.debug)
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundStyle(ShareTheme.textFaint)
+                                    .lineSpacing(2)
+                                    .padding(.top, 6)
+                            } label: {
+                                Text("DIAGNOSTIC")
+                                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                                    .tracking(1)
+                                    .foregroundStyle(ShareTheme.textFaint)
+                            }
+                            .tint(ShareTheme.textFaint)
+                        }
                     } else if let u = savedURL {
                         successCard(url: u)
                     }
