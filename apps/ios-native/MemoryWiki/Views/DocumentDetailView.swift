@@ -32,6 +32,7 @@ struct DocumentDetailView: View {
     @State private var confirmDelete = false
     @State private var togglingVisibility = false
     @State private var showTOC = false
+    @State private var showAddToBundle = false
 
     var body: some View {
         ZStack {
@@ -61,6 +62,12 @@ struct DocumentDetailView: View {
             }
         } message: {
             Text("It moves to Trash on memory.wiki — recoverable for 30 days.")
+        }
+        .sheet(isPresented: $showAddToBundle) {
+            AddToBundleSheet(docId: seed.id) {
+                showAddToBundle = false
+            }
+            .preferredColorScheme(.dark)
         }
         .sheet(isPresented: $showTOC) {
             if let detail {
@@ -151,6 +158,10 @@ struct DocumentDetailView: View {
                 Menu {
                     Button { startEditing() } label: { Label("Edit", systemImage: "pencil") }
                         .disabled(detail == nil)
+                    Button {
+                        Haptics.tap()
+                        showAddToBundle = true
+                    } label: { Label("Add to bundle…", systemImage: "square.stack.3d.up.badge.a") }
                     Button { copyAiPrompt() } label: { Label("Copy as AI prompt", systemImage: "sparkles") }
                     Button { UIPasteboard.general.string = seed.publicURL.absoluteString } label: {
                         Label("Copy URL", systemImage: "link")

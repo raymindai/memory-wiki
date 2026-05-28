@@ -14,6 +14,8 @@ struct ProfileView: View {
     @State private var path: [SettingsRoute] = []
     @State private var showFeedback = false
     @State private var showMailUnavailable = false
+    @State private var hubStats: APIClient.HubResponse? = nil
+    @State private var loadingHub = false
 
     private var hubURL: URL? {
         guard let slug = auth.session?.hubSlug, !slug.isEmpty else { return nil }
@@ -34,6 +36,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         title
                         hubCard
+                        hubStatsCard
                         section("ACCOUNT") {
                             SettingRow(label: "Email", value: auth.session?.email)
                             if let slug = auth.session?.hubSlug {
@@ -123,6 +126,75 @@ struct ProfileView: View {
                     $0.overrideUserInterfaceStyle = .dark
                 }
             }
+        }
+        .task { await loadHubStats() }
+        .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
+            hubStats = nil
+            Task { await loadHubStats() }
+        }
+    }
+
+    /// Render a compact owner-view summary of the user's hub:
+    /// stat tiles (docs / bundles) + counts split by public /
+    /// shared / private if available. Hidden when the user has
+    /// no hub slug yet (their hubCard already explains the
+    /// claim flow).
+    @ViewBuilder private var hubStatsCard: some View {
+        if let slug = auth.session?.hubSlug, !slug.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                SectionLabel("YOUR HUB")
+                if let hub = hubStats {
+                    HStack(spacing: 8) {
+                        HubStatTile(
+                            label: "MEMORIES",
+                            value: hub.stats?.documents.map(String.init) ?? "—",
+                            sublabel: hub.ownerView?.documents.flatMap { ov in
+                                let pub = ov.public?.count ?? 0
+                                let pri = (ov.private?.count ?? 0) + (ov.shared?.count ?? 0)
+                                return "\(pub) public · \(pri) private"
+                            } ?? ""
+                        )
+                        HubStatTile(
+                            label: "BUNDLES",
+                            value: hub.stats?.bundles.map(String.init) ?? "—",
+                            sublabel: hub.ownerView?.bundles.flatMap { ov in
+                                let pub = ov.public?.count ?? 0
+                                let pri = (ov.private?.count ?? 0) + (ov.shared?.count ?? 0)
+                                return "\(pub) public · \(pri) private"
+                            } ?? ""
+                        )
+                    }
+                    if let desc = hub.profile.hub_description, !desc.isEmpty {
+                        Text(desc)
+                            .font(Brand.body(size: 12))
+                            .foregroundStyle(Brand.textMuted)
+                            .lineSpacing(2)
+                    }
+                } else if loadingHub {
+                    Text("Loading hub…")
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.textFaint)
+                        .padding(.vertical, 8)
+                } else {
+                    Text("Couldn't load hub stats.")
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.textFaint)
+                }
+            }
+        }
+    }
+
+    /// Async fetch — uses the authenticated /api/hub/<slug>
+    /// endpoint which returns owner-view buckets when the
+    /// Bearer matches.
+    private func loadHubStats() async {
+        guard let slug = auth.session?.hubSlug, !slug.isEmpty else { return }
+        loadingHub = true
+        defer { loadingHub = false }
+        do {
+            hubStats = try await APIClient.shared.hub(slug: slug)
+        } catch {
+            // Silent — leave nil; UI shows the error fallback.
         }
     }
 
@@ -264,6 +336,39 @@ enum SettingsRoute: Hashable {
 // future locale) flows through SwiftUI's automatic lookup.
 // Passing a literal at the call site still works — Swift
 // converts string-literal → LocalizedStringKey implicitly.
+
+/// Compact stat tile for the hub overview — big mono number +
+/// uppercased label + faint mono sublabel ("12 public · 4 private").
+private struct HubStatTile: View {
+    let label: String
+    let value: String
+    let sublabel: String
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(Brand.mono(size: 9, weight: .medium))
+                .tracking(1.0)
+                .foregroundStyle(Brand.textFaint)
+            Text(value)
+                .font(Brand.display(size: 26))
+                .foregroundStyle(Brand.textPrimary)
+            if !sublabel.isEmpty {
+                Text(sublabel)
+                    .font(Brand.mono(size: 9))
+                    .foregroundStyle(Brand.textFaint)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Brand.surface)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
+    }
+}
 
 private struct SectionLabel: View {
     let text: LocalizedStringKey

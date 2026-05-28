@@ -162,6 +162,124 @@ final class APIClient {
         )
     }
 
+    // MARK: - Profile + Hub
+
+    /// User's own profile row — display_name, avatar, hub_slug,
+    /// hub_public, hub_description, plan.
+    struct UserProfile: Decodable {
+        let display_name: String?
+        let avatar_url: String?
+        let avatar_style: String?
+        let plan: String?
+        let hub_slug: String?
+        let hub_public: Bool?
+        let hub_description: String?
+    }
+    func userProfile() async throws -> UserProfile {
+        struct Response: Decodable { let profile: UserProfile? }
+        let response: Response = try await getJSON("/api/user/profile")
+        guard let profile = response.profile else {
+            throw APIError.http(404, "No profile")
+        }
+        return profile
+    }
+
+    /// Authenticated hub view for the signed-in user. Returns
+    /// owner-view (public + shared + private buckets) when the
+    /// Bearer token matches the hub's owner profile. Used by
+    /// the iOS Profile tab to render hub stats + a snapshot of
+    /// public surface.
+    struct HubResponse: Decodable {
+        struct Profile: Decodable {
+            let display_name: String?
+            let avatar_url: String?
+            let hub_slug: String?
+            let hub_description: String?
+        }
+        struct DocCard: Decodable, Identifiable, Hashable {
+            let id: String
+            let title: String?
+            let updated_at: String?
+        }
+        struct BundleCard: Decodable, Identifiable, Hashable {
+            let id: String
+            let title: String?
+            let updated_at: String?
+        }
+        struct Stats: Decodable {
+            let documents: Int?
+            let bundles: Int?
+        }
+        struct OwnerView: Decodable {
+            struct DocSets: Decodable {
+                let `public`: [DocCard]?
+                let shared: [DocCard]?
+                let `private`: [DocCard]?
+            }
+            struct BundleSets: Decodable {
+                let `public`: [BundleCard]?
+                let shared: [BundleCard]?
+                let `private`: [BundleCard]?
+            }
+            let documents: DocSets?
+            let bundles: BundleSets?
+        }
+        let profile: Profile
+        let documents: [DocCard]?
+        let bundles: [BundleCard]?
+        let stats: Stats?
+        let ownerView: OwnerView?
+    }
+    func hub(slug: String) async throws -> HubResponse {
+        // /api/hub/[slug] uses public URL path so encode the slug.
+        let path = "/api/hub/\(slug)"
+        return try await getJSON(path)
+    }
+
+    // MARK: - Bundle mutations
+
+    /// Create a new bundle with the given title + initial doc IDs.
+    /// Mirrors the web's POST /api/bundles. Returns the new bundle's id.
+    func createBundle(title: String, documentIds: [String] = []) async throws -> String {
+        struct Request: Encodable {
+            let title: String
+            let documentIds: [String]
+            let isDraft: Bool
+        }
+        struct Response: Decodable { let id: String }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let body = try JSONEncoder().encode(Request(title: title, documentIds: documentIds, isDraft: true))
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/bundles"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+        req.httpBody = body
+        let response: Response = try await perform(req)
+        bumpWidget()
+        return response.id
+    }
+
+    /// Add doc IDs to an existing bundle. PATCH /api/bundles/<id>
+    /// with action: "add-documents". Idempotent on the server.
+    func addDocumentsToBundle(bundleId: String, documentIds: [String]) async throws {
+        struct Request: Encodable {
+            let action: String
+            let documentIds: [String]
+        }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let body = try JSONEncoder().encode(Request(action: "add-documents", documentIds: documentIds))
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/bundles/\(bundleId)"))
+        req.httpMethod = "PATCH"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        req.httpBody = body
+        try await perform(req)
+        bumpWidget()
+    }
+
     // MARK: - Low-level
 
     private func getJSON<T: Decodable>(_ path: String) async throws -> T {
