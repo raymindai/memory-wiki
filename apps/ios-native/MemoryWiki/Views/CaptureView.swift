@@ -15,6 +15,8 @@ import SwiftUI
 import UIKit
 import ImageIO
 import UniformTypeIdentifiers
+import Speech
+import AVFoundation
 
 struct CaptureView: View {
     @EnvironmentObject private var router: AppRouter
@@ -28,7 +30,31 @@ struct CaptureView: View {
     @State private var showOCRPicker = false
     @State private var showURLSheet = false
     @State private var showImportSheet = false
-    @State private var ocrBanner: String? = nil
+    /// Discriminator for transient banners so each capture surface
+    /// gets its own icon + tint instead of every toast looking the
+    /// same. Errors carry a distinct red treatment so a failure
+    /// reads as a failure at a glance.
+    enum ToastKind {
+        case photo, ocr, voice, urlImport, fileImport, success, error, info
+
+        var icon: String {
+            switch self {
+            case .photo:      return "camera.fill"
+            case .ocr:        return "text.viewfinder"
+            case .voice:      return "mic.fill"
+            case .urlImport:  return "link"
+            case .fileImport: return "tray.and.arrow.down.fill"
+            case .success:    return "checkmark.circle.fill"
+            case .error:      return "exclamationmark.triangle.fill"
+            case .info:       return "info.circle.fill"
+            }
+        }
+    }
+    struct Toast: Equatable {
+        var message: String
+        var kind: ToastKind
+    }
+    @State private var ocrBanner: Toast? = nil
     @State private var ocrBannerDismissTask: Task<Void, Never>? = nil
     /// Sticky progress indicator for long-running flows (photo
     /// resize + upload, URL import, file import). Title is the
@@ -48,6 +74,10 @@ struct CaptureView: View {
     /// fix instead of just toasting the failure.
     @State private var permissionAlertShown: Bool = false
     @State private var permissionAlertMessage: String = ""
+    /// Engine's running best-guess transcript while dictating —
+    /// shown in the DictationBanner so the user can see what's
+    /// being heard before any of it is committed to the draft.
+    @State private var dictationInterim: String = ""
     /// Uploaded photo attachments — accumulate visually as a
     /// thumbnail strip so the user can SEE what they've added.
     /// Raw markdown is generated at save time.
@@ -128,7 +158,7 @@ struct CaptureView: View {
                 titleField
                 bodyField
                 if isDictating {
-                    DictationBanner { stopDictation() }
+                    DictationBanner(interim: dictationInterim) { stopDictation() }
                         .padding(.horizontal, 14)
                         // Float well clear of the bottom tab bar so
                         // the banner doesn't look glued to it.
@@ -141,17 +171,14 @@ struct CaptureView: View {
                         .padding(.bottom, 24)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else if let ocrBanner {
-                    OcrResultChip(message: ocrBanner) { self.ocrBanner = nil }
+                    OcrResultChip(toast: ocrBanner) { self.ocrBanner = nil }
                         .padding(.horizontal, 14)
                         .padding(.bottom, 24)
                 }
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(Brand.body(size: 12))
-                        .foregroundStyle(Brand.microRed)
-                        .padding(.horizontal, 18)
-                        .padding(.bottom, 4)
-                }
+                // Error surfaces via showBanner / ProcessingBanner —
+                // a duplicate red strip down here just doubled the
+                // same message. State variable is still kept for any
+                // callers that introspect it.
             }
             // The body field's MarkdownEditor attaches its own
             // UIKit inputAccessoryView — no SwiftUI overlay needed
@@ -185,8 +212,7 @@ struct CaptureView: View {
             PhotoCaptureSheet(isPresented: $showPhotoPicker, mode: .photo) { _, image in
                 Task { await uploadPhoto(image) }
             }
-            .presentationDetents([.medium])
-            .preferredColorScheme(.dark)
+            .iOS26Sheet([.medium])
         }
         .sheet(isPresented: $showOCRPicker) {
             // OCR mode → run Vision text recognition, surface a
@@ -195,7 +221,7 @@ struct CaptureView: View {
             PhotoCaptureSheet(isPresented: $showOCRPicker, mode: .ocr) { ocrText, _ in
                 let clean = ocrText.trimmingCharacters(in: .whitespacesAndNewlines)
                 if clean.isEmpty {
-                    showBanner("No text recognised in this image.")
+                    showBanner("No text recognised in this image.", .ocr)
                 } else {
                     // Stash the recognised text in a preview chip so
                     // the user can confirm before it lands in the
@@ -206,15 +232,13 @@ struct CaptureView: View {
                     Haptics.success()
                 }
             }
-            .presentationDetents([.medium])
-            .preferredColorScheme(.dark)
+            .iOS26Sheet([.medium])
         }
         .sheet(isPresented: $showURLSheet) {
             URLImportSheet(isPresented: $showURLSheet) { url in
                 Task { await saveURL(url) }
             }
-            .presentationDetents([.medium])
-            .preferredColorScheme(.dark)
+            .iOS26Sheet([.medium])
         }
         .alert("Permission needed", isPresented: $permissionAlertShown) {
             Button("Open Settings") {
@@ -231,8 +255,7 @@ struct CaptureView: View {
                 let name = url.lastPathComponent
                 Task { await importPickedFile(data: data, name: name, contentType: contentType) }
             }
-            .presentationDetents([.medium, .large])
-            .preferredColorScheme(.dark)
+            .iOS26Sheet([.medium, .large])
         }
     }
 
@@ -352,7 +375,7 @@ struct CaptureView: View {
                     }
                     bodyDraft = bodyDraft.isEmpty ? ocr : "\(bodyDraft)\n\n\(ocr)"
                     pendingOCR = nil
-                    showBanner("Inserted \(ocr.count) characters.")
+                    showBanner("Inserted \(ocr.count) characters from OCR.", .ocr)
                     Haptics.success()
                 },
                 onDiscard: {
@@ -736,7 +759,7 @@ struct CaptureView: View {
         } catch {
             withAnimation(.snappy) { processing = nil }
             errorMessage = error.localizedDescription
-            showBanner("URL import failed: \(error.localizedDescription)")
+            showBanner("URL import failed: \(error.localizedDescription)", .error)
             Haptics.warning()
         }
     }
@@ -764,33 +787,63 @@ struct CaptureView: View {
 
     private func startDictation() {
         Haptics.tap()
+        // Pre-check authorization so a previously-denied permission
+        // immediately shows the Open-Settings alert instead of the
+        // start() call silently no-op'ing (iOS doesn't re-prompt
+        // after a denial; requestAuthorization just returns the
+        // denied status with no UI).
+        let speechStatus = SFSpeechRecognizer.authorizationStatus()
+        let micStatus = AVAudioApplication.shared.recordPermission
+        if speechStatus == .denied || speechStatus == .restricted {
+            permissionAlertMessage = "Enable Speech Recognition in iOS Settings → Memory.Wiki to dictate notes."
+            permissionAlertShown = true
+            return
+        }
+        if micStatus == .denied {
+            permissionAlertMessage = "Enable Microphone in iOS Settings → Memory.Wiki to dictate notes."
+            permissionAlertShown = true
+            return
+        }
         // Don't drop focus — the new MarkdownEditor inputAccessoryView
         // stays attached while keyboard is up, so dictating in-place
         // is fine + the LISTENING banner overlays cleanly.
-        dictation.start(locales: ["ko-KR", "en-US"]) { recognised in
-            bodyDraft += bodyDraft.isEmpty ? recognised : " " + recognised
-            showBanner("Captured \"\(recognised.prefix(30))\"")
-        } onError: { msg in
-            errorMessage = msg
-            // Permission-denial paths surface "Enable … in iOS Settings"
-            // strings — offer a direct Settings deeplink alert so the
-            // user doesn't have to context-switch and hunt manually.
-            if msg.lowercased().contains("settings") {
-                permissionAlertMessage = msg
-                permissionAlertShown = true
-            } else {
-                showBanner("Voice: \(msg)")
+        dictation.start(
+            locales: ["ko-KR", "en-US"],
+            onRecognise: { recognised in
+                bodyDraft += bodyDraft.isEmpty ? recognised : " " + recognised
+                dictationInterim = ""
+                showBanner("Heard: \"\(recognised.prefix(40))\"", .voice)
+            },
+            onInterim: { interim in
+                dictationInterim = interim
+            },
+            onError: { msg in
+                errorMessage = msg
+                // Permission-denial paths surface "Enable … in iOS
+                // Settings" strings — offer a direct Settings
+                // deeplink alert so the user doesn't have to
+                // context-switch and hunt manually.
+                if msg.lowercased().contains("settings") {
+                    permissionAlertMessage = msg
+                    permissionAlertShown = true
+                } else {
+                    showBanner("Voice: \(msg)", .error)
+                }
+                dictationInterim = ""
+                withAnimation(.snappy) { isDictating = false }
+            },
+            onStop: {
+                dictationInterim = ""
+                withAnimation(.snappy) { isDictating = false }
             }
-            withAnimation(.snappy) { isDictating = false }
-        } onStop: {
-            withAnimation(.snappy) { isDictating = false }
-        }
+        )
         withAnimation(.snappy) { isDictating = true }
     }
 
     private func stopDictation() {
         Haptics.tap()
         dictation.stop()
+        dictationInterim = ""
         withAnimation(.snappy) { isDictating = false }
     }
 
@@ -823,7 +876,7 @@ struct CaptureView: View {
         }
         guard let (data, contentType, ext) = await prepareUploadPayload(image) else {
             withAnimation(.snappy) { processing = nil }
-            showBanner("Couldn't compress the photo small enough to upload.")
+            showBanner("Couldn't compress the photo small enough to upload.", .error)
             return
         }
         withAnimation(.snappy) {
@@ -839,11 +892,11 @@ struct CaptureView: View {
                 titleDraft = "Photo · \(Date().formatted(date: .abbreviated, time: .shortened))"
             }
             withAnimation(.snappy) { processing = nil }
-            showBanner("Photo added (\(humanBytes(data.count))).")
+            showBanner("Photo added (\(humanBytes(data.count))).", .photo)
             Haptics.success()
         } catch {
             withAnimation(.snappy) { processing = nil }
-            showBanner("Upload failed: \(error.localizedDescription)")
+            showBanner("Upload failed: \(error.localizedDescription)", .error)
             Haptics.warning()
         }
     }
@@ -944,11 +997,11 @@ struct CaptureView: View {
             let url = try await APIClient.shared.importFile(data: data, filename: name, contentType: contentType)
             savedURL = url
             withAnimation(.snappy) { processing = nil }
-            showBanner("Imported. Tap View to open.")
+            showBanner("Imported. Tap View to open.", .fileImport)
             Haptics.success()
         } catch {
             withAnimation(.snappy) { processing = nil }
-            showBanner("Import failed: \(error.localizedDescription)")
+            showBanner("Import failed: \(error.localizedDescription)", .error)
             Haptics.warning()
         }
     }
@@ -956,14 +1009,20 @@ struct CaptureView: View {
     /// Surface a short-lived status banner that auto-dismisses
     /// after 2.5 s. Cancels any prior pending dismissal so back-
     /// to-back messages don't disappear early.
-    private func showBanner(_ message: String) {
-        ocrBanner = message
+    /// Surface a short-lived status banner (kind drives the icon
+    /// + colour treatment so e.g. errors don't blend in with
+    /// successes). Auto-dismisses after 2.5 s — errors get 4.5 s
+    /// because the user needs longer to read a failure.
+    private func showBanner(_ message: String, _ kind: ToastKind = .info) {
+        let toast = Toast(message: message, kind: kind)
+        ocrBanner = toast
         ocrBannerDismissTask?.cancel()
-        ocrBannerDismissTask = Task { [message] in
-            try? await Task.sleep(nanoseconds: 2_500_000_000)
+        let lifetime: UInt64 = kind == .error ? 4_500_000_000 : 2_500_000_000
+        ocrBannerDismissTask = Task { [toast] in
+            try? await Task.sleep(nanoseconds: lifetime)
             if Task.isCancelled { return }
             await MainActor.run {
-                if ocrBanner == message { ocrBanner = nil }
+                if ocrBanner == toast { ocrBanner = nil }
             }
         }
     }
@@ -1033,7 +1092,9 @@ private struct URLImportSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Brand.background.ignoresSafeArea()
+                // No opaque fill — the sheet container is glass via
+                // .iOS26Sheet(), and Brand.background here would
+                // cover it.
                 VStack(alignment: .leading, spacing: 14) {
                     Text("Save a link")
                         .font(Brand.display(size: 22))
@@ -1164,7 +1225,7 @@ private struct ImportInfoSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Brand.background.ignoresSafeArea()
+                // Glass via .iOS26Sheet container — no opaque fill.
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Import")
@@ -1182,7 +1243,11 @@ private struct ImportInfoSheet: View {
                         FormatChipsRow()
                             .padding(.bottom, 4)
 
-                        // Primary affordance — file picker.
+                        // Primary affordance — file picker. No white
+                        // fill (the rest of the app reserves Brand.
+                        // textPrimary as accent on ink). Glass surface
+                        // with a microInfo glyph + ink label reads
+                        // as primary without going stark white.
                         Button {
                             Haptics.tap()
                             showPicker = true
@@ -1190,16 +1255,23 @@ private struct ImportInfoSheet: View {
                             HStack(spacing: 10) {
                                 Image(systemName: "doc.badge.plus")
                                     .font(.system(size: 16, weight: .regular))
-                                    .foregroundStyle(Brand.background)
+                                    .foregroundStyle(Brand.microInfo)
                                 Text(importingName.map { "Importing \($0)…" } ?? "Pick a file from iOS")
                                     .font(Brand.body(size: 14, weight: .semibold))
-                                    .foregroundStyle(Brand.background)
+                                    .foregroundStyle(Brand.textPrimary)
                                 Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Brand.textFaint)
                             }
                             .padding(.horizontal, 14).padding(.vertical, 14)
                             .background(
                                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(Brand.textPrimary)
+                                    .fill(.ultraThinMaterial)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .strokeBorder(Brand.microInfo.opacity(0.45), lineWidth: 1)
+                                    )
                             )
                         }
                         .buttonStyle(.plain)
@@ -1439,37 +1511,57 @@ private struct RestoreDraftChip: View {
 }
 
 private struct DictationBanner: View {
+    /// Engine's running best-guess. Updates as the user speaks;
+    /// emptied each time a chunk is finalised and committed to
+    /// the draft. Empty string = nothing to preview right now
+    /// (just listening), so we hide the preview row entirely.
+    var interim: String = ""
     var onStop: () -> Void
     @State private var pulse = false
     var body: some View {
-        HStack(spacing: 10) {
-            Circle()
-                .fill(Brand.microRed)
-                .frame(width: 8, height: 8)
-                .opacity(pulse ? 1 : 0.3)
-                .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: pulse)
-                .onAppear { pulse = true }
-            Text("LISTENING")
-                .font(Brand.mono(size: 9, weight: .medium)).tracking(1)
-                .foregroundStyle(Brand.textMuted)
-            Text("Korean + English")
-                .font(Brand.body(size: 11)).foregroundStyle(Brand.textFaint)
-            Spacer()
-            Button(action: onStop) {
-                Text("Stop")
-                    .font(Brand.body(size: 12, weight: .medium))
-                    .foregroundStyle(Brand.textPrimary)
-                    .padding(.horizontal, 12).padding(.vertical, 6)
-                    .background(Capsule().strokeBorder(Brand.borderDim, lineWidth: 1))
+        VStack(alignment: .leading, spacing: interim.isEmpty ? 0 : 8) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(Brand.microRed)
+                    .frame(width: 8, height: 8)
+                    .opacity(pulse ? 1 : 0.3)
+                    .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: pulse)
+                    .onAppear { pulse = true }
+                Text("LISTENING")
+                    .font(Brand.mono(size: 9, weight: .medium)).tracking(1)
+                    .foregroundStyle(Brand.textMuted)
+                Text("Korean + English")
+                    .font(Brand.body(size: 11)).foregroundStyle(Brand.textFaint)
+                Spacer()
+                Button(action: onStop) {
+                    Text("Stop")
+                        .font(Brand.body(size: 12, weight: .medium))
+                        .foregroundStyle(Brand.textPrimary)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Capsule().strokeBorder(Brand.borderDim, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
+            if !interim.isEmpty {
+                // Italicised partial transcript so the user can
+                // verify what's being heard before it lands in
+                // the draft body. The text is the rolling tail
+                // — past committed chunks aren't repeated.
+                Text(interim)
+                    .font(Brand.body(size: 13, weight: .regular).italic())
+                    .foregroundStyle(Brand.textMuted)
+                    .lineLimit(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity)
+            }
         }
-        .padding(.horizontal, 12).padding(.vertical, 8)
+        .padding(.horizontal, 12).padding(.vertical, interim.isEmpty ? 8 : 10)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Brand.surface)
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
+        .animation(.snappy(duration: 0.18), value: interim.isEmpty)
     }
 }
 
@@ -1509,17 +1601,43 @@ private struct ProcessingBanner: View {
     }
 }
 
+/// Transient banner. Icon, tint, and (for error) border colour
+/// flow from the toast's kind so a successful photo upload doesn't
+/// look like a failed URL import.
 private struct OcrResultChip: View {
-    let message: String
+    let toast: CaptureView.Toast
     var onDismiss: () -> Void
+
+    private var tint: Color {
+        switch toast.kind {
+        case .photo:      return Brand.microWarn
+        case .ocr:        return Brand.microInfo
+        case .voice:      return Brand.microInfo
+        case .urlImport:  return Brand.microInfo
+        case .fileImport: return Brand.microInfo
+        case .success:    return Brand.microLime
+        case .error:      return Brand.microRed
+        case .info:       return Brand.textMuted
+        }
+    }
+    private var borderColor: Color {
+        toast.kind == .error ? Brand.microRed.opacity(0.55) : Brand.borderDim
+    }
+    private var fill: AnyShapeStyle {
+        toast.kind == .error
+            ? AnyShapeStyle(Brand.microRed.opacity(0.10))
+            : AnyShapeStyle(Brand.surface)
+    }
+
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "text.viewfinder")
-                .font(.system(size: 12))
-                .foregroundStyle(Brand.microInfo)
-            Text(message)
-                .font(Brand.body(size: 12))
+            Image(systemName: toast.kind.icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(tint)
+            Text(toast.message)
+                .font(Brand.body(size: 12, weight: toast.kind == .error ? .semibold : .regular))
                 .foregroundStyle(Brand.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer()
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
@@ -1529,11 +1647,11 @@ private struct OcrResultChip: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 12).padding(.vertical, 8)
+        .padding(.horizontal, 12).padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Brand.surface)
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(fill)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(borderColor, lineWidth: 1))
         )
     }
 }

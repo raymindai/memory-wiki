@@ -134,3 +134,20 @@ extension Color {
         self.init(.sRGB, red: r, green: g, blue: b, opacity: opacity)
     }
 }
+
+// MARK: - iOS 26 sheet chrome
+
+extension View {
+    /// Unified iOS 26 sheet treatment — drag indicator, glass
+    /// presentation background, dark color scheme, and the caller-
+    /// supplied detents. Every modal in the app routes through this
+    /// so corner radius, material, and chrome stay consistent.
+    func iOS26Sheet(_ detents: Set<PresentationDetent>) -> some View {
+        self
+            .presentationDetents(detents)
+            .presentationDragIndicator(.visible)
+            .presentationBackground(.ultraThinMaterial)
+            .presentationCornerRadius(28)
+            .preferredColorScheme(.dark)
+    }
+}

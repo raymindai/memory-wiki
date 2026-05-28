@@ -24,17 +24,39 @@ struct RootView: View {
                 ZStack(alignment: .bottom) {
                     Brand.background.ignoresSafeArea()
 
-                    Group {
-                        switch router.selectedTab {
-                        case .start:    StartView()
-                        case .timeline: TimelineView()
-                        case .bundles:  BundlesView()
-                        case .capture:  CaptureView()
-                        case .profile:  ProfileView()
-                        }
+                    // All five tab views stay mounted across tab
+                    // switches. Previous `switch` rebuilt the active
+                    // view on every selection — destroying its
+                    // @StateObject and forcing a refetch on the
+                    // next visit, which is what made the app feel
+                    // "load on every tap." ZStack + opacity keeps
+                    // each model alive; hit testing is gated so
+                    // hidden tabs don't intercept taps. Memory cost
+                    // is modest (~five NavigationStacks).
+                    ZStack {
+                        StartView()
+                            .opacity(router.selectedTab == .start ? 1 : 0)
+                            .allowsHitTesting(router.selectedTab == .start)
+                        TimelineView()
+                            .opacity(router.selectedTab == .timeline ? 1 : 0)
+                            .allowsHitTesting(router.selectedTab == .timeline)
+                        BundlesView()
+                            .opacity(router.selectedTab == .bundles ? 1 : 0)
+                            .allowsHitTesting(router.selectedTab == .bundles)
+                        CaptureView()
+                            .opacity(router.selectedTab == .capture ? 1 : 0)
+                            .allowsHitTesting(router.selectedTab == .capture)
+                        ProfileView()
+                            .opacity(router.selectedTab == .profile ? 1 : 0)
+                            .allowsHitTesting(router.selectedTab == .profile)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.bottom, 56) // tab-bar height
+                    // iOS 26 floating-glass paradigm: content extends
+                    // edge-to-edge under the tab bar, the bar's
+                    // .ultraThinMaterial blur reveals whatever is
+                    // beneath it. No bottom inset here — scrollable
+                    // child views set their own .safeAreaInset(.bottom)
+                    // for the last-row hit area if they need it.
 
                     VStack(spacing: 0) {
                         if !reachability.isOnline {
@@ -48,6 +70,29 @@ struct RootView: View {
                         if !keyboardUp {
                             BrandTabBar(selected: $router.selectedTab)
                                 .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        }
+                    }
+                    // Dark gradient strip behind the floating tab
+                    // bar — content fades into Brand.background
+                    // over the bottom ~140pt so the bar reads
+                    // clearly without sitting on top of cluttered
+                    // imagery. Sits ABOVE content but BELOW the
+                    // tab bar in the ZStack via .allowsHitTesting
+                    // false so it never eats taps.
+                    .background(alignment: .bottom) {
+                        if !keyboardUp {
+                            LinearGradient(
+                                colors: [
+                                    Brand.background.opacity(0),
+                                    Brand.background.opacity(0.65),
+                                    Brand.background.opacity(0.95)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .frame(height: 140)
+                            .allowsHitTesting(false)
+                            .ignoresSafeArea(.container, edges: .bottom)
                         }
                     }
                     .animation(.snappy(duration: 0.22), value: reachability.isOnline)
@@ -139,54 +184,114 @@ enum AppTab: String, CaseIterable {
     }
 }
 
+/// Floating "liquid glass" tab bar in the iOS 26 native style —
+/// capsule shape, ultraThinMaterial fill, hairline border, sits
+/// inset from the screen edges instead of spanning edge-to-edge.
+/// Replaces the older full-width bordered strip.
 private struct BrandTabBar: View {
+    @EnvironmentObject private var auth: AuthManager
     @Binding var selected: AppTab
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AppTab.allCases, id: \.self) { tab in
                 Button {
+                    Haptics.selection()
                     selected = tab
                 } label: {
                     VStack(spacing: tab == .start ? 1 : 3) {
-                        tab.glyph
-                            // .font only affects SF Symbols; the
-                            // Start blob sizes itself via init.
+                        glyph(for: tab)
                             .font(.system(size: 16, weight: .regular))
-                            // Slightly taller cell for the Start
-                            // blob — matches the 38pt glyph.
-                            .frame(height: tab == .start ? 40 : 28)
-                        // Other tabs render the mono caption; Start
-                        // skips it entirely (blob is self-evident)
-                        // so the indicator sits flush under it
-                        // instead of where the empty caption was.
+                            .frame(height: tab == .start ? 38 : 26)
                         if tab != .start {
                             Text(tab.label)
                                 .font(Brand.mono(size: 9, weight: .medium))
                                 .tracking(0.5)
                                 .textCase(.uppercase)
                         }
-                        // Active indicator — ink hairline.
                         Rectangle()
                             .fill(selected == tab ? Brand.textPrimary : Color.clear)
                             .frame(width: 14, height: 1)
                     }
                     .foregroundStyle(selected == tab ? Brand.textPrimary : Brand.textFaint)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, tab == .start ? 4 : 8)
+                    .padding(.vertical, tab == .start ? 6 : 10)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
         .background(
-            Brand.background
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(Brand.borderDim)
-                        .frame(height: 1)
-                }
+            Capsule(style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(Brand.borderDim, lineWidth: 0.5)
+                )
+                .shadow(color: Color.black.opacity(0.35), radius: 18, x: 0, y: 6)
         )
+        .clipShape(Capsule(style: .continuous))
+        .padding(.horizontal, 12)
+        .padding(.bottom, 4)
+    }
+
+    /// .profile tab paints the user's avatar (small circle) when
+    /// available — everything else falls through to the static
+    /// AppTab.glyph mapping. Done here rather than in AppTab so the
+    /// enum stays free of EnvironmentObject coupling.
+    @ViewBuilder
+    private func glyph(for tab: AppTab) -> some View {
+        switch tab {
+        case .profile:
+            ProfileTabAvatar(
+                avatarURL: auth.session.flatMap { $0.avatarURL },
+                isActive: selected == .profile
+            )
+        default:
+            tab.glyph
+        }
+    }
+}
+
+/// 22pt circle avatar with a subtle ink ring when the tab is
+/// active. Falls back to the SF person glyph when no avatar URL
+/// exists (signed-in user without an uploaded picture yet).
+private struct ProfileTabAvatar: View {
+    let avatarURL: URL?
+    let isActive: Bool
+
+    var body: some View {
+        Group {
+            if let url = avatarURL {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let img):
+                        img.resizable().scaledToFill()
+                    default:
+                        placeholder
+                    }
+                }
+            } else {
+                placeholder
+            }
+        }
+        .frame(width: 22, height: 22)
+        .clipShape(Circle())
+        .overlay(
+            Circle().strokeBorder(
+                isActive ? Brand.textPrimary : Brand.borderDim,
+                lineWidth: isActive ? 1.5 : 0.5
+            )
+        )
+    }
+
+    private var placeholder: some View {
+        ZStack {
+            Circle().fill(Brand.surface)
+            Image(systemName: "person.fill")
+                .font(.system(size: 11))
+                .foregroundStyle(Brand.textMuted)
+        }
     }
 }
 

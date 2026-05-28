@@ -24,6 +24,14 @@ struct UserSession: Equatable {
     let email: String?
     let hubSlug: String?
     let accessToken: String
+    /// Optional profile avatar — used by the tab bar's Settings
+    /// slot so the user sees themselves rather than a generic
+    /// person glyph. Loaded best-effort during hydrate().
+    let avatarURL: URL?
+    /// Profile display name (`profiles.display_name`) — what we
+    /// greet the user with in Start hero + the editable field on
+    /// the Settings tab.
+    let displayName: String?
 }
 
 @MainActor
@@ -111,6 +119,29 @@ final class AuthManager: NSObject, ObservableObject {
         }
     }
 
+    /// Public refresh — used after the user edits their display
+    /// name (or any other profile field) in Settings so the new
+    /// value flows back into UserSession and the dependent views
+    /// (Start greeting, tab-bar avatar) repaint.
+    func refresh() async { await hydrate() }
+
+    /// Direct write to `profiles.display_name`. RLS lets a user
+    /// update their own row, so we don't need a separate API
+    /// endpoint just for this. Returns silently; the next
+    /// `refresh()` picks up the new value.
+    func updateDisplayName(_ newValue: String) async throws {
+        let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        struct Body: Encodable { let display_name: String? }
+        let body = Body(display_name: trimmed.isEmpty ? nil : trimmed)
+        guard let userId = session?.userId else { return }
+        _ = try await client
+            .from("profiles")
+            .update(body)
+            .eq("id", value: userId)
+            .execute()
+        await refresh()
+    }
+
     private func hydrate() async {
         let previousUserId = session?.userId
         guard let auth = try? await client.auth.session else {
@@ -128,14 +159,25 @@ final class AuthManager: NSObject, ObservableObject {
         // Best-effort lookup; tolerate missing rows (RLS may hide
         // it for fresh accounts that haven't run the bootstrap).
         var hubSlug: String?
+        var avatarURL: URL?
+        var displayName: String?
         if let profile: ProfileSlugRow = try? await client
             .from("profiles")
-            .select("hub_slug")
+            .select("hub_slug, avatar_url, avatar_style, display_name")
             .eq("id", value: auth.user.id)
             .single()
             .execute()
             .value {
             hubSlug = profile.hub_slug
+            displayName = profile.display_name?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if (displayName ?? "").isEmpty { displayName = nil }
+            // Only honour an explicit user-uploaded image — synthetic
+            // DiceBear styles are too generic for the tab-bar slot
+            // and would defeat the personalisation point.
+            if (profile.avatar_style ?? "") == "upload",
+               let raw = profile.avatar_url, let u = URL(string: raw) {
+                avatarURL = u
+            }
         }
         let newUserId = auth.user.id.uuidString.lowercased()
         let userChanged = previousUserId != nil && previousUserId != newUserId
@@ -143,7 +185,9 @@ final class AuthManager: NSObject, ObservableObject {
             userId: newUserId,
             email: auth.user.email,
             hubSlug: hubSlug,
-            accessToken: auth.accessToken
+            accessToken: auth.accessToken,
+            avatarURL: avatarURL,
+            displayName: displayName
         )
         // Switching accounts mid-process — broadcast so cached
         // doc lists / pinned IDs from the old account get wiped
@@ -206,6 +250,9 @@ extension AuthManager: ASWebAuthenticationPresentationContextProviding {
 
 private struct ProfileSlugRow: Decodable {
     let hub_slug: String?
+    let avatar_url: String?
+    let avatar_style: String?
+    let display_name: String?
 }
 
 extension AuthManager {
@@ -217,7 +264,9 @@ extension AuthManager {
             userId: "preview-user-id",
             email: "preview@memory.wiki",
             hubSlug: "preview",
-            accessToken: "preview-token"
+            accessToken: "preview-token",
+            avatarURL: nil,
+            displayName: "Preview"
         )
         return mgr
     }

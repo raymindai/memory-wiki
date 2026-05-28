@@ -20,16 +20,25 @@ final class DictationController: ObservableObject {
     private let audioEngine = AVAudioEngine()
     private var lastFinalLength = 0
     private var onRecognise: ((String) -> Void)?
+    private var onInterim: ((String) -> Void)?
     private var onError: ((String) -> Void)?
     private var onStop: (() -> Void)?
 
     /// Begin a dictation session. The first available locale in
     /// `locales` is used; permissions are requested if needed.
+    ///
+    /// `onInterim` (optional) receives the engine's running best-
+    /// guess transcript on every refinement — used by the UI to
+    /// preview what's being heard before it's committed. `onRecognise`
+    /// still fires only with finalised chunks so the doc draft
+    /// doesn't ingest partial guesses.
     func start(locales: [String],
                onRecognise: @escaping (String) -> Void,
+               onInterim: ((String) -> Void)? = nil,
                onError: @escaping (String) -> Void,
                onStop: @escaping () -> Void) {
         self.onRecognise = onRecognise
+        self.onInterim = onInterim
         self.onError = onError
         self.onStop = onStop
 
@@ -130,15 +139,22 @@ final class DictationController: ObservableObject {
             guard let self else { return }
             if let result {
                 let text = result.bestTranscription.formattedString
-                // Emit only the NEW tail beyond the last finalised
-                // length so callers don't see repeats as the
-                // engine refines partials.
+                // Surface partials so the listening banner can show
+                // the engine's best-guess tail in real time. Only
+                // the slice BEYOND the last finalised length is
+                // interim — the rest is committed text the editor
+                // already owns.
+                let interimTail = String(text.dropFirst(self.lastFinalLength))
+                    .trimmingCharacters(in: .whitespaces)
+                if !interimTail.isEmpty {
+                    DispatchQueue.main.async { self.onInterim?(interimTail) }
+                }
                 if result.isFinal {
-                    let tail = String(text.dropFirst(self.lastFinalLength)).trimmingCharacters(in: .whitespaces)
-                    if !tail.isEmpty {
-                        DispatchQueue.main.async { self.onRecognise?(tail) }
+                    if !interimTail.isEmpty {
+                        DispatchQueue.main.async { self.onRecognise?(interimTail) }
                     }
                     self.lastFinalLength = text.count
+                    DispatchQueue.main.async { self.onInterim?("") }
                 }
             }
             if let error {

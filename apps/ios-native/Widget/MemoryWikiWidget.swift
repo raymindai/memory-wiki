@@ -39,6 +39,11 @@ struct RecentDocsWidget: Widget {
         .configurationDisplayName("Memory.Wiki")
         .description("Recent memories + a one-tap Capture shortcut.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        // Opt out of the system widget content margins so we own
+        // the full canvas. Combined with the tiny inner padding
+        // below, this kills the fat dead band that previously
+        // ringed every row.
+        .contentMarginsDisabled()
     }
 }
 
@@ -176,12 +181,11 @@ struct RecentDocsView: View {
             Spacer(minLength: 0)
             captureButton
         }
-        // Halved widget padding per the user note — was 12/13pt,
-        // now 6/7pt. Edges of the widget canvas (containerBackground)
-        // get reclaimed for content, especially small size where
-        // every pixel counts.
-        .padding(.horizontal, family == .systemSmall ? 6 : 7)
-        .padding(.vertical, family == .systemSmall ? 6 : 7)
+        // Tight inner padding — combined with .contentMarginsDisabled
+        // on the WidgetConfiguration, the canvas now fills nearly
+        // edge to edge instead of being framed by a fat dead band.
+        .padding(.horizontal, family == .systemSmall ? 10 : 12)
+        .padding(.vertical, family == .systemSmall ? 10 : 12)
     }
 
     /// Header — small blob mark + ink wordmark + faint RECENT
@@ -243,8 +247,8 @@ struct RecentDocsView: View {
             Spacer()
             captureButton.opacity(0.4)
         }
-        .padding(.horizontal, 7)
-        .padding(.vertical, 7)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
     }
 
     private func docURL(_ id: String) -> URL {

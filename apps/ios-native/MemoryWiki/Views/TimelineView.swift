@@ -225,6 +225,11 @@ struct TimelineView: View {
             Text("\(model.documents.count)")
                 .font(Brand.mono(size: 11))
                 .foregroundStyle(Brand.textFaint)
+            // Background-refresh indicator — only shows when we
+            // already have data and a fresh fetch is running.
+            if model.loading && !model.documents.isEmpty {
+                RefreshingPip()
+            }
             Spacer()
             HeaderIconButton(systemName: "magnifyingglass") {
                 withAnimation(.snappy(duration: 0.22)) { showingSearch.toggle() }
@@ -312,7 +317,11 @@ struct TimelineView: View {
 
     @ViewBuilder private var contentInner: some View {
         if model.loading && model.documents.isEmpty {
-            BrandLoader(variant: .inline)
+            // Skeleton rows instead of a centred spinner —
+            // preserves the list layout's shape so the eye doesn't
+            // jump when real rows arrive. Shimmer makes it read
+            // as alive.
+            SkeletonList(count: 7)
                 .transition(.opacity)
         } else if let error = model.errorMessage, model.documents.isEmpty {
             EmptyState(
@@ -485,6 +494,15 @@ private struct DocumentRow: View {
     var isPinned: Bool = false
 
     var body: some View {
+        rowBody
+            // Prewarm the full doc into DocCache so tapping this
+            // row pushes DocumentDetailView with the body already
+            // painted instead of flashing a spinner. Idempotent;
+            // dedupes against in-flight + cached entries.
+            .onAppear { DocCache.shared.prefetch(doc.id) }
+    }
+
+    private var rowBody: some View {
         HStack(alignment: .center, spacing: 12) {
             DocStatusIcon(doc: doc, size: 18)
                 .frame(width: 24, alignment: .leading)

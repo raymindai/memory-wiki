@@ -134,6 +134,9 @@ struct BundlesView: View {
             Text("\(model.bundles.count)")
                 .font(Brand.mono(size: 11))
                 .foregroundStyle(Brand.textFaint)
+            if model.loading && !model.bundles.isEmpty {
+                RefreshingPip()
+            }
             Spacer()
             Button {
                 withAnimation(.snappy(duration: 0.22)) { showingSearch.toggle() }
@@ -215,7 +218,7 @@ struct BundlesView: View {
 
     @ViewBuilder private var contentInner: some View {
         if model.loading && model.bundles.isEmpty {
-            BrandLoader(variant: .inline)
+            SkeletonList(count: 6)
                 .transition(.opacity)
         } else if let err = model.errorMessage, model.bundles.isEmpty {
             EmptyBundleState(

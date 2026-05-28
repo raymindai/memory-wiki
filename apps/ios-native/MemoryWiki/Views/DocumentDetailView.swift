@@ -402,14 +402,36 @@ struct DocumentDetailView: View {
 
     private func load(force: Bool = false) async {
         if !force && detail != nil { return }
+        // Cache hit (prefetched while the row was visible in the
+        // timeline) — paint immediately, then quietly revalidate
+        // in the background so any server-side edit since the
+        // prefetch lands without making the user wait.
+        if !force, let cached = DocCache.shared.get(seed.id) {
+            detail = cached
+            Task { await revalidate() }
+            return
+        }
         loading = true
         error = nil
         do {
-            detail = try await APIClient.shared.document(id: seed.id)
+            let fresh = try await APIClient.shared.document(id: seed.id)
+            detail = fresh
+            DocCache.shared.put(fresh)
             loading = false
         } catch {
             self.error = error.localizedDescription
             loading = false
+        }
+    }
+
+    /// Background refresh used after a cache-hit paint — replaces
+    /// the visible detail in place without a loading state so the
+    /// user sees the latest content on next render.
+    private func revalidate() async {
+        guard let fresh = try? await APIClient.shared.document(id: seed.id) else { return }
+        await MainActor.run {
+            detail = fresh
+            DocCache.shared.put(fresh)
         }
     }
 }

@@ -16,6 +16,7 @@ struct ProfileView: View {
     @State private var showMailUnavailable = false
     @State private var hubStats: APIClient.HubResponse? = nil
     @State private var loadingHub = false
+    @State private var showEditDisplayName = false
 
     private var hubURL: URL? {
         guard let slug = auth.session?.hubSlug, !slug.isEmpty else { return nil }
@@ -41,6 +42,16 @@ struct ProfileView: View {
                             SettingRow(label: "Email", value: auth.session?.email)
                             if let slug = auth.session?.hubSlug {
                                 SettingRow(label: "Username", value: "@\(slug)")
+                            }
+                            // Display Name — what greets the user on
+                            // Start and what shows on shared/public
+                            // surfaces. Tappable to edit inline.
+                            SettingTapValueRow(
+                                label: "Display Name",
+                                value: auth.session?.displayName ?? "—",
+                                isPlaceholder: (auth.session?.displayName ?? "").isEmpty
+                            ) {
+                                showEditDisplayName = true
                             }
                         }
                         section("LANGUAGE") {
@@ -121,6 +132,19 @@ struct ProfileView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+        }
+        .sheet(isPresented: $showEditDisplayName) {
+            DisplayNameEditor(
+                current: auth.session?.displayName ?? "",
+                onSave: { newName in
+                    Task {
+                        try? await auth.updateDisplayName(newName)
+                        showEditDisplayName = false
+                    }
+                },
+                onCancel: { showEditDisplayName = false }
+            )
+            .iOS26Sheet([.height(280)])
         }
         .sheet(isPresented: $showFeedback) {
             FeedbackComposer(isPresented: $showFeedback)
@@ -533,6 +557,128 @@ private struct QuietActionButton: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Tappable variant of SettingRow — shows label on the left,
+/// current value (or placeholder dash) on the right, chevron at
+/// the end. Used by ACCOUNT → Display Name to open the editor.
+private struct SettingTapValueRow: View {
+    let label: LocalizedStringKey
+    let value: String
+    var isPlaceholder: Bool = false
+    var onTap: () -> Void
+    var body: some View {
+        Button(action: {
+            Haptics.selection()
+            onTap()
+        }) {
+            HStack {
+                Text(label).font(Brand.body(size: 14)).foregroundStyle(Brand.textPrimary)
+                Spacer()
+                Text(value)
+                    .font(Brand.body(size: 13))
+                    .foregroundStyle(isPlaceholder ? Brand.textFaint : Brand.textMuted)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Brand.textFaint)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 14)
+            .contentShape(Rectangle())
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(Brand.borderDim).frame(height: 1).padding(.leading, 14)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// Small sheet for editing the user's display name. Single
+/// TextField + Save / Cancel; trims whitespace, accepts empty
+/// (which clears the field server-side). Calls back to the host
+/// with the new value — host owns the actual API call so the
+/// sheet stays focused on input UX.
+private struct DisplayNameEditor: View {
+    let current: String
+    var onSave: (String) -> Void
+    var onCancel: () -> Void
+
+    @State private var text: String
+    @State private var saving = false
+    @FocusState private var fieldFocus: Bool
+
+    init(current: String, onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void) {
+        self.current = current
+        self.onSave = onSave
+        self.onCancel = onCancel
+        _text = State(initialValue: current)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                // Glass via .iOS26Sheet — no opaque fill here.
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Display Name")
+                        .font(Brand.display(size: 22))
+                        .foregroundStyle(Brand.textPrimary)
+                    Text("How Memory.Wiki greets you and what shows on the docs you share.")
+                        .font(Brand.body(size: 13))
+                        .foregroundStyle(Brand.textMuted)
+                        .lineSpacing(3)
+                    TextField("Your name", text: $text)
+                        .focused($fieldFocus)
+                        .font(Brand.body(size: 16))
+                        .textInputAutocapitalization(.words)
+                        .padding(.horizontal, 14).padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(Brand.surface)
+                                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+                        )
+                        .submitLabel(.done)
+                        .onSubmit {
+                            saving = true
+                            onSave(text)
+                        }
+                    Button {
+                        saving = true
+                        onSave(text)
+                    } label: {
+                        HStack {
+                            if saving {
+                                ProgressView().scaleEffect(0.7).tint(Brand.background)
+                            }
+                            Text(saving ? "Saving…" : "Save")
+                                .font(Brand.body(size: 15, weight: .semibold))
+                                .foregroundStyle(Brand.background)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 46)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Brand.textPrimary)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(saving)
+                    Spacer()
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 22)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Cancel", action: onCancel)
+                        .foregroundStyle(Brand.textMuted)
+                }
+            }
+            .toolbarBackground(Brand.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+        }
+        .onAppear { fieldFocus = true }
     }
 }
 

@@ -41,9 +41,12 @@ struct PhotoCaptureSheet: View {
     private var subhead: String {
         switch mode {
         case .photo:
-            return "Uploads the photo and embeds it in your memory. Tap a photo in the editor to view full size."
+            return "Compressed to WebP and uploaded; the original is embedded in your memory. Tap a photo in the editor to view full size."
         case .ocr:
-            return "Runs on-device OCR (English + Korean) and inserts the recognised text into your memory. The image itself is not uploaded."
+            // Surface the active recogniser languages so the user
+            // knows what alphabets to expect (and which inputs will
+            // come back empty). Apple Vision uses on-device models.
+            return "Vision OCR (on-device) recognises English + Korean and inserts the text into your memory. The original image isn't uploaded."
         }
     }
     private var cameraLabel: String {
@@ -54,8 +57,11 @@ struct PhotoCaptureSheet: View {
     }
 
     var body: some View {
+        // Background intentionally clear — iOS 26 .iOS26Sheet
+        // modifier sets presentationBackground(.ultraThinMaterial)
+        // on the sheet container, so any opaque fill here defeats
+        // the liquid-glass effect.
         ZStack {
-            Brand.background.ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
                     Text(title)

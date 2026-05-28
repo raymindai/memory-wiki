@@ -35,22 +35,33 @@ struct StartView: View {
     /// finishes loading. Each section reads its own delay.
     @State private var appeared = false
 
+    /// Display name source of truth: session.displayName (from
+    /// `profiles.display_name`, loaded by AuthManager.hydrate +
+    /// editable from Settings). If the user hasn't set one yet,
+    /// the greeting just runs without the personal vocative
+    /// instead of guessing a name from email/slug.
     private var displayName: String? {
-        hub?.profile.display_name?.trimmingCharacters(in: .whitespacesAndNewlines)
+        auth.session?.displayName
     }
     private var hubURL: URL? {
         guard let slug = auth.session?.hubSlug, !slug.isEmpty else { return nil }
         return URL(string: "https://memory.wiki/@\(slug)")
     }
+    /// Calm, classic greeting copy keyed off time of day. Three
+    /// short variations per slot, rotated by day-of-year so the
+    /// line stays stable through the day but doesn't read as
+    /// identical every visit. No quirky / forced-warmth phrases.
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        let base: String
+        let day = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        let variants: [String]
         switch h {
-        case 5..<12:  base = "Good morning"
-        case 12..<18: base = "Good afternoon"
-        case 18..<22: base = "Good evening"
-        default:      base = "Hello"
+        case 5..<12:   variants = ["Good morning",  "Morning",   "Hi"]
+        case 12..<18:  variants = ["Good afternoon","Afternoon", "Hi"]
+        case 18..<22:  variants = ["Good evening",  "Evening",   "Hi"]
+        default:       variants = ["Hello",         "Welcome back", "Hi"]
         }
+        let base = variants[day % variants.count]
         if let name = displayName, !name.isEmpty {
             return "\(base), \(name)"
         }
@@ -91,8 +102,23 @@ struct StartView: View {
         ZStack {
             Brand.background.ignoresSafeArea()
             if loading && documents.isEmpty && bundles.isEmpty {
-                BrandLoader(variant: .inline)
-                    .transition(.opacity)
+                // First-paint skeleton — hero block + stat strip +
+                // a few SkeletonRows so the scaffold reads before
+                // data lands. Beats a centred spinner that gives no
+                // hint of what's about to appear.
+                VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Brand.surface)
+                            .frame(width: 220, height: 28)
+                            .modifier(ShimmerModifier())
+                    }
+                    SkeletonStatStrip()
+                    SkeletonList(count: 4)
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 22)
+                .transition(.opacity)
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
@@ -145,17 +171,15 @@ struct StartView: View {
             // No leading blob — the blob already lives in the
             // tab bar as the Start tab's glyph. Repeating it
             // here at the top of the screen was redundant.
-            VStack(alignment: .leading, spacing: 4) {
-                Text(greeting)
-                    .font(Brand.display(size: 28))
-                    .foregroundStyle(Brand.textPrimary)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.8)
-                Text(weekSummary)
-                    .font(Brand.body(size: 13))
-                    .foregroundStyle(Brand.textMuted)
-                    .lineLimit(1)
-            }
+            // Just the greeting — the week-count subtitle was a
+            // verbal copy of the same number the editorial stat
+            // strip prints right below, which is the better surface
+            // for that data.
+            Text(greeting)
+                .font(Brand.display(size: 28))
+                .foregroundStyle(Brand.textPrimary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
 
             // AI URL strip — the wedge. Copy ready for any AI.
             if let url = hubURL {
@@ -458,7 +482,10 @@ struct StartView: View {
 
     private func load(force: Bool = false) async {
         if !force && !documents.isEmpty { return }
-        loading = true
+        // Only show the spinner on the very first load — refreshes
+        // over existing data flash awkwardly and there's nothing
+        // useful for the user to see while waiting.
+        if documents.isEmpty { loading = true }
         defer { loading = false }
         async let docsTask: [Document]? = try? await APIClient.shared.userDocuments()
         async let bundlesTask: [AppBundle]? = try? await APIClient.shared.userBundles()
