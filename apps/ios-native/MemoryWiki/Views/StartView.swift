@@ -183,6 +183,11 @@ struct StartView: View {
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
             Task { await load(force: true) }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .mwOpenHubChat)) { _ in
+            if let slug = auth.session?.hubSlug, !slug.isEmpty {
+                showHubChat = true
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
             documents = []
             bundles = []

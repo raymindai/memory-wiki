@@ -103,17 +103,11 @@ struct BundlesView: View {
                         updatedAt: nil, createdAt: nil, isDraft: nil,
                         visibility: nil, allowedEmailsCount: nil
                     ))
-                }
-            }
-            // Bundle members push DocumentDetailView via
-            // TimelineRoute — register the same destination here
-            // so the tap from the BundleDetailView member list
-            // resolves. Previously the route was only declared
-            // inside BundleDetailView (deeper on the stack) so
-            // SwiftUI silently no-op'd the push.
-            .navigationDestination(for: TimelineRoute.self) { route in
-                switch route {
                 case .docDetail(let doc):
+                    // Bundle members tap → push DocumentDetailView
+                    // through this same NavigationStack so the
+                    // user can swipe back to the bundle, not all
+                    // the way out to Bundles list.
                     DocumentDetailView(seed: doc)
                 case .docDetailById(let id):
                     DocumentDetailView(seed: Document(

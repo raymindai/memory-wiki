@@ -40,12 +40,33 @@ final class AppRouter: ObservableObject {
             selectedTab = .timeline
         case "capture":
             selectedTab = .capture
+        case "capture-paste":
+            // Widget "Paste" shortcut — flip to Capture and tell
+            // it to grab whatever is on the clipboard immediately.
+            selectedTab = .capture
+            NotificationCenter.default.post(name: .mwCapturePaste, object: nil)
+        case "chat-hub":
+            // Widget "Ask hub" shortcut — flip to Start, fire a
+            // notification StartView listens for to open the chat
+            // sheet over its own surface.
+            selectedTab = .start
+            NotificationCenter.default.post(name: .mwOpenHubChat, object: nil)
         case "profile":
             selectedTab = .profile
         default:
             break
         }
     }
+}
+
+extension Notification.Name {
+    /// Posted from AppRouter when a memorywiki:// URL asks Capture
+    /// to start a new capture pre-loaded with the system clipboard
+    /// contents (URL → URL-import mode; text → body draft).
+    static let mwCapturePaste = Notification.Name("MWCapturePaste")
+    /// Posted from AppRouter when a memorywiki:// URL asks the
+    /// Start tab to open the hub chat sheet.
+    static let mwOpenHubChat = Notification.Name("MWOpenHubChat")
 }
 
 /// Hashable route values for the Timeline NavigationStack. Using
@@ -60,4 +81,11 @@ enum TimelineRoute: Hashable {
 enum BundlesRoute: Hashable {
     case bundleDetail(AppBundle)
     case bundleDetailById(String)
+    /// Doc pushed from inside a BundleDetailView's member list.
+    /// We re-use the Document model so DocumentDetailView gets the
+    /// same seed shape it expects from the Timeline tab.
+    /// NavigationStack(path:) enforces a single route type per
+    /// stack — TimelineRoute pushes were silently dropped before.
+    case docDetail(Document)
+    case docDetailById(String)
 }

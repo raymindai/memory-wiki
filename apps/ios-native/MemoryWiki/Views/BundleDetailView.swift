@@ -66,17 +66,10 @@ struct BundleDetailView: View {
                 }
             }
         }
-        .navigationDestination(for: TimelineRoute.self) { route in
-            switch route {
-            case .docDetail(let doc):
-                DocumentDetailView(seed: doc)
-            case .docDetailById(let id):
-                DocumentDetailView(seed: Document(
-                    id: id, title: nil, updatedAt: nil, createdAt: nil,
-                    isDraft: nil, viewCount: nil, allowedEmails: nil, source: nil
-                ))
-            }
-        }
+        // The doc-push destination now lives on BundlesView's
+        // NavigationStack (as a BundlesRoute.docDetail case) —
+        // the typed path requires the destination be registered
+        // where the path lives, not nested deeper.
         .task { await load() }
         .refreshable { await load(force: true) }
         .sheet(isPresented: $showChat) {
@@ -172,7 +165,11 @@ struct BundleDetailView: View {
             } else if let detail, !detail.documents.isEmpty {
                 VStack(spacing: 6) {
                     ForEach(detail.documents) { doc in
-                        NavigationLink(value: TimelineRoute.docDetail(doc)) {
+                        // Push as BundlesRoute.docDetail so the
+                        // typed NavigationStack(path: bundlesPath)
+                        // actually accepts the value (TimelineRoute
+                        // pushes were silently dropped).
+                        NavigationLink(value: BundlesRoute.docDetail(doc)) {
                             MemberRow(doc: doc)
                         }
                         .buttonStyle(.plain)

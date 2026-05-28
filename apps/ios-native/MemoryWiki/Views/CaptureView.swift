@@ -217,6 +217,18 @@ struct CaptureView: View {
         }
         .onChange(of: titleDraft) { _, new in persistedTitle = new }
         .onChange(of: bodyDraft) { _, new in persistedBody = new }
+        .onReceive(NotificationCenter.default.publisher(for: .mwCapturePaste)) { _ in
+            // Widget "Paste" shortcut — refresh clipboard and
+            // bring the clipboard suggestion chip into view by
+            // making sure we're not focused on a field.
+            refreshClipboard()
+            if let text = UIPasteboard.general.string, clipboardURL == nil {
+                // Plain-text clipboard → seed body draft directly.
+                bodyDraft = bodyDraft.isEmpty ? text : "\(bodyDraft)\n\n\(text)"
+                focused = .body
+                bodyFocused = true
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
             let h = (notif.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect)?.height ?? 0
             withAnimation(.snappy(duration: 0.22)) {
@@ -461,7 +473,10 @@ struct CaptureView: View {
             .submitLabel(.next)
             .onSubmit { focused = .body }
             .padding(.horizontal, 18)
-            .padding(.top, 4)
+            // Lift the title field off whichever chip lives in
+            // chipsArea above it (Unsaved-draft / Clipboard /
+            // Saved banner) — 4pt was kissing the chip's edge.
+            .padding(.top, 14)
     }
 
     // MARK: - Body field
