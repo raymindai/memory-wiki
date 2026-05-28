@@ -79,6 +79,37 @@ final class AuthManager: NSObject, ObservableObject {
         await hydrate()
     }
 
+    /// Passwordless email-only demo sign-in. Hits /api/auth/demo-signin
+    /// on the web app, which only accepts the small server-side
+    /// allowlist (yc@mdfy.app / demo@mdfy.app / demo@memory.wiki).
+    /// Server uses service-role to mint a magiclink, redeems the OTP
+    /// server-side, and returns a real Supabase access/refresh
+    /// token pair we plug into the SDK via setSession.
+    func signInDemo(email: String) async throws {
+        struct DemoResp: Decodable {
+            let access_token: String
+            let refresh_token: String
+        }
+        var req = URLRequest(url: APIClient.baseURL.appendingPathComponent("/api/auth/demo-signin"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(["email": email])
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            let msg = (try? JSONDecoder().decode([String: String].self, from: data))?["error"]
+            throw APIError.http(
+                (response as? HTTPURLResponse)?.statusCode ?? -1,
+                msg ?? "Demo sign-in failed"
+            )
+        }
+        let body = try JSONDecoder().decode(DemoResp.self, from: data)
+        try await client.auth.setSession(
+            accessToken: body.access_token,
+            refreshToken: body.refresh_token
+        )
+        await hydrate()
+    }
+
     func signUpWithEmail(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
         await hydrate()

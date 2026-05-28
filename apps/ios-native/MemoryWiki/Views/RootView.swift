@@ -60,11 +60,12 @@ struct RootView: View {
                     // hidden under the floating capsule. SwiftUI
                     // automatically propagates this inset to inner
                     // ScrollView / List.
-                    .safeAreaInset(edge: .bottom, spacing: 0) {
-                        if !keyboardUp {
-                            Color.clear.frame(height: 50)
-                        }
-                    }
+                    // Each tab now declares its own .safeAreaInset
+                    // (50pt) inside its NavigationStack, since the
+                    // parent inset wasn't propagating reliably
+                    // through NavigationStack's coordinate space —
+                    // only Start (which had explicit bottom padding
+                    // in its ScrollView) was clearing the tab bar.
 
                     // Floating-glass tab bar isolation strip — sits
                     // ABOVE content but BELOW the tab bar in the
@@ -195,14 +196,17 @@ enum AppTab: String, CaseIterable {
 /// Replaces the older full-width bordered strip.
 private struct BrandTabBar: View {
     @EnvironmentObject private var auth: AuthManager
+    @EnvironmentObject private var router: AppRouter
     @Binding var selected: AppTab
+    /// Bumped when the user taps the active tab while it's already
+    /// at root — drives the horizontal shake on the whole bar.
+    @State private var shakeCount: CGFloat = 0
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AppTab.allCases, id: \.self) { tab in
                 Button {
-                    Haptics.selection()
-                    selected = tab
+                    handleTap(tab)
                 } label: {
                     VStack(spacing: tab == .start ? 1 : 3) {
                         glyph(for: tab)
@@ -238,6 +242,50 @@ private struct BrandTabBar: View {
         .clipShape(Capsule(style: .continuous))
         .padding(.horizontal, 12)
         .padding(.bottom, 4)
+        // Horizontal shake when the user re-taps the active tab
+        // while already at root — visual companion to the warning
+        // haptic so the input feels acknowledged instead of dead.
+        .modifier(ShakeEffect(animatableData: shakeCount))
+    }
+
+    /// iOS-native pattern: tapping the active tab pops its
+    /// navigation stack back to root; tapping while already at
+    /// root fires a heavier haptic so the user gets feedback that
+    /// the tap was registered (matches Mail, Safari, Settings).
+    private func handleTap(_ tab: AppTab) {
+        if selected == tab {
+            // Already on this tab — try to pop its nav stack.
+            let popped: Bool = {
+                switch tab {
+                case .timeline:
+                    if !router.timelinePath.isEmpty {
+                        router.timelinePath = []
+                        return true
+                    }
+                case .bundles:
+                    if !router.bundlesPath.isEmpty {
+                        router.bundlesPath = []
+                        return true
+                    }
+                default: break
+                }
+                return false
+            }()
+            if popped {
+                Haptics.selection()
+            } else {
+                // Already at root — explicit feedback that the
+                // tap was registered (otherwise it's silent and
+                // feels broken). Visual shake + warning haptic.
+                Haptics.warning()
+                withAnimation(.easeInOut(duration: 0.32)) {
+                    shakeCount += 1
+                }
+            }
+        } else {
+            Haptics.selection()
+            selected = tab
+        }
     }
 
     /// .profile tab paints the user's avatar (small circle) when
@@ -300,6 +348,21 @@ private struct ProfileTabAvatar: View {
     }
 }
 
+/// Horizontal shake — used by the tab bar when the user taps the
+/// active tab while it's already at root. Three left/right cycles
+/// of ±6pt translation; ties into a withAnimation block by binding
+/// `animatableData` to a state counter that the caller increments.
+private struct ShakeEffect: GeometryEffect {
+    var amount: CGFloat = 6
+    var shakesPerUnit: CGFloat = 3
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let x = amount * sin(animatableData * .pi * shakesPerUnit)
+        return ProjectionTransform(CGAffineTransform(translationX: x, y: 0))
+    }
+}
+
 /// Bottom-of-screen blur + dark fade backing for the floating
 /// tab bar. Two stacked layers:
 ///   1. .ultraThinMaterial, masked with a vertical gradient so the
@@ -314,37 +377,37 @@ private struct ProfileTabAvatar: View {
 private struct BottomFadeStrip: View {
     var body: some View {
         ZStack {
-            // Strong blur (thickMaterial), masked with a vertical
-            // gradient so the blur intensity ramps from invisible
-            // at the top edge to full strength behind the tab bar
-            // and down past the home indicator. The point is BLUR,
-            // not opacity — content stays visible through the
-            // strip, just defocused so the tab bar reads as the
-            // sharp foreground.
+            // BLUR layer — ultraThinMaterial in dark mode reads as a
+            // translucent dark frost, not the gray/white wash that
+            // .thickMaterial gave. Masked with a vertical gradient
+            // so blur intensity ramps in toward the bottom; content
+            // above the strip stays sharp.
+            // Blur — slightly stronger but still ultraThin (dark
+            // frost, not gray). Mask lets it ramp from 0 at the
+            // top to ~80% at the bottom so content behind the
+            // home indicator goes properly out of focus.
             Rectangle()
-                .fill(.thickMaterial)
+                .fill(.ultraThinMaterial)
                 .mask(
                     LinearGradient(
                         stops: [
                             .init(color: Color.black.opacity(0),    location: 0.00),
                             .init(color: Color.black.opacity(0.30), location: 0.30),
-                            .init(color: Color.black.opacity(0.95), location: 0.55),
-                            .init(color: Color.black,               location: 1.00)
+                            .init(color: Color.black.opacity(0.65), location: 0.55),
+                            .init(color: Color.black.opacity(0.80), location: 1.00)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
-            // Very light tint just so the tab-bar zone has a hint
-            // of darkening; NOT opaque (was 0.98 → made everything
-            // solid). Now content is still visible through the
-            // strip, just blurred.
+            // Black tint capped at 0.65 — dark glass look without
+            // hiding content behind it.
             LinearGradient(
                 stops: [
-                    .init(color: Brand.background.opacity(0.00), location: 0.00),
-                    .init(color: Brand.background.opacity(0.05), location: 0.30),
-                    .init(color: Brand.background.opacity(0.20), location: 0.55),
-                    .init(color: Brand.background.opacity(0.35), location: 1.00)
+                    .init(color: Color.black.opacity(0.00), location: 0.00),
+                    .init(color: Color.black.opacity(0.22), location: 0.30),
+                    .init(color: Color.black.opacity(0.48), location: 0.55),
+                    .init(color: Color.black.opacity(0.65), location: 1.00)
                 ],
                 startPoint: .top,
                 endPoint: .bottom

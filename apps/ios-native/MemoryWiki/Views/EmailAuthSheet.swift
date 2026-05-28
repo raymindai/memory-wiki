@@ -31,10 +31,27 @@ struct EmailAuthSheet: View {
 
                 VStack(spacing: 12) {
                     field("Email", text: $email, focus: .email, content: .emailAddress, keyboard: .emailAddress)
-                    field("Password", text: $password, focus: .password, content: .password, keyboard: .default, secure: true)
+                    if !isDemoEmail {
+                        field("Password", text: $password, focus: .password, content: .password, keyboard: .default, secure: true)
+                    } else {
+                        // Demo-account allowlist — no password needed.
+                        // Inline hint so the user understands why the
+                        // password field disappeared.
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundStyle(Brand.microInfo)
+                            Text("Demo account · no password needed.")
+                                .font(Brand.body(size: 12))
+                                .foregroundStyle(Brand.textMuted)
+                            Spacer()
+                        }
+                        .padding(.top, 2)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 22)
+                .animation(.snappy(duration: 0.2), value: isDemoEmail)
 
                 if let localError {
                     Text(localError)
@@ -138,10 +155,26 @@ struct EmailAuthSheet: View {
         }
     }
 
+    /// Server-side allowlist of accounts that use the passwordless
+    /// /api/auth/demo-signin path instead of email + password.
+    /// Mirrors the same set the route guards on the web side so
+    /// the iOS UI can drop the password requirement only for
+    /// those addresses.
+    private static let demoEmails: Set<String> = [
+        "demo@memory.wiki",
+        "demo@mdfy.app",
+        "yc@mdfy.app"
+    ]
+
+    private var isDemoEmail: Bool {
+        Self.demoEmails.contains(email.trimmingCharacters(in: .whitespaces).lowercased())
+    }
+
     private var canSubmit: Bool {
-        !working
-        && email.contains("@")
-        && password.count >= 6
+        guard !working, email.contains("@") else { return false }
+        // Demo emails get the password gate dropped — server mints
+        // a session for them via service-role magic link.
+        return isDemoEmail || password.count >= 6
     }
 
     private func submit() {
@@ -151,9 +184,13 @@ struct EmailAuthSheet: View {
         Task {
             defer { working = false }
             do {
-                switch mode {
-                case .signIn: try await auth.signInWithEmail(email: email, password: password)
-                case .signUp: try await auth.signUpWithEmail(email: email, password: password)
+                if isDemoEmail {
+                    try await auth.signInDemo(email: email)
+                } else {
+                    switch mode {
+                    case .signIn: try await auth.signInWithEmail(email: email, password: password)
+                    case .signUp: try await auth.signUpWithEmail(email: email, password: password)
+                    }
                 }
                 onComplete(nil)
                 dismiss()

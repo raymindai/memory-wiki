@@ -37,6 +37,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>MWSupabaseAnonKey</key>
 	<string>$(MEMORY_WIKI_SUPABASE_ANON_KEY)</string>
 	<key>MWSupabaseURL</key>
@@ -101,6 +103,10 @@
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 	<key>UIUserInterfaceStyle</key>
 	<string>Dark</string>
 </dict>

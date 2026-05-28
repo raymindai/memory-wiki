@@ -111,6 +111,11 @@ struct CaptureView: View {
 
     @AppStorage("mw.draft.title") private var persistedTitle: String = ""
     @AppStorage("mw.draft.body") private var persistedBody: String = ""
+    /// User-controlled dictation language list (comma-separated
+    /// BCP-47 identifiers). Defaults to ko-KR + en-US — Settings →
+    /// Voice → Dictation language lets the user pick any locale
+    /// SFSpeechRecognizer supports on this device.
+    @AppStorage("mw.dictationLocales") private var dictationLocales: String = "ko-KR,en-US"
     @State private var restorableTitle: String? = nil
     @State private var restorableBody: String? = nil
     @State private var dictation = DictationController()
@@ -145,7 +150,19 @@ struct CaptureView: View {
             // Backdrop blob only when the surface is truly idle —
             // not while focused, since the user's about to type
             // and the blob fading out mid-keystroke felt off.
-            if !anyFocused && !hasDraftContent && clipboardURL == nil && !hasRestorable && savedURL == nil {
+            //
+            // ALSO gated on `router.selectedTab == .capture`:
+            // each AnimatedBlob spins a full WKWebView running an
+            // SVG <animate> loop on the GPU forever. Keep-mounted
+            // tabs meant this blob kept burning cycles even when
+            // the user was on MDs/Bundles/etc — a measurable
+            // contributor to the phone-gets-hot complaint.
+            if router.selectedTab == .capture
+                && !anyFocused
+                && !hasDraftContent
+                && clipboardURL == nil
+                && !hasRestorable
+                && savedURL == nil {
                 AmbientBlob()
             }
             VStack(spacing: 0) {
@@ -160,20 +177,27 @@ struct CaptureView: View {
                 if isDictating {
                     DictationBanner(interim: dictationInterim) { stopDictation() }
                         .padding(.horizontal, 14)
-                        // Float well clear of the bottom tab bar so
-                        // the banner doesn't look glued to it.
-                        .padding(.bottom, 24)
+                        // Keyboard up: 24pt above keyboard. Keyboard
+                        // down: 80pt so the banner sits clear of
+                        // the floating tab bar (previously the
+                        // banner slid behind the tab bar's blur
+                        // strip when dictating with the keyboard
+                        // dismissed).
+                        .padding(.bottom, keyboardUp ? 24 : 80)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 if let processing {
                     ProcessingBanner(status: processing)
                         .padding(.horizontal, 14)
-                        .padding(.bottom, 24)
+                        // Same conditional as DictationBanner — sit
+                        // above the keyboard when it's up, sit above
+                        // the floating tab bar otherwise.
+                        .padding(.bottom, keyboardUp ? 24 : 80)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else if let ocrBanner {
                     OcrResultChip(toast: ocrBanner) { self.ocrBanner = nil }
                         .padding(.horizontal, 14)
-                        .padding(.bottom, 24)
+                        .padding(.bottom, keyboardUp ? 24 : 80)
                 }
                 // Error surfaces via showBanner / ProcessingBanner —
                 // a duplicate red strip down here just doubled the
@@ -807,8 +831,12 @@ struct CaptureView: View {
         // Don't drop focus — the new MarkdownEditor inputAccessoryView
         // stays attached while keyboard is up, so dictating in-place
         // is fine + the LISTENING banner overlays cleanly.
+        let locales = dictationLocales
+            .split(separator: ",")
+            .map { String($0).trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
         dictation.start(
-            locales: ["ko-KR", "en-US"],
+            locales: locales.isEmpty ? ["en-US"] : locales,
             onRecognise: { recognised in
                 bodyDraft += bodyDraft.isEmpty ? recognised : " " + recognised
                 dictationInterim = ""

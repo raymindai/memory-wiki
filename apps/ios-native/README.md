@@ -59,7 +59,7 @@ apps/ios-native/
 
 - Bundle ID: `wiki.memory.MemoryWiki`
 - Share Extension: `wiki.memory.MemoryWiki.ShareExtension`
-- App Group (data shared between app + extension): `group.wiki.memory.shared`
+- App Group (data shared between app + extension): `group.wiki.memory.MemoryWiki`
 - Custom URL scheme: `memorywiki://`
 - Universal Links: `https://memory.wiki/*` (configured in
   apple-app-site-association on the web app — added when we ship

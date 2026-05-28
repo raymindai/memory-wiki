@@ -186,6 +186,14 @@ struct TimelineView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            // Reserve a 50pt strip at the bottom so the floating
+            // tab bar doesn't cover the last list row. The parent
+            // safeAreaInset on RootView doesn't propagate through
+            // NavigationStack reliably, so each tab declares its
+            // own.
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear.frame(height: 50)
+            }
         }
         .task {
             // First mount uses cache logic — only fetches if
@@ -219,7 +227,7 @@ struct TimelineView: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text("Timeline")
+            Text("Markdowns")
                 .font(Brand.display(size: 26))
                 .foregroundStyle(Brand.textPrimary)
             Text("\(model.documents.count)")

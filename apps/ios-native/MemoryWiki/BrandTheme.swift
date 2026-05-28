@@ -61,9 +61,15 @@ enum Brand {
     /// Cal Sans 600 — the display face for app-name and large H1.
     /// Falls back to system rounded if the bundled font fails to
     /// register (CI / non-iOS targets).
+    ///
+    /// `.weight(.semibold)` is layered on top so non-Latin glyphs
+    /// (Korean / CJK — CalSans only covers Latin) render in the
+    /// system fallback at semibold weight instead of the default
+    /// regular, which made Korean H1 read as too thin against the
+    /// Cal Sans letterforms next to it.
     static func display(size: CGFloat) -> Font {
         if UIFont(name: "CalSans-Regular", size: size) != nil {
-            return Font.custom("CalSans-Regular", size: size)
+            return Font.custom("CalSans-Regular", size: size).weight(.semibold)
         }
         return Font.system(size: size, weight: .semibold, design: .rounded)
     }

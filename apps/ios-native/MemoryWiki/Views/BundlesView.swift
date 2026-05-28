@@ -106,6 +106,9 @@ struct BundlesView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear.frame(height: 70)
+            }
         }
         .task {
             await model.load()

@@ -23,6 +23,12 @@ final class DictationController: ObservableObject {
     private var onInterim: ((String) -> Void)?
     private var onError: ((String) -> Void)?
     private var onStop: (() -> Void)?
+    /// Latest interim tail emitted to the UI — kept so stop()
+    /// can commit it as final text even if SFSpeechRecognizer
+    /// never fires isFinal (which it often doesn't until the
+    /// audio session ends naturally, missing what the user
+    /// already spoke when they tap Stop mid-sentence).
+    private var pendingTail: String = ""
 
     /// Begin a dictation session. The first available locale in
     /// `locales` is used; permissions are requested if needed.
@@ -70,6 +76,18 @@ final class DictationController: ObservableObject {
     }
 
     func stop() {
+        // Commit whatever the engine has heard so far. SFSpeech
+        // only fires isFinal when it detects a long-enough pause
+        // or when audio ends naturally — if the user taps Stop
+        // mid-sentence (or speaks continuously), every recognised
+        // word stays "interim" and would be silently discarded.
+        // Flush the pending tail before tearing the task down.
+        if !pendingTail.isEmpty {
+            let tail = pendingTail
+            pendingTail = ""
+            onRecognise?(tail)
+            onInterim?("")
+        }
         if audioEngine.isRunning {
             audioEngine.stop()
             audioEngine.inputNode.removeTap(onBus: 0)
@@ -78,6 +96,11 @@ final class DictationController: ObservableObject {
         task?.cancel()
         request = nil
         task = nil
+        // Drop the error sink BEFORE the task's tail-end callback
+        // fires — otherwise the recogniser's "no speech detected"
+        // / "canceled" final notification surfaces as a user-
+        // visible error toast even though the stop was intentional.
+        onError = nil
         onStop?()
         onStop = nil
     }
@@ -146,6 +169,9 @@ final class DictationController: ObservableObject {
                 // already owns.
                 let interimTail = String(text.dropFirst(self.lastFinalLength))
                     .trimmingCharacters(in: .whitespaces)
+                // Stash the latest tail so stop() can commit it
+                // even if isFinal never fires for this segment.
+                self.pendingTail = interimTail
                 if !interimTail.isEmpty {
                     DispatchQueue.main.async { self.onInterim?(interimTail) }
                 }
@@ -154,14 +180,20 @@ final class DictationController: ObservableObject {
                         DispatchQueue.main.async { self.onRecognise?(interimTail) }
                     }
                     self.lastFinalLength = text.count
+                    self.pendingTail = ""
                     DispatchQueue.main.async { self.onInterim?("") }
                 }
             }
             if let error {
-                // Cancelled tasks throw .canceled — that's user
-                // intent, not a real error worth surfacing.
+                // Suppress benign post-stop errors:
+                //   203, 1110 — "No speech detected" (fires after
+                //               the user taps Stop having stopped
+                //               speaking a moment earlier)
+                //   209, 216, 301 — task cancelled / assistant
+                //                   canceled (kAFAssistantErrorDomain)
                 let ns = error as NSError
-                if ns.code != 203 && ns.code != 209 {
+                let benign: Set<Int> = [203, 209, 216, 301, 1110]
+                if !benign.contains(ns.code) {
                     DispatchQueue.main.async {
                         self.onError?("Dictation: \(error.localizedDescription)")
                     }

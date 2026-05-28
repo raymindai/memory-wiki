@@ -51,15 +51,25 @@ struct StartView: View {
     /// short variations per slot, rotated by day-of-year so the
     /// line stays stable through the day but doesn't read as
     /// identical every visit. No quirky / forced-warmth phrases.
+    /// Calm greetings with a touch of personality. Stable for the
+    /// whole day (rotation seeded by day-of-year), so a single
+    /// session doesn't feel repetitive but the variation reads as
+    /// "different day, different mood" instead of random.
+    /// Slightly wittier than the previous flat "Good morning"
+    /// trio per slot — short, warm, never cringe.
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
         let day = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
         let variants: [String]
         switch h {
-        case 5..<12:   variants = ["Good morning",  "Morning",   "Hi"]
-        case 12..<18:  variants = ["Good afternoon","Afternoon", "Hi"]
-        case 18..<22:  variants = ["Good evening",  "Evening",   "Hi"]
-        default:       variants = ["Hello",         "Welcome back", "Hi"]
+        case 5..<12:
+            variants = ["Morning", "Good morning", "Fresh page", "Hey early bird"]
+        case 12..<18:
+            variants = ["Hey", "Good afternoon", "Mid-day check-in", "Back at it"]
+        case 18..<22:
+            variants = ["Evening", "Good evening", "Wrapping up?", "Still in the game"]
+        default:
+            variants = ["Hello", "Welcome back", "Night owl mode", "Still here"]
         }
         let base = variants[day % variants.count]
         if let name = displayName, !name.isEmpty {
@@ -104,8 +114,12 @@ struct StartView: View {
             if loading && documents.isEmpty && bundles.isEmpty {
                 // First-paint skeleton — hero block + stat strip +
                 // a few SkeletonRows so the scaffold reads before
-                // data lands. Beats a centred spinner that gives no
-                // hint of what's about to appear.
+                // data lands. Mirrors the loaded layout exactly:
+                // top-aligned (NOT centred by the parent ZStack),
+                // same 18pt horizontal padding, same 18pt top
+                // padding as the real hero so the swap is
+                // geometric and the skeleton doesn't appear in
+                // the middle of an empty canvas.
                 VStack(alignment: .leading, spacing: 22) {
                     VStack(alignment: .leading, spacing: 8) {
                         RoundedRectangle(cornerRadius: 6, style: .continuous)
@@ -115,9 +129,11 @@ struct StartView: View {
                     }
                     SkeletonStatStrip()
                     SkeletonList(count: 4)
+                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 22)
+                .padding(.top, 18)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .transition(.opacity)
             } else {
                 ScrollView {
@@ -137,7 +153,10 @@ struct StartView: View {
                     }
                     .padding(.horizontal, 18)
                     .padding(.top, 18)
-                    .padding(.bottom, 36)
+                    // Base 36 + 40 extra (2 × +20 user passes) so
+                    // the last block clears the floating tab bar
+                    // comfortably.
+                    .padding(.bottom, 76)
                 }
                 .refreshable { await load(force: true) }
                 .transition(.opacity)

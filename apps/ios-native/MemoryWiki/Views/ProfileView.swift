@@ -5,6 +5,7 @@
 
 import SwiftUI
 import MessageUI
+import Speech
 
 struct ProfileView: View {
     @EnvironmentObject private var auth: AuthManager
@@ -22,6 +23,24 @@ struct ProfileView: View {
     /// "Couldn't load" string.
     @State private var hubError: String? = nil
     @State private var showEditDisplayName = false
+    @State private var showDictationPicker = false
+    @AppStorage("mw.dictationLocales") private var dictationLocales: String = "ko-KR,en-US"
+
+    /// Friendly summary of the user's current dictation locales,
+    /// shown on the Settings row before they tap to change it.
+    private var dictationSummary: String {
+        let ids = dictationLocales
+            .split(separator: ",")
+            .map { String($0).trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        if ids.isEmpty { return "Not set" }
+        let names = ids.map { id -> String in
+            Locale.current.localizedString(forIdentifier: id) ?? id
+        }
+        if names.count == 1 { return names[0] }
+        return "\(names.count) langs · " + names.prefix(2).joined(separator: ", ") +
+            (names.count > 2 ? "…" : "")
+    }
 
     private var hubURL: URL? {
         guard let slug = auth.session?.hubSlug, !slug.isEmpty else { return nil }
@@ -73,6 +92,15 @@ struct ProfileView: View {
                                 if let url = URL(string: UIApplication.openSettingsURLString) {
                                     UIApplication.shared.open(url)
                                 }
+                            }
+                        }
+                        section("VOICE") {
+                            SettingTapValueRow(
+                                label: "Dictation language",
+                                value: dictationSummary,
+                                isPlaceholder: false
+                            ) {
+                                showDictationPicker = true
                             }
                         }
                         section("LEARN") {
@@ -137,6 +165,9 @@ struct ProfileView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear.frame(height: 50)
+            }
         }
         .sheet(isPresented: $showEditDisplayName) {
             DisplayNameEditor(
@@ -150,6 +181,12 @@ struct ProfileView: View {
                 onCancel: { showEditDisplayName = false }
             )
             .iOS26Sheet([.height(280)])
+        }
+        .sheet(isPresented: $showDictationPicker) {
+            DictationLanguagePicker(selection: $dictationLocales) {
+                showDictationPicker = false
+            }
+            .iOS26Sheet([.large])
         }
         .sheet(isPresented: $showFeedback) {
             FeedbackComposer(isPresented: $showFeedback)
@@ -705,6 +742,141 @@ private struct DisplayNameEditor: View {
             .toolbarBackground(.visible, for: .navigationBar)
         }
         .onAppear { fieldFocus = true }
+    }
+}
+
+/// Multi-select picker over every locale SFSpeechRecognizer
+/// supports on this device. Selection persists to the same
+/// @AppStorage("mw.dictationLocales") key the Capture flow
+/// reads — change here, dictation picks it up on next start.
+private struct DictationLanguagePicker: View {
+    @Binding var selection: String
+    var onClose: () -> Void
+    @State private var searchText: String = ""
+
+    /// All locales the on-device recogniser supports. Sorted by
+    /// localised name so the list is browsable instead of being
+    /// alphabetised by raw identifier.
+    private let allLocales: [Locale] = SFSpeechRecognizer.supportedLocales()
+        .sorted { lhs, rhs in
+            (Locale.current.localizedString(forIdentifier: lhs.identifier) ?? lhs.identifier)
+                < (Locale.current.localizedString(forIdentifier: rhs.identifier) ?? rhs.identifier)
+        }
+
+    private var selectedIds: Set<String> {
+        Set(selection
+            .split(separator: ",")
+            .map { String($0).trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty })
+    }
+
+    private var filtered: [Locale] {
+        let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return allLocales }
+        return allLocales.filter { loc in
+            let n = (Locale.current.localizedString(forIdentifier: loc.identifier) ?? loc.identifier).lowercased()
+            return n.contains(q) || loc.identifier.lowercased().contains(q)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Dictation language")
+                        .font(Brand.display(size: 22))
+                        .foregroundStyle(Brand.textPrimary)
+                    Text("Pick one or more languages. When you start dictation, Memory.Wiki uses the first language that's installed on this device.")
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.textMuted)
+                        .lineSpacing(3)
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Brand.textFaint)
+                        TextField("Search languages", text: $searchText)
+                            .font(Brand.body(size: 14))
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+                    .padding(.horizontal, 12).padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Brand.surface)
+                            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+                    )
+                    ScrollView {
+                        LazyVStack(spacing: 4) {
+                            ForEach(filtered, id: \.identifier) { locale in
+                                LocaleRow(
+                                    locale: locale,
+                                    isSelected: selectedIds.contains(locale.identifier),
+                                    onTap: { toggle(locale.identifier) }
+                                )
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 18)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done", action: onClose)
+                        .foregroundStyle(Brand.textPrimary)
+                        .font(Brand.body(size: 14, weight: .semibold))
+                }
+            }
+            .toolbarBackground(.visible, for: .navigationBar)
+        }
+    }
+
+    private func toggle(_ id: String) {
+        Haptics.selection()
+        var ids = selectedIds
+        if ids.contains(id) {
+            // Block deselecting the last remaining language — dictation
+            // needs at least one locale to run.
+            if ids.count > 1 { ids.remove(id) }
+        } else {
+            ids.insert(id)
+        }
+        selection = ids.sorted().joined(separator: ",")
+    }
+}
+
+private struct LocaleRow: View {
+    let locale: Locale
+    let isSelected: Bool
+    var onTap: () -> Void
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(Locale.current.localizedString(forIdentifier: locale.identifier) ?? locale.identifier)
+                        .font(Brand.body(size: 14, weight: .medium))
+                        .foregroundStyle(Brand.textPrimary)
+                    Text(locale.identifier)
+                        .font(Brand.mono(size: 10))
+                        .foregroundStyle(Brand.textFaint)
+                }
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Brand.microInfo)
+                }
+            }
+            .padding(.horizontal, 12).padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isSelected ? Brand.surface : Color.clear)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
