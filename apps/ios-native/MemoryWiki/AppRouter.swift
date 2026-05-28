@@ -53,6 +53,13 @@ final class AppRouter: ObservableObject {
             NotificationCenter.default.post(name: .mwOpenHubChat, object: nil)
         case "profile":
             selectedTab = .profile
+        case "demo-signin":
+            // Screenshot-automation helper. Trips the standard
+            // demo magic-link flow without UI input so simctl can
+            // drive a signed-in simulator through every tab via
+            // deep links. The endpoint allowlist still gates this;
+            // arbitrary emails can't ride along.
+            Task { try? await AuthManager.shared.signInDemo(email: "demo@memory.wiki") }
         default:
             break
         }

@@ -31,3 +31,9 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+
+# Screenshot + sim build artifacts
+screenshots/
+build-sim/
+build/
+ExportOptions sensitive? — no, keep it tracked (above).
