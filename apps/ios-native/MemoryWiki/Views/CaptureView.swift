@@ -155,9 +155,12 @@ struct CaptureView: View {
             .preferredColorScheme(.dark)
         }
         .sheet(isPresented: $showImportSheet) {
-            ImportInfoSheet(isPresented: $showImportSheet)
-                .presentationDetents([.medium])
-                .preferredColorScheme(.dark)
+            ImportInfoSheet(isPresented: $showImportSheet) { url, data, contentType in
+                let name = url.lastPathComponent
+                Task { await importPickedFile(data: data, name: name, contentType: contentType) }
+            }
+            .presentationDetents([.medium, .large])
+            .preferredColorScheme(.dark)
         }
     }
 
@@ -231,7 +234,7 @@ struct CaptureView: View {
     private var modePicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ModePill(icon: "pencil", label: "Write", accent: Brand.microLime) {
+                ModePill(icon: "pencil", label: "Write", accent: Brand.textPrimary) {
                     Haptics.tap()
                     focused = .title
                 }
@@ -328,9 +331,9 @@ struct CaptureView: View {
             if !attachments.isEmpty {
                 attachmentsStrip
             }
-            // UITextView-backed editor with a real UIKit
-            // inputAccessoryView — guaranteed flush dock above
-            // the keyboard with no SwiftUI safe-area gap.
+            // UITextView-backed editor — needs an explicit fill
+            // frame, otherwise SwiftUI gives it intrinsic-content
+            // size (≈ 0) and taps land below the actual hit area.
             MarkdownEditor(
                 text: $bodyDraft,
                 isFocused: focused == .body,
@@ -344,6 +347,7 @@ struct CaptureView: View {
                 onStopDictation: { stopDictation() },
                 isDictating: isDictating
             )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -616,6 +620,23 @@ struct CaptureView: View {
         }
     }
 
+    /// Imports a user-picked file (PDF/DOCX/PPTX/XLSX/MD/TXT) by
+    /// POSTing to the right web endpoint in save mode. On success
+    /// we drop a SavedBanner so the user can View the new doc.
+    private func importPickedFile(data: Data, name: String, contentType: String) async {
+        showBanner("Importing \(name)…")
+        Haptics.tap()
+        do {
+            let url = try await APIClient.shared.importFile(data: data, filename: name, contentType: contentType)
+            savedURL = url
+            showBanner("Imported. Tap View to open.")
+            Haptics.success()
+        } catch {
+            showBanner("Import failed: \(error.localizedDescription)")
+            Haptics.warning()
+        }
+    }
+
     /// Surface a short-lived status banner that auto-dismisses
     /// after 2.5 s. Cancels any prior pending dismissal so back-
     /// to-back messages don't disappear early.
@@ -752,35 +773,86 @@ private struct URLImportSheet: View {
     }
 }
 
-/// Import info sheet — file import isn't shipped yet, but the entry
-/// point is here so users see the roadmap. Surfaces the working
-/// channels (Share Extension, web upload).
+/// Import sheet — primary action is the iOS file picker (PDF /
+/// Office / Markdown / TXT). Rows below explain the other
+/// channels with tap-through links to the relevant detail
+/// pages on memory.wiki.
 private struct ImportInfoSheet: View {
     @Binding var isPresented: Bool
+    var onPickedFile: (URL, Data, String) -> Void
+    @State private var showPicker = false
+    @State private var importingName: String?
+    @State private var error: String?
+
     var body: some View {
         NavigationStack {
             ZStack {
                 Brand.background.ignoresSafeArea()
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Import")
-                        .font(Brand.display(size: 22))
-                        .foregroundStyle(Brand.textPrimary)
-                    Text("Bring existing content into your hub.")
-                        .font(Brand.body(size: 13))
-                        .foregroundStyle(Brand.textMuted)
-                    ImportRow(icon: "square.and.arrow.up",
-                              title: "iOS Share Sheet",
-                              detail: "From Safari, Notes, Mail, anywhere — tap Share → Memory.Wiki. Works today.")
-                    ImportRow(icon: "globe",
-                              title: "Web upload (memory.wiki)",
-                              detail: "Drag PDF / Markdown / DOCX / TXT into the editor on memory.wiki. iOS file import coming soon.")
-                    ImportRow(icon: "doc.text",
-                              title: "VS Code / Desktop / CLI / MCP",
-                              detail: "Capture from your editor or terminal — they all land in the same hub.")
-                    Spacer()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Import")
+                            .font(Brand.display(size: 22))
+                            .foregroundStyle(Brand.textPrimary)
+                        Text("Bring existing content into your hub. iOS turns PDF / DOCX / PPTX / XLSX / MD / TXT into a Memory.Wiki doc.")
+                            .font(Brand.body(size: 13))
+                            .foregroundStyle(Brand.textMuted)
+                            .lineSpacing(3)
+                            .padding(.bottom, 4)
+
+                        // Primary affordance — file picker.
+                        Button {
+                            Haptics.tap()
+                            showPicker = true
+                        } label: {
+                            HStack(spacing: 10) {
+                                Image(systemName: "doc.badge.plus")
+                                    .font(.system(size: 16, weight: .regular))
+                                    .foregroundStyle(Brand.background)
+                                Text(importingName.map { "Importing \($0)…" } ?? "Pick a file from iOS")
+                                    .font(Brand.body(size: 14, weight: .semibold))
+                                    .foregroundStyle(Brand.background)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 14).padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(Brand.textPrimary)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(importingName != nil)
+
+                        if let error {
+                            Text(error)
+                                .font(Brand.body(size: 12))
+                                .foregroundStyle(Brand.microRed)
+                                .padding(.horizontal, 4)
+                        }
+
+                        Text("OR USE A COMPANION CHANNEL")
+                            .font(Brand.mono(size: 9, weight: .medium))
+                            .tracking(1.2)
+                            .foregroundStyle(Brand.textFaint)
+                            .padding(.top, 12)
+                            .padding(.bottom, 2)
+
+                        ImportLinkRow(icon: "square.and.arrow.up",
+                                      title: "iOS Share Sheet",
+                                      detail: "From Safari, Notes, Mail, anywhere — tap Share → Memory.Wiki.",
+                                      url: URL(string: "https://memory.wiki/install")!)
+                        ImportLinkRow(icon: "globe",
+                                      title: "Web upload (memory.wiki)",
+                                      detail: "Drag PDF / Markdown / DOCX / TXT into the editor on memory.wiki.",
+                                      url: URL(string: "https://memory.wiki/how")!)
+                        ImportLinkRow(icon: "doc.text",
+                                      title: "VS Code / Desktop / CLI / MCP",
+                                      detail: "Capture from your editor or terminal — same hub.",
+                                      url: URL(string: "https://memory.wiki/plugins")!)
+                    }
+                    .padding(.horizontal, 22)
+                    .padding(.top, 22)
+                    .padding(.bottom, 32)
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, 22)
             }
             .navigationTitle("Import")
             .navigationBarTitleDisplayMode(.inline)
@@ -793,40 +865,100 @@ private struct ImportInfoSheet: View {
             .toolbarBackground(Brand.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
+        .fileImporter(
+            isPresented: $showPicker,
+            allowedContentTypes: [
+                .pdf,
+                .init(filenameExtension: "docx")!,
+                .init(filenameExtension: "pptx")!,
+                .init(filenameExtension: "xlsx")!,
+                .plainText,
+                .init(filenameExtension: "md") ?? .plainText,
+                .init(filenameExtension: "markdown") ?? .plainText,
+            ],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                Task { await pickedFile(url) }
+            case .failure(let err):
+                error = err.localizedDescription
+            }
+        }
+    }
+
+    private func pickedFile(_ url: URL) async {
+        error = nil
+        let filename = url.lastPathComponent
+        importingName = filename
+        defer { importingName = nil }
+        // Need to start security-scoped access for file: URLs
+        // returned by the document picker.
+        let needsScope = url.startAccessingSecurityScopedResource()
+        defer { if needsScope { url.stopAccessingSecurityScopedResource() } }
+        do {
+            let data = try Data(contentsOf: url)
+            let contentType = guessContentType(filename: filename)
+            onPickedFile(url, data, contentType)
+            isPresented = false
+        } catch {
+            self.error = "Couldn't read \(filename): \(error.localizedDescription)"
+        }
+    }
+
+    private func guessContentType(filename: String) -> String {
+        let lower = filename.lowercased()
+        if lower.hasSuffix(".pdf") { return "application/pdf" }
+        if lower.hasSuffix(".docx") { return "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+        if lower.hasSuffix(".pptx") { return "application/vnd.openxmlformats-officedocument.presentationml.presentation" }
+        if lower.hasSuffix(".xlsx") { return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+        if lower.hasSuffix(".md") || lower.hasSuffix(".markdown") { return "text/markdown" }
+        return "text/plain"
     }
 }
 
-private struct ImportRow: View {
+/// Tappable row that opens a detail page on memory.wiki via
+/// SwiftUI Link. Used by the Import sheet's companion-channel
+/// section.
+private struct ImportLinkRow: View {
     let icon: String
     let title: String
-    /// Renamed from `body` to avoid colliding with the View
-    /// protocol's required `body` property.
     let detail: String
+    let url: URL
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundStyle(Brand.textMuted)
-                .frame(width: 24, alignment: .leading)
-                .padding(.top, 2)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(Brand.body(size: 14, weight: .medium))
-                    .foregroundStyle(Brand.textPrimary)
-                Text(detail)
-                    .font(Brand.body(size: 12))
+        Link(destination: url) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 14))
                     .foregroundStyle(Brand.textMuted)
-                    .lineSpacing(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: 24, alignment: .leading)
+                    .padding(.top, 2)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(Brand.body(size: 14, weight: .medium))
+                        .foregroundStyle(Brand.textPrimary)
+                    Text(detail)
+                        .font(Brand.body(size: 12))
+                        .foregroundStyle(Brand.textMuted)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Brand.textFaint)
+                    .padding(.top, 2)
             }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Brand.surface)
+                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+            )
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Brand.surface)
-                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
-        )
+        .buttonStyle(.plain)
     }
 }
 

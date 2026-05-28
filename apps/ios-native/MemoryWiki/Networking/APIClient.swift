@@ -162,6 +162,55 @@ final class APIClient {
         )
     }
 
+    // MARK: - File import (PDF / Office / Markdown / Text)
+
+    /// Imports a file by POSTing it to the right web endpoint
+    /// in end-to-end save mode (?save=1). Returns the canonical
+    /// public doc URL the user can open immediately.
+    ///
+    /// Endpoint routing:
+    ///   .pdf                  → /api/import/pdf?save=1
+    ///   .docx / .pptx / .xlsx → /api/import/office?save=1
+    ///   .md / .markdown       → /api/docs (treat as raw markdown)
+    ///   .txt                  → /api/docs (treat as markdown body)
+    func importFile(data: Data, filename: String, contentType: String) async throws -> URL {
+        let lower = filename.lowercased()
+        if lower.hasSuffix(".md") || lower.hasSuffix(".markdown") || lower.hasSuffix(".txt") {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            let titleHint = (filename as NSString).deletingPathExtension
+            let doc = try await createDocument(markdown: body, title: titleHint)
+            return doc.publicURL
+        }
+        let endpoint: String
+        if lower.hasSuffix(".pdf") {
+            endpoint = "/api/import/pdf?save=1"
+        } else if lower.hasSuffix(".docx") || lower.hasSuffix(".pptx") || lower.hasSuffix(".xlsx") {
+            endpoint = "/api/import/office?save=1"
+        } else {
+            throw APIError.http(415, "Unsupported file type: \(filename)")
+        }
+        struct Response: Decodable { let id: String }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let boundary = "MWFileImport\(UUID().uuidString)"
+        var body = Data()
+        let header = "--\(boundary)\r\n" +
+            "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n" +
+            "Content-Type: \(contentType)\r\n\r\n"
+        body.append(header.data(using: .utf8)!)
+        body.append(data)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent(endpoint))
+        req.httpMethod = "POST"
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+        req.httpBody = body
+        req.timeoutInterval = 120  // PDF parsing can be slow
+        let response: Response = try await perform(req)
+        return URL(string: "\(Self.baseURL.absoluteString)/\(response.id)")!
+    }
+
     // MARK: - Image upload
 
     /// Uploads raw image bytes to /api/upload and returns the

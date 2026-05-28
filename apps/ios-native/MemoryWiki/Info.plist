@@ -99,7 +99,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
-		<string>AccentColor</string>
+		<string>LaunchBackground</string>
 	</dict>
 	<key>UIUserInterfaceStyle</key>
 	<string>Dark</string>

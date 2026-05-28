@@ -162,7 +162,7 @@ struct StartView: View {
                         HStack(spacing: 6) {
                             Image(systemName: aiPromptCopied ? "checkmark" : "sparkles")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(aiPromptCopied ? Brand.microLime : Brand.textPrimary)
+                                .foregroundStyle(Brand.textPrimary)
                             Text(aiPromptCopied ? "Copied" : "Copy for AI")
                                 .font(Brand.body(size: 12, weight: .medium))
                                 .foregroundStyle(Brand.textPrimary)
@@ -199,7 +199,7 @@ struct StartView: View {
         HStack(spacing: 8) {
             PulseTile(label: "TODAY", value: "\(todayCount)",
                       sublabel: todayCount == 1 ? "memory" : "memories",
-                      accent: todayCount > 0 ? Brand.microLime : nil)
+                      accent: nil)
             PulseTile(label: "WEEK", value: "\(weekCount)",
                       sublabel: weekCount == 1 ? "memory" : "memories",
                       accent: nil)
@@ -213,7 +213,7 @@ struct StartView: View {
 
     private var quickActions: some View {
         HStack(spacing: 8) {
-            QuickActionTile(icon: "plus", label: "New capture", accent: Brand.microLime) {
+            QuickActionTile(icon: "plus", label: "New capture", accent: Brand.textPrimary) {
                 Haptics.tap()
                 router.selectedTab = .capture
             }
