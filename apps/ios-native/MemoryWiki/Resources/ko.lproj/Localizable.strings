@@ -67,6 +67,8 @@
 "LISTENING"           = "받아쓰는 중";
 "Korean + English"    = "한국어 + 영어";
 "Stop"                = "중지";
+"now"                 = "방금";
+"yesterday"           = "어제";
 "Add an image"        = "이미지 추가";
 "Take photo"          = "사진 촬영";
 "Choose from Library" = "보관함에서 선택";
@@ -112,9 +114,9 @@
 "Your knowledge hub for the AI age." = "AI 시대를 위한 지식 허브.";
 "iOS COMPANION"    = "iOS 컴패니언";
 "WHAT'S NEW"       = "새로운 기능";
-"On the web"       = "웹";
-"Across platforms" = "다양한 채널";
-"Legal"            = "법적 고지";
+"ON THE WEB"       = "웹";
+"ACROSS PLATFORMS" = "다양한 채널";
+"LEGAL"            = "법적 고지";
 "Built by Hyunsang + Claude." = "Hyunsang + Claude 제작.";
 
 /* ============ HELP ============ */

@@ -136,7 +136,7 @@ struct BundlesView: View {
         } else if let err = model.errorMessage, model.bundles.isEmpty {
             EmptyBundleState(
                 title: "Couldn't load bundles",
-                caption: err,
+                caption: LocalizedStringKey(err),
                 glyph: "wifi.slash",
                 action: ("Try again", { Task { await model.load() } })
             )
@@ -252,7 +252,10 @@ private struct BundleRow: View {
             if let n = bundle.documentCount {
                 HStack(spacing: 3) {
                     Image(systemName: "doc.text").font(.system(size: 8, weight: .medium))
-                    Text("\(n) doc\(n == 1 ? "" : "s")")
+                    // Inflect.localized() in iOS 15+ handles plural
+                    // form per-locale; Korean has no plural so it
+                    // renders "12개" via the strings file.
+                    Text("^[\(n) doc](inflect: true)")
                         .font(Brand.mono(size: 9, weight: .medium))
                         .tracking(0.4)
                 }
@@ -279,10 +282,10 @@ private struct BundleRow: View {
 }
 
 private struct EmptyBundleState: View {
-    let title: String
-    let caption: String
+    let title: LocalizedStringKey
+    let caption: LocalizedStringKey
     let glyph: String
-    let action: (String, () -> Void)?
+    let action: (LocalizedStringKey, () -> Void)?
     var body: some View {
         VStack(spacing: 14) {
             Spacer()

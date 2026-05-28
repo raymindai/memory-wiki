@@ -18,19 +18,19 @@ struct AboutView: View {
                 VStack(alignment: .leading, spacing: 28) {
                     hero
                     whatsNew
-                    sectionLinks("On the web", links: [
+                    sectionLinks("ON THE WEB", links: [
                         ("How it works", "https://memory.wiki/how"),
                         ("Manifesto", "https://memory.wiki/manifesto"),
                         ("Pricing", "https://memory.wiki/pricing"),
                     ])
-                    sectionLinks("Across platforms", links: [
+                    sectionLinks("ACROSS PLATFORMS", links: [
                         ("VS Code extension", "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode"),
                         ("Desktop (macOS)", "https://memory.wiki/download/desktop"),
                         ("Chrome extension", "https://memory.wiki/download/chrome"),
                         ("CLI (npm)", "https://www.npmjs.com/package/memory-wiki-cli"),
                         ("MCP server", "https://www.npmjs.com/package/memory-wiki-mcp"),
                     ])
-                    sectionLinks("Legal", links: [
+                    sectionLinks("LEGAL", links: [
                         ("Terms", "https://memory.wiki/terms"),
                         ("Privacy", "https://memory.wiki/privacy"),
                     ])
@@ -82,9 +82,9 @@ struct AboutView: View {
     }
 
     @ViewBuilder
-    private func sectionLinks(_ title: String, links: [(String, String)]) -> some View {
+    private func sectionLinks(_ title: LocalizedStringKey, links: [(String, String)]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionLabel(title.uppercased())
+            SectionLabel(title)
             VStack(spacing: 0) {
                 ForEach(links, id: \.0) { entry in
                     if let url = URL(string: entry.1) {
@@ -131,8 +131,8 @@ struct AboutView: View {
 }
 
 private struct SectionLabel: View {
-    let text: String
-    init(_ text: String) { self.text = text }
+    let text: LocalizedStringKey
+    init(_ text: LocalizedStringKey) { self.text = text }
     var body: some View {
         Text(text)
             .font(Brand.mono(size: 9, weight: .medium))

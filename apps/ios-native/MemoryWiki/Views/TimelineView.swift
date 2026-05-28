@@ -207,7 +207,7 @@ struct TimelineView: View {
         } else if let error = model.errorMessage, model.documents.isEmpty {
             EmptyState(
                 title: "Couldn't load timeline",
-                caption: error,
+                caption: LocalizedStringKey(error),
                 glyph: "wifi.slash",
                 action: ("Try again", { Task { await model.load() } })
             )
@@ -318,7 +318,7 @@ private struct BucketHeader: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(bucket.label)
+            Text(LocalizedStringKey(bucket.label))
                 .font(Brand.mono(size: 9, weight: .medium))
                 .tracking(1.2)
                 .foregroundStyle(Brand.textFaint)
@@ -505,12 +505,12 @@ private struct SemanticRow: View {
 }
 
 private struct EmptyState: View {
-    let title: String
-    let caption: String
+    let title: LocalizedStringKey
+    let caption: LocalizedStringKey
     let glyph: String
     /// Optional CTA — first-launch empty state surfaces a route
     /// out (Capture tab); error states surface a retry.
-    let action: (String, () -> Void)?
+    let action: (LocalizedStringKey, () -> Void)?
 
     var body: some View {
         VStack(spacing: 14) {

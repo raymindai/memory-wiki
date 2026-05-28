@@ -194,7 +194,7 @@ struct ProfileView: View {
     }
 
     @ViewBuilder
-    private func section<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
+    private func section<Content: View>(_ label: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(label)
             VStack(spacing: 0) { content() }
@@ -257,10 +257,15 @@ enum SettingsRoute: Hashable {
 }
 
 // MARK: - Rows
+//
+// All row labels are `LocalizedStringKey` so Korean (or any
+// future locale) flows through SwiftUI's automatic lookup.
+// Passing a literal at the call site still works — Swift
+// converts string-literal → LocalizedStringKey implicitly.
 
 private struct SectionLabel: View {
-    let text: String
-    init(_ text: String) { self.text = text }
+    let text: LocalizedStringKey
+    init(_ text: LocalizedStringKey) { self.text = text }
     var body: some View {
         Text(text)
             .font(Brand.mono(size: 9, weight: .medium))
@@ -270,7 +275,7 @@ private struct SectionLabel: View {
 }
 
 private struct SettingRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String?
     var body: some View {
         HStack {
@@ -289,7 +294,7 @@ private struct SettingRow: View {
 }
 
 private struct SettingLink: View {
-    let label: String
+    let label: LocalizedStringKey
     let systemImage: String
     let url: URL
     var body: some View {
@@ -310,7 +315,7 @@ private struct SettingLink: View {
 }
 
 private struct SettingNavRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let systemImage: String
     var onTap: () -> Void
     var body: some View {
@@ -340,7 +345,7 @@ private struct SettingNavRow: View {
 }
 
 private struct SettingActionRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let systemImage: String
     var onTap: () -> Void
     var body: some View {
@@ -364,7 +369,7 @@ private struct SettingActionRow: View {
 }
 
 private struct QuietActionButton: View {
-    let label: String
+    let label: LocalizedStringKey
     let systemImage: String
     var onTap: () -> Void
     var body: some View {
@@ -390,7 +395,7 @@ private struct QuietActionButton: View {
 
 private struct ThemePicker: View {
     @Binding var themePref: String
-    private let options: [(id: String, label: String, icon: String)] = [
+    private let options: [(id: String, label: LocalizedStringKey, icon: String)] = [
         ("dark",   "Dark",   "moon.fill"),
         ("light",  "Light",  "sun.max.fill"),
         ("system", "System", "circle.lefthalf.filled"),

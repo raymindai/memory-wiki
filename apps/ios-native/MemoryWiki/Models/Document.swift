@@ -67,19 +67,24 @@ struct Document: Identifiable, Hashable, Decodable {
         let date = sortDate
         let now = Date()
         let secs = now.timeIntervalSince(date)
-        if secs < 60 { return "now" }
+        if secs < 60 { return String(localized: "now") }
         let min = Int(secs / 60)
         if min < 60 { return "\(min)m" }
         let hr = Int(secs / 3600)
         if hr < 24 { return "\(hr)h" }
         let day = Int(secs / 86400)
-        if day == 1 { return "yesterday" }
+        if day == 1 { return String(localized: "yesterday") }
+        // Weekdays + months — DateFormatter respects the current
+        // user locale automatically so we get 월/화/水/Mon depending
+        // on the user's region.
         if day < 7 {
             let f = DateFormatter()
+            f.locale = Locale.current
             f.dateFormat = "EEE"
             return f.string(from: date)
         }
         let f = DateFormatter()
+        f.locale = Locale.current
         f.dateFormat = day < 365 ? "MMM d" : "MMM yyyy"
         return f.string(from: date)
     }

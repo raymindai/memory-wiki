@@ -103,7 +103,11 @@ private struct BrandTabBar: View {
                     VStack(spacing: 3) {
                         tab.glyph
                             .font(.system(size: 16, weight: .regular))
-                        Text(tab.label)
+                        // Wrap with LocalizedStringKey so SwiftUI
+                        // looks the value up in Localizable.strings
+                        // instead of taking the verbatim path that
+                        // the (String) initializer would.
+                        Text(LocalizedStringKey(tab.label))
                             .font(Brand.mono(size: 9, weight: .medium))
                             .tracking(0.5)
                             .textCase(.uppercase)

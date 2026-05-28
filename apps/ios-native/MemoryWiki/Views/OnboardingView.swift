@@ -70,13 +70,7 @@ struct OnboardingView: View {
 
     private var topBar: some View {
         HStack {
-            HStack(spacing: 0) {
-                Text("memory")
-                    .foregroundStyle(Brand.accent)
-                Text(".wiki")
-                    .foregroundStyle(Brand.textPrimary)
-            }
-            .font(Brand.display(size: 20))
+            MemoryWikiLogo(size: 18)
             Spacer()
             Button("Skip") { dismiss() }
                 .font(Brand.body(size: 13, weight: .medium))
