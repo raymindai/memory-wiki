@@ -40,6 +40,12 @@ struct RootView: View {
                     }
                     .animation(.snappy(duration: 0.22), value: reachability.isOnline)
                 }
+                // Force SwiftUI to fully tear down + rebuild the
+                // signed-in surface when the user identity changes.
+                // Without this @StateObject TimelineModel/BundlesModel
+                // can survive a sign-out → sign-in-as-other cycle and
+                // briefly show the previous account's docs.
+                .id(auth.session?.userId ?? "anon")
             } else {
                 AuthView()
             }

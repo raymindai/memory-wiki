@@ -393,7 +393,7 @@ private struct BrandBackdrop: View {
 
 private struct ProviderButton<Logo: View>: View {
     enum Style { case neutral, prominent }
-    let label: String
+    let label: LocalizedStringKey
     @ViewBuilder var logo: () -> Logo
     var style: Style
     var action: () -> Void

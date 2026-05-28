@@ -71,6 +71,13 @@ targets:
       path: MemoryWiki/Info.plist
       properties:
         CFBundleDisplayName: Memory.Wiki
+        # Siri pronounces CFBundleSpokenName instead of trying to
+        # vocalise CFBundleDisplayName. Without this Siri reads
+        # "Memory.Wiki" as "memory dot wiki" and requires the user
+        # to literally say "dot" — broken UX. Spoken name drops
+        # the dot so "Memory Wiki" matches both pronunciation and
+        # recognition.
+        CFBundleSpokenName: Memory Wiki
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
@@ -214,9 +221,12 @@ targets:
         excludes:
           - "**/.DS_Store"
           - "**/Info.plist"
+          - "**/*.js"
       - path: Shared
         excludes:
           - "**/.DS_Store"
+    resources:
+      - path: ShareExtension/Share.js
     info:
       path: ShareExtension/Info.plist
       properties:
@@ -233,7 +243,14 @@ targets:
           NSExtensionAttributes:
             NSExtensionActivationRule:
               NSExtensionActivationSupportsWebURLWithMaxCount: 5
+              NSExtensionActivationSupportsWebPageWithMaxCount: 5
               NSExtensionActivationSupportsText: true
+            # Safari (and any WKWebView) runs Share.js inside the
+            # page before invoking the extension — that's the only
+            # supported path to read document.title, window.location,
+            # the user's selection, and the article body. The result
+            # arrives as a public.propertyList NSItemProvider item.
+            NSExtensionJavaScriptPreprocessingFile: Share
         # MWBaseURL — read by SharedAPI so iOS staging vs prod
         # is a build-config toggle, not a code change.
         MWBaseURL: https://memory.wiki

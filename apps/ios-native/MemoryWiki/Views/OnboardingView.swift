@@ -116,10 +116,15 @@ struct OnboardingView: View {
 }
 
 private struct Card: Hashable {
-    let label: String
-    let title: String
-    let body: String
+    let label: LocalizedStringKey
+    let title: LocalizedStringKey
+    let body: LocalizedStringKey
     let glyph: String
+    /// Stable identity for SwiftUI's diffing — LocalizedStringKey
+    /// isn't comparable by literal value, so we hash on the glyph
+    /// (each card has a unique system image).
+    func hash(into hasher: inout Hasher) { hasher.combine(glyph) }
+    static func == (lhs: Card, rhs: Card) -> Bool { lhs.glyph == rhs.glyph }
 }
 
 private struct CardView: View {

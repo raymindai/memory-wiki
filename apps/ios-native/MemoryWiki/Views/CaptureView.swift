@@ -21,9 +21,15 @@ struct CaptureView: View {
     @State private var clipboardURL: URL?
     @State private var showPhotoPicker = false
     @FocusState private var focused: Bool
+    /// True only while the system soft keyboard is actually
+    /// on-screen. Used to gate the markdown accessory toolbar
+    /// — without this gate, .toolbar(.keyboard) renders the
+    /// strip floating above the tab bar (the user-reported bug)
+    /// even when no keyboard is visible.
+    @State private var keyboardUp = false
 
     /// Persisted draft body — survives app kill so a half-typed
-    /// note isn't lost when iOS evicts the process or the user
+    /// memory isn't lost when iOS evicts the process or the user
     /// gets a call. We restore on appear; if there's anything in
     /// here that DIDN'T get saved, the restore card surfaces.
     @AppStorage("mw.draft.body") private var persistedDraft: String = ""
@@ -34,6 +40,17 @@ struct CaptureView: View {
     var body: some View {
         ZStack {
             Brand.background.ignoresSafeArea()
+            // Ambient watermark blob — only when there's nothing
+            // typed + no chips up. Mirrors the auth-screen vibe so
+            // the empty Capture surface doesn't read like a dead
+            // text field. Pointer-passthrough so taps reach the
+            // editor underneath.
+            if draft.isEmpty && clipboardURL == nil && restorable == nil && savedURL == nil {
+                AnimatedBlob(size: 240, theme: .dark)
+                    .opacity(0.06)
+                    .blur(radius: 6)
+                    .allowsHitTesting(false)
+            }
             VStack(spacing: 0) {
                 header
                 if let saved = restorable, !saved.isEmpty, savedURL == nil {
@@ -93,11 +110,21 @@ struct CaptureView: View {
             if !persistedDraft.isEmpty && draft.isEmpty {
                 restorable = persistedDraft
             }
-            focused = true
+            // Don't auto-focus — focus auto-shows the soft kb on
+            // appear, which on tab switch sometimes leaves the
+            // accessory toolbar floating without the keyboard
+            // (the screenshot user reported). User taps the editor
+            // to bring the keyboard up themselves.
             refreshClipboard()
         }
         .onChange(of: focused) { _, isFocused in
             if isFocused { refreshClipboard() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            keyboardUp = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardUp = false
         }
         .onChange(of: draft) { _, new in
             // Keystroke-driven persist. @AppStorage debounces in
@@ -180,7 +207,12 @@ struct CaptureView: View {
                 .foregroundStyle(Brand.textPrimary)
                 .tint(Brand.textPrimary)
                 .toolbar {
-                    if focused { markdownToolbar }
+                    // Only render the markdown strip when the
+                    // soft keyboard is genuinely on-screen.
+                    // Otherwise iOS floats the accessory above
+                    // the tab bar with no keyboard underneath
+                    // — that was the visual bug.
+                    if focused && keyboardUp { markdownToolbar }
                 }
         }
     }

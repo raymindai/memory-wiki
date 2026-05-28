@@ -10,6 +10,7 @@ import SwiftUI
 import WidgetKit
 import CoreSpotlight
 import UIKit
+import AppIntents
 
 @main
 struct MemoryWikiApp: App {
@@ -20,6 +21,11 @@ struct MemoryWikiApp: App {
 
     init() {
         BackgroundRefresh.registerHandler()
+        // Force a refresh of the App Shortcuts metadata. iOS picks
+        // these up lazily; an explicit kick on launch makes them
+        // show up in Shortcuts.app / Spotlight / Siri immediately
+        // after a fresh install instead of "in a few minutes".
+        MemoryWikiShortcuts.updateAppShortcutParameters()
     }
 
     var body: some Scene {
