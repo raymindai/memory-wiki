@@ -218,15 +218,32 @@ struct CaptureView: View {
         .onChange(of: titleDraft) { _, new in persistedTitle = new }
         .onChange(of: bodyDraft) { _, new in persistedBody = new }
         .onReceive(NotificationCenter.default.publisher(for: .mwCapturePaste)) { _ in
-            // Widget "Paste" shortcut — refresh clipboard and
-            // bring the clipboard suggestion chip into view by
-            // making sure we're not focused on a field.
-            refreshClipboard()
-            if let text = UIPasteboard.general.string, clipboardURL == nil {
-                // Plain-text clipboard → seed body draft directly.
-                bodyDraft = bodyDraft.isEmpty ? text : "\(bodyDraft)\n\n\(text)"
+            // Widget "Paste" shortcut — drop whatever's on the
+            // clipboard directly into the body draft and focus
+            // the editor. Distinct from the bare "Capture" route
+            // which opens an empty canvas. Works for URL or text;
+            // for a URL we paste the full string + still surface
+            // the existing ClipboardChip so the user can convert
+            // it to a URL import with one tap.
+            let pb = UIPasteboard.general
+            let pasted: String? = {
+                if pb.hasURLs, let u = pb.url { return u.absoluteString }
+                if let s = pb.string?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !s.isEmpty { return s }
+                return nil
+            }()
+            if let pasted {
+                bodyDraft = bodyDraft.isEmpty ? pasted : "\(bodyDraft)\n\n\(pasted)"
                 focused = .body
                 bodyFocused = true
+                Haptics.success()
+            } else {
+                // Empty clipboard — just refresh the chip area
+                // and focus body so user can type.
+                refreshClipboard()
+                focused = .body
+                bodyFocused = true
+                showBanner("Clipboard is empty.", .info)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
