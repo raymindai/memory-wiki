@@ -34,11 +34,15 @@ struct BundleDetailView: View {
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 12)
-                .padding(.bottom, 40)
+                // Floating tab bar + safe area clearance.
+                .padding(.bottom, 90)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear.frame(height: 50)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {

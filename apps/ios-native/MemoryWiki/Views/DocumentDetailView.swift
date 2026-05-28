@@ -48,12 +48,18 @@ struct DocumentDetailView: View {
                 }
                 .padding(.horizontal, 18)
                 .padding(.top, 12)
-                .padding(.bottom, 40)
+                // Floating tab bar + safe area clearance — 40pt
+                // had the last paragraph slipping behind the
+                // capsule.
+                .padding(.bottom, 90)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            Color.clear.frame(height: 50)
+        }
         .task { await load() }
         .refreshable { await load(force: true) }
         .alert("Delete this doc?", isPresented: $confirmDelete) {
