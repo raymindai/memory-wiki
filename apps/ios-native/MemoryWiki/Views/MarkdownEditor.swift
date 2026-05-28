@@ -43,6 +43,9 @@ struct MarkdownEditor: UIViewRepresentable {
         placeholder.textColor = UIColor(red: 0.54, green: 0.54, blue: 0.57, alpha: 1)
         placeholder.font = MarkdownEditor.bodyFont
         placeholder.translatesAutoresizingMaskIntoConstraints = false
+        // CRITICAL: without this the label intercepts the first
+        // tap on the editor, dropping the user's focus attempt.
+        placeholder.isUserInteractionEnabled = false
         tv.addSubview(placeholder)
         NSLayoutConstraint.activate([
             placeholder.topAnchor.constraint(equalTo: tv.topAnchor, constant: 8),
@@ -78,7 +81,7 @@ struct MarkdownEditor: UIViewRepresentable {
         return UIFont.systemFont(ofSize: 16)
     }()
 
-    final class Coordinator: NSObject, UITextViewDelegate {
+    class Coordinator: NSObject, UITextViewDelegate {
         let parent: MarkdownEditor
         weak var toolbar: MarkdownPillBar?
         weak var textView: UITextView?
@@ -101,7 +104,7 @@ struct MarkdownEditor: UIViewRepresentable {
 
         // MARK: - Toolbar actions
 
-        func insert(_ scaffold: String) {
+        @objc func insert(_ scaffold: String) {
             UISelectionFeedbackGenerator().selectionChanged()
             guard let tv = textView ?? findTextView() else { return }
             let range = tv.selectedRange
@@ -117,7 +120,7 @@ struct MarkdownEditor: UIViewRepresentable {
             placeholderLabel?.isHidden = !tv.text.isEmpty
         }
 
-        func wrap(_ token: String) {
+        @objc func wrap(_ token: String) {
             UISelectionFeedbackGenerator().selectionChanged()
             guard let tv = textView ?? findTextView() else { return }
             let range = tv.selectedRange
@@ -163,6 +166,142 @@ struct MarkdownEditor: UIViewRepresentable {
         func tappedPhoto() { parent.onPhoto() }
         func tappedOCR()   { parent.onOCR() }
         func dismissKeyboard() { textView?.resignFirstResponder() }
+    }
+}
+
+/// Title-line UITextField wrapper that shares the same Notes-style
+/// `inputAccessoryView` as the body editor. Single line, display
+/// font, microWarn caret. Without this the SwiftUI-native TextField
+/// would show the system keyboard with no toolbar — different
+/// vocabulary from the body, jarring.
+struct MarkdownTitleField: UIViewRepresentable {
+    @Binding var text: String
+    var isFocused: Bool
+    var onFocusChange: (Bool) -> Void
+    var onPhoto: () -> Void
+    var onOCR: () -> Void
+    var onStartDictation: () -> Void
+    var onStopDictation: () -> Void
+    var isDictating: Bool
+    var onReturn: () -> Void
+
+    func makeUIView(context: Context) -> UITextField {
+        let tf = UITextField()
+        tf.delegate = context.coordinator
+        tf.backgroundColor = .clear
+        tf.textColor = UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
+        tf.tintColor = UIColor(red: 0.98, green: 0.71, blue: 0.10, alpha: 1)
+        tf.font = MarkdownTitleField.titleFont
+        tf.returnKeyType = .next
+        tf.autocapitalizationType = .sentences
+        tf.smartDashesType = .yes
+        tf.smartQuotesType = .yes
+        // Big-display placeholder via attributed string so we keep
+        // the same font / muted colour as the body editor.
+        tf.attributedPlaceholder = NSAttributedString(
+            string: "What's on your mind?",
+            attributes: [
+                .font: MarkdownTitleField.titleFont,
+                .foregroundColor: UIColor(red: 0.54, green: 0.54, blue: 0.57, alpha: 1)
+            ]
+        )
+        tf.addTarget(context.coordinator, action: #selector(Coordinator.editingChanged(_:)), for: .editingChanged)
+        // Share the same toolbar pill the body uses — buttons map
+        // back into the Coordinator which mediates between text
+        // field state and CaptureView callbacks.
+        let bar = MarkdownPillBar(target: context.coordinator.bodyCoordinator)
+        tf.inputAccessoryView = bar
+        context.coordinator.toolbar = bar
+        return tf
+    }
+
+    func updateUIView(_ tf: UITextField, context: Context) {
+        if tf.text != text { tf.text = text }
+        context.coordinator.toolbar?.setDictating(isDictating)
+        if isFocused && !tf.isFirstResponder {
+            DispatchQueue.main.async { tf.becomeFirstResponder() }
+        } else if !isFocused && tf.isFirstResponder {
+            DispatchQueue.main.async { tf.resignFirstResponder() }
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    static let titleFont: UIFont = {
+        if let f = UIFont(name: "CalSans-Regular", size: 26) { return f }
+        return UIFont.systemFont(ofSize: 26, weight: .semibold)
+    }()
+
+    final class Coordinator: NSObject, UITextFieldDelegate {
+        let parent: MarkdownTitleField
+        weak var toolbar: MarkdownPillBar?
+        weak var textField: UITextField?
+        /// Adapter coordinator that bridges toolbar actions back
+        /// to the parent. Each formatting button inserts into the
+        /// title's text (with the same wrap/insert vocabulary).
+        lazy var bodyCoordinator: MarkdownEditor.Coordinator = makeBridge()
+
+        init(_ parent: MarkdownTitleField) { self.parent = parent }
+
+        @objc func editingChanged(_ tf: UITextField) {
+            textField = tf
+            parent.text = tf.text ?? ""
+        }
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            self.textField = textField
+            parent.onFocusChange(true)
+        }
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            parent.onFocusChange(false)
+        }
+        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            parent.onReturn()
+            return false
+        }
+
+        /// Build a bridge Coordinator that translates toolbar
+        /// callbacks into title-field edits + parent callbacks.
+        private func makeBridge() -> MarkdownEditor.Coordinator {
+            // Construct a stub MarkdownEditor whose only purpose is
+            // to provide the parent callbacks; the bridge overrides
+            // insert/wrap to act on the text FIELD instead of a
+            // text view.
+            let stub = MarkdownEditor(
+                text: .constant(""),
+                isFocused: false,
+                onFocusChange: { _ in },
+                onPhoto: { [weak self] in self?.parent.onPhoto() },
+                onOCR:   { [weak self] in self?.parent.onOCR() },
+                onStartDictation: { [weak self] in self?.parent.onStartDictation() },
+                onStopDictation:  { [weak self] in self?.parent.onStopDictation() },
+                isDictating: parent.isDictating
+            )
+            return TitleBridgeCoordinator(stub, host: self)
+        }
+    }
+
+    /// Subclass that overrides insert/wrap to target the title
+    /// field. Toolbar formatting on the title line is rare but
+    /// supported (bold / italic). Most users will tap the body
+    /// then format — this just keeps the toolbar legal there.
+    final class TitleBridgeCoordinator: MarkdownEditor.Coordinator {
+        weak var host: Coordinator?
+        init(_ parent: MarkdownEditor, host: Coordinator) {
+            self.host = host
+            super.init(parent)
+        }
+        override func insert(_ scaffold: String) {
+            UISelectionFeedbackGenerator().selectionChanged()
+            guard let tf = host?.textField else { return }
+            tf.text = (tf.text ?? "") + scaffold
+            host?.parent.text = tf.text ?? ""
+        }
+        override func wrap(_ token: String) {
+            UISelectionFeedbackGenerator().selectionChanged()
+            guard let tf = host?.textField else { return }
+            tf.text = (tf.text ?? "") + "\(token)\(token)"
+            host?.parent.text = tf.text ?? ""
+        }
     }
 }
 

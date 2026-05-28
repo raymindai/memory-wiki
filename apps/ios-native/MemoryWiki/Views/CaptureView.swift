@@ -75,7 +75,10 @@ struct CaptureView: View {
     var body: some View {
         ZStack {
             Brand.background.ignoresSafeArea()
-            if !hasDraftContent && clipboardURL == nil && !hasRestorable && savedURL == nil {
+            // Backdrop blob only when the surface is truly idle —
+            // not while focused, since the user's about to type
+            // and the blob fading out mid-keystroke felt off.
+            if focused == nil && !hasDraftContent && clipboardURL == nil && !hasRestorable && savedURL == nil {
                 AmbientBlob()
             }
             VStack(spacing: 0) {
