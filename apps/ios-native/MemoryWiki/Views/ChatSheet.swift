@@ -52,10 +52,17 @@ struct ChatSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                header
-                transcript
-                composer
+            ZStack {
+                // Dark canvas — the parent .iOS26Sheet uses
+                // .ultraThinMaterial which reads too light when
+                // the chat content is text-heavy. Brand background
+                // overlay restores the app's ink-on-dark voice.
+                Brand.background.ignoresSafeArea()
+                VStack(spacing: 0) {
+                    header
+                    transcript
+                    composer
+                }
             }
         }
         .onAppear { inputFocused = true }
@@ -238,10 +245,27 @@ struct ChatSheet: View {
                 .padding(.horizontal, 16).padding(.vertical, 12)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(Brand.surface)
                         .overlay(Capsule(style: .continuous)
                             .strokeBorder(Brand.borderDim, lineWidth: 1))
                 )
+            // Keyboard dismiss — only shown while the input has
+            // focus so it doesn't clutter the row when the user
+            // is already reading the transcript.
+            if inputFocused {
+                Button {
+                    Haptics.selection()
+                    inputFocused = false
+                } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(Brand.textMuted)
+                        .frame(width: 38, height: 38)
+                        .background(Circle().fill(Brand.surface))
+                }
+                .buttonStyle(.plain)
+                .transition(.scale.combined(with: .opacity))
+            }
             Button { Task { await send() } } label: {
                 Image(systemName: sending ? "stop.fill" : "arrow.up")
                     .font(.system(size: 15, weight: .bold))
@@ -256,10 +280,11 @@ struct ChatSheet: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(.ultraThinMaterial)
+        .background(Brand.background.opacity(0.85))
         .overlay(alignment: .top) {
             Rectangle().fill(Brand.borderDim).frame(height: 0.5)
         }
+        .animation(.snappy(duration: 0.18), value: inputFocused)
     }
 
     private var canSend: Bool {
@@ -312,39 +337,59 @@ private struct MarkdownAssistantText: View {
     let dismiss: DismissAction
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(Array(slices().enumerated()), id: \.offset) { _, slice in
-                slice
+        // The assistant reply is broken into paragraphs by blank
+        // lines first — keeps tight prose tight and gives clean
+        // gaps between sections. Inside each paragraph, [doc:id]
+        // tokens are extracted out as a row of chips beneath the
+        // text so the chips don't break the prose's natural line
+        // wrapping.
+        VStack(alignment: .leading, spacing: 10) {
+            let paragraphs = raw.components(separatedBy: "\n\n").filter {
+                !$0.trimmingCharacters(in: .whitespaces).isEmpty
+            }
+            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, para in
+                paragraphView(para)
             }
         }
     }
 
-    /// Split the assistant message into a sequence of either text
-    /// runs (rendered as markdown) or doc-citation chips.
-    private func slices() -> [AnyView] {
-        var out: [AnyView] = []
+    @ViewBuilder
+    private func paragraphView(_ para: String) -> some View {
+        let (cleaned, docIds) = stripDocRefs(para)
+        VStack(alignment: .leading, spacing: 6) {
+            if !cleaned.isEmpty {
+                markdownText(cleaned)
+            }
+            if !docIds.isEmpty {
+                docChipsRow(docIds)
+            }
+        }
+    }
+
+    /// Returns the paragraph with `[doc:id]` tokens stripped + the
+    /// list of unique doc ids found inside it (preserved order).
+    private func stripDocRefs(_ para: String) -> (String, [String]) {
         let pattern = #"\[?doc:([A-Za-z0-9_-]{6,})\]?"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            out.append(AnyView(markdownText(raw)))
-            return out
+            return (para, [])
         }
-        let ns = raw as NSString
-        let matches = regex.matches(in: raw, range: NSRange(location: 0, length: ns.length))
-        var cursor = 0
+        let ns = para as NSString
+        let matches = regex.matches(in: para, range: NSRange(location: 0, length: ns.length))
+        var ids: [String] = []
+        var seen = Set<String>()
         for m in matches {
-            if m.range.location > cursor {
-                let pre = ns.substring(with: NSRange(location: cursor, length: m.range.location - cursor))
-                if !pre.isEmpty { out.append(AnyView(markdownText(pre))) }
-            }
-            let docId = ns.substring(with: m.range(at: 1))
-            out.append(AnyView(docChip(docId)))
-            cursor = m.range.location + m.range.length
+            let id = ns.substring(with: m.range(at: 1))
+            if !seen.contains(id) { ids.append(id); seen.insert(id) }
         }
-        if cursor < ns.length {
-            let tail = ns.substring(with: NSRange(location: cursor, length: ns.length - cursor))
-            if !tail.isEmpty { out.append(AnyView(markdownText(tail))) }
-        }
-        return out
+        // Remove the matched runs from the text + collapse double
+        // spaces / spaces-before-punct left behind.
+        var cleaned = regex.stringByReplacingMatches(
+            in: para, range: NSRange(location: 0, length: ns.length), withTemplate: ""
+        )
+        cleaned = cleaned.replacingOccurrences(of: "  ", with: " ")
+        cleaned = cleaned.replacingOccurrences(of: " .", with: ".")
+        cleaned = cleaned.replacingOccurrences(of: " ,", with: ",")
+        return (cleaned.trimmingCharacters(in: .whitespacesAndNewlines), ids)
     }
 
     @ViewBuilder
@@ -367,30 +412,96 @@ private struct MarkdownAssistantText: View {
         }
     }
 
-    private func docChip(_ id: String) -> some View {
-        Button {
-            Haptics.selection()
-            router.selectedTab = .timeline
-            router.timelinePath = [.docDetailById(id)]
-            dismiss()
-        } label: {
+    private func docChipsRow(_ ids: [String]) -> some View {
+        FlexibleHStack(spacing: 6) {
+            ForEach(ids, id: \.self) { id in
+                DocCitationChip(id: id) {
+                    Haptics.selection()
+                    router.selectedTab = .timeline
+                    router.timelinePath = [.docDetailById(id)]
+                    dismiss()
+                }
+            }
+        }
+    }
+}
+
+/// Single citation chip — fetches the doc's title via DocCache
+/// (already populated by Timeline row prefetching, falls back to
+/// a per-tap fetch). Displays the title instead of the raw id
+/// hash, with the file glyph for affordance.
+private struct DocCitationChip: View {
+    let id: String
+    let onTap: () -> Void
+    @State private var title: String? = nil
+
+    var body: some View {
+        Button(action: onTap) {
             HStack(spacing: 6) {
                 Image(systemName: "doc.text")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Brand.microInfo)
-                Text("doc \(id.prefix(8))")
-                    .font(Brand.mono(size: 11, weight: .medium))
+                Text(displayLabel)
+                    .font(Brand.body(size: 12, weight: .medium))
                     .foregroundStyle(Brand.textPrimary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
             .padding(.horizontal, 10).padding(.vertical, 5)
             .background(
                 Capsule(style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(Brand.surface)
                     .overlay(Capsule(style: .continuous)
-                        .strokeBorder(Brand.microInfo.opacity(0.45), lineWidth: 1))
+                        .strokeBorder(Brand.microInfo.opacity(0.40), lineWidth: 1))
             )
         }
         .buttonStyle(.plain)
+        .task { await resolveTitle() }
+    }
+
+    private var displayLabel: String {
+        if let t = title?.trimmingCharacters(in: .whitespaces), !t.isEmpty { return t }
+        return "doc \(id.prefix(8))"
+    }
+
+    private func resolveTitle() async {
+        if let cached = DocCache.shared.get(id) {
+            title = cached.title
+            return
+        }
+        // Cache miss — kick a fetch in the background.
+        DocCache.shared.prefetch(id)
+        // Poll briefly for the cache to fill (prefetch dedups so
+        // this is cheap). 5 × 200ms = 1 s ceiling before falling
+        // back to the id label.
+        for _ in 0..<5 {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            if let cached = DocCache.shared.get(id) {
+                title = cached.title
+                return
+            }
+        }
+    }
+}
+
+/// Wraps its children left-to-right and breaks to the next line
+/// when running out of horizontal room. Used for the citation
+/// chip row so a paragraph that cites many docs flows naturally
+/// instead of forcing horizontal scroll.
+private struct FlexibleHStack<Content: View>: View {
+    let spacing: CGFloat
+    @ViewBuilder let content: () -> Content
+    var body: some View {
+        // SwiftUI's `Layout` would be the proper API, but a Lazy
+        // VGrid with adaptive columns of ~120pt min reads the
+        // same for this use-case and is simpler to maintain.
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 100, maximum: 200), spacing: spacing, alignment: .leading)],
+            alignment: .leading,
+            spacing: spacing
+        ) {
+            content()
+        }
     }
 }
 

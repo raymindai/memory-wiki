@@ -105,6 +105,23 @@ struct BundlesView: View {
                     ))
                 }
             }
+            // Bundle members push DocumentDetailView via
+            // TimelineRoute — register the same destination here
+            // so the tap from the BundleDetailView member list
+            // resolves. Previously the route was only declared
+            // inside BundleDetailView (deeper on the stack) so
+            // SwiftUI silently no-op'd the push.
+            .navigationDestination(for: TimelineRoute.self) { route in
+                switch route {
+                case .docDetail(let doc):
+                    DocumentDetailView(seed: doc)
+                case .docDetailById(let id):
+                    DocumentDetailView(seed: Document(
+                        id: id, title: nil, updatedAt: nil, createdAt: nil,
+                        isDraft: nil, viewCount: nil, allowedEmails: nil, source: nil
+                    ))
+                }
+            }
             .toolbar(.hidden, for: .navigationBar)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 Color.clear.frame(height: 70)

@@ -104,7 +104,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             },
             body: JSON.stringify({
               model: "claude-haiku-4-5-20251001",
-              max_tokens: 4096,
+              max_tokens: 64000,
               stream: true,
               messages: [{ role: "user", content: fullPrompt }],
             }),

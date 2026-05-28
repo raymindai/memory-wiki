@@ -190,9 +190,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
               // does the heavy lifting; the model just synthesises
               // concisely.
               model: "claude-haiku-4-5-20251001",
-              // 2048 was clipping mid-sentence on richer answers.
-              // 4096 still keeps responses fast on Haiku.
-              max_tokens: 4096,
+              // Haiku 4.5 max output is 64k tokens; let the model
+              // run long when the question warrants it. Earlier
+              // 4096 cap was clipping rich answers.
+              max_tokens: 64000,
               stream: true,
               messages: [{ role: "user", content: fullPrompt }],
             }),
