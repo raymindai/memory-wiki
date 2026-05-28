@@ -304,11 +304,10 @@ struct TimelineView: View {
 
     @ViewBuilder private var content: some View {
         contentInner
-            // Cross-fade + 6pt rise as the list arrives — feels
-            // less jarring than the loader vanishing and the
-            // ScrollView snapping in.
-            .animation(.smooth(duration: 0.36), value: model.loading)
-            .animation(.smooth(duration: 0.36), value: model.documents.count)
+            // Slower + softer transition for elegance — content
+            // settles in rather than snapping.
+            .animation(.smooth(duration: 0.55), value: model.loading)
+            .animation(.smooth(duration: 0.55), value: model.documents.count)
     }
 
     @ViewBuilder private var contentInner: some View {

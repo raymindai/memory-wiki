@@ -209,8 +209,8 @@ struct BundlesView: View {
 
     @ViewBuilder private var content: some View {
         contentInner
-            .animation(.smooth(duration: 0.36), value: model.loading)
-            .animation(.smooth(duration: 0.36), value: model.bundles.count)
+            .animation(.smooth(duration: 0.55), value: model.loading)
+            .animation(.smooth(duration: 0.55), value: model.bundles.count)
     }
 
     @ViewBuilder private var contentInner: some View {

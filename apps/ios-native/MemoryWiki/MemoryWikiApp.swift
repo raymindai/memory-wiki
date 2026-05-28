@@ -18,6 +18,10 @@ struct MemoryWikiApp: App {
     @StateObject private var router = AppRouter.shared
     @Environment(\.scenePhase) private var scenePhase
     @UIApplicationDelegateAdaptor(MWAppDelegate.self) private var appDelegate
+    /// Brand-led splash overlay that smooths the transition from
+    /// the iOS launch screen → RootView. Flipped off after a
+    /// ~1.0 s dwell so the boot feels deliberate, not jolting.
+    @State private var bootSplash = true
 
     init() {
         BackgroundRefresh.registerHandler()
@@ -30,9 +34,28 @@ struct MemoryWikiApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(auth)
-                .environmentObject(router)
+            ZStack {
+                RootView()
+                    .environmentObject(auth)
+                    .environmentObject(router)
+                    .opacity(bootSplash ? 0 : 1)
+                if bootSplash {
+                    SplashView()
+                        .transition(.opacity)
+                }
+            }
+            .animation(.easeOut(duration: 0.45), value: bootSplash)
+            .task {
+                // 1.0 s dwell on the splash, then a 0.45 s cross-
+                // fade into RootView. Gives the blob enough time
+                // to read as a brand greeting.
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                bootSplash = false
+            }
+            // Re-bind everything below so the existing event
+            // handlers stay attached to the same hierarchy.
+            .environmentObject(auth)
+            .environmentObject(router)
                 .onOpenURL { url in
                     // memorywiki:// — two flavours:
                     //   auth-callback → AuthManager
