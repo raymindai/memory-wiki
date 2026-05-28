@@ -69,7 +69,16 @@ async function getHub(slug: string, at: Date | null): Promise<HubData | null> {
   // avatar_style="identicon" render the new "shapes" style.
   const style = rawStyle === "identicon" ? "shapes" : rawStyle;
   let resolvedAvatar: string;
-  if (style && style !== "oauth") {
+  // "upload" is the sentinel meaning the user uploaded their own
+  // image to Supabase Storage — profile.avatar_url holds the URL.
+  // Treating "upload" as a DiceBear style name produced a broken
+  // /9.x/upload/svg request (no such style) and rendered a broken
+  // image on the hub face.
+  if (style === "upload") {
+    resolvedAvatar = profile.avatar_url
+      || oauthAvatar
+      || `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
+  } else if (style && style !== "oauth") {
     resolvedAvatar = `https://api.dicebear.com/9.x/${style}/svg?seed=${seed}`;
   } else if (profile.avatar_url) {
     resolvedAvatar = profile.avatar_url;

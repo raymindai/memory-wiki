@@ -5457,9 +5457,39 @@
 }
 
 @media (max-width: 720px) {
-  .v8-frontier .vhub-doc-row { grid-template-columns: 14px 1fr auto; }
+  /* Drop the URL meta column on mobile + slim the gutter so a long
+     doc title doesn't push the time chip off the right edge. */
+  .v8-frontier .vhub-doc-row {
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 10px 6px;
+  }
   .v8-frontier .vhub-doc-meta { display: none; }
   .v8-frontier .vhub-card { padding: 40px 24px 32px; }
+  /* Long /@<slug> hub URL would otherwise nowrap past the viewport
+     and shove the page right — let the urlcard wrap onto two rows
+     on narrow widths. */
+  .v8-frontier .vhub-deploy-urlcard {
+    flex-wrap: wrap;
+  }
+  .v8-frontier .vhub-deploy-urlcard .vhub-deploy-url {
+    flex-basis: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* hub-copy-btn full width on the second row */
+  .v8-frontier .hub-copy-btn {
+    width: 100%;
+    justify-content: center;
+    border-left: 0;
+    border-top: 1px solid var(--hair);
+  }
+  /* Same hard cap on the bundle title column so a long title can't
+     blow out the bundle card. */
+  .v8-frontier .vhub-bundle-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Hub container width — readable column, not full viewport */
