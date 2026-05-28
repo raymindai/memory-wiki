@@ -179,9 +179,12 @@ targets:
         excludes:
           - "**/.DS_Store"
           - "**/Info.plist"
+          - "**/Assets.xcassets/**"
       - path: Shared
         excludes:
           - "**/.DS_Store"
+    resources:
+      - path: Widget/Assets.xcassets
     info:
       path: Widget/Info.plist
       properties:
@@ -222,6 +225,7 @@ targets:
           - "**/.DS_Store"
           - "**/Info.plist"
           - "**/*.js"
+          - "**/Assets.xcassets/**"
       - path: Shared
         excludes:
           - "**/.DS_Store"
@@ -230,6 +234,8 @@ targets:
       # resources` so xcodegen wires it into the .appex.
       - path: ShareExtension/Share.js
         buildPhase: resources
+    resources:
+      - path: ShareExtension/Assets.xcassets
     info:
       path: ShareExtension/Info.plist
       properties:

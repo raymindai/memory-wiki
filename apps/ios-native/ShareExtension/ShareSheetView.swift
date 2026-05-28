@@ -387,30 +387,17 @@ private enum ShareTheme {
     static let microLime   = Color(red: 0.710, green: 1.000, blue: 0.100)
 }
 
-/// Brand blob silhouette — three overlapping circles fused with
-/// a small blur. Mirrors the Widget extension's BlobMark so all
-/// three iOS surfaces carry the same mark.
+/// Brand blob silhouette — bundled mwblob-dark vector asset
+/// (mwlogoset v2/icon-inline-dark.svg). Same artwork the main
+/// app + widget use; rendered template-mode so it picks up the
+/// current foreground colour.
 private struct ShareBlobMark: View {
     var body: some View {
-        GeometryReader { proxy in
-            let s = min(proxy.size.width, proxy.size.height)
-            let r1 = s * 0.34
-            let r2 = s * 0.30
-            let r3 = s * 0.32
-            ZStack {
-                Circle().fill(ShareTheme.textPrimary)
-                    .frame(width: r1 * 2, height: r1 * 2)
-                    .offset(x: -s * 0.14, y: -s * 0.10)
-                Circle().fill(ShareTheme.textPrimary)
-                    .frame(width: r2 * 2, height: r2 * 2)
-                    .offset(x: s * 0.18, y: -s * 0.06)
-                Circle().fill(ShareTheme.textPrimary)
-                    .frame(width: r3 * 2, height: r3 * 2)
-                    .offset(x: s * 0.02, y: s * 0.18)
-            }
-            .frame(width: proxy.size.width, height: proxy.size.height)
-            .blur(radius: s * 0.045)
-        }
+        Image("mwblob-dark")
+            .resizable()
+            .renderingMode(.template)
+            .aspectRatio(contentMode: .fit)
+            .foregroundStyle(ShareTheme.textPrimary)
     }
 }
 

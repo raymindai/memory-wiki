@@ -65,6 +65,13 @@ public enum SharedAPI {
     /// Creates a doc and returns the canonical public URL. Used
     /// by the Share Extension to capture the highlighted page /
     /// text into the user's hub.
+    ///
+    /// Server-side /api/docs runs embedding generation on insert,
+    /// which can take 5-15s for medium markdown. We extend the
+    /// per-request timeout to 90s and retry once on a transient
+    /// timeout — extensions live for only ~30s by default, but
+    /// Apple bumps that when there's a live extensionContext
+    /// completion in flight.
     public static func createDocument(markdown: String, title: String? = nil, source: String = "ios-share") async throws -> URL {
         guard let session = SharedSessionStore.load() else { throw SharedAPIError.notSignedIn }
         struct Request: Encodable {
@@ -72,18 +79,45 @@ public enum SharedAPI {
             let title: String?
             let source: String
         }
-        struct Response: Decodable {
-            let id: String
-        }
+        struct Response: Decodable { let id: String }
         let body = try JSONEncoder().encode(Request(markdown: markdown, title: title, source: source))
-        var req = URLRequest(url: baseURL.appendingPathComponent("/api/docs"))
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
-        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
-        req.httpBody = body
-        let (data, response) = try await URLSession.shared.data(for: req)
+
+        func makeRequest() -> URLRequest {
+            var req = URLRequest(url: baseURL.appendingPathComponent("/api/docs"))
+            req.httpMethod = "POST"
+            req.timeoutInterval = 90  // up from default 60 — embedding step is slow
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+            req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+            if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+            req.httpBody = body
+            return req
+        }
+
+        // Custom session so the resource timeout (overall request
+        // including retries) matches the per-request timeout.
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 90
+        config.timeoutIntervalForResource = 120
+        let session_ = URLSession(configuration: config)
+
+        do {
+            return try await perform(makeRequest(), on: session_)
+        } catch {
+            // Retry once on a timeout — the first request may have
+            // landed on a cold Vercel function. Subsequent calls
+            // hit the warmed instance + return fast.
+            let ns = error as NSError
+            if ns.domain == NSURLErrorDomain && ns.code == NSURLErrorTimedOut {
+                return try await perform(makeRequest(), on: session_)
+            }
+            throw error
+        }
+    }
+
+    private static func perform(_ req: URLRequest, on session: URLSession) async throws -> URL {
+        struct Response: Decodable { let id: String }
+        let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse else {
             throw SharedAPIError.http(-1, "no response")
         }

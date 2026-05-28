@@ -56,38 +56,22 @@ enum WTheme {
 
 // MARK: - Brand blob (SwiftUI Shape)
 
-/// Brand blob silhouette — three overlapping circles arranged
-/// into a clover-like organic mass, reading as the same logo
-/// silhouette the main app's animated morph SVG settles into.
-/// Drawn as a SwiftUI Shape so it scales crisply at any size.
+/// Brand blob silhouette — the canonical
+/// `mwlogoset v2/icon-inline-dark.svg` bundled into the
+/// widget's asset catalog with vector representation
+/// preserved, so it scales crisply at any size on iOS 17+.
+/// Widgets are static snapshots so we can't animate the
+/// morph; the static silhouette is the correct mark.
 struct BlobMark: View {
     var color: Color = WTheme.textPrimary
     var body: some View {
-        GeometryReader { proxy in
-            let s = min(proxy.size.width, proxy.size.height)
-            let r1 = s * 0.34
-            let r2 = s * 0.30
-            let r3 = s * 0.32
-            ZStack {
-                Circle()
-                    .fill(color)
-                    .frame(width: r1 * 2, height: r1 * 2)
-                    .offset(x: -s * 0.14, y: -s * 0.10)
-                Circle()
-                    .fill(color)
-                    .frame(width: r2 * 2, height: r2 * 2)
-                    .offset(x: s * 0.18, y: -s * 0.06)
-                Circle()
-                    .fill(color)
-                    .frame(width: r3 * 2, height: r3 * 2)
-                    .offset(x: s * 0.02, y: s * 0.18)
-            }
-            .frame(width: proxy.size.width, height: proxy.size.height)
-            // Drop-shadow blur fuses the three circles into one
-            // continuous blob — the silhouette reads as a single
-            // organic mass instead of "three circles."
-            .blur(radius: s * 0.045)
-        }
+        // .renderingMode(.template) lets us tint the artwork
+        // ink/light to match the rest of the widget surface.
+        Image("mwblob-dark")
+            .resizable()
+            .renderingMode(.template)
+            .aspectRatio(contentMode: .fit)
+            .foregroundStyle(color)
     }
 }
 

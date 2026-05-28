@@ -27,10 +27,13 @@ MemoryWikiPreprocessor.prototype = {
             if (article) {
                 bodyText = article.innerText || "";
             }
-            // Cap to keep the extension's IPC small; the user can
-            // open the doc on the web for the full version.
-            if (bodyText.length > 4000) {
-                bodyText = bodyText.slice(0, 4000) + "\n\n…";
+            // Cap to keep the IPC payload + the downstream POST
+            // small. 4KB markdown was causing /api/docs to time out
+            // on slower networks (the server runs embedding on
+            // create). 2KB is plenty for a useful snippet — the
+            // full page is one tap away via the Source URL anyway.
+            if (bodyText.length > 2000) {
+                bodyText = bodyText.slice(0, 2000) + "\n\n… (continued at source URL)";
             }
 
             args.completionFunction({
