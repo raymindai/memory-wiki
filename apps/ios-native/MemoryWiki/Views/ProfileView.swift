@@ -44,7 +44,9 @@ struct ProfileView: View {
                             }
                         }
                         section("LANGUAGE") {
-                            SettingActionRow(label: "Change app language", systemImage: "globe") {
+                            SettingActionRow(label: "Change app language",
+                                             systemImage: "globe",
+                                             iconTint: Brand.microInfo) {
                                 Haptics.tap()
                                 // iOS shows "Memory.Wiki → Preferred Language"
                                 // automatically because we bundle ko + en
@@ -58,19 +60,27 @@ struct ProfileView: View {
                             }
                         }
                         section("LEARN") {
-                            SettingNavRow(label: "Help & Shortcuts", systemImage: "questionmark.circle") {
+                            SettingNavRow(label: "Help & Shortcuts",
+                                          systemImage: "questionmark.circle",
+                                          iconTint: Brand.microInfo) {
                                 path.append(.help)
                             }
-                            SettingActionRow(label: "Replay welcome tour", systemImage: "sparkles") {
+                            SettingActionRow(label: "Replay welcome tour",
+                                             systemImage: "sparkles",
+                                             iconTint: Brand.microWarn) {
                                 Haptics.tap()
                                 onboarded = false
                             }
-                            SettingNavRow(label: "About Memory.Wiki", systemImage: "info.circle") {
+                            SettingNavRow(label: "About Memory.Wiki",
+                                          systemImage: "info.circle",
+                                          iconTint: Brand.microInfo) {
                                 path.append(.about)
                             }
                         }
                         section("FEEDBACK") {
-                            SettingActionRow(label: "Send feedback", systemImage: "envelope") {
+                            SettingActionRow(label: "Send feedback",
+                                             systemImage: "envelope",
+                                             iconTint: Brand.microWarn) {
                                 Haptics.tap()
                                 if MFMailComposeViewController.canSendMail() {
                                     showFeedback = true
@@ -78,12 +88,20 @@ struct ProfileView: View {
                                     showMailUnavailable = true
                                 }
                             }
-                            SettingLink(label: "Manifesto", systemImage: "arrow.up.right", url: URL(string: "https://memory.wiki/manifesto")!)
-                            SettingLink(label: "How it works", systemImage: "arrow.up.right", url: URL(string: "https://memory.wiki/how")!)
+                            SettingLink(label: "Manifesto",
+                                        systemImage: "arrow.up.right",
+                                        url: URL(string: "https://memory.wiki/manifesto")!)
+                            SettingLink(label: "How it works",
+                                        systemImage: "arrow.up.right",
+                                        url: URL(string: "https://memory.wiki/how")!)
                         }
                         section("LEGAL") {
-                            SettingLink(label: "Terms", systemImage: "arrow.up.right", url: URL(string: "https://memory.wiki/terms")!)
-                            SettingLink(label: "Privacy", systemImage: "arrow.up.right", url: URL(string: "https://memory.wiki/privacy")!)
+                            SettingLink(label: "Terms",
+                                        systemImage: "arrow.up.right",
+                                        url: URL(string: "https://memory.wiki/terms")!)
+                            SettingLink(label: "Privacy",
+                                        systemImage: "arrow.up.right",
+                                        url: URL(string: "https://memory.wiki/privacy")!)
                         }
                         section("VERSION") {
                             SettingRow(label: "iOS Companion", value: version)
@@ -152,7 +170,8 @@ struct ProfileView: View {
                                 let pub = ov.public?.count ?? 0
                                 let pri = (ov.private?.count ?? 0) + (ov.shared?.count ?? 0)
                                 return "\(pub) public · \(pri) private"
-                            } ?? ""
+                            } ?? "",
+                            accent: Brand.microInfo
                         )
                         HubStatTile(
                             label: "BUNDLES",
@@ -161,7 +180,8 @@ struct ProfileView: View {
                                 let pub = ov.public?.count ?? 0
                                 let pri = (ov.private?.count ?? 0) + (ov.shared?.count ?? 0)
                                 return "\(pub) public · \(pri) private"
-                            } ?? ""
+                            } ?? "",
+                            accent: Brand.microWarn
                         )
                     }
                     if let desc = hub.profile.hub_description, !desc.isEmpty {
@@ -225,10 +245,11 @@ struct ProfileView: View {
                         HStack(spacing: 6) {
                             Image(systemName: copied ? "checkmark" : "sparkles")
                                 .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(copied ? Brand.textPrimary : Brand.microInfo)
                             Text(copied ? "Copied" : "Copy for AI")
                                 .font(Brand.body(size: 12, weight: .medium))
+                                .foregroundStyle(Brand.textPrimary)
                         }
-                        .foregroundStyle(Brand.textPrimary)
                         .padding(.horizontal, 14)
                     }
                     .buttonStyle(.plain)
@@ -343,12 +364,22 @@ private struct HubStatTile: View {
     let label: String
     let value: String
     let sublabel: String
+    /// Tiny coloured indicator next to the label — distinguishes
+    /// MEMORIES (info) from BUNDLES (warn) at a glance without
+    /// adding background tints. The dot is 5pt so it reads as
+    /// "category marker" not "status pill".
+    var accent: Color = Brand.textFaint
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(Brand.mono(size: 9, weight: .medium))
-                .tracking(1.0)
-                .foregroundStyle(Brand.textFaint)
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(accent)
+                    .frame(width: 5, height: 5)
+                Text(label)
+                    .font(Brand.mono(size: 9, weight: .medium))
+                    .tracking(1.0)
+                    .foregroundStyle(Brand.textFaint)
+            }
             Text(value)
                 .font(Brand.display(size: 26))
                 .foregroundStyle(Brand.textPrimary)
@@ -424,6 +455,10 @@ private struct SettingLink: View {
 private struct SettingNavRow: View {
     let label: LocalizedStringKey
     let systemImage: String
+    /// Optional accent for the leading glyph. Defaults to muted ink
+    /// so legacy call sites stay quiet; pass a Brand.microXxx tint
+    /// to highlight the row's intent (info / warn / red).
+    var iconTint: Color = Brand.textMuted
     var onTap: () -> Void
     var body: some View {
         Button {
@@ -433,7 +468,7 @@ private struct SettingNavRow: View {
             HStack {
                 Image(systemName: systemImage)
                     .font(.system(size: 13))
-                    .foregroundStyle(Brand.textMuted)
+                    .foregroundStyle(iconTint)
                     .frame(width: 20, alignment: .center)
                 Text(label).font(Brand.body(size: 14)).foregroundStyle(Brand.textPrimary)
                 Spacer()
@@ -454,13 +489,14 @@ private struct SettingNavRow: View {
 private struct SettingActionRow: View {
     let label: LocalizedStringKey
     let systemImage: String
+    var iconTint: Color = Brand.textMuted
     var onTap: () -> Void
     var body: some View {
         Button(action: onTap) {
             HStack {
                 Image(systemName: systemImage)
                     .font(.system(size: 13))
-                    .foregroundStyle(Brand.textMuted)
+                    .foregroundStyle(iconTint)
                     .frame(width: 20, alignment: .center)
                 Text(label).font(Brand.body(size: 14)).foregroundStyle(Brand.textPrimary)
                 Spacer()

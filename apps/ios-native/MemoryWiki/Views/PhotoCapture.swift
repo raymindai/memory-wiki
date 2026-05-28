@@ -1,8 +1,11 @@
 // PhotoCapture — camera + photo-library bridge for the Capture
-// tab. Pick or shoot an image; Vision's VNRecognizeTextRequest
-// extracts text on-device; the result becomes a new doc with the
-// OCR'd text as the body. No image upload in v1 — the focus is
-// the text. Future: rehost the image into /api/upload + embed.
+// tab. Two flavours via `Mode`:
+//   .photo  → upload the original image, embed it as an attachment
+//             thumbnail. No OCR.
+//   .ocr    → run on-device Vision OCR, return only the extracted
+//             text. Original image is not uploaded.
+// The sheet adapts its title + guidance copy + secondary line to
+// match the mode, so the user always knows what's about to happen.
 
 import SwiftUI
 import PhotosUI
@@ -14,18 +17,48 @@ import Vision
 /// CaptureView level; the sheet is the SwiftUI UI surface, the
 /// underlying pickers are UIKit + PhotosUI.
 struct PhotoCaptureSheet: View {
+    /// Which behaviour this sheet performs. Title + copy + the
+    /// returned tuple semantics all switch on this.
+    enum Mode { case photo, ocr }
+
     @Binding var isPresented: Bool
+    var mode: Mode = .ocr
+    /// For `.photo` mode the first arg is empty; the image is the
+    /// payload. For `.ocr` mode the first arg is the recognised
+    /// text and the image is provided for optional preview.
     var onText: (String, UIImage) -> Void
 
     @State private var showCamera = false
     @State private var showLibrary = false
+    /// Running OCR / upload state — the picker has dismissed but
+    /// the work isn't done yet. Surface a spinner so the user
+    /// doesn't think the sheet is frozen.
+    @State private var processing = false
+
+    private var title: String {
+        mode == .photo ? "Attach a photo" : "Scan text from image"
+    }
+    private var subhead: String {
+        switch mode {
+        case .photo:
+            return "Uploads the photo and embeds it in your memory. Tap a photo in the editor to view full size."
+        case .ocr:
+            return "Runs on-device OCR (English + Korean) and inserts the recognised text into your memory. The image itself is not uploaded."
+        }
+    }
+    private var cameraLabel: String {
+        mode == .photo ? "Take a new photo" : "Scan with camera"
+    }
+    private var libraryLabel: String {
+        mode == .photo ? "Choose from Library" : "Pick image to scan"
+    }
 
     var body: some View {
         ZStack {
             Brand.background.ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
-                    Text("Add an image")
+                    Text(title)
                         .font(Brand.display(size: 22))
                         .foregroundStyle(Brand.textPrimary)
                     Spacer()
@@ -39,21 +72,33 @@ struct PhotoCaptureSheet: View {
                     .buttonStyle(.plain)
                 }
 
-                Text("On-device OCR turns the image into a new markdown doc. Original photo isn't uploaded in this version.")
+                Text(subhead)
                     .font(Brand.body(size: 12))
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(3)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Button { showCamera = true } label: {
-                    PickerButton(icon: "camera", label: "Take photo")
+                    PickerButton(icon: "camera", label: cameraLabel)
                 }
                 .buttonStyle(.plain)
+                .disabled(processing)
 
                 Button { showLibrary = true } label: {
-                    PickerButton(icon: "photo.on.rectangle.angled", label: "Choose from Library")
+                    PickerButton(icon: "photo.on.rectangle.angled", label: libraryLabel)
                 }
                 .buttonStyle(.plain)
+                .disabled(processing)
+
+                if processing {
+                    HStack(spacing: 8) {
+                        ProgressView().scaleEffect(0.7).tint(Brand.textMuted)
+                        Text(mode == .photo ? "Uploading photo…" : "Recognising text…")
+                            .font(Brand.body(size: 12))
+                            .foregroundStyle(Brand.textMuted)
+                    }
+                    .padding(.top, 4)
+                }
 
                 Spacer()
             }
@@ -77,11 +122,22 @@ struct PhotoCaptureSheet: View {
     }
 
     private func handle(_ image: UIImage) {
-        Task.detached {
-            let text = await PhotoCapture.ocr(image: image)
-            await MainActor.run {
-                onText(text, image)
-                isPresented = false
+        switch mode {
+        case .photo:
+            // Hand off to the parent — the upload happens there
+            // via APIClient.uploadImage. Empty first arg signals
+            // "no OCR was run."
+            onText("", image)
+            isPresented = false
+        case .ocr:
+            processing = true
+            Task.detached {
+                let text = await PhotoCapture.ocr(image: image)
+                await MainActor.run {
+                    processing = false
+                    onText(text, image)
+                    isPresented = false
+                }
             }
         }
     }

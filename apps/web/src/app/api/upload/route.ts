@@ -106,32 +106,39 @@ export async function POST(req: NextRequest) {
   // Read file buffer
   const rawBuffer = Buffer.from(await file.arrayBuffer());
 
-  // Convert to WebP (except SVG and GIF which should stay as-is)
+  // Policy: every raster image stored on this server is WebP.
+  //   - JPEG / PNG / WebP / GIF → re-encoded as WebP (animated WebP
+  //     for GIF so animation survives; sharp's `animated: true`
+  //     reads every page of the input).
+  //   - SVG stays SVG (rasterising a vector would be a regression).
+  // If the WebP encoder chokes on weird input we fall back to the
+  // raw bytes rather than failing the upload, but the storage
+  // pathname's extension and content-type both reflect what we
+  // actually wrote.
   let uploadBuffer: Buffer;
   let uploadContentType: string;
   let ext: string;
 
   if (file.type === "image/svg+xml") {
-    // SVG: keep as-is (vector format, no conversion needed)
     uploadBuffer = rawBuffer;
     uploadContentType = "image/svg+xml";
     ext = "svg";
-  } else if (file.type === "image/gif") {
-    // GIF: keep as-is (may be animated)
-    uploadBuffer = rawBuffer;
-    uploadContentType = "image/gif";
-    ext = "gif";
   } else {
-    // JPEG, PNG, WebP → convert to WebP (smaller file size)
     try {
-      uploadBuffer = await sharp(rawBuffer).webp({ quality: 85 }).toBuffer();
+      const animated = file.type === "image/gif";
+      uploadBuffer = await sharp(rawBuffer, animated ? { animated: true } : {})
+        .webp({ quality: 85 })
+        .toBuffer();
       uploadContentType = "image/webp";
       ext = "webp";
     } catch {
       // Fallback: upload original if conversion fails
       uploadBuffer = rawBuffer;
       uploadContentType = file.type;
-      ext = file.type === "image/png" ? "png" : file.type === "image/jpeg" ? "jpg" : "webp";
+      ext = file.type === "image/png" ? "png"
+          : file.type === "image/jpeg" ? "jpg"
+          : file.type === "image/gif" ? "gif"
+          : "webp";
     }
   }
 

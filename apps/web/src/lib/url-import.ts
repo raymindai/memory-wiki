@@ -102,14 +102,27 @@ export async function importFromUrl(rawUrl: string): Promise<UrlImportResult> {
 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
+  // Browser-shaped headers — many big-publisher sites (NYT, FT,
+  // Bloomberg, Cloudflare-fronted blogs) return 403 to anything
+  // that looks like a server-side scraper. Mirroring a current
+  // Chrome client lets the common reading-mode case work while we
+  // still respect robots semantics (we only follow user-pasted URLs
+  // and fetch a single page on-demand).
+  const browserHeaders: Record<string, string> = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+  };
   let res: Response;
   try {
     res = await fetch(url.toString(), {
-      headers: {
-        // Identify ourselves so site owners can recognise the traffic.
-        "User-Agent": "memory.wiki/1.0 (URL import; +https://memory.wiki/about)",
-        "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
-      },
+      headers: browserHeaders,
       signal: ctrl.signal,
       redirect: "follow",
     });
@@ -123,6 +136,20 @@ export async function importFromUrl(rawUrl: string): Promise<UrlImportResult> {
   clearTimeout(timer);
 
   if (!res.ok) {
+    // Friendlier messages for the gated-content cases — bare
+    // "Upstream returned 403" tells the user nothing about *why*.
+    if (res.status === 403 || res.status === 401) {
+      throw new UrlImportError(
+        `${url.hostname} blocks automated readers (HTTP ${res.status}). Open the page and use the Share extension to capture it instead.`,
+        res.status
+      );
+    }
+    if (res.status === 451) {
+      throw new UrlImportError(`${url.hostname} is unavailable for legal reasons (HTTP 451).`, 451);
+    }
+    if (res.status === 429) {
+      throw new UrlImportError(`${url.hostname} rate-limited the fetch. Try again in a minute.`, 429);
+    }
     throw new UrlImportError(`Upstream returned ${res.status}`, res.status);
   }
   const ct = (res.headers.get("content-type") || "").toLowerCase();

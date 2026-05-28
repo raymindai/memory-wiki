@@ -134,17 +134,20 @@ export async function uploadImageBuffer(
   let uploadBuffer: Buffer;
   let uploadContentType: string;
   let ext: string;
+  // Same policy as /api/upload — every raster lands as WebP, GIF
+  // becomes animated WebP. SVG stays vector. URL-import rehosts
+  // route through here when the server pulls images out of a
+  // fetched page, so this is the second of two enforcement points.
   if (contentType === "image/svg+xml") {
     uploadBuffer = buffer;
     uploadContentType = "image/svg+xml";
     ext = "svg";
-  } else if (contentType === "image/gif") {
-    uploadBuffer = buffer;
-    uploadContentType = "image/gif";
-    ext = "gif";
   } else {
     try {
-      uploadBuffer = await sharp(buffer).webp({ quality: 85 }).toBuffer();
+      const animated = contentType === "image/gif";
+      uploadBuffer = await sharp(buffer, animated ? { animated: true } : {})
+        .webp({ quality: 85 })
+        .toBuffer();
       uploadContentType = "image/webp";
       ext = "webp";
     } catch (err) {
@@ -153,7 +156,10 @@ export async function uploadImageBuffer(
       console.warn(`[import-images] sharp failed for ${hintFilename}; falling back to raw`, err);
       uploadBuffer = buffer;
       uploadContentType = contentType;
-      ext = contentType === "image/png" ? "png" : contentType === "image/jpeg" ? "jpg" : "webp";
+      ext = contentType === "image/png" ? "png"
+          : contentType === "image/jpeg" ? "jpg"
+          : contentType === "image/gif" ? "gif"
+          : "webp";
     }
   }
 

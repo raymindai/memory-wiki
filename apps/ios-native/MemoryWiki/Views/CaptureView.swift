@@ -13,6 +13,8 @@
 
 import SwiftUI
 import UIKit
+import ImageIO
+import UniformTypeIdentifiers
 
 struct CaptureView: View {
     @EnvironmentObject private var router: AppRouter
@@ -28,6 +30,24 @@ struct CaptureView: View {
     @State private var showImportSheet = false
     @State private var ocrBanner: String? = nil
     @State private var ocrBannerDismissTask: Task<Void, Never>? = nil
+    /// Sticky progress indicator for long-running flows (photo
+    /// resize + upload, URL import, file import). Title is the
+    /// stage label, detail is an optional size / page / count
+    /// substring. Set to nil when the work completes or errors.
+    struct ProcessingStatus: Equatable {
+        var title: String
+        var detail: String? = nil
+    }
+    @State private var processing: ProcessingStatus? = nil
+    /// OCR text awaiting user confirmation — shown in a preview
+    /// chip with Insert / Discard so the user can read what was
+    /// recognised before it lands in the body draft.
+    @State private var pendingOCR: String? = nil
+    /// Set when dictation reports a permission-denial error so an
+    /// alert with an Open Settings deeplink can offer a one-tap
+    /// fix instead of just toasting the failure.
+    @State private var permissionAlertShown: Bool = false
+    @State private var permissionAlertMessage: String = ""
     /// Uploaded photo attachments — accumulate visually as a
     /// thumbnail strip so the user can SEE what they've added.
     /// Raw markdown is generated at save time.
@@ -40,7 +60,24 @@ struct CaptureView: View {
     @State private var uploadInProgress = false
     enum CaptureField { case title, body }
     @FocusState private var focused: CaptureField?
+    /// Mirror of @FocusState for the body field, which is a
+    /// UIViewRepresentable (MarkdownEditor) — @FocusState ignores
+    /// writes that don't match a SwiftUI `.focused()` modifier in
+    /// the hierarchy, so setting `focused = .body` was being
+    /// silently dropped. This @State Bool, driven by the editor's
+    /// onFocusChange callback, is what the header + overlay logic
+    /// actually reads to decide "is the body editing right now."
+    @State private var bodyFocused: Bool = false
+    /// Single source of truth for "any field has the keyboard" —
+    /// title via @FocusState, body via the bridge above.
+    private var anyFocused: Bool { focused != nil || bodyFocused }
     @State private var keyboardUp = false
+    /// Live keyboard height (0 when down). Used to position our
+    /// custom pill bar as a SwiftUI overlay just above the keyboard
+    /// so we control spacing + horizontal insets — the system
+    /// `.toolbar(.keyboard)` placement caps the bar's chrome and
+    /// clips our content.
+    @State private var keyboardHeight: CGFloat = 0
 
     @AppStorage("mw.draft.title") private var persistedTitle: String = ""
     @AppStorage("mw.draft.body") private var persistedBody: String = ""
@@ -73,12 +110,12 @@ struct CaptureView: View {
     private var charCount: Int { combinedMarkdown.count }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             Brand.background.ignoresSafeArea()
             // Backdrop blob only when the surface is truly idle —
             // not while focused, since the user's about to type
             // and the blob fading out mid-keystroke felt off.
-            if focused == nil && !hasDraftContent && clipboardURL == nil && !hasRestorable && savedURL == nil {
+            if !anyFocused && !hasDraftContent && clipboardURL == nil && !hasRestorable && savedURL == nil {
                 AmbientBlob()
             }
             VStack(spacing: 0) {
@@ -93,13 +130,20 @@ struct CaptureView: View {
                 if isDictating {
                     DictationBanner { stopDictation() }
                         .padding(.horizontal, 14)
-                        .padding(.bottom, 8)
+                        // Float well clear of the bottom tab bar so
+                        // the banner doesn't look glued to it.
+                        .padding(.bottom, 24)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                if let ocrBanner {
+                if let processing {
+                    ProcessingBanner(status: processing)
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, 24)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if let ocrBanner {
                     OcrResultChip(message: ocrBanner) { self.ocrBanner = nil }
                         .padding(.horizontal, 14)
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 24)
                 }
                 if let errorMessage {
                     Text(errorMessage)
@@ -109,38 +153,56 @@ struct CaptureView: View {
                         .padding(.bottom, 4)
                 }
             }
+            // The body field's MarkdownEditor attaches its own
+            // UIKit inputAccessoryView — no SwiftUI overlay needed
+            // here.
         }
         .onAppear { onAppearEffects() }
         .onChange(of: focused) { _, isFocused in
             if isFocused != nil { refreshClipboard() }
         }
+        .onChange(of: bodyFocused) { _, isFocused in
+            if isFocused { refreshClipboard() }
+        }
         .onChange(of: titleDraft) { _, new in persistedTitle = new }
         .onChange(of: bodyDraft) { _, new in persistedBody = new }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-            withAnimation(.snappy(duration: 0.22)) { keyboardUp = true }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notif in
+            let h = (notif.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect)?.height ?? 0
+            withAnimation(.snappy(duration: 0.22)) {
+                keyboardUp = true
+                keyboardHeight = h
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-            withAnimation(.snappy(duration: 0.22)) { keyboardUp = false }
+            withAnimation(.snappy(duration: 0.22)) {
+                keyboardUp = false
+                keyboardHeight = 0
+            }
         }
         .sheet(isPresented: $showPhotoPicker) {
-            // Photo mode → upload image, embed as markdown image.
-            PhotoCaptureSheet(isPresented: $showPhotoPicker) { _, image in
+            // Photo mode → upload original image, attach as thumbnail.
+            // No OCR; sheet shows "Attach a photo" copy.
+            PhotoCaptureSheet(isPresented: $showPhotoPicker, mode: .photo) { _, image in
                 Task { await uploadPhoto(image) }
             }
             .presentationDetents([.medium])
             .preferredColorScheme(.dark)
         }
         .sheet(isPresented: $showOCRPicker) {
-            PhotoCaptureSheet(isPresented: $showOCRPicker) { ocrText, _ in
+            // OCR mode → run Vision text recognition, surface a
+            // preview chip before committing the text. The sheet
+            // shows "Scan text from image" copy.
+            PhotoCaptureSheet(isPresented: $showOCRPicker, mode: .ocr) { ocrText, _ in
                 let clean = ocrText.trimmingCharacters(in: .whitespacesAndNewlines)
                 if clean.isEmpty {
                     showBanner("No text recognised in this image.")
                 } else {
-                    if titleDraft.isEmpty {
-                        titleDraft = "OCR · \(Date().formatted(date: .abbreviated, time: .shortened))"
-                    }
-                    bodyDraft = bodyDraft.isEmpty ? clean : "\(bodyDraft)\n\n\(clean)"
-                    showBanner("OCR extracted \(clean.count) characters.")
+                    // Stash the recognised text in a preview chip so
+                    // the user can confirm before it lands in the
+                    // body. Tap Insert → appended; tap Discard →
+                    // gone. Was previously auto-committed with no
+                    // chance to review.
+                    pendingOCR = clean
                     Haptics.success()
                 }
             }
@@ -153,6 +215,16 @@ struct CaptureView: View {
             }
             .presentationDetents([.medium])
             .preferredColorScheme(.dark)
+        }
+        .alert("Permission needed", isPresented: $permissionAlertShown) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Not now", role: .cancel) { }
+        } message: {
+            Text(permissionAlertMessage)
         }
         .sheet(isPresented: $showImportSheet) {
             ImportInfoSheet(isPresented: $showImportSheet) { url, data, contentType in
@@ -177,11 +249,12 @@ struct CaptureView: View {
                     .foregroundStyle(Brand.textFaint)
             }
             Spacer()
-            if hasDraftContent || focused != nil {
+            if hasDraftContent || anyFocused {
                 HStack(spacing: 8) {
                     Button {
                         Haptics.tap()
                         focused = nil
+                        bodyFocused = false
                         if hasDraftContent {
                             restorableTitle = titleDraft
                             restorableBody = bodyDraft
@@ -221,6 +294,7 @@ struct CaptureView: View {
         .padding(.top, 18)
         .padding(.bottom, 12)
         .animation(.snappy(duration: 0.18), value: focused)
+        .animation(.snappy(duration: 0.18), value: bodyFocused)
         .animation(.snappy(duration: 0.18), value: hasDraftContent)
     }
 
@@ -269,7 +343,26 @@ struct CaptureView: View {
 
     @ViewBuilder
     private var chipsArea: some View {
-        if hasRestorable && savedURL == nil {
+        if let ocr = pendingOCR {
+            OcrPreviewChip(
+                text: ocr,
+                onInsert: {
+                    if titleDraft.isEmpty {
+                        titleDraft = "OCR · \(Date().formatted(date: .abbreviated, time: .shortened))"
+                    }
+                    bodyDraft = bodyDraft.isEmpty ? ocr : "\(bodyDraft)\n\n\(ocr)"
+                    pendingOCR = nil
+                    showBanner("Inserted \(ocr.count) characters.")
+                    Haptics.success()
+                },
+                onDiscard: {
+                    pendingOCR = nil
+                    Haptics.warning()
+                }
+            )
+            .padding(.horizontal, 14)
+            .padding(.top, 6)
+        } else if hasRestorable && savedURL == nil {
             let preview = (restorableTitle?.isEmpty == false
                            ? restorableTitle!
                            : (restorableBody ?? ""))
@@ -326,39 +419,111 @@ struct CaptureView: View {
 
     // MARK: - Body field
 
+    /// Body field — UITextView wrapped via MarkdownEditor. The
+    /// UITextView's inputAccessoryView pins our Notes-style pill
+    /// flush against the keyboard top with zero gap — every SwiftUI
+    /// path (.toolbar(.keyboard) / safeAreaInset / overlay+keyboard
+    /// tracking) leaves a system-margin gutter. The FillingTextView
+    /// subclass disables intrinsic-size hinting so SwiftUI stretches
+    /// the editor to fill the bound height — that's what makes
+    /// taps on empty space below the cursor actually focus the
+    /// editor (previously the tap area collapsed to a single line).
     private var bodyField: some View {
         VStack(spacing: 0) {
             if !attachments.isEmpty {
                 attachmentsStrip
             }
-            ZStack {
-                MarkdownEditor(
-                    text: $bodyDraft,
-                    isFocused: focused == .body,
-                    onFocusChange: { newFocus in
-                        if newFocus { focused = .body }
-                        else if focused == .body { focused = nil }
-                    },
-                    onPhoto: { showPhotoPicker = true },
-                    onOCR: { showOCRPicker = true },
-                    onStartDictation: { startDictation() },
-                    onStopDictation: { stopDictation() },
-                    isDictating: isDictating
-                )
-                // Hit-target overlay — guarantees taps anywhere
-                // in the body area land focus on the editor, even
-                // if SwiftUI hasn't allocated the UITextView the
-                // full visible height. SwiftUI was giving the
-                // UIViewRepresentable intrinsic-content sizing
-                // (~0pt) so taps below the cursor line missed.
-                Color.clear
-                    .contentShape(Rectangle())
-                    .allowsHitTesting(focused != .body)
-                    .onTapGesture { focused = .body }
-            }
+            MarkdownEditor(
+                text: $bodyDraft,
+                isFocused: bodyFocused,
+                onFocusChange: { newFocus in
+                    bodyFocused = newFocus
+                    if newFocus { focused = nil }   // sibling fields lose focus
+                },
+                onPhoto: { showPhotoPicker = true },
+                onOCR: { showOCRPicker = true },
+                onStartDictation: { startDictation() },
+                onStopDictation: { stopDictation() },
+                isDictating: isDictating
+            )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // SwiftUI-level tap fallback for empty/blank-area taps.
+            // UITextView naturally focuses on tap when it has text,
+            // but when empty the tap can land outside its layout
+            // manager's text region and never trigger first-responder.
+            // `.simultaneousGesture` so this doesn't steal taps from
+            // the UITextView (which needs them to position the cursor
+            // when the field is non-empty).
+            .contentShape(Rectangle())
+            .simultaneousGesture(
+                TapGesture().onEnded { bodyFocused = true }
+            )
         }
         .frame(maxHeight: .infinity)
+    }
+
+    /// Horizontal rail of every formatting / media button. Rendered
+    /// as a SwiftUI overlay anchored above the keyboard rect (see
+    /// `body`), so we control inner padding + horizontal insets +
+    /// vertical breathing room. The rail itself is a glass capsule
+    /// for visual separation from the dark body area; horizontal
+    /// scrolling kicks in only when the content exceeds available
+    /// width.
+    private var keyboardToolbarRail: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 2) {
+                kbButton("number") { insertBody("\n# ") }
+                kbButton("bold") { wrap("**") }
+                kbButton("italic") { wrap("*") }
+                kbButton("list.bullet") { insertBody("\n- ") }
+                kbButton("list.number") { insertBody("\n1. ") }
+                kbButton("checkmark.square") { insertBody("\n- [ ] ") }
+                kbButton("chevron.left.forwardslash.chevron.right") { insertBody("\n```\n\n```\n") }
+                kbButton("link") { insertBody("[text](https://)") }
+                kbButton("quote.bubble") { insertBody("\n> ") }
+                // Visual divider before media + voice — distinct
+                // from formatting tokens.
+                Rectangle().fill(Brand.borderDim)
+                    .frame(width: 1, height: 18)
+                    .padding(.horizontal, 4)
+                kbButton("camera", tint: Brand.microWarn) { showPhotoPicker = true }
+                kbButton("text.viewfinder", tint: Brand.microInfo) { showOCRPicker = true }
+                kbButton(isDictating ? "mic.fill" : "mic",
+                         tint: isDictating ? Brand.microRed : Brand.textPrimary) {
+                    if isDictating { stopDictation() } else { startDictation() }
+                }
+                kbButton("keyboard.chevron.compact.down", tint: Brand.textMuted) {
+                    focused = nil
+                }
+            }
+            .padding(.horizontal, 8)
+        }
+        .background(
+            Capsule(style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(Capsule(style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
+        .clipShape(Capsule(style: .continuous))
+        // Pill margin from screen edges — keeps the rail clearly
+        // distinct from the surrounding body field.
+        .padding(.horizontal, 10)
+    }
+
+    @ViewBuilder
+    private func kbButton(_ systemName: String,
+                          tint: Color = Brand.textPrimary,
+                          action: @escaping () -> Void) -> some View {
+        Button {
+            Haptics.selection()
+            action()
+        } label: {
+            Image(systemName: systemName)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(tint)
+                .frame(width: 38, height: 32)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     /// Horizontal strip of attached photos. Tap thumbnail to
@@ -545,17 +710,34 @@ struct CaptureView: View {
         }
     }
 
+    /// Imports a URL via the SSE pipeline on `/api/import/url`.
+    /// Branches server-side: YouTube → oEmbed + transcript; general
+    /// web → HTML → Turndown → MD with images rehosted. Stage labels
+    /// from the SSE stream flow into the sticky `processing` banner
+    /// so the user sees exactly which step is running ("Fetching
+    /// page", "Rehosting images", "Saving doc") instead of a single
+    /// opaque spinner that could mean anything.
     private func saveURL(_ url: URL) async {
-        let host = url.host ?? "Link"
-        let body = "Source: \(url.absoluteString)\n"
-        await run {
-            let doc = try await APIClient.shared.createDocument(
-                markdown: "# \(host)\n\n\(body)",
-                title: host
-            )
-            savedURL = doc.publicURL
+        withAnimation(.snappy) {
+            processing = ProcessingStatus(title: "Starting import", detail: url.host)
+        }
+        do {
+            let docURL = try await APIClient.shared.importURL(url) { stage in
+                Task { @MainActor in
+                    withAnimation(.snappy) {
+                        processing = ProcessingStatus(title: stage, detail: url.host)
+                    }
+                }
+            }
+            savedURL = docURL
             clipboardURL = nil
+            withAnimation(.snappy) { processing = nil }
             Haptics.success()
+        } catch {
+            withAnimation(.snappy) { processing = nil }
+            errorMessage = error.localizedDescription
+            showBanner("URL import failed: \(error.localizedDescription)")
+            Haptics.warning()
         }
     }
 
@@ -590,7 +772,15 @@ struct CaptureView: View {
             showBanner("Captured \"\(recognised.prefix(30))\"")
         } onError: { msg in
             errorMessage = msg
-            showBanner("Voice: \(msg)")
+            // Permission-denial paths surface "Enable … in iOS Settings"
+            // strings — offer a direct Settings deeplink alert so the
+            // user doesn't have to context-switch and hunt manually.
+            if msg.lowercased().contains("settings") {
+                permissionAlertMessage = msg
+                permissionAlertShown = true
+            } else {
+                showBanner("Voice: \(msg)")
+            }
             withAnimation(.snappy) { isDictating = false }
         } onStop: {
             withAnimation(.snappy) { isDictating = false }
@@ -608,40 +798,156 @@ struct CaptureView: View {
     /// as a visual thumbnail (NOT raw markdown in the body) so
     /// the user sees what they've added. The `![Photo](url)`
     /// markdown is appended at save time via combinedMarkdown.
+    ///
+    /// Hard upload ceiling — Vercel's serverless function body
+    /// cap on App Router is 4.5 MB regardless of our own
+    /// MAX_FILE_SIZE check, so we have to land BELOW that in the
+    /// request body itself or the platform rejects with
+    /// FUNCTION_PAYLOAD_TOO_LARGE before our code runs. 3.5 MB
+    /// gives multipart envelope overhead enough headroom.
+    private static let uploadByteCeiling = 3_500_000
+
+    /// iPhone HEIC / Live Photos come back massive (often 8-15 MB).
+    /// Pipeline:
+    ///   1. Resize so the longer edge ≤ 1600pt (~2.5 MP — plenty
+    ///      for retina viewing on phone + desktop).
+    ///   2. Encode as WebP at quality 0.75 (sharp re-encodes server-
+    ///      side too but a lean payload makes the round trip).
+    ///   3. If still over the ceiling, downsize / drop quality
+    ///      iteratively until it fits.
+    /// Falls back to JPEG if WebP encoding fails on some odd
+    /// input (shouldn't happen on iOS 14+ but better than dying).
     private func uploadPhoto(_ image: UIImage) async {
-        guard let data = image.jpegData(compressionQuality: 0.85) else {
-            showBanner("Couldn't encode the photo.")
+        withAnimation(.snappy) {
+            processing = ProcessingStatus(title: "Resizing photo", detail: "compressing for upload")
+        }
+        guard let (data, contentType, ext) = await prepareUploadPayload(image) else {
+            withAnimation(.snappy) { processing = nil }
+            showBanner("Couldn't compress the photo small enough to upload.")
             return
+        }
+        withAnimation(.snappy) {
+            processing = ProcessingStatus(title: "Uploading photo", detail: humanBytes(data.count))
         }
         uploadInProgress = true
         defer { uploadInProgress = false }
         Haptics.tap()
         do {
-            let url = try await APIClient.shared.uploadImage(data: data, contentType: "image/jpeg")
+            let url = try await APIClient.shared.uploadImage(data: data, contentType: contentType, fileExtension: ext)
             attachments.append(PhotoAttachment(url: url, thumbnail: image))
             if titleDraft.isEmpty {
                 titleDraft = "Photo · \(Date().formatted(date: .abbreviated, time: .shortened))"
             }
-            showBanner("Photo added.")
+            withAnimation(.snappy) { processing = nil }
+            showBanner("Photo added (\(humanBytes(data.count))).")
             Haptics.success()
         } catch {
+            withAnimation(.snappy) { processing = nil }
             showBanner("Upload failed: \(error.localizedDescription)")
             Haptics.warning()
         }
+    }
+
+    /// Try a sequence of (edge, quality) pairs until the encoded
+    /// bytes fit under `softTarget` (then `uploadByteCeiling` as
+    /// the absolute floor). Default starts at 1280pt @ WebP 0.70 —
+    /// retina-sharp on every iPhone/iPad and typically lands under
+    /// 500 KB for normal photos (vs. ~1.5 MB at 1600pt @ 0.75).
+    /// Tries WebP first; only falls back to JPEG if ImageIO can't
+    /// write WebP at all for this image.
+    private func prepareUploadPayload(_ image: UIImage) async -> (Data, String, String)? {
+        // First pair that produces ≤ softTarget bytes wins. If no
+        // pair clears softTarget but the smallest clears ceiling,
+        // ship that. Anything still above ceiling = nil → upload
+        // refused before it leaves the device.
+        // WebP @ 0.5 is visually clean for photos at viewing
+        // sizes — most native-camera shots land 250-400 KB.
+        let softTarget = 500_000          // 500 KB sweet spot
+        let attempts: [(edge: CGFloat, q: CGFloat)] = [
+            (1280, 0.50),
+            (1024, 0.45),
+            (900,  0.40),
+            (800,  0.35),
+            (640,  0.30)
+        ]
+        var lastWebP: Data? = nil
+        for attempt in attempts {
+            let prepped = resizeForUpload(image, maxEdge: attempt.edge)
+            if let webp = prepped.webpData(quality: attempt.q) {
+                lastWebP = webp
+                if webp.count <= softTarget {
+                    return (webp, "image/webp", "webp")
+                }
+            }
+        }
+        // Soft target unreachable — accept the smallest result we
+        // got if it at least clears the absolute platform ceiling.
+        if let webp = lastWebP, webp.count <= Self.uploadByteCeiling {
+            return (webp, "image/webp", "webp")
+        }
+        // WebP encoder unavailable — drop back to JPEG with the
+        // same ladder. Same two-tier acceptance (softTarget first,
+        // ceiling as last resort).
+        var lastJPEG: Data? = nil
+        for attempt in attempts {
+            let prepped = resizeForUpload(image, maxEdge: attempt.edge)
+            if let jpeg = prepped.jpegData(compressionQuality: attempt.q) {
+                lastJPEG = jpeg
+                if jpeg.count <= softTarget {
+                    return (jpeg, "image/jpeg", "jpg")
+                }
+            }
+        }
+        if let jpeg = lastJPEG, jpeg.count <= Self.uploadByteCeiling {
+            return (jpeg, "image/jpeg", "jpg")
+        }
+        return nil
+    }
+
+    /// Scale `image` so the longer edge is at most `maxEdge` points
+    /// (preserving aspect ratio). Returns the original if it's
+    /// already within bounds.
+    private func resizeForUpload(_ image: UIImage, maxEdge: CGFloat) -> UIImage {
+        let w = image.size.width, h = image.size.height
+        let longer = max(w, h)
+        guard longer > maxEdge else { return image }
+        let scale = maxEdge / longer
+        let target = CGSize(width: w * scale, height: h * scale)
+        let renderer = UIGraphicsImageRenderer(size: target)
+        return renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: target)) }
+    }
+
+    /// Short human size — used in the "Photo added (X)" toast so
+    /// the user can sanity-check the upload was actually compact.
+    private func humanBytes(_ count: Int) -> String {
+        let kb = Double(count) / 1024
+        if kb < 1024 { return String(format: "%.0f KB", kb) }
+        return String(format: "%.1f MB", kb / 1024)
     }
 
     /// Imports a user-picked file (PDF/DOCX/PPTX/XLSX/MD/TXT) by
     /// POSTing to the right web endpoint in save mode. On success
     /// we drop a SavedBanner so the user can View the new doc.
     private func importPickedFile(data: Data, name: String, contentType: String) async {
-        showBanner("Importing \(name)…")
+        // PDF / DOCX parsing on the web side can take 5-20 seconds
+        // depending on file size — the user needs to see that we
+        // ARE working on it, not just a frozen UI. The sticky
+        // banner stays up until the server returns or errors.
+        withAnimation(.snappy) {
+            processing = ProcessingStatus(
+                title: "Importing \(name)",
+                detail: humanBytes(data.count)
+            )
+        }
         Haptics.tap()
         do {
             let url = try await APIClient.shared.importFile(data: data, filename: name, contentType: contentType)
             savedURL = url
+            withAnimation(.snappy) { processing = nil }
             showBanner("Imported. Tap View to open.")
             Haptics.success()
         } catch {
+            withAnimation(.snappy) { processing = nil }
             showBanner("Import failed: \(error.localizedDescription)")
             Haptics.warning()
         }
@@ -709,11 +1015,14 @@ private struct ModePill: View {
 }
 
 /// URL paste sheet — explicit URL entry for the "Save a link" path.
-/// Validates input, derives a host title.
+/// Validates input, derives a host title. Auto-fills if the
+/// clipboard currently holds a URL (one-tap "Use clipboard URL"
+/// affordance instead of asking the user to paste manually).
 private struct URLImportSheet: View {
     @Binding var isPresented: Bool
     var onSubmit: (URL) -> Void
     @State private var input = ""
+    @State private var clipboardURL: URL? = nil
     @FocusState private var fieldFocus: Bool
     private var parsedURL: URL? {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -726,13 +1035,49 @@ private struct URLImportSheet: View {
             ZStack {
                 Brand.background.ignoresSafeArea()
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("Paste a URL")
+                    Text("Save a link")
                         .font(Brand.display(size: 22))
                         .foregroundStyle(Brand.textPrimary)
-                    Text("We'll save the URL as a new memory. On Memory.Wiki the page is auto-fetched and indexed.")
+                    // Honest copy: this drops the link as a memory.
+                    // Page enrichment (title scrape, summary) happens
+                    // when you open it on memory.wiki — not on the
+                    // device. Previously this read "auto-fetched and
+                    // indexed," which overpromised the result.
+                    Text("Fetches the page, converts it to markdown (text + images), and saves as a new memory. Works for web pages, YouTube videos, and most public URLs.")
                         .font(Brand.body(size: 13))
                         .foregroundStyle(Brand.textMuted)
                         .lineSpacing(3)
+                    if let clip = clipboardURL, input.isEmpty {
+                        Button {
+                            input = clip.absoluteString
+                            Haptics.selection()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "doc.on.clipboard")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Brand.microInfo)
+                                Text("Use clipboard URL")
+                                    .font(Brand.body(size: 12, weight: .medium))
+                                    .foregroundStyle(Brand.textPrimary)
+                                Text(clip.host ?? clip.absoluteString)
+                                    .font(Brand.mono(size: 11))
+                                    .foregroundStyle(Brand.textFaint)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                Spacer()
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(Brand.textFaint)
+                            }
+                            .padding(.horizontal, 12).padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(Brand.surface)
+                                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
                     TextField("https://…", text: $input)
                         .focused($fieldFocus)
                         .font(Brand.mono(size: 14))
@@ -749,6 +1094,19 @@ private struct URLImportSheet: View {
                         .onSubmit {
                             if let url = parsedURL { onSubmit(url); isPresented = false }
                         }
+                    // Inline validation hint — visible only when the
+                    // user has typed something that doesn't parse as
+                    // a URL. Save button stays disabled either way.
+                    if !input.isEmpty && parsedURL == nil {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.circle")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Brand.microWarn)
+                            Text("That doesn't look like a valid URL.")
+                                .font(Brand.body(size: 12))
+                                .foregroundStyle(Brand.textMuted)
+                        }
+                    }
                     Button {
                         if let url = parsedURL { onSubmit(url); isPresented = false }
                     } label: {
@@ -779,7 +1137,16 @@ private struct URLImportSheet: View {
             .toolbarBackground(Brand.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
-        .onAppear { fieldFocus = true }
+        .onAppear {
+            fieldFocus = true
+            // Sniff the clipboard ONCE on appear so the suggestion
+            // chip is immediately offered if relevant — saves a
+            // paste round-trip. UIPasteboard.hasURLs is a privacy-
+            // friendly check that doesn't read the contents.
+            if UIPasteboard.general.hasURLs, let u = UIPasteboard.general.url {
+                clipboardURL = u
+            }
+        }
     }
 }
 
@@ -803,10 +1170,16 @@ private struct ImportInfoSheet: View {
                         Text("Import")
                             .font(Brand.display(size: 22))
                             .foregroundStyle(Brand.textPrimary)
-                        Text("Bring existing content into your hub. iOS turns PDF / DOCX / PPTX / XLSX / MD / TXT into a Memory.Wiki doc.")
+                        Text("Bring existing content into your hub. iOS turns any of these into a Memory.Wiki doc:")
                             .font(Brand.body(size: 13))
                             .foregroundStyle(Brand.textMuted)
                             .lineSpacing(3)
+
+                        // Format chips — micro-coloured glyph per
+                        // extension so the supported set reads at a
+                        // glance instead of as a comma list. Reds for
+                        // PDF, blues for Office, ink for plain text.
+                        FormatChipsRow()
                             .padding(.bottom, 4)
 
                         // Primary affordance — file picker.
@@ -972,6 +1345,52 @@ private struct ImportLinkRow: View {
     }
 }
 
+/// Horizontal scroll of supported import formats — each chip is a
+/// short uppercase label + micro-coloured glyph, grouped by
+/// flavour: reds for PDF (Adobe), blues for Office (Microsoft),
+/// muted ink for the plain-text family.
+private struct FormatChipsRow: View {
+    private struct Format: Identifiable {
+        let id = UUID()
+        let label: String
+        let icon: String
+        let tint: Color
+    }
+    private let formats: [Format] = [
+        .init(label: "PDF",  icon: "doc.richtext",      tint: Brand.microRed),
+        .init(label: "DOCX", icon: "doc.text",          tint: Brand.microInfo),
+        .init(label: "PPTX", icon: "rectangle.on.rectangle", tint: Brand.microWarn),
+        .init(label: "XLSX", icon: "tablecells",        tint: Brand.microInfo),
+        .init(label: "MD",   icon: "number",            tint: Brand.textPrimary),
+        .init(label: "TXT",  icon: "text.alignleft",    tint: Brand.textMuted)
+    ]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(formats) { f in
+                    HStack(spacing: 6) {
+                        Image(systemName: f.icon)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(f.tint)
+                        Text(f.label)
+                            .font(Brand.mono(size: 10, weight: .medium))
+                            .tracking(0.8)
+                            .foregroundStyle(Brand.textPrimary)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(Brand.surface)
+                            .overlay(Capsule().strokeBorder(Brand.borderDim, lineWidth: 1))
+                    )
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Chips
 
 private struct RestoreDraftChip: View {
@@ -1054,6 +1473,42 @@ private struct DictationBanner: View {
     }
 }
 
+/// Sticky progress chip — spinner + title + optional detail.
+/// Owned by CaptureView, dismissed only when the long-running
+/// task finishes or errors. Distinct from OcrResultChip (which is
+/// transient) because the user must know that work is still in
+/// flight for resize / upload / SSE-staged imports.
+private struct ProcessingBanner: View {
+    let status: CaptureView.ProcessingStatus
+    var body: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .scaleEffect(0.7)
+                .tint(Brand.textPrimary)
+                .frame(width: 22, height: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(status.title)
+                    .font(Brand.body(size: 12, weight: .medium))
+                    .foregroundStyle(Brand.textPrimary)
+                if let detail = status.detail, !detail.isEmpty {
+                    Text(detail)
+                        .font(Brand.mono(size: 10))
+                        .foregroundStyle(Brand.textFaint)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 12).padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
+    }
+}
+
 private struct OcrResultChip: View {
     let message: String
     var onDismiss: () -> Void
@@ -1079,6 +1534,75 @@ private struct OcrResultChip: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
+    }
+}
+
+/// OCR-confirmation chip — shows the first few lines of the
+/// recognised text plus a char count so the user can sanity-check
+/// before it gets dumped into the body. Insert appends, Discard
+/// throws away. Replaces the previous auto-insert behaviour.
+private struct OcrPreviewChip: View {
+    let text: String
+    var onInsert: () -> Void
+    var onDiscard: () -> Void
+
+    private var preview: String {
+        let lines = text.split(separator: "\n").prefix(3).joined(separator: " · ")
+        return String(lines)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "text.viewfinder")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Brand.microInfo)
+                Text("RECOGNISED \(text.count) CHARS")
+                    .font(Brand.mono(size: 9, weight: .medium))
+                    .tracking(1)
+                    .foregroundStyle(Brand.textFaint)
+                Spacer()
+            }
+            Text(preview)
+                .font(Brand.body(size: 12))
+                .foregroundStyle(Brand.textPrimary)
+                .lineLimit(3)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 8) {
+                Button(action: onDiscard) {
+                    Text("Discard")
+                        .font(Brand.body(size: 12, weight: .medium))
+                        .foregroundStyle(Brand.textMuted)
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Brand.surface)
+                                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+                        )
+                }
+                .buttonStyle(.plain)
+                Button(action: onInsert) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.down.to.line.compact")
+                            .font(.system(size: 10, weight: .semibold))
+                        Text("Insert into body")
+                            .font(Brand.body(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(Brand.background)
+                    .padding(.horizontal, 12).padding(.vertical, 7)
+                    .background(Capsule().fill(Brand.textPrimary))
+                }
+                .buttonStyle(.plain)
+                Spacer()
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Brand.surface)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
     }
 }
@@ -1172,3 +1696,29 @@ private struct SavedBanner: View {
 }
 
 #Preview { CaptureView() }
+
+private extension UIImage {
+    /// Encode this UIImage as WebP using ImageIO's
+    /// CGImageDestination + `UTType.webP` (iOS 14+). Returns nil
+    /// if the platform doesn't have a WebP encoder registered
+    /// (extremely unlikely on iOS 14+, but the caller falls back
+    /// to JPEG if so).
+    ///
+    /// `quality` is the standard 0…1 ImageIO compression hint —
+    /// 0.78 lands roughly between visually-lossless and noticeable
+    /// banding for a 2048pt-edge photo.
+    func webpData(quality: CGFloat) -> Data? {
+        guard let cg = cgImage else { return nil }
+        let buffer = NSMutableData()
+        let utType = UTType.webP.identifier as CFString
+        guard let dest = CGImageDestinationCreateWithData(buffer as CFMutableData, utType, 1, nil) else {
+            return nil
+        }
+        let options: [CFString: Any] = [
+            kCGImageDestinationLossyCompressionQuality: quality
+        ]
+        CGImageDestinationAddImage(dest, cg, options as CFDictionary)
+        guard CGImageDestinationFinalize(dest) else { return nil }
+        return buffer as Data
+    }
+}

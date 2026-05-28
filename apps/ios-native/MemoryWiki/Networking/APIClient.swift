@@ -211,17 +211,86 @@ final class APIClient {
         return URL(string: "\(Self.baseURL.absoluteString)/\(response.id)")!
     }
 
+    // MARK: - URL → Markdown import
+
+    /// Drives the `/api/import/url` SSE pipeline: web sends back
+    /// `stage` events with human labels ("Fetching page", "Extracting
+    /// content", "Rehosting images") and a final `done` event with
+    /// the new doc's id + title. We stream-parse the SSE bytes, fire
+    /// `onStage` for each stage label and return the public URL on
+    /// `done`. YouTube + general-web + PDF land here uniformly —
+    /// the server picks the right pipeline from the URL's shape.
+    ///
+    /// Throws if the server emits an `error` event or if the
+    /// transport itself fails.
+    func importURL(_ url: URL, onStage: @escaping (String) -> Void = { _ in }) async throws -> URL {
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/import/url"))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+        req.httpBody = try JSONEncoder().encode(["url": url.absoluteString])
+        req.timeoutInterval = 180   // image rehosting + Turndown can take a while
+
+        let (bytes, response) = try await self.session.bytes(for: req)
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.http(-1, "no response")
+        }
+        // Non-200 responses are still JSON, not SSE — drain quickly
+        // and surface the error message.
+        if http.statusCode != 200 {
+            var data = Data()
+            for try await chunk in bytes { data.append(chunk) }
+            let msg = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
+            throw APIError.http(http.statusCode, msg)
+        }
+        struct DonePayload: Decodable { let id: String; let title: String? }
+        var currentEvent: String? = nil
+        for try await line in bytes.lines {
+            if line.hasPrefix("event:") {
+                currentEvent = line.dropFirst("event:".count).trimmingCharacters(in: .whitespaces)
+            } else if line.hasPrefix("data:") {
+                let raw = line.dropFirst("data:".count).trimmingCharacters(in: .whitespaces)
+                guard !raw.isEmpty, let payload = raw.data(using: .utf8) else { continue }
+                switch currentEvent {
+                case "stage":
+                    if let obj = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+                       let label = obj["label"] as? String {
+                        onStage(label)
+                    }
+                case "done":
+                    if let done = try? JSONDecoder().decode(DonePayload.self, from: payload) {
+                        return Self.baseURL.appendingPathComponent(done.id)
+                    }
+                case "error":
+                    let msg = (try? JSONSerialization.jsonObject(with: payload) as? [String: Any])?["message"] as? String
+                    throw APIError.http(-1, msg ?? "Import failed.")
+                default: break
+                }
+                currentEvent = nil
+            }
+        }
+        throw APIError.http(-1, "Import stream ended without a result.")
+    }
+
     // MARK: - Image upload
 
     /// Uploads raw image bytes to /api/upload and returns the
     /// public CDN URL. Used by Capture's Photo mode to embed an
-    /// image into a new doc via `![alt](url)` markdown.
-    func uploadImage(data: Data, contentType: String) async throws -> URL {
+    /// image into a new doc via `![alt](url)` markdown. The
+    /// `fileExtension` arg drives the multipart filename suffix
+    /// so the server's content-type sniff stays consistent with
+    /// our claimed `contentType` (defaults to "jpg" for legacy
+    /// callers that still send JPEG bytes).
+    func uploadImage(data: Data, contentType: String, fileExtension: String = "jpg") async throws -> URL {
         struct Response: Decodable { let url: String }
         guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
         let boundary = "MWImageUpload\(UUID().uuidString)"
         var body = Data()
-        let filename = "capture-\(Int(Date().timeIntervalSince1970)).jpg"
+        let filename = "capture-\(Int(Date().timeIntervalSince1970)).\(fileExtension)"
         let header = "--\(boundary)\r\n" +
             "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n" +
             "Content-Type: \(contentType)\r\n\r\n"

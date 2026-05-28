@@ -23,7 +23,7 @@ struct MarkdownEditor: UIViewRepresentable {
     var isDictating: Bool
 
     func makeUIView(context: Context) -> UITextView {
-        let tv = UITextView()
+        let tv = FillingTextView()
         tv.delegate = context.coordinator
         tv.backgroundColor = .clear
         tv.textColor = UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
@@ -36,6 +36,14 @@ struct MarkdownEditor: UIViewRepresentable {
         tv.autocapitalizationType = .sentences
         tv.smartDashesType = .yes
         tv.smartQuotesType = .yes
+        // Without this UITextView reports a small intrinsicContentSize
+        // (just the text bounds), so SwiftUI inside a VStack stops
+        // stretching it to fill the available height — the visible
+        // tap area collapses to a one-line strip and taps below
+        // the cursor row miss. Telling SwiftUI to "not hug, not
+        // resist" stretches it to fill.
+        tv.setContentHuggingPriority(.defaultLow, for: .vertical)
+        tv.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         // Empty-state placeholder using a UILabel overlay; SwiftUI
         // overlay was being clipped by the input accessory frame.
         let placeholder = UILabel()
@@ -67,9 +75,22 @@ struct MarkdownEditor: UIViewRepresentable {
         if tv.text != text { tv.text = text }
         context.coordinator.toolbar?.setDictating(isDictating)
         context.coordinator.placeholderLabel?.isHidden = !tv.text.isEmpty
+        // Focus race-fix: UIKit calls becomeFirstResponder()
+        // natively on tap, then keyboardWillShow re-renders SwiftUI
+        // BEFORE the textViewDidBeginEditing delegate has bubbled
+        // the focus back into our @FocusState. If we resign here
+        // any time isFocused == false, that stale re-render would
+        // kill the focus we just gained.
+        //
+        // Track the previous SwiftUI focus state and only resign
+        // on a true `true → false` transition (Cancel pressed,
+        // toolbar dismiss tapped, etc.). Initial false on first
+        // tap is left alone — UIKit owns that path.
+        let prev = context.coordinator.wasFocused
+        context.coordinator.wasFocused = isFocused
         if isFocused && !tv.isFirstResponder {
             DispatchQueue.main.async { tv.becomeFirstResponder() }
-        } else if !isFocused && tv.isFirstResponder {
+        } else if !isFocused && prev && tv.isFirstResponder {
             DispatchQueue.main.async { tv.resignFirstResponder() }
         }
     }
@@ -86,6 +107,10 @@ struct MarkdownEditor: UIViewRepresentable {
         weak var toolbar: MarkdownPillBar?
         weak var textView: UITextView?
         weak var placeholderLabel: UILabel?
+        /// Tracks the SwiftUI-side focus state across renders so
+        /// updateUIView can distinguish a real true→false dismiss
+        /// from a stale-render false (see updateUIView comment).
+        var wasFocused: Bool = false
 
         init(_ parent: MarkdownEditor) { self.parent = parent }
 
@@ -312,11 +337,21 @@ struct MarkdownTitleField: UIViewRepresentable {
 // against the keyboard's top edge — no SwiftUI safe-area padding
 // inserts a gutter below the bar.
 
-final class MarkdownPillBar: UIView {
+final class MarkdownPillBar: UIView, UIScrollViewDelegate {
     weak var target: MarkdownEditor.Coordinator?
     private var dictButton: UIButton?
     private let pill = UIView()
     private let scroll = UIScrollView()
+    /// Edge fade overlays — pill-color gradients on the leading/
+    /// trailing edges of the scroll area. Alpha is driven by
+    /// scrollViewDidScroll so the hint only appears when there's
+    /// actually more content beyond the edge.
+    private let leftFade = UIView()
+    private let rightFade = UIView()
+    private let leftFadeLayer = CAGradientLayer()
+    private let rightFadeLayer = CAGradientLayer()
+    /// Pill background colour — also the opaque stop of the fade.
+    private let pillColor = UIColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1)
 
     init(target: MarkdownEditor.Coordinator) {
         self.target = target
@@ -327,11 +362,14 @@ final class MarkdownPillBar: UIView {
         // The pill — capsule fill + hairline border. Lives inside
         // the bar with 8pt horizontal margins so it doesn't kiss
         // the screen edges.
-        pill.backgroundColor = UIColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1)
+        pill.backgroundColor = pillColor
         pill.layer.cornerRadius = 24
         pill.layer.borderWidth = 0.5
         pill.layer.borderColor = UIColor(red: 0.18, green: 0.18, blue: 0.20, alpha: 0.7).cgColor
         pill.translatesAutoresizingMaskIntoConstraints = false
+        // Clip so the fade overlays follow the capsule corners
+        // instead of bleeding past them.
+        pill.clipsToBounds = true
         addSubview(pill)
         NSLayoutConstraint.activate([
             pill.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
@@ -344,6 +382,7 @@ final class MarkdownPillBar: UIView {
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.showsHorizontalScrollIndicator = false
         scroll.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+        scroll.delegate = self
         pill.addSubview(scroll)
         NSLayoutConstraint.activate([
             scroll.leadingAnchor.constraint(equalTo: pill.leadingAnchor),
@@ -351,6 +390,36 @@ final class MarkdownPillBar: UIView {
             scroll.topAnchor.constraint(equalTo: pill.topAnchor),
             scroll.bottomAnchor.constraint(equalTo: pill.bottomAnchor),
         ])
+
+        // Fade overlays — drawn on top of the scroll content so
+        // partially-clipped buttons get blurred toward the pill
+        // colour, suggesting "there's more this way." Width matches
+        // the chevron's horizontal travel so the hint reads quickly
+        // without dominating the bar.
+        let fadeWidth: CGFloat = 28
+        for (view, layer, isLeft) in [
+            (leftFade, leftFadeLayer, true),
+            (rightFade, rightFadeLayer, false)
+        ] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            view.isUserInteractionEnabled = false
+            view.alpha = 0
+            layer.colors = isLeft
+                ? [pillColor.cgColor, pillColor.withAlphaComponent(0).cgColor]
+                : [pillColor.withAlphaComponent(0).cgColor, pillColor.cgColor]
+            layer.startPoint = CGPoint(x: 0, y: 0.5)
+            layer.endPoint = CGPoint(x: 1, y: 0.5)
+            view.layer.addSublayer(layer)
+            pill.addSubview(view)
+            NSLayoutConstraint.activate([
+                view.topAnchor.constraint(equalTo: pill.topAnchor),
+                view.bottomAnchor.constraint(equalTo: pill.bottomAnchor),
+                view.widthAnchor.constraint(equalToConstant: fadeWidth),
+                isLeft
+                    ? view.leadingAnchor.constraint(equalTo: pill.leadingAnchor)
+                    : view.trailingAnchor.constraint(equalTo: pill.trailingAnchor),
+            ])
+        }
 
         let stack = UIStackView()
         stack.axis = .horizontal
@@ -407,6 +476,39 @@ final class MarkdownPillBar: UIView {
         CGSize(width: UIView.noIntrinsicMetric, height: 56)
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // CAGradientLayer doesn't auto-resize with its hosting
+        // UIView; pin its frame to the view's bounds on each
+        // layout pass. Disable implicit animations so the fade
+        // doesn't slide during rotation / keyboard show.
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        leftFadeLayer.frame = leftFade.bounds
+        rightFadeLayer.frame = rightFade.bounds
+        CATransaction.commit()
+        updateFades()
+    }
+
+    // MARK: - UIScrollViewDelegate
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        updateFades()
+    }
+
+    /// Show/hide the leading & trailing fade overlays based on
+    /// scroll position. Each fade ramps from 0 → 1 over the first
+    /// 20pt of available scroll distance, so it appears gracefully
+    /// instead of snapping in.
+    private func updateFades() {
+        let x = scroll.contentOffset.x + scroll.contentInset.left
+        let maxX = scroll.contentSize.width - scroll.bounds.width + scroll.contentInset.right
+        let ramp: CGFloat = 20
+        leftFade.alpha = min(1, max(0, x / ramp))
+        let remaining = max(0, maxX - scroll.contentOffset.x)
+        rightFade.alpha = min(1, max(0, remaining / ramp))
+    }
+
     func setDictating(_ active: Bool) {
         dictButton?.setImage(UIImage(systemName: active ? "mic.fill" : "mic"), for: .normal)
         dictButton?.tintColor = active
@@ -425,5 +527,17 @@ final class MarkdownPillBar: UIView {
         b.heightAnchor.constraint(equalToConstant: 40).isActive = true
         b.addAction(UIAction { _ in action() }, for: .touchUpInside)
         return b
+    }
+}
+
+/// UITextView subclass that reports no intrinsic content height.
+/// Default UITextView returns the content size, which makes
+/// SwiftUI shrink the view to a single-line strip when the text
+/// is empty — collapsing the tap area below the cursor. Returning
+/// noIntrinsicMetric lets SwiftUI's frame system size us to the
+/// full available height of the parent (`.frame(maxHeight: .infinity)`).
+final class FillingTextView: UITextView {
+    override var intrinsicContentSize: CGSize {
+        CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
     }
 }
