@@ -301,16 +301,23 @@ struct CaptureView: View {
 /// Shared ambient blob backdrop — used by Capture / Timeline /
 /// Bundles empty states. Big, blurred, very faint so the screen
 /// reads as alive without competing with content.
+///
+/// Anchored to the screen, NOT the safe area — fixed position
+/// regardless of keyboard / tab bar / nav bar.
 struct AmbientBlob: View {
     var body: some View {
         GeometryReader { proxy in
-            let dim = max(proxy.size.width, proxy.size.height) * 1.4
+            // Slightly smaller than before so it doesn't dominate
+            // the canvas. Centred fixed; pointer passthrough.
+            let dim = max(proxy.size.width, proxy.size.height) * 0.95
             AnimatedBlob(size: dim, theme: .dark)
-                .opacity(0.04)
-                .blur(radius: 14)
+                .opacity(0.045)
+                .blur(radius: 12)
                 .frame(width: proxy.size.width, height: proxy.size.height, alignment: .center)
         }
-        .ignoresSafeArea()
+        // Ignore EVERY edge — fixed position so the keyboard
+        // arriving doesn't shift it.
+        .ignoresSafeArea(.all)
         .allowsHitTesting(false)
     }
 }

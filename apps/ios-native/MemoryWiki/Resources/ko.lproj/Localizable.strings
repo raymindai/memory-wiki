@@ -140,12 +140,12 @@
 "01 / CAPTURE"           = "01 / 캡쳐";
 "02 / FEED YOUR AI"      = "02 / AI에 전달";
 "03 / ALWAYS WITHIN REACH" = "03 / 어디서나 한 손에";
-"Catch ideas the moment they hit." = "떠오른 순간 바로 잡는다.";
-"Share Sheet from Safari, dictate while walking, OCR a whiteboard photo, paste from clipboard — every input lands as a memory in your hub." = "Safari 공유 시트, 걸으면서 받아쓰기, 화이트보드 사진 OCR, 클립보드 붙여넣기 — 모든 입력이 허브의 메모리로 모입니다.";
-"One URL works in every AI." = "URL 하나로 모든 AI에서.";
-"Paste memory.wiki/@you into Claude, ChatGPT, Cursor, or any other AI. They all fetch the same markdown — so every chat starts knowing what you've already learned." = "Claude, ChatGPT, Cursor 어디든 memory.wiki/@당신을 붙여넣으면, 모든 대화가 이미 학습한 내용을 알고 시작합니다.";
-"iOS is your pocket companion." = "iOS는 주머니 속 컴패니언.";
-"Widget, Spotlight, Siri, and Shortcuts all wire into Memory.Wiki. The full editor + collaboration + bundles live on the web — iOS keeps capture and lookup at one tap." = "위젯, Spotlight, Siri, Shortcuts 모두 Memory.Wiki와 연결됩니다. 전체 에디터, 협업, 번들은 웹에서 — iOS는 빠른 캡쳐와 검색에 집중합니다.";
+"Save anything, in one tap." = "한 번의 탭으로 무엇이든.";
+"From Safari, Notes, a photo, a thought spoken out loud — every input becomes a memory in your hub. Never lose an idea to “I'll write that down later.”" = "Safari, 메모, 사진, 입 밖으로 꺼낸 생각 — 무엇이든 허브의 메모리가 됩니다. \"나중에 적어야지\" 하고 잊어버리는 일은 끝.";
+"Stop re-explaining yourself." = "AI에게 똑같은 설명을 그만.";
+"Paste memory.wiki/@you into Claude, ChatGPT, Cursor — they all read the same memory. One link, every model already knows who you are and what you've learned." = "memory.wiki/@당신을 Claude, ChatGPT, Cursor에 붙여넣으세요 — 모두 같은 메모리를 읽습니다. 링크 하나로 모든 모델이 당신을 알고 시작합니다.";
+"Your hub follows you everywhere." = "허브가 어디든 따라옵니다.";
+"Home-screen widget, Siri voice capture, Spotlight search, Shortcuts — iOS keeps your memory one tap away. Full editor + collaboration + bundles live on the web." = "홈 화면 위젯, Siri 음성 캡쳐, Spotlight 검색, Shortcuts — iOS는 메모리를 한 손가락 거리에. 전체 에디터, 협업, 번들은 웹에 있습니다.";
 
 /* ============ AUTH ============ */
 "Continue with Apple"  = "Apple로 계속하기";

@@ -39,6 +39,18 @@ struct RootView: View {
                         BrandTabBar(selected: $router.selectedTab)
                     }
                     .animation(.snappy(duration: 0.22), value: reachability.isOnline)
+                    // CRITICAL: Without this, SwiftUI's automatic
+                    // keyboard avoidance pushes the entire tab-bar
+                    // VStack UP when the editor's soft keyboard
+                    // appears, leaving the UITextView's
+                    // inputAccessoryView visually BEHIND the
+                    // pushed-up tab bar. Telling the tab bar to
+                    // ignore the keyboard safe-area pins it to
+                    // the screen bottom; the keyboard then covers
+                    // it cleanly and the accessory view sits
+                    // exactly where it should (right above the
+                    // keyboard).
+                    .ignoresSafeArea(.keyboard, edges: .bottom)
                 }
                 // Force SwiftUI to fully tear down + rebuild the
                 // signed-in surface when the user identity changes.

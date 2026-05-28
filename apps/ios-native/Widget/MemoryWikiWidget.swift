@@ -56,49 +56,37 @@ enum WTheme {
 
 // MARK: - Brand blob (SwiftUI Shape)
 
-/// Compact blob mark — abstracts the brand SVG into a pure
-/// SwiftUI Shape so the widget extension (which can't import
-/// the main app's WKWebView-backed AnimatedBlob) still ships
-/// the brand glyph. Static — widgets are snapshots, not
-/// animation surfaces.
+/// Brand blob silhouette — three overlapping circles arranged
+/// into a clover-like organic mass, reading as the same logo
+/// silhouette the main app's animated morph SVG settles into.
+/// Drawn as a SwiftUI Shape so it scales crisply at any size.
 struct BlobMark: View {
     var color: Color = WTheme.textPrimary
     var body: some View {
-        Canvas { ctx, size in
-            let w = size.width
-            let h = size.height
-            // 6-point organic blob: a Bezier-stitched outline that
-            // reads as "round + slightly squished" — same silhouette
-            // the iOS app's AnimatedBlob settles into mid-morph.
-            var path = Path()
-            path.move(to: CGPoint(x: w * 0.50, y: h * 0.08))
-            path.addCurve(
-                to: CGPoint(x: w * 0.92, y: h * 0.42),
-                control1: CGPoint(x: w * 0.78, y: h * 0.08),
-                control2: CGPoint(x: w * 0.95, y: h * 0.20)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.78, y: h * 0.90),
-                control1: CGPoint(x: w * 0.90, y: h * 0.65),
-                control2: CGPoint(x: w * 0.94, y: h * 0.84)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.25, y: h * 0.92),
-                control1: CGPoint(x: w * 0.55, y: h * 0.98),
-                control2: CGPoint(x: w * 0.40, y: h * 1.00)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.06, y: h * 0.45),
-                control1: CGPoint(x: w * 0.08, y: h * 0.82),
-                control2: CGPoint(x: w * 0.04, y: h * 0.62)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.50, y: h * 0.08),
-                control1: CGPoint(x: w * 0.08, y: h * 0.18),
-                control2: CGPoint(x: w * 0.28, y: h * 0.06)
-            )
-            path.closeSubpath()
-            ctx.fill(path, with: .color(color))
+        GeometryReader { proxy in
+            let s = min(proxy.size.width, proxy.size.height)
+            let r1 = s * 0.34
+            let r2 = s * 0.30
+            let r3 = s * 0.32
+            ZStack {
+                Circle()
+                    .fill(color)
+                    .frame(width: r1 * 2, height: r1 * 2)
+                    .offset(x: -s * 0.14, y: -s * 0.10)
+                Circle()
+                    .fill(color)
+                    .frame(width: r2 * 2, height: r2 * 2)
+                    .offset(x: s * 0.18, y: -s * 0.06)
+                Circle()
+                    .fill(color)
+                    .frame(width: r3 * 2, height: r3 * 2)
+                    .offset(x: s * 0.02, y: s * 0.18)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            // Drop-shadow blur fuses the three circles into one
+            // continuous blob — the silhouette reads as a single
+            // organic mass instead of "three circles."
+            .blur(radius: s * 0.045)
         }
     }
 }
@@ -310,17 +298,17 @@ private struct DocPreview: View {
         }
     }
 
+    /// Status icon mirroring the iOS DocStatusIcon vocabulary:
+    /// globe for public, cloud for private. Same semantics as
+    /// the main app so the widget reads as the same product.
+    /// (Was a coloured dot + hollow ring earlier — user couldn't
+    /// tell what the difference meant.)
     @ViewBuilder
     private var statusBadge: some View {
-        if isPublic {
-            Circle()
-                .fill(WTheme.microLime)
-                .frame(width: 5, height: 5)
-        } else {
-            Circle()
-                .strokeBorder(WTheme.textFaint, lineWidth: 1)
-                .frame(width: 5, height: 5)
-        }
+        Image(systemName: isPublic ? "globe" : "cloud.fill")
+            .font(.system(size: dense ? 10 : 11, weight: .regular))
+            .foregroundStyle(isPublic ? WTheme.textPrimary : WTheme.textFaint)
+            .frame(width: 12)
     }
 }
 

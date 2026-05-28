@@ -18,20 +18,20 @@ struct OnboardingView: View {
     private let cards: [Card] = [
         Card(
             label: "01 / CAPTURE",
-            title: "Catch ideas the moment they hit.",
-            body: "Share Sheet from Safari, dictate while walking, OCR a whiteboard photo, paste from clipboard — every input lands as a memory in your hub.",
+            title: "Save anything, in one tap.",
+            body: "From Safari, Notes, a photo, a thought spoken out loud — every input becomes a memory in your hub. Never lose an idea to “I'll write that down later.”",
             glyph: "square.and.arrow.up"
         ),
         Card(
             label: "02 / FEED YOUR AI",
-            title: "One URL works in every AI.",
-            body: "Paste memory.wiki/@you into Claude, ChatGPT, Cursor, or any other AI. They all fetch the same markdown — so every chat starts knowing what you've already learned.",
+            title: "Stop re-explaining yourself.",
+            body: "Paste memory.wiki/@you into Claude, ChatGPT, Cursor — they all read the same memory. One link, every model already knows who you are and what you've learned.",
             glyph: "sparkles"
         ),
         Card(
             label: "03 / ALWAYS WITHIN REACH",
-            title: "iOS is your pocket companion.",
-            body: "Widget, Spotlight, Siri, and Shortcuts all wire into Memory.Wiki. The full editor + collaboration + bundles live on the web — iOS keeps capture and lookup at one tap.",
+            title: "Your hub follows you everywhere.",
+            body: "Home-screen widget, Siri voice capture, Spotlight search, Shortcuts — iOS keeps your memory one tap away. Full editor + collaboration + bundles live on the web.",
             glyph: "iphone.gen3"
         ),
     ]

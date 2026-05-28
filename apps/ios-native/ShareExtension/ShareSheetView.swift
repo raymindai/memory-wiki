@@ -387,44 +387,29 @@ private enum ShareTheme {
     static let microLime   = Color(red: 0.710, green: 1.000, blue: 0.100)
 }
 
-/// Brand blob silhouette drawn directly as a SwiftUI Shape.
-/// Mirrors the Widget extension's BlobMark so all three iOS
-/// surfaces (main app via WKWebView animation, widget, share
-/// extension) carry the same mark.
+/// Brand blob silhouette — three overlapping circles fused with
+/// a small blur. Mirrors the Widget extension's BlobMark so all
+/// three iOS surfaces carry the same mark.
 private struct ShareBlobMark: View {
     var body: some View {
-        Canvas { ctx, size in
-            let w = size.width
-            let h = size.height
-            var path = Path()
-            path.move(to: CGPoint(x: w * 0.50, y: h * 0.08))
-            path.addCurve(
-                to: CGPoint(x: w * 0.92, y: h * 0.42),
-                control1: CGPoint(x: w * 0.78, y: h * 0.08),
-                control2: CGPoint(x: w * 0.95, y: h * 0.20)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.78, y: h * 0.90),
-                control1: CGPoint(x: w * 0.90, y: h * 0.65),
-                control2: CGPoint(x: w * 0.94, y: h * 0.84)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.25, y: h * 0.92),
-                control1: CGPoint(x: w * 0.55, y: h * 0.98),
-                control2: CGPoint(x: w * 0.40, y: h * 1.00)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.06, y: h * 0.45),
-                control1: CGPoint(x: w * 0.08, y: h * 0.82),
-                control2: CGPoint(x: w * 0.04, y: h * 0.62)
-            )
-            path.addCurve(
-                to: CGPoint(x: w * 0.50, y: h * 0.08),
-                control1: CGPoint(x: w * 0.08, y: h * 0.18),
-                control2: CGPoint(x: w * 0.28, y: h * 0.06)
-            )
-            path.closeSubpath()
-            ctx.fill(path, with: .color(ShareTheme.textPrimary))
+        GeometryReader { proxy in
+            let s = min(proxy.size.width, proxy.size.height)
+            let r1 = s * 0.34
+            let r2 = s * 0.30
+            let r3 = s * 0.32
+            ZStack {
+                Circle().fill(ShareTheme.textPrimary)
+                    .frame(width: r1 * 2, height: r1 * 2)
+                    .offset(x: -s * 0.14, y: -s * 0.10)
+                Circle().fill(ShareTheme.textPrimary)
+                    .frame(width: r2 * 2, height: r2 * 2)
+                    .offset(x: s * 0.18, y: -s * 0.06)
+                Circle().fill(ShareTheme.textPrimary)
+                    .frame(width: r3 * 2, height: r3 * 2)
+                    .offset(x: s * 0.02, y: s * 0.18)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .blur(radius: s * 0.045)
         }
     }
 }

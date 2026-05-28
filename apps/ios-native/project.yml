@@ -244,15 +244,17 @@ targets:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
           NSExtensionAttributes:
+            # WebPage > 0 is what triggers Safari to inject + run
+            # Share.js inside the page. Without it (or with the
+            # bare WebURL rule alone), iOS routes the share as a
+            # plain URL share and the JS preprocessor never runs
+            # — that was the "내용이 같이 캡쳐 안 됨" bug.
+            #
+            # Keep Text support so non-Safari sources that share
+            # plain text still trigger the extension.
             NSExtensionActivationRule:
-              NSExtensionActivationSupportsWebURLWithMaxCount: 5
-              NSExtensionActivationSupportsWebPageWithMaxCount: 5
+              NSExtensionActivationSupportsWebPageWithMaxCount: 1
               NSExtensionActivationSupportsText: true
-            # Safari (and any WKWebView) runs Share.js inside the
-            # page before invoking the extension — that's the only
-            # supported path to read document.title, window.location,
-            # the user's selection, and the article body. The result
-            # arrives as a public.propertyList NSItemProvider item.
             NSExtensionJavaScriptPreprocessingFile: Share
         # MWBaseURL — read by SharedAPI so iOS staging vs prod
         # is a build-config toggle, not a code change.
