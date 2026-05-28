@@ -86,8 +86,8 @@ async function ensureProfile(userId) {
     hub_description:
       "A polished demo hub showing what Memory.Wiki can hold — research, engineering notes, reading log, project planning. Paste any URL into Claude or ChatGPT to see the cross-AI payload.",
     plan: "pro",
-    avatar_style: "shapes",
-    avatar_url: "https://api.dicebear.com/9.x/shapes/svg?seed=memorywikidemo"
+    avatar_style: "identicon",
+    avatar_url: "https://api.dicebear.com/9.x/identicon/svg?seed=memorywikidemo"
   }, { onConflict: "id" });
   if (error) throw error;
 }
