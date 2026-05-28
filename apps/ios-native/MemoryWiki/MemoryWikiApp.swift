@@ -140,4 +140,8 @@ extension Notification.Name {
     /// Timeline can auto-focus the search bar without a binding
     /// hop through the router.
     static let mwOpenSearch = Notification.Name("MWOpenSearch")
+    /// Posted when AuthManager observes a session change — sign-out
+    /// or sign-in-as-different-user. Models listen and drop their
+    /// in-memory cache so the previous account's docs don't flash.
+    static let mwUserChanged = Notification.Name("MWUserChanged")
 }

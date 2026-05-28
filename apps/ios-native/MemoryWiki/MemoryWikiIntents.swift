@@ -12,14 +12,14 @@ import UIKit
 
 /// Opens the app on the Capture tab. Optional text parameter is
 /// dropped into the draft so chained shortcuts (clipboard →
-/// Memory.Wiki, dictated note → Memory.Wiki) work out of the
+/// Memory.Wiki, dictated text → Memory.Wiki) work out of the
 /// box.
 struct CaptureNoteIntent: AppIntent {
-    static var title: LocalizedStringResource = "Capture a note"
+    static var title: LocalizedStringResource = "Capture a memory"
     static var description = IntentDescription("Open the Capture tab. Optionally pre-fill with text.")
     static var openAppWhenRun: Bool = true
 
-    @Parameter(title: "Note text", default: "")
+    @Parameter(title: "Memory text", default: "")
     var text: String
 
     func perform() async throws -> some IntentResult {
@@ -40,7 +40,7 @@ struct CaptureNoteIntent: AppIntent {
 
 struct SearchMemoryIntent: AppIntent {
     static var title: LocalizedStringResource = "Search Memory.Wiki"
-    static var description = IntentDescription("Search your captured notes by title or meaning.")
+    static var description = IntentDescription("Search your captured memories by title or meaning.")
     static var openAppWhenRun: Bool = true
 
     @Parameter(title: "Query")
@@ -116,9 +116,10 @@ struct MemoryWikiShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CaptureNoteIntent(),
             phrases: [
-                "Capture a note in \(.applicationName)",
-                "New note in \(.applicationName)",
-                "\(.applicationName)에 노트 캡쳐",
+                "Capture a memory in \(.applicationName)",
+                "New memory in \(.applicationName)",
+                "\(.applicationName)에 메모리 캡쳐",
+                "\(.applicationName)에 메모 추가",
             ],
             shortTitle: "Capture",
             systemImageName: "plus.circle"

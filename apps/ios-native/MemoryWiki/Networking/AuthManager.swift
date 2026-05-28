@@ -77,9 +77,18 @@ final class AuthManager: NSObject, ObservableObject {
     }
 
     func signOut() async {
+        let previousUserId = session?.userId
         try? await client.auth.signOut()
         session = nil
         SharedSessionStore.clear()
+        // Broadcast so TimelineModel / BundlesModel / PinnedStore
+        // can drop their cached state immediately. Otherwise the
+        // previous account's docs flash in the next sign-in.
+        NotificationCenter.default.post(
+            name: .mwUserChanged,
+            object: nil,
+            userInfo: ["previousUserId": previousUserId ?? ""]
+        )
     }
 
     /// memorywiki://auth-callback — invoked from MemoryWikiApp.onOpenURL
@@ -103,7 +112,15 @@ final class AuthManager: NSObject, ObservableObject {
     }
 
     private func hydrate() async {
+        let previousUserId = session?.userId
         guard let auth = try? await client.auth.session else {
+            if previousUserId != nil {
+                NotificationCenter.default.post(
+                    name: .mwUserChanged,
+                    object: nil,
+                    userInfo: ["previousUserId": previousUserId ?? ""]
+                )
+            }
             session = nil
             return
         }
@@ -120,12 +137,27 @@ final class AuthManager: NSObject, ObservableObject {
             .value {
             hubSlug = profile.hub_slug
         }
+        let newUserId = auth.user.id.uuidString.lowercased()
+        let userChanged = previousUserId != nil && previousUserId != newUserId
         session = UserSession(
-            userId: auth.user.id.uuidString.lowercased(),
+            userId: newUserId,
             email: auth.user.email,
             hubSlug: hubSlug,
             accessToken: auth.accessToken
         )
+        // Switching accounts mid-process — broadcast so cached
+        // doc lists / pinned IDs from the old account get wiped
+        // before the new account's data starts loading.
+        if userChanged {
+            NotificationCenter.default.post(
+                name: .mwUserChanged,
+                object: nil,
+                userInfo: [
+                    "previousUserId": previousUserId ?? "",
+                    "newUserId": newUserId,
+                ]
+            )
+        }
         // Mirror the access token + identity into the App Group
         // Keychain so the Share Extension (different process) can
         // POST /api/docs without re-doing the OAuth round-trip.

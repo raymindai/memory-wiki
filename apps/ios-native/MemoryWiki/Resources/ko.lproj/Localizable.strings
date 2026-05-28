@@ -21,8 +21,8 @@
 /* ============ TIMELINE ============ */
 "Search titles or meaning" = "제목/의미로 검색";
 "Nothing captured yet"     = "아직 저장된 노트가 없어요";
-"Start with a quick note, paste a URL from your clipboard, or use the iOS Share Sheet from Safari." = "메모를 적거나, 클립보드의 URL을 붙이거나, Safari의 공유 시트를 사용해보세요.";
-"Capture your first note"  = "첫 노트 만들기";
+"Write something, paste a URL from your clipboard, or use the iOS Share Sheet from Safari." = "직접 적거나, 클립보드의 URL을 붙이거나, Safari의 공유 시트로 보내보세요.";
+"Capture your first memory" = "첫 메모리 만들기";
 "Couldn't load timeline"   = "타임라인을 불러오지 못했어요";
 "Try again"                = "다시 시도";
 "No matches"               = "결과 없음";
@@ -85,6 +85,8 @@
 
 "ACCOUNT"    = "계정";
 "APPEARANCE" = "테마";
+"LANGUAGE"   = "언어";
+"Change app language" = "앱 언어 변경";
 "LEARN"      = "도움말";
 "FEEDBACK"   = "피드백";
 "LEGAL"      = "법적 고지";

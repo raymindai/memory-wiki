@@ -45,6 +45,10 @@ struct RootView: View {
             }
         }
         .animation(.snappy(duration: 0.22), value: auth.isSignedIn)
+        .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
+            // Wipe local-only per-user state on identity change.
+            PinnedStore.shared.clearForUserChange()
+        }
         // Onboarding overlay — first signed-in launch only.
         .fullScreenCover(isPresented: shouldShowOnboarding) {
             OnboardingView(done: $onboardingDone)

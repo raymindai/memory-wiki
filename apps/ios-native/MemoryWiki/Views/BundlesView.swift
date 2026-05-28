@@ -24,6 +24,12 @@ final class BundlesModel: ObservableObject {
         }
     }
 
+    func clearForUserChange() {
+        bundles = []
+        searchText = ""
+        errorMessage = nil
+    }
+
     var visible: [AppBundle] {
         let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !q.isEmpty else { return bundles }
@@ -63,6 +69,10 @@ struct BundlesView: View {
         }
         .task { await model.load() }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
+            Task { await model.load() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
+            model.clearForUserChange()
             Task { await model.load() }
         }
     }

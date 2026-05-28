@@ -69,6 +69,20 @@ final class TimelineModel: ObservableObject {
         }
     }
 
+    /// Wipe the in-memory cache. Called on user-change events so
+    /// the new account's first paint doesn't briefly show the
+    /// previous account's docs (a quick "Untitled" flash). Also
+    /// clears the Spotlight index for the same reason.
+    func clearForUserChange() {
+        documents = []
+        semanticHits = []
+        semanticTask?.cancel()
+        semanticLoading = false
+        errorMessage = nil
+        searchText = ""
+        Task.detached { await SpotlightIndexer.sync([]) }
+    }
+
     /// Filter by search text + group by bucket, preserving the
     /// reverse-chronological sort inside each bucket. Buckets
     /// with zero matches are dropped so the timeline collapses
@@ -131,6 +145,12 @@ struct TimelineView: View {
         .onReceive(NotificationCenter.default.publisher(for: .mwOpenSearch)) { _ in
             withAnimation(.snappy(duration: 0.22)) { showingSearch = true }
             searchFocused = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
+            // Account switch — empty the list immediately, then
+            // re-fetch under the new identity.
+            model.clearForUserChange()
+            Task { await model.load() }
         }
     }
 
@@ -214,9 +234,9 @@ struct TimelineView: View {
         } else if model.documents.isEmpty {
             EmptyState(
                 title: "Nothing captured yet",
-                caption: "Start with a quick note, paste a URL from your clipboard, or use the iOS Share Sheet from Safari.",
+                caption: "Write something, paste a URL from your clipboard, or use the iOS Share Sheet from Safari.",
                 glyph: "tray",
-                action: ("Capture your first note", { Haptics.tap(); router.selectedTab = .capture })
+                action: ("Capture your first memory", { Haptics.tap(); router.selectedTab = .capture })
             )
         } else if model.grouped.isEmpty && model.semanticHits.isEmpty {
             EmptyState(

@@ -31,6 +31,13 @@ final class PinnedStore: ObservableObject {
         persist()
     }
 
+    /// Wipe the local pin list — called on sign-out / account
+    /// switch so pins from one user don't leak into another.
+    func clearForUserChange() {
+        docIds = []
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
     private func persist() {
         UserDefaults.standard.set(docIds.sorted().joined(separator: ","), forKey: key)
     }

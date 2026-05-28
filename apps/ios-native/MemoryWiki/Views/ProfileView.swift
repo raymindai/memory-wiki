@@ -44,6 +44,20 @@ struct ProfileView: View {
                         section("APPEARANCE") {
                             ThemePicker(themePref: $themePref)
                         }
+                        section("LANGUAGE") {
+                            SettingActionRow(label: "Change app language", systemImage: "globe") {
+                                Haptics.tap()
+                                // iOS shows "Memory.Wiki → Preferred Language"
+                                // automatically because we bundle ko + en
+                                // localisations. Opening Settings is the
+                                // standard pattern — Apple doesn't expose
+                                // an in-app override that survives without
+                                // wrestling Bundle internals.
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                        }
                         section("LEARN") {
                             SettingNavRow(label: "Help & Shortcuts", systemImage: "questionmark.circle") {
                                 path.append(.help)
