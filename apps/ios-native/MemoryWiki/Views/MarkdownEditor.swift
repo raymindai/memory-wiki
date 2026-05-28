@@ -1,18 +1,13 @@
 // MarkdownEditor — UITextView wrapped as a SwiftUI view, with a
-// real UIKit `inputAccessoryView` so the markdown toolbar slides
-// in with the keyboard and out with it. iOS guarantees the
-// accessory view is shown ONLY while the keyboard is on-screen
-// — that's exactly the contract SwiftUI's `.toolbar(.keyboard)`
-// has failed to honour on this surface.
+// real UIKit `inputAccessoryView` so the markdown toolbar docks
+// flush against the keyboard's top edge with ZERO gap (every
+// SwiftUI-native attempt — .toolbar(.keyboard), safeAreaInset
+// — left a system-padding gutter we couldn't close).
 //
-// API matches a SwiftUI TextEditor:
-//   - `@Binding var text: String`
-//   - `var focused: FocusState<Bool>.Binding`
-//   - `var onInsert: (String) -> Void`  — toolbar buttons call
-//     this to append at the cursor.
-//
-// Brand chrome: dark canvas, ink body, JetBrains Mono toolbar
-// button labels, no system tinting.
+// Toolbar is a Notes-style horizontally scrolling capsule pill
+// containing every formatting token plus media buttons (camera,
+// OCR text-scan, mic). Hosts callbacks back into the SwiftUI
+// CaptureView so photo + voice + OCR flows reuse the same state.
 
 import SwiftUI
 import UIKit
@@ -21,6 +16,8 @@ struct MarkdownEditor: UIViewRepresentable {
     @Binding var text: String
     var isFocused: Bool
     var onFocusChange: (Bool) -> Void
+    var onPhoto: () -> Void
+    var onOCR: () -> Void
     var onStartDictation: () -> Void
     var onStopDictation: () -> Void
     var isDictating: Bool
@@ -30,20 +27,34 @@ struct MarkdownEditor: UIViewRepresentable {
         tv.delegate = context.coordinator
         tv.backgroundColor = .clear
         tv.textColor = UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
-        tv.tintColor = UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
+        tv.tintColor = UIColor(red: 0.98, green: 0.71, blue: 0.10, alpha: 1) // microWarn
         tv.font = MarkdownEditor.bodyFont
-        tv.textContainerInset = UIEdgeInsets(top: 14, left: 14, bottom: 14, right: 14)
+        tv.textContainerInset = UIEdgeInsets(top: 6, left: 14, bottom: 14, right: 14)
         tv.alwaysBounceVertical = true
         tv.keyboardDismissMode = .interactive
         tv.autocorrectionType = .yes
         tv.autocapitalizationType = .sentences
         tv.smartDashesType = .yes
         tv.smartQuotesType = .yes
+        // Empty-state placeholder using a UILabel overlay; SwiftUI
+        // overlay was being clipped by the input accessory frame.
+        let placeholder = UILabel()
+        placeholder.text = "Add more details…"
+        placeholder.textColor = UIColor(red: 0.54, green: 0.54, blue: 0.57, alpha: 1)
+        placeholder.font = MarkdownEditor.bodyFont
+        placeholder.translatesAutoresizingMaskIntoConstraints = false
+        tv.addSubview(placeholder)
+        NSLayoutConstraint.activate([
+            placeholder.topAnchor.constraint(equalTo: tv.topAnchor, constant: 8),
+            placeholder.leadingAnchor.constraint(equalTo: tv.leadingAnchor, constant: 18),
+        ])
+        context.coordinator.placeholderLabel = placeholder
 
-        // Attach the markdown toolbar as the keyboard accessory.
-        // UIKit handles all the show/hide timing — it only paints
-        // when the keyboard is on-screen, which is the fix.
-        let bar = MarkdownToolbarBar(target: context.coordinator)
+        // Attach the Notes-style toolbar pill as the keyboard
+        // accessory. UIKit handles all show/hide timing — it
+        // paints ONLY while the keyboard is on-screen, docked
+        // flush against the keyboard's top edge.
+        let bar = MarkdownPillBar(target: context.coordinator)
         tv.inputAccessoryView = bar
         context.coordinator.toolbar = bar
         return tv
@@ -51,11 +62,8 @@ struct MarkdownEditor: UIViewRepresentable {
 
     func updateUIView(_ tv: UITextView, context: Context) {
         if tv.text != text { tv.text = text }
-        // Update dictation button state on the toolbar so the
-        // mic icon flips fill/stroke when dictation is active.
         context.coordinator.toolbar?.setDictating(isDictating)
-        // Focus state — push if SwiftUI says we should be focused
-        // and we aren't, and vice versa.
+        context.coordinator.placeholderLabel?.isHidden = !tv.text.isEmpty
         if isFocused && !tv.isFirstResponder {
             DispatchQueue.main.async { tv.becomeFirstResponder() }
         } else if !isFocused && tv.isFirstResponder {
@@ -63,25 +71,25 @@ struct MarkdownEditor: UIViewRepresentable {
         }
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     static let bodyFont: UIFont = {
-        if let f = UIFont(name: "NotoSans-Regular", size: 15) { return f }
-        return UIFont.systemFont(ofSize: 15)
+        if let f = UIFont(name: "NotoSans-Regular", size: 16) { return f }
+        return UIFont.systemFont(ofSize: 16)
     }()
 
     final class Coordinator: NSObject, UITextViewDelegate {
         let parent: MarkdownEditor
-        weak var toolbar: MarkdownToolbarBar?
+        weak var toolbar: MarkdownPillBar?
         weak var textView: UITextView?
+        weak var placeholderLabel: UILabel?
 
         init(_ parent: MarkdownEditor) { self.parent = parent }
 
         func textViewDidChange(_ textView: UITextView) {
             self.textView = textView
             parent.text = textView.text
+            placeholderLabel?.isHidden = !textView.text.isEmpty
         }
         func textViewDidBeginEditing(_ textView: UITextView) {
             self.textView = textView
@@ -97,56 +105,41 @@ struct MarkdownEditor: UIViewRepresentable {
             UISelectionFeedbackGenerator().selectionChanged()
             guard let tv = textView ?? findTextView() else { return }
             let range = tv.selectedRange
-            let insertion = NSAttributedString(string: scaffold, attributes: [
+            let mutable = NSMutableAttributedString(attributedString: tv.attributedText)
+            let attr = NSAttributedString(string: scaffold, attributes: [
                 .font: MarkdownEditor.bodyFont,
                 .foregroundColor: UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
             ])
-            let mutable = NSMutableAttributedString(attributedString: tv.attributedText)
-            mutable.replaceCharacters(in: range, with: insertion)
+            mutable.replaceCharacters(in: range, with: attr)
             tv.attributedText = mutable
-            let newPos = range.location + scaffold.count
-            tv.selectedRange = NSRange(location: newPos, length: 0)
+            tv.selectedRange = NSRange(location: range.location + scaffold.count, length: 0)
             parent.text = tv.text
+            placeholderLabel?.isHidden = !tv.text.isEmpty
         }
 
-        /// Wrap the current selection (or insert paired tokens at
-        /// the caret with the cursor parked between them).
         func wrap(_ token: String) {
             UISelectionFeedbackGenerator().selectionChanged()
             guard let tv = textView ?? findTextView() else { return }
             let range = tv.selectedRange
             let body = (tv.text as NSString).substring(with: range)
             let replacement = "\(token)\(body)\(token)"
-            let attributed = NSAttributedString(string: replacement, attributes: [
+            let mutable = NSMutableAttributedString(attributedString: tv.attributedText)
+            mutable.replaceCharacters(in: range, with: NSAttributedString(string: replacement, attributes: [
                 .font: MarkdownEditor.bodyFont,
                 .foregroundColor: UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
-            ])
-            let mutable = NSMutableAttributedString(attributedString: tv.attributedText)
-            mutable.replaceCharacters(in: range, with: attributed)
+            ]))
             tv.attributedText = mutable
-            // Place caret inside the tokens when there was no
-            // selection; otherwise leave it after the wrap.
-            let newLoc = range.length == 0
-                ? range.location + token.count
-                : range.location + replacement.count
-            tv.selectedRange = NSRange(location: newLoc, length: 0)
+            tv.selectedRange = NSRange(
+                location: range.length == 0 ? range.location + token.count : range.location + replacement.count,
+                length: 0
+            )
             parent.text = tv.text
+            placeholderLabel?.isHidden = !tv.text.isEmpty
         }
 
-        func insertLink() {
-            insert(scaffold: "[text](https://)")
-        }
-
-        private func insert(scaffold: String) {
-            insert(scaffold)
-        }
+        func insertLink() { insert("[text](https://)") }
 
         private func findTextView() -> UITextView? {
-            // Recursive walk — UIWindow doesn't expose a
-            // firstResponder property publicly, so we hunt down
-            // the responder chain looking for a UITextView in
-            // editing state. Used only as a fallback when the
-            // delegate hasn't given us a strong ref yet.
             for scene in UIApplication.shared.connectedScenes {
                 guard let ws = scene as? UIWindowScene else { continue }
                 for window in ws.windows {
@@ -155,7 +148,6 @@ struct MarkdownEditor: UIViewRepresentable {
             }
             return nil
         }
-
         private static func findEditing(in view: UIView) -> UITextView? {
             if let tv = view as? UITextView, tv.isFirstResponder { return tv }
             for sub in view.subviews {
@@ -165,92 +157,133 @@ struct MarkdownEditor: UIViewRepresentable {
         }
 
         func tappedDictation() {
-            if parent.isDictating {
-                parent.onStopDictation()
-            } else {
-                parent.onStartDictation()
-            }
+            if parent.isDictating { parent.onStopDictation() }
+            else { parent.onStartDictation() }
         }
-
-        func dismissKeyboard() {
-            textView?.resignFirstResponder()
-        }
+        func tappedPhoto() { parent.onPhoto() }
+        func tappedOCR()   { parent.onOCR() }
+        func dismissKeyboard() { textView?.resignFirstResponder() }
     }
 }
 
-/// UIKit-native toolbar bar — a UIView with a horizontal stack of
-/// quiet buttons. Lives as `UITextView.inputAccessoryView` so
-/// UIKit handles all show/hide timing with the keyboard.
-final class MarkdownToolbarBar: UIView {
+// MARK: - Notes-style pill toolbar
+//
+// Capsule container with a horizontally scrolling button row.
+// Sits as `UITextView.inputAccessoryView`, so iOS docks it flush
+// against the keyboard's top edge — no SwiftUI safe-area padding
+// inserts a gutter below the bar.
+
+final class MarkdownPillBar: UIView {
     weak var target: MarkdownEditor.Coordinator?
     private var dictButton: UIButton?
+    private let pill = UIView()
+    private let scroll = UIScrollView()
 
     init(target: MarkdownEditor.Coordinator) {
         self.target = target
-        super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 44))
-        autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        backgroundColor = UIColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1)
-        layer.borderWidth = 0.5
-        layer.borderColor = UIColor(red: 0.18, green: 0.18, blue: 0.20, alpha: 0.6).cgColor
+        super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 56))
+        autoresizingMask = [.flexibleWidth]
+        backgroundColor = .clear
+
+        // The pill — capsule fill + hairline border. Lives inside
+        // the bar with 8pt horizontal margins so it doesn't kiss
+        // the screen edges.
+        pill.backgroundColor = UIColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1)
+        pill.layer.cornerRadius = 24
+        pill.layer.borderWidth = 0.5
+        pill.layer.borderColor = UIColor(red: 0.18, green: 0.18, blue: 0.20, alpha: 0.7).cgColor
+        pill.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(pill)
+        NSLayoutConstraint.activate([
+            pill.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            pill.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            pill.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            pill.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
+            pill.heightAnchor.constraint(equalToConstant: 48),
+        ])
+
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.showsHorizontalScrollIndicator = false
+        scroll.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+        pill.addSubview(scroll)
+        NSLayoutConstraint.activate([
+            scroll.leadingAnchor.constraint(equalTo: pill.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: pill.trailingAnchor),
+            scroll.topAnchor.constraint(equalTo: pill.topAnchor),
+            scroll.bottomAnchor.constraint(equalTo: pill.bottomAnchor),
+        ])
 
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.alignment = .center
-        stack.distribution = .equalSpacing
-        stack.spacing = 4
+        stack.spacing = 2
         stack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(stack)
+        scroll.addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
-            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
-            stack.heightAnchor.constraint(equalToConstant: 38),
+            stack.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
+            stack.heightAnchor.constraint(equalTo: scroll.frameLayoutGuide.heightAnchor),
         ])
 
-        // Each scaffold button. Hash chosen over "H1/H2" labels
-        // for compactness; tap inserts `\n# ` so the next caret
-        // typing becomes a heading.
+        // Formatting tokens.
         stack.addArrangedSubview(button(systemName: "number") { [weak self] in self?.target?.insert("\n# ") })
         stack.addArrangedSubview(button(systemName: "bold") { [weak self] in self?.target?.wrap("**") })
         stack.addArrangedSubview(button(systemName: "italic") { [weak self] in self?.target?.wrap("*") })
         stack.addArrangedSubview(button(systemName: "list.bullet") { [weak self] in self?.target?.insert("\n- ") })
         stack.addArrangedSubview(button(systemName: "list.number") { [weak self] in self?.target?.insert("\n1. ") })
+        stack.addArrangedSubview(button(systemName: "checkmark.square") { [weak self] in self?.target?.insert("\n- [ ] ") })
         stack.addArrangedSubview(button(systemName: "chevron.left.forwardslash.chevron.right") { [weak self] in self?.target?.insert("\n```\n\n```\n") })
         stack.addArrangedSubview(button(systemName: "link") { [weak self] in self?.target?.insertLink() })
-        // Filler so the dictation + dismiss buttons stick to the
-        // right edge regardless of stack distribution.
-        let spacer = UIView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        stack.addArrangedSubview(spacer)
+        stack.addArrangedSubview(button(systemName: "quote.bubble") { [weak self] in self?.target?.insert("\n> ") })
+        stack.addArrangedSubview(button(systemName: "minus") { [weak self] in self?.target?.insert("\n\n---\n\n") })
+        // Divider
+        let divider = UIView()
+        divider.backgroundColor = UIColor(red: 0.18, green: 0.18, blue: 0.20, alpha: 1)
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.widthAnchor.constraint(equalToConstant: 1).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 22).isActive = true
+        let dividerWrap = UIView()
+        dividerWrap.translatesAutoresizingMaskIntoConstraints = false
+        dividerWrap.addSubview(divider)
+        NSLayoutConstraint.activate([
+            divider.centerYAnchor.constraint(equalTo: dividerWrap.centerYAnchor),
+            divider.centerXAnchor.constraint(equalTo: dividerWrap.centerXAnchor),
+            dividerWrap.widthAnchor.constraint(equalToConstant: 12),
+        ])
+        stack.addArrangedSubview(dividerWrap)
+        // Media + voice.
+        stack.addArrangedSubview(button(systemName: "camera", tint: UIColor(red: 0.98, green: 0.71, blue: 0.10, alpha: 1)) { [weak self] in self?.target?.tappedPhoto() })
+        stack.addArrangedSubview(button(systemName: "text.viewfinder", tint: UIColor(red: 0.38, green: 0.65, blue: 0.98, alpha: 1)) { [weak self] in self?.target?.tappedOCR() })
         let dict = button(systemName: "mic") { [weak self] in self?.target?.tappedDictation() }
         dictButton = dict
         stack.addArrangedSubview(dict)
-        stack.addArrangedSubview(button(systemName: "keyboard.chevron.compact.down") { [weak self] in self?.target?.dismissKeyboard() })
+        stack.addArrangedSubview(button(systemName: "keyboard.chevron.compact.down", tint: UIColor(red: 0.63, green: 0.63, blue: 0.67, alpha: 1)) { [weak self] in self?.target?.dismissKeyboard() })
     }
 
     required init?(coder: NSCoder) { fatalError() }
 
     override var intrinsicContentSize: CGSize {
-        CGSize(width: UIView.noIntrinsicMetric, height: 44)
+        CGSize(width: UIView.noIntrinsicMetric, height: 56)
     }
 
     func setDictating(_ active: Bool) {
-        let name = active ? "mic.fill" : "mic"
-        let tint = active
+        dictButton?.setImage(UIImage(systemName: active ? "mic.fill" : "mic"), for: .normal)
+        dictButton?.tintColor = active
             ? UIColor(red: 0.94, green: 0.27, blue: 0.27, alpha: 1)
-            : UIColor(red: 0.63, green: 0.63, blue: 0.67, alpha: 1)
-        dictButton?.setImage(UIImage(systemName: name), for: .normal)
-        dictButton?.tintColor = tint
+            : UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
     }
 
-    private func button(systemName: String, action: @escaping () -> Void) -> UIButton {
+    private func button(systemName: String,
+                        tint: UIColor = UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1),
+                        action: @escaping () -> Void) -> UIButton {
         let b = UIButton(type: .system)
         b.setImage(UIImage(systemName: systemName), for: .normal)
-        b.tintColor = UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1)
+        b.tintColor = tint
         b.imageView?.contentMode = .scaleAspectFit
-        b.widthAnchor.constraint(greaterThanOrEqualToConstant: 32).isActive = true
-        b.heightAnchor.constraint(equalToConstant: 38).isActive = true
+        b.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        b.heightAnchor.constraint(equalToConstant: 40).isActive = true
         b.addAction(UIAction { _ in action() }, for: .touchUpInside)
         return b
     }

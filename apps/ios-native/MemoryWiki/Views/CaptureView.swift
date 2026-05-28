@@ -27,6 +27,17 @@ struct CaptureView: View {
     @State private var showURLSheet = false
     @State private var showImportSheet = false
     @State private var ocrBanner: String? = nil
+    @State private var ocrBannerDismissTask: Task<Void, Never>? = nil
+    /// Uploaded photo attachments — accumulate visually as a
+    /// thumbnail strip so the user can SEE what they've added.
+    /// Raw markdown is generated at save time.
+    struct PhotoAttachment: Identifiable {
+        let id = UUID()
+        let url: URL
+        let thumbnail: UIImage
+    }
+    @State private var attachments: [PhotoAttachment] = []
+    @State private var uploadInProgress = false
     enum CaptureField { case title, body }
     @FocusState private var focused: CaptureField?
     @State private var keyboardUp = false
@@ -41,13 +52,17 @@ struct CaptureView: View {
     private var combinedMarkdown: String {
         let t = titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let b = bodyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !t.isEmpty && !b.isEmpty { return "# \(t)\n\n\(b)" }
-        if !t.isEmpty { return "# \(t)" }
-        return b
+        let photoLines = attachments.map { "![Photo](\($0.url.absoluteString))" }.joined(separator: "\n\n")
+        var parts: [String] = []
+        if !t.isEmpty { parts.append("# \(t)") }
+        if !b.isEmpty { parts.append(b) }
+        if !photoLines.isEmpty { parts.append(photoLines) }
+        return parts.joined(separator: "\n\n")
     }
     private var hasDraftContent: Bool {
         !titleDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !bodyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !bodyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        !attachments.isEmpty
     }
     private var canSave: Bool {
         !saving && savedURL == nil && hasDraftContent
@@ -113,18 +128,16 @@ struct CaptureView: View {
             .preferredColorScheme(.dark)
         }
         .sheet(isPresented: $showOCRPicker) {
-            // OCR mode → on-device Vision text extraction, image
-            // discarded, text appended to body.
             PhotoCaptureSheet(isPresented: $showOCRPicker) { ocrText, _ in
                 let clean = ocrText.trimmingCharacters(in: .whitespacesAndNewlines)
                 if clean.isEmpty {
-                    ocrBanner = "No text recognised in this image."
+                    showBanner("No text recognised in this image.")
                 } else {
                     if titleDraft.isEmpty {
                         titleDraft = "OCR · \(Date().formatted(date: .abbreviated, time: .shortened))"
                     }
                     bodyDraft = bodyDraft.isEmpty ? clean : "\(bodyDraft)\n\n\(clean)"
-                    ocrBanner = "OCR extracted \(clean.count) characters."
+                    showBanner("OCR extracted \(clean.count) characters.")
                     Haptics.success()
                 }
             }
@@ -308,28 +321,74 @@ struct CaptureView: View {
     // MARK: - Body field
 
     private var bodyField: some View {
-        ZStack(alignment: .topLeading) {
-            if bodyDraft.isEmpty {
-                Text("Add more details…")
-                    .font(Brand.body(size: 16))
-                    .foregroundStyle(Brand.textFaint)
-                    .padding(.horizontal, 22)
-                    .padding(.top, 16)
-                    .allowsHitTesting(false)
+        VStack(spacing: 0) {
+            if !attachments.isEmpty {
+                attachmentsStrip
             }
-            TextEditor(text: $bodyDraft)
-                .focused($focused, equals: .body)
-                .scrollContentBackground(.hidden)
-                .padding(.horizontal, 14)
-                .padding(.top, 8)
-                .font(Brand.body(size: 16))
-                .foregroundStyle(Brand.textPrimary)
-                .tint(Brand.microWarn)
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    if focused != nil && keyboardUp {
-                        markdownToolbar
+            // UITextView-backed editor with a real UIKit
+            // inputAccessoryView — guaranteed flush dock above
+            // the keyboard with no SwiftUI safe-area gap.
+            MarkdownEditor(
+                text: $bodyDraft,
+                isFocused: focused == .body,
+                onFocusChange: { newFocus in
+                    if newFocus { focused = .body }
+                    else if focused == .body { focused = nil }
+                },
+                onPhoto: { showPhotoPicker = true },
+                onOCR: { showOCRPicker = true },
+                onStartDictation: { startDictation() },
+                onStopDictation: { stopDictation() },
+                isDictating: isDictating
+            )
+        }
+    }
+
+    /// Horizontal strip of attached photos. Tap thumbnail to
+    /// remove. Each thumbnail is the actual uploaded image, so
+    /// the user SEES what they've attached instead of a raw
+    /// markdown link in the body.
+    private var attachmentsStrip: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(attachments) { att in
+                    ZStack(alignment: .topTrailing) {
+                        Image(uiImage: att.thumbnail)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 76, height: 76)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .strokeBorder(Brand.borderDim, lineWidth: 1)
+                            )
+                        Button {
+                            Haptics.tap()
+                            attachments.removeAll { $0.id == att.id }
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundStyle(.white, .black.opacity(0.7))
+                                .padding(4)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
+                if uploadInProgress {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Brand.surface)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .strokeBorder(Brand.borderDim, lineWidth: 1)
+                            )
+                        ProgressView().tint(Brand.textMuted)
+                    }
+                    .frame(width: 76, height: 76)
+                }
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 10)
         }
     }
 
@@ -506,11 +565,15 @@ struct CaptureView: View {
 
     private func startDictation() {
         Haptics.tap()
-        focused = nil
+        // Don't drop focus — the new MarkdownEditor inputAccessoryView
+        // stays attached while keyboard is up, so dictating in-place
+        // is fine + the LISTENING banner overlays cleanly.
         dictation.start(locales: ["ko-KR", "en-US"]) { recognised in
             bodyDraft += bodyDraft.isEmpty ? recognised : " " + recognised
+            showBanner("Captured \"\(recognised.prefix(30))\"")
         } onError: { msg in
             errorMessage = msg
+            showBanner("Voice: \(msg)")
             withAnimation(.snappy) { isDictating = false }
         } onStop: {
             withAnimation(.snappy) { isDictating = false }
@@ -524,28 +587,44 @@ struct CaptureView: View {
         withAnimation(.snappy) { isDictating = false }
     }
 
-    /// Uploads a captured photo as an image to /api/upload and
-    /// appends a `![alt](url)` markdown embed to the body.
-    /// Surface uses `Photo` mode (vs OCR which extracts text).
+    /// Uploads a captured photo. The image lands in `attachments`
+    /// as a visual thumbnail (NOT raw markdown in the body) so
+    /// the user sees what they've added. The `![Photo](url)`
+    /// markdown is appended at save time via combinedMarkdown.
     private func uploadPhoto(_ image: UIImage) async {
         guard let data = image.jpegData(compressionQuality: 0.85) else {
-            ocrBanner = "Couldn't encode the photo."
+            showBanner("Couldn't encode the photo.")
             return
         }
-        ocrBanner = "Uploading photo…"
+        uploadInProgress = true
+        defer { uploadInProgress = false }
         Haptics.tap()
         do {
             let url = try await APIClient.shared.uploadImage(data: data, contentType: "image/jpeg")
-            let embed = "![Photo](\(url.absoluteString))"
-            bodyDraft = bodyDraft.isEmpty ? embed : "\(bodyDraft)\n\n\(embed)"
+            attachments.append(PhotoAttachment(url: url, thumbnail: image))
             if titleDraft.isEmpty {
                 titleDraft = "Photo · \(Date().formatted(date: .abbreviated, time: .shortened))"
             }
-            ocrBanner = "Photo uploaded."
+            showBanner("Photo added.")
             Haptics.success()
         } catch {
-            ocrBanner = "Upload failed: \(error.localizedDescription)"
+            showBanner("Upload failed: \(error.localizedDescription)")
             Haptics.warning()
+        }
+    }
+
+    /// Surface a short-lived status banner that auto-dismisses
+    /// after 2.5 s. Cancels any prior pending dismissal so back-
+    /// to-back messages don't disappear early.
+    private func showBanner(_ message: String) {
+        ocrBanner = message
+        ocrBannerDismissTask?.cancel()
+        ocrBannerDismissTask = Task { [message] in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            if Task.isCancelled { return }
+            await MainActor.run {
+                if ocrBanner == message { ocrBanner = nil }
+            }
         }
     }
 }
