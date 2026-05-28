@@ -16,6 +16,11 @@ struct ProfileView: View {
     @State private var showMailUnavailable = false
     @State private var hubStats: APIClient.HubResponse? = nil
     @State private var loadingHub = false
+    /// Concrete error from the hub fetch — surfaced under the
+    /// stats card so a misconfigured slug / expired token / 5xx
+    /// becomes visible instead of vanishing into a generic
+    /// "Couldn't load" string.
+    @State private var hubError: String? = nil
     @State private var showEditDisplayName = false
 
     private var hubURL: URL? {
@@ -220,9 +225,26 @@ struct ProfileView: View {
                         .foregroundStyle(Brand.textFaint)
                         .padding(.vertical, 8)
                 } else {
-                    Text("Couldn't load hub stats.")
-                        .font(Brand.body(size: 12))
-                        .foregroundStyle(Brand.textFaint)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Couldn't load hub stats.")
+                            .font(Brand.body(size: 12))
+                            .foregroundStyle(Brand.textFaint)
+                        if let err = hubError {
+                            Text(err)
+                                .font(Brand.mono(size: 10))
+                                .foregroundStyle(Brand.microRed)
+                                .lineLimit(3)
+                        }
+                        Button {
+                            Haptics.tap()
+                            Task { await loadHubStats() }
+                        } label: {
+                            Text("Retry")
+                                .font(Brand.body(size: 12, weight: .medium))
+                                .foregroundStyle(Brand.microInfo)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             }
         }
@@ -232,13 +254,17 @@ struct ProfileView: View {
     /// endpoint which returns owner-view buckets when the
     /// Bearer matches.
     private func loadHubStats() async {
-        guard let slug = auth.session?.hubSlug, !slug.isEmpty else { return }
+        guard let slug = auth.session?.hubSlug, !slug.isEmpty else {
+            hubError = "No hub slug on this account yet."
+            return
+        }
         loadingHub = true
         defer { loadingHub = false }
         do {
             hubStats = try await APIClient.shared.hub(slug: slug)
+            hubError = nil
         } catch {
-            // Silent — leave nil; UI shows the error fallback.
+            hubError = error.localizedDescription
         }
     }
 

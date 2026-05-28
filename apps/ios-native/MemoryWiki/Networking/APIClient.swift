@@ -340,12 +340,24 @@ final class APIClient {
     /// Bearer token matches the hub's owner profile. Used by
     /// the iOS Profile tab to render hub stats + a snapshot of
     /// public surface.
+    /// Matches /api/hub/[slug]'s response shape literally:
+    ///   { hub: {…}, documents: [...], bundles: [...], counts: {…},
+    ///     ownerView: {…}, isOwner, lastUpdated, … }
+    /// Earlier version used `profile`/`stats` (web v6 naming);
+    /// switched to `hub`/`counts` so decoding stops failing with
+    /// "data couldn't be read because it is missing".
+    ///
+    /// Backwards-compat shim: `profile` + `stats` computed
+    /// properties so existing call sites (Settings, Start) don't
+    /// need to be touched.
     struct HubResponse: Decodable {
-        struct Profile: Decodable {
+        struct Hub: Decodable {
+            let slug: String?
             let display_name: String?
             let avatar_url: String?
-            let hub_slug: String?
-            let hub_description: String?
+            let description: String?
+            let plan: String?
+            let url: String?
         }
         struct DocCard: Decodable, Identifiable, Hashable {
             let id: String
@@ -357,9 +369,11 @@ final class APIClient {
             let title: String?
             let updated_at: String?
         }
-        struct Stats: Decodable {
+        struct Counts: Decodable {
             let documents: Int?
             let bundles: Int?
+            let concepts: Int?
+            let totalWords: Int?
         }
         struct OwnerView: Decodable {
             struct DocSets: Decodable {
@@ -375,11 +389,36 @@ final class APIClient {
             let documents: DocSets?
             let bundles: BundleSets?
         }
-        let profile: Profile
+        let hub: Hub
         let documents: [DocCard]?
         let bundles: [BundleCard]?
-        let stats: Stats?
+        let counts: Counts?
         let ownerView: OwnerView?
+        let isOwner: Bool?
+
+        // MARK: - Back-compat surface
+        struct Profile {
+            let display_name: String?
+            let avatar_url: String?
+            let hub_slug: String?
+            let hub_description: String?
+        }
+        var profile: Profile {
+            Profile(
+                display_name: hub.display_name,
+                avatar_url: hub.avatar_url,
+                hub_slug: hub.slug,
+                hub_description: hub.description
+            )
+        }
+        struct Stats {
+            let documents: Int?
+            let bundles: Int?
+        }
+        var stats: Stats? {
+            guard let c = counts else { return nil }
+            return Stats(documents: c.documents, bundles: c.bundles)
+        }
     }
     func hub(slug: String) async throws -> HubResponse {
         // /api/hub/[slug] uses public URL path so encode the slug.

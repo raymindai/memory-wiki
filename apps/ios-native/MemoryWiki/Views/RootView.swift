@@ -52,12 +52,40 @@ struct RootView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     // iOS 26 floating-glass paradigm: content extends
-                    // edge-to-edge under the tab bar, the bar's
-                    // .ultraThinMaterial blur reveals whatever is
-                    // beneath it. No bottom inset here — scrollable
-                    // child views set their own .safeAreaInset(.bottom)
-                    // for the last-row hit area if they need it.
+                    // edge-to-edge behind the tab bar (the blur
+                    // strip reveals what's underneath), but scrollable
+                    // children get an extra ~88pt of bottom safe-area
+                    // inset so the LAST row can actually scroll above
+                    // the bar — otherwise content sat permanently
+                    // hidden under the floating capsule. SwiftUI
+                    // automatically propagates this inset to inner
+                    // ScrollView / List.
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        if !keyboardUp {
+                            Color.clear.frame(height: 50)
+                        }
+                    }
 
+                    // Floating-glass tab bar isolation strip — sits
+                    // ABOVE content but BELOW the tab bar in the
+                    // ZStack. Two layers stacked:
+                    //   1. .ultraThinMaterial behind a top-→-bottom
+                    //      black mask so the blur ramps in toward
+                    //      the bottom (zero blur at top edge, full
+                    //      blur by the home indicator).
+                    //   2. Dark gradient on top so content fades to
+                    //      Brand.background, giving the tab bar a
+                    //      clear ink-on-dark backdrop regardless of
+                    //      what's scrolled underneath.
+                    // Extends past the safe-area bottom so the home-
+                    // indicator zone is part of the strip, not a
+                    // hard cutoff.
+                    if !keyboardUp {
+                        BottomFadeStrip()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                            .ignoresSafeArea(.container, edges: .bottom)
+                            .allowsHitTesting(false)
+                    }
                     VStack(spacing: 0) {
                         if !reachability.isOnline {
                             OfflineBanner()
@@ -70,29 +98,6 @@ struct RootView: View {
                         if !keyboardUp {
                             BrandTabBar(selected: $router.selectedTab)
                                 .transition(.opacity.combined(with: .move(edge: .bottom)))
-                        }
-                    }
-                    // Dark gradient strip behind the floating tab
-                    // bar — content fades into Brand.background
-                    // over the bottom ~140pt so the bar reads
-                    // clearly without sitting on top of cluttered
-                    // imagery. Sits ABOVE content but BELOW the
-                    // tab bar in the ZStack via .allowsHitTesting
-                    // false so it never eats taps.
-                    .background(alignment: .bottom) {
-                        if !keyboardUp {
-                            LinearGradient(
-                                colors: [
-                                    Brand.background.opacity(0),
-                                    Brand.background.opacity(0.65),
-                                    Brand.background.opacity(0.95)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .frame(height: 140)
-                            .allowsHitTesting(false)
-                            .ignoresSafeArea(.container, edges: .bottom)
                         }
                     }
                     .animation(.snappy(duration: 0.22), value: reachability.isOnline)
@@ -292,6 +297,60 @@ private struct ProfileTabAvatar: View {
                 .font(.system(size: 11))
                 .foregroundStyle(Brand.textMuted)
         }
+    }
+}
+
+/// Bottom-of-screen blur + dark fade backing for the floating
+/// tab bar. Two stacked layers:
+///   1. .ultraThinMaterial, masked with a vertical gradient so the
+///      blur ramps from invisible at the top edge to full strength
+///      at the home indicator. Content scrolled under the strip
+///      stays legible at the top, gets progressively de-emphasised
+///      toward the tab bar.
+///   2. A dark fade (clear → Brand.background) painted on top so
+///      the tab bar always sits over an ink-on-dark backdrop, no
+///      matter what's underneath.
+/// 200pt tall to give the ramp room to breathe.
+private struct BottomFadeStrip: View {
+    var body: some View {
+        ZStack {
+            // Strong blur (thickMaterial), masked with a vertical
+            // gradient so the blur intensity ramps from invisible
+            // at the top edge to full strength behind the tab bar
+            // and down past the home indicator. The point is BLUR,
+            // not opacity — content stays visible through the
+            // strip, just defocused so the tab bar reads as the
+            // sharp foreground.
+            Rectangle()
+                .fill(.thickMaterial)
+                .mask(
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color.black.opacity(0),    location: 0.00),
+                            .init(color: Color.black.opacity(0.30), location: 0.30),
+                            .init(color: Color.black.opacity(0.95), location: 0.55),
+                            .init(color: Color.black,               location: 1.00)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            // Very light tint just so the tab-bar zone has a hint
+            // of darkening; NOT opaque (was 0.98 → made everything
+            // solid). Now content is still visible through the
+            // strip, just blurred.
+            LinearGradient(
+                stops: [
+                    .init(color: Brand.background.opacity(0.00), location: 0.00),
+                    .init(color: Brand.background.opacity(0.05), location: 0.30),
+                    .init(color: Brand.background.opacity(0.20), location: 0.55),
+                    .init(color: Brand.background.opacity(0.35), location: 1.00)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        .frame(height: 130)
     }
 }
 

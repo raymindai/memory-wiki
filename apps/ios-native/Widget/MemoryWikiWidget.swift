@@ -181,11 +181,13 @@ struct RecentDocsView: View {
             Spacer(minLength: 0)
             captureButton
         }
-        // Tight inner padding — combined with .contentMarginsDisabled
-        // on the WidgetConfiguration, the canvas now fills nearly
-        // edge to edge instead of being framed by a fat dead band.
-        .padding(.horizontal, family == .systemSmall ? 10 : 12)
-        .padding(.vertical, family == .systemSmall ? 10 : 12)
+        // Inner padding — combined with .contentMarginsDisabled
+        // (no system margin), 14/16pt is enough breathing room
+        // without the fat dead band the system margin used to add.
+        // Earlier 10/12 was too tight; this pulls it back without
+        // losing the edge-to-edge feel.
+        .padding(.horizontal, family == .systemSmall ? 14 : 16)
+        .padding(.vertical, family == .systemSmall ? 14 : 16)
     }
 
     /// Header — small blob mark + ink wordmark + faint RECENT
@@ -230,7 +232,12 @@ struct RecentDocsView: View {
             .foregroundStyle(WTheme.background)
             .frame(maxWidth: .infinity, minHeight: family == .systemSmall ? 28 : 32)
             .background(
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                // iOS widget canvas radius is ~22pt. With 14-16pt
+                // outer inset, a concentric inner radius lands
+                // around 8pt; bump to 14pt so the button reads as
+                // following the canvas curve rather than as a tiny
+                // pill stuck against a big rounded frame.
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(WTheme.textPrimary)
             )
         }
@@ -247,8 +254,8 @@ struct RecentDocsView: View {
             Spacer()
             captureButton.opacity(0.4)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
+        .padding(.horizontal, family == .systemSmall ? 14 : 16)
+        .padding(.vertical, family == .systemSmall ? 14 : 16)
     }
 
     private func docURL(_ id: String) -> URL {
