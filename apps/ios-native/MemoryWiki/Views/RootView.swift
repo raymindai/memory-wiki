@@ -22,6 +22,7 @@ struct RootView: View {
 
                     Group {
                         switch router.selectedTab {
+                        case .start:    StartView()
                         case .timeline: TimelineView()
                         case .bundles:  BundlesView()
                         case .capture:  CaptureView()
@@ -93,21 +94,31 @@ struct RootView: View {
 }
 
 enum AppTab: String, CaseIterable {
-    case timeline, bundles, capture, profile
+    // Order: MDs / Bundles / Start (centre) / Capture / Settings.
+    // Centre slot gets the brand blob — it's the dashboard / hero
+    // surface, visually anchoring the bar.
+    case timeline, bundles, start, capture, profile
 
     var label: String {
         switch self {
-        case .timeline: return "MDs"     // was "Timeline" — matches the web sidebar's "MDs" section
+        case .start:    return "Start"
+        case .timeline: return "MDs"
         case .bundles:  return "Bundles"
         case .capture:  return "Capture"
         case .profile:  return "Settings"
         }
     }
 
-    /// Single-line glyph drawn in code (no SF Symbol). Matches the
-    /// web's small line-icon vocabulary in the editor toolbar.
+    /// Single-line glyph drawn in code. Start tab uses the
+    /// AnimatedBlob (real morph SVG) at a larger size so it
+    /// reads as the brand mark anchoring the centre of the
+    /// tab bar; everything else stays SF Symbols.
     @ViewBuilder var glyph: some View {
         switch self {
+        case .start:
+            // Larger + animated — calls attention to the
+            // dashboard surface as the "home" of the app.
+            AnimatedBlob(size: 28, theme: .dark)
         case .timeline:
             Image(systemName: "list.bullet")
         case .bundles:
@@ -131,7 +142,8 @@ private struct BrandTabBar: View {
                 } label: {
                     VStack(spacing: 3) {
                         tab.glyph
-                            .font(.system(size: 16, weight: .regular))
+                            .font(.system(size: tab == .start ? 22 : 16, weight: .regular))
+                            .frame(height: 28)
                         // Wrap with LocalizedStringKey so SwiftUI
                         // looks the value up in Localizable.strings
                         // instead of taking the verbatim path that

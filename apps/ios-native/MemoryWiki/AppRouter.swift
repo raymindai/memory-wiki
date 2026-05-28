@@ -13,7 +13,7 @@ import SwiftUI
 
 @MainActor
 final class AppRouter: ObservableObject {
-    @Published var selectedTab: AppTab = .timeline
+    @Published var selectedTab: AppTab = .start
     @Published var timelinePath: [TimelineRoute] = []
     @Published var bundlesPath: [BundlesRoute] = []
 
