@@ -110,14 +110,17 @@ struct TimelineView: View {
     @State private var filter: TimelineFilter = .all
     @FocusState private var searchFocused: Bool
 
-    /// Top-level segmented filter — All vs Starred. Future
-    /// additions (Public / Synced) plug in here.
+    /// Web-parity segmented filter — All / Private / Shared /
+    /// Synced. Same vocabulary the web sidebar uses on the MDs
+    /// section so iOS reads as the same product.
     enum TimelineFilter: String, CaseIterable {
-        case all, starred
+        case all, `private`, shared, synced
         var label: LocalizedStringKey {
             switch self {
             case .all:     return "All"
-            case .starred: return "Starred"
+            case .private: return "Private"
+            case .shared:  return "Shared"
+            case .synced:  return "Synced"
             }
         }
     }
@@ -128,13 +131,22 @@ struct TimelineView: View {
     }
 
     /// Apply the segmented filter on top of the loaded documents
-    /// before grouping. When Starred is active, only pinned docs
-    /// show (and the explicit pinned-section gets folded into
-    /// the buckets so the user sees them grouped chronologically).
+    /// before grouping. Vocabulary matches the web sidebar:
+    ///   - all     : everything
+    ///   - private : isDraft == true (only the owner can see)
+    ///   - shared  : isDraft == false && allowed_emails > 0
+    ///   - synced  : came in from a companion channel (vscode /
+    ///               desktop / cli / mcp / chrome)
     private func docsForFilter() -> [Document] {
         switch filter {
-        case .all:     return model.documents
-        case .starred: return model.documents.filter { pinned.isPinned($0.id) }
+        case .all:
+            return model.documents
+        case .private:
+            return model.documents.filter { $0.isDraft == true }
+        case .shared:
+            return model.documents.filter { $0.isDraft == false && $0.isRestricted }
+        case .synced:
+            return model.documents.filter { $0.syncedSource != nil }
         }
     }
 
@@ -208,43 +220,22 @@ struct TimelineView: View {
         .padding(.bottom, 12)
     }
 
-    /// All / Starred segmented filter strip. Hidden when search
-    /// is active to keep the chrome quiet.
+    /// Web-parity segmented filter strip. Same chip vocabulary
+    /// the web sidebar uses on the MDs section.
     @ViewBuilder
     private var filterStrip: some View {
         if !showingSearch {
-            HStack(spacing: 6) {
-                ForEach(TimelineFilter.allCases, id: \.self) { f in
-                    Button {
-                        Haptics.selection()
-                        withAnimation(.snappy(duration: 0.18)) { filter = f }
-                    } label: {
-                        HStack(spacing: 5) {
-                            if f == .starred {
-                                // Star glyph in micro-warn yellow —
-                                // every other star surface uses the
-                                // same colour so the brand reads
-                                // "starred = warm yellow."
-                                Image(systemName: filter == f ? "star.fill" : "star")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(Brand.microWarn)
-                            }
-                            Text(f.label)
-                                .font(Brand.body(size: 12, weight: .medium))
-                                .foregroundStyle(filter == f ? Brand.textPrimary : Brand.textMuted)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(TimelineFilter.allCases, id: \.self) { f in
+                        FilterChip(label: f.label, isActive: filter == f) {
+                            Haptics.selection()
+                            withAnimation(.snappy(duration: 0.18)) { filter = f }
                         }
-                        .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(
-                            Capsule()
-                                .fill(filter == f ? Brand.surface : Color.clear)
-                                .overlay(Capsule().strokeBorder(filter == f ? Brand.borderDim : .clear, lineWidth: 1))
-                        )
                     }
-                    .buttonStyle(.plain)
                 }
-                Spacer()
+                .padding(.horizontal, 18)
             }
-            .padding(.horizontal, 18)
             .padding(.bottom, 10)
         }
     }
@@ -314,22 +305,16 @@ struct TimelineView: View {
             )
         } else if model.grouped(from: docsForFilter()).isEmpty && model.semanticHits.isEmpty {
             EmptyState(
-                title: filter == .starred ? "No starred memories" : "No matches",
-                caption: filter == .starred
-                    ? "Long-press a memory in the All view to star it."
-                    : "Try a shorter query — meaning-based search needs at least 3 characters.",
-                glyph: filter == .starred ? "star" : "magnifyingglass",
-                action: filter == .starred
-                    ? ("Browse all", { withAnimation { filter = .all } })
-                    : nil
+                title: emptyTitleForFilter,
+                caption: emptyCaptionForFilter,
+                glyph: emptyGlyphForFilter,
+                action: filter == .all ? nil : ("Browse all", { withAnimation { filter = .all } })
             )
         } else {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     // Pinned docs surface above the time buckets
-                    // — only shown in All view + no active search,
-                    // since the Starred filter already promotes
-                    // them to the whole list.
+                    // — only shown in All view + no active search.
                     if filter == .all && !pinnedDocs.isEmpty && model.searchText.isEmpty {
                         Section {
                             VStack(spacing: 6) {
@@ -371,6 +356,33 @@ struct TimelineView: View {
                 .padding(.bottom, 12)
             }
             .refreshable { await model.load() }
+        }
+    }
+
+    // MARK: - Filter empty state helpers
+
+    private var emptyTitleForFilter: LocalizedStringKey {
+        switch filter {
+        case .all:     return "No matches"
+        case .private: return "No private memories"
+        case .shared:  return "No shared memories"
+        case .synced:  return "No synced memories"
+        }
+    }
+    private var emptyCaptionForFilter: LocalizedStringKey {
+        switch filter {
+        case .all:     return "Try a shorter query — meaning-based search needs at least 3 characters."
+        case .private: return "Memories you keep to yourself land here."
+        case .shared:  return "Memories you've shared with specific people land here."
+        case .synced:  return "Memories captured from VS Code, Desktop, Chrome, CLI or MCP land here."
+        }
+    }
+    private var emptyGlyphForFilter: String {
+        switch filter {
+        case .all:     return "magnifyingglass"
+        case .private: return "cloud"
+        case .shared:  return "person.2"
+        case .synced:  return "arrow.triangle.2.circlepath"
         }
     }
 
@@ -609,6 +621,28 @@ private struct SemanticRow: View {
                 .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+}
+
+/// Shared filter chip used by Timeline + Bundles. Quiet ink
+/// when inactive, surface fill + border when selected.
+struct FilterChip: View {
+    let label: LocalizedStringKey
+    let isActive: Bool
+    var onTap: () -> Void
+    var body: some View {
+        Button(action: onTap) {
+            Text(label)
+                .font(Brand.body(size: 13, weight: isActive ? .semibold : .medium))
+                .foregroundStyle(isActive ? Brand.textPrimary : Brand.textMuted)
+                .padding(.horizontal, 14).padding(.vertical, 7)
+                .background(
+                    Capsule()
+                        .fill(isActive ? Brand.surface : Color.clear)
+                        .overlay(Capsule().strokeBorder(isActive ? Brand.borderDim : .clear, lineWidth: 1))
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 

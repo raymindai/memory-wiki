@@ -45,26 +45,32 @@ struct BundlesView: View {
     @State private var filter: BundleFilter = .all
     @FocusState private var searchFocused: Bool
 
-    /// Same All / Starred segmented filter the Timeline tab has.
-    /// Starred reads from PinnedStore.bundleIds — server-synced
-    /// with the web's /api/user/pins endpoint.
+    /// Web-parity segmented filter — All / Private / Shared /
+    /// Public. Bundles don't have a "synced" source like docs do,
+    /// so the fourth chip is Public (published, non-restricted).
     enum BundleFilter: String, CaseIterable {
-        case all, starred
+        case all, `private`, shared, `public`
         var label: LocalizedStringKey {
             switch self {
             case .all:     return "All"
-            case .starred: return "Starred"
+            case .private: return "Private"
+            case .shared:  return "Shared"
+            case .public:  return "Public"
             }
         }
     }
 
     private var visibleBundles: [AppBundle] {
-        let base: [AppBundle]
         switch filter {
-        case .all:     base = model.visible
-        case .starred: base = model.visible.filter { pinned.isPinnedBundle($0.id) }
+        case .all:
+            return model.visible
+        case .private:
+            return model.visible.filter { $0.isDraft == true }
+        case .shared:
+            return model.visible.filter { $0.isDraft == false && $0.isRestricted }
+        case .public:
+            return model.visible.filter { $0.isDraft == false && !$0.isRestricted }
         }
-        return base
     }
 
     var body: some View {
@@ -144,34 +150,17 @@ struct BundlesView: View {
     @ViewBuilder
     private var filterStrip: some View {
         if !showingSearch {
-            HStack(spacing: 6) {
-                ForEach(BundleFilter.allCases, id: \.self) { f in
-                    Button {
-                        Haptics.selection()
-                        withAnimation(.snappy(duration: 0.18)) { filter = f }
-                    } label: {
-                        HStack(spacing: 5) {
-                            if f == .starred {
-                                Image(systemName: filter == f ? "star.fill" : "star")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(Brand.microWarn)
-                            }
-                            Text(f.label)
-                                .font(Brand.body(size: 12, weight: .medium))
-                                .foregroundStyle(filter == f ? Brand.textPrimary : Brand.textMuted)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(BundleFilter.allCases, id: \.self) { f in
+                        FilterChip(label: f.label, isActive: filter == f) {
+                            Haptics.selection()
+                            withAnimation(.snappy(duration: 0.18)) { filter = f }
                         }
-                        .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(
-                            Capsule()
-                                .fill(filter == f ? Brand.surface : Color.clear)
-                                .overlay(Capsule().strokeBorder(filter == f ? Brand.borderDim : .clear, lineWidth: 1))
-                        )
                     }
-                    .buttonStyle(.plain)
                 }
-                Spacer()
+                .padding(.horizontal, 18)
             }
-            .padding(.horizontal, 18)
             .padding(.bottom, 10)
         }
     }
@@ -233,14 +222,10 @@ struct BundlesView: View {
             )
         } else if visibleBundles.isEmpty {
             EmptyBundleState(
-                title: filter == .starred ? "No starred bundles" : "No matches",
-                caption: filter == .starred
-                    ? "Long-press a bundle in the All view to star it."
-                    : "Try a different search.",
-                glyph: filter == .starred ? "star" : "magnifyingglass",
-                action: filter == .starred
-                    ? ("Browse all", { withAnimation { filter = .all } })
-                    : nil
+                title: bundleEmptyTitle,
+                caption: bundleEmptyCaption,
+                glyph: bundleEmptyGlyph,
+                action: filter == .all ? nil : ("Browse all", { withAnimation { filter = .all } })
             )
         } else {
             ScrollView {
@@ -260,6 +245,31 @@ struct BundlesView: View {
                 await model.load()
                 await pinned.hydrateFromServer()
             }
+        }
+    }
+
+    private var bundleEmptyTitle: LocalizedStringKey {
+        switch filter {
+        case .all:     return "No matches"
+        case .private: return "No private bundles"
+        case .shared:  return "No shared bundles"
+        case .public:  return "No public bundles"
+        }
+    }
+    private var bundleEmptyCaption: LocalizedStringKey {
+        switch filter {
+        case .all:     return "Try a different search."
+        case .private: return "Bundles you keep to yourself land here."
+        case .shared:  return "Bundles you've shared with specific people land here."
+        case .public:  return "Published bundles anyone can read land here."
+        }
+    }
+    private var bundleEmptyGlyph: String {
+        switch filter {
+        case .all:     return "magnifyingglass"
+        case .private: return "cloud"
+        case .shared:  return "person.2"
+        case .public:  return "globe"
         }
     }
 

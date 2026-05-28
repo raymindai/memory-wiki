@@ -97,7 +97,7 @@ enum AppTab: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .timeline: return "Timeline"
+        case .timeline: return "MDs"     // was "Timeline" — matches the web sidebar's "MDs" section
         case .bundles:  return "Bundles"
         case .capture:  return "Capture"
         case .profile:  return "Settings"

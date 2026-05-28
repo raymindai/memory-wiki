@@ -11,23 +11,29 @@ import SwiftUI
 
 struct BrandLoader: View {
     enum Variant {
-        case inline       // 56pt blob + caption — empty list / body in flight
-        case full         // 96pt blob + caption — app boot
+        case inline       // bigger blob + caption — empty list / body in flight
+        case full         // largest blob + caption — app boot
     }
     var variant: Variant = .inline
     var caption: String = "LOADING"
 
-    private var size: CGFloat { variant == .full ? 96 : 56 }
+    // Larger sizes per the brand-loader feedback — the previous
+    // 56/96pt blobs felt timid; bump for presence.
+    private var size: CGFloat { variant == .full ? 140 : 96 }
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 18) {
             AnimatedBlob(size: size, theme: .dark)
             Text(caption)
-                .font(Brand.mono(size: 9, weight: .medium))
-                .tracking(1.2)
+                .font(Brand.mono(size: 10, weight: .medium))
+                .tracking(1.4)
                 .foregroundStyle(Brand.textFaint)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Anchor TOP — sits inside the content area rather than
+        // dead-centering the whole screen. Caller wraps in a
+        // VStack with whatever header offset the surface uses.
+        .frame(maxWidth: .infinity, alignment: .top)
+        .padding(.top, 40)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Loading")
     }

@@ -13,7 +13,8 @@
 "_locale.tag" = "ko";
 
 /* ============ TAB BAR ============ */
-"Timeline"  = "타임라인";
+"Timeline"  = "MDs";
+"MDs"       = "MDs";
 "Bundles"   = "번들";
 "Capture"   = "캡쳐";
 "Settings"  = "설정";
@@ -35,7 +36,23 @@
 "PINNED"     = "고정됨";
 "STARRED"    = "별표";
 "All"        = "전체";
-"Starred"    = "고정";
+"Starred"    = "별표";
+"Private"    = "비공개";
+"Shared"     = "공유";
+"Synced"     = "동기화";
+"Public"     = "공개";
+"No private memories" = "비공개 메모리가 없어요";
+"No shared memories"  = "공유한 메모리가 없어요";
+"No synced memories"  = "동기화된 메모리가 없어요";
+"No private bundles"  = "비공개 번들이 없어요";
+"No shared bundles"   = "공유한 번들이 없어요";
+"No public bundles"   = "공개 번들이 없어요";
+"Memories you keep to yourself land here." = "혼자만 보는 메모리가 여기 모입니다.";
+"Memories you've shared with specific people land here." = "특정 사람과 공유한 메모리가 여기 모입니다.";
+"Memories captured from VS Code, Desktop, Chrome, CLI or MCP land here." = "VS Code, 데스크탑, Chrome, CLI, MCP에서 캡쳐된 메모리가 여기 모입니다.";
+"Bundles you keep to yourself land here." = "혼자만 보는 번들이 여기 모입니다.";
+"Bundles you've shared with specific people land here." = "특정 사람과 공유한 번들이 여기 모입니다.";
+"Published bundles anyone can read land here." = "공개한 번들이 여기 모입니다.";
 "No starred memories" = "고정된 메모리가 없어요";
 "Long-press a memory in the All view to star it." = "전체 화면에서 메모리를 길게 눌러 고정하세요.";
 "Browse all" = "전체 보기";

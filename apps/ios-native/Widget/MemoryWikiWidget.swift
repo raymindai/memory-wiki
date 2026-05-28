@@ -158,9 +158,9 @@ struct RecentDocsView: View {
     }
 
     private var signedInBody: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             header
-            VStack(alignment: .leading, spacing: family == .systemSmall ? 4 : 6) {
+            VStack(alignment: .leading, spacing: family == .systemSmall ? 3 : 5) {
                 ForEach(visible) { doc in
                     Link(destination: docURL(doc.id)) {
                         DocPreview(doc: doc, dense: family == .systemSmall)
@@ -176,8 +176,12 @@ struct RecentDocsView: View {
             Spacer(minLength: 0)
             captureButton
         }
-        .padding(.horizontal, family == .systemSmall ? 12 : 14)
-        .padding(.vertical, family == .systemSmall ? 12 : 13)
+        // Halved widget padding per the user note — was 12/13pt,
+        // now 6/7pt. Edges of the widget canvas (containerBackground)
+        // get reclaimed for content, especially small size where
+        // every pixel counts.
+        .padding(.horizontal, family == .systemSmall ? 6 : 7)
+        .padding(.vertical, family == .systemSmall ? 6 : 7)
     }
 
     /// Header — small blob mark + ink wordmark + faint RECENT
@@ -229,7 +233,7 @@ struct RecentDocsView: View {
     }
 
     private var placeholder: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             header
             Spacer()
             Text("Open the app once to sign in. Your recent memories will land here.")
@@ -239,8 +243,8 @@ struct RecentDocsView: View {
             Spacer()
             captureButton.opacity(0.4)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 7)
     }
 
     private func docURL(_ id: String) -> URL {

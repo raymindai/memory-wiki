@@ -46,6 +46,12 @@ struct CaptureView: View {
             if draft.isEmpty && clipboardURL == nil && restorable == nil && savedURL == nil {
                 AmbientBlob()
             }
+            // Inline layout — header → chips → editor → bottomBar
+            // all in the same VStack so the bottom bar sits
+            // DIRECTLY above the tab bar with no dead space.
+            // When the keyboard rises the markdown accessory
+            // strip takes over; we hide the bottomBar so they
+            // don't both fight for space.
             VStack(spacing: 0) {
                 header
                 chipsArea
@@ -68,9 +74,10 @@ struct CaptureView: View {
                         .padding(.horizontal, 18)
                         .padding(.bottom, 4)
                 }
-            }
-            if !keyboardUp {
-                VStack { Spacer(); bottomBar }
+                if !keyboardUp {
+                    bottomBar
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .onAppear { onAppearEffects() }
