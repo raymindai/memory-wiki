@@ -13,6 +13,7 @@ struct BundleDetailView: View {
     @State private var loading = true
     @State private var error: String?
     @State private var copiedAi = false
+    @State private var showChat = false
 
     var body: some View {
         ZStack {
@@ -41,9 +42,18 @@ struct BundleDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    Button {
+                        Haptics.tap()
+                        showChat = true
+                    } label: {
+                        Label("Chat with this bundle", systemImage: "bubble.left.and.bubble.right")
+                    }
                     Button { copyAiPrompt() } label: { Label("Copy as AI prompt", systemImage: "sparkles") }
                     Button { UIPasteboard.general.string = seed.publicURL.absoluteString } label: {
                         Label("Copy URL", systemImage: "link")
+                    }
+                    ShareLink(item: seed.publicURL) {
+                        Label("Share…", systemImage: "square.and.arrow.up")
                     }
                     Divider()
                     Link(destination: seed.publicURL) {
@@ -69,6 +79,10 @@ struct BundleDetailView: View {
         }
         .task { await load() }
         .refreshable { await load(force: true) }
+        .sheet(isPresented: $showChat) {
+            ChatSheet(scope: .bundle(id: seed.id, title: seed.displayTitle))
+                .iOS26Sheet([.large])
+        }
     }
 
     private var header: some View {

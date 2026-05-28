@@ -276,6 +276,83 @@ final class APIClient {
         throw APIError.http(-1, "Import stream ended without a result.")
     }
 
+    // MARK: - Chat (hub + bundle)
+
+    /// Scope of a chat session — drives the endpoint path.
+    enum ChatScope {
+        case hub(slug: String)
+        case bundle(id: String)
+        var path: String {
+            switch self {
+            case .hub(let s):    return "/api/hub/\(s)/chat"
+            case .bundle(let id): return "/api/bundles/\(id)/chat"
+            }
+        }
+    }
+
+    struct ChatMessage: Codable {
+        let role: String   // "user" | "assistant"
+        let content: String
+    }
+
+    /// Stream a chat completion from the hub/bundle chat endpoint.
+    /// The server responds with raw text chunks (NOT SSE-framed);
+    /// we read them with URLSession.bytes and pass each decoded
+    /// chunk to `onChunk` so the UI can render token-by-token.
+    /// Returns the full assistant reply on completion.
+    func streamChat(
+        scope: ChatScope,
+        message: String,
+        history: [ChatMessage] = [],
+        onChunk: @escaping (String) -> Void
+    ) async throws -> String {
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent(scope.path))
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+        struct Body: Encodable {
+            let message: String
+            let history: [ChatMessage]
+        }
+        req.httpBody = try JSONEncoder().encode(Body(message: message, history: history))
+        req.timeoutInterval = 120
+
+        let (bytes, response) = try await self.session.bytes(for: req)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            var data = Data()
+            for try await chunk in bytes { data.append(chunk) }
+            let msg = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
+            throw APIError.http(
+                (response as? HTTPURLResponse)?.statusCode ?? -1,
+                msg ?? "Chat request failed"
+            )
+        }
+        var assembled = ""
+        var buffer = Data()
+        for try await byte in bytes {
+            buffer.append(byte)
+            // Flush every ~64 bytes or on newline so the UI sees
+            // smooth incremental tokens without per-byte churn.
+            if buffer.count >= 64 || byte == 0x0A {
+                if let text = String(data: buffer, encoding: .utf8) {
+                    assembled += text
+                    let snapshot = text
+                    await MainActor.run { onChunk(snapshot) }
+                    buffer.removeAll(keepingCapacity: true)
+                }
+            }
+        }
+        if !buffer.isEmpty, let tail = String(data: buffer, encoding: .utf8) {
+            assembled += tail
+            let final = tail
+            await MainActor.run { onChunk(final) }
+        }
+        return assembled
+    }
+
     // MARK: - Image upload
 
     /// Uploads raw image bytes to /api/upload and returns the

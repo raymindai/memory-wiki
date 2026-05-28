@@ -27,7 +27,16 @@
 //   SUPABASE_SERVICE_ROLE_KEY
 
 import { createClient } from "@supabase/supabase-js";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+
+// Deterministic id from a stable seed string — running the script
+// twice with the same title produces the same id, so upserts
+// actually dedupe instead of leaving stale rows around.
+function deterministicId(prefix, seed) {
+  const hash = createHash("sha256").update(`${prefix}:${seed}`).digest("hex");
+  // 12-char alphanumeric-friendly slice — fits documents.id format.
+  return hash.slice(0, 12);
+}
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -392,11 +401,11 @@ async function seedDocuments(userId) {
     const updated = dateNDaysAgo(Math.max(0, Math.floor(i * 1.7) - Math.floor(Math.random() * 3)));
     const vis = visibilityForIndex(i);
     return {
-      id: nanoid12(),
+      id: deterministicId("doc", title),
       user_id: userId,
       title,
       markdown: composeBody(title),
-      edit_token: nanoid12() + nanoid12(),
+      edit_token: deterministicId("tok", title) + deterministicId("tok2", title),
       folder_id: folderForIndex(i),
       is_draft: vis.is_draft,
       edit_mode: vis.edit_mode,
@@ -448,11 +457,11 @@ async function seedBundles(userId, docs) {
   const bundles = BUNDLE_TITLES.map(([title, folder_id], i) => {
     const vis = bundleVisibility(i);
     return {
-      id: nanoid12(),
+      id: deterministicId("bundle", title),
       user_id: userId,
       title,
       description: `${title} — a curated set of memories grouped by theme. Reviewer note: this is generated demo content.`,
-      edit_token: nanoid12() + nanoid12(),
+      edit_token: deterministicId("btok", title) + deterministicId("btok2", title),
       folder_id,
       is_draft: vis.is_draft,
       edit_mode: vis.edit_mode,

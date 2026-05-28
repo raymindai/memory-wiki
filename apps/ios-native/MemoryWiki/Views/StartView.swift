@@ -31,6 +31,7 @@ struct StartView: View {
     @State private var hub: APIClient.HubResponse?
     @State private var loading = true
     @State private var aiPromptCopied = false
+    @State private var showHubChat = false
     /// Drives the per-block stagger entrance once the data
     /// finishes loading. Each section reads its own delay.
     @State private var appeared = false
@@ -171,6 +172,13 @@ struct StartView: View {
             }
         }
         .animation(.smooth(duration: 0.36), value: loading)
+        .sheet(isPresented: $showHubChat) {
+            if let slug = auth.session?.hubSlug {
+                let name = displayName ?? "your hub"
+                ChatSheet(scope: .hub(slug: slug, title: "\(name)'s hub"))
+                    .iOS26Sheet([.large])
+            }
+        }
         .task { await load() }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
             Task { await load(force: true) }
@@ -230,6 +238,35 @@ struct StartView: View {
                         .fill(Brand.surface)
                         .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
                 )
+
+                // Chat with your hub — in-app USE surface so you
+                // don't have to context-switch to ChatGPT/Claude.
+                if let slug = auth.session?.hubSlug, !slug.isEmpty {
+                    Button {
+                        Haptics.tap()
+                        showHubChat = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Brand.microInfo)
+                            Text("Ask your hub")
+                                .font(Brand.body(size: 13, weight: .semibold))
+                                .foregroundStyle(Brand.textPrimary)
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(Brand.textFaint)
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(.ultraThinMaterial)
+                                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.microInfo.opacity(0.45), lineWidth: 1))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
     }

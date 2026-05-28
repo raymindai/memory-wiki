@@ -166,6 +166,9 @@ struct DocumentDetailView: View {
                     Button { UIPasteboard.general.string = seed.publicURL.absoluteString } label: {
                         Label("Copy URL", systemImage: "link")
                     }
+                    ShareLink(item: seed.publicURL) {
+                        Label("Share…", systemImage: "square.and.arrow.up")
+                    }
                     Divider()
                     if let detail {
                         let isPublic = detail.isDraft == false
