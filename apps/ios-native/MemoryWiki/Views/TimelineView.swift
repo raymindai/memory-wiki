@@ -533,34 +533,37 @@ private struct EmptyState: View {
     let action: (LocalizedStringKey, () -> Void)?
 
     var body: some View {
-        VStack(spacing: 14) {
-            Spacer()
-            Image(systemName: glyph)
-                .font(.system(size: 28, weight: .light))
-                .foregroundStyle(Brand.textFaint)
-            Text(title)
-                .font(Brand.body(size: 15, weight: .medium))
-                .foregroundStyle(Brand.textPrimary)
-            Text(caption)
-                .font(Brand.body(size: 13))
-                .foregroundStyle(Brand.textMuted)
-                .multilineTextAlignment(.center)
-                .lineSpacing(3)
-                .padding(.horizontal, 40)
-            if let (label, run) = action {
-                Button(action: run) {
-                    Text(label)
-                        .font(Brand.body(size: 13, weight: .medium))
-                        .foregroundStyle(Brand.background)
-                        .padding(.horizontal, 18).padding(.vertical, 10)
-                        .background(Capsule().fill(Brand.textPrimary))
+        ZStack {
+            AmbientBlob()
+            VStack(spacing: 14) {
+                Spacer()
+                Image(systemName: glyph)
+                    .font(.system(size: 28, weight: .light))
+                    .foregroundStyle(Brand.textFaint)
+                Text(title)
+                    .font(Brand.body(size: 15, weight: .medium))
+                    .foregroundStyle(Brand.textPrimary)
+                Text(caption)
+                    .font(Brand.body(size: 13))
+                    .foregroundStyle(Brand.textMuted)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .padding(.horizontal, 40)
+                if let (label, run) = action {
+                    Button(action: run) {
+                        Text(label)
+                            .font(Brand.body(size: 13, weight: .medium))
+                            .foregroundStyle(Brand.background)
+                            .padding(.horizontal, 18).padding(.vertical, 10)
+                            .background(Capsule().fill(Brand.textPrimary))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
                 }
-                .buttonStyle(.plain)
-                .padding(.top, 4)
+                Spacer()
             }
-            Spacer()
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 }
 

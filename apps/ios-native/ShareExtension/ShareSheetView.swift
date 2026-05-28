@@ -74,7 +74,13 @@ struct ShareSheetView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 6) {
+            // Blob mark inline next to the wordmark — same
+            // SwiftUI Shape the widget uses. Extensions can't
+            // import the main app's AnimatedBlob, so we draw
+            // the silhouette in code.
+            ShareBlobMark()
+                .frame(width: 18, height: 18)
             Text("memory.wiki")
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                 .foregroundStyle(ShareTheme.textPrimary)
@@ -379,6 +385,48 @@ private enum ShareTheme {
     static let textFaint   = Color(red: 0.541, green: 0.541, blue: 0.569)
     static let microRed    = Color(red: 0.940, green: 0.270, blue: 0.270)
     static let microLime   = Color(red: 0.710, green: 1.000, blue: 0.100)
+}
+
+/// Brand blob silhouette drawn directly as a SwiftUI Shape.
+/// Mirrors the Widget extension's BlobMark so all three iOS
+/// surfaces (main app via WKWebView animation, widget, share
+/// extension) carry the same mark.
+private struct ShareBlobMark: View {
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width
+            let h = size.height
+            var path = Path()
+            path.move(to: CGPoint(x: w * 0.50, y: h * 0.08))
+            path.addCurve(
+                to: CGPoint(x: w * 0.92, y: h * 0.42),
+                control1: CGPoint(x: w * 0.78, y: h * 0.08),
+                control2: CGPoint(x: w * 0.95, y: h * 0.20)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.78, y: h * 0.90),
+                control1: CGPoint(x: w * 0.90, y: h * 0.65),
+                control2: CGPoint(x: w * 0.94, y: h * 0.84)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.25, y: h * 0.92),
+                control1: CGPoint(x: w * 0.55, y: h * 0.98),
+                control2: CGPoint(x: w * 0.40, y: h * 1.00)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.06, y: h * 0.45),
+                control1: CGPoint(x: w * 0.08, y: h * 0.82),
+                control2: CGPoint(x: w * 0.04, y: h * 0.62)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.50, y: h * 0.08),
+                control1: CGPoint(x: w * 0.08, y: h * 0.18),
+                control2: CGPoint(x: w * 0.28, y: h * 0.06)
+            )
+            path.closeSubpath()
+            ctx.fill(path, with: .color(ShareTheme.textPrimary))
+        }
+    }
 }
 
 private struct ChipButton: View {

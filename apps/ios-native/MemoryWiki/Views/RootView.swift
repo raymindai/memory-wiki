@@ -52,8 +52,15 @@ struct RootView: View {
         }
         .animation(.snappy(duration: 0.22), value: auth.isSignedIn)
         .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
-            // Wipe local-only per-user state on identity change.
+            // Wipe local-only per-user state on identity change +
+            // reset the router so the next sign-in lands on the
+            // Timeline (not whatever tab the previous user was on)
+            // and clears any pushed detail screens from the old
+            // navigation stacks.
             PinnedStore.shared.clearForUserChange()
+            router.selectedTab = .timeline
+            router.timelinePath = []
+            router.bundlesPath = []
         }
         // Onboarding overlay — first signed-in launch only.
         .fullScreenCover(isPresented: shouldShowOnboarding) {

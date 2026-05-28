@@ -1,17 +1,22 @@
-// MemoryWikiWidget — Home + Lock screen widget. Three sizes:
-//   - systemSmall  : 2 docs + Capture deep link
-//   - systemMedium : 4 docs + Capture deep link
-//   - systemLarge  : 7 docs + Capture deep link
+// MemoryWikiWidget — Home + Lock screen widget.
+//
+// Layout (all sizes):
+//   ┌──────────────────────────────────────────┐
+//   │  [blob] memory.wiki  RECENT          ·   │   header
+//   │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+//   │   • <doc 1>                         3m  │
+//   │   • <doc 2>                         2h  │
+//   │   • <doc 3>                          ⋮  │
+//   │                                          │
+//   │  ┌────────────────────────────────────┐  │
+//   │  │  +  Capture                         │  │   bottom CTA
+//   │  └────────────────────────────────────┘  │
+//   └──────────────────────────────────────────┘
 //
 // Each row deep-links into the main app at memorywiki://doc/<id>.
-// The "+ Capture" button deep-links to memorywiki://capture so
-// the user starts a new memory in one tap from the lock screen.
-//
-// TimelineProvider refreshes every 30 minutes; the main app
-// calls WidgetCenter.reloadAllTimelines() after any mutation so
-// the widget stays fresh between scheduled refreshes. Auth
-// lives in the App Group Keychain via SharedSessionStore — no
-// Supabase SDK in the widget binary.
+// Capture pill deep-links to memorywiki://capture. Auth lives in
+// the App Group Keychain via SharedSessionStore — no Supabase
+// SDK in the widget binary.
 
 import WidgetKit
 import SwiftUI
@@ -32,14 +37,12 @@ struct RecentDocsWidget: Widget {
                 .containerBackground(WTheme.background, for: .widget)
         }
         .configurationDisplayName("Memory.Wiki")
-        .description("Recent captures + a one-tap Capture shortcut.")
+        .description("Recent memories + a one-tap Capture shortcut.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
-// MARK: - Brand tokens (mirrors the main app's Brand enum so the
-// widget reads as one product. Re-declared here because the
-// widget extension can't import the main app's module.)
+// MARK: - Brand tokens
 
 enum WTheme {
     static let background   = Color(red: 0.035, green: 0.035, blue: 0.043)
@@ -48,9 +51,56 @@ enum WTheme {
     static let textMuted    = Color(red: 0.631, green: 0.631, blue: 0.667)
     static let textFaint    = Color(red: 0.541, green: 0.541, blue: 0.569)
     static let borderDim    = Color(red: 0.180, green: 0.180, blue: 0.196)
-    /// Lime only on the smallest possible surface — the public
-    /// status dot. NEVER for primary text or fills.
     static let microLime    = Color(red: 0.71, green: 1.0, blue: 0.10)
+}
+
+// MARK: - Brand blob (SwiftUI Shape)
+
+/// Compact blob mark — abstracts the brand SVG into a pure
+/// SwiftUI Shape so the widget extension (which can't import
+/// the main app's WKWebView-backed AnimatedBlob) still ships
+/// the brand glyph. Static — widgets are snapshots, not
+/// animation surfaces.
+struct BlobMark: View {
+    var color: Color = WTheme.textPrimary
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width
+            let h = size.height
+            // 6-point organic blob: a Bezier-stitched outline that
+            // reads as "round + slightly squished" — same silhouette
+            // the iOS app's AnimatedBlob settles into mid-morph.
+            var path = Path()
+            path.move(to: CGPoint(x: w * 0.50, y: h * 0.08))
+            path.addCurve(
+                to: CGPoint(x: w * 0.92, y: h * 0.42),
+                control1: CGPoint(x: w * 0.78, y: h * 0.08),
+                control2: CGPoint(x: w * 0.95, y: h * 0.20)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.78, y: h * 0.90),
+                control1: CGPoint(x: w * 0.90, y: h * 0.65),
+                control2: CGPoint(x: w * 0.94, y: h * 0.84)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.25, y: h * 0.92),
+                control1: CGPoint(x: w * 0.55, y: h * 0.98),
+                control2: CGPoint(x: w * 0.40, y: h * 1.00)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.06, y: h * 0.45),
+                control1: CGPoint(x: w * 0.08, y: h * 0.82),
+                control2: CGPoint(x: w * 0.04, y: h * 0.62)
+            )
+            path.addCurve(
+                to: CGPoint(x: w * 0.50, y: h * 0.08),
+                control1: CGPoint(x: w * 0.08, y: h * 0.18),
+                control2: CGPoint(x: w * 0.28, y: h * 0.06)
+            )
+            path.closeSubpath()
+            ctx.fill(path, with: .color(color))
+        }
+    }
 }
 
 // MARK: - Timeline
@@ -100,14 +150,24 @@ struct RecentDocsView: View {
     let entry: DocEntry
 
     var body: some View {
-        if !entry.signedIn {
-            placeholder
-        } else {
-            switch family {
-            case .systemSmall:  smallBody
-            case .systemMedium: mediumBody
-            case .systemLarge:  largeBody
-            default: smallBody
+        ZStack {
+            // Ambient background — large faint blob centered.
+            // Widgets are snapshots so we render the static
+            // silhouette; opacity tuned to feel like texture.
+            GeometryReader { proxy in
+                let dim = max(proxy.size.width, proxy.size.height) * 1.4
+                BlobMark(color: WTheme.textPrimary)
+                    .opacity(0.05)
+                    .blur(radius: 6)
+                    .frame(width: dim, height: dim)
+                    .position(x: proxy.size.width * 0.85, y: proxy.size.height * 0.9)
+            }
+            .allowsHitTesting(false)
+
+            if !entry.signedIn {
+                placeholder
+            } else {
+                signedInBody
             }
         }
     }
@@ -115,8 +175,8 @@ struct RecentDocsView: View {
     private var rowCount: Int {
         switch family {
         case .systemSmall:  return 2
-        case .systemMedium: return 4
-        case .systemLarge:  return 7
+        case .systemMedium: return 3
+        case .systemLarge:  return 6
         default: return 1
         }
     }
@@ -125,159 +185,87 @@ struct RecentDocsView: View {
         Array(entry.docs.prefix(rowCount))
     }
 
-    // MARK: small
-
-    /// Small widget — single dense column. Header is just the
-    /// ink wordmark + the Capture pill in the top-right so the
-    /// row area gets every pixel it can.
-    private var smallBody: some View {
+    private var signedInBody: some View {
         VStack(alignment: .leading, spacing: 8) {
-            compactHeader
-            VStack(alignment: .leading, spacing: 6) {
+            header
+            VStack(alignment: .leading, spacing: family == .systemSmall ? 4 : 6) {
                 ForEach(visible) { doc in
                     Link(destination: docURL(doc.id)) {
-                        DocPreview(doc: doc, dense: true)
+                        DocPreview(doc: doc, dense: family == .systemSmall)
                     }
                 }
                 if visible.isEmpty {
-                    emptyHint
+                    Text("Nothing yet — tap below to capture.")
+                        .font(.system(size: 10))
+                        .foregroundStyle(WTheme.textMuted)
+                        .padding(.top, 2)
                 }
             }
             Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
-    }
-
-    // MARK: medium
-
-    private var mediumBody: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            fullHeader
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(visible) { doc in
-                    Link(destination: docURL(doc.id)) {
-                        DocPreview(doc: doc, dense: true)
-                    }
-                }
-                if visible.isEmpty {
-                    emptyHint
-                }
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-    }
-
-    // MARK: large
-
-    private var largeBody: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            fullHeader
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(visible) { doc in
-                    Link(destination: docURL(doc.id)) {
-                        DocPreview(doc: doc, dense: false)
-                    }
-                }
-                if visible.isEmpty {
-                    emptyHint
-                }
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-    }
-
-    // MARK: pieces
-
-    /// Small-widget header — ink wordmark only; Capture pill
-    /// shares the row so the docs section gets all the height.
-    private var compactHeader: some View {
-        HStack(alignment: .center, spacing: 0) {
-            Text("memory.wiki")
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(WTheme.textPrimary)
-            Spacer()
             captureButton
         }
+        .padding(.horizontal, family == .systemSmall ? 12 : 14)
+        .padding(.vertical, family == .systemSmall ? 12 : 13)
     }
 
-    /// Medium / large header — wordmark on left, Capture pill on
-    /// right. A thin hairline below adds breathing room before
-    /// the doc list without spending much vertical space.
-    private var fullHeader: some View {
-        VStack(spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("memory.wiki")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(WTheme.textPrimary)
+    /// Header — small blob mark + ink wordmark + faint RECENT
+    /// caption. Always shown with the blob (per the user feedback
+    /// "memory.wiki 나올때는 항상 심볼이 같이 나오면 좋겠음").
+    private var header: some View {
+        HStack(alignment: .center, spacing: 6) {
+            BlobMark()
+                .frame(width: family == .systemSmall ? 14 : 16,
+                       height: family == .systemSmall ? 14 : 16)
+            Text("memory.wiki")
+                .font(.system(size: family == .systemSmall ? 12 : 13,
+                              weight: .semibold, design: .rounded))
+                .foregroundStyle(WTheme.textPrimary)
+            if family != .systemSmall {
                 Text("RECENT")
                     .font(.system(size: 8, weight: .medium, design: .monospaced))
                     .tracking(1.0)
                     .foregroundStyle(WTheme.textFaint)
-                Spacer()
-                captureButton
             }
+            Spacer()
+        }
+        .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(WTheme.borderDim)
+                .fill(WTheme.borderDim.opacity(0.4))
                 .frame(height: 0.5)
+                .padding(.top, 22)
         }
     }
 
-    /// Capture pill — ink-on-surface (NOT white-on-ink the way
-    /// the old version was). Subtle border. Matches the main
-    /// app's quiet button vocabulary.
+    /// Bottom-wide Capture button — full row, ink-on-textPrimary
+    /// to read as the primary action. Bigger tap target than the
+    /// previous tiny pill so it works on small widget too.
     private var captureButton: some View {
         Link(destination: URL(string: "memorywiki://capture")!) {
-            HStack(spacing: 3) {
+            HStack(spacing: 6) {
                 Image(systemName: "plus")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(size: 12, weight: .bold))
                 Text("Capture")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(size: 12, weight: .semibold))
             }
-            .foregroundStyle(WTheme.textPrimary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .foregroundStyle(WTheme.background)
+            .frame(maxWidth: .infinity, minHeight: family == .systemSmall ? 28 : 32)
             .background(
-                Capsule()
-                    .fill(WTheme.surface)
-                    .overlay(Capsule().strokeBorder(WTheme.borderDim, lineWidth: 0.5))
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(WTheme.textPrimary)
             )
         }
     }
 
-    /// Shown when there are no docs yet (just-signed-in or
-    /// brand-new account). Quiet copy, lime-free.
-    private var emptyHint: some View {
-        Text("Nothing yet — tap Capture to start.")
-            .font(.system(size: 10))
-            .foregroundStyle(WTheme.textMuted)
-            .padding(.top, 4)
-    }
-
-    /// Not-signed-in widget body. Wordmark up top, message in
-    /// the middle, dimmed Capture button at the bottom.
     private var placeholder: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("memory.wiki")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(WTheme.textPrimary)
-                Spacer()
-                Text("SIGN IN")
-                    .font(.system(size: 8, weight: .medium, design: .monospaced))
-                    .tracking(1.0)
-                    .foregroundStyle(WTheme.textFaint)
-            }
+            header
             Spacer()
-            Text("Open the app once to sign in. Your recent captures will land here.")
-                .font(.system(size: 11))
+            Text("Open the app once to sign in. Your recent memories will land here.")
+                .font(.system(size: family == .systemSmall ? 10 : 11))
                 .foregroundStyle(WTheme.textMuted)
                 .lineSpacing(2)
             Spacer()
+            captureButton.opacity(0.4)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
@@ -296,9 +284,6 @@ private struct DocPreview: View {
 
     private var isPublic: Bool { doc.isDraft == false }
 
-    /// Time chip. "now / 3m / 5h / 2d" — small, monospaced,
-    /// right-aligned. Matches the iOS main app's compactTime
-    /// vocabulary so the two surfaces feel like the same product.
     private var time: String {
         guard let d = doc.updatedAt else { return "" }
         let secs = Date().timeIntervalSince(d)
@@ -312,13 +297,9 @@ private struct DocPreview: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            // Status badge — small filled circle, lime only when
-            // the doc is public. Private docs get a faint hollow
-            // ring instead. Keeps lime to the smallest possible
-            // surface per the brand colour-balance rule.
             statusBadge
             Text(doc.displayTitle)
-                .font(.system(size: dense ? 11 : 13, weight: .medium))
+                .font(.system(size: dense ? 11 : 12, weight: .medium))
                 .foregroundStyle(WTheme.textPrimary)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -327,7 +308,6 @@ private struct DocPreview: View {
                 .font(.system(size: dense ? 9 : 10, weight: .medium, design: .monospaced))
                 .foregroundStyle(WTheme.textFaint)
         }
-        .padding(.vertical, dense ? 2 : 4)
     }
 
     @ViewBuilder

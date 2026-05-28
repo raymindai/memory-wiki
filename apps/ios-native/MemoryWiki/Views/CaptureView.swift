@@ -46,10 +46,7 @@ struct CaptureView: View {
             // text field. Pointer-passthrough so taps reach the
             // editor underneath.
             if draft.isEmpty && clipboardURL == nil && restorable == nil && savedURL == nil {
-                AnimatedBlob(size: 240, theme: .dark)
-                    .opacity(0.06)
-                    .blur(radius: 6)
-                    .allowsHitTesting(false)
+                AmbientBlob()
             }
             VStack(spacing: 0) {
                 header
@@ -198,78 +195,26 @@ struct CaptureView: View {
                     .padding(.top, 18)
                     .allowsHitTesting(false)
             }
-            TextEditor(text: $draft)
-                .focused($focused)
-                .scrollContentBackground(.hidden)
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
-                .font(Brand.body(size: 15))
-                .foregroundStyle(Brand.textPrimary)
-                .tint(Brand.textPrimary)
-                .toolbar {
-                    // Only render the markdown strip when the
-                    // soft keyboard is genuinely on-screen.
-                    // Otherwise iOS floats the accessory above
-                    // the tab bar with no keyboard underneath
-                    // — that was the visual bug.
-                    if focused && keyboardUp { markdownToolbar }
-                }
+            // UITextView-backed editor with a real UIKit
+            // inputAccessoryView — iOS guarantees the markdown
+            // toolbar shows ONLY while the keyboard is on-screen.
+            // SwiftUI's .toolbar(.keyboard) had been floating the
+            // strip above the tab bar with no keyboard underneath
+            // (the bug visible on device).
+            MarkdownEditor(
+                text: $draft,
+                isFocused: focused,
+                onFocusChange: { focused = $0 },
+                onStartDictation: { startDictation() },
+                onStopDictation: { stopDictation() },
+                isDictating: isDictating
+            )
         }
     }
 
-    /// Keyboard accessory bar exposing the most-used markdown
-    /// scaffolds. Each button appends at the cursor (or wraps
-    /// the trailing whitespace if there is one) — TextEditor on
-    /// iOS doesn't expose selection range without a UIKit bridge,
-    /// so this is the pragmatic version.
-    @ToolbarContentBuilder
-    private var markdownToolbar: some ToolbarContent {
-        ToolbarItemGroup(placement: .keyboard) {
-            MdToolButton(label: "H1") { insert(scaffold: "\n# ") }
-            MdToolButton(label: "H2") { insert(scaffold: "\n## ") }
-            MdToolButton(systemImage: "bold") { wrap(with: "**") }
-            MdToolButton(systemImage: "italic") { wrap(with: "*") }
-            MdToolButton(systemImage: "list.bullet") { insert(scaffold: "\n- ") }
-            MdToolButton(systemImage: "number") { insert(scaffold: "\n1. ") }
-            MdToolButton(systemImage: "chevron.left.forwardslash.chevron.right") { insert(scaffold: "\n```\n\n```\n") }
-            MdToolButton(systemImage: "link") { insertLink() }
-            Spacer()
-            // Dictation toggle — calls the system speech
-            // recognizer (on-device when possible, ko+en).
-            Button {
-                if isDictating { stopDictation() } else { startDictation() }
-            } label: {
-                Image(systemName: isDictating ? "mic.fill" : "mic")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(isDictating ? Brand.microRed : Brand.textMuted)
-            }
-            Button {
-                focused = false
-            } label: {
-                Image(systemName: "keyboard.chevron.compact.down")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Brand.textMuted)
-            }
-        }
-    }
-
-    private func insert(scaffold: String) {
-        Haptics.tap()
-        draft += scaffold
-    }
-
-    private func wrap(with token: String) {
-        Haptics.tap()
-        // No selection API on TextEditor — append paired tokens
-        // with a single space between so the cursor lands on the
-        // inside on next keystroke.
-        draft += "\(token)\(token)"
-    }
-
-    private func insertLink() {
-        Haptics.tap()
-        draft += "[text](https://)"
-    }
+    // Markdown toolbar now lives in MarkdownEditor's UIKit
+    // inputAccessoryView (so it shows ONLY with the keyboard).
+    // Old SwiftUI .toolbar(.keyboard) implementation removed.
 
     // MARK: - Clipboard
 
@@ -353,38 +298,20 @@ struct CaptureView: View {
     }
 }
 
-/// Compact button for the keyboard toolbar — single label OR a
-/// SF Symbol. Quiet ink-on-clear; never lime so the editor
-/// chrome stays out of the way.
-private struct MdToolButton: View {
-    var label: String?
-    var systemImage: String?
-    var onTap: () -> Void
-    init(label: String, onTap: @escaping () -> Void) {
-        self.label = label
-        self.systemImage = nil
-        self.onTap = onTap
-    }
-    init(systemImage: String, onTap: @escaping () -> Void) {
-        self.label = nil
-        self.systemImage = systemImage
-        self.onTap = onTap
-    }
+/// Shared ambient blob backdrop — used by Capture / Timeline /
+/// Bundles empty states. Big, blurred, very faint so the screen
+/// reads as alive without competing with content.
+struct AmbientBlob: View {
     var body: some View {
-        Button(action: onTap) {
-            if let label {
-                Text(label)
-                    .font(Brand.mono(size: 11, weight: .medium))
-                    .tracking(0.4)
-                    .foregroundStyle(Brand.textPrimary)
-                    .frame(minWidth: 28)
-            } else if let systemImage {
-                Image(systemName: systemImage)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Brand.textPrimary)
-                    .frame(minWidth: 28)
-            }
+        GeometryReader { proxy in
+            let dim = max(proxy.size.width, proxy.size.height) * 1.4
+            AnimatedBlob(size: dim, theme: .dark)
+                .opacity(0.04)
+                .blur(radius: 14)
+                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .center)
         }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
     }
 }
 

@@ -136,16 +136,16 @@
 /* ============ ONBOARDING ============ */
 "Skip"                   = "건너뛰기";
 "Next"                   = "다음";
-"Start capturing"        = "캡쳐 시작하기";
+"Start capturing"        = "시작하기";
 "01 / CAPTURE"           = "01 / 캡쳐";
-"02 / USE"               = "02 / 활용";
-"03 / EDIT"              = "03 / 편집";
-"From any app, in two taps." = "어떤 앱에서든 두 번의 탭으로.";
-"iOS Share Sheet → Memory.Wiki. Selection, page, URL — anything you can share lands as a doc in your hub." = "iOS 공유 시트 → Memory.Wiki. 선택 영역, 페이지, URL — 공유할 수 있는 모든 것이 허브의 메모리로 저장됩니다.";
-"One URL, every AI."     = "URL 하나, 모든 AI.";
-"Paste memory.wiki/@you into Claude, ChatGPT, or Cursor. They all fetch the same markdown." = "Claude, ChatGPT, Cursor에 memory.wiki/@you를 붙여넣으세요. 모두 같은 마크다운을 받아갑니다.";
-"Read on mobile, edit on web." = "모바일로 읽고, 웹에서 편집.";
-"iOS keeps capture + reading fast. Memory.Wiki on the web is the canonical editor — open any doc there for the full surface." = "iOS는 빠른 캡쳐와 읽기에 집중합니다. 웹의 Memory.Wiki가 정식 에디터예요 — 어떤 메모리든 거기서 열면 전체 기능을 쓸 수 있습니다.";
+"02 / FEED YOUR AI"      = "02 / AI에 전달";
+"03 / ALWAYS WITHIN REACH" = "03 / 어디서나 한 손에";
+"Catch ideas the moment they hit." = "떠오른 순간 바로 잡는다.";
+"Share Sheet from Safari, dictate while walking, OCR a whiteboard photo, paste from clipboard — every input lands as a memory in your hub." = "Safari 공유 시트, 걸으면서 받아쓰기, 화이트보드 사진 OCR, 클립보드 붙여넣기 — 모든 입력이 허브의 메모리로 모입니다.";
+"One URL works in every AI." = "URL 하나로 모든 AI에서.";
+"Paste memory.wiki/@you into Claude, ChatGPT, Cursor, or any other AI. They all fetch the same markdown — so every chat starts knowing what you've already learned." = "Claude, ChatGPT, Cursor 어디든 memory.wiki/@당신을 붙여넣으면, 모든 대화가 이미 학습한 내용을 알고 시작합니다.";
+"iOS is your pocket companion." = "iOS는 주머니 속 컴패니언.";
+"Widget, Spotlight, Siri, and Shortcuts all wire into Memory.Wiki. The full editor + collaboration + bundles live on the web — iOS keeps capture and lookup at one tap." = "위젯, Spotlight, Siri, Shortcuts 모두 Memory.Wiki와 연결됩니다. 전체 에디터, 협업, 번들은 웹에서 — iOS는 빠른 캡쳐와 검색에 집중합니다.";
 
 /* ============ AUTH ============ */
 "Continue with Apple"  = "Apple로 계속하기";
