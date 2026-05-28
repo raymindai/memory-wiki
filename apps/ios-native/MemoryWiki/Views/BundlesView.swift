@@ -199,8 +199,15 @@ struct BundlesView: View {
     }
 
     @ViewBuilder private var content: some View {
+        contentInner
+            .animation(.smooth(duration: 0.36), value: model.loading)
+            .animation(.smooth(duration: 0.36), value: model.bundles.count)
+    }
+
+    @ViewBuilder private var contentInner: some View {
         if model.loading && model.bundles.isEmpty {
             BrandLoader(variant: .inline)
+                .transition(.opacity)
         } else if let err = model.errorMessage, model.bundles.isEmpty {
             EmptyBundleState(
                 title: "Couldn't load bundles",
@@ -245,6 +252,10 @@ struct BundlesView: View {
                 await model.load()
                 await pinned.hydrateFromServer()
             }
+            .transition(.asymmetric(
+                insertion: .opacity.combined(with: .move(edge: .bottom)),
+                removal: .opacity
+            ))
         }
     }
 

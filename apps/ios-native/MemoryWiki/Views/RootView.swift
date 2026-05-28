@@ -142,13 +142,16 @@ private struct BrandTabBar: View {
                 } label: {
                     VStack(spacing: 3) {
                         tab.glyph
-                            .font(.system(size: tab == .start ? 22 : 16, weight: .regular))
-                            .frame(height: 28)
-                        // Wrap with LocalizedStringKey so SwiftUI
-                        // looks the value up in Localizable.strings
-                        // instead of taking the verbatim path that
-                        // the (String) initializer would.
-                        Text(LocalizedStringKey(tab.label))
+                            .font(.system(size: tab == .start ? 28 : 16, weight: .regular))
+                            // Start tab has no caption → the blob
+                            // gets to be bigger (~the full tab cell
+                            // height) so it reads as the centre
+                            // hero of the bar.
+                            .frame(height: tab == .start ? 42 : 28)
+                        // Start tab is glyph-only (the brand blob is
+                        // self-evident — no "Start" caption needed).
+                        // Other tabs keep the mono caption.
+                        Text(tab == .start ? "" : tab.label)
                             .font(Brand.mono(size: 9, weight: .medium))
                             .tracking(0.5)
                             .textCase(.uppercase)

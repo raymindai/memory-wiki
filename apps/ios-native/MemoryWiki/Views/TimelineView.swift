@@ -287,8 +287,18 @@ struct TimelineView: View {
     // MARK: - Content
 
     @ViewBuilder private var content: some View {
+        contentInner
+            // Cross-fade + 6pt rise as the list arrives — feels
+            // less jarring than the loader vanishing and the
+            // ScrollView snapping in.
+            .animation(.smooth(duration: 0.36), value: model.loading)
+            .animation(.smooth(duration: 0.36), value: model.documents.count)
+    }
+
+    @ViewBuilder private var contentInner: some View {
         if model.loading && model.documents.isEmpty {
             BrandLoader(variant: .inline)
+                .transition(.opacity)
         } else if let error = model.errorMessage, model.documents.isEmpty {
             EmptyState(
                 title: "Couldn't load timeline",
@@ -356,6 +366,12 @@ struct TimelineView: View {
                 .padding(.bottom, 12)
             }
             .refreshable { await model.load() }
+            // Gentle rise + fade as the list arrives — replaces
+            // the abrupt loader → list snap.
+            .transition(.asymmetric(
+                insertion: .opacity.combined(with: .move(edge: .bottom)),
+                removal: .opacity
+            ))
         }
     }
 

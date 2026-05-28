@@ -68,11 +68,17 @@ struct StartView: View {
             return d >= weekAgo && d <= Date()
         }.count
     }
-    private var starredDocs: [Document] {
-        documents.filter { pinned.isPinned($0.id) }.prefix(4).map { $0 }
+    private var starredItems: [StartItem] {
+        let docs = documents.filter { pinned.isPinned($0.id) }
+            .map { StartItem.doc($0) }
+        let bs = bundles.filter { pinned.isPinnedBundle($0.id) }
+            .map { StartItem.bundle($0) }
+        return (docs + bs).sorted { $0.sortDate > $1.sortDate }.prefix(5).map { $0 }
     }
-    private var recentDocs: [Document] {
-        Array(documents.prefix(6))
+    private var recentItems: [StartItem] {
+        let docs = documents.map { StartItem.doc($0) }
+        let bs = bundles.map { StartItem.bundle($0) }
+        return (docs + bs).sorted { $0.sortDate > $1.sortDate }.prefix(7).map { $0 }
     }
     private var featuredBundle: AppBundle? {
         bundles.first { $0.isDraft == false } ?? bundles.first
@@ -83,16 +89,17 @@ struct StartView: View {
             Brand.background.ignoresSafeArea()
             if loading && documents.isEmpty && bundles.isEmpty {
                 BrandLoader(variant: .inline)
+                    .transition(.opacity)
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         hero
                         pulseRow
                         quickActions
-                        if !recentDocs.isEmpty {
+                        if !recentItems.isEmpty {
                             recentSection
                         }
-                        if !starredDocs.isEmpty {
+                        if !starredItems.isEmpty {
                             starredSection
                         }
                         if let bundle = featuredBundle {
@@ -104,8 +111,13 @@ struct StartView: View {
                     .padding(.bottom, 36)
                 }
                 .refreshable { await load(force: true) }
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .bottom)),
+                    removal: .opacity
+                ))
             }
         }
+        .animation(.smooth(duration: 0.36), value: loading)
         .task { await load() }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
             Task { await load(force: true) }
@@ -231,15 +243,8 @@ struct StartView: View {
                 router.selectedTab = .timeline
             }
             VStack(spacing: 6) {
-                ForEach(recentDocs) { doc in
-                    Button {
-                        Haptics.selection()
-                        router.selectedTab = .timeline
-                        router.timelinePath = [.docDetail(doc)]
-                    } label: {
-                        StartDocRow(doc: doc, starred: pinned.isPinned(doc.id))
-                    }
-                    .buttonStyle(.plain)
+                ForEach(recentItems) { item in
+                    startRow(for: item)
                 }
             }
         }
@@ -269,17 +274,37 @@ struct StartView: View {
                 .buttonStyle(.plain)
             }
             VStack(spacing: 6) {
-                ForEach(starredDocs) { doc in
-                    Button {
-                        Haptics.selection()
-                        router.selectedTab = .timeline
-                        router.timelinePath = [.docDetail(doc)]
-                    } label: {
-                        StartDocRow(doc: doc, starred: true)
-                    }
-                    .buttonStyle(.plain)
+                ForEach(starredItems) { item in
+                    startRow(for: item)
                 }
             }
+        }
+    }
+
+    /// Renders the appropriate compact row + wires tap to jump
+    /// to the right tab + push the detail. Same call site for
+    /// doc and bundle so the section ordering by date is clean.
+    @ViewBuilder
+    private func startRow(for item: StartItem) -> some View {
+        switch item {
+        case .doc(let doc):
+            Button {
+                Haptics.selection()
+                router.selectedTab = .timeline
+                router.timelinePath = [.docDetail(doc)]
+            } label: {
+                StartDocRow(doc: doc, starred: pinned.isPinned(doc.id))
+            }
+            .buttonStyle(.plain)
+        case .bundle(let bundle):
+            Button {
+                Haptics.selection()
+                router.selectedTab = .bundles
+                router.bundlesPath = [.bundleDetail(bundle)]
+            } label: {
+                StartBundleRow(bundle: bundle, starred: pinned.isPinnedBundle(bundle.id))
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -473,6 +498,71 @@ private struct QuickActionTile: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Unified item wrapper so Recent + Starred sections can render
+/// docs + bundles in one date-sorted list. Each case carries
+/// its model and exposes a common sortDate for ordering.
+enum StartItem: Identifiable {
+    case doc(Document)
+    case bundle(AppBundle)
+    var id: String {
+        switch self {
+        case .doc(let d):    return "d:\(d.id)"
+        case .bundle(let b): return "b:\(b.id)"
+        }
+    }
+    var sortDate: Date {
+        switch self {
+        case .doc(let d):    return d.sortDate
+        case .bundle(let b): return b.sortDate
+        }
+    }
+}
+
+/// Compact bundle row used in Start's Recent + Starred sections.
+/// Mirrors StartDocRow's visual rhythm — same height, same
+/// trailing time chip — so the mixed list reads as one stream.
+private struct StartBundleRow: View {
+    let bundle: AppBundle
+    let starred: Bool
+    var body: some View {
+        HStack(spacing: 10) {
+            BundleLayersIcon(
+                size: 16,
+                color: bundle.isDraft == false
+                    ? (bundle.isRestricted ? Brand.microInfo : Brand.microLime)
+                    : Brand.textFaint
+            )
+            .frame(width: 22, alignment: .leading)
+            Text(bundle.displayTitle)
+                .font(Brand.body(size: 13, weight: .medium))
+                .foregroundStyle(Brand.textPrimary)
+                .lineLimit(1)
+            if starred {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(Brand.microWarn)
+            }
+            // Tiny BUNDLE caption so the user can tell at a
+            // glance which item is a doc vs bundle in a mixed
+            // list — same visual weight as the timestamp.
+            Text("BUNDLE")
+                .font(Brand.mono(size: 8, weight: .medium))
+                .tracking(0.7)
+                .foregroundStyle(Brand.textFaint)
+            Spacer(minLength: 6)
+            Text(bundle.compactTime)
+                .font(Brand.mono(size: 10))
+                .foregroundStyle(Brand.textFaint)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Brand.surface)
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
     }
 }
 

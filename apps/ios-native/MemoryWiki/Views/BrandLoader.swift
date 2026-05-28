@@ -22,18 +22,21 @@ struct BrandLoader: View {
     private var size: CGFloat { variant == .full ? 140 : 96 }
 
     var body: some View {
+        // Centre vertically + horizontally INSIDE whatever space
+        // the caller hands us. Spacers + maxHeight: .infinity
+        // means the blob+caption land in the middle of the
+        // available content area — header / filter strip stays
+        // put at the top, only the loader moves to centre.
         VStack(spacing: 18) {
+            Spacer(minLength: 0)
             AnimatedBlob(size: size, theme: .dark)
             Text(caption)
                 .font(Brand.mono(size: 10, weight: .medium))
                 .tracking(1.4)
                 .foregroundStyle(Brand.textFaint)
+            Spacer(minLength: 0)
         }
-        // Anchor TOP — sits inside the content area rather than
-        // dead-centering the whole screen. Caller wraps in a
-        // VStack with whatever header offset the surface uses.
-        .frame(maxWidth: .infinity, alignment: .top)
-        .padding(.top, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Loading")
     }

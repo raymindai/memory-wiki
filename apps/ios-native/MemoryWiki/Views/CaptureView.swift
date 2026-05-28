@@ -282,7 +282,10 @@ struct CaptureView: View {
                     Rectangle().fill(Brand.borderDim).frame(height: 0.5)
                 }
         )
-        .padding(.bottom, 56) // above the custom tab bar
+        // No extra .padding(.bottom, 56) — RootView already
+        // reserves that space for the custom tab bar, so adding
+        // it here doubled the gap and pushed the bar visibly
+        // above the tab strip (the dead-space bug).
     }
 
     // MARK: - Clipboard / lifecycle / save / dictation
