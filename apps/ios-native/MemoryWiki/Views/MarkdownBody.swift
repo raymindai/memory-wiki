@@ -31,6 +31,32 @@ struct MarkdownBody: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        // Body-wide text selection — the per-block .textSelection
+        // modifiers SwiftUI inherits from this one. Lets the user
+        // long-press anywhere to start a system selection handle.
+        .textSelection(.enabled)
+    }
+}
+
+/// Heading record extracted from a parsed MarkdownBody — used
+/// by DocumentDetailView's table-of-contents sheet to render
+/// + jump to sections.
+struct MarkdownHeading: Identifiable, Hashable {
+    let id = UUID()
+    let level: Int
+    let text: String
+}
+
+extension MarkdownBody {
+    /// Walk the parsed blocks and return every heading in
+    /// document order. Used by the TOC sheet.
+    static func headings(in markdown: String) -> [MarkdownHeading] {
+        MarkdownBlock.parse(markdown).compactMap { block in
+            if case .heading(let level, let text) = block {
+                return MarkdownHeading(level: level, text: text)
+            }
+            return nil
+        }
     }
 }
 
@@ -379,12 +405,12 @@ private struct CodeBlockView: View {
                     Text(lang.uppercased())
                         .font(Brand.mono(size: 9, weight: .medium))
                         .tracking(0.6)
-                        .foregroundStyle(Brand.textFaint)
+                        .foregroundStyle(Brand.textMuted)
                 } else {
                     Text("CODE")
                         .font(Brand.mono(size: 9, weight: .medium))
                         .tracking(0.6)
-                        .foregroundStyle(Brand.textFaint)
+                        .foregroundStyle(Brand.textMuted)
                 }
                 Spacer()
                 Button {
@@ -400,15 +426,19 @@ private struct CodeBlockView: View {
                             .font(Brand.mono(size: 9, weight: .medium))
                             .tracking(0.6)
                     }
-                    .foregroundStyle(Brand.textMuted)
+                    .foregroundStyle(Brand.textPrimary)
                 }
                 .buttonStyle(.plain)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(Brand.canvas)
+            // Header strip needs to read as a SEPARATE band from
+            // the dark canvas below. `Brand.canvas` is darker than
+            // the doc page background so the strip was invisible
+            // — use a brighter zinc surface + visible bottom rule.
+            .background(Brand.border.opacity(0.5))
             .overlay(alignment: .bottom) {
-                Rectangle().fill(Brand.borderDim).frame(height: 1)
+                Rectangle().fill(Brand.border).frame(height: 1)
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 Text(source)

@@ -31,6 +31,7 @@ struct DocumentDetailView: View {
     // Delete + visibility confirmation
     @State private var confirmDelete = false
     @State private var togglingVisibility = false
+    @State private var showTOC = false
 
     var body: some View {
         ZStack {
@@ -61,6 +62,62 @@ struct DocumentDetailView: View {
         } message: {
             Text("It moves to Trash on memory.wiki — recoverable for 30 days.")
         }
+        .sheet(isPresented: $showTOC) {
+            if let detail {
+                TableOfContentsSheet(
+                    headings: MarkdownBody.headings(in: detail.markdown),
+                    onPick: { _ in showTOC = false }
+                )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .preferredColorScheme(.dark)
+            }
+        }
+    }
+
+    // Inline TOC sheet — quick orientation for long docs. Tapping
+    // a heading dismisses + (future) scrolls. Scroll integration is
+    // a follow-up — for now the sheet's job is summary + copy.
+    private struct TableOfContentsSheet: View {
+        let headings: [MarkdownHeading]
+        var onPick: (MarkdownHeading) -> Void
+        var body: some View {
+            ZStack {
+                Brand.background.ignoresSafeArea()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("TABLE OF CONTENTS")
+                            .font(Brand.mono(size: 9, weight: .medium))
+                            .tracking(1.2)
+                            .foregroundStyle(Brand.textFaint)
+                            .padding(.bottom, 6)
+                        ForEach(headings) { h in
+                            Button { onPick(h) } label: {
+                                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                    Text("H\(h.level)")
+                                        .font(Brand.mono(size: 10, weight: .medium))
+                                        .foregroundStyle(Brand.textFaint)
+                                        .frame(width: 20, alignment: .leading)
+                                    Text(h.text)
+                                        .font(Brand.body(size: 14 - CGFloat(min(h.level - 1, 2))))
+                                        .foregroundStyle(Brand.textPrimary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .multilineTextAlignment(.leading)
+                                }
+                                .padding(.leading, CGFloat(max(0, h.level - 1)) * 14)
+                                .padding(.vertical, 8)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 22)
+                    .padding(.top, 18)
+                    .padding(.bottom, 32)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
     }
 
     @ToolbarContentBuilder private var toolbarContent: some ToolbarContent {
@@ -78,6 +135,18 @@ struct DocumentDetailView: View {
                 .fontWeight(.semibold)
             }
         } else {
+            // TOC button — only when the doc has at least one heading.
+            if let detail, !MarkdownBody.headings(in: detail.markdown).isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Haptics.tap()
+                        showTOC = true
+                    } label: {
+                        Image(systemName: "list.bullet.indent")
+                            .foregroundStyle(Brand.textMuted)
+                    }
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button { startEditing() } label: { Label("Edit", systemImage: "pencil") }

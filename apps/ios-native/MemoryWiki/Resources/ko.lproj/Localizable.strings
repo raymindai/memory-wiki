@@ -33,6 +33,12 @@
 "THIS MONTH" = "이번 달";
 "EARLIER"    = "이전";
 "PINNED"     = "고정됨";
+"All"        = "전체";
+"Starred"    = "고정";
+"No starred memories" = "고정된 메모리가 없어요";
+"Long-press a memory in the All view to star it." = "전체 화면에서 메모리를 길게 눌러 고정하세요.";
+"Browse all" = "전체 보기";
+"TABLE OF CONTENTS" = "목차";
 "BY MEANING" = "의미 기반";
 
 /* ============ DOCUMENT ROW + DETAIL ============ */

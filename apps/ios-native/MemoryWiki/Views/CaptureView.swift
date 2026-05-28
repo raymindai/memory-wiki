@@ -1,15 +1,20 @@
-// CaptureView — focused capture surface, redesigned.
+// CaptureView — focused capture surface, vanilla-SwiftUI rebuild.
 //
-// Brand-forward minimal header (blob + memory.wiki + CAPTURE caption),
-// big editor with a compelling placeholder, smart chips above the
-// editor (clipboard URL, unsaved draft, saved confirmation), sticky
-// bottom action bar with Photo / Voice / Save when the keyboard is
-// down. The markdown formatting toolbar slides in above the keyboard
-// via MarkdownEditor's UIKit inputAccessoryView when typing.
+// Rebuild notes: the previous UIViewRepresentable wrapper was
+// reliable on paper but the user could not get the cursor to
+// engage on device + the markdown bar floated below the tab bar.
+// This version uses a plain SwiftUI TextEditor — which is the
+// canonical iOS native input — and pairs it with the standard
+// .toolbar(.keyboard) markdown row. The tab bar already has
+// .ignoresSafeArea(.keyboard) (from a prior fix in RootView)
+// so the toolbar lands above the keyboard, not below the tab
+// bar.
 //
-// Inspirations: Drafts, Bear, Apple Notes. The principle is a
-// single focused writing surface — no form chrome, no competing
-// affordances, the WRITING area is the hero.
+// Capture is the most important surface; the layout is now
+// title-feeling, like Apple Notes: large display "Capture",
+// big body editor with a prompt placeholder, photo / voice
+// chips on the left of the sticky bottom bar, primary Save
+// pill on the right.
 
 import SwiftUI
 import UIKit
@@ -22,12 +27,10 @@ struct CaptureView: View {
     @State private var errorMessage: String?
     @State private var clipboardURL: URL?
     @State private var showPhotoPicker = false
+    @State private var ocrBanner: String? = nil
     @FocusState private var focused: Bool
     @State private var keyboardUp = false
 
-    /// Persisted draft body — survives app kill so a half-typed
-    /// memory isn't lost when iOS evicts the process or the user
-    /// gets a call.
     @AppStorage("mw.draft.body") private var persistedDraft: String = ""
     @State private var restorable: String? = nil
     @State private var dictation = DictationController()
@@ -40,8 +43,6 @@ struct CaptureView: View {
     var body: some View {
         ZStack {
             Brand.background.ignoresSafeArea()
-            // Ambient blob backdrop — only when the canvas is
-            // truly empty (no draft, no chips, no success card).
             if draft.isEmpty && clipboardURL == nil && restorable == nil && savedURL == nil {
                 AmbientBlob()
             }
@@ -55,6 +56,11 @@ struct CaptureView: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+                if let ocrBanner {
+                    OcrResultChip(message: ocrBanner) { self.ocrBanner = nil }
+                        .padding(.horizontal, 14)
+                        .padding(.bottom, 8)
+                }
                 if let errorMessage {
                     Text(errorMessage)
                         .font(Brand.body(size: 12))
@@ -63,10 +69,6 @@ struct CaptureView: View {
                         .padding(.bottom, 4)
                 }
             }
-            // Sticky bottom action bar — appears above the tab
-            // bar when keyboard is down. Hidden when keyboard up
-            // (the inputAccessoryView markdown toolbar takes its
-            // place anchored to the keyboard).
             if !keyboardUp {
                 VStack { Spacer(); bottomBar }
             }
@@ -75,9 +77,7 @@ struct CaptureView: View {
         .onChange(of: focused) { _, isFocused in
             if isFocused { refreshClipboard() }
         }
-        .onChange(of: draft) { _, new in
-            persistedDraft = new
-        }
+        .onChange(of: draft) { _, new in persistedDraft = new }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             withAnimation(.snappy(duration: 0.22)) { keyboardUp = true }
         }
@@ -86,28 +86,28 @@ struct CaptureView: View {
         }
         .sheet(isPresented: $showPhotoPicker) {
             PhotoCaptureSheet(isPresented: $showPhotoPicker) { ocrText, _ in
-                let title = "Photo capture · \(Date().formatted(date: .abbreviated, time: .shortened))"
-                draft = "# \(title)\n\n\(ocrText)"
+                let clean = ocrText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if clean.isEmpty {
+                    ocrBanner = "No text recognised in this image."
+                } else {
+                    let title = "Photo capture · \(Date().formatted(date: .abbreviated, time: .shortened))"
+                    draft = "# \(title)\n\n\(clean)"
+                    ocrBanner = "OCR extracted \(clean.count) characters."
+                    Haptics.success()
+                }
             }
             .presentationDetents([.medium])
             .preferredColorScheme(.dark)
         }
     }
 
-    // MARK: - Header
+    // MARK: - Header (tab-consistent — large "Capture" display title)
 
-    /// Tab-consistent header — large display title matching the
-    /// Timeline / Bundles / Settings tabs. (Previously a custom
-    /// blob+wordmark+chevron-close header — too divergent from
-    /// the rest of the surface and called out as inconsistent.)
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text("Capture")
                 .font(Brand.display(size: 26))
                 .foregroundStyle(Brand.textPrimary)
-            // Tiny mono character-count hint when there's a
-            // draft, matching the "139" doc count chip on the
-            // Timeline header.
             if !draft.isEmpty {
                 Text("\(draft.count)")
                     .font(Brand.mono(size: 11))
@@ -133,32 +133,31 @@ struct CaptureView: View {
                 persistedDraft = ""
             }
             .padding(.horizontal, 14)
-            .padding(.top, 10)
+            .padding(.top, 6)
         } else if let url = clipboardURL, savedURL == nil {
             ClipboardChip(url: url, busy: saving) {
                 Task { await saveURL(url) }
-            } onDismiss: {
-                clipboardURL = nil
-            }
+            } onDismiss: { clipboardURL = nil }
             .padding(.horizontal, 14)
-            .padding(.top, 10)
+            .padding(.top, 6)
         } else if let url = savedURL {
             SavedBanner(url: url) {
                 savedURL = nil
                 draft = ""
             }
             .padding(.horizontal, 14)
-            .padding(.top, 10)
+            .padding(.top, 6)
         }
     }
 
     // MARK: - Editor
 
+    /// Vanilla SwiftUI TextEditor — the path of least resistance
+    /// for getting cursor + keyboard + selection to actually
+    /// behave. Markdown toolbar lives in .toolbar(.keyboard) so
+    /// iOS slides it in with the keyboard.
     private var editor: some View {
         ZStack(alignment: .topLeading) {
-            // Editor-style empty state — generous Cal Sans prompt
-            // + faint mono hint row (paste / voice / camera).
-            // Reads as an editor canvas, not a form field.
             if draft.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("What's on your mind?")
@@ -168,31 +167,71 @@ struct CaptureView: View {
                     HStack(spacing: 14) {
                         EmptyHintRow(icon: "doc.on.clipboard", label: "Paste a URL")
                         EmptyHintRow(icon: "mic", label: "Tap mic to dictate")
+                        EmptyHintRow(icon: "camera", label: "Photo OCR")
                     }
-                    .padding(.top, 2)
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 18)
                 .allowsHitTesting(false)
-                .transition(.opacity)
             }
-            MarkdownEditor(
-                text: $draft,
-                isFocused: focused,
-                onFocusChange: { focused = $0 },
-                onStartDictation: { startDictation() },
-                onStopDictation: { stopDictation() },
-                isDictating: isDictating
-            )
-            .opacity(draft.isEmpty ? 0.4 : 1)
+            TextEditor(text: $draft)
+                .focused($focused)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .font(Brand.body(size: 16))
+                .foregroundStyle(Brand.textPrimary)
+                .tint(Brand.textPrimary)
+                .toolbar {
+                    if focused {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            mdButton("number") { insert("\n# ") }
+                            mdButton("bold") { wrap("**") }
+                            mdButton("italic") { wrap("*") }
+                            mdButton("list.bullet") { insert("\n- ") }
+                            mdButton("list.number") { insert("\n1. ") }
+                            mdButton("chevron.left.forwardslash.chevron.right") { insert("\n```\n\n```\n") }
+                            mdButton("link") { insert("[text](https://)") }
+                            Spacer()
+                            mdButton(isDictating ? "mic.fill" : "mic",
+                                     tint: isDictating ? Brand.microRed : Brand.textPrimary) {
+                                if isDictating { stopDictation() } else { startDictation() }
+                            }
+                            mdButton("keyboard.chevron.compact.down", tint: Brand.textMuted) {
+                                focused = false
+                            }
+                        }
+                    }
+                }
         }
+    }
+
+    /// Toolbar button factory — reused for every markdown
+    /// scaffold + the dictation toggle + the dismiss-keyboard.
+    @ViewBuilder
+    private func mdButton(_ systemName: String,
+                          tint: Color = Brand.textPrimary,
+                          action: @escaping () -> Void) -> some View {
+        Button {
+            Haptics.selection()
+            action()
+        } label: {
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(tint)
+                .frame(minWidth: 32)
+        }
+    }
+
+    private func insert(_ scaffold: String) {
+        draft += scaffold
+    }
+    private func wrap(_ token: String) {
+        draft += "\(token)\(token)"
     }
 
     // MARK: - Bottom bar
 
-    /// Sticky bottom action bar. Photo + Voice on the left, Save
-    /// on the right. Hidden when the keyboard is up (the markdown
-    /// toolbar in MarkdownEditor's inputAccessoryView takes over).
     private var bottomBar: some View {
         HStack(spacing: 12) {
             BottomChip(systemImage: "camera", label: "Photo") {
@@ -205,9 +244,6 @@ struct CaptureView: View {
                 if isDictating { stopDictation() } else { startDictation() }
             }
             Spacer()
-            // Primary action — ink-on-textPrimary pill. Disabled
-            // state is faint, not gray, so it reads as "ready to
-            // wake up" instead of "broken."
             Button {
                 Task { await saveDraft() }
             } label: {
@@ -215,21 +251,17 @@ struct CaptureView: View {
                     if saving {
                         ProgressView().scaleEffect(0.6).tint(Brand.background)
                     } else {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 11, weight: .semibold))
+                        Image(systemName: "arrow.up").font(.system(size: 11, weight: .semibold))
                     }
                     Text(saving ? "Saving…" : "Save")
                         .font(Brand.body(size: 14, weight: .semibold))
                 }
                 .foregroundStyle(canSave ? Brand.background : Brand.textMuted)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 11)
+                .padding(.horizontal, 16).padding(.vertical, 11)
                 .background(
                     Capsule()
                         .fill(canSave ? Brand.textPrimary : Brand.surface)
-                        .overlay(
-                            Capsule().strokeBorder(canSave ? .clear : Brand.borderDim, lineWidth: 1)
-                        )
+                        .overlay(Capsule().strokeBorder(canSave ? .clear : Brand.borderDim, lineWidth: 1))
                 )
             }
             .buttonStyle(.plain)
@@ -238,16 +270,15 @@ struct CaptureView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            Brand.background.opacity(0.92)
-                .background(.ultraThinMaterial)
+            Brand.background
                 .overlay(alignment: .top) {
                     Rectangle().fill(Brand.borderDim).frame(height: 0.5)
                 }
         )
-        .padding(.bottom, 56) // sit above the custom tab bar
+        .padding(.bottom, 56) // above the custom tab bar
     }
 
-    // MARK: - Clipboard
+    // MARK: - Clipboard / lifecycle / save / dictation
 
     private func refreshClipboard() {
         let pb = UIPasteboard.general
@@ -258,8 +289,6 @@ struct CaptureView: View {
             clipboardURL = url
         }
     }
-
-    // MARK: - Lifecycle
 
     private func onAppearEffects() {
         let prefillKey = "mw.intent.captureText"
@@ -272,8 +301,6 @@ struct CaptureView: View {
         }
         refreshClipboard()
     }
-
-    // MARK: - Save
 
     private func saveDraft() async {
         let body = draft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -307,10 +334,9 @@ struct CaptureView: View {
         catch { errorMessage = error.localizedDescription }
     }
 
-    // MARK: - Dictation
-
     private func startDictation() {
         Haptics.tap()
+        focused = false // make room visually for the LISTENING banner
         dictation.start(locales: ["ko-KR", "en-US"]) { recognised in
             draft += draft.isEmpty ? recognised : " " + recognised
         } onError: { msg in
@@ -331,11 +357,6 @@ struct CaptureView: View {
 
 // MARK: - Pieces
 
-/// Shared ambient blob backdrop — used by Capture / Timeline /
-/// Bundles empty states. Big, blurred, very faint so the screen
-/// reads as alive without competing with content. Anchored to
-/// the screen (ignoresSafeArea(.all)) so keyboard arrival
-/// doesn't shift its position.
 struct AmbientBlob: View {
     var body: some View {
         GeometryReader { proxy in
@@ -350,9 +371,6 @@ struct AmbientBlob: View {
     }
 }
 
-/// Tiny faint hint row used inside the empty-state — icon +
-/// short label, used to telegraph the auxiliary inputs without
-/// stealing focus from the main prompt.
 private struct EmptyHintRow: View {
     let icon: String
     let label: LocalizedStringKey
@@ -367,8 +385,6 @@ private struct EmptyHintRow: View {
     }
 }
 
-/// Bottom action chip — icon + label, ink on glass surface.
-/// Used for Photo / Voice toggles in the bottom action bar.
 private struct BottomChip: View {
     let systemImage: String
     let label: LocalizedStringKey
@@ -383,15 +399,45 @@ private struct BottomChip: View {
                     .font(Brand.body(size: 13, weight: .medium))
             }
             .foregroundStyle(accent ?? Brand.textPrimary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 12).padding(.vertical, 10)
             .background(
                 Capsule()
-                    .fill(.ultraThinMaterial)
+                    .fill(Brand.surface)
                     .overlay(Capsule().strokeBorder(Brand.borderDim, lineWidth: 1))
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Banner that surfaces what the OCR extracted (or didn't).
+/// Same vocabulary as the other capture chips.
+private struct OcrResultChip: View {
+    let message: String
+    var onDismiss: () -> Void
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "text.viewfinder")
+                .font(.system(size: 12))
+                .foregroundStyle(Brand.textFaint)
+            Text(message)
+                .font(Brand.body(size: 12))
+                .foregroundStyle(Brand.textPrimary)
+            Spacer()
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Brand.textFaint)
+                    .frame(width: 24, height: 24)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Brand.surface)
+                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
     }
 }
 
@@ -402,24 +448,19 @@ private struct RestoreDraftChip: View {
     var onRestore: () -> Void
     var onDismiss: () -> Void
     private var oneLine: String {
-        preview.replacingOccurrences(of: "\n", with: " ")
-            .trimmingCharacters(in: .whitespaces)
+        preview.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespaces)
     }
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "tray.and.arrow.up")
-                .font(.system(size: 12))
-                .foregroundStyle(Brand.textFaint)
+                .font(.system(size: 12)).foregroundStyle(Brand.textFaint)
             VStack(alignment: .leading, spacing: 1) {
                 Text("UNSAVED DRAFT")
-                    .font(Brand.mono(size: 8, weight: .medium))
-                    .tracking(1)
+                    .font(Brand.mono(size: 8, weight: .medium)).tracking(1)
                     .foregroundStyle(Brand.textFaint)
                 Text(oneLine)
-                    .font(Brand.body(size: 12))
-                    .foregroundStyle(Brand.textPrimary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                    .font(Brand.body(size: 12)).foregroundStyle(Brand.textPrimary)
+                    .lineLimit(1).truncationMode(.tail)
             }
             Spacer(minLength: 8)
             Button(action: { Haptics.tap(); onRestore() }) {
@@ -441,7 +482,7 @@ private struct RestoreDraftChip: View {
         .padding(.horizontal, 12).padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
     }
@@ -461,12 +502,10 @@ private struct DictationBanner: View {
                 .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: pulse)
                 .onAppear { pulse = true }
             Text("LISTENING")
-                .font(Brand.mono(size: 9, weight: .medium))
-                .tracking(1)
+                .font(Brand.mono(size: 9, weight: .medium)).tracking(1)
                 .foregroundStyle(Brand.textMuted)
             Text("Korean + English")
-                .font(Brand.body(size: 11))
-                .foregroundStyle(Brand.textFaint)
+                .font(Brand.body(size: 11)).foregroundStyle(Brand.textFaint)
             Spacer()
             Button(action: onStop) {
                 Text("Stop")
@@ -480,7 +519,7 @@ private struct DictationBanner: View {
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
     }
@@ -493,22 +532,17 @@ private struct ClipboardChip: View {
     let busy: Bool
     var onSave: () -> Void
     var onDismiss: () -> Void
-
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "doc.on.clipboard")
-                .font(.system(size: 12, weight: .regular))
-                .foregroundStyle(Brand.textFaint)
+                .font(.system(size: 12)).foregroundStyle(Brand.textFaint)
             VStack(alignment: .leading, spacing: 1) {
                 Text("FROM CLIPBOARD")
-                    .font(Brand.mono(size: 8, weight: .medium))
-                    .tracking(1)
+                    .font(Brand.mono(size: 8, weight: .medium)).tracking(1)
                     .foregroundStyle(Brand.textFaint)
                 Text(url.absoluteString)
-                    .font(Brand.mono(size: 11))
-                    .foregroundStyle(Brand.textPrimary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                    .font(Brand.mono(size: 11)).foregroundStyle(Brand.textPrimary)
+                    .lineLimit(1).truncationMode(.middle)
             }
             Spacer(minLength: 8)
             Button(action: onSave) {
@@ -528,11 +562,10 @@ private struct ClipboardChip: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 12).padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
     }
@@ -543,17 +576,14 @@ private struct ClipboardChip: View {
 private struct SavedBanner: View {
     let url: URL
     var onDismiss: () -> Void
-
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "checkmark")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Brand.textPrimary)
             Text(url.absoluteString.replacingOccurrences(of: "https://", with: ""))
-                .font(Brand.mono(size: 11))
-                .foregroundStyle(Brand.textPrimary)
-                .lineLimit(1)
-                .truncationMode(.middle)
+                .font(Brand.mono(size: 11)).foregroundStyle(Brand.textPrimary)
+                .lineLimit(1).truncationMode(.middle)
             Spacer()
             Link(destination: url) {
                 Text("View")
@@ -564,8 +594,7 @@ private struct SavedBanner: View {
             }
             ShareLink(item: url) {
                 Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Brand.textFaint)
+                    .font(.system(size: 12)).foregroundStyle(Brand.textFaint)
             }
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
@@ -577,7 +606,7 @@ private struct SavedBanner: View {
         .padding(.horizontal, 12).padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
     }

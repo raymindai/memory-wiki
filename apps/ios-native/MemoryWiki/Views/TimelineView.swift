@@ -83,15 +83,14 @@ final class TimelineModel: ObservableObject {
         Task.detached { await SpotlightIndexer.sync([]) }
     }
 
-    /// Filter by search text + group by bucket, preserving the
-    /// reverse-chronological sort inside each bucket. Buckets
-    /// with zero matches are dropped so the timeline collapses
-    /// gracefully under tight search queries.
-    var grouped: [(TimelineBucket, [Document])] {
+    /// Filter by search text + group by bucket. The caller
+    /// passes pre-filtered docs (e.g. only starred) so the
+    /// grouping logic stays small.
+    func grouped(from source: [Document]) -> [(TimelineBucket, [Document])] {
         let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let visible = q.isEmpty
-            ? documents
-            : documents.filter { $0.displayTitle.lowercased().contains(q) }
+            ? source
+            : source.filter { $0.displayTitle.lowercased().contains(q) }
         var by: [TimelineBucket: [Document]] = [:]
         for doc in visible {
             by[doc.bucket, default: []].append(doc)
@@ -108,11 +107,35 @@ struct TimelineView: View {
     @StateObject private var model = TimelineModel()
     @StateObject private var pinned = PinnedStore.shared
     @State private var showingSearch = false
+    @State private var filter: TimelineFilter = .all
     @FocusState private var searchFocused: Bool
+
+    /// Top-level segmented filter — All vs Starred. Future
+    /// additions (Public / Synced) plug in here.
+    enum TimelineFilter: String, CaseIterable {
+        case all, starred
+        var label: LocalizedStringKey {
+            switch self {
+            case .all:     return "All"
+            case .starred: return "Starred"
+            }
+        }
+    }
 
     private var pinnedDocs: [Document] {
         guard !pinned.docIds.isEmpty else { return [] }
         return model.documents.filter { pinned.isPinned($0.id) }
+    }
+
+    /// Apply the segmented filter on top of the loaded documents
+    /// before grouping. When Starred is active, only pinned docs
+    /// show (and the explicit pinned-section gets folded into
+    /// the buckets so the user sees them grouped chronologically).
+    private func docsForFilter() -> [Document] {
+        switch filter {
+        case .all:     return model.documents
+        case .starred: return model.documents.filter { pinned.isPinned($0.id) }
+        }
     }
 
     var body: some View {
@@ -122,6 +145,7 @@ struct TimelineView: View {
                 VStack(spacing: 0) {
                     header
                     if showingSearch { searchBar }
+                    filterStrip
                     content
                 }
             }
@@ -173,6 +197,42 @@ struct TimelineView: View {
         .padding(.horizontal, 18)
         .padding(.top, 18)
         .padding(.bottom, 12)
+    }
+
+    /// All / Starred segmented filter strip. Hidden when search
+    /// is active to keep the chrome quiet.
+    @ViewBuilder
+    private var filterStrip: some View {
+        if !showingSearch {
+            HStack(spacing: 6) {
+                ForEach(TimelineFilter.allCases, id: \.self) { f in
+                    Button {
+                        Haptics.selection()
+                        withAnimation(.snappy(duration: 0.18)) { filter = f }
+                    } label: {
+                        HStack(spacing: 5) {
+                            if f == .starred {
+                                Image(systemName: "pin.fill")
+                                    .font(.system(size: 9, weight: .semibold))
+                            }
+                            Text(f.label)
+                                .font(Brand.body(size: 12, weight: .medium))
+                        }
+                        .foregroundStyle(filter == f ? Brand.textPrimary : Brand.textMuted)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(filter == f ? Brand.surface : Color.clear)
+                                .overlay(Capsule().strokeBorder(filter == f ? Brand.borderDim : .clear, lineWidth: 1))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 10)
+        }
     }
 
     private var searchBar: some View {
@@ -238,20 +298,25 @@ struct TimelineView: View {
                 glyph: "tray",
                 action: ("Capture your first memory", { Haptics.tap(); router.selectedTab = .capture })
             )
-        } else if model.grouped.isEmpty && model.semanticHits.isEmpty {
+        } else if model.grouped(from: docsForFilter()).isEmpty && model.semanticHits.isEmpty {
             EmptyState(
-                title: "No matches",
-                caption: "Try a shorter query — meaning-based search needs at least 3 characters.",
-                glyph: "magnifyingglass",
-                action: nil
+                title: filter == .starred ? "No starred memories" : "No matches",
+                caption: filter == .starred
+                    ? "Long-press a memory in the All view to star it."
+                    : "Try a shorter query — meaning-based search needs at least 3 characters.",
+                glyph: filter == .starred ? "pin.slash" : "magnifyingglass",
+                action: filter == .starred
+                    ? ("Browse all", { withAnimation { filter = .all } })
+                    : nil
             )
         } else {
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
                     // Pinned docs surface above the time buckets
-                    // — only shown when search is inactive (the
-                    // search results are the user's intent then).
-                    if !pinnedDocs.isEmpty && model.searchText.isEmpty {
+                    // — only shown in All view + no active search,
+                    // since the Starred filter already promotes
+                    // them to the whole list.
+                    if filter == .all && !pinnedDocs.isEmpty && model.searchText.isEmpty {
                         Section {
                             VStack(spacing: 6) {
                                 ForEach(pinnedDocs) { doc in
@@ -268,7 +333,7 @@ struct TimelineView: View {
                             BucketHeader(bucket: .pinned, count: pinnedDocs.count)
                         }
                     }
-                    ForEach(model.grouped, id: \.0) { bucket, docs in
+                    ForEach(model.grouped(from: docsForFilter()), id: \.0) { bucket, docs in
                         Section {
                             VStack(spacing: 6) {
                                 ForEach(docs) { doc in

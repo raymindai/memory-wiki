@@ -217,11 +217,17 @@ private struct BundleRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            // Stacked-sheets glyph — bundle's identity
-            Image(systemName: "square.stack.3d.up.fill")
-                .font(.system(size: 16, weight: .regular))
-                .foregroundStyle(bundle.isDraft == false ? Brand.textPrimary : Brand.textFaint)
-                .frame(width: 24, alignment: .leading)
+            // Layers glyph — matches the lucide-react `Layers`
+            // icon the web uses in every bundle row, with the
+            // same colour vocabulary (lime for public, info
+            // blue for restricted, faint ink for private).
+            BundleLayersIcon(
+                size: 18,
+                color: bundle.isDraft == false
+                    ? (bundle.isRestricted ? Brand.microInfo : Brand.microLime)
+                    : Brand.textFaint
+            )
+            .frame(width: 24, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(bundle.displayTitle)
@@ -328,6 +334,42 @@ private struct EmptyBundleState: View {
             }
             .frame(maxWidth: .infinity)
         }
+    }
+}
+
+/// Pure SwiftUI port of the web's `lucide-react` <Layers /> glyph
+/// — three stacked diamonds — so the iOS bundle vocabulary
+/// matches the web sidebar's bundle row exactly.
+struct BundleLayersIcon: View {
+    var size: CGFloat = 18
+    var color: Color = .white
+    var body: some View {
+        Canvas { ctx, sz in
+            let w = sz.width
+            let h = sz.height
+            let strokeWidth: CGFloat = max(1.2, size * 0.08)
+            // Top diamond
+            var top = Path()
+            top.move(to: CGPoint(x: w * 0.5, y: h * 0.10))
+            top.addLine(to: CGPoint(x: w * 0.92, y: h * 0.32))
+            top.addLine(to: CGPoint(x: w * 0.5, y: h * 0.54))
+            top.addLine(to: CGPoint(x: w * 0.08, y: h * 0.32))
+            top.closeSubpath()
+            ctx.stroke(top, with: .color(color), lineWidth: strokeWidth)
+            // Middle diamond
+            var mid = Path()
+            mid.move(to: CGPoint(x: w * 0.08, y: h * 0.50))
+            mid.addLine(to: CGPoint(x: w * 0.5, y: h * 0.72))
+            mid.addLine(to: CGPoint(x: w * 0.92, y: h * 0.50))
+            ctx.stroke(mid, with: .color(color), lineWidth: strokeWidth)
+            // Bottom diamond
+            var bot = Path()
+            bot.move(to: CGPoint(x: w * 0.08, y: h * 0.68))
+            bot.addLine(to: CGPoint(x: w * 0.5, y: h * 0.90))
+            bot.addLine(to: CGPoint(x: w * 0.92, y: h * 0.68))
+            ctx.stroke(bot, with: .color(color), lineWidth: strokeWidth)
+        }
+        .frame(width: size, height: size)
     }
 }
 
