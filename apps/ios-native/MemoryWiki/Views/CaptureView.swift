@@ -23,6 +23,7 @@ struct CaptureView: View {
     @State private var errorMessage: String?
     @State private var clipboardURL: URL?
     @State private var showPhotoPicker = false
+    @State private var showOCRPicker = false
     @State private var showURLSheet = false
     @State private var showImportSheet = false
     @State private var ocrBanner: String? = nil
@@ -104,13 +105,23 @@ struct CaptureView: View {
             withAnimation(.snappy(duration: 0.22)) { keyboardUp = false }
         }
         .sheet(isPresented: $showPhotoPicker) {
-            PhotoCaptureSheet(isPresented: $showPhotoPicker) { ocrText, _ in
+            // Photo mode → upload image, embed as markdown image.
+            PhotoCaptureSheet(isPresented: $showPhotoPicker) { _, image in
+                Task { await uploadPhoto(image) }
+            }
+            .presentationDetents([.medium])
+            .preferredColorScheme(.dark)
+        }
+        .sheet(isPresented: $showOCRPicker) {
+            // OCR mode → on-device Vision text extraction, image
+            // discarded, text appended to body.
+            PhotoCaptureSheet(isPresented: $showOCRPicker) { ocrText, _ in
                 let clean = ocrText.trimmingCharacters(in: .whitespacesAndNewlines)
                 if clean.isEmpty {
                     ocrBanner = "No text recognised in this image."
                 } else {
                     if titleDraft.isEmpty {
-                        titleDraft = "Photo capture · \(Date().formatted(date: .abbreviated, time: .shortened))"
+                        titleDraft = "OCR · \(Date().formatted(date: .abbreviated, time: .shortened))"
                     }
                     bodyDraft = bodyDraft.isEmpty ? clean : "\(bodyDraft)\n\n\(clean)"
                     ocrBanner = "OCR extracted \(clean.count) characters."
@@ -216,6 +227,10 @@ struct CaptureView: View {
                     Haptics.tap()
                     showPhotoPicker = true
                 }
+                ModePill(icon: "text.viewfinder", label: "OCR", accent: Brand.microInfo) {
+                    Haptics.tap()
+                    showOCRPicker = true
+                }
                 ModePill(icon: isDictating ? "mic.fill" : "mic",
                          label: isDictating ? "Stop" : "Voice",
                          accent: isDictating ? Brand.microRed : Brand.textPrimary) {
@@ -318,45 +333,63 @@ struct CaptureView: View {
         }
     }
 
-    /// Notes-style horizontal scrolling toolbar. Lives via
-    /// safeAreaInset on the body field so it sits cleanly above
-    /// the keyboard with no clipping at the edges + an 8pt gap
-    /// from the keyboard line.
+    /// Apple Notes-style toolbar: single rounded glass pill with
+    /// every formatting + media button. Photo / OCR / Voice are
+    /// reachable from inside the writing flow (not just from the
+    /// empty-state mode picker), so the user can add a photo or
+    /// dictate a sentence without leaving the draft.
+    ///
+    /// Anchored via .ignoresSafeArea(.container, edges: .bottom)
+    /// so the system bottom safe area (home indicator) doesn't
+    /// re-introduce the gap between this pill and the keyboard.
     private var markdownToolbar: some View {
-        VStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 4) {
-                    mdButton("number") { insertBody("\n# ") }
-                    mdButton("bold") { wrap("**") }
-                    mdButton("italic") { wrap("*") }
-                    mdButton("list.bullet") { insertBody("\n- ") }
-                    mdButton("list.number") { insertBody("\n1. ") }
-                    mdButton("checkmark.square") { insertBody("\n- [ ] ") }
-                    mdButton("chevron.left.forwardslash.chevron.right") { insertBody("\n```\n\n```\n") }
-                    mdButton("link") { insertBody("[text](https://)") }
-                    mdButton("quote.bubble") { insertBody("\n> ") }
-                    mdButton("minus") { insertBody("\n\n---\n\n") }
-                    Spacer(minLength: 12)
-                    mdButton(isDictating ? "mic.fill" : "mic",
-                             tint: isDictating ? Brand.microRed : Brand.textPrimary) {
-                        if isDictating { stopDictation() } else { startDictation() }
-                    }
-                    mdButton("keyboard.chevron.compact.down", tint: Brand.textMuted) {
-                        focused = nil
-                    }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 0) {
+                mdButton("number") { insertBody("\n# ") }
+                mdButton("bold") { wrap("**") }
+                mdButton("italic") { wrap("*") }
+                mdButton("list.bullet") { insertBody("\n- ") }
+                mdButton("list.number") { insertBody("\n1. ") }
+                mdButton("checkmark.square") { insertBody("\n- [ ] ") }
+                mdButton("chevron.left.forwardslash.chevron.right") { insertBody("\n```\n\n```\n") }
+                mdButton("link") { insertBody("[text](https://)") }
+                mdButton("quote.bubble") { insertBody("\n> ") }
+                mdButton("minus") { insertBody("\n\n---\n\n") }
+                // Visual divider before media + voice — distinct
+                // from formatting tokens.
+                Rectangle().fill(Brand.borderDim)
+                    .frame(width: 1, height: 18)
+                    .padding(.horizontal, 4)
+                mdButton("camera", tint: Brand.microWarn) {
+                    showPhotoPicker = true
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
+                mdButton("text.viewfinder", tint: Brand.microInfo) {
+                    showOCRPicker = true
+                }
+                mdButton(isDictating ? "mic.fill" : "mic",
+                         tint: isDictating ? Brand.microRed : Brand.textPrimary) {
+                    if isDictating { stopDictation() } else { startDictation() }
+                }
+                mdButton("keyboard.chevron.compact.down", tint: Brand.textMuted) {
+                    focused = nil
+                }
             }
-            .background(
-                Brand.surface
-                    .overlay(alignment: .top) {
-                        Rectangle().fill(Brand.borderDim).frame(height: 0.5)
-                    }
-            )
-            // 8pt cushion between toolbar and keyboard line.
-            Color.clear.frame(height: 8).background(Brand.background)
+            .padding(.horizontal, 6)
         }
+        .background(
+            Capsule(style: .continuous)
+                .fill(Brand.surface)
+                .overlay(Capsule(style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
+        )
+        .padding(.horizontal, 10)
+        // No bottom padding — pill should sit flush above the
+        // keyboard's suggestion bar.
+        .padding(.bottom, 0)
+        // Ignore the container's bottom safe area so the system
+        // home-indicator inset doesn't push the pill UP and leave
+        // a black gap below it. The keyboard itself covers the
+        // home-indicator area when up.
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 
     @ViewBuilder
@@ -370,8 +403,11 @@ struct CaptureView: View {
             Image(systemName: systemName)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(tint)
-                .frame(width: 38, height: 32)
+                // Notes button cell: square-ish, ample tap area,
+                // no fill (the pill background handles framing).
+                .frame(width: 40, height: 36)
         }
+        .buttonStyle(.plain)
     }
 
     private func insertBody(_ scaffold: String) {
@@ -486,6 +522,31 @@ struct CaptureView: View {
         Haptics.tap()
         dictation.stop()
         withAnimation(.snappy) { isDictating = false }
+    }
+
+    /// Uploads a captured photo as an image to /api/upload and
+    /// appends a `![alt](url)` markdown embed to the body.
+    /// Surface uses `Photo` mode (vs OCR which extracts text).
+    private func uploadPhoto(_ image: UIImage) async {
+        guard let data = image.jpegData(compressionQuality: 0.85) else {
+            ocrBanner = "Couldn't encode the photo."
+            return
+        }
+        ocrBanner = "Uploading photo…"
+        Haptics.tap()
+        do {
+            let url = try await APIClient.shared.uploadImage(data: data, contentType: "image/jpeg")
+            let embed = "![Photo](\(url.absoluteString))"
+            bodyDraft = bodyDraft.isEmpty ? embed : "\(bodyDraft)\n\n\(embed)"
+            if titleDraft.isEmpty {
+                titleDraft = "Photo · \(Date().formatted(date: .abbreviated, time: .shortened))"
+            }
+            ocrBanner = "Photo uploaded."
+            Haptics.success()
+        } catch {
+            ocrBanner = "Upload failed: \(error.localizedDescription)"
+            Haptics.warning()
+        }
     }
 }
 

@@ -162,6 +162,39 @@ final class APIClient {
         )
     }
 
+    // MARK: - Image upload
+
+    /// Uploads raw image bytes to /api/upload and returns the
+    /// public CDN URL. Used by Capture's Photo mode to embed an
+    /// image into a new doc via `![alt](url)` markdown.
+    func uploadImage(data: Data, contentType: String) async throws -> URL {
+        struct Response: Decodable { let url: String }
+        guard let session = await AuthManager.shared.session else { throw APIError.notAuthenticated }
+        let boundary = "MWImageUpload\(UUID().uuidString)"
+        var body = Data()
+        let filename = "capture-\(Int(Date().timeIntervalSince1970)).jpg"
+        let header = "--\(boundary)\r\n" +
+            "Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n" +
+            "Content-Type: \(contentType)\r\n\r\n"
+        body.append(header.data(using: .utf8)!)
+        body.append(data)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+
+        var req = URLRequest(url: Self.baseURL.appendingPathComponent("/api/upload"))
+        req.httpMethod = "POST"
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        req.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        req.setValue(session.userId, forHTTPHeaderField: "x-user-id")
+        if let email = session.email { req.setValue(email, forHTTPHeaderField: "x-user-email") }
+        req.httpBody = body
+        req.timeoutInterval = 30
+        let response: Response = try await perform(req)
+        guard let url = URL(string: response.url) else {
+            throw APIError.http(-1, "bad upload URL")
+        }
+        return url
+    }
+
     // MARK: - Profile + Hub
 
     /// User's own profile row — display_name, avatar, hub_slug,
