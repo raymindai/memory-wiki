@@ -33,11 +33,16 @@
 "THIS MONTH" = "이번 달";
 "EARLIER"    = "이전";
 "PINNED"     = "고정됨";
+"STARRED"    = "별표";
 "All"        = "전체";
 "Starred"    = "고정";
 "No starred memories" = "고정된 메모리가 없어요";
 "Long-press a memory in the All view to star it." = "전체 화면에서 메모리를 길게 눌러 고정하세요.";
 "Browse all" = "전체 보기";
+"No starred bundles" = "고정된 번들이 없어요";
+"Long-press a bundle in the All view to star it." = "전체 화면에서 번들을 길게 눌러 고정하세요.";
+"Star"      = "고정";
+"Unstar"    = "고정 해제";
 "TABLE OF CONTENTS" = "목차";
 "BY MEANING" = "의미 기반";
 

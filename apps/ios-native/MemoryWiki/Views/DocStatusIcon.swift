@@ -43,19 +43,20 @@ struct DocStatusIcon: View {
     }
 
     /// Tiny circle with a check — mirrors the web's
-    /// data-sidebar sync badge: ink dot, white check, sits at
-    /// the corner of the access glyph.
+    /// data-sidebar sync badge: ink-bg ring around a micro-info
+    /// blue dot with a white check on top. Same visual semantic
+    /// as the synced-source chip on the row's trailing edge.
     private var syncBadge: some View {
         ZStack {
             Circle()
                 .fill(Brand.background)
                 .frame(width: 12, height: 12)
             Circle()
-                .fill(Brand.textPrimary)
+                .fill(Brand.microInfo)
                 .frame(width: 10, height: 10)
             Image(systemName: "checkmark")
                 .font(.system(size: 6.5, weight: .bold))
-                .foregroundStyle(Brand.background)
+                .foregroundStyle(.white)
         }
     }
 

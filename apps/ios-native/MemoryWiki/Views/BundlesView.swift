@@ -40,8 +40,32 @@ final class BundlesModel: ObservableObject {
 struct BundlesView: View {
     @EnvironmentObject private var router: AppRouter
     @StateObject private var model = BundlesModel()
+    @StateObject private var pinned = PinnedStore.shared
     @State private var showingSearch = false
+    @State private var filter: BundleFilter = .all
     @FocusState private var searchFocused: Bool
+
+    /// Same All / Starred segmented filter the Timeline tab has.
+    /// Starred reads from PinnedStore.bundleIds — server-synced
+    /// with the web's /api/user/pins endpoint.
+    enum BundleFilter: String, CaseIterable {
+        case all, starred
+        var label: LocalizedStringKey {
+            switch self {
+            case .all:     return "All"
+            case .starred: return "Starred"
+            }
+        }
+    }
+
+    private var visibleBundles: [AppBundle] {
+        let base: [AppBundle]
+        switch filter {
+        case .all:     base = model.visible
+        case .starred: base = model.visible.filter { pinned.isPinnedBundle($0.id) }
+        }
+        return base
+    }
 
     var body: some View {
         NavigationStack(path: $router.bundlesPath) {
@@ -50,6 +74,7 @@ struct BundlesView: View {
                 VStack(spacing: 0) {
                     header
                     if showingSearch { searchBar }
+                    filterStrip
                     content
                 }
             }
@@ -67,13 +92,22 @@ struct BundlesView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            await pinned.hydrateFromServer()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
-            Task { await model.load() }
+            Task {
+                await model.load()
+                await pinned.hydrateFromServer()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
             model.clearForUserChange()
-            Task { await model.load() }
+            Task {
+                await model.load()
+                await pinned.hydrateFromServer()
+            }
         }
     }
 
@@ -105,6 +139,41 @@ struct BundlesView: View {
         .padding(.horizontal, 18)
         .padding(.top, 18)
         .padding(.bottom, 12)
+    }
+
+    @ViewBuilder
+    private var filterStrip: some View {
+        if !showingSearch {
+            HStack(spacing: 6) {
+                ForEach(BundleFilter.allCases, id: \.self) { f in
+                    Button {
+                        Haptics.selection()
+                        withAnimation(.snappy(duration: 0.18)) { filter = f }
+                    } label: {
+                        HStack(spacing: 5) {
+                            if f == .starred {
+                                Image(systemName: filter == f ? "star.fill" : "star")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(Brand.microWarn)
+                            }
+                            Text(f.label)
+                                .font(Brand.body(size: 12, weight: .medium))
+                                .foregroundStyle(filter == f ? Brand.textPrimary : Brand.textMuted)
+                        }
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(filter == f ? Brand.surface : Color.clear)
+                                .overlay(Capsule().strokeBorder(filter == f ? Brand.borderDim : .clear, lineWidth: 1))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 18)
+            .padding(.bottom, 10)
+        }
     }
 
     private var searchBar: some View {
@@ -162,19 +231,23 @@ struct BundlesView: View {
                     }
                 })
             )
-        } else if model.visible.isEmpty {
+        } else if visibleBundles.isEmpty {
             EmptyBundleState(
-                title: "No matches",
-                caption: "Try a different search.",
-                glyph: "magnifyingglass",
-                action: nil
+                title: filter == .starred ? "No starred bundles" : "No matches",
+                caption: filter == .starred
+                    ? "Long-press a bundle in the All view to star it."
+                    : "Try a different search.",
+                glyph: filter == .starred ? "star" : "magnifyingglass",
+                action: filter == .starred
+                    ? ("Browse all", { withAnimation { filter = .all } })
+                    : nil
             )
         } else {
             ScrollView {
                 LazyVStack(spacing: 6) {
-                    ForEach(model.visible) { bundle in
+                    ForEach(visibleBundles) { bundle in
                         NavigationLink(value: BundlesRoute.bundleDetail(bundle)) {
-                            BundleRow(bundle: bundle)
+                            BundleRow(bundle: bundle, isPinned: pinned.isPinnedBundle(bundle.id))
                                 .contextMenu { bundleMenu(bundle) }
                         }
                         .buttonStyle(.plain)
@@ -183,12 +256,24 @@ struct BundlesView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 12)
             }
-            .refreshable { await model.load() }
+            .refreshable {
+                await model.load()
+                await pinned.hydrateFromServer()
+            }
         }
     }
 
     @ViewBuilder
     private func bundleMenu(_ bundle: AppBundle) -> some View {
+        let isPinned = pinned.isPinnedBundle(bundle.id)
+        Button {
+            Haptics.selection()
+            pinned.toggleBundle(bundle.id)
+        } label: {
+            Label(isPinned ? "Unstar" : "Star",
+                  systemImage: isPinned ? "star.slash" : "star")
+        }
+        Divider()
         Button {
             UIPasteboard.general.string = bundle.publicURL.absoluteString
             Haptics.success()
@@ -214,6 +299,7 @@ struct BundlesView: View {
 
 private struct BundleRow: View {
     let bundle: AppBundle
+    var isPinned: Bool = false
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -230,10 +316,17 @@ private struct BundleRow: View {
             .frame(width: 24, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(bundle.displayTitle)
-                    .font(Brand.body(size: 14, weight: .medium))
-                    .foregroundStyle(Brand.textPrimary)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(bundle.displayTitle)
+                        .font(Brand.body(size: 14, weight: .medium))
+                        .foregroundStyle(Brand.textPrimary)
+                        .lineLimit(1)
+                    if isPinned {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Brand.microWarn)
+                    }
+                }
                 metaLine
             }
 

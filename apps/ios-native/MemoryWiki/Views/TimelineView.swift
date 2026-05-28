@@ -162,9 +162,15 @@ struct TimelineView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            await pinned.hydrateFromServer()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
-            Task { await model.load() }
+            Task {
+                await model.load()
+                await pinned.hydrateFromServer()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .mwOpenSearch)) { _ in
             withAnimation(.snappy(duration: 0.22)) { showingSearch = true }
@@ -174,7 +180,10 @@ struct TimelineView: View {
             // Account switch — empty the list immediately, then
             // re-fetch under the new identity.
             model.clearForUserChange()
-            Task { await model.load() }
+            Task {
+                await model.load()
+                await pinned.hydrateFromServer()
+            }
         }
     }
 
@@ -212,13 +221,18 @@ struct TimelineView: View {
                     } label: {
                         HStack(spacing: 5) {
                             if f == .starred {
-                                Image(systemName: "pin.fill")
-                                    .font(.system(size: 9, weight: .semibold))
+                                // Star glyph in micro-warn yellow —
+                                // every other star surface uses the
+                                // same colour so the brand reads
+                                // "starred = warm yellow."
+                                Image(systemName: filter == f ? "star.fill" : "star")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(Brand.microWarn)
                             }
                             Text(f.label)
                                 .font(Brand.body(size: 12, weight: .medium))
+                                .foregroundStyle(filter == f ? Brand.textPrimary : Brand.textMuted)
                         }
-                        .foregroundStyle(filter == f ? Brand.textPrimary : Brand.textMuted)
                         .padding(.horizontal, 12).padding(.vertical, 6)
                         .background(
                             Capsule()
@@ -304,7 +318,7 @@ struct TimelineView: View {
                 caption: filter == .starred
                     ? "Long-press a memory in the All view to star it."
                     : "Try a shorter query — meaning-based search needs at least 3 characters.",
-                glyph: filter == .starred ? "pin.slash" : "magnifyingglass",
+                glyph: filter == .starred ? "star" : "magnifyingglass",
                 action: filter == .starred
                     ? ("Browse all", { withAnimation { filter = .all } })
                     : nil
@@ -361,15 +375,15 @@ struct TimelineView: View {
     }
 
     /// Long-press menu shared by pinned + bucketed rows. Covers
-    /// pin/unpin, copy URL, copy AI prompt, share, open on web.
+    /// star/unstar, copy URL, copy AI prompt, share, open on web.
     @ViewBuilder
     private func docMenu(_ doc: Document) -> some View {
         Button {
             Haptics.selection()
             pinned.toggle(doc.id)
         } label: {
-            Label(pinned.isPinned(doc.id) ? "Unpin" : "Pin to top",
-                  systemImage: pinned.isPinned(doc.id) ? "pin.slash" : "pin")
+            Label(pinned.isPinned(doc.id) ? "Unstar" : "Star",
+                  systemImage: pinned.isPinned(doc.id) ? "star.slash" : "star")
         }
         Divider()
         Button {
@@ -436,9 +450,12 @@ private struct DocumentRow: View {
                         .foregroundStyle(Brand.textPrimary)
                         .lineLimit(1)
                     if isPinned {
-                        Image(systemName: "pin.fill")
-                            .font(.system(size: 9))
-                            .foregroundStyle(Brand.textFaint)
+                        // Starred = micro-warn yellow filled star.
+                        // Brand convention: lime for public status,
+                        // warn yellow for user-curated/personal.
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Brand.microWarn)
                     }
                 }
                 trailingBadges
@@ -477,28 +494,30 @@ private struct DocumentRow: View {
     }
 
     /// Inline micro chips for source + view count when present.
+    /// Micro-color vocab: sync chip uses info blue (matches web's
+    /// data-sidebar sync badge); view count stays faint.
     @ViewBuilder private var trailingBadges: some View {
-        let chips: [(String, String)] = {
-            var out: [(String, String)] = []
-            if let src = doc.syncedSource { out.append(("arrow.triangle.2.circlepath", src.uppercased())) }
-            if let vc = doc.viewCount, vc > 0 { out.append(("eye", "\(vc)")) }
-            return out
-        }()
-        if !chips.isEmpty {
-            HStack(spacing: 8) {
-                ForEach(0..<chips.count, id: \.self) { idx in
-                    HStack(spacing: 3) {
-                        Image(systemName: chips[idx].0)
-                            .font(.system(size: 8, weight: .medium))
-                        Text(chips[idx].1)
-                            .font(Brand.mono(size: 9, weight: .medium))
-                            .tracking(0.5)
-                    }
-                    .foregroundStyle(Brand.textFaint)
+        HStack(spacing: 8) {
+            if let src = doc.syncedSource {
+                HStack(spacing: 3) {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 8, weight: .medium))
+                    Text(src.uppercased())
+                        .font(Brand.mono(size: 9, weight: .medium))
+                        .tracking(0.5)
                 }
+                .foregroundStyle(Brand.microInfo)
             }
-        } else {
-            EmptyView()
+            if let vc = doc.viewCount, vc > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "eye")
+                        .font(.system(size: 8, weight: .medium))
+                    Text("\(vc)")
+                        .font(Brand.mono(size: 9, weight: .medium))
+                        .tracking(0.5)
+                }
+                .foregroundStyle(Brand.textFaint)
+            }
         }
     }
 }

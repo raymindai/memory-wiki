@@ -153,7 +153,7 @@ enum TimelineBucket: String, CaseIterable, Identifiable {
         case .thisWeek: return "THIS WEEK"
         case .thisMonth: return "THIS MONTH"
         case .earlier: return "EARLIER"
-        case .pinned: return "PINNED"
+        case .pinned: return "STARRED"
         }
     }
 }
