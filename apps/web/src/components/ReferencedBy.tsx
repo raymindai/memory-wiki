@@ -1,10 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { File as FileIcon, Layers, Globe } from "lucide-react";
 import type { ReferencedBy } from "@/lib/queryBacklinks";
 
-// Server component. Renders the "Referenced by" section on viewer
-// pages — auto-generated from the `backlinks` table populated by
-// syncBacklinks() at write time.
+// Client component. Despite being just a list renderer, it carries
+// onMouseEnter / onMouseLeave handlers for the row hover effect —
+// passing those to <Link> (a Client component) from a Server
+// component throws "Event handlers cannot be passed to Client
+// Component props" in production. Marking this file 'use client'
+// resolves that without changing visuals.
 //
 // Visual parity with RelatedInHubPanel: mono caption + count on the
 // right, then boxed card rows with a leading kind-icon, bold title,
