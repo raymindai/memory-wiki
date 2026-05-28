@@ -394,22 +394,14 @@ private struct MarkdownAssistantText: View {
 
     @ViewBuilder
     private func markdownText(_ s: String) -> some View {
-        if let attributed = try? AttributedString(
-            markdown: s,
-            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        ) {
-            Text(attributed)
-                .font(Brand.body(size: 14))
-                .foregroundStyle(Brand.textPrimary)
-                .textSelection(.enabled)
-                .fixedSize(horizontal: false, vertical: true)
-        } else {
-            Text(s)
-                .font(Brand.body(size: 14))
-                .foregroundStyle(Brand.textPrimary)
-                .textSelection(.enabled)
-                .fixedSize(horizontal: false, vertical: true)
-        }
+        // Use the full block-level MarkdownBody renderer so
+        // headings (##), lists (- / 1.), code fences (```),
+        // blockquotes (>) and rules (---) render as styled
+        // blocks instead of leaking their raw characters.
+        // `AttributedString(markdown:, .inlineOnly…)` only knew
+        // about **bold** / *italic* / `code` / links — every
+        // block construct ended up as literal text.
+        MarkdownBody(markdown: s)
     }
 
     private func docChipsRow(_ ids: [String]) -> some View {
