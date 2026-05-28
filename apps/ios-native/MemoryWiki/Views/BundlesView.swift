@@ -11,13 +11,21 @@ final class BundlesModel: ObservableObject {
     @Published private(set) var loading = false
     @Published var errorMessage: String?
     @Published var searchText = ""
+    private var lastLoaded: Date?
 
-    func load() async {
-        loading = true
+    /// Same cache logic as TimelineModel — skip network when
+    /// cached <30s ago unless caller forces.
+    func load(force: Bool = false) async {
+        if !force, !bundles.isEmpty,
+           let last = lastLoaded, Date().timeIntervalSince(last) < 30 {
+            return
+        }
+        if bundles.isEmpty { loading = true }
         defer { loading = false }
         do {
             bundles = try await APIClient.shared.userBundles()
                 .sorted { $0.sortDate > $1.sortDate }
+            lastLoaded = Date()
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
@@ -26,6 +34,7 @@ final class BundlesModel: ObservableObject {
 
     func clearForUserChange() {
         bundles = []
+        lastLoaded = nil
         searchText = ""
         errorMessage = nil
     }
@@ -104,14 +113,14 @@ struct BundlesView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
             Task {
-                await model.load()
+                await model.load(force: true)
                 await pinned.hydrateFromServer()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
             model.clearForUserChange()
             Task {
-                await model.load()
+                await model.load(force: true)
                 await pinned.hydrateFromServer()
             }
         }
@@ -249,13 +258,9 @@ struct BundlesView: View {
                 .padding(.bottom, 12)
             }
             .refreshable {
-                await model.load()
+                await model.load(force: true)
                 await pinned.hydrateFromServer()
             }
-            .transition(.asymmetric(
-                insertion: .opacity.combined(with: .move(edge: .bottom)),
-                removal: .opacity
-            ))
         }
     }
 

@@ -21,41 +21,64 @@ import UIKit
 
 struct CaptureView: View {
     @EnvironmentObject private var router: AppRouter
-    @State private var draft = ""
+    // Two-field layout (Apple Notes pattern): title at the top
+    // styled H1, body below styled P. Combined on save as
+    // `# <title>\n\n<body>` so the server's title-extractor
+    // picks the first line just like every other channel.
+    @State private var titleDraft = ""
+    @State private var bodyDraft = ""
     @State private var saving = false
     @State private var savedURL: URL?
     @State private var errorMessage: String?
     @State private var clipboardURL: URL?
     @State private var showPhotoPicker = false
     @State private var ocrBanner: String? = nil
-    @FocusState private var focused: Bool
+    /// Three focus targets so we can drive cursor placement
+    /// explicitly + know which field is active for the
+    /// keyboard-up state machine.
+    enum CaptureField { case title, body }
+    @FocusState private var focused: CaptureField?
     @State private var keyboardUp = false
 
-    @AppStorage("mw.draft.body") private var persistedDraft: String = ""
-    @State private var restorable: String? = nil
+    @AppStorage("mw.draft.title") private var persistedTitle: String = ""
+    @AppStorage("mw.draft.body") private var persistedBody: String = ""
+    @State private var restorableTitle: String? = nil
+    @State private var restorableBody: String? = nil
     @State private var dictation = DictationController()
     @State private var isDictating = false
 
+    private var combinedMarkdown: String {
+        let t = titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        let b = bodyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !t.isEmpty && !b.isEmpty { return "# \(t)\n\n\(b)" }
+        if !t.isEmpty { return "# \(t)" }
+        return b
+    }
+    private var hasDraftContent: Bool {
+        !titleDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        !bodyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     private var canSave: Bool {
-        !saving && savedURL == nil && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !saving && savedURL == nil && hasDraftContent
+    }
+    private var hasRestorable: Bool {
+        (restorableTitle?.isEmpty == false) || (restorableBody?.isEmpty == false)
     }
 
     var body: some View {
         ZStack {
             Brand.background.ignoresSafeArea()
-            if draft.isEmpty && clipboardURL == nil && restorable == nil && savedURL == nil {
+            if !hasDraftContent && clipboardURL == nil && !hasRestorable && savedURL == nil {
                 AmbientBlob()
             }
-            // Inline layout — header → chips → editor → bottomBar
-            // all in the same VStack so the bottom bar sits
-            // DIRECTLY above the tab bar with no dead space.
-            // When the keyboard rises the markdown accessory
-            // strip takes over; we hide the bottomBar so they
-            // don't both fight for space.
             VStack(spacing: 0) {
                 header
                 chipsArea
-                editor
+                titleField
+                // No divider — Notes lets typography do the
+                // work. Title bold/large, body regular/smaller
+                // is enough hierarchy.
+                bodyField
                 if isDictating {
                     DictationBanner { stopDictation() }
                         .padding(.horizontal, 14)
@@ -82,9 +105,10 @@ struct CaptureView: View {
         }
         .onAppear { onAppearEffects() }
         .onChange(of: focused) { _, isFocused in
-            if isFocused { refreshClipboard() }
+            if isFocused != nil { refreshClipboard() }
         }
-        .onChange(of: draft) { _, new in persistedDraft = new }
+        .onChange(of: titleDraft) { _, new in persistedTitle = new }
+        .onChange(of: bodyDraft) { _, new in persistedBody = new }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             withAnimation(.snappy(duration: 0.22)) { keyboardUp = true }
         }
@@ -97,8 +121,10 @@ struct CaptureView: View {
                 if clean.isEmpty {
                     ocrBanner = "No text recognised in this image."
                 } else {
-                    let title = "Photo capture · \(Date().formatted(date: .abbreviated, time: .shortened))"
-                    draft = "# \(title)\n\n\(clean)"
+                    if titleDraft.isEmpty {
+                        titleDraft = "Photo capture · \(Date().formatted(date: .abbreviated, time: .shortened))"
+                    }
+                    bodyDraft = bodyDraft.isEmpty ? clean : "\(bodyDraft)\n\n\(clean)"
                     ocrBanner = "OCR extracted \(clean.count) characters."
                     Haptics.success()
                 }
@@ -108,36 +134,81 @@ struct CaptureView: View {
         }
     }
 
-    // MARK: - Header (tab-consistent — large "Capture" display title)
+    // MARK: - Header — Apple Notes pattern (floating circle buttons)
 
+    /// Floating circle buttons mirroring Apple Notes' compose
+    /// chrome: small ellipsis on the left, share + yellow Done
+    /// (microWarn check) on the right when content exists or
+    /// focus is live. Header is minimal otherwise — Notes lets
+    /// the canvas dominate, and so should we.
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text("Capture")
-                .font(Brand.display(size: 26))
-                .foregroundStyle(Brand.textPrimary)
-            if !draft.isEmpty {
-                Text("\(draft.count)")
-                    .font(Brand.mono(size: 11))
+        HStack(spacing: 8) {
+            // Left: minimal char count chip when there's content.
+            if hasDraftContent {
+                Text("\(combinedMarkdown.count)")
+                    .font(Brand.mono(size: 10, weight: .medium))
                     .foregroundStyle(Brand.textFaint)
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .background(Capsule().strokeBorder(Brand.borderDim, lineWidth: 1))
             }
             Spacer()
+            if hasDraftContent || focused != nil {
+                // Cancel — small glass circle with an X. Stashes
+                // current text into restorable in case it was a
+                // mistap, then clears the fields.
+                CircleHeaderButton(systemName: "xmark", tint: Brand.textMuted) {
+                    Haptics.tap()
+                    focused = nil
+                    if hasDraftContent {
+                        restorableTitle = titleDraft
+                        restorableBody = bodyDraft
+                    }
+                    titleDraft = ""
+                    bodyDraft = ""
+                }
+                // Done — yellow filled circle with a check. The
+                // signature Apple Notes affordance, micro-warn
+                // tinted to match the brand's star vocabulary.
+                Button {
+                    Task { await saveDraft() }
+                } label: {
+                    Image(systemName: saving ? "ellipsis" : "checkmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(canSave ? Brand.background : Brand.textFaint)
+                        .frame(width: 34, height: 34)
+                        .background(Circle().fill(canSave ? Brand.microWarn : Brand.surface))
+                        .overlay(Circle().strokeBorder(canSave ? .clear : Brand.borderDim, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSave)
+                .transition(.opacity)
+            }
         }
-        .padding(.horizontal, 18)
-        .padding(.top, 18)
-        .padding(.bottom, 12)
+        .padding(.horizontal, 14)
+        .padding(.top, 12)
+        .padding(.bottom, 4)
+        .animation(.snappy(duration: 0.18), value: focused)
+        .animation(.snappy(duration: 0.18), value: hasDraftContent)
     }
 
     // MARK: - Smart chips
 
     @ViewBuilder
     private var chipsArea: some View {
-        if let saved = restorable, !saved.isEmpty, savedURL == nil {
-            RestoreDraftChip(preview: saved) {
-                draft = saved
-                restorable = nil
+        if hasRestorable && savedURL == nil {
+            let preview = (restorableTitle?.isEmpty == false
+                           ? restorableTitle!
+                           : (restorableBody ?? ""))
+            RestoreDraftChip(preview: preview) {
+                titleDraft = restorableTitle ?? ""
+                bodyDraft = restorableBody ?? ""
+                restorableTitle = nil
+                restorableBody = nil
             } onDismiss: {
-                restorable = nil
-                persistedDraft = ""
+                restorableTitle = nil
+                restorableBody = nil
+                persistedTitle = ""
+                persistedBody = ""
             }
             .padding(.horizontal, 14)
             .padding(.top, 6)
@@ -150,62 +221,73 @@ struct CaptureView: View {
         } else if let url = savedURL {
             SavedBanner(url: url) {
                 savedURL = nil
-                draft = ""
+                titleDraft = ""
+                bodyDraft = ""
             }
             .padding(.horizontal, 14)
             .padding(.top, 6)
         }
     }
 
-    // MARK: - Editor
+    // MARK: - Title field (H1)
 
-    /// Vanilla SwiftUI TextEditor — the path of least resistance
-    /// for getting cursor + keyboard + selection to actually
-    /// behave. Markdown toolbar lives in .toolbar(.keyboard) so
-    /// iOS slides it in with the keyboard.
-    private var editor: some View {
+    /// Bold display TextField — Notes-style title at the top of
+    /// the canvas. Placeholder is the brand prompt.
+    private var titleField: some View {
+        TextField("",
+                  text: $titleDraft,
+                  prompt: Text("What's on your mind?")
+                    .foregroundStyle(Brand.textFaint)
+                    .font(Brand.display(size: 28)))
+            .focused($focused, equals: .title)
+            .font(Brand.display(size: 28))
+            .foregroundStyle(Brand.textPrimary)
+            .tint(Brand.microWarn)
+            .submitLabel(.next)
+            .onSubmit { focused = .body }
+            .padding(.horizontal, 18)
+            .padding(.top, 4)
+    }
+
+    // MARK: - Body field (P)
+
+    /// Normal body-sized TextEditor below the title. Markdown
+    /// keyboard accessory attaches here.
+    private var bodyField: some View {
         ZStack(alignment: .topLeading) {
-            if draft.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("What's on your mind?")
-                        .font(Brand.display(size: 26))
-                        .foregroundStyle(Brand.textMuted)
-                        .padding(.bottom, 2)
-                    HStack(spacing: 14) {
-                        EmptyHintRow(icon: "doc.on.clipboard", label: "Paste a URL")
-                        EmptyHintRow(icon: "mic", label: "Tap mic to dictate")
-                        EmptyHintRow(icon: "camera", label: "Photo OCR")
-                    }
-                }
-                .padding(.horizontal, 22)
-                .padding(.top, 18)
-                .allowsHitTesting(false)
+            if bodyDraft.isEmpty {
+                Text("Add more details…")
+                    .font(Brand.body(size: 16))
+                    .foregroundStyle(Brand.textFaint)
+                    .padding(.horizontal, 22)
+                    .padding(.top, 16)
+                    .allowsHitTesting(false)
             }
-            TextEditor(text: $draft)
-                .focused($focused)
+            TextEditor(text: $bodyDraft)
+                .focused($focused, equals: .body)
                 .scrollContentBackground(.hidden)
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
+                .padding(.horizontal, 14)
+                .padding(.top, 8)
                 .font(Brand.body(size: 16))
                 .foregroundStyle(Brand.textPrimary)
-                .tint(Brand.textPrimary)
+                .tint(Brand.microWarn)
                 .toolbar {
-                    if focused {
+                    if focused != nil {
                         ToolbarItemGroup(placement: .keyboard) {
-                            mdButton("number") { insert("\n# ") }
+                            mdButton("number") { insertBody("\n# ") }
                             mdButton("bold") { wrap("**") }
                             mdButton("italic") { wrap("*") }
-                            mdButton("list.bullet") { insert("\n- ") }
-                            mdButton("list.number") { insert("\n1. ") }
-                            mdButton("chevron.left.forwardslash.chevron.right") { insert("\n```\n\n```\n") }
-                            mdButton("link") { insert("[text](https://)") }
+                            mdButton("list.bullet") { insertBody("\n- ") }
+                            mdButton("list.number") { insertBody("\n1. ") }
+                            mdButton("chevron.left.forwardslash.chevron.right") { insertBody("\n```\n\n```\n") }
+                            mdButton("link") { insertBody("[text](https://)") }
                             Spacer()
                             mdButton(isDictating ? "mic.fill" : "mic",
                                      tint: isDictating ? Brand.microRed : Brand.textPrimary) {
                                 if isDictating { stopDictation() } else { startDictation() }
                             }
                             mdButton("keyboard.chevron.compact.down", tint: Brand.textMuted) {
-                                focused = false
+                                focused = nil
                             }
                         }
                     }
@@ -213,8 +295,8 @@ struct CaptureView: View {
         }
     }
 
-    /// Toolbar button factory — reused for every markdown
-    /// scaffold + the dictation toggle + the dismiss-keyboard.
+    // MARK: - Toolbar helpers
+
     @ViewBuilder
     private func mdButton(_ systemName: String,
                           tint: Color = Brand.textPrimary,
@@ -230,11 +312,18 @@ struct CaptureView: View {
         }
     }
 
-    private func insert(_ scaffold: String) {
-        draft += scaffold
+    /// Markdown scaffolds always insert into the body. If user
+    /// is in the title, move focus first.
+    private func insertBody(_ scaffold: String) {
+        if focused == .title { focused = .body }
+        bodyDraft += scaffold
     }
     private func wrap(_ token: String) {
-        draft += "\(token)\(token)"
+        if focused == .title {
+            titleDraft += "\(token)\(token)"
+        } else {
+            bodyDraft += "\(token)\(token)"
+        }
     }
 
     // MARK: - Bottom bar
@@ -303,33 +392,46 @@ struct CaptureView: View {
     private func onAppearEffects() {
         let prefillKey = "mw.intent.captureText"
         if let prefill = UserDefaults.standard.string(forKey: prefillKey), !prefill.isEmpty {
-            draft = prefill
+            bodyDraft = prefill
             UserDefaults.standard.removeObject(forKey: prefillKey)
         }
-        if !persistedDraft.isEmpty && draft.isEmpty {
-            restorable = persistedDraft
+        if (!persistedTitle.isEmpty || !persistedBody.isEmpty)
+            && !hasDraftContent {
+            restorableTitle = persistedTitle.isEmpty ? nil : persistedTitle
+            restorableBody = persistedBody.isEmpty ? nil : persistedBody
         }
         refreshClipboard()
     }
 
     private func saveDraft() async {
-        let body = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !body.isEmpty else { return }
+        let md = combinedMarkdown.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !md.isEmpty else { return }
+        let titleHint = titleDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         await run {
-            let doc = try await APIClient.shared.createDocument(markdown: body)
+            let doc = try await APIClient.shared.createDocument(
+                markdown: md,
+                title: titleHint.isEmpty ? nil : titleHint
+            )
             savedURL = doc.publicURL
-            draft = ""
-            persistedDraft = ""
-            restorable = nil
+            titleDraft = ""
+            bodyDraft = ""
+            persistedTitle = ""
+            persistedBody = ""
+            restorableTitle = nil
+            restorableBody = nil
+            focused = nil
             Haptics.success()
         }
     }
 
     private func saveURL(_ url: URL) async {
         let host = url.host ?? "Link"
-        let body = "# \(host)\n\nSource: \(url.absoluteString)\n"
+        let body = "Source: \(url.absoluteString)\n"
         await run {
-            let doc = try await APIClient.shared.createDocument(markdown: body, title: host)
+            let doc = try await APIClient.shared.createDocument(
+                markdown: "# \(host)\n\n\(body)",
+                title: host
+            )
             savedURL = doc.publicURL
             clipboardURL = nil
             Haptics.success()
@@ -346,9 +448,9 @@ struct CaptureView: View {
 
     private func startDictation() {
         Haptics.tap()
-        focused = false // make room visually for the LISTENING banner
+        focused = nil // make room visually for the LISTENING banner
         dictation.start(locales: ["ko-KR", "en-US"]) { recognised in
-            draft += draft.isEmpty ? recognised : " " + recognised
+            bodyDraft += bodyDraft.isEmpty ? recognised : " " + recognised
         } onError: { msg in
             errorMessage = msg
             withAnimation(.snappy) { isDictating = false }
@@ -392,6 +494,28 @@ private struct EmptyHintRow: View {
                 .font(Brand.body(size: 12))
         }
         .foregroundStyle(Brand.textFaint)
+    }
+}
+
+/// Notes-style circular header button — glass surface, small,
+/// quiet ink glyph. Used for Cancel.
+private struct CircleHeaderButton: View {
+    let systemName: String
+    let tint: Color
+    var onTap: () -> Void
+    var body: some View {
+        Button(action: onTap) {
+            Image(systemName: systemName)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(tint)
+                .frame(width: 34, height: 34)
+                .background(
+                    Circle()
+                        .fill(.ultraThinMaterial)
+                        .overlay(Circle().strokeBorder(Brand.borderDim, lineWidth: 1))
+                )
+        }
+        .buttonStyle(.plain)
     }
 }
 

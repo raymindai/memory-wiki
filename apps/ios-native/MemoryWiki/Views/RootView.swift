@@ -13,6 +13,10 @@ struct RootView: View {
     /// time the user dismisses OnboardingView.
     @AppStorage("mw.onboarded") private var onboarded: Bool = false
     @State private var onboardingDone: Bool = false
+    /// Hide the tab bar entirely while the soft keyboard is up
+    /// — the keyboard otherwise rides over the markdown toolbar
+    /// AND the tab bar piles in above it (the user-reported mess).
+    @State private var keyboardUp = false
 
     var body: some View {
         Group {
@@ -37,20 +41,17 @@ struct RootView: View {
                             OfflineBanner()
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
-                        BrandTabBar(selected: $router.selectedTab)
+                        // Hide tab bar entirely while keyboard is
+                        // up — otherwise iOS shoves it into the
+                        // space between markdown toolbar and
+                        // editor content (the screenshot mess).
+                        if !keyboardUp {
+                            BrandTabBar(selected: $router.selectedTab)
+                                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        }
                     }
                     .animation(.snappy(duration: 0.22), value: reachability.isOnline)
-                    // CRITICAL: Without this, SwiftUI's automatic
-                    // keyboard avoidance pushes the entire tab-bar
-                    // VStack UP when the editor's soft keyboard
-                    // appears, leaving the UITextView's
-                    // inputAccessoryView visually BEHIND the
-                    // pushed-up tab bar. Telling the tab bar to
-                    // ignore the keyboard safe-area pins it to
-                    // the screen bottom; the keyboard then covers
-                    // it cleanly and the accessory view sits
-                    // exactly where it should (right above the
-                    // keyboard).
+                    .animation(.snappy(duration: 0.22), value: keyboardUp)
                     .ignoresSafeArea(.keyboard, edges: .bottom)
                 }
                 // Force SwiftUI to fully tear down + rebuild the
@@ -64,6 +65,12 @@ struct RootView: View {
             }
         }
         .animation(.snappy(duration: 0.22), value: auth.isSignedIn)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            keyboardUp = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardUp = false
+        }
         .onReceive(NotificationCenter.default.publisher(for: .mwUserChanged)) { _ in
             // Wipe local-only per-user state on identity change +
             // reset the router so the next sign-in lands on the
@@ -110,15 +117,16 @@ enum AppTab: String, CaseIterable {
     }
 
     /// Single-line glyph drawn in code. Start tab uses the
-    /// AnimatedBlob (real morph SVG) at a larger size so it
-    /// reads as the brand mark anchoring the centre of the
+    /// AnimatedBlob (real morph SVG) at a much larger size so
+    /// it reads as the brand mark anchoring the centre of the
     /// tab bar; everything else stays SF Symbols.
     @ViewBuilder var glyph: some View {
         switch self {
         case .start:
-            // Larger + animated — calls attention to the
-            // dashboard surface as the "home" of the app.
-            AnimatedBlob(size: 28, theme: .dark)
+            // Big enough to fill the no-caption cell. .font(...)
+            // doesn't affect AnimatedBlob (WKWebView), so the
+            // size has to come from the init parameter directly.
+            AnimatedBlob(size: 48, theme: .dark)
         case .timeline:
             Image(systemName: "list.bullet")
         case .bundles:
@@ -140,31 +148,32 @@ private struct BrandTabBar: View {
                 Button {
                     selected = tab
                 } label: {
-                    VStack(spacing: 3) {
+                    VStack(spacing: tab == .start ? 1 : 3) {
                         tab.glyph
-                            .font(.system(size: tab == .start ? 28 : 16, weight: .regular))
-                            // Start tab has no caption → the blob
-                            // gets to be bigger (~the full tab cell
-                            // height) so it reads as the centre
-                            // hero of the bar.
-                            .frame(height: tab == .start ? 42 : 28)
-                        // Start tab is glyph-only (the brand blob is
-                        // self-evident — no "Start" caption needed).
-                        // Other tabs keep the mono caption.
-                        Text(tab == .start ? "" : tab.label)
-                            .font(Brand.mono(size: 9, weight: .medium))
-                            .tracking(0.5)
-                            .textCase(.uppercase)
-                        // Active indicator — ink hairline, no lime.
-                        // Pure design: brand chrome stays grayscale,
-                        // accent only earns its keep for status.
+                            // .font only affects SF Symbols; the
+                            // Start blob sizes itself via init.
+                            .font(.system(size: 16, weight: .regular))
+                            // Start cell is taller so the 48pt
+                            // blob has room to breathe.
+                            .frame(height: tab == .start ? 50 : 28)
+                        // Other tabs render the mono caption; Start
+                        // skips it entirely (blob is self-evident)
+                        // so the indicator sits flush under it
+                        // instead of where the empty caption was.
+                        if tab != .start {
+                            Text(tab.label)
+                                .font(Brand.mono(size: 9, weight: .medium))
+                                .tracking(0.5)
+                                .textCase(.uppercase)
+                        }
+                        // Active indicator — ink hairline.
                         Rectangle()
                             .fill(selected == tab ? Brand.textPrimary : Color.clear)
                             .frame(width: 14, height: 1)
                     }
                     .foregroundStyle(selected == tab ? Brand.textPrimary : Brand.textFaint)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, tab == .start ? 4 : 8)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)

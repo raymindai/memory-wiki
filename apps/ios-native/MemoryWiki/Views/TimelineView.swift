@@ -17,6 +17,11 @@ final class TimelineModel: ObservableObject {
     @Published private(set) var semanticHits: [APIClient.SemanticHit] = []
     @Published private(set) var semanticLoading = false
     private var semanticTask: Task<Void, Never>?
+    /// Timestamp of the last successful load. Used to skip a
+    /// refetch when the user just hopped tabs — without this,
+    /// every Tab tap triggered a fresh /api/user/documents call
+    /// and showed the loader briefly.
+    private var lastLoaded: Date?
 
     /// Debounced (300ms) semantic search. Cancels any pending
     /// previous request so only the latest query lands. The
@@ -51,17 +56,25 @@ final class TimelineModel: ObservableObject {
         }
     }
 
-    func load() async {
-        loading = true
+    /// Loads the user's docs. Skips the network call if the
+    /// cache is fresh (<30s old) UNLESS `force=true` — pull-to-
+    /// refresh + foreground-refresh + user-change all force.
+    /// Plain tab switches re-enter this method but reuse cache.
+    func load(force: Bool = false) async {
+        if !force, !documents.isEmpty,
+           let last = lastLoaded, Date().timeIntervalSince(last) < 30 {
+            return
+        }
+        // Only flip the loading state when we actually have to
+        // show the BrandLoader — a re-fetch over a populated list
+        // shouldn't flash the loader.
+        if documents.isEmpty { loading = true }
         defer { loading = false }
         do {
             let raw = try await APIClient.shared.userDocuments()
             documents = raw.sorted { $0.sortDate > $1.sortDate }
+            lastLoaded = Date()
             errorMessage = nil
-            // Push latest snapshot into iOS Spotlight so the
-            // system search across docs stays in sync. Detached
-            // because failures are non-fatal and the user has
-            // already seen the timeline by this point.
             let docsSnapshot = documents
             Task.detached { await SpotlightIndexer.sync(docsSnapshot) }
         } catch {
@@ -175,12 +188,15 @@ struct TimelineView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
         .task {
+            // First mount uses cache logic — only fetches if
+            // empty or stale, so tab switches don't re-spam
+            // the network.
             await model.load()
             await pinned.hydrateFromServer()
         }
         .onReceive(NotificationCenter.default.publisher(for: .mwForegroundRefresh)) { _ in
             Task {
-                await model.load()
+                await model.load(force: true)
                 await pinned.hydrateFromServer()
             }
         }
@@ -193,7 +209,7 @@ struct TimelineView: View {
             // re-fetch under the new identity.
             model.clearForUserChange()
             Task {
-                await model.load()
+                await model.load(force: true)
                 await pinned.hydrateFromServer()
             }
         }
@@ -304,7 +320,7 @@ struct TimelineView: View {
                 title: "Couldn't load timeline",
                 caption: LocalizedStringKey(error),
                 glyph: "wifi.slash",
-                action: ("Try again", { Task { await model.load() } })
+                action: ("Try again", { Task { await model.load(force: true) } })
             )
         } else if model.documents.isEmpty {
             EmptyState(
@@ -365,13 +381,12 @@ struct TimelineView: View {
                 }
                 .padding(.bottom, 12)
             }
-            .refreshable { await model.load() }
+            .refreshable { await model.load(force: true) }
             // Gentle rise + fade as the list arrives — replaces
             // the abrupt loader → list snap.
-            .transition(.asymmetric(
-                insertion: .opacity.combined(with: .move(edge: .bottom)),
-                removal: .opacity
-            ))
+            // Pure cross-fade — no slide. Feels more settled
+            // than the rise-up transition.
+            .transition(.opacity)
         }
     }
 

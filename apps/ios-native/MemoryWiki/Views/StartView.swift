@@ -111,10 +111,7 @@ struct StartView: View {
                     .padding(.bottom, 36)
                 }
                 .refreshable { await load(force: true) }
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .bottom)),
-                    removal: .opacity
-                ))
+                .transition(.opacity)
             }
         }
         .animation(.smooth(duration: 0.36), value: loading)
@@ -134,20 +131,19 @@ struct StartView: View {
 
     private var hero: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .center, spacing: 14) {
-                MemoryWikiLogo(size: 30, variant: .iconOnly)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(greeting)
-                        .font(Brand.display(size: 22))
-                        .foregroundStyle(Brand.textPrimary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                    Text(weekSummary)
-                        .font(Brand.body(size: 12))
-                        .foregroundStyle(Brand.textMuted)
-                        .lineLimit(1)
-                }
-                Spacer()
+            // No leading blob — the blob already lives in the
+            // tab bar as the Start tab's glyph. Repeating it
+            // here at the top of the screen was redundant.
+            VStack(alignment: .leading, spacing: 4) {
+                Text(greeting)
+                    .font(Brand.display(size: 28))
+                    .foregroundStyle(Brand.textPrimary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                Text(weekSummary)
+                    .font(Brand.body(size: 13))
+                    .foregroundStyle(Brand.textMuted)
+                    .lineLimit(1)
             }
 
             // AI URL strip — the wedge. Copy ready for any AI.
