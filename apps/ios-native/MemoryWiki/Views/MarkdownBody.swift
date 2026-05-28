@@ -69,11 +69,50 @@ enum MarkdownBlock: Hashable {
     case blockquote(String)
     case bulletList([String])
     case orderedList([String])
+    /// GFM task list — each entry is (checked, label). Parsed
+    /// out of bullet lists where the first chars are `[ ]` /
+    /// `[x]` / `[X]`. Rendered as a checkbox row.
+    case taskList([(Bool, String)])
+    /// GFM table — header cells + body rows. Parsed when a
+    /// paragraph starts with a pipe line followed by a separator
+    /// line of dashes.
+    case table(header: [String], rows: [[String]])
     case thematicBreak
     /// Standalone image: a paragraph that's just `![alt](url)`.
     /// Pulled out of the paragraph stream so the renderer can
     /// give it its own AsyncImage with a brand-styled frame.
     case image(alt: String, url: String)
+
+    static func == (lhs: MarkdownBlock, rhs: MarkdownBlock) -> Bool {
+        switch (lhs, rhs) {
+        case (.heading(let a, let b), .heading(let c, let d)): return a == c && b == d
+        case (.paragraph(let a), .paragraph(let b)): return a == b
+        case (.codeBlock(let l, let s), .codeBlock(let l2, let s2)): return l == l2 && s == s2
+        case (.blockquote(let a), .blockquote(let b)): return a == b
+        case (.bulletList(let a), .bulletList(let b)): return a == b
+        case (.orderedList(let a), .orderedList(let b)): return a == b
+        case (.taskList(let a), .taskList(let b)):
+            return a.map { "\($0.0)|\($0.1)" } == b.map { "\($0.0)|\($0.1)" }
+        case (.table(let h1, let r1), .table(let h2, let r2)): return h1 == h2 && r1 == r2
+        case (.thematicBreak, .thematicBreak): return true
+        case (.image(let a, let u), .image(let a2, let u2)): return a == a2 && u == u2
+        default: return false
+        }
+    }
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .heading(let l, let t): hasher.combine(0); hasher.combine(l); hasher.combine(t)
+        case .paragraph(let t): hasher.combine(1); hasher.combine(t)
+        case .codeBlock(let l, let s): hasher.combine(2); hasher.combine(l); hasher.combine(s)
+        case .blockquote(let t): hasher.combine(3); hasher.combine(t)
+        case .bulletList(let a): hasher.combine(4); hasher.combine(a)
+        case .orderedList(let a): hasher.combine(5); hasher.combine(a)
+        case .taskList(let a): hasher.combine(6); for it in a { hasher.combine(it.0); hasher.combine(it.1) }
+        case .table(let h, let r): hasher.combine(7); hasher.combine(h); hasher.combine(r)
+        case .thematicBreak: hasher.combine(8)
+        case .image(let a, let u): hasher.combine(9); hasher.combine(a); hasher.combine(u)
+        }
+    }
 
     static func parse(_ input: String) -> [MarkdownBlock] {
         var blocks: [MarkdownBlock] = []
@@ -92,7 +131,20 @@ enum MarkdownBlock: Hashable {
         }
         func flushBullets() {
             if !pendingBullets.isEmpty {
-                blocks.append(.bulletList(pendingBullets))
+                // Split into task-list vs plain bullet list — if
+                // EVERY item starts with `[ ]` / `[x]` / `[X]`
+                // it's a GFM task list.
+                let parsed: [(Bool, String)?] = pendingBullets.map { item in
+                    let t = item.trimmingCharacters(in: .whitespaces)
+                    if t.hasPrefix("[ ] ") { return (false, String(t.dropFirst(4))) }
+                    if t.hasPrefix("[x] ") || t.hasPrefix("[X] ") { return (true, String(t.dropFirst(4))) }
+                    return nil
+                }
+                if parsed.allSatisfy({ $0 != nil }) {
+                    blocks.append(.taskList(parsed.compactMap { $0 }))
+                } else {
+                    blocks.append(.bulletList(pendingBullets))
+                }
                 pendingBullets.removeAll()
             }
         }
@@ -165,6 +217,28 @@ enum MarkdownBlock: Hashable {
                 continue
             }
 
+            // GFM table — pipe-delimited header followed by a
+            // separator line of dashes, followed by zero or more
+            // body rows. Lines after a non-pipe line end the
+            // table. We don't try to honour per-column alignment
+            // (:---: etc.) yet; everything is left-aligned.
+            if trimmed.contains("|") && i + 1 < lines.count {
+                let next = lines[i + 1].trimmingCharacters(in: .whitespaces)
+                if isTableSeparator(next), let header = parseTableRow(trimmed) {
+                    flushAll()
+                    var rows: [[String]] = []
+                    i += 2  // skip header + separator
+                    while i < lines.count {
+                        let l = lines[i].trimmingCharacters(in: .whitespaces)
+                        if l.isEmpty || !l.contains("|") { break }
+                        if let row = parseTableRow(l) { rows.append(row) }
+                        i += 1
+                    }
+                    blocks.append(.table(header: header, rows: rows))
+                    continue
+                }
+            }
+
             // Blockquote
             if trimmed.hasPrefix(">") {
                 flushParagraph(); flushBullets(); flushOrdered()
@@ -203,6 +277,28 @@ enum MarkdownBlock: Hashable {
         }
         flushAll()
         return blocks
+    }
+
+    /// Splits a `| a | b | c |` line into ["a","b","c"]. Returns
+    /// nil if the line isn't pipe-delimited cleanly.
+    private static func parseTableRow(_ s: String) -> [String]? {
+        var line = s.trimmingCharacters(in: .whitespaces)
+        if line.hasPrefix("|") { line.removeFirst() }
+        if line.hasSuffix("|") { line.removeLast() }
+        let cells = line.split(separator: "|", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        return cells.isEmpty ? nil : cells
+    }
+
+    /// Recognises `|---|---|` style separator rows. Allows
+    /// alignment colons (`:---:`, `:---`, `---:`) per GFM spec.
+    private static func isTableSeparator(_ s: String) -> Bool {
+        guard s.contains("|"), s.contains("-") else { return false }
+        guard let cells = parseTableRow(s), !cells.isEmpty else { return false }
+        return cells.allSatisfy { cell in
+            let core = cell.replacingOccurrences(of: ":", with: "")
+            return !core.isEmpty && core.allSatisfy { $0 == "-" }
+        }
     }
 
     /// `![alt](url)` on a line by itself — returns nil otherwise.
@@ -301,6 +397,81 @@ private struct MarkdownBlockView: View {
                 .padding(.vertical, 8)
         case .image(let alt, let url):
             MarkdownImage(alt: alt, urlString: url)
+        case .taskList(let items):
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(items.indices, id: \.self) { i in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: items[i].0 ? "checkmark.square.fill" : "square")
+                            .font(.system(size: 14))
+                            .foregroundStyle(items[i].0 ? Brand.microInfo : Brand.textFaint)
+                            .frame(width: 18, alignment: .center)
+                            .padding(.top, 2)
+                        InlineMarkdown(text: items[i].1)
+                            .font(Brand.body(size: 15))
+                            .foregroundStyle(items[i].0 ? Brand.textMuted : Brand.textPrimary)
+                            .strikethrough(items[i].0, color: Brand.textFaint)
+                            .lineSpacing(4)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .textSelection(.enabled)
+                    }
+                }
+            }
+        case .table(let header, let rows):
+            MarkdownTable(header: header, rows: rows)
+        }
+    }
+}
+
+/// GFM table renderer — uses a horizontal ScrollView so wide
+/// tables stay readable on phone screens instead of being
+/// crushed into one-character columns. Header row uses faint
+/// mono caps, body rows alternate surface fills for readability.
+private struct MarkdownTable: View {
+    let header: [String]
+    let rows: [[String]]
+
+    private let cellMinWidth: CGFloat = 100
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    ForEach(header.indices, id: \.self) { i in
+                        Text(header[i])
+                            .font(Brand.mono(size: 10, weight: .medium))
+                            .tracking(0.8)
+                            .foregroundStyle(Brand.textFaint)
+                            .textCase(.uppercase)
+                            .frame(minWidth: cellMinWidth, alignment: .leading)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                    }
+                }
+                .background(Brand.surface)
+                Rectangle().fill(Brand.borderDim).frame(height: 0.5)
+                ForEach(rows.indices, id: \.self) { r in
+                    HStack(spacing: 0) {
+                        ForEach(0..<header.count, id: \.self) { c in
+                            let cell = c < rows[r].count ? rows[r][c] : ""
+                            InlineMarkdown(text: cell)
+                                .font(Brand.body(size: 13))
+                                .foregroundStyle(Brand.textPrimary)
+                                .frame(minWidth: cellMinWidth, alignment: .leading)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 10)
+                        }
+                    }
+                    .background(r.isMultiple(of: 2) ? Color.clear : Brand.surface.opacity(0.5))
+                    if r < rows.count - 1 {
+                        Rectangle().fill(Brand.borderDim.opacity(0.5)).frame(height: 0.5)
+                    }
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Brand.borderDim, lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
     }
 }
