@@ -331,24 +331,34 @@ struct CaptureView: View {
             if !attachments.isEmpty {
                 attachmentsStrip
             }
-            // UITextView-backed editor — needs an explicit fill
-            // frame, otherwise SwiftUI gives it intrinsic-content
-            // size (≈ 0) and taps land below the actual hit area.
-            MarkdownEditor(
-                text: $bodyDraft,
-                isFocused: focused == .body,
-                onFocusChange: { newFocus in
-                    if newFocus { focused = .body }
-                    else if focused == .body { focused = nil }
-                },
-                onPhoto: { showPhotoPicker = true },
-                onOCR: { showOCRPicker = true },
-                onStartDictation: { startDictation() },
-                onStopDictation: { stopDictation() },
-                isDictating: isDictating
-            )
+            ZStack {
+                MarkdownEditor(
+                    text: $bodyDraft,
+                    isFocused: focused == .body,
+                    onFocusChange: { newFocus in
+                        if newFocus { focused = .body }
+                        else if focused == .body { focused = nil }
+                    },
+                    onPhoto: { showPhotoPicker = true },
+                    onOCR: { showOCRPicker = true },
+                    onStartDictation: { startDictation() },
+                    onStopDictation: { stopDictation() },
+                    isDictating: isDictating
+                )
+                // Hit-target overlay — guarantees taps anywhere
+                // in the body area land focus on the editor, even
+                // if SwiftUI hasn't allocated the UITextView the
+                // full visible height. SwiftUI was giving the
+                // UIViewRepresentable intrinsic-content sizing
+                // (~0pt) so taps below the cursor line missed.
+                Color.clear
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(focused != .body)
+                    .onTapGesture { focused = .body }
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(maxHeight: .infinity)
     }
 
     /// Horizontal strip of attached photos. Tap thumbnail to

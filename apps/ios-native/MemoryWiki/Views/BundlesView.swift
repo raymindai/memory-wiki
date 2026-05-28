@@ -261,6 +261,13 @@ struct BundlesView: View {
                 await model.load(force: true)
                 await pinned.hydrateFromServer()
             }
+            .transition(
+                .asymmetric(
+                    insertion: .opacity.animation(.smooth(duration: 0.5))
+                        .combined(with: .scale(scale: 0.99).animation(.smooth(duration: 0.5))),
+                    removal: .opacity.animation(.easeOut(duration: 0.25))
+                )
+            )
         }
     }
 

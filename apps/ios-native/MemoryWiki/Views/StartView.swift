@@ -31,6 +31,9 @@ struct StartView: View {
     @State private var hub: APIClient.HubResponse?
     @State private var loading = true
     @State private var aiPromptCopied = false
+    /// Drives the per-block stagger entrance once the data
+    /// finishes loading. Each section reads its own delay.
+    @State private var appeared = false
 
     private var displayName: String? {
         hub?.profile.display_name?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -93,17 +96,17 @@ struct StartView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        hero
-                        pulseRow
-                        quickActions
+                        staggered(0) { hero }
+                        staggered(1) { pulseRow }
+                        staggered(2) { quickActions }
                         if !recentItems.isEmpty {
-                            recentSection
+                            staggered(3) { recentSection }
                         }
                         if !starredItems.isEmpty {
-                            starredSection
+                            staggered(4) { starredSection }
                         }
                         if let bundle = featuredBundle {
-                            featuredBundleCard(bundle)
+                            staggered(5) { featuredBundleCard(bundle) }
                         }
                     }
                     .padding(.horizontal, 18)
@@ -112,6 +115,14 @@ struct StartView: View {
                 }
                 .refreshable { await load(force: true) }
                 .transition(.opacity)
+                .onAppear {
+                    // Reset on every re-appear so revisiting the
+                    // tab plays the entrance again.
+                    appeared = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.04) {
+                        appeared = true
+                    }
+                }
             }
         }
         .animation(.smooth(duration: 0.36), value: loading)
@@ -193,20 +204,45 @@ struct StartView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { aiPromptCopied = false }
     }
 
-    // MARK: - Pulse row
+    // MARK: - Pulse row (editorial number strip)
 
+    /// Quiet, surface-less number strip — replaces the boxed
+    /// stat cards. Each pair stacks the big display numeral
+    /// above a mono caption; thin hairlines top + bottom anchor
+    /// the row as one band. Less boxy, more "dashboard editorial."
     private var pulseRow: some View {
-        HStack(spacing: 8) {
-            PulseTile(label: "TODAY", value: "\(todayCount)",
-                      sublabel: todayCount == 1 ? "memory" : "memories",
-                      accent: nil)
-            PulseTile(label: "WEEK", value: "\(weekCount)",
-                      sublabel: weekCount == 1 ? "memory" : "memories",
-                      accent: nil)
-            PulseTile(label: "TOTAL", value: "\(documents.count)",
-                      sublabel: "all time",
-                      accent: nil)
+        VStack(spacing: 0) {
+            Rectangle().fill(Brand.borderDim).frame(height: 0.5)
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                pulseStat(value: "\(todayCount)", label: "TODAY")
+                pulseDivider
+                pulseStat(value: "\(weekCount)", label: "THIS WEEK")
+                pulseDivider
+                pulseStat(value: "\(documents.count)", label: "ALL TIME")
+            }
+            .padding(.vertical, 14)
+            Rectangle().fill(Brand.borderDim).frame(height: 0.5)
         }
+    }
+    private func pulseStat(value: String, label: LocalizedStringKey) -> some View {
+        VStack(alignment: .center, spacing: 6) {
+            Text(value)
+                .font(Brand.display(size: 30))
+                .foregroundStyle(Brand.textPrimary)
+                .tracking(-0.6)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(label)
+                .font(Brand.mono(size: 9, weight: .medium))
+                .tracking(1.4)
+                .foregroundStyle(Brand.textFaint)
+        }
+        .frame(maxWidth: .infinity)
+    }
+    private var pulseDivider: some View {
+        Rectangle()
+            .fill(Brand.borderDim)
+            .frame(width: 0.5, height: 36)
     }
 
     // MARK: - Quick actions
@@ -383,6 +419,19 @@ struct StartView: View {
     }
 
     // MARK: - Section header
+
+    /// Stagger wrapper — fades + lifts each block in with a
+    /// 0.08 s delay per slot. Animation re-triggers on
+    /// .onAppear so revisits feel just as composed as the
+    /// first load.
+    @ViewBuilder
+    private func staggered<Content: View>(_ index: Int,
+                                          @ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 12)
+            .animation(.smooth(duration: 0.55).delay(0.08 * Double(index)), value: appeared)
+    }
 
     private func sectionHeader(label: LocalizedStringKey,
                                actionLabel: LocalizedStringKey,

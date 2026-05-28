@@ -381,11 +381,15 @@ struct TimelineView: View {
                 .padding(.bottom, 12)
             }
             .refreshable { await model.load(force: true) }
-            // Gentle rise + fade as the list arrives — replaces
-            // the abrupt loader → list snap.
-            // Pure cross-fade — no slide. Feels more settled
-            // than the rise-up transition.
-            .transition(.opacity)
+            // Pure cross-fade + 0.99 → 1.00 scale settle so the
+            // list arrives gently rather than snapping in.
+            .transition(
+                .asymmetric(
+                    insertion: .opacity.animation(.smooth(duration: 0.5))
+                        .combined(with: .scale(scale: 0.99).animation(.smooth(duration: 0.5))),
+                    removal: .opacity.animation(.easeOut(duration: 0.25))
+                )
+            )
         }
     }
 
