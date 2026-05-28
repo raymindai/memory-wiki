@@ -230,34 +230,17 @@ struct RecentDocsView: View {
         }
     }
 
-    /// Editorial stats + hub shortcut shown above the Capture
-    /// button on the systemLarge widget. Uses the docs already
-    /// loaded into the entry — no extra fetch — so we compute
-    /// week + month counts from the timestamps in hand.
+    /// Quick-action shortcuts shown above the Capture button on
+    /// the systemLarge widget — Ask / Search / Paste. Each is a
+    /// Link to a memorywiki:// URL the app handles in AppRouter.
+    /// Bigger touch targets than the stats row this replaced;
+    /// stats removed per the user's call ("없어도 된다").
     private var largeFooter: some View {
-        let cal = Calendar.current
-        let now = Date()
-        let weekAgo = now.addingTimeInterval(-7 * 86400)
-        let monthAgo = now.addingTimeInterval(-30 * 86400)
-        let weekCount = entry.docs.filter { ($0.updatedAt ?? .distantPast) >= weekAgo }.count
-        let monthCount = entry.docs.filter { ($0.updatedAt ?? .distantPast) >= monthAgo }.count
-        let todayCount = entry.docs.filter { cal.isDateInToday($0.updatedAt ?? .distantPast) }.count
-        return VStack(spacing: 8) {
+        VStack(spacing: 8) {
             Rectangle()
                 .fill(WTheme.borderDim.opacity(0.4))
                 .frame(height: 0.5)
-            HStack(alignment: .firstTextBaseline, spacing: 0) {
-                statCell(label: "TODAY", value: "\(todayCount)")
-                statDivider
-                statCell(label: "THIS WEEK", value: "\(weekCount)")
-                statDivider
-                statCell(label: "THIS MONTH", value: "\(monthCount)")
-            }
-            // Three quick actions — ASK / SEARCH / PASTE. Each
-            // is a Link to a memorywiki:// URL the app already
-            // handles in AppRouter, so the deep links route to
-            // the right tab + post the right notification.
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 quickAction(icon: "bubble.left.and.bubble.right", label: "Ask", url: "memorywiki://chat-hub")
                 quickAction(icon: "magnifyingglass", label: "Search", url: "memorywiki://search")
                 quickAction(icon: "doc.on.clipboard", label: "Paste", url: "memorywiki://capture-paste")
@@ -268,38 +251,23 @@ struct RecentDocsView: View {
 
     private func quickAction(icon: String, label: String, url: String) -> some View {
         Link(destination: URL(string: url)!) {
-            HStack(spacing: 4) {
+            VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
                 Text(label)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 12, weight: .semibold))
             }
             .foregroundStyle(WTheme.textPrimary)
-            .frame(maxWidth: .infinity, minHeight: 28)
+            .frame(maxWidth: .infinity, minHeight: 52)
             .background(
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .strokeBorder(WTheme.borderDim, lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(WTheme.surface)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .strokeBorder(WTheme.borderDim, lineWidth: 1)
+                    )
             )
         }
-    }
-
-    private func statCell(label: String, value: String) -> some View {
-        VStack(alignment: .center, spacing: 2) {
-            Text(value)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundStyle(WTheme.textPrimary)
-            Text(label)
-                .font(.system(size: 8, weight: .medium, design: .monospaced))
-                .tracking(0.8)
-                .foregroundStyle(WTheme.textFaint)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var statDivider: some View {
-        Rectangle()
-            .fill(WTheme.borderDim.opacity(0.5))
-            .frame(width: 0.5, height: 22)
     }
 
     /// Bottom-wide Capture button — full row, ink-on-textPrimary
