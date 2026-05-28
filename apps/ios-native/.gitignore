@@ -24,6 +24,7 @@ Pods/
 # Builds
 DerivedData/
 build/
+build-device/
 
 # fastlane
 fastlane/report.xml
