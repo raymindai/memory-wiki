@@ -9,6 +9,11 @@ import { PureButton } from "./PureButton";
 
 /**
  * PureNav — fixed top nav with blob logo, links, theme toggle, CTA.
+ *
+ * Mobile (<760px): primary nav links + More dropdown + lang switch +
+ * theme toggle collapse into a hamburger drawer. Only the brand on
+ * the left and the primary CTA on the right stay in the top row, so
+ * the marketing header reads cleanly on every viewport.
  */
 export function PureNav({
   theme,
@@ -39,8 +44,6 @@ export function PureNav({
   const norm = (p: string) => p.replace(/[#?].*$/, "").replace(/\/+$/, "") || "/";
   const here = norm(pathname);
   const isCurrent = (href: string) => {
-    // Anchor-only navigation (#x or /foo#x) is a section jump, not a
-    // separate "current page" — never mark it as the active route.
     if (href.startsWith("#") || href.includes("#")) return false;
     const target = norm(href);
     return target === here;
@@ -62,6 +65,23 @@ export function PureNav({
     };
   }, [moreOpen]);
   const moreHasCurrent = !!more?.some((l) => isCurrent(l.href));
+
+  // Mobile hamburger drawer. Open on hamburger tap; close on link
+  // tap, backdrop tap, route change, or Escape. Body scroll is
+  // locked while open so the page underneath doesn't drift.
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [menuOpen]);
 
   return (
     <header className="pure-nav">
@@ -121,14 +141,13 @@ export function PureNav({
           )}
         </nav>
         <div className="pure-nav-right">
+          {/* lang + theme are desktop-only — collapsed into the
+              hamburger drawer on mobile. */}
           {langSwitch && (
             <a
               href={langSwitch.href}
-              className="pure-nav-lang"
+              className="pure-nav-lang pure-nav-desktop-only"
               onClick={() => {
-                // Persist the user's locale choice so middleware honors it on
-                // subsequent requests. Without this, /ko/* gets bounced back to
-                // /* whenever the cookie says "en" (or vice versa).
                 document.cookie = `mw-lang=${langSwitch.locale}; path=/; max-age=31536000; SameSite=Lax`;
               }}
             >
@@ -136,7 +155,7 @@ export function PureNav({
             </a>
           )}
           <button
-            className="pure-nav-theme"
+            className="pure-nav-theme pure-nav-desktop-only"
             onClick={toggleTheme}
             aria-label="Toggle theme"
             title={`Theme: ${theme}`}
@@ -148,8 +167,92 @@ export function PureNav({
             )}
           </button>
           <PureButton href={ctaHref} size="sm">{ctaLabel}</PureButton>
+          {/* Mobile-only hamburger — opens the drawer with links +
+              more items + lang switch + theme toggle. */}
+          <button
+            type="button"
+            className="pure-nav-hamburger pure-nav-mobile-only"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="pure-nav-drawer"
+          >
+            {menuOpen ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile drawer — render outside the inner so it can take the
+          full viewport width. Animation handled in CSS. */}
+      {menuOpen && (
+        <div
+          id="pure-nav-drawer"
+          className="pure-nav-drawer"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="pure-nav-drawer-backdrop"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden
+          />
+          <div className="pure-nav-drawer-panel">
+            <nav className="pure-nav-drawer-links">
+              {links.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={`pure-nav-drawer-link${isCurrent(l.href) ? " is-current" : ""}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              {more && more.length > 0 && (
+                <>
+                  <div className="pure-nav-drawer-sep" />
+                  <div className="pure-nav-drawer-section">{moreLabel}</div>
+                  {more.map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      className={`pure-nav-drawer-link${isCurrent(l.href) ? " is-current" : ""}`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </>
+              )}
+            </nav>
+            <div className="pure-nav-drawer-foot">
+              {langSwitch && (
+                <a
+                  href={langSwitch.href}
+                  className="pure-nav-drawer-util"
+                  onClick={() => {
+                    document.cookie = `mw-lang=${langSwitch.locale}; path=/; max-age=31536000; SameSite=Lax`;
+                    setMenuOpen(false);
+                  }}
+                >
+                  {langSwitch.label}
+                </a>
+              )}
+              <button
+                type="button"
+                className="pure-nav-drawer-util"
+                onClick={() => { toggleTheme(); setMenuOpen(false); }}
+              >
+                {theme === "dark" ? "Light theme" : "Dark theme"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -171,9 +171,129 @@
 }
 .v8-frontier .pure-nav-cta:active { transform: scale(0.97); }
 
-/* Hide links on narrow viewport */
+/* Hamburger button — mobile only, sits at the right edge after
+   the primary CTA. Quiet ink ring matching the theme toggle. */
+.v8-frontier .pure-nav-hamburger {
+  display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--hair-strong);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+.v8-frontier .pure-nav-hamburger:hover { color: var(--ink); border-color: var(--ink); }
+
+.v8-frontier .pure-nav-desktop-only { display: inline-flex; }
+.v8-frontier .pure-nav-mobile-only  { display: none; }
+
+/* Mobile: hide the centred link cluster + lang + theme; the
+   hamburger surfaces them in the drawer instead. CTA stays. */
 @media (max-width: 760px) {
   .v8-frontier .pure-nav-links { display: none; }
+  .v8-frontier .pure-nav-desktop-only { display: none !important; }
+  .v8-frontier .pure-nav-mobile-only  { display: inline-flex; }
+  .v8-frontier .pure-nav-inner { padding: 0 14px; gap: 8px; }
+  .v8-frontier .pure-nav-right { gap: 6px; }
+  .v8-frontier .pure-nav-word { font-size: 15px; }
+  .v8-frontier .pure-nav-mark { width: 30px; height: 30px; }
+}
+
+/* ─── Drawer ─────────────────────────────────────────────── */
+.v8-frontier .pure-nav-drawer {
+  position: fixed;
+  inset: 56px 0 0 0;             /* sits under the 56px nav */
+  z-index: 99;
+  pointer-events: auto;
+}
+.v8-frontier .pure-nav-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: pure-nav-fade 160ms ease-out;
+}
+.v8-frontier .pure-nav-drawer-panel {
+  position: relative;
+  background: var(--bg);
+  border-bottom: 1px solid var(--hair-strong);
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: calc(100dvh - 56px);
+  overflow-y: auto;
+  animation: pure-nav-slide 180ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.v8-frontier[data-frontier-theme="light"] .pure-nav-drawer-panel { background: var(--bg); }
+
+.v8-frontier .pure-nav-drawer-links {
+  display: flex;
+  flex-direction: column;
+}
+.v8-frontier .pure-nav-drawer-link {
+  display: block;
+  padding: 12px 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.v8-frontier .pure-nav-drawer-link.is-current,
+.v8-frontier .pure-nav-drawer-link:hover {
+  color: var(--ink);
+}
+.v8-frontier .pure-nav-drawer-sep {
+  height: 1px;
+  background: var(--hair-strong);
+  margin: 14px 0 6px;
+}
+.v8-frontier .pure-nav-drawer-section {
+  padding: 0 8px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.v8-frontier .pure-nav-drawer-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid var(--hair-strong);
+}
+.v8-frontier .pure-nav-drawer-util {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid var(--hair-strong);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  text-decoration: none;
+}
+.v8-frontier .pure-nav-drawer-util:hover { color: var(--ink); border-color: var(--ink); }
+
+@keyframes pure-nav-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pure-nav-slide {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 /* Cal Sans-styled stacked wordmark */
