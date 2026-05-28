@@ -219,7 +219,7 @@ private struct MemberRow: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))

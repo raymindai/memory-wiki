@@ -119,19 +119,21 @@ struct DocumentDetailView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                DocStatusIcon(doc: detail?.asDocument ?? seed, size: 22)
-                Text(detail?.displayTitle ?? seed.displayTitle)
-                    .font(Brand.display(size: 26))
-                    .foregroundStyle(Brand.textPrimary)
-                    .tracking(0)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(4)
-            }
-            // Mono URL chip below the title — quick visual confirm
-            // that THIS is the canonical URL that paste-anywhere
-            // hands to AI clients.
+            // Title stands alone — full width, no leading glyph
+            // competing for the eye. Status icon moved down to
+            // sit beside the URL chip where it reads as metadata.
+            Text(detail?.displayTitle ?? seed.displayTitle)
+                .font(Brand.display(size: 26))
+                .foregroundStyle(Brand.textPrimary)
+                .tracking(0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(4)
+
+            // URL strip — status icon on the left (public globe
+            // / private cloud / shared people glyph), then the
+            // mono URL, then Copy for AI on the right.
             HStack(spacing: 8) {
+                DocStatusIcon(doc: detail?.asDocument ?? seed, size: 14)
                 Text(seed.publicURL.absoluteString.replacingOccurrences(of: "https://", with: ""))
                     .font(Brand.mono(size: 11))
                     .foregroundStyle(Brand.textMuted)

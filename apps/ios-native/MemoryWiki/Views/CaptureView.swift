@@ -96,41 +96,28 @@ struct CaptureView: View {
 
     // MARK: - Header
 
-    /// Minimal brand-forward header — blob + wordmark + CAPTURE
-    /// caption + a quiet close that bounces back to Timeline.
-    /// No "Save" button up here; that lives in the bottom bar so
-    /// the header reads as identity, not as a form toolbar.
+    /// Tab-consistent header — large display title matching the
+    /// Timeline / Bundles / Settings tabs. (Previously a custom
+    /// blob+wordmark+chevron-close header — too divergent from
+    /// the rest of the surface and called out as inconsistent.)
     private var header: some View {
-        HStack(alignment: .center, spacing: 8) {
-            MemoryWikiLogo(size: 20)
-            Text("CAPTURE")
-                .font(Brand.mono(size: 9, weight: .medium))
-                .tracking(1.4)
-                .foregroundStyle(Brand.textFaint)
-            Spacer()
-            Button {
-                Haptics.tap()
-                if focused { focused = false }
-                router.selectedTab = .timeline
-            } label: {
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Brand.textMuted)
-                    .frame(width: 32, height: 32)
-                    .background(
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                            .overlay(Circle().strokeBorder(Brand.borderDim, lineWidth: 1))
-                    )
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Text("Capture")
+                .font(Brand.display(size: 26))
+                .foregroundStyle(Brand.textPrimary)
+            // Tiny mono character-count hint when there's a
+            // draft, matching the "139" doc count chip on the
+            // Timeline header.
+            if !draft.isEmpty {
+                Text("\(draft.count)")
+                    .font(Brand.mono(size: 11))
+                    .foregroundStyle(Brand.textFaint)
             }
-            .buttonStyle(.plain)
+            Spacer()
         }
         .padding(.horizontal, 18)
         .padding(.top, 18)
         .padding(.bottom, 12)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Brand.borderDim).frame(height: 0.5)
-        }
     }
 
     // MARK: - Smart chips
@@ -169,21 +156,25 @@ struct CaptureView: View {
 
     private var editor: some View {
         ZStack(alignment: .topLeading) {
-            // Big compelling placeholder when the editor is empty.
-            // Cal Sans display weight — reads as a prompt, not a
-            // hint, so the empty surface feels intentional.
+            // Editor-style empty state — generous Cal Sans prompt
+            // + faint mono hint row (paste / voice / camera).
+            // Reads as an editor canvas, not a form field.
             if draft.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text("What's on your mind?")
-                        .font(Brand.display(size: 24))
+                        .font(Brand.display(size: 26))
                         .foregroundStyle(Brand.textMuted)
-                    Text("Type, paste a URL, or tap the mic.")
-                        .font(Brand.body(size: 13))
-                        .foregroundStyle(Brand.textFaint)
+                        .padding(.bottom, 2)
+                    HStack(spacing: 14) {
+                        EmptyHintRow(icon: "doc.on.clipboard", label: "Paste a URL")
+                        EmptyHintRow(icon: "mic", label: "Tap mic to dictate")
+                    }
+                    .padding(.top, 2)
                 }
                 .padding(.horizontal, 22)
-                .padding(.top, 22)
+                .padding(.top, 18)
                 .allowsHitTesting(false)
+                .transition(.opacity)
             }
             MarkdownEditor(
                 text: $draft,
@@ -193,7 +184,7 @@ struct CaptureView: View {
                 onStopDictation: { stopDictation() },
                 isDictating: isDictating
             )
-            .opacity(draft.isEmpty ? 0.85 : 1)
+            .opacity(draft.isEmpty ? 0.4 : 1)
         }
     }
 
@@ -356,6 +347,23 @@ struct AmbientBlob: View {
         }
         .ignoresSafeArea(.all)
         .allowsHitTesting(false)
+    }
+}
+
+/// Tiny faint hint row used inside the empty-state — icon +
+/// short label, used to telegraph the auxiliary inputs without
+/// stealing focus from the main prompt.
+private struct EmptyHintRow: View {
+    let icon: String
+    let label: LocalizedStringKey
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .regular))
+            Text(label)
+                .font(Brand.body(size: 12))
+        }
+        .foregroundStyle(Brand.textFaint)
     }
 }
 

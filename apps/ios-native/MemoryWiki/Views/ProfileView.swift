@@ -8,7 +8,6 @@ import MessageUI
 
 struct ProfileView: View {
     @EnvironmentObject private var auth: AuthManager
-    @AppStorage("mw.theme") private var themePref: String = "dark"
     @AppStorage("mw.onboarded") private var onboarded: Bool = false
     @State private var copied = false
     @State private var hubCopied = false
@@ -40,9 +39,6 @@ struct ProfileView: View {
                             if let slug = auth.session?.hubSlug {
                                 SettingRow(label: "Username", value: "@\(slug)")
                             }
-                        }
-                        section("APPEARANCE") {
-                            ThemePicker(themePref: $themePref)
                         }
                         section("LANGUAGE") {
                             SettingActionRow(label: "Change app language", systemImage: "globe") {
@@ -119,10 +115,15 @@ struct ProfileView: View {
         } message: {
             Text("Set up a Mail account in iOS Settings, or email hi@raymind.ai from any other app.")
         }
-        .onChange(of: themePref) { _, new in
-            applyTheme(new)
+        .onAppear {
+            // Dark-only app — force dark scheme on every appear in
+            // case iOS auto-switched based on system Light mode.
+            for scene in UIApplication.shared.connectedScenes {
+                (scene as? UIWindowScene)?.windows.forEach {
+                    $0.overrideUserInterfaceStyle = .dark
+                }
+            }
         }
-        .onAppear { applyTheme(themePref) }
     }
 
     private var title: some View {
@@ -246,20 +247,7 @@ struct ProfileView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { copied = false }
     }
 
-    private func applyTheme(_ pref: String) {
-        // Walk the connected scenes and override style. SwiftUI's
-        // .preferredColorScheme is per-view; we want global.
-        let style: UIUserInterfaceStyle = {
-            switch pref {
-            case "light": return .light
-            case "system": return .unspecified
-            default:       return .dark
-            }
-        }()
-        for scene in UIApplication.shared.connectedScenes {
-            (scene as? UIWindowScene)?.windows.forEach { $0.overrideUserInterfaceStyle = style }
-        }
-    }
+    // Theme system removed — app is dark-only by product decision.
 }
 
 /// Navigation destinations inside the Settings tab. Kept narrow on
@@ -407,38 +395,7 @@ private struct QuietActionButton: View {
     }
 }
 
-private struct ThemePicker: View {
-    @Binding var themePref: String
-    private let options: [(id: String, label: LocalizedStringKey, icon: String)] = [
-        ("dark",   "Dark",   "moon.fill"),
-        ("light",  "Light",  "sun.max.fill"),
-        ("system", "System", "circle.lefthalf.filled"),
-    ]
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(options, id: \.id) { opt in
-                Button {
-                    Haptics.selection()
-                    themePref = opt.id
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: opt.icon).font(.system(size: 11, weight: .regular))
-                        Text(opt.label).font(Brand.body(size: 12, weight: .medium))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .foregroundStyle(themePref == opt.id ? Brand.textPrimary : Brand.textMuted)
-                    .background(
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .fill(themePref == opt.id ? Brand.surface : Color.clear)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(6)
-    }
-}
+// ThemePicker removed — app is dark-only.
 
 #Preview {
     ProfileView().environmentObject(AuthManager.preview())

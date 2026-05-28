@@ -396,9 +396,13 @@ private struct DocumentRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
+        // Solid zinc surface — was .ultraThinMaterial which on a
+        // dark canvas reads as bright glass and made the whole
+        // timeline feel washed out. Brand.surface matches the
+        // web's row treatment + the rest of the iOS chrome.
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -517,7 +521,7 @@ private struct SemanticRow: View {
         .padding(.horizontal, 14).padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
                 .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Brand.borderDim, lineWidth: 1))
         )
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))

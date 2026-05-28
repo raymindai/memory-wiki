@@ -248,7 +248,7 @@ private struct BundleRow: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Brand.surface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)

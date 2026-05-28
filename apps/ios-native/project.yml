@@ -183,8 +183,13 @@ targets:
       - path: Shared
         excludes:
           - "**/.DS_Store"
-    resources:
+      # Explicit buildPhase: resources so xcodegen wires the
+      # asset catalog through the actual Copy Bundle Resources
+      # build phase (the bare `resources:` block was being
+      # silently dropped — the compiled Assets.car never made
+      # it into the appex).
       - path: Widget/Assets.xcassets
+        buildPhase: resources
     info:
       path: Widget/Info.plist
       properties:
@@ -229,13 +234,12 @@ targets:
       - path: Shared
         excludes:
           - "**/.DS_Store"
-      # Share.js gets copied into the bundle by the resources
-      # build phase. Listed under `sources:` with `buildPhase:
-      # resources` so xcodegen wires it into the .appex.
+      # Resources — Share.js + asset catalog both wired through
+      # the Copy Bundle Resources phase explicitly.
       - path: ShareExtension/Share.js
         buildPhase: resources
-    resources:
       - path: ShareExtension/Assets.xcassets
+        buildPhase: resources
     info:
       path: ShareExtension/Info.plist
       properties:
