@@ -31,6 +31,7 @@ struct DocumentDetailView: View {
     // Delete + visibility confirmation
     @State private var confirmDelete = false
     @State private var togglingVisibility = false
+    @State private var showChat = false
     @State private var showTOC = false
     @State private var showAddToBundle = false
 
@@ -68,6 +69,10 @@ struct DocumentDetailView: View {
                 showAddToBundle = false
             }
             .preferredColorScheme(.dark)
+        }
+        .sheet(isPresented: $showChat) {
+            ChatSheet(scope: .doc(id: seed.id, title: detail?.title ?? seed.displayTitle))
+                .iOS26Sheet([.large])
         }
         .sheet(isPresented: $showTOC) {
             if let detail {
@@ -162,6 +167,12 @@ struct DocumentDetailView: View {
                         Haptics.tap()
                         showAddToBundle = true
                     } label: { Label("Add to bundle…", systemImage: "square.stack.3d.up.badge.a") }
+                    Button {
+                        Haptics.tap()
+                        showChat = true
+                    } label: {
+                        Label("Chat with this doc", systemImage: "bubble.left.and.bubble.right")
+                    }
                     Button { copyAiPrompt() } label: { Label("Copy as AI prompt", systemImage: "sparkles") }
                     Button { UIPasteboard.general.string = seed.publicURL.absoluteString } label: {
                         Label("Copy URL", systemImage: "link")

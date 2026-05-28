@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return `--- Document ${i + 1}: "${doc.title || "Untitled"}" (id: doc:${doc.id}) ---\n${content}`;
   }).join("\n\n");
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return new Response(JSON.stringify({ error: "AI not configured" }), { status: 503 });
   }
@@ -86,7 +86,70 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     history.map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n\n")
   }\n\nUser: ${message}\n\nAssistant:`;
 
-  // Stream response from Gemini
+  // Anthropic Haiku — same provider + model the hub chat uses so
+  // the two surfaces have identical voice + latency + citation
+  // format. Streams raw text chunks (no SSE framing) for parity
+  // with /api/hub/<slug>/chat — the iOS ChatSheet expects that.
+  if (process.env.ANTHROPIC_API_KEY) {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-api-key": process.env.ANTHROPIC_API_KEY!,
+              "anthropic-version": "2023-06-01",
+            },
+            body: JSON.stringify({
+              model: "claude-haiku-4-5-20251001",
+              max_tokens: 4096,
+              stream: true,
+              messages: [{ role: "user", content: fullPrompt }],
+            }),
+          });
+          if (!res.ok || !res.body) {
+            controller.enqueue(encoder.encode(`Error: AI request failed (${res.status})`));
+            controller.close();
+            return;
+          }
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buf = "";
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            const lines = buf.split("\n");
+            buf = lines.pop() || "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const payload = line.slice(6).trim();
+              if (!payload || payload === "[DONE]") continue;
+              try {
+                const obj = JSON.parse(payload);
+                if (obj.type === "content_block_delta" && obj.delta?.text) {
+                  controller.enqueue(encoder.encode(obj.delta.text));
+                }
+              } catch { /* skip malformed */ }
+            }
+          }
+          controller.close();
+        } catch (err) {
+          console.error("Bundle chat stream error:", err);
+          controller.enqueue(encoder.encode(`\n[Error: ${(err as Error).message}]`));
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, {
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" },
+    });
+  }
+
+  // Fallback: Gemini (kept for parity but not preferred; the
+  // response framing is SSE here, not raw text).
   if (process.env.GEMINI_API_KEY) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({

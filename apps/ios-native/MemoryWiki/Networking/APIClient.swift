@@ -282,10 +282,12 @@ final class APIClient {
     enum ChatScope {
         case hub(slug: String)
         case bundle(id: String)
+        case doc(id: String)
         var path: String {
             switch self {
             case .hub(let s):    return "/api/hub/\(s)/chat"
             case .bundle(let id): return "/api/bundles/\(id)/chat"
+            case .doc(let id):    return "/api/docs/\(id)/chat"
             }
         }
     }

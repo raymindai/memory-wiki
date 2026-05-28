@@ -185,8 +185,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
               "anthropic-version": "2023-06-01",
             },
             body: JSON.stringify({
-              model: "claude-sonnet-4-20250514",
-              max_tokens: 2048,
+              // Claude Haiku 4.5 — fast + cheap for chat-grounded
+              // hub Q&A. The system prompt + retrieved doc context
+              // does the heavy lifting; the model just synthesises
+              // concisely.
+              model: "claude-haiku-4-5-20251001",
+              // 2048 was clipping mid-sentence on richer answers.
+              // 4096 still keeps responses fast on Haiku.
+              max_tokens: 4096,
               stream: true,
               messages: [{ role: "user", content: fullPrompt }],
             }),
