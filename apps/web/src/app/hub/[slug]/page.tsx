@@ -195,7 +195,17 @@ export default async function HubPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { at: atRaw } = await searchParams;
   const at = parseAt(atRaw);
-  const hub = await getHub(slug, at);
+  // TEMP DEBUG — log to Vercel function logs so we can root-cause
+  // the production-only 500 on /@raymindai. Remove after fix.
+  console.log("[hub-page] start", { slug, atRaw, runtime: process.version });
+  let hub: HubData | null = null;
+  try {
+    hub = await getHub(slug, at);
+    console.log("[hub-page] getHub ok", { slug, hasHub: !!hub, docs: hub?.docs.length, bundles: hub?.bundles.length });
+  } catch (e) {
+    console.error("[hub-page] getHub THREW", { slug, err: String(e), stack: e instanceof Error ? e.stack?.slice(0, 800) : null });
+    throw e;
+  }
   if (!hub) notFound();
 
   const author = hub.profile.display_name || slug;
@@ -222,6 +232,7 @@ export default async function HubPage({ params, searchParams }: Props) {
       }))
     : { documents: [], bundles: [], hubs: [], total: 0 };
 
+  console.log("[hub-page] about to render", { slug, recent: recent.length, older: olderDocs.length, refs: referencedBy.total });
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)", color: "var(--text-primary)" }}>
       <ViewerHeader
