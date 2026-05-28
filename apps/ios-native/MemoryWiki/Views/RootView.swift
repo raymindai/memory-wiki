@@ -123,10 +123,10 @@ enum AppTab: String, CaseIterable {
     @ViewBuilder var glyph: some View {
         switch self {
         case .start:
-            // Big enough to fill the no-caption cell. .font(...)
-            // doesn't affect AnimatedBlob (WKWebView), so the
-            // size has to come from the init parameter directly.
-            AnimatedBlob(size: 48, theme: .dark)
+            // Sized so the blob feels like the centre hero
+            // without overwhelming the bar — tuned down from
+            // 48pt per user feedback.
+            AnimatedBlob(size: 38, theme: .dark)
         case .timeline:
             Image(systemName: "list.bullet")
         case .bundles:
@@ -153,9 +153,9 @@ private struct BrandTabBar: View {
                             // .font only affects SF Symbols; the
                             // Start blob sizes itself via init.
                             .font(.system(size: 16, weight: .regular))
-                            // Start cell is taller so the 48pt
-                            // blob has room to breathe.
-                            .frame(height: tab == .start ? 50 : 28)
+                            // Slightly taller cell for the Start
+                            // blob — matches the 38pt glyph.
+                            .frame(height: tab == .start ? 40 : 28)
                         // Other tabs render the mono caption; Start
                         // skips it entirely (blob is self-evident)
                         // so the indicator sits flush under it
