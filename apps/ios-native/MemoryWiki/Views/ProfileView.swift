@@ -729,7 +729,7 @@ private struct DisplayNameEditor: View {
                     Spacer()
                 }
                 .padding(.horizontal, 22)
-                .padding(.top, 22)
+                .padding(.top, 6)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -152,7 +152,12 @@ extension View {
         self
             .presentationDetents(detents)
             .presentationDragIndicator(.visible)
-            .presentationBackground(.ultraThinMaterial)
+            // Solid Brand.background — `.ultraThinMaterial` was
+            // reading too bright/light against the dark canvas
+            // and bled the parent surface through, fighting the
+            // brand's ink-on-dark identity. Solid dark zinc
+            // matches every other surface in the app.
+            .presentationBackground(Brand.background)
             .presentationCornerRadius(28)
             .preferredColorScheme(.dark)
     }

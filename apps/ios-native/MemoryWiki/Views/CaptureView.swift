@@ -1245,9 +1245,11 @@ private struct URLImportSheet: View {
                     Spacer()
                 }
                 .padding(.horizontal, 22)
-                .padding(.top, 22)
+                .padding(.top, 6)
             }
-            .navigationTitle("URL")
+            // Toolbar title omitted — body H1 ("Save a link") is
+            // the title of record; duplicating it in the nav bar
+            // was redundant.
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -1367,11 +1369,14 @@ private struct ImportInfoSheet: View {
                                       url: URL(string: "https://memory.wiki/plugins")!)
                     }
                     .padding(.horizontal, 22)
-                    .padding(.top, 22)
+                    // Tight gap to the drag indicator + Done toolbar —
+                    // 22pt felt orphaned now that the duplicate
+                    // "Import" navigation title is gone.
+                    .padding(.top, 6)
                     .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Import")
+            // Body H1 is the title — toolbar slot left for Done only.
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
