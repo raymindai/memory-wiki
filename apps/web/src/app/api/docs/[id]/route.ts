@@ -153,12 +153,28 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   const requesterEmail = verified?.email || _req.headers.get("x-user-email") || "";
   const isAllowedEditor = (data.allowed_editors || []).some((e: string) => e.toLowerCase() === requesterEmail.toLowerCase());
 
-  // Resolve owner email for non-owners (so they can see who owns the doc)
+  // Resolve owner email + brand accent for non-owners (so the
+  // viewer can show who owns the doc AND paint it in the owner's
+  // chosen accent / color scheme — without this the doc inherits
+  // whatever the visitor saved in their own localStorage, which is
+  // why a shared doc reads as the visitor's brand instead of the
+  // owner's).
   let ownerEmail: string | undefined;
+  let ownerAccent: string | undefined;
+  let ownerScheme: string | undefined;
   if (!isOwnedByRequester && data.user_id) {
     try {
       const { data: ownerAuth } = await supabase.auth.admin.getUserById(data.user_id);
       ownerEmail = ownerAuth?.user?.email || undefined;
+    } catch { /* ignore */ }
+    try {
+      const { data: ownerProfile } = await supabase
+        .from("profiles")
+        .select("accent_color, color_scheme")
+        .eq("id", data.user_id)
+        .maybeSingle();
+      ownerAccent = (ownerProfile?.accent_color as string | null) || undefined;
+      ownerScheme = (ownerProfile?.color_scheme as string | null) || undefined;
     } catch { /* ignore */ }
   }
 
@@ -226,6 +242,8 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     inBundles,
     ...(isOwnedByRequester ? { editToken: data.edit_token, allowedEmails: data.allowed_emails || [], allowedEditors: data.allowed_editors || [] } : {}),
     ...(ownerEmail ? { ownerEmail } : {}),
+    ...(ownerAccent ? { ownerAccent } : {}),
+    ...(ownerScheme ? { ownerScheme } : {}),
   });
 }
 

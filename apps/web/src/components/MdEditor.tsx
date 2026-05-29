@@ -174,6 +174,15 @@ function useTheme() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  // Owner brand override — when the visitor is reading someone
+  // else's shared doc, paint the page in that owner's accent /
+  // scheme (pulled from their profile and shipped by /api/docs/[id]
+  // as ownerAccent / ownerScheme). Stored as a per-tab override on
+  // the Tab type; null/empty means "fall back to visitor's own
+  // accent / scheme."
+  const [activeOwnerAccent, setActiveOwnerAccent] = useState<string | null>(null);
+  const [activeOwnerScheme, setActiveOwnerScheme] = useState<string | null>(null);
+
   useEffect(() => {
     // Lime is the root default (CSS :root --accent), so removing
     // the data-accent attribute lets the root value apply. The old
@@ -181,20 +190,22 @@ function useTheme() {
     // data-accent="orange" on click), causing this effect to undo
     // the SettingsEmbed write on every accent change — the user
     // had to click twice for the preview to stick.
-    if (accentColor === "lime") {
+    const effective = activeOwnerAccent || accentColor;
+    if (effective === "lime") {
       document.documentElement.removeAttribute("data-accent");
     } else {
-      document.documentElement.setAttribute("data-accent", accentColor);
+      document.documentElement.setAttribute("data-accent", effective);
     }
-  }, [accentColor]);
+  }, [accentColor, activeOwnerAccent]);
 
   useEffect(() => {
-    if (colorScheme === "default") {
+    const effective = activeOwnerScheme || colorScheme;
+    if (effective === "default") {
       document.documentElement.removeAttribute("data-scheme");
     } else {
-      document.documentElement.setAttribute("data-scheme", colorScheme);
+      document.documentElement.setAttribute("data-scheme", effective);
     }
-  }, [colorScheme]);
+  }, [colorScheme, activeOwnerScheme]);
 
   // Cross-component sync — when SettingsEmbed (or any future caller)
   // changes the saved theme/accent/scheme without going through this
@@ -274,7 +285,12 @@ function useTheme() {
     syncPrefToProfile("color_scheme", s);
   }, [syncPrefToProfile]);
 
-  return { theme, toggleTheme, accentColor, setAccentColor, colorScheme, setColorScheme };
+  return {
+    theme, toggleTheme,
+    accentColor, setAccentColor,
+    colorScheme, setColorScheme,
+    setActiveOwnerAccent, setActiveOwnerScheme,
+  };
 }
 
 
@@ -306,7 +322,7 @@ export default function MdEditor() {
   const isMobile = useIsMobile();
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
   const mod = isMac ? "Cmd" : "Ctrl";
-  const { theme, toggleTheme, accentColor, setAccentColor, colorScheme, setColorScheme } = useTheme();
+  const { theme, toggleTheme, accentColor, setAccentColor, colorScheme, setColorScheme, setActiveOwnerAccent, setActiveOwnerScheme } = useTheme();
   const { user, profile, loading: authLoading, accessToken, isAuthenticated, signInWithGoogle, signInWithGitHub, signInWithEmail, signOut } = useAuth();
   // Only use anonymousId when not logged in
   const anonymousId = (!user?.id && typeof window !== "undefined") ? getAnonymousId() : "";
@@ -3882,6 +3898,18 @@ export default function MdEditor() {
             const token = getEditToken(fromId);
             const ownerByToken = !!token;
             const ownerByAccount = !!doc.isOwner;
+
+            // Owner brand override — apply the doc owner's accent +
+            // color scheme when the visitor isn't the owner. When the
+            // visitor IS the owner, clear the override so their own
+            // saved accent stays in charge.
+            if (!ownerByToken && !ownerByAccount) {
+              setActiveOwnerAccent((doc.ownerAccent as string | undefined) || null);
+              setActiveOwnerScheme((doc.ownerScheme as string | undefined) || null);
+            } else {
+              setActiveOwnerAccent(null);
+              setActiveOwnerScheme(null);
+            }
 
             // Determine permission — three roles now:
             //   mine     — I created (token OR account ownership)
