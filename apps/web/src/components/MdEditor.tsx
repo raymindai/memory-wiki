@@ -7742,22 +7742,6 @@ ${clone.innerHTML}
 
             {/* Presence indicators moved to before theme toggle */}
 
-            {/* Locate in sidebar — scrolls the active doc / bundle row
-                into view inside the MDs (or MD Bundles) tree and
-                expands its parent folders. Replaces the previous
-                behavior where every activeTabId change auto-scrolled
-                the sidebar (annoying on Recent / Starred clicks). */}
-            {(activeTab?.cloudId || activeTab?.bundleId) && !showHub && !showSettings && !showGalaxy && !showOnboarding && (
-              <button
-                onClick={() => { revealActiveInSidebar(); if (!showSidebar) setShowSidebar(true); }}
-                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ color: "var(--text-muted)" }}
-                title="Locate in sidebar"
-              >
-                <Locate width={12} height={12} />
-              </button>
-            )}
-
             <div className="relative group">
               <button
                 onClick={handleShare}
@@ -11869,6 +11853,24 @@ ${clone.innerHTML}
                     </div>
                   );
                 })()}
+                {/* Locate in sidebar — scrolls the active doc / bundle row
+                    into view inside the MDs (or MD Bundles) tree and
+                    expands its parent folders. Replaces the previous
+                    behavior where every activeTabId change auto-scrolled
+                    the sidebar (annoying on Recent / Starred clicks).
+                    Sits inside the MD strip, right after the Type chip,
+                    so the affordance is next to the doc context it
+                    affects. */}
+                {(activeTab?.cloudId || activeTab?.bundleId) && (
+                  <button
+                    onClick={() => { revealActiveInSidebar(); if (!showSidebar) setShowSidebar(true); }}
+                    className="flex items-center justify-center h-5 w-5 rounded-md transition-colors hover:bg-[var(--toggle-bg)] normal-case"
+                    style={{ color: "var(--text-faint)" }}
+                    title="Locate in sidebar"
+                  >
+                    <Locate width={11} height={11} />
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-1 normal-case shrink-0 flex-nowrap">
                 {/* Toolbar toggle — icon with hint popover for new users */}
