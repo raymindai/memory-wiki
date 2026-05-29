@@ -8594,7 +8594,7 @@ ${clone.innerHTML}
                                   if (el) recentRowRefs.current.set(entry.id, el);
                                   else recentRowRefs.current.delete(entry.id);
                                 }}
-                                className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(entry.id) ? " mw-recent-enter" : ""}`}
+                                className={`relative flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(entry.id) ? " mw-recent-enter" : ""}`}
                                 style={{ paddingLeft: 6, paddingRight: 6, color: "var(--text-secondary)" }}
                                 onClick={() => {
                                   // If already at the top of Recent, plain switch.
@@ -8611,11 +8611,15 @@ ${clone.innerHTML}
                                 title={bundle.title || "Untitled Bundle"}
                               >
                                 {renderBundleStatusIcon(entry.bundleId, 13)}
-                                <span className="truncate flex-1 text-body">{bundle.title || "Untitled Bundle"}</span>
+                                <span className="truncate flex-1 min-w-0 text-body">{bundle.title || "Untitled Bundle"}</span>
+                                {/* Absolute-positioned overlay — never takes
+                                    layout space so the title above can use
+                                    the entire row width whether hovered or
+                                    not. Only paints on group hover. */}
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setRecentTabIds(prev => prev.filter(id => id !== entry.id)); }}
-                                  className="shrink-0 w-4 h-4 rounded items-center justify-center transition-colors hover:bg-[var(--border-dim)] hidden group-hover/recent:flex"
-                                  style={{ color: "var(--text-faint)" }}
+                                  className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded flex items-center justify-center transition-opacity hover:bg-[var(--border-dim)] opacity-0 group-hover/recent:opacity-100"
+                                  style={{ color: "var(--text-faint)", background: "var(--toggle-bg)" }}
                                   title="Remove from recent"
                                 >
                                   <X width={9} height={9} />
@@ -8634,17 +8638,21 @@ ${clone.innerHTML}
                                 if (el) recentRowRefs.current.set(tab.id, el);
                                 else recentRowRefs.current.delete(tab.id);
                               }}
-                              className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(tab.id) ? " mw-recent-enter" : ""}`}
+                              className={`relative flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(tab.id) ? " mw-recent-enter" : ""}`}
                               style={{ paddingLeft: 6, paddingRight: 6, color: "var(--text-secondary)" }}
                               onClick={(e) => handleDocClick(tab.id, e)}
                               title={displayTitle}
                             >
                               {tab.kind === "bundle" ? renderBundleStatusIcon(tab.bundleId, 13) : <DocStatusIcon tab={tab} isActive={false} />}
-                              <span className="truncate flex-1 text-body">{displayTitle}</span>
+                              <span className="truncate flex-1 min-w-0 text-body">{displayTitle}</span>
+                              {/* Absolute-positioned overlay — never takes
+                                  layout space so the title above can use
+                                  the entire row width whether hovered or
+                                  not. Only paints on group hover. */}
                               <button
                                 onClick={(e) => { e.stopPropagation(); setRecentTabIds(prev => prev.filter(id => id !== tab.id)); }}
-                                className="shrink-0 w-4 h-4 rounded items-center justify-center transition-colors hover:bg-[var(--border-dim)] hidden group-hover/recent:flex"
-                                style={{ color: "var(--text-faint)" }}
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded flex items-center justify-center transition-opacity hover:bg-[var(--border-dim)] opacity-0 group-hover/recent:opacity-100"
+                                style={{ color: "var(--text-faint)", background: "var(--toggle-bg)" }}
                                 title="Remove from recent"
                               >
                                 <X width={9} height={9} />
