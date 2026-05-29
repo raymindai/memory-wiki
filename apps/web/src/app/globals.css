@@ -2847,6 +2847,19 @@ textarea::selection {
   animation: mwRecentEnter 320ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
+/* Brief flash applied to the sidebar row when the user clicks the
+   doc-header Locate button. Fades the toggle-bg fill in and out so
+   the user can spot the row right after the scroll lands. Falls off
+   on its own; the JS adds the class then removes it after 1.4s. */
+@keyframes mwSidebarRevealFlash {
+  0%   { background-color: var(--toggle-bg); }
+  60%  { background-color: var(--toggle-bg); }
+  100% { background-color: transparent; }
+}
+.mw-sidebar-reveal-flash {
+  animation: mwSidebarRevealFlash 1.4s ease-out both;
+}
+
 /* ── Bundle Canvas Detail Level slider ──
    Native <input type="range"> styled to match the Memory.Wiki palette.
    Track is rendered via the inline `background: linear-gradient`

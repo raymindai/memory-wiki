@@ -55,7 +55,7 @@ import {
   FolderPlus, Folder, FolderOpen, File as FileIcon, MoreHorizontal,
   User, Users, Search, X, Trash2, RefreshCw, Lock, ShieldAlert, FileX,
   LogOut, HelpCircle, Clock, Upload, FileText, Sparkles, Zap, Loader2, RotateCcw, AlignLeft, BookOpen, CircleCheck, Layers, Check, Globe, Network, LayoutDashboard, Smile, Settings, Cloud, MessageSquarePlus, Wand2, Atom,
-  ChevronsDownUp, ChevronsUpDown, ArrowUpRight, Star,
+  ChevronsDownUp, ChevronsUpDown, ArrowUpRight, Star, Locate,
 } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
 import { buildAuthHeaders } from "@/lib/auth-fetch";
@@ -2713,19 +2713,21 @@ export default function MdEditor() {
     setNavTick(t => t + 1);
   }, [activeTabId, showOnboarding]);
 
-  // Reveal active tab in sidebar — auto-expand the parent folder and
-  // scroll the row into view whenever activeTabId changes. Refs are
-  // used for the tabs + folders lookups so manually toggling a
-  // folder open/closed (which mutates `folders`) does NOT re-fire
-  // this effect and trigger a phantom scrollIntoView on the active
-  // tab. Only an actual activeTabId change should reveal.
+  // Reveal active tab in sidebar — auto-expand parent folders and
+  // scroll the row into view. Used to fire on every activeTabId
+  // change, which scrolled the MDs tree under the user's cursor
+  // every time they clicked a Recent or Starred row (annoying).
+  // Now exposed as an imperative function — the doc header has a
+  // small Locate button that fires it explicitly, so the reveal
+  // happens only when the user asks for it.
   const tabsRefForReveal = useRef(tabs);
   const foldersRefForReveal = useRef(folders);
   tabsRefForReveal.current = tabs;
   foldersRefForReveal.current = folders;
-  useEffect(() => {
-    if (!activeTabId) return;
-    const tab = tabsRefForReveal.current.find((t) => t.id === activeTabId);
+  const revealActiveInSidebar = useCallback(() => {
+    const id = activeTabIdRef.current;
+    if (!id) return;
+    const tab = tabsRefForReveal.current.find((t) => t.id === id);
     if (!tab) return;
     if (tab.folderId) {
       const expandAncestors = (fid: string | undefined | null) => {
@@ -2744,13 +2746,18 @@ export default function MdEditor() {
       };
       expandAncestors(tab.folderId);
     }
-    const t = setTimeout(() => {
-      const row = document.querySelector<HTMLElement>(`[data-sidebar-tab-id="${CSS.escape(activeTabId)}"]`);
+    // 50ms gives the folder-expand state update time to paint the
+    // hidden row into the DOM before we query for it.
+    setTimeout(() => {
+      const row = document.querySelector<HTMLElement>(`[data-sidebar-tab-id="${CSS.escape(id)}"]`);
       if (!row) return;
       row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      // Brief flash so the user can spot the row after scroll. The
+      // class is cleared 1.4s later; the CSS rule lives in globals.css.
+      row.classList.add("mw-sidebar-reveal-flash");
+      setTimeout(() => row.classList.remove("mw-sidebar-reveal-flash"), 1400);
     }, 50);
-    return () => clearTimeout(t);
-  }, [activeTabId]);
+  }, []);
 
   // Track Home (dashboard) entries into nav history. Fires when
   // showOnboarding flips true via the Home button or Alt+H.
@@ -7697,6 +7704,22 @@ ${clone.innerHTML}
             )}
 
             {/* Presence indicators moved to before theme toggle */}
+
+            {/* Locate in sidebar — scrolls the active doc / bundle row
+                into view inside the MDs (or MD Bundles) tree and
+                expands its parent folders. Replaces the previous
+                behavior where every activeTabId change auto-scrolled
+                the sidebar (annoying on Recent / Starred clicks). */}
+            {(activeTab?.cloudId || activeTab?.bundleId) && !showHub && !showSettings && !showGalaxy && !showOnboarding && (
+              <button
+                onClick={() => { revealActiveInSidebar(); if (!showSidebar) setShowSidebar(true); }}
+                className="w-6 h-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ color: "var(--text-muted)" }}
+                title="Locate in sidebar"
+              >
+                <Locate width={12} height={12} />
+              </button>
+            )}
 
             <div className="relative group">
               <button
