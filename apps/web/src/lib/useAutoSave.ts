@@ -396,6 +396,16 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
   }, []);
 
   /**
+   * Read the last known server timestamp. The "is this an external
+   * write?" check (realtime auto-pull, visibility refetch, foreground
+   * poll) needs to compare the fetched doc's updated_at against the
+   * timestamp WE last wrote / fetched. Without this, the check has
+   * to compare markdown bodies, but that requires a separately
+   * tracked "last saved body" which the caller doesn't have.
+   */
+  const getLastServerUpdatedAt = useCallback(() => lastServerUpdatedAtRef.current, []);
+
+  /**
    * Clear the sticky `error` (and any conflict). Used when switching
    * tabs / loading a new doc, since a stale error from a previous
    * tab's failed save shouldn't keep showing in the header on a doc
@@ -412,6 +422,7 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
     forceSave,
     dismissConflict,
     setLastServerUpdatedAt,
+    getLastServerUpdatedAt,
     clearError,
     cancel,
   };

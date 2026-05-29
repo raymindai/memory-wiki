@@ -3940,6 +3940,15 @@ export default function MdEditor() {
               setViewMode("preview"); // readonly users get the rendered view
             }
 
+            // Seed the conflict-detection timestamp from the bootstrap
+            // load, same as loadTab does. Without this seed the
+            // updated_at comparison in the realtime / poll refetch
+            // has no baseline and treats every server fetch as "newer"
+            // — which is what caused the false "updated elsewhere"
+            // toast for a user editing their own doc after a deep-
+            // link entry.
+            if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at as string);
+
             // "Shared by me" = the doc is published (visible to anyone
             // with the URL), regardless of edit_mode. Matching the
             // sidebar's bulk-load semantics: sharedDocIds is derived
@@ -4539,20 +4548,32 @@ export default function MdEditor() {
             const doc = await res.json();
             const serverMd = doc.markdown as string;
             const serverTitle = (doc.title as string) || undefined;
+            const serverUpdatedAt = (doc.updated_at as string) || "";
+
+            // "External update" = server's updated_at moved past the
+            // timestamp WE last saved or fetched. Body comparison
+            // (serverMd vs cached tab.markdown) doesn't work because
+            // tab.markdown is the load-time body, not the last-saved
+            // body — so it always looked diverged after a self-save.
+            const lastKnown = autoSave.getLastServerUpdatedAt();
+            if (lastKnown && serverUpdatedAt && serverUpdatedAt <= lastKnown) return;
 
             const localMd = markdownRef.current;
-            const currentTabData = tabs.find(t => t.id === activeTabIdRef.current);
-            const lastSavedMd = currentTabData?.markdown || "";
+            if (serverMd === localMd) {
+              // Body matches anyway (somehow updated_at moved without
+              // a body change, or our lastKnown was empty). Sync the
+              // timestamp so the next check is accurate.
+              if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
+              return;
+            }
 
-            // "External update" = server diverged from what WE last saved.
-            // The earlier check used localMd !== lastSavedMd to gate the
-            // "updated elsewhere" toast, but localMd diverges from
-            // lastSavedMd as soon as the user types one character (the
-            // autosave hasn't landed yet). That falsely flagged the
-            // user's own in-progress typing as an external conflict.
-            const serverDiverged = serverMd !== lastSavedMd;
-            if (!serverDiverged) return; // nothing actually changed externally
-            const localIsDirty = localMd !== lastSavedMd || autoSave.isSaving;
+            // Local is dirty if autosave is mid-flight. We can't compare
+            // localMd against any "last saved" body cheaply (tabs.markdown
+            // is load-time, not last-saved), but updated_at advanced past
+            // lastKnown already proved someone else wrote — so the choice
+            // is just: overwrite or notify. Overwrite is safe iff the
+            // autosave queue is empty.
+            const localIsDirty = autoSave.isSaving;
 
             if (!localIsDirty) {
               // Server changed, local clean → auto-pull silently
@@ -4561,12 +4582,12 @@ export default function MdEditor() {
               if (serverTitle) setTitle(serverTitle);
               doRender(serverMd);
               cmSetDocRef.current?.(serverMd);
-              if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at as string);
+              if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
               setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: serverTitle || t.title } : t));
               highlightDiff(oldMd, serverMd);
             } else {
-              // True conflict — server changed AND local has uncommitted
-              // edits. Notify but don't overwrite.
+              // True conflict — server moved forward AND local has
+              // uncommitted edits. Notify but don't overwrite.
               showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
             }
           } catch { /* fetch failed, ignore */ }
@@ -4603,17 +4624,24 @@ export default function MdEditor() {
         if (!res.ok) return;
         const doc = await res.json();
         const serverMd = doc.markdown as string;
+        const serverUpdatedAt = (doc.updated_at as string) || "";
+        // External-update signal: server's updated_at moved past what
+        // we last saved or fetched. Body comparison doesn't work
+        // because tab.markdown is load-time only, never updated on
+        // autosave success, so it always looked diverged after a
+        // self-save and falsely flagged the user's own typing as an
+        // external conflict.
+        const lastKnown = autoSave.getLastServerUpdatedAt();
+        if (lastKnown && serverUpdatedAt && serverUpdatedAt <= lastKnown) return;
+
         const localMd = markdownRef.current;
-        const currentTabData = tabs.find(t => t.id === activeTabIdRef.current);
-        const lastSavedMd = currentTabData?.markdown || "";
-        // External-update signal is "server diverged from what we last
-        // saved" — NOT "server differs from current editor content."
-        // localMd diverges from lastSavedMd the moment the user types
-        // one character, so comparing against localMd treated normal
-        // in-progress typing as an external conflict.
-        const serverDiverged = serverMd !== lastSavedMd;
-        if (!serverDiverged) return;
-        const localIsDirty = localMd !== lastSavedMd;
+        if (serverMd === localMd) {
+          if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
+          return;
+        }
+        // Genuine external advance. If autosave is mid-flight, the
+        // user has uncommitted edits we shouldn't overwrite.
+        const localIsDirty = autoSave.isSaving;
         if (localIsDirty) {
           showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
           return;
@@ -4624,7 +4652,7 @@ export default function MdEditor() {
         doRender(serverMd);
         cmSetDocRef.current?.(serverMd);
         tiptapRef.current?.setMarkdown(serverMd);
-        if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at as string);
+        if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
         setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: (doc.title as string) || t.title } : t));
         highlightDiff(oldMd, serverMd);
       } catch { /* ignore */ }
