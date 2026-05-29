@@ -8485,16 +8485,21 @@ ${clone.innerHTML}
                       <div
                         key={`${p.kind}:${p.id}`}
                         onClick={onOpen}
-                        className="flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)] group/pin"
+                        className="relative flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)] group/pin"
                         style={{ color: "var(--text-secondary)" }}
                         title={title}
                       >
                         <span className="shrink-0">{iconNode}</span>
-                        <span className="flex-1 truncate text-body">{title}</span>
+                        <span className="flex-1 min-w-0 truncate text-body">{title}</span>
+                        {/* Absolute-positioned unstar overlay — never takes
+                            layout space so the title above uses the full
+                            row width whether hovered or not. opacity-0 on
+                            an inline child still reserved its w-4 + gap-2,
+                            which is what was clipping the title early. */}
                         <button
                           onClick={(e) => { e.stopPropagation(); void togglePin(p.kind, p.id); }}
-                          className="shrink-0 w-4 h-4 rounded flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity hover:bg-[var(--border)]"
-                          style={{ color: "var(--text-faint)" }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded flex items-center justify-center opacity-0 group-hover/pin:opacity-100 transition-opacity hover:bg-[var(--border)]"
+                          style={{ color: "var(--text-faint)", background: "var(--toggle-bg)" }}
                           title="Unstar"
                         >
                           <Star width={10} height={10} style={{ fill: "currentColor" }} />
