@@ -51,6 +51,13 @@ final class AppRouter: ObservableObject {
             // sheet over its own surface.
             selectedTab = .start
             NotificationCenter.default.post(name: .mwOpenHubChat, object: nil)
+        case "search":
+            // Widget "Search" shortcut — flip to Timeline and fire
+            // the notification TimelineView listens for to expand
+            // its search bar + focus the field. Mirrors the home-
+            // screen quick-action route in MemoryWikiApp.swift.
+            selectedTab = .timeline
+            NotificationCenter.default.post(name: .mwOpenSearch, object: nil)
         case "profile":
             selectedTab = .profile
         case "demo-signin":
