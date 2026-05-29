@@ -4512,18 +4512,22 @@ export default function MdEditor() {
             const serverMd = doc.markdown as string;
             const serverTitle = (doc.title as string) || undefined;
 
-            // Compare to current markdown
             const localMd = markdownRef.current;
-            if (serverMd === localMd) return; // no actual content change
-
-            // Check if local has unsaved changes (user is actively editing)
-            // Compare current editor content with last saved version
             const currentTabData = tabs.find(t => t.id === activeTabIdRef.current);
             const lastSavedMd = currentTabData?.markdown || "";
-            const hasLocalChanges = localMd !== lastSavedMd || autoSave.isSaving;
 
-            if (!hasLocalChanges) {
-              // Auto-pull silently — user hasn't made local changes
+            // "External update" = server diverged from what WE last saved.
+            // The earlier check used localMd !== lastSavedMd to gate the
+            // "updated elsewhere" toast, but localMd diverges from
+            // lastSavedMd as soon as the user types one character (the
+            // autosave hasn't landed yet). That falsely flagged the
+            // user's own in-progress typing as an external conflict.
+            const serverDiverged = serverMd !== lastSavedMd;
+            if (!serverDiverged) return; // nothing actually changed externally
+            const localIsDirty = localMd !== lastSavedMd || autoSave.isSaving;
+
+            if (!localIsDirty) {
+              // Server changed, local clean → auto-pull silently
               const oldMd = localMd;
               setMarkdownRaw(serverMd);
               if (serverTitle) setTitle(serverTitle);
@@ -4532,10 +4536,10 @@ export default function MdEditor() {
               if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at as string);
               setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: serverTitle || t.title } : t));
               highlightDiff(oldMd, serverMd);
-              showToast("Document updated from another source", "info");
             } else {
-              // User has unsaved changes — DON'T overwrite, just notify
-              showToast("This document was updated by someone else. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
+              // True conflict — server changed AND local has uncommitted
+              // edits. Notify but don't overwrite.
+              showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
             }
           } catch { /* fetch failed, ignore */ }
         }
@@ -4572,13 +4576,18 @@ export default function MdEditor() {
         const doc = await res.json();
         const serverMd = doc.markdown as string;
         const localMd = markdownRef.current;
-        if (serverMd === localMd) return;
-        // Auto-pull only if local has no unsaved changes — same policy
-        // as the realtime auto-pull.
         const currentTabData = tabs.find(t => t.id === activeTabIdRef.current);
         const lastSavedMd = currentTabData?.markdown || "";
-        if (localMd !== lastSavedMd) {
-          showToast("This document was updated elsewhere. Save to keep yours or reload to see theirs.", "info");
+        // External-update signal is "server diverged from what we last
+        // saved" — NOT "server differs from current editor content."
+        // localMd diverges from lastSavedMd the moment the user types
+        // one character, so comparing against localMd treated normal
+        // in-progress typing as an external conflict.
+        const serverDiverged = serverMd !== lastSavedMd;
+        if (!serverDiverged) return;
+        const localIsDirty = localMd !== lastSavedMd;
+        if (localIsDirty) {
+          showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
           return;
         }
         const oldMd = localMd;
