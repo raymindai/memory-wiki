@@ -1255,8 +1255,10 @@ private struct URLImportSheet: View {
                         .foregroundStyle(Brand.textMuted)
                 }
             }
-            .toolbarBackground(Brand.background, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            // Let the sheet's presentationBackground(.ultraThinMaterial)
+            // extend under the toolbar — overriding with Brand.background
+            // created a visible tonal step between the toolbar (opaque
+            // ink) and the body (glass) that the user flagged.
         }
         .onAppear {
             fieldFocus = true
@@ -1377,8 +1379,10 @@ private struct ImportInfoSheet: View {
                         .foregroundStyle(Brand.textMuted)
                 }
             }
-            .toolbarBackground(Brand.background, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            // Let the sheet's presentationBackground(.ultraThinMaterial)
+            // extend under the toolbar — overriding with Brand.background
+            // created a visible tonal step between the toolbar (opaque
+            // ink) and the body (glass) that the user flagged.
         }
         .fileImporter(
             isPresented: $showPicker,

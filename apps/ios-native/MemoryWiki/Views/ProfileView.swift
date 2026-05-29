@@ -738,8 +738,8 @@ private struct DisplayNameEditor: View {
                         .foregroundStyle(Brand.textMuted)
                 }
             }
-            .toolbarBackground(Brand.background, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            // Let the sheet's glass extend under the toolbar so the
+            // header + body tone match (no opaque ink band on top).
         }
         .onAppear { fieldFocus = true }
     }
@@ -829,7 +829,9 @@ private struct DictationLanguagePicker: View {
                         .font(Brand.body(size: 14, weight: .semibold))
                 }
             }
-            .toolbarBackground(.visible, for: .navigationBar)
+            // No explicit toolbarBackground — sheet's
+            // presentationBackground(.ultraThinMaterial) flows
+            // under the toolbar for consistent tone with body.
         }
     }
 
