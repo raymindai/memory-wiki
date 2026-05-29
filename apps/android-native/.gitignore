@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+local.properties
+secrets.local.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.kotlin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Outputs
+captures/
+*.apk
+*.aab
+release/
+debug/
+
+# Native
+.cxx/
+
+# Keystore (NEVER commit)
+*.jks
+*.keystore

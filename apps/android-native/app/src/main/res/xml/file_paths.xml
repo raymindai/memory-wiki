@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Temp files for camera capture + OCR before upload. -->
+    <cache-path name="captures" path="captures/" />
+    <files-path name="documents" path="documents/" />
+</paths>

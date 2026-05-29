@@ -1,0 +1,10 @@
+<resources>
+    <color name="brand_background">#FF09090B</color>
+    <color name="brand_surface">#FF18181B</color>
+    <color name="brand_sheet">#FF111114</color>
+    <color name="brand_text_primary">#FFFAFAFA</color>
+    <color name="brand_text_muted">#FFA1A1AA</color>
+    <color name="brand_text_faint">#FF8A8A91</color>
+    <color name="brand_border">#FF2D2D31</color>
+    <color name="brand_accent_lime">#FFB5FF1A</color>
+</resources>
