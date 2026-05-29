@@ -9,29 +9,22 @@ package wiki.memory.memorywiki.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.HiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import dagger.hilt.android.lifecycle.HiltViewModel as HiltVM
+import dagger.hilt.android.lifecycle.HiltViewModel
 import wiki.memory.memorywiki.AppRouter
 import wiki.memory.memorywiki.AppTab
 import wiki.memory.memorywiki.RouterEvent
@@ -45,16 +38,15 @@ import wiki.memory.memorywiki.ui.chat.ChatScopeId
 import wiki.memory.memorywiki.ui.document.DocumentDetailScreen
 import wiki.memory.memorywiki.ui.markdowns.MarkdownsScreen
 import wiki.memory.memorywiki.ui.settings.SettingsScreen
-import wiki.memory.memorywiki.ui.shell.BrandTabBar
 import wiki.memory.memorywiki.ui.shell.BottomFadeStrip
+import wiki.memory.memorywiki.ui.shell.BrandTabBar
 import wiki.memory.memorywiki.ui.start.StartScreen
 import wiki.memory.memorywiki.ui.theme.AccentColorChoice
 import wiki.memory.memorywiki.ui.theme.Brand
-import wiki.memory.memorywiki.ui.theme.LocalActiveOwnerAccent
 import wiki.memory.memorywiki.ui.theme.MemoryWikiTheme
 import javax.inject.Inject
 
-@HiltVM
+@HiltViewModel
 class RootViewModel @Inject constructor(
     val router: AppRouter,
     val auth: AuthManager,
@@ -91,7 +83,6 @@ private fun SignedInShell(router: AppRouter) {
     val navController = rememberNavController()
     val tab by router.selectedTab.collectAsState()
 
-    // Mirror tab selection into NavController.
     LaunchedEffect(tab) {
         val target = tab.route
         val current = navController.currentDestination?.parent?.route ?: navController.currentDestination?.route
@@ -103,13 +94,12 @@ private fun SignedInShell(router: AppRouter) {
             }
         }
     }
-    // Doc / bundle push events.
     LaunchedEffect(Unit) {
         router.events.collect { evt ->
             when (evt) {
                 is RouterEvent.PushDocDetail -> navController.navigate("markdowns/doc/${evt.docId}")
                 is RouterEvent.PushBundleDetail -> navController.navigate("bundles/${evt.bundleId}")
-                else -> Unit // Screen-local events handled by individual screens
+                else -> Unit
             }
         }
     }
@@ -148,7 +138,6 @@ private fun SignedInShell(router: AppRouter) {
             composable(AppTab.Capture.route) { CaptureScreen(navController) }
             composable(AppTab.Settings.route) { SettingsScreen(navController) }
 
-            // Modal-ish destinations
             composable("chat/{kind}/{id}/{title}") { backStack ->
                 val kind = backStack.arguments?.getString("kind").orEmpty()
                 val id = backStack.arguments?.getString("id").orEmpty()
@@ -160,7 +149,6 @@ private fun SignedInShell(router: AppRouter) {
             }
         }
 
-        // Tab bar (floating glass, mirrors iOS BrandTabBar)
         Box(Modifier.align(Alignment.BottomCenter)) {
             BottomFadeStrip()
             BrandTabBar(

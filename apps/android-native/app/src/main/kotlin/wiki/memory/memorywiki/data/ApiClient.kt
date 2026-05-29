@@ -140,6 +140,23 @@ class ApiClient @Inject constructor(
         if (!res.status.isSuccess()) error("HTTP ${res.status.value} reanalyzeHub")
     }
 
+    // ─── Profile (accent + scheme) ───
+
+    suspend fun updateProfile(accent: String? = null, scheme: String? = null, displayName: String? = null) {
+        val payload = buildMap<String, String?> {
+            accent?.let { put("accent_color", it) }
+            scheme?.let { put("color_scheme", it) }
+            displayName?.let { put("display_name", it) }
+        }.filterValues { it != null }
+        if (payload.isEmpty()) return
+        val res = http.patch("$base/api/user/profile") {
+            authHeaders()
+            contentType(ContentType.Application.Json)
+            setBody(payload)
+        }
+        if (!res.status.isSuccess()) error("HTTP ${res.status.value} updateProfile")
+    }
+
     // ─── Pins ───
 
     @Serializable data class Pin(val kind: String, val id: String)

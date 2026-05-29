@@ -168,6 +168,11 @@ class AuthManager @Inject constructor(
         _session.value = null
     }
 
+    /** Force-rehydrate from supabase + profiles. Called after a
+     *  profile mutation (display name, accent, scheme) so the
+     *  session flow re-emits with the fresh values. */
+    suspend fun refresh() = hydrate()
+
     // ─── Internal ───
 
     private suspend fun hydrate() {

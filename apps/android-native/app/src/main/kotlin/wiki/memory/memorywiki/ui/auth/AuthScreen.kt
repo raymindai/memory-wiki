@@ -184,6 +184,31 @@ fun AuthScreen(vm: AuthViewModel = hiltViewModel()) {
             Text("$left  ", color = Brand.TextFaint, style = BrandType.body(12))
             Text(right, color = Brand.TextPrimary, style = BrandType.body(12, FontWeight.Medium))
         }
+
+        Spacer(Modifier.height(28.dp))
+        Row(
+            Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ProviderButton("Apple",  Modifier.weight(1f)) { vm.auth.beginAppleOAuth() }
+            ProviderButton("GitHub", Modifier.weight(1f)) { vm.auth.beginGithubOAuth() }
+        }
+    }
+}
+
+@Composable
+private fun ProviderButton(label: String, modifier: Modifier, onClick: () -> Unit) {
+    androidx.compose.material3.OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.height(46.dp),
+        shape = Brand.Shapes.small,
+        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+            containerColor = Brand.Surface,
+            contentColor = Brand.TextPrimary,
+        ),
+        border = androidx.compose.foundation.BorderStroke(0.5.dp, Brand.BorderDim),
+    ) {
+        Text(label, style = BrandType.body(13, FontWeight.Medium))
     }
 }
 

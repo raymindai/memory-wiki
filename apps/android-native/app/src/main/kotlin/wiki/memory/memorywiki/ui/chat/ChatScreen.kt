@@ -1,6 +1,6 @@
 /*
  * ChatScreen — streaming chat over Hub / Bundle / Doc scope.
- * Backed by Claude Haiku 4.5 (model selection is server-side).
+ * Backed by Claude Haiku 4.5 (server-side model choice).
  *
  *  - Scope chip top-left (HUB / BUNDLE / DOC) + title + close
  *  - Lazy column transcript with user / assistant bubbles
@@ -31,6 +31,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -40,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +52,7 @@ import wiki.memory.memorywiki.data.ApiClient
 import wiki.memory.memorywiki.data.ChatScope
 import wiki.memory.memorywiki.data.DocCache
 import wiki.memory.memorywiki.data.model.ChatMessage
+import wiki.memory.memorywiki.di.MarkwonEntryPoint
 import wiki.memory.memorywiki.ui.markdown.MarkdownBody
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.BrandType
@@ -95,8 +98,11 @@ fun ChatScreen(
     navController: NavController,
     scopeId: ChatScopeId,
     vm: ChatViewModel = hiltViewModel(),
-    markwon: Markwon = remember { Markwon.create(navController.context) },
 ) {
+    val context = LocalContext.current
+    val markwon = remember(context) {
+        EntryPointAccessors.fromApplication(context.applicationContext, MarkwonEntryPoint::class.java).markwon()
+    }
     val messages by vm.messages.collectAsState()
     val streaming by vm.streaming.collectAsState()
     var input by remember { mutableStateOf("") }
@@ -108,7 +114,6 @@ fun ChatScreen(
     }
 
     Column(Modifier.fillMaxSize().background(Brand.Background).padding(top = 44.dp)) {
-        // Top bar
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -128,7 +133,6 @@ fun ChatScreen(
             }
         }
 
-        // Transcript
         LazyColumn(
             state = listState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -136,20 +140,20 @@ fun ChatScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (messages.isEmpty()) {
-                item { Suggestions(onPick = {
-                    input = it
-                }) }
+                item { Suggestions(onPick = { input = it }) }
             }
             items(messages.size) { idx ->
                 val m = messages[idx]
-                if (m.role == "user") UserBubble(m.content) else AssistantBubble(m.content, markwon)
+                if (m.role == "user") UserBubble(m.content)
+                else AssistantBubble(m.content, markwon, vm.docCache, onCitationClick = { docId ->
+                    navController.navigate("markdowns/doc/$docId")
+                })
             }
             if (streaming && messages.lastOrNull()?.content?.isBlank() == true) {
                 item { Text("Thinking…", style = BrandType.body(13), color = Brand.TextFaint) }
             }
         }
 
-        // Composer
         Row(
             Modifier
                 .fillMaxWidth()
@@ -223,18 +227,22 @@ private fun UserBubble(content: String) {
 }
 
 @Composable
-private fun AssistantBubble(content: String, markwon: Markwon) {
+private fun AssistantBubble(
+    content: String,
+    markwon: Markwon,
+    docCache: DocCache,
+    onCitationClick: (String) -> Unit,
+) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         MarkdownBody(markdown = stripCitations(content), markwon = markwon, modifier = Modifier.fillMaxWidth())
-        // Citation chips parsed from [doc:<id>] markers
-        val citationIds = citationRegex.findAll(content).map { it.groupValues[1] }.toList()
+        val citationIds = citationRegex.findAll(content).map { it.groupValues[1] }.toList().distinct()
         if (citationIds.isNotEmpty()) {
             Row(
                 Modifier.fillMaxWidth().padding(top = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                citationIds.distinct().forEach { id ->
-                    DocCitationChip(id)
+                citationIds.forEach { id ->
+                    DocCitationChip(id, docCache, onClick = { onCitationClick(id) })
                 }
             }
         }
@@ -245,21 +253,26 @@ private val citationRegex = Regex("""\[doc:([A-Za-z0-9_-]{6,16})]""")
 private fun stripCitations(s: String) = s.replace(citationRegex, "")
 
 @Composable
-fun DocCitationChip(id: String) {
-    // Tries DocCache snapshot first; falls back to "doc/<id>" label.
-    // (Hilt-injected DocCache would be cleaner, but we keep this
-    // composable allocation-free for transcript scroll perf.)
-    val title = id // TODO inject DocCache and call snapshot(id)?.title ?: id
+fun DocCitationChip(id: String, docCache: DocCache, onClick: () -> Unit) {
+    // Resolve title via DocCache snapshot; fall back to id while
+    // the prefetch fetch is in flight. The prefetch call kicks off a
+    // background refetch so the chip's title updates a beat later
+    // (DocCache bumps `changes` which the surrounding LazyColumn
+    // observes through its own state — for chat we accept a brief
+    // id-as-title fallback rather than ladder another state hop).
+    val title = docCache.snapshot(id)?.title ?: id
+    LaunchedEffect(id) { docCache.prefetch(id) }
     Row(
         Modifier
             .background(Brand.Surface, RoundedCornerShape(8.dp))
             .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(8.dp))
+            .clickable { onClick() }
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Box(Modifier.size(6.dp).background(Brand.MicroInfo, RoundedCornerShape(3.dp)))
-        Text(title, style = BrandType.mono(10), color = Brand.TextPrimary)
+        Text(title, style = BrandType.mono(10), color = Brand.TextPrimary, maxLines = 1)
     }
 }
 

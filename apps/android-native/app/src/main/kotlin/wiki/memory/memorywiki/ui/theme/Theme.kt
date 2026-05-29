@@ -6,20 +6,21 @@
  *    later release, separate from system theme tracking).
  *  - Material 3 ColorScheme is built from Brand tokens so accidental
  *    Material component usage stays on-brand.
- *  - Owner accent override (see CompositionLocals below) lets a
- *    shared-doc viewer paint chrome in the doc owner's accent
- *    without mutating the visitor's saved preference.
+ *  - Owner accent override (CompositionLocal below) lets a shared-
+ *    doc viewer paint chrome in the doc owner's accent without
+ *    mutating the visitor's saved preference.
  */
 
 package wiki.memory.memorywiki.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.app.Activity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 
@@ -34,7 +35,6 @@ val LocalEffectiveAccent = staticCompositionLocalOf<AccentColorChoice> { AccentC
 
 @Composable
 fun MemoryWikiTheme(
-    @Suppress("UNUSED_PARAMETER") useDarkTheme: Boolean = isSystemInDarkTheme(),
     userAccent: AccentColorChoice = AccentColorChoice.Lime,
     ownerAccentOverride: AccentColorChoice? = null,
     content: @Composable () -> Unit,
@@ -67,9 +67,8 @@ fun MemoryWikiTheme(
     )
 
     val context = LocalContext.current
-    // Status bar + nav bar painted as background, with light-on-dark icons.
-    androidx.compose.runtime.SideEffect {
-        (context as? android.app.Activity)?.window?.let { win ->
+    SideEffect {
+        (context as? Activity)?.window?.let { win ->
             win.statusBarColor = Brand.Background.toArgb()
             win.navigationBarColor = Brand.Background.toArgb()
             val controller = WindowCompat.getInsetsController(win, win.decorView)
@@ -91,10 +90,3 @@ fun MemoryWikiTheme(
         )
     }
 }
-
-private fun Color.toArgb(): Int = android.graphics.Color.argb(
-    (alpha * 255).toInt(),
-    (red * 255).toInt(),
-    (green * 255).toInt(),
-    (blue * 255).toInt(),
-)

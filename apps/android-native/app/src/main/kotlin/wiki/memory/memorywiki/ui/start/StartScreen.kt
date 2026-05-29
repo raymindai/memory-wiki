@@ -43,13 +43,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import wiki.memory.memorywiki.AppRouter
-import wiki.memory.memorywiki.AppTab
 import wiki.memory.memorywiki.BuildConfig
 import wiki.memory.memorywiki.RouterEvent
 import wiki.memory.memorywiki.auth.AuthManager
 import wiki.memory.memorywiki.data.ApiClient
 import wiki.memory.memorywiki.data.model.DocSummary
-import wiki.memory.memorywiki.ui.chat.ChatScopeId
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.BrandType
 import java.util.Calendar
@@ -63,6 +61,8 @@ class StartViewModel @Inject constructor(
 ) : ViewModel() {
     private val _recent = MutableStateFlow<List<DocSummary>>(emptyList())
     val recent: StateFlow<List<DocSummary>> = _recent.asStateFlow()
+    private val _starredIds = MutableStateFlow<List<String>>(emptyList())
+    val starredIds: StateFlow<List<String>> = _starredIds.asStateFlow()
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
     private val _todayCount = MutableStateFlow(0)
@@ -74,8 +74,18 @@ class StartViewModel @Inject constructor(
 
     init { refresh() }
 
+    fun openSearch() = viewModelScope.launch {
+        router.selectTab(wiki.memory.memorywiki.AppTab.Markdowns)
+        router.emit(RouterEvent.OpenSearch)
+    }
+
+    fun openCapture() { router.selectTab(wiki.memory.memorywiki.AppTab.Capture) }
+
     fun refresh() = viewModelScope.launch {
         _loading.value = true
+        runCatching { api.pins() }.onSuccess { p ->
+            _starredIds.value = p.pins.filter { it.kind == "document" }.map { it.id }
+        }
         runCatching { api.userDocuments() }.onSuccess { resp ->
             _recent.value = resp.documents.take(7)
             val now = System.currentTimeMillis()
@@ -105,6 +115,7 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
         ?: "${BuildConfig.API_BASE}/@yourname"
     val clipboard = LocalClipboardManager.current
     val recent by vm.recent.collectAsState()
+    val starredIds by vm.starredIds.collectAsState()
     val loading by vm.loading.collectAsState()
     val today by vm.todayCount.collectAsState()
     val week by vm.weekCount.collectAsState()
@@ -144,11 +155,25 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
         EditorialStatStrip(today = today, week = week, allTime = allTime)
 
         QuickActions(
-            onCapture = { vm.router.selectTab(AppTab.Capture) },
-            onSearch = { vm.router.selectTab(AppTab.Markdowns); vm.viewModelScope.launch { vm.router.emit(RouterEvent.OpenSearch) } },
-            onOpenHub = { /* TODO open hub viewer */ },
+            onCapture = { vm.openCapture() },
+            onSearch = { vm.openSearch() },
+            onOpenHub = { /* hub viewer wired in v0.2 */ },
         )
 
+        if (starredIds.isNotEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            Text("STARRED", style = BrandType.mono(9, FontWeight.Medium), color = Brand.TextFaint)
+            // Cross-reference the recent set; titles for unseen docs
+            // will land once DocCache prefetches.
+            starredIds.take(5).forEach { id ->
+                val doc = recent.firstOrNull { it.id == id }
+                if (doc != null) {
+                    RecentRow(doc) { navController.navigate("markdowns/doc/${doc.id}") }
+                } else {
+                    PlainRow(id) { navController.navigate("markdowns/doc/$id") }
+                }
+            }
+        }
         Spacer(Modifier.height(4.dp))
         Text("RECENT", style = BrandType.mono(9, FontWeight.Medium), color = Brand.TextFaint)
         recent.forEach { doc ->
@@ -159,6 +184,22 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
         if (loading && recent.isEmpty()) {
             wiki.memory.memorywiki.ui.components.SkeletonList(count = 5)
         }
+    }
+}
+
+@Composable
+private fun PlainRow(id: String, onClick: () -> Unit) {
+    androidx.compose.foundation.layout.Row(
+        Modifier
+            .fillMaxWidth()
+            .background(Brand.Surface, androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(Modifier.size(8.dp).background(Brand.MicroWarn, androidx.compose.foundation.shape.RoundedCornerShape(4.dp)))
+        Text(id, style = BrandType.mono(11), color = Brand.TextSecondary)
     }
 }
 

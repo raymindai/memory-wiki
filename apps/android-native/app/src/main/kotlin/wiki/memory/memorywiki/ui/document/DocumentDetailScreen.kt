@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.noties.markwon.Markwon
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,7 +50,9 @@ import wiki.memory.memorywiki.BuildConfig
 import wiki.memory.memorywiki.data.ApiClient
 import wiki.memory.memorywiki.data.DocCache
 import wiki.memory.memorywiki.data.model.DocumentDetail
+import wiki.memory.memorywiki.di.MarkwonEntryPoint
 import wiki.memory.memorywiki.ui.markdown.MarkdownBody
+import androidx.compose.ui.platform.LocalContext
 import wiki.memory.memorywiki.ui.theme.AccentColorChoice
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.BrandType
@@ -82,8 +85,11 @@ fun DocumentDetailScreen(
     navController: NavController,
     docId: String,
     vm: DocumentDetailViewModel = hiltViewModel(),
-    markwon: Markwon = androidx.compose.runtime.remember { Markwon.create(navController.context) },
 ) {
+    val context = LocalContext.current
+    val markwon = remember(context) {
+        EntryPointAccessors.fromApplication(context.applicationContext, MarkwonEntryPoint::class.java).markwon()
+    }
     val detail by vm.detail.collectAsState()
     val loading by vm.loading.collectAsState()
     val clipboard = LocalClipboardManager.current

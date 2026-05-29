@@ -9,8 +9,8 @@ package wiki.memory.memorywiki.share
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,8 +39,8 @@ class ShareReceiverActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val intent = intent ?: run { finish(); return }
-        if (intent.action != Intent.ACTION_SEND && intent.action != Intent.ACTION_SEND_MULTIPLE) {
+        val src = intent ?: run { finish(); return }
+        if (src.action != Intent.ACTION_SEND && src.action != Intent.ACTION_SEND_MULTIPLE) {
             finish(); return
         }
         if (auth.session.value == null) {
@@ -51,8 +51,8 @@ class ShareReceiverActivity : Activity() {
         lifecycleScope.launch {
             try {
                 when {
-                    intent.type == "text/plain" -> handleText(intent)
-                    intent.type?.startsWith("image/") == true -> handleImage(intent)
+                    src.type == "text/plain" -> handleText(src)
+                    src.type?.startsWith("image/") == true -> handleImage(src)
                     else -> toast("Unsupported share type")
                 }
             } catch (t: Throwable) {
@@ -78,14 +78,15 @@ class ShareReceiverActivity : Activity() {
                 contentType(ContentType.Application.Json)
                 setBody(NewDocRequest(markdown = body, title = title.ifBlank { null }))
             }
-            if (res.status.isSuccess()) toast("Saved to memory.wiki")
-            else toast("Save failed (${res.status.value})")
+            withContext(Dispatchers.Main) {
+                if (res.status.isSuccess()) toast("Saved to memory.wiki")
+                else toast("Save failed (${res.status.value})")
+            }
         }
     }
 
     private suspend fun handleImage(intent: Intent) {
-        val uri: Uri = intent.getParcelableExtra(Intent.EXTRA_STREAM)
-            ?: run { toast("No image"); return }
+        val uri: Uri = extractStream(intent) ?: run { toast("No image"); return }
         val bytes = withContext(Dispatchers.IO) {
             contentResolver.openInputStream(uri)?.use { it.readBytes() }
         } ?: run { toast("Couldn't read image"); return }
@@ -96,6 +97,14 @@ class ShareReceiverActivity : Activity() {
         val upload = api.uploadImage(payload.bytes, payload.fileExtension, payload.contentType)
         toast("Uploaded: ${upload.url}")
     }
+
+    /** API 33+ requires the typed overload of getParcelableExtra. */
+    @Suppress("DEPRECATION")
+    private fun extractStream(intent: Intent): Uri? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        else
+            intent.getParcelableExtra(Intent.EXTRA_STREAM)
 
     private fun io.ktor.client.request.HttpRequestBuilder.authHeaders() {
         val session = auth.session.value ?: return

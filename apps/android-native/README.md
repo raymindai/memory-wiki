@@ -87,13 +87,10 @@ These are tracked for v0.2:
 
 - KaTeX / Mermaid via lazy WebView (same gap as iOS)
 - Footnotes (Markwon plugin add)
-- CameraX wiring for the Photo / OCR sub-flows (stubs in `CaptureScreen.kt`)
-- SpeechRecognizer wiring for Voice
-- Storage Access Framework picker for Import
-- Pins (starred) UI on Start
+- Google Sign-In with Credential Manager (Apple/GitHub Custom Tabs OAuth are wired via Supabase; Google needs Firebase OAuth client + SHA-1, see Phase 4 in setup guide)
 - In-app hub viewer (Hub tab equivalent of `/hub/<slug>`)
-- Apple / GitHub OAuth flows (Custom Tabs scaffolding in place; provider buttons hidden until wired)
 - Play Console listing + Data Safety form (see [memory.wiki/vfj8dNg_ §17](https://memory.wiki/vfj8dNg_))
+- 30s background revalidate on MDs / Bundles (the StateFlow is wired; just needs a ticker)
 
 ## Brand assets
 

@@ -50,8 +50,16 @@ import wiki.memory.memorywiki.ui.theme.BrandType
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(val auth: AuthManager) : ViewModel() {
+class SettingsViewModel @Inject constructor(
+    val auth: AuthManager,
+    val api: wiki.memory.memorywiki.data.ApiClient,
+) : ViewModel() {
     fun updateDisplayName(name: String) = viewModelScope.launch { auth.updateDisplayName(name) }
+    fun setAccent(choice: AccentColorChoice) = viewModelScope.launch {
+        runCatching { api.updateProfile(accent = choice.key) }
+        // Force a session re-hydrate so RootShell picks up the new accent.
+        auth.refresh()
+    }
     fun signOut() = viewModelScope.launch { auth.signOut() }
 }
 
@@ -117,7 +125,7 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
         SectionLabel("KEY COLOR")
         AccentPicker(
             selected = AccentColorChoice.from(session?.accentColor),
-            onSelect = { /* TODO PATCH /api/user/profile { accent_color } */ },
+            onSelect = { vm.setAccent(it) },
         )
 
         Spacer(Modifier.height(8.dp))

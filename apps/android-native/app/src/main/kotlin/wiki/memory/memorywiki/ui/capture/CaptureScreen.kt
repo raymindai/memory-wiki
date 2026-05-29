@@ -147,10 +147,13 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
             when (mode) {
                 CaptureMode.Write -> WriteBody(body, vm::setBody)
                 CaptureMode.URL -> UrlMode(onSubmit = vm::importUrl)
-                CaptureMode.Photo -> PhotoModeStub()
-                CaptureMode.OCR -> OcrModeStub()
-                CaptureMode.Voice -> VoiceModeStub()
-                CaptureMode.Import -> ImportModeStub()
+                CaptureMode.Photo -> PhotoMode(api = vm.api, onCaptured = { url ->
+                    vm.pasteIntoBody("![photo]($url)")
+                    vm.setMode(CaptureMode.Write)
+                }, onError = { /* TODO surface via banner */ })
+                CaptureMode.OCR -> OcrMode(onAppend = { vm.pasteIntoBody(it) }, onError = { /* TODO banner */ })
+                CaptureMode.Voice -> VoiceMode(onAppend = { vm.pasteIntoBody(it) }, onError = { /* TODO banner */ })
+                CaptureMode.Import -> ImportMode(onAppend = { vm.pasteIntoBody(it) }, onError = { /* TODO banner */ })
             }
         }
 
@@ -236,14 +239,3 @@ private fun UrlMode(onSubmit: (String) -> Unit) {
     }
 }
 
-@Composable private fun PhotoModeStub() = StubMode("Photo capture — tap the camera button (CameraX wiring TBD).")
-@Composable private fun OcrModeStub() = StubMode("OCR — point camera at text or pick a photo (ML Kit wiring TBD).")
-@Composable private fun VoiceModeStub() = StubMode("Voice dictation — hold to speak (SpeechRecognizer wiring TBD).")
-@Composable private fun ImportModeStub() = StubMode("Import a file — PDF, Office, Markdown (Storage Access Framework wiring TBD).")
-
-@Composable
-private fun StubMode(text: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
-        Text(text, style = BrandType.body(13), color = Brand.TextMuted)
-    }
-}
