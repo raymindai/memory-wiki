@@ -66,13 +66,22 @@ struct EmailAuthSheet: View {
                 Button(action: submit) {
                     Text(working ? "Working…" : (mode == .signIn ? "Sign in" : "Create account"))
                         .font(Brand.body(size: 15, weight: .medium))
-                        .foregroundStyle(Brand.background)
+                        // Single foregroundStyle — the previous
+                        // version had `.foregroundStyle(Brand.background)`
+                        // hard-coded above the conditional one, so the
+                        // inner Text always painted as zinc-950 ink even
+                        // when disabled, vanishing against the zinc-900
+                        // surface fill.
+                        .foregroundStyle(canSubmit ? Brand.background : Brand.textMuted)
                         .frame(maxWidth: .infinity, minHeight: 50)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .fill(canSubmit ? Brand.textPrimary : Brand.surface)
                         )
-                        .foregroundStyle(canSubmit ? Brand.background : Brand.textFaint)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .strokeBorder(canSubmit ? .clear : Brand.border, lineWidth: 1)
+                        )
                 }
                 .buttonStyle(.plain)
                 .disabled(!canSubmit)
