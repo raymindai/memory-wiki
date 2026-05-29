@@ -4536,6 +4536,62 @@ export default function MdEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabId, docId]);
 
+  // ─── Visibility / focus refetch ───
+  // Belt-and-suspenders for the realtime channel above: when the user
+  // returns to the tab (visibilitychange) or window (focus), refetch
+  // the active doc and pull cleanly if it's changed server-side AND
+  // the local copy is clean. Realtime can silently miss a payload
+  // (RLS hiccup, dropped websocket frame, suspended tab) — this
+  // makes sure no one ever has to hit refresh to see an update they
+  // made from another surface (MCP / iOS / CLI / another browser).
+  useEffect(() => {
+    const currentTab = tabs.find(t => t.id === activeTabId);
+    const cloudId = currentTab?.cloudId;
+    if (!cloudId) return;
+
+    const refetchIfStale = async () => {
+      // Skip if we're the ones that just saved (within 3s) — same
+      // guard the realtime channel uses to avoid clobbering local edits.
+      if (Date.now() - realtimeLastSaveRef.current < 3000) return;
+      if (autoSave.isSaving) return;
+      try {
+        const res = await fetch(`/api/docs/${cloudId}`, { headers: authHeadersRef.current });
+        if (!res.ok) return;
+        const doc = await res.json();
+        const serverMd = doc.markdown as string;
+        const localMd = markdownRef.current;
+        if (serverMd === localMd) return;
+        // Auto-pull only if local has no unsaved changes — same policy
+        // as the realtime auto-pull.
+        const currentTabData = tabs.find(t => t.id === activeTabIdRef.current);
+        const lastSavedMd = currentTabData?.markdown || "";
+        if (localMd !== lastSavedMd) {
+          showToast("This document was updated elsewhere. Save to keep yours or reload to see theirs.", "info");
+          return;
+        }
+        const oldMd = localMd;
+        setMarkdownRaw(serverMd);
+        if (doc.title) setTitle(doc.title as string);
+        doRender(serverMd);
+        cmSetDocRef.current?.(serverMd);
+        tiptapRef.current?.setMarkdown(serverMd);
+        if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at as string);
+        setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: (doc.title as string) || t.title } : t));
+        highlightDiff(oldMd, serverMd);
+      } catch { /* ignore */ }
+    };
+
+    const onVisibility = () => { if (!document.hidden) refetchIfStale(); };
+    const onFocus = () => refetchIfStale();
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTabId, docId]);
+
   // ─── Supabase Realtime: Notifications ───
   // Subscribe to new notifications for the logged-in user.
   useEffect(() => {
