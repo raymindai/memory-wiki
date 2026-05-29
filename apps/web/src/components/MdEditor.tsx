@@ -4684,6 +4684,71 @@ export default function MdEditor() {
     return () => { if (debounceTimer) clearTimeout(debounceTimer); supabase.removeChannel(channel); };
   }, [user?.id]);
 
+  // ─── Supabase Realtime: Bundles + folders ───
+  // Subscribe to bundles + folders so the sidebar reflects changes
+  // made on iOS / another tab / another device without forcing the
+  // user to hit Refresh. Documents had its own channel above; this
+  // closes the gap for the other two sidebar surfaces.
+  useEffect(() => {
+    if (!user?.id) return;
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    let bundleDebounce: ReturnType<typeof setTimeout> | null = null;
+    let folderDebounce: ReturnType<typeof setTimeout> | null = null;
+
+    const reloadBundles = async () => {
+      try {
+        const res = await fetch("/api/bundles", { headers: authHeadersRef.current, cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.bundles) setBundles(data.bundles);
+      } catch { /* offline */ }
+    };
+    const reloadFolders = async () => {
+      try {
+        const res = await fetch("/api/user/folders", { headers: authHeadersRef.current, cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data?.folders) return;
+        setFolders(data.folders.map((f: { id: string; name: string; collapsed?: boolean; section?: string; parent_id?: string | null; emoji?: string; sort_order?: number }) => ({
+          id: f.id,
+          name: f.name,
+          collapsed: f.collapsed || false,
+          section: (f.section || "my") as "my" | "shared",
+          parentId: f.parent_id || null,
+          emoji: f.emoji || undefined,
+          sortOrder: f.sort_order ?? 0,
+        })));
+      } catch { /* offline */ }
+    };
+
+    const channel = supabase
+      .channel(`sidebar-aux-${user.id}`)
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'bundles', filter: `user_id=eq.${user.id}` },
+        () => {
+          if (bundleDebounce) clearTimeout(bundleDebounce);
+          bundleDebounce = setTimeout(reloadBundles, 1200);
+        }
+      )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'folders', filter: `user_id=eq.${user.id}` },
+        () => {
+          if (folderDebounce) clearTimeout(folderDebounce);
+          folderDebounce = setTimeout(reloadFolders, 1200);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (bundleDebounce) clearTimeout(bundleDebounce);
+      if (folderDebounce) clearTimeout(folderDebounce);
+      supabase.removeChannel(channel);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   // Preview: click to scroll to source + double-click to inline edit
 
   // Uses comrak's data-sourcepos="startLine:startCol-endLine:endCol" for accurate mapping
@@ -7955,19 +8020,29 @@ ${clone.innerHTML}
               <Tooltip text="Refresh from server">
                 <button
                   id="sidebar-refresh-btn"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    // Spin the icon (NOT the button) so the hover
-                    // background doesn't rotate along with it.
-                    setRefreshSpinning(true);
-                    setTimeout(() => setRefreshSpinning(false), 600);
                     if (!user?.id) return;
+                    setRefreshSpinning(true);
                     // Refresh everything the sidebar surfaces — docs,
-                    // bundles, folders — in parallel. Previously only
-                    // docs were refetched, so a bundle/folder created
-                    // in another tab needed a full browser reload.
-                    fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
-                      .then(res => res.ok ? res.json() : null)
+                    // bundles, folders — in parallel. Three real fixes
+                    // here over the earlier silent-fail version:
+                    //   1. `cache: "no-store"` so the browser HTTP
+                    //      cache doesn't serve a stale 304 against
+                    //      the same URL the user just hit a moment
+                    //      before (the primary cause of "refresh
+                    //      does nothing" reports).
+                    //   2. Promise.all + spinner stops on actual
+                    //      completion — not a hardcoded 600ms.
+                    //   3. console.warn on failed fetches so a stale
+                    //      access token (401) is at least visible in
+                    //      DevTools instead of silently swallowed.
+                    const opts: RequestInit = { headers: authHeaders, cache: "no-store" };
+                    const docsP = fetch("/api/user/documents?includeDeleted=1", opts)
+                      .then(res => {
+                        if (!res.ok) { console.warn("[sidebar refresh] docs", res.status); return null; }
+                        return res.json();
+                      })
                       .then(data => {
                         if (data?.documents) {
                           setServerDocs(data.documents); ingestDocAiMeta(data.documents);
@@ -7980,13 +8055,20 @@ ${clone.innerHTML}
                             return [...prev.map(t => t.cloudId ? { ...t, source: (sm.get(t.cloudId) as string) || undefined } : t), ...nw];
                           });
                         }
-                      }).catch(() => {});
-                    fetch("/api/bundles", { headers: authHeaders })
-                      .then(res => res.ok ? res.json() : null)
+                      })
+                      .catch(err => console.warn("[sidebar refresh] docs threw", err));
+                    const bundlesP = fetch("/api/bundles", opts)
+                      .then(res => {
+                        if (!res.ok) { console.warn("[sidebar refresh] bundles", res.status); return null; }
+                        return res.json();
+                      })
                       .then(data => { if (data?.bundles) setBundles(data.bundles); })
-                      .catch(() => {});
-                    fetch("/api/user/folders", { headers: authHeaders })
-                      .then(res => res.ok ? res.json() : null)
+                      .catch(err => console.warn("[sidebar refresh] bundles threw", err));
+                    const foldersP = fetch("/api/user/folders", opts)
+                      .then(res => {
+                        if (!res.ok) { console.warn("[sidebar refresh] folders", res.status); return null; }
+                        return res.json();
+                      })
                       .then(data => {
                         if (!data?.folders) return;
                         setFolders(data.folders.map((f: { id: string; name: string; collapsed?: boolean; section?: string; parent_id?: string | null; emoji?: string; sort_order?: number }) => ({
@@ -7999,7 +8081,9 @@ ${clone.innerHTML}
                           sortOrder: f.sort_order ?? 0,
                         })));
                       })
-                      .catch(() => {});
+                      .catch(err => console.warn("[sidebar refresh] folders threw", err));
+                    try { await Promise.all([docsP, bundlesP, foldersP]); }
+                    finally { setRefreshSpinning(false); }
                   }}
                   className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]" data-action="refresh"
                   style={{ color: "var(--text-faint)" }}
