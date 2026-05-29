@@ -152,12 +152,14 @@ extension View {
         self
             .presentationDetents(detents)
             .presentationDragIndicator(.visible)
-            // Solid Brand.background — `.ultraThinMaterial` was
+            // Solid near-background dark — `.ultraThinMaterial` was
             // reading too bright/light against the dark canvas
-            // and bled the parent surface through, fighting the
-            // brand's ink-on-dark identity. Solid dark zinc
-            // matches every other surface in the app.
-            .presentationBackground(Brand.background)
+            // (bled the parent surface through). Pure Brand.background
+            // (#09090B) read too dark/flat. Mid-tone #111114 sits a
+            // hair above background so the sheet edge is visible
+            // against the parent without losing the ink-on-dark
+            // identity.
+            .presentationBackground(Color(hex: 0x111114))
             .presentationCornerRadius(28)
             .preferredColorScheme(.dark)
     }
