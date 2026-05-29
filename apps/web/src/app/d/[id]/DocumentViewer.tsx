@@ -161,7 +161,7 @@ export default function DocumentViewer({
     document.documentElement.setAttribute("data-theme", initial);
     // Restore accent and scheme
     const accent = localStorage.getItem("mw-accent");
-    if (accent && accent !== "orange") {
+    if (accent && accent !== "lime") {
       document.documentElement.setAttribute("data-accent", accent);
     }
     const scheme = localStorage.getItem("mw-scheme");
@@ -169,6 +169,40 @@ export default function DocumentViewer({
       document.documentElement.setAttribute("data-scheme", scheme);
     }
   }, []);
+
+  // Owner brand override — paint the page in the doc owner's saved
+  // accent / color scheme so a shared doc reads as the OWNER's
+  // brand, not the visitor's. /api/docs/[id] includes ownerAccent /
+  // ownerScheme from the owner's profile when the requester isn't
+  // the owner. Without this override an anon / different-user
+  // visitor sees the doc in their own lime default (or their own
+  // saved accent), which makes the doc feel branded by the visitor
+  // instead of the author.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/docs/${id}`, {
+          headers: { "x-no-view-count": "1" },
+          cache: "no-store",
+        });
+        if (!res.ok || cancelled) return;
+        const doc = await res.json();
+        if (doc.isOwner) return; // owner sees their own accent already
+        const ownerAccent = (doc.ownerAccent as string | undefined) || null;
+        const ownerScheme = (doc.ownerScheme as string | undefined) || null;
+        if (ownerAccent && ownerAccent !== "lime") {
+          document.documentElement.setAttribute("data-accent", ownerAccent);
+        } else if (ownerAccent === "lime") {
+          document.documentElement.removeAttribute("data-accent");
+        }
+        if (ownerScheme && ownerScheme !== "default") {
+          document.documentElement.setAttribute("data-scheme", ownerScheme);
+        }
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
 
   const toggleTheme = useCallback(() => {
     const next = theme === "dark" ? "light" : "dark";
