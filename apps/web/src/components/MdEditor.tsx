@@ -1355,6 +1355,23 @@ export default function MdEditor() {
     }
   }, [isMobile]);
   const [editorPlaceholder, setEditorPlaceholder] = useState<"sign-in" | "restricted" | "not-found" | "deleted" | null>(null);
+  // Stuck-loader watchdog — if isLoading stays true for >8s without
+  // any code path flipping it (the success path's doRender, an
+  // explicit setIsLoading(false), or an error placeholder), force
+  // dismiss and surface "not-found". Safety net for the
+  // "open a private link while logged-out → infinite logo" class of
+  // bugs: any future early-return that forgets to clear isLoading
+  // still recovers within 8 seconds instead of stranding the visitor
+  // on a perpetual loader. Loader being permanently stuck is the
+  // worst possible failure mode — nothing on screen, no recourse.
+  useEffect(() => {
+    if (!isLoading) return;
+    const t = setTimeout(() => {
+      setIsLoading(false);
+      setEditorPlaceholder((cur) => cur ?? "not-found");
+    }, 8000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
   const [deletedDocId, setDeletedDocId] = useState<string | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     if (typeof window === "undefined") return 240;
@@ -3816,6 +3833,13 @@ export default function MdEditor() {
             } else {
               setEditorPlaceholder("not-found");
             }
+            // Dismiss the boot loader so the placeholder (sign-in /
+            // restricted / not-found) is actually visible. Previously
+            // we returned without flipping isLoading → the inner
+            // MemoryWikiLogo loader stayed on top forever, exactly the
+            // "open a private link while logged-out → infinite loading"
+            // symptom.
+            setIsLoading(false);
             return;
           }
           {
@@ -3824,6 +3848,7 @@ export default function MdEditor() {
             if (prevDeleted) {
               setDeletedDocId(fromId);
               setEditorPlaceholder("deleted");
+              setIsLoading(false);
               return;
             }
 
@@ -12434,7 +12459,7 @@ ${clone.innerHTML}
               </div>
             )}
             <div className="flex-1 overflow-auto body-scroll relative" ref={previewRef}>
-              {showInnerLoader && activeTab?.kind !== "bundle" && !showHub && (
+              {showInnerLoader && !editorPlaceholder && activeTab?.kind !== "bundle" && !showHub && (
                 // Visually identical to page.tsx's boot loader — same
                 // logo size, same bar dimensions, same caption — so
                 // when this overlay takes over from the boot loader
