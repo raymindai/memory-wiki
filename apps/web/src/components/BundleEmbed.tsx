@@ -307,6 +307,64 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
     return () => window.removeEventListener("mw-bundle-doc-added", handler as EventListener);
   }, [bundleId, parentAuthHeaders]);
 
+  // ─── Supabase Realtime: bundle_documents + bundles meta ───
+  // Picks up external membership / meta changes (iOS adds a doc,
+  // CLI mutates the title, another tab rearranges members) and
+  // silently re-fetches the bundle so the canvas + list views
+  // stay in sync without the user hitting Refresh.
+  useEffect(() => {
+    if (!bundleId) return;
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+    (async () => {
+      const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase || cancelled) return;
+      let debounce: ReturnType<typeof setTimeout> | null = null;
+      const reload = async () => {
+        const headers: Record<string, string> = { ...(parentAuthHeaders || {}) };
+        try {
+          const r = await fetch(`/api/bundles/${bundleId}`, { headers, cache: "no-store" });
+          if (!r.ok) return;
+          const data = await r.json();
+          if (!data) return;
+          setDocuments(data.documents || []);
+          if (typeof data.title === "string") setBundleTitle(data.title);
+          if (typeof data.description === "string" || data.description === null) setBundleDescription(data.description);
+          if (typeof data.intent === "string") setBundleIntent(data.intent);
+          if (typeof data.is_draft === "boolean") setBundleIsDraft(data.is_draft);
+          if (Array.isArray(data.allowed_emails)) setBundleAllowedEmails(data.allowed_emails);
+          setGraphGeneratedAt(data.graph_generated_at || null);
+          setEmbeddingUpdatedAt(data.embedding_updated_at || null);
+          setIsAnalysisStale(!!data.isAnalysisStale);
+        } catch { /* offline */ }
+      };
+      const ch = supabase
+        .channel(`bundle-live-${bundleId}`)
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'bundle_documents', filter: `bundle_id=eq.${bundleId}` },
+          () => {
+            if (debounce) clearTimeout(debounce);
+            debounce = setTimeout(reload, 800);
+          }
+        )
+        .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'bundles', filter: `id=eq.${bundleId}` },
+          () => {
+            if (debounce) clearTimeout(debounce);
+            debounce = setTimeout(reload, 800);
+          }
+        )
+        .subscribe();
+      cleanup = () => {
+        if (debounce) clearTimeout(debounce);
+        supabase.removeChannel(ch);
+      };
+    })();
+    return () => { cancelled = true; cleanup?.(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bundleId]);
+
   const handleRegenerate = useCallback(async () => {
     setAiGraph(null);
     setIsAnalyzing(true);
