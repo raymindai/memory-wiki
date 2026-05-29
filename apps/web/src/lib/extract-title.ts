@@ -1,7 +1,49 @@
-/** Extract title from markdown (first # heading, or "Untitled" fallback). */
+/**
+ * Extract title from markdown (first # heading, or "Untitled" fallback).
+ *
+ * Strips inline markdown formatting from the heading so the title
+ * reads as plain prose everywhere it's displayed (browser tab,
+ * viewer header chip, sidebar row, OG preview). A heading like
+ * `# Foo / [bar](https://bar.com) **baz**` would otherwise surface
+ * with the link/bold syntax intact and read as raw markdown to
+ * non-editing visitors.
+ */
 export function extractTitleFromMd(md: string): string {
   const match = md.match(/^#\s+(.+)/m);
-  return match ? match[1].trim() : "Untitled";
+  if (!match) return "Untitled";
+  return stripInlineMarkdown(match[1]).trim() || "Untitled";
+}
+
+/**
+ * Strip inline markdown formatting and leave just the visible text.
+ * Conservative: only touches well-known inline constructs (links,
+ * images, bold/italic markers, inline code backticks, raw HTML tags,
+ * footnote refs). Anything else passes through.
+ *
+ * Sequence matters — link/image first (greedy on bracket+paren pair),
+ * then strip emphasis runs, then unwrap inline code.
+ */
+function stripInlineMarkdown(s: string): string {
+  let out = s;
+  // ![alt](url) → alt
+  out = out.replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1");
+  // [text](url) → text
+  out = out.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+  // [text][ref] → text
+  out = out.replace(/\[([^\]]+)\]\[[^\]]*\]/g, "$1");
+  // Footnote markers [^1]
+  out = out.replace(/\[\^[^\]]+\]/g, "");
+  // **bold**, __bold__, *italic*, _italic_  (non-greedy)
+  out = out.replace(/(\*\*|__)(.+?)\1/g, "$2");
+  out = out.replace(/(\*|_)(.+?)\1/g, "$2");
+  // ~~strike~~
+  out = out.replace(/~~(.+?)~~/g, "$1");
+  // `code`
+  out = out.replace(/`([^`]+)`/g, "$1");
+  // Raw inline HTML tags like <em>X</em>
+  out = out.replace(/<\/?[a-z][a-z0-9-]*[^>]*>/gi, "");
+  // Trailing/leading whitespace from removals
+  return out.replace(/\s+/g, " ").trim();
 }
 
 /**
