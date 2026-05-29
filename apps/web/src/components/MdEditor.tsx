@@ -4495,8 +4495,11 @@ export default function MdEditor() {
 
           // Fetch the latest document content from server
           // (Realtime payload.new may not include all columns depending on REPLICA IDENTITY)
+          // cache: no-store — browser HTTP cache was returning a stale
+          // copy even when realtime fired correctly, so the auto-pull
+          // looked like nothing happened.
           try {
-            const res = await fetch(`/api/docs/${cloudId}`, { headers: authHeadersRef.current });
+            const res = await fetch(`/api/docs/${cloudId}`, { headers: authHeadersRef.current, cache: "no-store" });
             if (!res.ok) return;
             const doc = await res.json();
             const serverMd = doc.markdown as string;
@@ -4555,7 +4558,9 @@ export default function MdEditor() {
       if (Date.now() - realtimeLastSaveRef.current < 3000) return;
       if (autoSave.isSaving) return;
       try {
-        const res = await fetch(`/api/docs/${cloudId}`, { headers: authHeadersRef.current });
+        // cache: no-store — browser HTTP cache was returning a stale
+        // copy on revisit, so the auto-pull looked like nothing happened.
+        const res = await fetch(`/api/docs/${cloudId}`, { headers: authHeadersRef.current, cache: "no-store" });
         if (!res.ok) return;
         const doc = await res.json();
         const serverMd = doc.markdown as string;
@@ -4585,9 +4590,23 @@ export default function MdEditor() {
     const onFocus = () => refetchIfStale();
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("focus", onFocus);
+
+    // Foreground poll — visibilitychange/focus don't fire while the
+    // user keeps the tab in front the whole time, so a long-lived
+    // viewer never sees an external update (MCP/iOS/CLI) until they
+    // tab away and back. Poll every 15s when the page is visible so
+    // the worst-case staleness for an open page is ~15s, not "until
+    // I switch tabs." Skips when document.hidden so background tabs
+    // don't burn API calls. Bails inside refetchIfStale if local has
+    // unsaved edits or we just saved.
+    const pollId = window.setInterval(() => {
+      if (!document.hidden) refetchIfStale();
+    }, 15000);
+
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("focus", onFocus);
+      window.clearInterval(pollId);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTabId, docId]);
