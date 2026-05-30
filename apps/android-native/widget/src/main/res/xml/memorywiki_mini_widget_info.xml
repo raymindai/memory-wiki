@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Single-cell capture-only variant. Sits anywhere on the
+     home screen or lock screen and fires memorywiki://capture
+     on tap. Same brand surface as the main widget but stripped
+     to the bare minimum. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="60dp"
+    android:minHeight="60dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:maxResizeWidth="120dp"
+    android:maxResizeHeight="120dp"
+    android:resizeMode="none"
+    android:widgetCategory="home_screen|keyguard"
+    android:previewLayout="@layout/widget_mini_preview"
+    android:description="@string/widget_mini_description" />

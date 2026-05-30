@@ -1,3 +1,4 @@
 <resources>
     <string name="widget_description">memory.wiki quick capture and recent memories.</string>
+    <string name="widget_mini_description">memory.wiki one-tap capture button.</string>
 </resources>

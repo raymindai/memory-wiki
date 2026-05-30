@@ -1,0 +1,8 @@
+<!-- Inverted brand surface for the mini widget — ink glyph on
+     bone background. Pairs with the dark home widget so they
+     read as a set in the picker. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FAFAFA" />
+    <corners android:radius="18dp" />
+</shape>

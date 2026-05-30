@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Picker preview for the 1x1 capture-only widget. Inverted
+     ink-on-white so it stands out in the widget tray next to
+     the larger dark variant. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:background="@drawable/widget_bg_mini">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="+"
+        android:textColor="#09090B"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+</FrameLayout>

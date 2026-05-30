@@ -103,6 +103,18 @@
         <!-- Glance App Widget receiver — declared in the :widget module's
              manifest and merged in automatically. -->
 
+        <!-- Quick Settings tile — Capture in one swipe-down + tap. -->
+        <service
+            android:name=".qs.CaptureTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_qs_capture"
+            android:label="Memory.Wiki"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <!-- FileProvider for image capture / OCR temp files -->
         <provider
             android:name="androidx.core.content.FileProvider"
