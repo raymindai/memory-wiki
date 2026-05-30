@@ -28,3 +28,7 @@ debug/
 # Keystore (NEVER commit)
 *.jks
 *.keystore
+
+# never commit secrets — backups created by sed -i, vim, etc.
+secrets.local.properties*
+*.bak
