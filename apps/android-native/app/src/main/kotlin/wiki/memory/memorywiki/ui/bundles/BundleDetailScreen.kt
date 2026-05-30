@@ -149,9 +149,7 @@ fun BundleDetailScreen(
         }
 
         if (loading && detail == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                wiki.memory.memorywiki.ui.components.BrandBlob(sizeDp = 96)
-            }
+            wiki.memory.memorywiki.ui.components.BrandLoader()
             return@Column
         }
         val d = detail ?: return@Column
