@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Static app shortcuts — the long-press menu that pops out when
+  the user holds the launcher icon. Mirrors iOS Quick Actions:
+  Capture / Ask hub / Search / Paste, each firing the matching
+  memorywiki:// deep link straight into MainActivity.
+
+  targetPackage is intentionally omitted so debug + release
+  variants both resolve to the calling app's own package at
+  runtime (otherwise we'd need a manifest placeholder swap per
+  variant).
+
+  Order here = render order in the launcher (top → bottom).
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="capture"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_capture"
+        android:shortcutShortLabel="@string/shortcut_capture_short"
+        android:shortcutLongLabel="@string/shortcut_capture_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="wiki.memory.memorywiki.MainActivity"
+            android:data="memorywiki://capture" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="ask"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_ask"
+        android:shortcutShortLabel="@string/shortcut_ask_short"
+        android:shortcutLongLabel="@string/shortcut_ask_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="wiki.memory.memorywiki.MainActivity"
+            android:data="memorywiki://chat-hub" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_search"
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="wiki.memory.memorywiki.MainActivity"
+            android:data="memorywiki://search" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="paste"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_paste"
+        android:shortcutShortLabel="@string/shortcut_paste_short"
+        android:shortcutLongLabel="@string/shortcut_paste_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="wiki.memory.memorywiki.MainActivity"
+            android:data="memorywiki://capture-paste" />
+    </shortcut>
+
+</shortcuts>

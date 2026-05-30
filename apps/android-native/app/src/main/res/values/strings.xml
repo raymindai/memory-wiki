@@ -3,4 +3,14 @@
     <string name="widget_name">memory.wiki</string>
     <string name="widget_description">Quick capture and recent memories from your hub.</string>
     <string name="file_provider_authority">${applicationId}.fileprovider</string>
+
+    <!-- App shortcuts (long-press launcher icon) -->
+    <string name="shortcut_capture_short">Capture</string>
+    <string name="shortcut_capture_long">New capture</string>
+    <string name="shortcut_ask_short">Ask</string>
+    <string name="shortcut_ask_long">Ask your hub</string>
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search memories</string>
+    <string name="shortcut_paste_short">Paste</string>
+    <string name="shortcut_paste_long">Paste from clipboard</string>
 </resources>
