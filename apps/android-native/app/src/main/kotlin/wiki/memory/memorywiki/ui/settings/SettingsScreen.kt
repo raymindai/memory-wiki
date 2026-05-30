@@ -160,6 +160,25 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             onSelect = { vm.setAccent(it) },
         )
 
+        // Language — opens Android system per-app locale picker
+        // (Settings.ACTION_APP_LOCALE_SETTINGS, API 33+). Falls
+        // back to the global language picker on older devices.
+        SectionLabel("LANGUAGE")
+        LinkCardGroup(
+            rows = listOf(
+                LinkRow(Lucide.Globe, "Change app language", Brand.MicroInfo) {
+                    val intent = if (android.os.Build.VERSION.SDK_INT >= 33) {
+                        Intent(android.provider.Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                            data = "package:${context.packageName}".toUri()
+                        }
+                    } else {
+                        Intent(android.provider.Settings.ACTION_LOCALE_SETTINGS)
+                    }
+                    runCatching { context.startActivity(intent) }
+                },
+            ),
+        )
+
         // Learn
         SectionLabel("LEARN")
         LinkCardGroup(

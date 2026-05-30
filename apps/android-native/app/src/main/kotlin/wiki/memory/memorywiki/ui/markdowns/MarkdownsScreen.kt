@@ -236,9 +236,13 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
 
     LaunchedEffect(Unit) {
         vm.router.events.collect { evt ->
-            if (evt is RouterEvent.OpenSearch) {
-                searchOpen = true
-                searchFocus.requestFocus()
+            when (evt) {
+                is RouterEvent.OpenSearch -> {
+                    searchOpen = true
+                    searchFocus.requestFocus()
+                }
+                is RouterEvent.ForegroundRefresh -> vm.refresh()
+                else -> Unit
             }
         }
     }

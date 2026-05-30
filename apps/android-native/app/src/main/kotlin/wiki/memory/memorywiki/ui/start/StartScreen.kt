@@ -171,10 +171,14 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
 
     LaunchedEffect(Unit) {
         vm.router.events.collect { evt ->
-            if (evt is RouterEvent.OpenHubChat) {
-                val slug = vm.auth.session.value?.hubSlug ?: return@collect
-                val title = vm.auth.session.value?.displayName ?: "Your hub"
-                navController.navigate("chat/hub/$slug/$title")
+            when (evt) {
+                is RouterEvent.OpenHubChat -> {
+                    val slug = vm.auth.session.value?.hubSlug ?: return@collect
+                    val title = vm.auth.session.value?.displayName ?: "Your hub"
+                    navController.navigate("chat/hub/$slug/$title")
+                }
+                is RouterEvent.ForegroundRefresh -> vm.refresh()
+                else -> Unit
             }
         }
     }

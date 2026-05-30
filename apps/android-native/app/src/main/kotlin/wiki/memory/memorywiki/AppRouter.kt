@@ -50,6 +50,10 @@ sealed class RouterEvent {
     data object OpenSearch : RouterEvent()
     data object CapturePaste : RouterEvent()
     data object OpenHubChat : RouterEvent()
+    /** Fired when the app returns to the foreground. Lists +
+     *  dashboard collect this to re-pull from the server so the
+     *  user lands on fresh state instead of cached. */
+    data object ForegroundRefresh : RouterEvent()
     data class PushDocDetail(val docId: String) : RouterEvent()
     data class PushBundleDetail(val bundleId: String) : RouterEvent()
 }

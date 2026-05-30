@@ -26,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import wiki.memory.memorywiki.AppRouter
 import wiki.memory.memorywiki.AppTab
 import wiki.memory.memorywiki.RouterEvent
@@ -84,6 +85,22 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
     val navController = rememberNavController()
     val tab by router.selectedTab.collectAsState()
     val session by auth.session.collectAsState()
+
+    // Foreground refresh — fire RouterEvent.ForegroundRefresh every
+    // time the app comes back to the foreground (ON_RESUME). Lists
+    // + dashboard consume this to re-pull from the server so the
+    // user lands on fresh state instead of cached.
+    val refreshScope = androidx.compose.runtime.rememberCoroutineScope()
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                refreshScope.launch { router.emit(RouterEvent.ForegroundRefresh) }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(tab) {
         val target = tab.route

@@ -96,6 +96,7 @@ import wiki.memory.memorywiki.util.compactTime
 class BundlesViewModel @Inject constructor(
     val api: ApiClient,
     val pinned: wiki.memory.memorywiki.data.PinnedStore,
+    val router: wiki.memory.memorywiki.AppRouter,
 ) : ViewModel() {
     enum class Filter { All, Private, Shared, Public }
 
@@ -162,6 +163,12 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
 
     var searchOpen by remember { mutableStateOf(false) }
     val pullState = rememberPullToRefreshState()
+
+    LaunchedEffect(Unit) {
+        vm.router.events.collect { evt ->
+            if (evt is wiki.memory.memorywiki.RouterEvent.ForegroundRefresh) vm.refresh()
+        }
+    }
 
     Column(
         Modifier
