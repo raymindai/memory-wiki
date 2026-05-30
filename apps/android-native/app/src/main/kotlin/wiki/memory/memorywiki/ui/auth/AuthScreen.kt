@@ -58,15 +58,17 @@ class AuthViewModel @Inject constructor(
     }
 
     fun submit() = viewModelScope.launch {
-        if (!canSubmit()) return@launch
+        android.util.Log.i("MW-Auth", "submit() called: email='$email', canSubmit=${canSubmit()}, isDemo=${isDemo()}")
+        if (!canSubmit()) { android.util.Log.w("MW-Auth", "canSubmit() false, bailing"); return@launch }
         working = true; error = null
         runCatching {
             when {
-                isDemo() -> auth.signInDemo(email)
+                isDemo() -> { android.util.Log.i("MW-Auth", "calling signInDemo()"); auth.signInDemo(email) }
                 mode == Mode.SignIn -> auth.signInWithEmail(email, password)
                 else -> auth.signUpWithEmail(email, password)
             }
-        }.onFailure { error = it.message ?: "Sign-in failed" }
+        }.onSuccess { android.util.Log.i("MW-Auth", "signin success") }
+         .onFailure { android.util.Log.e("MW-Auth", "signin FAIL: ${it.javaClass.simpleName}: ${it.message}", it); error = it.message ?: "Sign-in failed" }
         working = false
     }
 

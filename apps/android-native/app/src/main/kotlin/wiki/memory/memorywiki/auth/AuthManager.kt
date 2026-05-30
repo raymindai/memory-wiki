@@ -69,6 +69,7 @@ class AuthManager @Inject constructor(
         // Hydrate immediately + listen for changes.
         scope.launch {
             supabase.auth.sessionStatus.collect { status ->
+                android.util.Log.i("MW-Auth", "sessionStatus → ${status.javaClass.simpleName}")
                 when (status) {
                     is SessionStatus.Authenticated -> hydrate()
                     is SessionStatus.NotAuthenticated -> {
@@ -79,10 +80,6 @@ class AuthManager @Inject constructor(
                         _session.value = null
                         _loading.value = false
                     }
-                    // `Initializing` covers the supabase-kt 3.x rename of
-                    // `LoadingFromStorage`. We keep loading=true through
-                    // it so the boot splash hangs around until auth
-                    // really resolves.
                     else -> Unit
                 }
             }
@@ -139,13 +136,16 @@ class AuthManager @Inject constructor(
 
     suspend fun signInDemo(email: String) {
         val normalized = email.trim().lowercase()
+        android.util.Log.i("MW-Auth", "signInDemo: POST /api/auth/demo-signin for $normalized")
         require(isDemoEmail(normalized)) { "Demo allowlist refused $normalized" }
         val resp = http.post("${BuildConfig.API_BASE}/api/auth/demo-signin") {
             contentType(ContentType.Application.Json)
             setBody(DemoSignInRequest(normalized))
         }
+        android.util.Log.i("MW-Auth", "signInDemo: server returned HTTP ${resp.status.value}")
         if (!resp.status.isSuccess()) error("Demo sign-in HTTP ${resp.status.value}")
         val body: DemoSignInWire = resp.body()
+        android.util.Log.i("MW-Auth", "signInDemo: importing session, token len=${body.access_token.length}")
         supabase.auth.importSession(
             io.github.jan.supabase.auth.user.UserSession(
                 accessToken = body.access_token,
@@ -155,6 +155,8 @@ class AuthManager @Inject constructor(
                 user = null,
             ),
         )
+        android.util.Log.i("MW-Auth", "signInDemo: importSession returned, forcing hydrate")
+        hydrate()
     }
 
     // ─── Mutations ───
@@ -180,31 +182,61 @@ class AuthManager @Inject constructor(
     // ─── Internal ───
 
     private suspend fun hydrate() {
-        val auth = supabase.auth.currentSessionOrNull() ?: run {
-            _session.value = null; _loading.value = false; return
+        val auth = supabase.auth.currentSessionOrNull()
+        android.util.Log.i("MW-Auth", "hydrate: currentSessionOrNull=${auth != null}, user=${auth?.user?.id}")
+        if (auth == null) { _session.value = null; _loading.value = false; return }
+        // The demo signin path imports a session with user=null and
+        // GET /auth/v1/user with that bearer fails (Supabase considers
+        // demo sessions service-role-minted, not interactive). The JWT
+        // itself carries everything we need (`sub`, `email`,
+        // `user_metadata.display_name`) — decode it directly instead.
+        val userId: String
+        val userEmail: String?
+        val userMetaDisplayName: String?
+        val auth0User = auth.user
+        if (auth0User != null) {
+            userId = auth0User.id
+            userEmail = auth0User.email
+            userMetaDisplayName = null
+        } else {
+            val claims = decodeJwtClaims(auth.accessToken)
+            userId = claims?.optString("sub") ?: ""
+            userEmail = claims?.optString("email")?.takeIf { it.isNotBlank() }
+            userMetaDisplayName = claims?.optJSONObject("user_metadata")
+                ?.optString("display_name")?.takeIf { it.isNotBlank() }
         }
-        val user = auth.user ?: run {
-            _loading.value = false; return
+        if (userId.isEmpty()) {
+            android.util.Log.w("MW-Auth", "hydrate: couldn't extract user id from session")
+            _session.value = UserSession(
+                userId = "", email = userEmail,
+                accessToken = auth.accessToken, refreshToken = auth.refreshToken,
+            )
+            _loading.value = false
+            return
         }
+        android.util.Log.i("MW-Auth", "hydrate: user resolved id=$userId email=$userEmail")
         val profile = runCatching {
             supabase.from("profiles")
                 .select(columns = io.github.jan.supabase.postgrest.query.Columns.list(
                     "id", "hub_slug", "display_name", "avatar_url",
                     "avatar_style", "accent_color", "color_scheme", "plan",
                 )) {
-                    filter { eq("id", user.id) }
+                    filter { eq("id", userId) }
                     limit(1)
                 }
                 .decodeSingleOrNull<ProfileRow>()
+        }.onFailure {
+            android.util.Log.e("MW-Auth", "profile fetch failed: ${it.message}")
         }.getOrNull()
+        android.util.Log.i("MW-Auth", "hydrate: profile=${profile?.hubSlug} displayName=${profile?.displayName}")
 
         _session.value = UserSession(
-            userId = user.id,
-            email = user.email,
+            userId = userId,
+            email = userEmail,
             accessToken = auth.accessToken,
             refreshToken = auth.refreshToken,
             hubSlug = profile?.hubSlug,
-            displayName = profile?.displayName?.trim().takeUnless { it.isNullOrEmpty() },
+            displayName = profile?.displayName?.trim()?.takeUnless { it.isEmpty() } ?: userMetaDisplayName,
             avatarUrl = profile?.avatarUrl?.takeIf { profile.avatarStyle == "upload" },
             accentColor = profile?.accentColor,
             colorScheme = profile?.colorScheme,
@@ -212,6 +244,17 @@ class AuthManager @Inject constructor(
         )
         _loading.value = false
     }
+
+    /** Decode the payload of a base64url-encoded JWT and return its
+     *  claims as a JSONObject. Returns null on parse failure. */
+    private fun decodeJwtClaims(token: String): org.json.JSONObject? = runCatching {
+        val parts = token.split(".")
+        if (parts.size < 2) return@runCatching null
+        val payload = parts[1]
+        val padded = payload + "=".repeat((4 - payload.length % 4) % 4)
+        val json = String(android.util.Base64.decode(padded, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP))
+        org.json.JSONObject(json)
+    }.getOrNull()
 
     @Serializable
     private data class DemoSignInRequest(val email: String)
