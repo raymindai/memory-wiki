@@ -131,7 +131,8 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
         currentRoute == "markdowns/doc/{id}" ||
         currentRoute == "bundles/doc/{id}" ||
         currentRoute == "bundles/{id}" ||
-        currentRoute == "about"
+        currentRoute == "about" ||
+        currentRoute == "help"
 
     Box(Modifier.fillMaxSize()) {
         NavHost(
@@ -168,6 +169,9 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
             composable(AppTab.Settings.route) { SettingsScreen(navController) }
             composable("about") {
                 wiki.memory.memorywiki.ui.about.AboutScreen(navController)
+            }
+            composable("help") {
+                wiki.memory.memorywiki.ui.help.HelpScreen(navController)
             }
 
             composable("chat/{kind}/{id}/{title}") { backStack ->

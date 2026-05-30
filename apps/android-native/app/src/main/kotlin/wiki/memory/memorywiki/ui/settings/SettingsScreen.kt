@@ -186,8 +186,8 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                 LinkRow(Lucide.Info, "About Memory.Wiki", Brand.MicroInfo) {
                     navController.navigate("about")
                 },
-                LinkRow(Lucide.BookOpen, "How it works", Brand.MicroWarn) {
-                    openUrl("$baseUrl/how")
+                LinkRow(Lucide.BookOpen, "Help & Shortcuts", Brand.MicroWarn) {
+                    navController.navigate("help")
                 },
                 LinkRow(Lucide.RotateCcw, "Replay welcome tour", Brand.TextMuted) {
                     // Clears mw.onboarded so RootShell shows the
@@ -214,12 +214,15 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = "mailto:hi@raymind.ai".toUri()
                         putExtra(Intent.EXTRA_SUBJECT, "Memory.Wiki Android feedback")
-                        putExtra(
-                            Intent.EXTRA_TEXT,
-                            "\n\n— sent from Android v${BuildConfig.VERSION_NAME}",
-                        )
+                        putExtra(Intent.EXTRA_TEXT, feedbackBodyTemplate())
                     }
-                    context.startActivity(intent)
+                    runCatching { context.startActivity(intent) }.onFailure {
+                        android.widget.Toast.makeText(
+                            context,
+                            "No email app installed — write us at hi@raymind.ai",
+                            android.widget.Toast.LENGTH_LONG,
+                        ).show()
+                    }
                 },
             ),
         )
@@ -443,6 +446,22 @@ private fun AccentPicker(selected: AccentColorChoice, onSelect: (AccentColorChoi
             )
         }
     }
+}
+
+// Pre-fills the email so bug reports always carry version,
+// device, OS, and locale (mirrors iOS FeedbackComposer.bodyTemplate).
+private fun feedbackBodyTemplate(): String {
+    val device = "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}"
+    val os = "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})"
+    val locale = java.util.Locale.getDefault().toLanguageTag()
+    return """
+
+
+        ---
+        App: Memory.Wiki Android v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
+        Device: $device / $os
+        Locale: $locale
+        """.trimIndent()
 }
 
 @Composable
