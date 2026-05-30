@@ -94,20 +94,28 @@ fun SkeletonStatStrip() {
     }
 }
 
+/** Inline 10dp progress indicator + mono 8 'REFRESHING' caption.
+ *  Sits next to a list header title while background revalidate
+ *  runs over data already on screen — mirrors iOS RefreshingPip. */
 @Composable
 fun RefreshingPip(visible: Boolean) {
-    val alpha = if (visible) {
-        val transition = rememberInfiniteTransition(label = "pip")
-        val v by transition.animateFloat(
-            initialValue = 0.4f, targetValue = 1f,
-            animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
-            label = "pip-alpha",
+    if (!visible) return
+    androidx.compose.foundation.layout.Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        androidx.compose.material3.CircularProgressIndicator(
+            modifier = Modifier.size(10.dp),
+            color = Brand.TextMuted,
+            strokeWidth = 1.2.dp,
         )
-        v
-    } else 0f
-    Box(
-        Modifier
-            .size(6.dp)
-            .background(Brand.MicroLime.copy(alpha = alpha), RoundedCornerShape(3.dp)),
-    )
+        androidx.compose.material3.Text(
+            "REFRESHING",
+            fontSize = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp),
+            color = Brand.TextFaint,
+            style = wiki.memory.memorywiki.ui.theme.BrandType.mono(
+                8, androidx.compose.ui.text.font.FontWeight.Medium,
+            ),
+        )
+    }
 }
