@@ -40,6 +40,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import wiki.memory.memorywiki.BuildConfig
 import wiki.memory.memorywiki.auth.AuthManager
 import wiki.memory.memorywiki.data.model.*
@@ -208,12 +212,20 @@ class ApiClient @Inject constructor(
 
     // ─── Bundles CRUD ───
 
-    suspend fun createBundle(title: String, description: String? = null): CreateBundleResponse {
+    suspend fun createBundle(
+        title: String,
+        documentIds: List<String>,
+        description: String? = null,
+        isDraft: Boolean = true,
+    ): CreateBundleResponse {
+        // Server requires documentIds to be non-empty.
         val res = http.post("$base/api/bundles") {
             authHeaders()
             contentType(ContentType.Application.Json)
-            setBody(buildMap {
+            setBody(buildJsonObject {
                 put("title", title)
+                put("documentIds", buildJsonArray { documentIds.forEach { add(it) } })
+                put("isDraft", isDraft)
                 description?.let { put("description", it) }
             })
         }
@@ -221,11 +233,16 @@ class ApiClient @Inject constructor(
         return json.decodeFromString(res.bodyAsText())
     }
 
+    /** Adds doc IDs to an existing bundle via the action=add-documents
+     *  patch on /api/bundles/<id>. Idempotent server-side. */
     suspend fun addDocumentsToBundle(bundleId: String, docIds: List<String>) {
-        val res = http.post("$base/api/bundles/$bundleId/documents") {
+        val res = http.patch("$base/api/bundles/$bundleId") {
             authHeaders()
             contentType(ContentType.Application.Json)
-            setBody(mapOf("documentIds" to docIds))
+            setBody(buildJsonObject {
+                put("action", "add-documents")
+                put("documentIds", buildJsonArray { docIds.forEach { add(it) } })
+            })
         }
         if (!res.status.isSuccess()) error("HTTP ${res.status.value} addDocumentsToBundle")
     }

@@ -158,6 +158,7 @@ fun DocumentDetailScreen(
     var editing by remember { mutableStateOf(false) }
     var editedMarkdown by remember { mutableStateOf("") }
     var confirmDelete by remember { mutableStateOf(false) }
+    var addToBundleOpen by remember { mutableStateOf(false) }
     LaunchedEffect(copied) {
         if (copied) { delay(1400); copied = false }
     }
@@ -220,6 +221,12 @@ fun DocumentDetailScreen(
                             text = { Text(if (isPinnedHere) "Unstar" else "Star") },
                             onClick = { menuOpen = false; vm.pinned.toggleDoc(docId) },
                         )
+                        if (d?.isOwner == true) {
+                            DropdownMenuItem(text = { Text("Add to bundle…") }, onClick = {
+                                menuOpen = false
+                                addToBundleOpen = true
+                            })
+                        }
                         DropdownMenuItem(
                             text = { Text("Chat with this doc") },
                             onClick = {
@@ -365,6 +372,13 @@ fun DocumentDetailScreen(
                 } else {
                     MarkdownBody(markdown = d.markdown, markwon = markwon)
                 }
+            }
+
+            if (addToBundleOpen) {
+                wiki.memory.memorywiki.ui.bundles.AddToBundleSheet(
+                    docId = docId,
+                    onDismiss = { addToBundleOpen = false },
+                )
             }
 
             // Delete confirmation dialog
