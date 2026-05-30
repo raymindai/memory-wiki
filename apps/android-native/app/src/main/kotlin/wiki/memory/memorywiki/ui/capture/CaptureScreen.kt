@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -104,6 +105,21 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
     val banner by vm.banner.collectAsState()
     val clipboard = LocalClipboardManager.current
 
+    // Local TextFieldValue so the markdown pill bar can do
+    // selection-aware inserts (wrap selection, prepend line,
+    // place caret inside link template).
+    var bodyValue by remember(body) {
+        mutableStateOf(
+            androidx.compose.ui.text.input.TextFieldValue(
+                text = body,
+                selection = androidx.compose.ui.text.TextRange(body.length),
+            ),
+        )
+    }
+    // Track whether the body field is focused so the pill bar
+    // only appears when the user is actively editing.
+    var bodyFocused by remember { mutableStateOf(false) }
+
     // Clipboard paste on demand
     LaunchedEffect(Unit) {
         vm.router.events.collect { evt ->
@@ -115,7 +131,12 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
     }
 
     Column(Modifier.fillMaxSize().padding(top = 56.dp)) {
-        Text("Capture", style = BrandType.display(22), color = Brand.TextPrimary, modifier = Modifier.padding(horizontal = 18.dp))
+        Text(
+            "Capture",
+            style = BrandType.display(26),
+            color = Brand.TextPrimary,
+            modifier = Modifier.padding(horizontal = 18.dp),
+        )
         Spacer(Modifier.height(10.dp))
         ModePillRow(mode = mode, onChange = vm::setMode)
         Spacer(Modifier.height(20.dp))
@@ -144,7 +165,14 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
         // Mode-specific surface
         Box(Modifier.weight(1f).padding(horizontal = 18.dp)) {
             when (mode) {
-                CaptureMode.Write -> WriteBody(body, vm::setBody)
+                CaptureMode.Write -> WriteBody(
+                    value = bodyValue,
+                    onChange = { newValue ->
+                        bodyValue = newValue
+                        vm.setBody(newValue.text)
+                    },
+                    onFocusChanged = { bodyFocused = it },
+                )
                 CaptureMode.URL -> UrlMode(onSubmit = vm::importUrl)
                 CaptureMode.Photo -> PhotoMode(api = vm.api, onCaptured = { url ->
                     vm.pasteIntoBody("![photo]($url)")
@@ -156,7 +184,33 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
             }
         }
 
-        ProcessingBanner(title = banner?.first, detail = banner?.second, modifier = Modifier.imePadding().padding(bottom = 80.dp))
+        // Markdown pill bar — only when body field is focused +
+        // we're in Write mode. Docks above the soft keyboard via
+        // imePadding(). When keyboard is dismissed the bar sits
+        // above the floating tab bar (extra 80dp bottom clearance).
+        // Mirrors iOS UIInputAccessoryView behaviour.
+        if (mode == CaptureMode.Write && bodyFocused) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .padding(bottom = 80.dp),
+            ) {
+                MarkdownPillBar(
+                    value = bodyValue,
+                    onChange = { newValue ->
+                        bodyValue = newValue
+                        vm.setBody(newValue.text)
+                    },
+                )
+            }
+        }
+
+        ProcessingBanner(
+            title = banner?.first,
+            detail = banner?.second,
+            modifier = Modifier.imePadding().padding(bottom = 80.dp),
+        )
     }
 }
 
@@ -190,15 +244,23 @@ private fun ModePillRow(mode: CaptureMode, onChange: (CaptureMode) -> Unit) {
 }
 
 @Composable
-private fun WriteBody(body: String, onChange: (String) -> Unit) {
+private fun WriteBody(
+    value: androidx.compose.ui.text.input.TextFieldValue,
+    onChange: (androidx.compose.ui.text.input.TextFieldValue) -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
+) {
     BasicTextField(
-        value = body,
+        value = value,
         onValueChange = onChange,
-        textStyle = BrandType.body(15).copy(color = Brand.TextPrimary, lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified),
+        textStyle = BrandType.body(15).copy(color = Brand.TextPrimary),
         cursorBrush = SolidColor(Brand.TextPrimary),
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .onFocusChanged { onFocusChanged(it.isFocused) },
         decorationBox = { inner ->
-            if (body.isEmpty()) Text("Add more details…", style = BrandType.body(15), color = Brand.TextFaint)
+            if (value.text.isEmpty()) {
+                Text("Add more details…", style = BrandType.body(15), color = Brand.TextFaint)
+            }
             inner()
         },
     )
