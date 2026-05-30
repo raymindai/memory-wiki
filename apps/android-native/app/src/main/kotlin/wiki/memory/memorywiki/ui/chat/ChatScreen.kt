@@ -20,10 +20,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.KeyboardHide
+import com.composables.icons.lucide.ArrowUp
+import com.composables.icons.lucide.ChevronDown
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.X
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -129,7 +129,7 @@ fun ChatScreen(
             )
             Text(scopeId.title, style = BrandType.display(18), color = Brand.TextPrimary, modifier = Modifier.weight(1f))
             IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Outlined.Close, null, tint = Brand.TextMuted)
+                Icon(Lucide.X, null, tint = Brand.TextMuted)
             }
         }
 
@@ -183,7 +183,7 @@ fun ChatScreen(
                 )
             }
             IconButton(onClick = { ime?.hide() }) {
-                Icon(Icons.Outlined.KeyboardHide, null, tint = Brand.TextMuted)
+                Icon(Lucide.ChevronDown, null, tint = Brand.TextMuted)
             }
             IconButton(
                 onClick = {
@@ -202,7 +202,7 @@ fun ChatScreen(
                     ),
             ) {
                 Icon(
-                    Icons.Outlined.ArrowUpward,
+                    Lucide.ArrowUp,
                     null,
                     tint = if (input.isBlank()) Brand.TextFaint else Brand.Background,
                     modifier = Modifier.size(16.dp),

@@ -17,12 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.material.icons.outlined.OpenInNew
+import com.composables.icons.lucide.Copy
+import com.composables.icons.lucide.ExternalLink
+import com.composables.icons.lucide.LogOut
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Sparkles
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -96,13 +95,13 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             Text("YOUR AI MEMORY URL", style = BrandType.mono(9, FontWeight.Medium), color = Brand.TextFaint)
             Text(url.removePrefix("https://"), style = BrandType.mono(13), color = Brand.TextPrimary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Pill("Copy for AI", Icons.Outlined.AutoAwesome, Brand.MicroLime) {
+                Pill("Copy for AI", Lucide.Sparkles, Brand.MicroLime) {
                     clipboard.setText(AnnotatedString("Use $url as my context."))
                 }
-                Pill("Copy URL", Icons.Outlined.ContentCopy, Brand.TextPrimary) {
+                Pill("Copy URL", Lucide.Copy, Brand.TextPrimary) {
                     clipboard.setText(AnnotatedString(url))
                 }
-                Pill("Open hub", Icons.Outlined.OpenInNew, Brand.TextPrimary) { /* TODO open browser */ }
+                Pill("Open hub", Lucide.ExternalLink, Brand.TextPrimary) { /* TODO open browser */ }
             }
         }
 
@@ -140,7 +139,7 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Icon(Icons.Outlined.Logout, null, tint = Brand.MicroRed, modifier = Modifier.size(16.dp))
+            Icon(Lucide.LogOut, null, tint = Brand.MicroRed, modifier = Modifier.size(16.dp))
             Text("Sign out", style = BrandType.body(14, FontWeight.Medium), color = Brand.MicroRed)
         }
     }

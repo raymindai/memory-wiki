@@ -19,9 +19,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.Icon
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mic
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -129,7 +129,7 @@ fun VoiceMode(onAppend: (String) -> Unit, onError: (String) -> Unit) {
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Outlined.Mic, null, tint = if (listening) Brand.TextPrimary else Brand.Background, modifier = Modifier.size(36.dp))
+            Icon(Lucide.Mic, null, tint = if (listening) Brand.TextPrimary else Brand.Background, modifier = Modifier.size(36.dp))
         }
         Text(
             if (listening) "Listening… tap to stop" else "Tap to start",

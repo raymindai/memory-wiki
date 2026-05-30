@@ -18,10 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Search
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.X
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -148,7 +147,7 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
             RefreshingPip(visible = refreshing)
             Spacer(Modifier.weight(1f))
             Icon(
-                if (searchOpen) Icons.Outlined.Close else Icons.Outlined.Search,
+                if (searchOpen) Lucide.X else Lucide.Search,
                 contentDescription = if (searchOpen) "Close search" else "Search",
                 tint = Brand.TextMuted,
                 modifier = Modifier

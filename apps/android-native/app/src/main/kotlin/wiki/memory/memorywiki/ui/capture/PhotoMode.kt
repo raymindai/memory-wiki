@@ -27,9 +27,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.Icon
+import com.composables.icons.lucide.Camera
+import com.composables.icons.lucide.Lucide
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -132,7 +132,7 @@ fun PhotoMode(api: ApiClient, onCaptured: (String) -> Unit, onError: (String) ->
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Outlined.PhotoCamera, null, tint = Brand.Background, modifier = Modifier.size(28.dp))
+            Icon(Lucide.Camera, null, tint = Brand.Background, modifier = Modifier.size(28.dp))
         }
     }
 }

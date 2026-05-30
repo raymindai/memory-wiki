@@ -13,11 +13,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.OpenInNew
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Copy
+import com.composables.icons.lucide.ExternalLink
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.MessageCircle
+import com.composables.icons.lucide.Sparkles
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,7 +79,7 @@ fun BundleDetailScreen(
     Column(Modifier.fillMaxSize().padding(top = 44.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Outlined.ArrowBack, null, tint = Brand.TextPrimary)
+                Icon(Lucide.ArrowLeft, null, tint = Brand.TextPrimary)
             }
             Spacer(Modifier.weight(1f))
         }
@@ -157,9 +158,9 @@ private fun DeployCard(
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionPill("Copy for AI", Icons.Outlined.AutoAwesome, onCopyForAi, Modifier.weight(1f), accent = Brand.MicroPurple)
-            ActionPill("Copy URL", Icons.Outlined.ContentCopy, onCopyUrl, Modifier.weight(1f))
-            ActionPill("Chat", Icons.Outlined.AutoAwesome, onChatWithBundle, Modifier.weight(1f), accent = Brand.MicroInfo)
+            ActionPill("Copy for AI", Lucide.Sparkles, onCopyForAi, Modifier.weight(1f), accent = Brand.MicroPurple)
+            ActionPill("Copy URL", Lucide.Copy, onCopyUrl, Modifier.weight(1f))
+            ActionPill("Chat", Lucide.MessageCircle, onChatWithBundle, Modifier.weight(1f), accent = Brand.MicroInfo)
         }
     }
 }
@@ -191,6 +192,6 @@ private fun MemberRow(doc: DocSummary, onClick: () -> Unit) {
     ) {
         Box(Modifier.size(8.dp).background(if (!doc.isDraft) Brand.MicroLime else Brand.TextFaint, RoundedCornerShape(4.dp)))
         Text(doc.title ?: "Untitled", style = BrandType.body(14), color = Brand.TextPrimary, modifier = Modifier.weight(1f), maxLines = 1)
-        Icon(Icons.Outlined.OpenInNew, null, tint = Brand.TextFaint, modifier = Modifier.size(14.dp))
+        Icon(Lucide.ExternalLink, null, tint = Brand.TextFaint, modifier = Modifier.size(14.dp))
     }
 }

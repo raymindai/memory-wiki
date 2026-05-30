@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Layers
+import com.composables.icons.lucide.Layers
+import com.composables.icons.lucide.Lucide
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -155,7 +155,7 @@ private fun BundleRow(b: BundleSummary, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Icon(Icons.Outlined.Layers, null, tint = visibilityColor(b.visibility), modifier = Modifier.size(18.dp))
+        Icon(Lucide.Layers, null, tint = visibilityColor(b.visibility), modifier = Modifier.size(18.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(b.title ?: "Untitled Bundle", style = BrandType.body(15, FontWeight.Medium), color = Brand.TextPrimary, maxLines = 1)
             Text("${b.documentCount} ${if (b.documentCount == 1) "doc" else "docs"}", style = BrandType.mono(10), color = Brand.TextFaint)

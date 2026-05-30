@@ -19,15 +19,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Mic
-import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material3.Icon
+import com.composables.icons.lucide.Camera
+import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Link
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mic
+import com.composables.icons.lucide.ScanText
+import com.composables.icons.lucide.SquarePen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,12 +56,12 @@ import wiki.memory.memorywiki.ui.theme.BrandType
 import javax.inject.Inject
 
 enum class CaptureMode(val label: String, val icon: ImageVector) {
-    Write("Write", Icons.Outlined.Edit),
-    URL("URL", Icons.Outlined.Link),
-    Photo("Photo", Icons.Outlined.CameraAlt),
-    OCR("OCR", Icons.Outlined.TextFields),
-    Voice("Voice", Icons.Outlined.Mic),
-    Import("Import", Icons.Outlined.Description),
+    Write("Write", Lucide.SquarePen),
+    URL("URL", Lucide.Link),
+    Photo("Photo", Lucide.Camera),
+    OCR("OCR", Lucide.ScanText),
+    Voice("Voice", Lucide.Mic),
+    Import("Import", Lucide.FileText),
 }
 
 @HiltViewModel

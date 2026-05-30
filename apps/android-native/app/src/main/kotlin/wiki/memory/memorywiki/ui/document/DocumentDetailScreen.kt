@@ -16,12 +16,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.OpenInNew
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Ellipsis
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Sparkles
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -107,11 +105,11 @@ fun DocumentDetailScreen(
             // Top bar
             Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.Outlined.ArrowBack, null, tint = Brand.TextPrimary)
+                    Icon(Lucide.ArrowLeft, null, tint = Brand.TextPrimary)
                 }
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.Outlined.MoreVert, null, tint = Brand.TextPrimary)
+                    Icon(Lucide.Ellipsis, null, tint = Brand.TextPrimary)
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(text = { Text("Chat with this doc") }, onClick = {
@@ -159,7 +157,7 @@ fun DocumentDetailScreen(
                 ) {
                     Text(url.removePrefix("https://"), style = BrandType.mono(11), color = Brand.TextSecondary)
                     Spacer(Modifier.weight(1f))
-                    Pill("Copy for AI", Icons.Outlined.AutoAwesome) {
+                    Pill("Copy for AI", Lucide.Sparkles) {
                         clipboard.setText(AnnotatedString("Use $url as my context."))
                     }
                 }
