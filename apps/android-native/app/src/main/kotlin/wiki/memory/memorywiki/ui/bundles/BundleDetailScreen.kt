@@ -1,41 +1,65 @@
 /*
- * BundleDetailScreen — title / description / visibility chip,
- * DeployCard (Copy AI / Copy URL / Open hub), members list,
- * overflow menu (Chat / Copy URL / Open on web).
+ * BundleDetailScreen — port of iOS BundleDetailView.swift.
+ *
+ *   Top bar       back + ellipsis overflow Menu (Chat / Copy AI /
+ *                 Copy URL / Share / Open on web)
+ *   Header        22dp stack glyph + display 26 title
+ *   Description   body 14 muted lineHeight 4 when present
+ *   Deploy card   "DEPLOY THIS BUNDLE TO ANY AI" mono header +
+ *                 explainer + inner mono URL pill with vertical
+ *                 divider + Copy-for-AI swap (sparkles → check
+ *                 1.4s). All wrapped in surface@50% + borderDim
+ *                 outer card.
+ *   Members       "MEMBERS" mono label + count + MemberRow per doc
+ *                 (DocStatusIcon + title + compactTime + chevron)
+ *   Pull-to-refresh + bottom 50dp safe inset
  */
 
 package wiki.memory.memorywiki.ui.bundles
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Copy
-import com.composables.icons.lucide.ExternalLink
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.MessageCircle
-import com.composables.icons.lucide.Sparkles
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Check
+import com.composables.icons.lucide.ChevronRight
+import com.composables.icons.lucide.Ellipsis
+import com.composables.icons.lucide.Layers
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Sparkles
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,23 +68,26 @@ import wiki.memory.memorywiki.BuildConfig
 import wiki.memory.memorywiki.data.ApiClient
 import wiki.memory.memorywiki.data.model.BundleDetail
 import wiki.memory.memorywiki.data.model.DocSummary
+import wiki.memory.memorywiki.ui.components.DocStatusIcon
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.BrandType
-import javax.inject.Inject
+import wiki.memory.memorywiki.util.compactTime
 
 @HiltViewModel
-class BundleDetailViewModel @Inject constructor(
-    val api: ApiClient,
-) : ViewModel() {
+class BundleDetailViewModel @Inject constructor(val api: ApiClient) : ViewModel() {
     private val _detail = MutableStateFlow<BundleDetail?>(null)
     val detail: StateFlow<BundleDetail?> = _detail.asStateFlow()
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
+    private val _refreshing = MutableStateFlow(false)
+    val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
 
-    fun load(id: String) = viewModelScope.launch {
-        _loading.value = true
+    fun load(id: String, force: Boolean = false) = viewModelScope.launch {
+        if (!force && _detail.value?.id == id) return@launch
+        if (_detail.value == null) _loading.value = true else _refreshing.value = true
         runCatching { api.bundleDetail(id) }.onSuccess { _detail.value = it }
         _loading.value = false
+        _refreshing.value = false
     }
 }
 
@@ -72,111 +99,234 @@ fun BundleDetailScreen(
 ) {
     val detail by vm.detail.collectAsState()
     val loading by vm.loading.collectAsState()
+    val refreshing by vm.refreshing.collectAsState()
     val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val pullState = rememberPullToRefreshState()
+    var menuOpen by remember { mutableStateOf(false) }
+    var copied by remember { mutableStateOf(false) }
+    LaunchedEffect(copied) {
+        if (copied) { delay(1400); copied = false }
+    }
 
     LaunchedEffect(bundleId) { vm.load(bundleId) }
 
+    val url = "${BuildConfig.API_BASE.removeSuffix("/")}/b/$bundleId"
+
     Column(Modifier.fillMaxSize().padding(top = 44.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Lucide.ArrowLeft, null, tint = Brand.TextPrimary)
             }
             Spacer(Modifier.weight(1f))
+            IconButton(onClick = { menuOpen = true }) {
+                Icon(Lucide.Ellipsis, null, tint = Brand.TextPrimary)
+            }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = { Text("Chat with this bundle") },
+                    onClick = {
+                        menuOpen = false
+                        val title = detail?.title ?: "Bundle"
+                        navController.navigate("chat/bundle/$bundleId/$title")
+                    },
+                )
+                DropdownMenuItem(text = { Text("Copy as AI prompt") }, onClick = {
+                    menuOpen = false
+                    clipboard.setText(AnnotatedString("Use $url as my context bundle."))
+                })
+                DropdownMenuItem(text = { Text("Copy URL") }, onClick = {
+                    menuOpen = false
+                    clipboard.setText(AnnotatedString(url))
+                })
+                DropdownMenuItem(text = { Text("Share…") }, onClick = {
+                    menuOpen = false
+                    shareBundleUrl(context, url)
+                })
+                DropdownMenuItem(text = { Text("Open on memory.wiki") }, onClick = {
+                    menuOpen = false
+                    context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                })
+            }
         }
 
         if (loading && detail == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Brand.TextPrimary)
+                CircularProgressIndicator(color = Brand.TextPrimary, strokeWidth = 1.6.dp)
             }
             return@Column
         }
-
         val d = detail ?: return@Column
-        val url = "${BuildConfig.API_BASE}/b/${d.id}"
 
-        LazyColumn(contentPadding = PaddingValues(horizontal = 18.dp, vertical = 0.dp)) {
-            item {
-                Text(d.title ?: "Untitled Bundle", style = BrandType.display(22), color = Brand.TextPrimary)
-                d.description?.let {
-                    Spacer(Modifier.height(6.dp))
-                    Text(it, style = BrandType.body(13), color = Brand.TextMuted)
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = { vm.load(bundleId, force = true) },
+            state = pullState,
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 18.dp)
+                    .padding(top = 12.dp, bottom = 140.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                Header(title = d.title ?: "Untitled Bundle")
+                d.description?.takeIf { it.isNotBlank() }?.let { desc ->
+                    Text(
+                        desc,
+                        style = BrandType.body(14),
+                        color = Brand.TextMuted,
+                    )
                 }
-                Spacer(Modifier.height(16.dp))
+                DeployCard(
+                    url = url,
+                    copied = copied,
+                    onCopyAi = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        clipboard.setText(AnnotatedString("Use $url as my context."))
+                        copied = true
+                    },
+                )
+                Box(Modifier.fillMaxWidth().height(0.5.dp).background(Brand.BorderDim))
+                MembersSection(
+                    docs = d.documents,
+                    onTap = { doc ->
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        navController.navigate("bundles/doc/${doc.id}")
+                    },
+                )
             }
-
-            item {
-                DeployCard(url = url, onCopyForAi = {
-                    clipboard.setText(AnnotatedString("Use $url as my context."))
-                }, onCopyUrl = {
-                    clipboard.setText(AnnotatedString(url))
-                }, onChatWithBundle = {
-                    val title = d.title ?: "Bundle"
-                    navController.navigate("chat/bundle/${d.id}/${title}")
-                })
-                Spacer(Modifier.height(20.dp))
-            }
-
-            item {
-                Text("MEMBERS", style = BrandType.mono(9, FontWeight.Medium), color = Brand.TextFaint)
-                Spacer(Modifier.height(8.dp))
-            }
-            items(d.documents, key = { it.id }) { doc ->
-                MemberRow(doc) { navController.navigate("bundles/doc/${doc.id}") }
-            }
-            item { Spacer(Modifier.height(140.dp)) }
         }
     }
 }
 
 @Composable
-private fun DeployCard(
-    url: String,
-    onCopyForAi: () -> Unit,
-    onCopyUrl: () -> Unit,
-    onChatWithBundle: () -> Unit,
-) {
+private fun Header(title: String) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            Lucide.Layers,
+            null,
+            tint = Brand.TextPrimary,
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .size(22.dp),
+        )
+        Text(
+            title,
+            style = BrandType.display(26),
+            color = Brand.TextPrimary,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun DeployCard(url: String, copied: Boolean, onCopyAi: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .background(Brand.Surface, RoundedCornerShape(14.dp))
-            .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(14.dp))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .clip(RoundedCornerShape(12.dp))
+            .background(Brand.Surface.copy(alpha = 0.5f))
+            .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(12.dp))
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text("DEPLOY THIS BUNDLE TO ANY AI", style = BrandType.mono(9, FontWeight.Medium), color = Brand.MicroPurple)
-        Text(
-            "Paste the URL into Claude, ChatGPT, Gemini, or Cursor. The bundle serves a structured digest that links to every member doc.",
-            style = BrandType.body(12),
-            color = Brand.TextMuted,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(Lucide.Sparkles, null, tint = Brand.TextPrimary, modifier = Modifier.size(11.dp))
             Text(
-                url.removePrefix("https://"),
-                style = BrandType.mono(11),
-                color = Brand.TextPrimary,
-                modifier = Modifier.weight(1f),
+                "DEPLOY THIS BUNDLE TO ANY AI",
+                style = BrandType.mono(9, FontWeight.Medium),
+                color = Brand.TextFaint,
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActionPill("Copy for AI", Lucide.Sparkles, onCopyForAi, Modifier.weight(1f), accent = Brand.MicroPurple)
-            ActionPill("Copy URL", Lucide.Copy, onCopyUrl, Modifier.weight(1f))
-            ActionPill("Chat", Lucide.MessageCircle, onChatWithBundle, Modifier.weight(1f), accent = Brand.MicroInfo)
+        Text(
+            "Paste the URL into Claude, ChatGPT, or Cursor. The bundle serves a structured digest that links to every member doc.",
+            style = BrandType.body(13),
+            color = Brand.TextMuted,
+        )
+        // Inner URL pill with vertical divider and Copy-for-AI swap.
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Brand.SheetBg.copy(alpha = 0.75f))
+                .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(8.dp)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                url.removePrefix("https://"),
+                style = BrandType.mono(12),
+                color = Brand.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            )
+            Box(Modifier.width(0.5.dp).height(24.dp).background(Brand.BorderDim))
+            Row(
+                Modifier
+                    .clickable { onCopyAi() }
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    if (copied) Lucide.Check else Lucide.Sparkles,
+                    null,
+                    tint = Brand.TextPrimary,
+                    modifier = Modifier.size(11.dp),
+                )
+                Text(
+                    if (copied) "Copied" else "Copy for AI",
+                    style = BrandType.body(12, FontWeight.Medium),
+                    color = Brand.TextPrimary,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun ActionPill(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier, accent: androidx.compose.ui.graphics.Color = Brand.TextPrimary) {
-    Row(
-        modifier
-            .background(Brand.ToggleBg, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Icon(icon, null, tint = accent, modifier = Modifier.size(11.dp))
-        Text(label, style = BrandType.body(12, FontWeight.Medium), color = Brand.TextPrimary)
+private fun MembersSection(docs: List<DocSummary>, onTap: (DocSummary) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "MEMBERS",
+                style = BrandType.mono(9, FontWeight.Medium),
+                color = Brand.TextFaint,
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                docs.size.toString(),
+                style = BrandType.mono(10),
+                color = Brand.TextFaint,
+            )
+        }
+        if (docs.isEmpty()) {
+            Text(
+                "This bundle is empty.",
+                style = BrandType.body(13),
+                color = Brand.TextFaint,
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                docs.forEach { doc ->
+                    MemberRow(doc = doc, onClick = { onTap(doc) })
+                }
+            }
+        }
     }
 }
 
@@ -185,13 +335,46 @@ private fun MemberRow(doc: DocSummary, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Brand.Surface)
+            .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(8.dp))
             .clickable { onClick() }
-            .padding(vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(8.dp).background(if (!doc.isDraft) Brand.MicroLime else Brand.TextFaint, RoundedCornerShape(4.dp)))
-        Text(doc.title ?: "Untitled", style = BrandType.body(14), color = Brand.TextPrimary, modifier = Modifier.weight(1f), maxLines = 1)
-        Icon(Lucide.ExternalLink, null, tint = Brand.TextFaint, modifier = Modifier.size(14.dp))
+        DocStatusIcon(isDraft = doc.isDraft, sizeDp = 16)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                doc.title ?: "Untitled",
+                style = BrandType.body(14, FontWeight.Medium),
+                color = Brand.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                compactTime(doc.updatedAt),
+                style = BrandType.mono(9),
+                color = Brand.TextFaint,
+            )
+        }
+        Icon(
+            Lucide.ChevronRight,
+            null,
+            tint = Brand.TextFaint,
+            modifier = Modifier.size(11.dp),
+        )
     }
+}
+
+private fun shareBundleUrl(context: android.content.Context, url: String) {
+    context.startActivity(
+        Intent.createChooser(
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, url)
+            },
+            "Share bundle",
+        ),
+    )
 }
