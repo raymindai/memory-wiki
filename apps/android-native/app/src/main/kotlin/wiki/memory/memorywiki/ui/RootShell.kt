@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -96,6 +97,15 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
         }
     }
 
+    // Hide the floating tab bar on full-screen surfaces (Chat,
+    // Document detail, Bundle detail) where the chrome would
+    // crowd the bottom of the composer / scroll.
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val hideTabBar = currentRoute?.startsWith("chat/") == true ||
+        currentRoute == "markdowns/doc/{id}" ||
+        currentRoute == "bundles/doc/{id}" ||
+        currentRoute == "bundles/{id}"
+
     Box(Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
@@ -142,8 +152,11 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
         }
 
         // Bottom chrome: fade strip behind, floating tab bar above.
-        BottomFadeStrip(Modifier.align(Alignment.BottomCenter))
-        BrandTabBar(
+        // Hidden on full-screen surfaces so they own the bottom edge.
+        if (!hideTabBar) {
+            BottomFadeStrip(Modifier.align(Alignment.BottomCenter))
+        }
+        if (!hideTabBar) BrandTabBar(
             selected = tab,
             onSelect = { router.selectTab(it) },
             avatarUrl = session?.avatarUrl,
