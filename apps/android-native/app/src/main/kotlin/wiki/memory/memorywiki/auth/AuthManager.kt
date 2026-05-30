@@ -75,11 +75,15 @@ class AuthManager @Inject constructor(
                         _session.value = null
                         _loading.value = false
                     }
-                    SessionStatus.LoadingFromStorage -> { /* keep loading=true */ }
                     is SessionStatus.RefreshFailure -> {
                         _session.value = null
                         _loading.value = false
                     }
+                    // `Initializing` covers the supabase-kt 3.x rename of
+                    // `LoadingFromStorage`. We keep loading=true through
+                    // it so the boot splash hangs around until auth
+                    // really resolves.
+                    else -> Unit
                 }
             }
         }

@@ -1,7 +1,7 @@
 /*
  * Models — wire format for the memory.wiki API.
  *
- * Field names mirror what `apps/web/src/app/api/*` returns. Optional
+ * Field names mirror what `apps/web/src/app/api/` returns. Optional
  * fields are nullable; rare-but-present ones use defaults so the JSON
  * decoder doesn't choke on a missing key.
  */

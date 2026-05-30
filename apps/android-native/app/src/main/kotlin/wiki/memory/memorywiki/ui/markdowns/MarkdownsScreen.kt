@@ -26,11 +26,12 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -169,7 +170,7 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
                     singleLine = true,
                     placeholder = { Text("Search titles or meaning", color = Brand.TextFaint, style = BrandType.body(14)) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    colors = TextFieldDefaults.colors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Brand.Surface, unfocusedContainerColor = Brand.Surface,
                         focusedTextColor = Brand.TextPrimary, unfocusedTextColor = Brand.TextPrimary,
                         cursorColor = Brand.TextPrimary,

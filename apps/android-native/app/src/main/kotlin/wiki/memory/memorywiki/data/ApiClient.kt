@@ -1,5 +1,5 @@
 /*
- * ApiClient — single Ktor-based gateway to apps/web/src/app/api/*.
+ * ApiClient — single Ktor-based gateway to apps/web/src/app/api/.
  * Mirrors apps/ios-native/MemoryWiki/Networking/APIClient.swift.
  *
  * Auth header strategy:
@@ -47,19 +47,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 sealed class ChatScope(open val title: String) {
+    abstract val path: String
     data class Hub(val slug: String, override val title: String) : ChatScope(title) {
-        val path = "/api/hub/$slug/chat"
+        override val path get() = "/api/hub/$slug/chat"
     }
     data class Bundle(val id: String, override val title: String) : ChatScope(title) {
-        val path = "/api/bundles/$id/chat"
+        override val path get() = "/api/bundles/$id/chat"
     }
     data class Doc(val id: String, override val title: String) : ChatScope(title) {
-        val path = "/api/docs/$id/chat"
-    }
-    val path: String get() = when (this) {
-        is Hub -> "/api/hub/$slug/chat"
-        is Bundle -> "/api/bundles/$id/chat"
-        is Doc -> "/api/docs/$id/chat"
+        override val path get() = "/api/docs/$id/chat"
     }
 }
 
@@ -229,11 +225,13 @@ class ApiClient @Inject constructor(
                 return@execute
             }
             val channel: ByteReadChannel = response.bodyAsChannel()
-            val buf = ByteArray(2 * 1024)
+            // Read line-by-line. The Anthropic stream is plain text
+            // (NOT SSE-framed for these endpoints) but does end each
+            // chunk with \n; readUTF8Line handles that cleanly in
+            // both Ktor 2.x and 3.x without the API rename mess.
             while (!channel.isClosedForRead) {
-                val n = channel.readAvailable(buf, 0, buf.size)
-                if (n <= 0) continue
-                emit(buf.copyOfRange(0, n).toString(Charsets.UTF_8))
+                val line = channel.readUTF8Line() ?: break
+                if (line.isNotEmpty()) emit(line + "\n")
             }
         }
     }

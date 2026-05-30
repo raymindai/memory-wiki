@@ -6,12 +6,12 @@
 
 package wiki.memory.memorywiki.share
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import io.ktor.client.HttpClient
@@ -32,7 +32,7 @@ import wiki.memory.memorywiki.util.WebPEncoder
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ShareReceiverActivity : Activity() {
+class ShareReceiverActivity : ComponentActivity() {
     @Inject lateinit var auth: AuthManager
     @Inject lateinit var http: HttpClient
     @Inject lateinit var api: ApiClient

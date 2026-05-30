@@ -75,12 +75,12 @@ object MemoryWikiWidget : GlanceAppWidget() {
             Column(modifier = GlanceModifier.fillMaxSize()) {
                 Text(
                     "memory.wiki",
-                    style = TextStyle(color = ColorProvider(INK), fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                    style = TextStyle(color = ColorProvider(day = INK, night = INK), fontWeight = FontWeight.Medium, fontSize = 13.sp),
                 )
                 Spacer(GlanceModifier.height(2.dp))
                 Text(
                     "RECENTLY UPDATED",
-                    style = TextStyle(color = ColorProvider(FAINT), fontWeight = FontWeight.Medium, fontSize = 9.sp),
+                    style = TextStyle(color = ColorProvider(day = FAINT, night = FAINT), fontWeight = FontWeight.Medium, fontSize = 9.sp),
                 )
                 Spacer(GlanceModifier.height(8.dp))
 
@@ -97,7 +97,7 @@ object MemoryWikiWidget : GlanceAppWidget() {
                 ) {
                     Text(
                         "+ New capture",
-                        style = TextStyle(color = ColorProvider(BG), fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                        style = TextStyle(color = ColorProvider(day = BG, night = BG), fontWeight = FontWeight.Medium, fontSize = 13.sp),
                     )
                 }
 
@@ -128,7 +128,7 @@ private fun QuickPill(label: String, uri: String, modifier: GlanceModifier) {
     ) {
         Text(
             label,
-            style = TextStyle(color = ColorProvider(INK), fontWeight = FontWeight.Medium, fontSize = 13.sp),
+            style = TextStyle(color = ColorProvider(day = INK, night = INK), fontWeight = FontWeight.Medium, fontSize = 13.sp),
         )
     }
 }

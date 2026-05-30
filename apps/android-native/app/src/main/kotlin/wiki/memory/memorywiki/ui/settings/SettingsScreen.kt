@@ -21,13 +21,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.LogOut
+import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -140,7 +140,7 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Icon(Icons.Outlined.LogOut, null, tint = Brand.MicroRed, modifier = Modifier.size(16.dp))
+            Icon(Icons.Outlined.Logout, null, tint = Brand.MicroRed, modifier = Modifier.size(16.dp))
             Text("Sign out", style = BrandType.body(14, FontWeight.Medium), color = Brand.MicroRed)
         }
     }
@@ -230,7 +230,7 @@ private fun DisplayNameSheet(initial: String, onDismiss: () -> Unit, onSave: (St
                 onValueChange = { name = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                colors = TextFieldDefaults.colors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Brand.Surface, unfocusedContainerColor = Brand.Surface,
                     focusedTextColor = Brand.TextPrimary, unfocusedTextColor = Brand.TextPrimary,
                     cursorColor = Brand.TextPrimary,
