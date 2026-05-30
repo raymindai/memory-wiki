@@ -1,7 +1,14 @@
 /*
- * ShareReceiverActivity — translucent activity that handles ACTION_SEND
- * (text + image) from the system share sheet. Mirrors iOS Share
- * Extension: silent POST, toast, finish. No UI of its own.
+ * ShareReceiverActivity — translucent receiver for ACTION_SEND
+ * from the system share sheet.
+ *
+ *   text/plain  →  forward into Capture (Write mode) so the user
+ *                  can edit + title before publishing. Mirrors the
+ *                  iOS Share Extension preview sheet.
+ *   image/...   →  encode to WebP, upload, create a one-line doc
+ *                  referencing the uploaded URL. Silent + toast.
+ *                  (Photo-share usually means "save this for
+ *                  later", not "let me write about it now.")
  */
 
 package wiki.memory.memorywiki.share
@@ -21,15 +28,16 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import wiki.memory.memorywiki.BuildConfig
+import wiki.memory.memorywiki.MainActivity
 import wiki.memory.memorywiki.auth.AuthManager
 import wiki.memory.memorywiki.data.ApiClient
 import wiki.memory.memorywiki.util.WebPEncoder
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class ShareReceiverActivity : ComponentActivity() {
@@ -48,41 +56,42 @@ class ShareReceiverActivity : ComponentActivity() {
             finish(); return
         }
 
-        lifecycleScope.launch {
-            try {
-                when {
-                    src.type == "text/plain" -> handleText(src)
-                    src.type?.startsWith("image/") == true -> handleImage(src)
-                    else -> toast("Unsupported share type")
+        when {
+            src.type == "text/plain" -> {
+                forwardToCapture(src)
+                finish()
+            }
+            src.type?.startsWith("image/") == true -> {
+                lifecycleScope.launch {
+                    runCatching { handleImage(src) }
+                        .onFailure { toast("Share failed: ${it.message}") }
+                    finish()
                 }
-            } catch (t: Throwable) {
-                toast("Share failed: ${t.message}")
-            } finally {
+            }
+            else -> {
+                toast("Unsupported share type")
                 finish()
             }
         }
     }
 
-    private suspend fun handleText(intent: Intent) {
-        val text = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
-        val title = intent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim().orEmpty()
+    /** Hands the shared text off to MainActivity via an explicit
+     *  Intent carrying memorywiki://capture + EXTRA_TEXT/SUBJECT.
+     *  MainActivity reads the extras and emits CaptureWithBody so
+     *  the user lands on Write mode with the text pre-filled. */
+    private fun forwardToCapture(src: Intent) {
+        val text = src.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
         if (text.isBlank()) { toast("Nothing to share"); return }
-
-        val body = buildString {
-            if (title.isNotBlank()) appendLine("# $title").appendLine()
-            append(text)
-        }
-        withContext(Dispatchers.IO) {
-            val res = http.post("${BuildConfig.API_BASE}/api/docs") {
-                authHeaders()
-                contentType(ContentType.Application.Json)
-                setBody(NewDocRequest(markdown = body, title = title.ifBlank { null }))
+        val forward = Intent(this, MainActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            data = Uri.parse("memorywiki://capture")
+            putExtra(Intent.EXTRA_TEXT, text)
+            src.getStringExtra(Intent.EXTRA_SUBJECT)?.let {
+                putExtra(Intent.EXTRA_SUBJECT, it)
             }
-            withContext(Dispatchers.Main) {
-                if (res.status.isSuccess()) toast("Saved to memory.wiki")
-                else toast("Save failed (${res.status.value})")
-            }
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
+        startActivity(forward)
     }
 
     private suspend fun handleImage(intent: Intent) {
@@ -95,7 +104,18 @@ class ShareReceiverActivity : ComponentActivity() {
         val payload = WebPEncoder.encode(bitmap)
             ?: run { toast("Encode failed"); return }
         val upload = api.uploadImage(payload.bytes, payload.fileExtension, payload.contentType)
-        toast("Uploaded: ${upload.url}")
+        val markdown = "![shared image](${upload.url})"
+        withContext(Dispatchers.IO) {
+            val res = http.post("${BuildConfig.API_BASE}/api/docs") {
+                authHeaders()
+                contentType(ContentType.Application.Json)
+                setBody(NewDocRequest(markdown = markdown, title = null))
+            }
+            withContext(Dispatchers.Main) {
+                if (res.status.isSuccess()) toast("Image saved to memory.wiki")
+                else toast("Save failed (${res.status.value})")
+            }
+        }
     }
 
     /** API 33+ requires the typed overload of getParcelableExtra. */

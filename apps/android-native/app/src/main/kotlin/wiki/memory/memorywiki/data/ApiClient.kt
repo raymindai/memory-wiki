@@ -110,6 +110,25 @@ class ApiClient @Inject constructor(
         return json.decodeFromString(res.bodyAsText())
     }
 
+    @Serializable
+    data class CreateDocResponse(val id: String)
+
+    /** Creates a brand-new doc on the user's hub. Mirrors POST
+     *  /api/docs. Body / title both optional but at least one of
+     *  them should be non-blank or the server will reject. */
+    suspend fun createDocument(markdown: String, title: String? = null): CreateDocResponse {
+        val res = http.post("$base/api/docs") {
+            authHeaders()
+            contentType(ContentType.Application.Json)
+            setBody(buildJsonObject {
+                put("markdown", markdown)
+                title?.takeIf { it.isNotBlank() }?.let { put("title", it) }
+            })
+        }
+        if (!res.status.isSuccess()) error("HTTP ${res.status.value} createDocument")
+        return json.decodeFromString(res.bodyAsText())
+    }
+
     suspend fun updateDocument(id: String, markdown: String) {
         val res = http.patch("$base/api/docs/$id") {
             authHeaders()

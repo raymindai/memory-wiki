@@ -78,6 +78,32 @@ class CaptureViewModel @Inject constructor(
     fun setBody(s: String) { _body.value = s }
     fun pasteIntoBody(s: String) { _body.value = if (_body.value.isBlank()) s else _body.value + "\n\n" + s }
 
+    private val _publishing = MutableStateFlow(false)
+    val publishing: StateFlow<Boolean> = _publishing.asStateFlow()
+
+    fun canPublish(): Boolean = !_publishing.value &&
+        (_body.value.isNotBlank() || _title.value.isNotBlank())
+
+    fun publish(onDone: (String?) -> Unit) = viewModelScope.launch {
+        if (!canPublish()) { onDone(null); return@launch }
+        _publishing.value = true
+        runCatching {
+            api.createDocument(
+                markdown = _body.value.trim(),
+                title = _title.value.trim().ifBlank { null },
+            )
+        }.onSuccess { resp ->
+            _title.value = ""
+            _body.value = ""
+            _publishing.value = false
+            onDone(resp.id)
+        }.onFailure {
+            _publishing.value = false
+            _banner.value = "Publish failed" to (it.message ?: "")
+            onDone(null)
+        }
+    }
+
     fun importUrl(url: String) = viewModelScope.launch {
         _banner.value = "Importing URL…" to "Fetching and converting to markdown"
         api.streamImportUrl(url).collect { evt ->
@@ -114,23 +140,71 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
     // only appears when the user is actively editing.
     var bodyFocused by remember { mutableStateOf(false) }
 
-    // Clipboard paste on demand
+    // Clipboard paste + share-sheet hand-off
     LaunchedEffect(Unit) {
         vm.router.events.collect { evt ->
-            if (evt is RouterEvent.CapturePaste) {
-                val text = clipboard.getText()?.text
-                if (!text.isNullOrBlank()) vm.pasteIntoBody(text)
+            when (evt) {
+                is RouterEvent.CapturePaste -> {
+                    val text = clipboard.getText()?.text
+                    if (!text.isNullOrBlank()) vm.pasteIntoBody(text)
+                }
+                is RouterEvent.CaptureWithBody -> {
+                    vm.setMode(CaptureMode.Write)
+                    evt.title?.let { vm.setTitle(it) }
+                    vm.setBody(evt.body)
+                }
+                else -> Unit
             }
         }
     }
 
+    val publishing by vm.publishing.collectAsState()
+    val canPublish = (title.isNotBlank() || body.isNotBlank()) && !publishing
+
     Column(Modifier.fillMaxSize().padding(top = 56.dp)) {
-        Text(
-            "Capture",
-            style = BrandType.display(26),
-            color = Brand.TextPrimary,
-            modifier = Modifier.padding(horizontal = 18.dp),
-        )
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Capture",
+                style = BrandType.display(26),
+                color = Brand.TextPrimary,
+                modifier = Modifier.weight(1f),
+            )
+            // Publish action — visible in every mode. Disabled
+            // until title or body has content.
+            Row(
+                Modifier
+                    .background(
+                        color = if (canPublish) Brand.TextPrimary else Brand.Surface,
+                        shape = RoundedCornerShape(50),
+                    )
+                    .border(
+                        width = 0.5.dp,
+                        color = if (canPublish) Brand.TextPrimary else Brand.BorderDim,
+                        shape = RoundedCornerShape(50),
+                    )
+                    .clickable(enabled = canPublish) {
+                        vm.publish { newId ->
+                            if (newId != null) {
+                                vm.router.selectTab(wiki.memory.memorywiki.AppTab.Markdowns)
+                                vm.viewModelScope.launch {
+                                    vm.router.emit(RouterEvent.PushDocDetail(newId))
+                                }
+                            }
+                        }
+                    }
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    if (publishing) "Publishing…" else "Publish",
+                    style = BrandType.body(13, FontWeight.Medium),
+                    color = if (canPublish) Brand.Background else Brand.TextFaint,
+                )
+            }
+        }
         Spacer(Modifier.height(10.dp))
         ModePillRow(mode = mode, onChange = vm::setMode)
         Spacer(Modifier.height(20.dp))

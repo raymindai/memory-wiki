@@ -54,6 +54,11 @@ sealed class RouterEvent {
      *  dashboard collect this to re-pull from the server so the
      *  user lands on fresh state instead of cached. */
     data object ForegroundRefresh : RouterEvent()
+    /** Carries a body (and optional title) into the Capture screen
+     *  pre-filled. Used by ShareReceiverActivity to land system
+     *  share-sheet text/URL into Write mode so the user can edit
+     *  + title before publishing. */
+    data class CaptureWithBody(val body: String, val title: String? = null) : RouterEvent()
     data class PushDocDetail(val docId: String) : RouterEvent()
     data class PushBundleDetail(val bundleId: String) : RouterEvent()
 }

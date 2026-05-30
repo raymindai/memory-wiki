@@ -56,6 +56,21 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch { auth.signInDemo("demo@memory.wiki") }
             return
         }
+        // Share-sheet text/URL forwarded by ShareReceiverActivity —
+        // carries EXTRA_TEXT/EXTRA_SUBJECT alongside memorywiki://
+        // capture. Forward into the Capture surface so the user can
+        // edit + title before publishing.
+        if (data.scheme == "memorywiki" && data.host == "capture") {
+            val body = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim().orEmpty()
+            val title = intent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim()
+            if (body.isNotEmpty()) {
+                router.selectTab(AppTab.Capture)
+                lifecycleScope.launch {
+                    router.emit(RouterEvent.CaptureWithBody(body, title))
+                }
+                return
+            }
+        }
         lifecycleScope.launch { router.handle(data) }
     }
 }
