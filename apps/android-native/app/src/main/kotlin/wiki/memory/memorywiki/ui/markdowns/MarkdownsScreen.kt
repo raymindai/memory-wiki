@@ -120,11 +120,38 @@ class MarkdownsViewModel @Inject constructor(
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+    private val _semanticHits = MutableStateFlow<List<wiki.memory.memorywiki.data.model.SearchHit>>(emptyList())
+    val semanticHits: StateFlow<List<wiki.memory.memorywiki.data.model.SearchHit>> = _semanticHits.asStateFlow()
+    private val _semanticLoading = MutableStateFlow(false)
+    val semanticLoading: StateFlow<Boolean> = _semanticLoading.asStateFlow()
+    private var semanticJob: kotlinx.coroutines.Job? = null
 
     init { refresh() }
 
     fun setFilter(f: Filter) { _filter.value = f }
-    fun setQuery(q: String) { _query.value = q }
+
+    /** Debounced semantic search. Title-match runs locally + instantly
+     *  inside the `visible` flow; this enriches the UI with body
+     *  matches behind it. Cancels any in-flight previous query so
+     *  only the latest lands. 300ms debounce + ≥3 char gate. */
+    fun setQuery(q: String) {
+        _query.value = q
+        semanticJob?.cancel()
+        val trimmed = q.trim()
+        if (trimmed.length < 3) {
+            _semanticHits.value = emptyList()
+            _semanticLoading.value = false
+            return
+        }
+        _semanticLoading.value = true
+        semanticJob = viewModelScope.launch {
+            kotlinx.coroutines.delay(300)
+            runCatching { api.semanticSearch(trimmed, limit = 8) }
+                .onSuccess { _semanticHits.value = it.results }
+                .onFailure { _semanticHits.value = emptyList() }
+            _semanticLoading.value = false
+        }
+    }
 
     fun refresh() = viewModelScope.launch {
         if (_all.value.isNotEmpty()) _refreshing.value = true else _loading.value = true
@@ -218,6 +245,7 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
 
     val pullState = rememberPullToRefreshState()
     val pinnedIds by vm.pinned.docIds.collectAsState()
+    val semanticAll by vm.semanticHits.collectAsState()
     val pinnedDocs = remember(visible, pinnedIds, filter, query) {
         if (filter == MarkdownsViewModel.Filter.All && query.isBlank())
             visible.filter { it.id in pinnedIds }
@@ -240,6 +268,7 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
             },
         )
 
+        val semanticLoading by vm.semanticLoading.collectAsState()
         AnimatedVisibility(
             visible = searchOpen,
             enter = fadeIn(tween(180)) + slideInVertically(tween(220)) { -it / 2 },
@@ -250,6 +279,7 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
                 onChange = vm::setQuery,
                 onClear = { vm.setQuery("") },
                 focusRequester = searchFocus,
+                loading = semanticLoading,
             )
         }
 
@@ -323,6 +353,21 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
                             )
                         }
                     }
+                    // BY MEANING — server-side semantic matches that
+                    // didn't surface via title contains.
+                    val titleHitIds = visible.map { it.id }.toSet()
+                    val extra = semanticAll.filter { it.documentId !in titleHitIds }
+                    if (extra.isNotEmpty()) {
+                        item(key = "header-by-meaning") {
+                            BucketHeader("BY MEANING", extra.size)
+                        }
+                        items(extra, key = { "sem-${it.documentId}" }) { hit ->
+                            SemanticRow(
+                                hit = hit,
+                                onClick = { navController.navigate("markdowns/doc/${hit.documentId}") },
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -381,6 +426,7 @@ private fun SearchBar(
     onChange: (String) -> Unit,
     onClear: () -> Unit,
     focusRequester: FocusRequester,
+    loading: Boolean,
 ) {
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     Row(
@@ -419,6 +465,13 @@ private fun SearchBar(
                 }
             },
         )
+        if (loading) {
+            androidx.compose.material3.CircularProgressIndicator(
+                modifier = Modifier.size(11.dp),
+                color = Brand.TextFaint,
+                strokeWidth = 1.2.dp,
+            )
+        }
         if (query.isNotEmpty()) {
             Icon(
                 Lucide.X,
@@ -673,6 +726,56 @@ private fun shareUrl(context: android.content.Context, url: String) {
             "Share doc",
         ),
     )
+}
+
+// ───────────────────────── Semantic row ─────────────────────────
+
+@Composable
+private fun SemanticRow(
+    hit: wiki.memory.memorywiki.data.model.SearchHit,
+    onClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Brand.Surface)
+            .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            Lucide.Sparkles,
+            null,
+            tint = Brand.MicroInfo,
+            modifier = Modifier
+                .padding(top = 1.dp)
+                .size(13.dp),
+        )
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                hit.title ?: "Untitled",
+                style = BrandType.body(14, FontWeight.Medium),
+                color = Brand.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            hit.snippet?.takeIf { it.isNotBlank() }?.let { snippet ->
+                Text(
+                    snippet,
+                    style = BrandType.body(12),
+                    color = Brand.TextMuted,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
 }
 
 // ───────────────────────── Empty state ─────────────────────────
