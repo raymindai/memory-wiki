@@ -59,11 +59,20 @@ fun RootShell(vm: RootViewModel = hiltViewModel()) {
     val loading by vm.auth.loading.collectAsState()
     val visitorAccent = AccentColorChoice.from(session?.accentColor)
 
+    // Onboarding flag — flip on first signed-in launch only.
+    val showOnboarding = wiki.memory.memorywiki.ui.onboarding.shouldShowOnboarding()
+    val onboardingState = androidx.compose.runtime.remember(showOnboarding) {
+        androidx.compose.runtime.mutableStateOf(!showOnboarding)
+    }
+
     MemoryWikiTheme(userAccent = visitorAccent) {
         Surface(Modifier.fillMaxSize(), color = Brand.Background) {
             when {
                 loading -> SplashScreen()
                 session == null -> AuthScreen()
+                !onboardingState.value -> wiki.memory.memorywiki.ui.onboarding.OnboardingScreen(
+                    onDismiss = { onboardingState.value = true },
+                )
                 else -> SignedInShell(vm.router, vm.auth)
             }
         }
