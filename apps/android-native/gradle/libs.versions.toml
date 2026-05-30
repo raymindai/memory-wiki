@@ -31,6 +31,11 @@ composeBom = "2024.12.01"
 composeNav = "2.8.5"
 composeMaterialIcons = "1.7.6"
 accompanist = "0.36.0"
+# Lucide icons for Compose — same icon set the web app uses
+# (`lucide-react`). Brand consistency: every screen on every surface
+# pulls from the same shape language. devsrsouza maintains the
+# longest-running stable Compose port.
+lucide = "1.1.0"
 
 # Coil 3
 coil = "3.0.4"
@@ -85,6 +90,10 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 
 # Accompanist (system UI / permissions)
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+
+# Lucide icons (Compose multiplatform port; ImageVector for every
+# lucide icon, picks up new icons on each version bump).
+lucide-icons = { group = "com.composables", name = "icons-lucide", version.ref = "lucide" }
 
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

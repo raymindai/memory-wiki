@@ -111,6 +111,7 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.accompanist.permissions)
+    implementation(libs.lucide.icons)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
