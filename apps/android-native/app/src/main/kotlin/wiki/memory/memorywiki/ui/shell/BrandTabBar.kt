@@ -171,7 +171,7 @@ private fun TabItem(
     ) {
         Column(
             Modifier
-                .matchParentSize()
+                .fillMaxWidth()
                 .then(
                     if (isCentre) Modifier
                     else Modifier.clickable(
