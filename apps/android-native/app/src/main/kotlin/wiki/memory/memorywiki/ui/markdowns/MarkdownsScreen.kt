@@ -79,6 +79,7 @@ import com.composables.icons.lucide.Inbox
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.RefreshCw
 import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.Upload
 import com.composables.icons.lucide.Users
 import com.composables.icons.lucide.X
@@ -112,6 +113,7 @@ import wiki.memory.memorywiki.util.compactTime
 class MarkdownsViewModel @Inject constructor(
     val api: ApiClient,
     val router: AppRouter,
+    val pinned: wiki.memory.memorywiki.data.PinnedStore,
 ) : ViewModel() {
     enum class Filter { All, Private, Shared, Synced }
 
@@ -135,6 +137,7 @@ class MarkdownsViewModel @Inject constructor(
 
     fun refresh() = viewModelScope.launch {
         if (_all.value.isNotEmpty()) _refreshing.value = true else _loading.value = true
+        pinned.hydrate()
         runCatching { api.userDocuments() }
             .onSuccess { _all.value = it.documents; _error.value = null }
             .onFailure { _error.value = it.message ?: "Couldn't load timeline" }
@@ -223,6 +226,17 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
     }
 
     val pullState = rememberPullToRefreshState()
+    val pinnedIds by vm.pinned.docIds.collectAsState()
+    val pinnedDocs = remember(visible, pinnedIds, filter, query) {
+        if (filter == MarkdownsViewModel.Filter.All && query.isBlank())
+            visible.filter { it.id in pinnedIds }
+        else emptyList()
+    }
+    val nonPinned = remember(visible, pinnedIds, filter, query) {
+        if (filter == MarkdownsViewModel.Filter.All && query.isBlank())
+            visible.filter { it.id !in pinnedIds }
+        else visible
+    }
 
     Column(Modifier.fillMaxSize().padding(top = 44.dp)) {
         Header(
@@ -292,14 +306,29 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
                     contentPadding = PaddingValues(top = 6.dp, bottom = 140.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    group(visible).forEach { (bucket, docs) ->
+                    if (pinnedDocs.isNotEmpty()) {
+                        item(key = "header-pinned") {
+                            BucketHeader("STARRED", pinnedDocs.size)
+                        }
+                        items(pinnedDocs, key = { "pin-${it.id}" }) { doc ->
+                            DocumentRow(
+                                doc = doc,
+                                pinned = true,
+                                onClick = { navController.navigate("markdowns/doc/${doc.id}") },
+                                onTogglePin = { vm.pinned.toggleDoc(doc.id) },
+                            )
+                        }
+                    }
+                    group(nonPinned).forEach { (bucket, docs) ->
                         item(key = "header-${bucket.name}") {
                             BucketHeader(bucket.label, docs.size)
                         }
                         items(docs, key = { it.id }) { doc ->
                             DocumentRow(
                                 doc = doc,
+                                pinned = doc.id in pinnedIds,
                                 onClick = { navController.navigate("markdowns/doc/${doc.id}") },
+                                onTogglePin = { vm.pinned.toggleDoc(doc.id) },
                             )
                         }
                     }
@@ -496,7 +525,12 @@ private fun BucketHeader(label: String, count: Int) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun DocumentRow(doc: DocSummary, onClick: () -> Unit) {
+private fun DocumentRow(
+    doc: DocSummary,
+    pinned: Boolean,
+    onClick: () -> Unit,
+    onTogglePin: () -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
@@ -533,13 +567,22 @@ private fun DocumentRow(doc: DocSummary, onClick: () -> Unit) {
                 sizeDp = 18,
             )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text(
-                    doc.title ?: "Untitled",
-                    style = BrandType.body(14, FontWeight.Medium),
-                    color = Brand.TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        doc.title ?: "Untitled",
+                        style = BrandType.body(14, FontWeight.Medium),
+                        color = Brand.TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (pinned) {
+                        Icon(Lucide.Star, null, tint = Brand.MicroWarn, modifier = Modifier.size(10.dp))
+                    }
+                }
                 MetaLine(doc, syncedSource)
             }
             Text(
@@ -560,6 +603,10 @@ private fun DocumentRow(doc: DocSummary, onClick: () -> Unit) {
             )
         }
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text(if (pinned) "Unstar" else "Star") },
+                onClick = { menuOpen = false; onTogglePin() },
+            )
             DropdownMenuItem(text = { Text("Copy URL") }, onClick = {
                 menuOpen = false
                 clipboard.setText(AnnotatedString(url))

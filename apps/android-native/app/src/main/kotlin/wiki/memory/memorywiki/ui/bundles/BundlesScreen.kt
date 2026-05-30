@@ -75,6 +75,7 @@ import com.composables.icons.lucide.Globe
 import com.composables.icons.lucide.Layers
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.Upload
 import com.composables.icons.lucide.Users
 import com.composables.icons.lucide.X
@@ -99,7 +100,10 @@ import wiki.memory.memorywiki.util.compactTime
 // ───────────────────────── ViewModel ─────────────────────────
 
 @HiltViewModel
-class BundlesViewModel @Inject constructor(val api: ApiClient) : ViewModel() {
+class BundlesViewModel @Inject constructor(
+    val api: ApiClient,
+    val pinned: wiki.memory.memorywiki.data.PinnedStore,
+) : ViewModel() {
     enum class Filter { All, Private, Shared, Public }
 
     private val _all = MutableStateFlow<List<BundleSummary>>(emptyList())
@@ -122,6 +126,7 @@ class BundlesViewModel @Inject constructor(val api: ApiClient) : ViewModel() {
 
     fun refresh() = viewModelScope.launch {
         if (_all.value.isNotEmpty()) _refreshing.value = true else _loading.value = true
+        pinned.hydrate()
         runCatching { api.userBundles() }
             .onSuccess { _all.value = it.bundles; _error.value = null }
             .onFailure { _error.value = it.message ?: "Couldn't load bundles" }
@@ -227,18 +232,23 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
                     ctaLabel = if (filter != BundlesViewModel.Filter.All) "Browse all" else null,
                     onCta = { vm.setFilter(BundlesViewModel.Filter.All) },
                 )
-                else -> LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 14.dp),
-                    contentPadding = PaddingValues(top = 6.dp, bottom = 140.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    items(visible, key = { it.id }) { b ->
-                        BundleRow(
-                            bundle = b,
-                            onClick = { navController.navigate("bundles/${b.id}") },
-                        )
+                else -> {
+                    val pinnedIds by vm.pinned.bundleIds.collectAsState()
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 14.dp),
+                        contentPadding = PaddingValues(top = 6.dp, bottom = 140.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        items(visible, key = { it.id }) { b ->
+                            BundleRow(
+                                bundle = b,
+                                pinned = b.id in pinnedIds,
+                                onClick = { navController.navigate("bundles/${b.id}") },
+                                onTogglePin = { vm.pinned.toggleBundle(b.id) },
+                            )
+                        }
                     }
                 }
             }
@@ -401,7 +411,12 @@ private fun FilterPill(label: String, active: Boolean, onClick: () -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun BundleRow(bundle: BundleSummary, onClick: () -> Unit) {
+private fun BundleRow(
+    bundle: BundleSummary,
+    pinned: Boolean,
+    onClick: () -> Unit,
+    onTogglePin: () -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
@@ -436,13 +451,22 @@ private fun BundleRow(bundle: BundleSummary, onClick: () -> Unit) {
                 sizeDp = 18,
             )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text(
-                    bundle.title ?: "Untitled Bundle",
-                    style = BrandType.body(14, FontWeight.Medium),
-                    color = Brand.TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        bundle.title ?: "Untitled Bundle",
+                        style = BrandType.body(14, FontWeight.Medium),
+                        color = Brand.TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (pinned) {
+                        Icon(Lucide.Star, null, tint = Brand.MicroWarn, modifier = Modifier.size(10.dp))
+                    }
+                }
                 MetaLine(bundle)
             }
             Text(
@@ -466,6 +490,10 @@ private fun BundleRow(bundle: BundleSummary, onClick: () -> Unit) {
             expanded = menuOpen,
             onDismissRequest = { menuOpen = false },
         ) {
+            DropdownMenuItem(
+                text = { Text(if (pinned) "Unstar" else "Star") },
+                onClick = { menuOpen = false; onTogglePin() },
+            )
             DropdownMenuItem(text = { Text("Copy URL") }, onClick = {
                 menuOpen = false
                 clipboard.setText(AnnotatedString(url))

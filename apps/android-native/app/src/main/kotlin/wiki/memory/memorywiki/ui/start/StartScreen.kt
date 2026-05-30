@@ -88,15 +88,12 @@ class StartViewModel @Inject constructor(
     val auth: AuthManager,
     val api: ApiClient,
     val router: AppRouter,
+    val pinned: wiki.memory.memorywiki.data.PinnedStore,
 ) : ViewModel() {
     private val _documents = MutableStateFlow<List<DocSummary>>(emptyList())
     val documents: StateFlow<List<DocSummary>> = _documents.asStateFlow()
     private val _bundles = MutableStateFlow<List<BundleSummary>>(emptyList())
     val bundles: StateFlow<List<BundleSummary>> = _bundles.asStateFlow()
-    private val _starredDocs = MutableStateFlow<List<String>>(emptyList())
-    val starredDocs: StateFlow<List<String>> = _starredDocs.asStateFlow()
-    private val _starredBundles = MutableStateFlow<List<String>>(emptyList())
-    val starredBundles: StateFlow<List<String>> = _starredBundles.asStateFlow()
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
@@ -111,10 +108,7 @@ class StartViewModel @Inject constructor(
 
     fun refresh() = viewModelScope.launch {
         _loading.value = true
-        runCatching { api.pins() }.onSuccess { p ->
-            _starredDocs.value = p.pins.filter { it.kind == "document" }.map { it.id }
-            _starredBundles.value = p.pins.filter { it.kind == "bundle" }.map { it.id }
-        }
+        pinned.hydrate()
         runCatching { api.userDocuments() }.onSuccess { resp ->
             _documents.value = resp.documents
         }
@@ -154,8 +148,8 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
     val session by vm.auth.session.collectAsState()
     val documents by vm.documents.collectAsState()
     val bundles by vm.bundles.collectAsState()
-    val starredDocs by vm.starredDocs.collectAsState()
-    val starredBundles by vm.starredBundles.collectAsState()
+    val starredDocs by vm.pinned.docIds.collectAsState()
+    val starredBundles by vm.pinned.bundleIds.collectAsState()
     val loading by vm.loading.collectAsState()
 
     val displayName = session?.displayName
