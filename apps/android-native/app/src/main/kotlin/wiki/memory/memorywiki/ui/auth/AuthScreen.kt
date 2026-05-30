@@ -333,7 +333,10 @@ private fun ProviderButton(
             )
             .padding(horizontal = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        // Logo + label centered as a pair — iOS HStack inside a
+        // frame(maxWidth: .infinity) does the same. Was Start so
+        // the text sat flush left, looking like a list row.
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
     ) {
         Box(Modifier.size(18.dp), contentAlignment = Alignment.Center) {
             if (provider == AuthProvider.Email) {
