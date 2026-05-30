@@ -142,17 +142,22 @@ fun AuthScreen(vm: AuthViewModel = hiltViewModel()) {
     Box(Modifier.fillMaxSize().background(Brand.Background)) {
         BrandBackdrop()
 
+        // iOS layout: hero floats in the upper-middle, provider stack
+        // anchored near the bottom, footer at the very bottom.
+        // Two flex spacers (top ~ 1f, between ~ 2f) gives the hero
+        // a calm vertical centre-line above the controls instead of
+        // jamming everything to the top of the safe area.
         Column(
             Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .systemBarsPadding()
                 .padding(horizontal = 22.dp)
-                .padding(top = 28.dp, bottom = 22.dp),
+                .padding(top = 12.dp, bottom = 22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.weight(1f))
             Hero(appeared = appeared)
-            Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.weight(2f))
             ProviderStack(appeared = appeared, vm = vm)
             vm.error?.let { msg ->
                 Spacer(Modifier.height(12.dp))
@@ -164,9 +169,8 @@ fun AuthScreen(vm: AuthViewModel = hiltViewModel()) {
                     modifier = Modifier.padding(horizontal = 28.dp),
                 )
             }
-            Spacer(Modifier.height(28.dp))
-            Footer(appeared = appeared)
             Spacer(Modifier.height(20.dp))
+            Footer(appeared = appeared)
         }
     }
 

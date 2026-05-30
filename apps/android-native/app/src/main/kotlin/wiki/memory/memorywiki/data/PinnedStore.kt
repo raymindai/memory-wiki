@@ -38,11 +38,17 @@ class PinnedStore @Inject constructor(private val api: ApiClient) {
     fun isPinnedBundle(id: String): Boolean = id in _bundleIds.value
 
     suspend fun hydrate() {
-        runCatching { api.pins() }.onSuccess { resp ->
-            _docIds.value = resp.pins.filter { it.kind == "document" }.map { it.id }.toSet()
-            _bundleIds.value = resp.pins.filter { it.kind == "bundle" }.map { it.id }.toSet()
-            _hydrated.value = true
-        }
+        runCatching { api.pins() }
+            .onSuccess { resp ->
+                _docIds.value = resp.pins.filter { it.kind == "document" }.map { it.id }.toSet()
+                _bundleIds.value = resp.pins.filter { it.kind == "bundle" }.map { it.id }.toSet()
+                _hydrated.value = true
+                android.util.Log.d(
+                    "PinnedStore",
+                    "hydrate ok: ${_docIds.value.size} docs, ${_bundleIds.value.size} bundles",
+                )
+            }
+            .onFailure { android.util.Log.w("PinnedStore", "hydrate failed", it) }
     }
 
     /** Optimistic toggle. Flip local state first so the UI

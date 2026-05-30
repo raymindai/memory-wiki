@@ -165,6 +165,11 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
     var searchOpen by remember { mutableStateOf(false) }
     val pullState = rememberPullToRefreshState()
 
+    // Re-hydrate pins on every screen entry — mirrors iOS .task on
+    // BundlesView. Catches the case where the user pinned a bundle
+    // on web mid-session and the ViewModel.init hydrate already ran.
+    LaunchedEffect(Unit) { vm.pinned.hydrate() }
+
     LaunchedEffect(Unit) {
         vm.router.events.collect { evt ->
             if (evt is wiki.memory.memorywiki.RouterEvent.ForegroundRefresh) vm.refresh()

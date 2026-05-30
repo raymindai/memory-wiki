@@ -163,62 +163,86 @@ private fun TabItem(
 ) {
     val isCentre = spec.glyph is TabGlyph.BrandCentre
     val interaction = remember { MutableInteractionSource() }
-    Column(
-        Modifier
-            .width(if (isCentre) 64.dp else 60.dp)
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onTap,
-            )
-            .padding(vertical = if (isCentre) 4.dp else 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(if (isCentre) 1.dp else 3.dp),
+    // Box wrapper lets the center tab layer a transparent clickable
+    // overlay above the BrandBlob WebView (WebViews swallow touches
+    // even with isClickable=false + onTouchListener returning false).
+    Box(
+        Modifier.width(if (isCentre) 64.dp else 60.dp),
     ) {
-        // Glyph slot — fixed height so labels and indicators line up
-        // across center vs non-center tabs.
-        Box(
-            modifier = Modifier.height(if (isCentre) 38.dp else 22.dp),
-            contentAlignment = Alignment.Center,
+        Column(
+            Modifier
+                .matchParentSize()
+                .then(
+                    if (isCentre) Modifier
+                    else Modifier.clickable(
+                        interactionSource = interaction,
+                        indication = null,
+                        onClick = onTap,
+                    ),
+                )
+                .padding(vertical = if (isCentre) 4.dp else 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(if (isCentre) 1.dp else 3.dp),
         ) {
-            when (val g = spec.glyph) {
-                is TabGlyph.BrandCentre -> {
-                    BrandBlob(sizeDp = 38)
-                }
-                is TabGlyph.Lucide -> {
-                    Icon(
-                        g.icon,
-                        contentDescription = spec.label,
-                        tint = if (selected) Brand.TextPrimary else Brand.TextFaint,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                is TabGlyph.ProfileAvatar -> {
-                    ProfileTabAvatar(avatarUrl = avatarUrl, isActive = selected)
+            // Glyph slot — fixed height so labels and indicators line up
+            // across center vs non-center tabs.
+            Box(
+                modifier = Modifier.height(if (isCentre) 38.dp else 22.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                when (val g = spec.glyph) {
+                    is TabGlyph.BrandCentre -> {
+                        BrandBlob(sizeDp = 38)
+                    }
+                    is TabGlyph.Lucide -> {
+                        Icon(
+                            g.icon,
+                            contentDescription = spec.label,
+                            tint = if (selected) Brand.TextPrimary else Brand.TextFaint,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    is TabGlyph.ProfileAvatar -> {
+                        ProfileTabAvatar(avatarUrl = avatarUrl, isActive = selected)
+                    }
                 }
             }
-        }
 
-        // Label — center tab has none (the blob is the brand mark).
-        if (!isCentre) {
-            Text(
-                text = spec.label.uppercase(),
-                style = BrandType.mono(9, FontWeight.Medium),
-                color = if (selected) Brand.TextPrimary else Brand.TextFaint,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.wrapContentWidth(),
+            // Label — center tab has none (the blob is the brand mark).
+            if (!isCentre) {
+                Text(
+                    text = spec.label.uppercase(),
+                    style = BrandType.mono(9, FontWeight.Medium),
+                    color = if (selected) Brand.TextPrimary else Brand.TextFaint,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.wrapContentWidth(),
+                )
+            } else {
+                Spacer(Modifier.height(0.dp))
+            }
+
+            // Indicator — 14×1dp rectangle, ink when active.
+            Box(
+                Modifier
+                    .width(14.dp)
+                    .height(1.dp)
+                    .background(if (selected) Brand.TextPrimary else Color.Transparent),
             )
-        } else {
-            Spacer(Modifier.height(0.dp))
         }
-
-        // Indicator — 14×1dp rectangle, ink when active.
-        Box(
-            Modifier
-                .width(14.dp)
-                .height(1.dp)
-                .background(if (selected) Brand.TextPrimary else Color.Transparent),
-        )
+        if (isCentre) {
+            // Click-eating overlay above the WebView. Same size as the
+            // tab cell, transparent, no ripple — matches the rest of
+            // the bar's silent tap behaviour.
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .clickable(
+                        interactionSource = interaction,
+                        indication = null,
+                        onClick = onTap,
+                    ),
+            )
+        }
     }
 }
 

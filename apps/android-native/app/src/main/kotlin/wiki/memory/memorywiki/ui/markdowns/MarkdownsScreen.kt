@@ -247,6 +247,13 @@ fun MarkdownsScreen(navController: NavController, vm: MarkdownsViewModel = hiltV
         }
     }
 
+    // Re-hydrate pins on every screen entry — mirrors iOS .task on
+    // TimelineView. ViewModel.init only fires once per process and
+    // can race the auth handshake; this LaunchedEffect runs every
+    // time the composable enters composition so the STARRED section
+    // catches up even if the user pinned something on web mid-session.
+    LaunchedEffect(Unit) { vm.pinned.hydrate() }
+
     val pullState = rememberPullToRefreshState()
     val pinnedIds by vm.pinned.docIds.collectAsState()
     val semanticAll by vm.semanticHits.collectAsState()
