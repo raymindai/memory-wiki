@@ -63,7 +63,7 @@ fun RootShell(vm: RootViewModel = hiltViewModel()) {
             when {
                 loading -> BootSplash()
                 session == null -> AuthScreen()
-                else -> SignedInShell(vm.router)
+                else -> SignedInShell(vm.router, vm.auth)
             }
         }
     }
@@ -79,9 +79,10 @@ private fun BootSplash() {
 }
 
 @Composable
-private fun SignedInShell(router: AppRouter) {
+private fun SignedInShell(router: AppRouter, auth: AuthManager) {
     val navController = rememberNavController()
     val tab by router.selectedTab.collectAsState()
+    val session by auth.session.collectAsState()
 
     LaunchedEffect(tab) {
         val target = tab.route
@@ -149,13 +150,38 @@ private fun SignedInShell(router: AppRouter) {
             }
         }
 
-        Box(Modifier.align(Alignment.BottomCenter)) {
-            BottomFadeStrip()
-            BrandTabBar(
-                selected = tab,
-                onSelect = { router.selectTab(it) },
-                modifier = Modifier.systemBarsPadding(),
-            )
-        }
+        // Bottom chrome: fade strip behind, floating tab bar above.
+        BottomFadeStrip(Modifier.align(Alignment.BottomCenter))
+        BrandTabBar(
+            selected = tab,
+            onSelect = { router.selectTab(it) },
+            avatarUrl = session?.avatarUrl,
+            onReselect = { selectedTab ->
+                // iOS-equivalent: pop the visible stack root. Returns
+                // true if anything popped (so the caller suppresses the
+                // shake/warning haptic). Start / Capture / Settings
+                // are single-screen flows — never pop, always shake.
+                when (selectedTab) {
+                    AppTab.Markdowns -> {
+                        val popped = navController.popBackStack(
+                            route = "markdowns/list",
+                            inclusive = false,
+                        )
+                        popped
+                    }
+                    AppTab.Bundles -> {
+                        val popped = navController.popBackStack(
+                            route = "bundles/list",
+                            inclusive = false,
+                        )
+                        popped
+                    }
+                    else -> false
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .systemBarsPadding(),
+        )
     }
 }

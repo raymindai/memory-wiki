@@ -1,7 +1,8 @@
 /*
- * BottomFadeStrip — soft gradient from transparent to Brand.Background
- * sitting just under the floating tab bar. Mirrors iOS' BottomFadeStrip:
- * scroll content fades into the bar instead of clipping abruptly.
+ * BottomFadeStrip — soft gradient from transparent at the top to
+ * the page background at the home indicator. Sits BEHIND the
+ * floating tab bar so scrolled content fades out cleanly instead
+ * of crashing into the capsule. Matches iOS BottomFadeStrip.
  */
 
 package wiki.memory.memorywiki.ui.shell
@@ -17,16 +18,17 @@ import androidx.compose.ui.unit.dp
 import wiki.memory.memorywiki.ui.theme.Brand
 
 @Composable
-fun BottomFadeStrip() {
+fun BottomFadeStrip(modifier: Modifier = Modifier) {
     Box(
-        Modifier
+        modifier
             .fillMaxWidth()
-            .height(96.dp)
+            .height(130.dp)
             .background(
                 Brush.verticalGradient(
-                    0f to Brand.Background.copy(alpha = 0f),
+                    0.00f to Brand.Background.copy(alpha = 0f),
+                    0.30f to Brand.Background.copy(alpha = 0.30f),
                     0.55f to Brand.Background.copy(alpha = 0.65f),
-                    1f to Brand.Background,
+                    1.00f to Brand.Background,
                 ),
             ),
     )

@@ -61,7 +61,9 @@ data class BundleSummary(
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("is_draft") val isDraft: Boolean = true,
     val visibility: String? = null,
-    @SerialName("document_count") val documentCount: Int = 0,
+    // Server returns camelCase `documentCount` for this one field —
+    // it's computed post-query in /api/bundles, not a DB column.
+    val documentCount: Int = 0,
     @SerialName("creator_type") val creatorType: String? = null,
     @SerialName("folder_id") val folderId: String? = null,
 )

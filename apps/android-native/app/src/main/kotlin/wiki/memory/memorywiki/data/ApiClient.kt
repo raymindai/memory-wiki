@@ -87,7 +87,9 @@ class ApiClient @Inject constructor(
     }
 
     suspend fun userBundles(): UserBundlesResponse {
-        val res = http.get("$base/api/user/bundles") { authHeaders() }
+        // Web/iOS hit /api/bundles which is already scoped to the
+        // authenticated user (verifyAuthToken inside the handler).
+        val res = http.get("$base/api/bundles") { authHeaders() }
         if (!res.status.isSuccess()) error("HTTP ${res.status.value} userBundles")
         return json.decodeFromString(res.bodyAsText())
     }
