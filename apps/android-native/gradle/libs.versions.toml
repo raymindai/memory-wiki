@@ -1,9 +1,16 @@
 [versions]
 # Build
-agp = "8.7.3"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.28"
-hilt = "2.52"
+agp = "9.2.1"
+kotlin = "2.2.10"
+# KSP version is `<kotlinVersion>-<kspVersion>`. Latest for Kotlin
+# 2.2.10 is `2.2.10-2.0.2`. The bare `2.3.2` value the Upgrade
+# Assistant suggested doesn't exist on Maven (KSP never released a
+# 2.3.x line — it always carries the Kotlin prefix).
+ksp = "2.2.10-2.0.2"
+# Hilt 2.52 + KSP 2.x has a broken Class.forName("KspTaskJvm")
+# lookup → ClassNotFoundException at configure time (dagger #3965).
+# Fixed in 2.55+. 2.57.2 is the latest stable.
+hilt = "2.57.2"
 hiltNav = "1.2.0"
 
 # Core
