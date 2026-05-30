@@ -1,9 +1,8 @@
 /*
  * BrandTabBar — floating glass tab bar mirroring iOS BrandTabBar.
- * Five tabs: Start, MDs, Capture (centerpiece blob), Bundles, Settings.
- * Active gets ink ring + ink glyph; inactive stays muted. Each tap
- * fires a long-press haptic to give the bar the "felt" weight iOS
- * has from CHHapticEngine.
+ * Order: [MDs, Bundles, Start★, Capture, Settings]. Start tab gets
+ * the brand blob glyph as the centre anchor; the other four use
+ * Lucide icons (same shape language as web `lucide-react`).
  */
 
 package wiki.memory.memorywiki.ui.shell
@@ -14,7 +13,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -25,12 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.Notes
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,13 +33,23 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.Layers
+import com.composables.icons.lucide.List
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.User
 import wiki.memory.memorywiki.AppTab
+import wiki.memory.memorywiki.ui.components.BrandBlob
 import wiki.memory.memorywiki.ui.theme.Brand
 
-private data class TabSpec(val tab: AppTab, val icon: ImageVector, val label: String)
+private sealed class TabGlyph {
+    data class Lucide(val icon: ImageVector) : TabGlyph()
+    data object BrandCentre : TabGlyph()
+}
+
+private data class TabSpec(val tab: AppTab, val glyph: TabGlyph, val label: String)
 
 @Composable
 fun BrandTabBar(
@@ -57,11 +59,11 @@ fun BrandTabBar(
 ) {
     val specs = remember {
         listOf(
-            TabSpec(AppTab.Start,     Icons.Outlined.AutoAwesome, "Start"),
-            TabSpec(AppTab.Markdowns, Icons.Outlined.Notes,       "MDs"),
-            TabSpec(AppTab.Capture,   Icons.Outlined.Add,         "Capture"),
-            TabSpec(AppTab.Bundles,   Icons.Outlined.Layers,      "Bundles"),
-            TabSpec(AppTab.Settings,  Icons.Outlined.Person,      "Settings"),
+            TabSpec(AppTab.Markdowns, TabGlyph.Lucide(Lucide.List),  "MDs"),
+            TabSpec(AppTab.Bundles,   TabGlyph.Lucide(Lucide.Layers), "Bundles"),
+            TabSpec(AppTab.Start,     TabGlyph.BrandCentre,           "Start"),
+            TabSpec(AppTab.Capture,   TabGlyph.Lucide(Lucide.Plus),  "Capture"),
+            TabSpec(AppTab.Settings,  TabGlyph.Lucide(Lucide.User),  "Settings"),
         )
     }
     val haptics = LocalHapticFeedback.current
@@ -97,42 +99,50 @@ fun BrandTabBar(
 
 @Composable
 private fun TabItem(spec: TabSpec, selected: Boolean, onClick: () -> Unit) {
-    val ringSize by animateDpAsState(if (selected) 40.dp else 36.dp, spring(Spring.DampingRatioMediumBouncy), label = "ring")
+    val isCentre = spec.glyph is TabGlyph.BrandCentre
+    val ringSize by animateDpAsState(
+        targetValue = when {
+            isCentre -> if (selected) 46.dp else 42.dp
+            else -> if (selected) 40.dp else 36.dp
+        },
+        animationSpec = spring(Spring.DampingRatioMediumBouncy),
+        label = "ring",
+    )
     Box(
         Modifier
-            .width(64.dp)
+            .width(if (isCentre) 72.dp else 60.dp)
             .height(50.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        if (spec.tab == AppTab.Capture) {
-            Box(
-                Modifier
-                    .size(ringSize)
-                    .background(if (selected) Brand.TextPrimary else Brand.Surface, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    spec.icon,
-                    contentDescription = spec.label,
-                    tint = if (selected) Brand.Background else Brand.TextPrimary,
-                    modifier = Modifier.size(22.dp),
-                )
+        when (val g = spec.glyph) {
+            is TabGlyph.BrandCentre -> {
+                // No surrounding ring — the brand blob IS the
+                // affordance. Selected state lifts the glyph and
+                // dims unselected to muted lime per the v8 rule
+                // (lime is reserved for status, but the brand mark
+                // earned an exception as the centre anchor).
+                BrandBlob(sizeDp = if (selected) 40 else 32)
             }
-        } else {
-            Box(
-                Modifier
-                    .size(ringSize)
-                    .background(if (selected) Brand.Surface else Color.Transparent, CircleShape)
-                    .border(if (selected) 0.5.dp else 0.dp, Brand.TextPrimary.copy(alpha = if (selected) 0.6f else 0f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    spec.icon,
-                    contentDescription = spec.label,
-                    tint = if (selected) Brand.TextPrimary else Brand.TextMuted,
-                    modifier = Modifier.size(20.dp),
-                )
+            is TabGlyph.Lucide -> {
+                Box(
+                    Modifier
+                        .size(ringSize)
+                        .background(if (selected) Brand.Surface else Color.Transparent, CircleShape)
+                        .border(
+                            if (selected) 0.5.dp else 0.dp,
+                            Brand.TextPrimary.copy(alpha = if (selected) 0.6f else 0f),
+                            CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        g.icon,
+                        contentDescription = spec.label,
+                        tint = if (selected) Brand.TextPrimary else Brand.TextMuted,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
     }

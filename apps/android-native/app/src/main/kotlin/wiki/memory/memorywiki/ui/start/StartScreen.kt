@@ -18,13 +18,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import com.composables.icons.lucide.ArrowRight
+import com.composables.icons.lucide.Compass
+import com.composables.icons.lucide.Copy
+import com.composables.icons.lucide.Layers
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.MessageCircle
+import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.Sparkles
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -162,9 +166,7 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
 
         if (starredIds.isNotEmpty()) {
             Spacer(Modifier.height(4.dp))
-            Text("STARRED", style = BrandType.mono(9, FontWeight.Medium), color = Brand.TextFaint)
-            // Cross-reference the recent set; titles for unseen docs
-            // will land once DocCache prefetches.
+            SectionLabel("STARRED")
             starredIds.take(5).forEach { id ->
                 val doc = recent.firstOrNull { it.id == id }
                 if (doc != null) {
@@ -174,17 +176,53 @@ fun StartScreen(navController: NavController, vm: StartViewModel = hiltViewModel
                 }
             }
         }
-        Spacer(Modifier.height(4.dp))
-        Text("RECENT", style = BrandType.mono(9, FontWeight.Medium), color = Brand.TextFaint)
-        recent.forEach { doc ->
-            RecentRow(doc) {
-                navController.navigate("markdowns/doc/${doc.id}")
+
+        // ─── Recent grouped by time bucket (TODAY / WEEK / MONTH / EARLIER)
+        if (recent.isNotEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            val now = System.currentTimeMillis()
+            val cal = java.util.Calendar.getInstance().apply {
+                timeInMillis = now
+                set(java.util.Calendar.HOUR_OF_DAY, 0); set(java.util.Calendar.MINUTE, 0); set(java.util.Calendar.SECOND, 0); set(java.util.Calendar.MILLISECOND, 0)
+            }
+            val todayMs = cal.timeInMillis
+            val weekAgo = now - 7L * 24 * 3600 * 1000
+            val monthAgo = now - 30L * 24 * 3600 * 1000
+
+            val today = recent.filter { parseInstantMillis(it.updatedAt) >= todayMs }
+            val thisWeek = recent.filter { val t = parseInstantMillis(it.updatedAt); t in weekAgo until todayMs }
+            val thisMonth = recent.filter { val t = parseInstantMillis(it.updatedAt); t in monthAgo until weekAgo }
+            val earlier = recent.filter { parseInstantMillis(it.updatedAt) < monthAgo }
+
+            listOf(
+                "TODAY" to today,
+                "THIS WEEK" to thisWeek,
+                "THIS MONTH" to thisMonth,
+                "EARLIER" to earlier,
+            ).forEach { (label, group) ->
+                if (group.isNotEmpty()) {
+                    Spacer(Modifier.height(6.dp))
+                    SectionLabel(label)
+                    group.forEach { doc ->
+                        RecentRow(doc) { navController.navigate("markdowns/doc/${doc.id}") }
+                    }
+                }
             }
         }
         if (loading && recent.isEmpty()) {
             wiki.memory.memorywiki.ui.components.SkeletonList(count = 5)
         }
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text,
+        style = BrandType.mono(9, FontWeight.Medium),
+        color = Brand.TextFaint,
+        modifier = Modifier.padding(start = 4.dp, top = 2.dp, bottom = 2.dp),
+    )
 }
 
 @Composable
@@ -225,25 +263,25 @@ private fun HubUrlCard(url: String, onCopyForAi: () -> Unit) {
             .fillMaxWidth()
             .background(Brand.Surface, RoundedCornerShape(12.dp))
             .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(12.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = url.removePrefix("https://"),
             style = BrandType.mono(12),
             color = Brand.TextPrimary,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(vertical = 8.dp),
         )
         Row(
             Modifier
-                .background(Brand.ToggleBg, RoundedCornerShape(8.dp))
+                .background(Brand.TextPrimary, RoundedCornerShape(8.dp))
                 .clickable { onCopyForAi() }
-                .padding(horizontal = 10.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Icon(Icons.Outlined.AutoAwesome, null, tint = Brand.TextPrimary, modifier = Modifier.size(11.dp))
-            Text("Copy for AI", style = BrandType.body(12, FontWeight.Medium), color = Brand.TextPrimary)
+            Icon(Lucide.Sparkles, null, tint = Brand.Background, modifier = Modifier.size(12.dp))
+            Text("Copy for AI", style = BrandType.body(12, FontWeight.Medium), color = Brand.Background)
         }
     }
 }
@@ -260,10 +298,10 @@ private fun AskYourHubButton(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Icon(Icons.Outlined.AutoAwesome, null, tint = Brand.MicroInfo, modifier = Modifier.size(16.dp))
+        Icon(Lucide.MessageCircle, null, tint = Brand.MicroInfo, modifier = Modifier.size(16.dp))
         Text("Ask your hub", style = BrandType.body(14, FontWeight.Medium), color = Brand.TextPrimary)
         Spacer(Modifier.weight(1f))
-        Text("→", style = BrandType.body(14), color = Brand.TextMuted)
+        Icon(Lucide.ArrowRight, null, tint = Brand.TextMuted, modifier = Modifier.size(14.dp))
     }
 }
 
@@ -292,9 +330,9 @@ private fun StatCell(label: String, value: Int, modifier: Modifier = Modifier) {
 @Composable
 private fun QuickActions(onCapture: () -> Unit, onSearch: () -> Unit, onOpenHub: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        ActionTile("New capture", Icons.Outlined.Add, Modifier.weight(1f), onCapture)
-        ActionTile("Search", Icons.Outlined.Search, Modifier.weight(1f), onSearch, accent = Brand.MicroInfo)
-        ActionTile("Open hub", Icons.Outlined.AutoAwesome, Modifier.weight(1f), onOpenHub, accent = Brand.MicroWarn)
+        ActionTile("New capture", Lucide.Plus, Modifier.weight(1f), onCapture)
+        ActionTile("Search", Lucide.Search, Modifier.weight(1f), onSearch, accent = Brand.MicroInfo)
+        ActionTile("Open hub", Lucide.Compass, Modifier.weight(1f), onOpenHub, accent = Brand.MicroWarn)
     }
 }
 

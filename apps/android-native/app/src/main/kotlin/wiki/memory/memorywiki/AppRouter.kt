@@ -29,10 +29,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Enum declaration order = tab-bar render order. iOS uses
+ *  [MDs, Bundles, Start★, Capture, Settings] with Start as the
+ *  centre brand-glyph anchor; we match exactly so the muscle
+ *  memory carries across surfaces. */
 enum class AppTab(val route: String) {
-    Start("start"),
     Markdowns("markdowns"),
     Bundles("bundles"),
+    Start("start"),
     Capture("capture"),
     Settings("settings"),
 }
