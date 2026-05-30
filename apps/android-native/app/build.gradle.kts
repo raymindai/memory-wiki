@@ -20,9 +20,30 @@ val secrets = Properties().apply {
 fun secret(key: String, default: String = ""): String =
     secrets.getProperty(key) ?: System.getenv(key) ?: default
 
+// Play Store release signing. Reads keystore path + passwords from
+// release-keystore.properties (gitignored, lives next to the app
+// module). Falls back to the debug keystore if the file is missing
+// so `assembleDebug` / dev workflows still work; release builds
+// without the file will fail loudly at sign time.
+val releaseKeystoreFile = rootProject.file("release-keystore.properties")
+val releaseKeystoreProps = Properties().apply {
+    if (releaseKeystoreFile.exists()) load(releaseKeystoreFile.inputStream())
+}
+
 android {
     namespace = "wiki.memory.memorywiki"
     compileSdk = 35
+
+    signingConfigs {
+        if (releaseKeystoreFile.exists()) {
+            create("release") {
+                storeFile = file(releaseKeystoreProps.getProperty("storeFile"))
+                storePassword = releaseKeystoreProps.getProperty("storePassword")
+                keyAlias = releaseKeystoreProps.getProperty("keyAlias")
+                keyPassword = releaseKeystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "wiki.memory.MemoryWiki"
@@ -50,7 +71,11 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (releaseKeystoreFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 

@@ -39,3 +39,12 @@
 
 # Glance
 -keep class androidx.glance.appwidget.** { *; }
+
+# Markwon — its gif decoder references pl.droidsonroids.gif as an
+# optional dep we don't ship. Silence R8 so the GIF code path stays
+# out of the APK without R8 erroring on the missing class.
+-dontwarn pl.droidsonroids.gif.**
+
+# Markwon HTML / image plugins
+-dontwarn org.commonmark.**
+-dontwarn io.noties.markwon.**

@@ -25,9 +25,10 @@ debug/
 # Native
 .cxx/
 
-# Keystore (NEVER commit)
+# Keystore (NEVER commit) + Play release signing config
 *.jks
 *.keystore
+release-keystore.properties
 
 # never commit secrets — backups created by sed -i, vim, etc.
 secrets.local.properties*
