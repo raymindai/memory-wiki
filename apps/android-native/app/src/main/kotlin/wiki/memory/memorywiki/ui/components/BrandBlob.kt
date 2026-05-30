@@ -61,8 +61,13 @@ fun BrandBlob(
                 setBackgroundColor(AColor.TRANSPARENT)
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
+                // Critical: pass touches through to the parent (the
+                // tab bar's Column.clickable). Without these the
+                // WebView swallowed taps on the center "Start" tab.
                 isClickable = false
                 isFocusable = false
+                isFocusableInTouchMode = false
+                setOnTouchListener { _, _ -> false }
                 setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
                 settings.apply {
                     javaScriptEnabled = false  // SMIL is declarative, no JS

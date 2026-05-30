@@ -61,20 +61,11 @@ fun RootShell(vm: RootViewModel = hiltViewModel()) {
     MemoryWikiTheme(userAccent = visitorAccent) {
         Surface(Modifier.fillMaxSize(), color = Brand.Background) {
             when {
-                loading -> BootSplash()
+                loading -> SplashScreen()
                 session == null -> AuthScreen()
                 else -> SignedInShell(vm.router, vm.auth)
             }
         }
-    }
-}
-
-@Composable
-private fun BootSplash() {
-    Box(Modifier.fillMaxSize().background(Brand.Background), contentAlignment = Alignment.Center) {
-        // Replaced once the SplashScreen API hand-off completes; we
-        // keep the bg-only state here so a slow auth refresh doesn't
-        // flash the AuthScreen prematurely.
     }
 }
 
