@@ -150,7 +150,7 @@ fun BundleDetailScreen(
 
         if (loading && detail == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Brand.TextPrimary, strokeWidth = 1.6.dp)
+                wiki.memory.memorywiki.ui.components.BrandBlob(sizeDp = 96)
             }
             return@Column
         }

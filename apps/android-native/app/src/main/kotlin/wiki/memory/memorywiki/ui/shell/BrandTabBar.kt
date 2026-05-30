@@ -112,9 +112,9 @@ fun BrandTabBar(
                     spotColor = Color.Black,
                 )
                 .clip(RoundedCornerShape(50))
-                .background(Brand.SheetBg.copy(alpha = 0.85f))
+                .background(Brand.SheetBg)
                 .border(width = 0.5.dp, color = Brand.BorderDim, shape = RoundedCornerShape(50))
-                .padding(horizontal = 4.dp, vertical = 6.dp),
+                .padding(horizontal = 10.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(0.dp),
         ) {
