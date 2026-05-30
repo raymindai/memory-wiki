@@ -60,13 +60,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.composables.icons.lucide.ArrowUp
-import com.composables.icons.lucide.ChevronDown
-import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Sparkles
-import com.composables.icons.lucide.TriangleAlert
-import com.composables.icons.lucide.X
+import com.composables.icons.lucide.*
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.noties.markwon.Markwon

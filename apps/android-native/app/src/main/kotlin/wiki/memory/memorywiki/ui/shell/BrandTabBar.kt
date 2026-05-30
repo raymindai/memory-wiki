@@ -55,11 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.composables.icons.lucide.Layers
-import com.composables.icons.lucide.List
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Plus
-import com.composables.icons.lucide.User
+import com.composables.icons.lucide.*
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlinx.coroutines.launch

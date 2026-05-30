@@ -20,13 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import com.composables.icons.lucide.Camera
-import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Link
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Mic
-import com.composables.icons.lucide.ScanText
-import com.composables.icons.lucide.SquarePen
+import com.composables.icons.lucide.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment

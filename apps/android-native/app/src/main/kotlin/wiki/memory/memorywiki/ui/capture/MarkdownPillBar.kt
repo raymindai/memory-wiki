@@ -38,18 +38,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.Bold
-import com.composables.icons.lucide.ChevronDown
-import com.composables.icons.lucide.Code
-import com.composables.icons.lucide.Hash
-import com.composables.icons.lucide.Italic
-import com.composables.icons.lucide.Link
-import com.composables.icons.lucide.List
-import com.composables.icons.lucide.ListOrdered
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Minus
-import com.composables.icons.lucide.Quote
-import com.composables.icons.lucide.SquareCheck
+import com.composables.icons.lucide.*
 import wiki.memory.memorywiki.ui.theme.Brand
 
 @Composable

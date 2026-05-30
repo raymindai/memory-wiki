@@ -71,14 +71,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.composables.icons.lucide.Globe
-import com.composables.icons.lucide.Layers
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Search
-import com.composables.icons.lucide.Star
-import com.composables.icons.lucide.Upload
-import com.composables.icons.lucide.Users
-import com.composables.icons.lucide.X
+import com.composables.icons.lucide.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

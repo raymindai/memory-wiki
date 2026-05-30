@@ -81,9 +81,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.composables.icons.lucide.ArrowUpRight
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Mail
+import com.composables.icons.lucide.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

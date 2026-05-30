@@ -24,11 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.Check
-import com.composables.icons.lucide.Cloud
-import com.composables.icons.lucide.Globe
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Users
+import com.composables.icons.lucide.*
 import wiki.memory.memorywiki.ui.theme.Brand
 
 @Composable

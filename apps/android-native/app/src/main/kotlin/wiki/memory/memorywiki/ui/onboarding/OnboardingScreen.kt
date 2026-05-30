@@ -42,10 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Smartphone
-import com.composables.icons.lucide.Sparkles
-import com.composables.icons.lucide.Upload
+import com.composables.icons.lucide.*
 import kotlinx.coroutines.launch
 import wiki.memory.memorywiki.ui.components.AmbientBlob
 import wiki.memory.memorywiki.ui.theme.Brand

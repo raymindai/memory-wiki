@@ -48,15 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.composables.icons.lucide.ArrowRight
-import com.composables.icons.lucide.Check
-import com.composables.icons.lucide.Compass
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.MessageCircle
-import com.composables.icons.lucide.Plus
-import com.composables.icons.lucide.Search
-import com.composables.icons.lucide.Sparkles
-import com.composables.icons.lucide.Star
+import com.composables.icons.lucide.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
 import javax.inject.Inject

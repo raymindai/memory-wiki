@@ -50,13 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Check
-import com.composables.icons.lucide.ChevronRight
-import com.composables.icons.lucide.Ellipsis
-import com.composables.icons.lucide.Layers
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Sparkles
+import com.composables.icons.lucide.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay

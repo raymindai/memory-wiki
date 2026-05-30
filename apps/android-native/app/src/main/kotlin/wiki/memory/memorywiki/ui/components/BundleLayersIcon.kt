@@ -17,8 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.Layers
-import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.*
 import wiki.memory.memorywiki.ui.theme.Brand
 
 @Composable
