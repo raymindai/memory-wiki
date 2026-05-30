@@ -60,6 +60,7 @@ import com.composables.icons.lucide.Clock
 import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.Eye
 import com.composables.icons.lucide.Globe
+import com.composables.icons.lucide.List
 import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.RefreshCw
@@ -159,6 +160,7 @@ fun DocumentDetailScreen(
     var editedMarkdown by remember { mutableStateOf("") }
     var confirmDelete by remember { mutableStateOf(false) }
     var addToBundleOpen by remember { mutableStateOf(false) }
+    var tocOpen by remember { mutableStateOf(false) }
     LaunchedEffect(copied) {
         if (copied) { delay(1400); copied = false }
     }
@@ -204,6 +206,16 @@ fun DocumentDetailScreen(
                         Icon(Lucide.ArrowLeft, null, tint = Brand.TextPrimary)
                     }
                     Spacer(Modifier.weight(1f))
+                    // TOC button — only when the doc has at least
+                    // one heading. Matches iOS toolbar layout.
+                    val headings = remember(detail?.markdown) {
+                        extractHeadings(detail?.markdown.orEmpty())
+                    }
+                    if (headings.isNotEmpty()) {
+                        IconButton(onClick = { tocOpen = true }) {
+                            Icon(Lucide.List, null, tint = Brand.TextMuted)
+                        }
+                    }
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(Lucide.Ellipsis, null, tint = Brand.TextPrimary)
                     }
@@ -378,6 +390,13 @@ fun DocumentDetailScreen(
                 wiki.memory.memorywiki.ui.bundles.AddToBundleSheet(
                     docId = docId,
                     onDismiss = { addToBundleOpen = false },
+                )
+            }
+
+            if (tocOpen) {
+                TableOfContentsSheet(
+                    headings = extractHeadings(d.markdown),
+                    onDismiss = { tocOpen = false },
                 )
             }
 
