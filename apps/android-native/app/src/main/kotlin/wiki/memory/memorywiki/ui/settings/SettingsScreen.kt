@@ -9,6 +9,7 @@
 
 package wiki.memory.memorywiki.ui.settings
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,11 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import com.composables.icons.lucide.Copy
-import com.composables.icons.lucide.ExternalLink
-import com.composables.icons.lucide.LogOut
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Sparkles
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -31,28 +27,59 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.composables.icons.lucide.ChevronRight
+import com.composables.icons.lucide.Copy
+import com.composables.icons.lucide.ExternalLink
+import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.BookOpen
+import com.composables.icons.lucide.Info
+import com.composables.icons.lucide.LogOut
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mail
+import com.composables.icons.lucide.Shield
+import com.composables.icons.lucide.Sparkles
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import wiki.memory.memorywiki.BuildConfig
 import wiki.memory.memorywiki.auth.AuthManager
+import wiki.memory.memorywiki.data.model.BundleSummary
+import wiki.memory.memorywiki.data.model.DocSummary
 import wiki.memory.memorywiki.ui.theme.AccentColorChoice
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.BrandType
-import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     val auth: AuthManager,
     val api: wiki.memory.memorywiki.data.ApiClient,
 ) : ViewModel() {
+    private val _docs = MutableStateFlow<List<DocSummary>>(emptyList())
+    val docs: StateFlow<List<DocSummary>> = _docs.asStateFlow()
+    private val _bundles = MutableStateFlow<List<BundleSummary>>(emptyList())
+    val bundles: StateFlow<List<BundleSummary>> = _bundles.asStateFlow()
+
+    init { loadHubStats() }
+
+    fun loadHubStats() = viewModelScope.launch {
+        runCatching { api.userDocuments() }.onSuccess { _docs.value = it.documents }
+        runCatching { api.userBundles() }.onSuccess { _bundles.value = it.bundles }
+    }
+
     fun updateDisplayName(name: String) = viewModelScope.launch { auth.updateDisplayName(name) }
     fun setAccent(choice: AccentColorChoice) = viewModelScope.launch {
         runCatching { api.updateProfile(accent = choice.key) }
@@ -65,13 +92,21 @@ class SettingsViewModel @Inject constructor(
 @Composable
 fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltViewModel()) {
     val session by vm.auth.session.collectAsState()
+    val docs by vm.docs.collectAsState()
+    val bundles by vm.bundles.collectAsState()
     val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
     val displayName = session?.displayName ?: session?.email?.substringBefore("@") ?: "—"
     val email = session?.email ?: "—"
     val slug = session?.hubSlug ?: "yourname"
-    val url = "${BuildConfig.API_BASE}/@$slug"
+    val baseUrl = BuildConfig.API_BASE.removeSuffix("/")
+    val url = "$baseUrl/@$slug"
 
     var nameSheetOpen by remember { mutableStateOf(false) }
+
+    val openUrl: (String) -> Unit = { target ->
+        context.startActivity(Intent(Intent.ACTION_VIEW, target.toUri()))
+    }
 
     Column(
         Modifier
@@ -81,9 +116,9 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             .padding(top = 56.dp, bottom = 140.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        Text("Settings", style = BrandType.display(22), color = Brand.TextPrimary)
+        Text("Settings", style = BrandType.display(26), color = Brand.TextPrimary)
 
-        // Hub card
+        // Hub URL card (unchanged structure, with Open hub now functional)
         Column(
             Modifier
                 .fillMaxWidth()
@@ -101,9 +136,17 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
                 Pill("Copy URL", Lucide.Copy, Brand.TextPrimary) {
                     clipboard.setText(AnnotatedString(url))
                 }
-                Pill("Open hub", Lucide.ExternalLink, Brand.TextPrimary) { /* TODO open browser */ }
+                Pill("Open hub", Lucide.ExternalLink, Brand.TextPrimary) { openUrl(url) }
             }
         }
+
+        // Hub stats: memories + bundles tiles
+        HubStatsCard(
+            memories = docs.size,
+            publicMemories = docs.count { !it.isDraft },
+            bundles = bundles.size,
+            publicBundles = bundles.count { !it.isDraft },
+        )
 
         // Account
         SectionLabel("ACCOUNT")
@@ -127,7 +170,54 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             onSelect = { vm.setAccent(it) },
         )
 
-        Spacer(Modifier.height(8.dp))
+        // Learn
+        SectionLabel("LEARN")
+        LinkCardGroup(
+            rows = listOf(
+                LinkRow(Lucide.Info, "About Memory.Wiki", Brand.MicroInfo) { openUrl("$baseUrl/about") },
+                LinkRow(Lucide.BookOpen, "How it works", Brand.MicroWarn) { openUrl("$baseUrl/how") },
+            ),
+        )
+
+        // Feedback
+        SectionLabel("FEEDBACK")
+        LinkCardGroup(
+            rows = listOf(
+                LinkRow(Lucide.Mail, "Send feedback", Brand.MicroInfo) {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = "mailto:hi@raymind.ai".toUri()
+                        putExtra(Intent.EXTRA_SUBJECT, "Memory.Wiki Android feedback")
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "\n\n— sent from Android v${BuildConfig.VERSION_NAME}",
+                        )
+                    }
+                    context.startActivity(intent)
+                },
+            ),
+        )
+
+        // Legal
+        SectionLabel("LEGAL")
+        LinkCardGroup(
+            rows = listOf(
+                LinkRow(Lucide.FileText, "Terms", Brand.TextFaint) { openUrl("$baseUrl/terms") },
+                LinkRow(Lucide.Shield, "Privacy", Brand.TextFaint) { openUrl("$baseUrl/privacy") },
+            ),
+        )
+
+        // Version footer
+        Text(
+            "Android Companion v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            style = BrandType.mono(9, FontWeight.Medium),
+            color = Brand.TextFaint,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+
+        Spacer(Modifier.height(2.dp))
 
         Row(
             Modifier
@@ -150,6 +240,122 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
             onDismiss = { nameSheetOpen = false },
             onSave = { vm.updateDisplayName(it); nameSheetOpen = false },
         )
+    }
+}
+
+// ───────────────────── Hub stats card ─────────────────────
+
+@Composable
+private fun HubStatsCard(memories: Int, publicMemories: Int, bundles: Int, publicBundles: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionLabel("YOUR HUB")
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            HubStatTile(
+                label = "MEMORIES",
+                dotColor = Brand.MicroInfo,
+                value = memories.toString(),
+                sublabel = "$publicMemories public · ${memories - publicMemories} private",
+                modifier = Modifier.weight(1f),
+            )
+            HubStatTile(
+                label = "BUNDLES",
+                dotColor = Brand.MicroWarn,
+                value = bundles.toString(),
+                sublabel = "$publicBundles public · ${bundles - publicBundles} private",
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HubStatTile(
+    label: String,
+    dotColor: androidx.compose.ui.graphics.Color,
+    value: String,
+    sublabel: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(Brand.Surface)
+            .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(10.dp))
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Box(
+                Modifier
+                    .size(5.dp)
+                    .clip(CircleShape)
+                    .background(dotColor),
+            )
+            Text(
+                label,
+                style = BrandType.mono(9, FontWeight.Medium),
+                color = Brand.TextFaint,
+            )
+        }
+        Text(
+            value,
+            style = BrandType.display(26),
+            color = Brand.TextPrimary,
+        )
+        Text(
+            sublabel,
+            style = BrandType.mono(9),
+            color = Brand.TextFaint,
+        )
+    }
+}
+
+// ───────────────────── Link card group ─────────────────────
+
+private data class LinkRow(
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val label: String,
+    val tint: androidx.compose.ui.graphics.Color,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun LinkCardGroup(rows: List<LinkRow>) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Brand.Surface)
+            .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(14.dp)),
+    ) {
+        rows.forEachIndexed { i, row ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { row.onClick() }
+                    .padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(Modifier.size(20.dp), contentAlignment = Alignment.Center) {
+                    Icon(row.icon, null, tint = row.tint, modifier = Modifier.size(13.dp))
+                }
+                Text(
+                    row.label,
+                    style = BrandType.body(14),
+                    color = Brand.TextPrimary,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(Lucide.ChevronRight, null, tint = Brand.TextFaint, modifier = Modifier.size(11.dp))
+            }
+            if (i < rows.size - 1) Divider()
+        }
     }
 }
 
