@@ -63,4 +63,28 @@
             android:data="memorywiki://capture-paste" />
     </shortcut>
 
+    <!--
+      Google Assistant App Actions. Lets the user say "Hey Google,
+      take a note with memory.wiki" or "Hey Google, search
+      memory.wiki" and land in the matching screen. iOS parity:
+      mirrors MemoryWikiIntents.swift (Siri Shortcuts).
+
+      Uses the standard Built-in Intents (BIIs) vocabulary so the
+      system grammar covers the natural-language variations
+      ("take a memo / write a note / jot down…").
+    -->
+    <capability android:name="actions.intent.CREATE_NOTE">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="wiki.memory.memorywiki.MainActivity"
+            android:data="memorywiki://capture" />
+    </capability>
+
+    <capability android:name="actions.intent.GET_THING">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="wiki.memory.memorywiki.MainActivity"
+            android:data="memorywiki://search" />
+    </capability>
+
 </shortcuts>

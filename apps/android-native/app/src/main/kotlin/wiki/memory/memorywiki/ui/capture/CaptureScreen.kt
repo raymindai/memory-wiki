@@ -124,6 +124,7 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
     val body by vm.body.collectAsState()
     val banner by vm.banner.collectAsState()
     val clipboard = LocalClipboardManager.current
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     // Local TextFieldValue so the markdown pill bar can do
     // selection-aware inserts (wrap selection, prepend line,
@@ -186,8 +187,16 @@ fun CaptureScreen(navController: NavController, vm: CaptureViewModel = hiltViewM
                         shape = RoundedCornerShape(50),
                     )
                     .clickable(enabled = canPublish) {
+                        haptics.performHapticFeedback(
+                            androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove,
+                        )
                         vm.publish { newId ->
                             if (newId != null) {
+                                // Strong tick on success so the user feels
+                                // the publish landed before the screen swaps.
+                                haptics.performHapticFeedback(
+                                    androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress,
+                                )
                                 vm.router.selectTab(wiki.memory.memorywiki.AppTab.Markdowns)
                                 vm.viewModelScope.launch {
                                     vm.router.emit(RouterEvent.PushDocDetail(newId))

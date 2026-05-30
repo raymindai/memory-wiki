@@ -653,7 +653,11 @@ private fun DocumentRow(
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             DropdownMenuItem(
                 text = { Text(if (pinned) "Unstar" else "Star") },
-                onClick = { menuOpen = false; onTogglePin() },
+                onClick = {
+                    menuOpen = false
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onTogglePin()
+                },
             )
             DropdownMenuItem(text = { Text("Copy URL") }, onClick = {
                 menuOpen = false
