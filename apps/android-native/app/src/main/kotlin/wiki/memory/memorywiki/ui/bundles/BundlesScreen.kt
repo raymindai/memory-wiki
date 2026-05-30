@@ -160,6 +160,7 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
     val loading by vm.loading.collectAsState()
     val refreshing by vm.refreshing.collectAsState()
     val errorMsg by vm.error.collectAsState()
+    val context = LocalContext.current
 
     var searchOpen by remember { mutableStateOf(false) }
     val pullState = rememberPullToRefreshState()
@@ -222,8 +223,13 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
                 )
                 all.isEmpty() -> EmptyState(
                     title = "No bundles yet",
-                    caption = "Bundles group docs that share a topic. Create one on memory.wiki — each bundle gets its own URL you can deploy to AI.",
+                    caption = "Bundles group docs that share a topic. Open memory.wiki on the web to create your first one.",
                     glyph = Lucide.Layers,
+                    ctaLabel = "Open memory.wiki",
+                    onCta = {
+                        val url = BuildConfig.API_BASE.removeSuffix("/")
+                        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                    },
                 )
                 visible.isEmpty() -> EmptyState(
                     title = emptyTitle(filter, query),
@@ -369,14 +375,20 @@ private fun SearchBar(query: String, onChange: (String) -> Unit, onClear: () -> 
             },
         )
         if (query.isNotEmpty()) {
-            Icon(
-                Lucide.X,
-                null,
-                tint = Brand.TextFaint,
-                modifier = Modifier
-                    .size(13.dp)
+            Box(
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
                     .clickable { onClear() },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Lucide.X,
+                    null,
+                    tint = Brand.TextFaint,
+                    modifier = Modifier.size(13.dp),
+                )
+            }
         }
     }
 }
@@ -500,17 +512,23 @@ private fun BundleRow(
                 style = BrandType.mono(10),
                 color = Brand.TextFaint,
             )
-            Icon(
-                Lucide.Upload,
-                null,
-                tint = Brand.TextFaint,
-                modifier = Modifier
-                    .size(13.dp)
+            Box(
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
                     .clickable {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         shareUrl(context, url)
                     },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Lucide.Upload,
+                    null,
+                    tint = Brand.TextFaint,
+                    modifier = Modifier.size(13.dp),
+                )
+            }
         }
         DropdownMenu(
             expanded = menuOpen,

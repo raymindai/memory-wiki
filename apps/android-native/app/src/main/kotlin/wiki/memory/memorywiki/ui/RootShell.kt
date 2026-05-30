@@ -7,6 +7,12 @@
 
 package wiki.memory.memorywiki.ui
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +55,29 @@ import wiki.memory.memorywiki.ui.theme.AccentColorChoice
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.MemoryWikiTheme
 import javax.inject.Inject
+
+// iOS-style push transitions for detail screens. Top-level tab
+// destinations stay on the NavHost default (fade) — they are
+// peers, not parent/child. New screen slides in from the right
+// while the previous fades out; pop reverses the slide.
+private val pushEnter: AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.() -> EnterTransition = {
+    slideIntoContainer(
+        AnimatedContentTransitionScope.SlideDirection.Start,
+        animationSpec = tween(280),
+    ) + fadeIn(tween(180))
+}
+private val pushExit: AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.() -> ExitTransition = {
+    fadeOut(tween(140))
+}
+private val popEnter: AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.() -> EnterTransition = {
+    fadeIn(tween(140))
+}
+private val popExit: AnimatedContentTransitionScope<androidx.navigation.NavBackStackEntry>.() -> ExitTransition = {
+    slideOutOfContainer(
+        AnimatedContentTransitionScope.SlideDirection.End,
+        animationSpec = tween(280),
+    ) + fadeOut(tween(180))
+}
 
 @HiltViewModel
 class RootViewModel @Inject constructor(
@@ -142,10 +171,20 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
             startDestination = AppTab.Start.route,
             modifier = Modifier.fillMaxSize(),
         ) {
+            // Top-level tabs use the NavHost default (fade) — they
+            // are peers, not parent/child. Detail screens push in
+            // from the right and pop back to the right, matching
+            // iOS navigation feel.
             composable(AppTab.Start.route) { StartScreen(navController) }
             navigation(startDestination = "markdowns/list", route = AppTab.Markdowns.route) {
                 composable("markdowns/list") { MarkdownsScreen(navController) }
-                composable("markdowns/doc/{id}") { backStack ->
+                composable(
+                    "markdowns/doc/{id}",
+                    enterTransition = pushEnter,
+                    exitTransition = pushExit,
+                    popEnterTransition = popEnter,
+                    popExitTransition = popExit,
+                ) { backStack ->
                     DocumentDetailScreen(
                         navController = navController,
                         docId = backStack.arguments?.getString("id").orEmpty(),
@@ -154,13 +193,25 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
             }
             navigation(startDestination = "bundles/list", route = AppTab.Bundles.route) {
                 composable("bundles/list") { BundlesScreen(navController) }
-                composable("bundles/{id}") { backStack ->
+                composable(
+                    "bundles/{id}",
+                    enterTransition = pushEnter,
+                    exitTransition = pushExit,
+                    popEnterTransition = popEnter,
+                    popExitTransition = popExit,
+                ) { backStack ->
                     BundleDetailScreen(
                         navController = navController,
                         bundleId = backStack.arguments?.getString("id").orEmpty(),
                     )
                 }
-                composable("bundles/doc/{id}") { backStack ->
+                composable(
+                    "bundles/doc/{id}",
+                    enterTransition = pushEnter,
+                    exitTransition = pushExit,
+                    popEnterTransition = popEnter,
+                    popExitTransition = popExit,
+                ) { backStack ->
                     DocumentDetailScreen(
                         navController = navController,
                         docId = backStack.arguments?.getString("id").orEmpty(),
@@ -169,14 +220,32 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
             }
             composable(AppTab.Capture.route) { CaptureScreen(navController) }
             composable(AppTab.Settings.route) { SettingsScreen(navController) }
-            composable("about") {
+            composable(
+                "about",
+                enterTransition = pushEnter,
+                exitTransition = pushExit,
+                popEnterTransition = popEnter,
+                popExitTransition = popExit,
+            ) {
                 wiki.memory.memorywiki.ui.about.AboutScreen(navController)
             }
-            composable("help") {
+            composable(
+                "help",
+                enterTransition = pushEnter,
+                exitTransition = pushExit,
+                popEnterTransition = popEnter,
+                popExitTransition = popExit,
+            ) {
                 wiki.memory.memorywiki.ui.help.HelpScreen(navController)
             }
 
-            composable("chat/{kind}/{id}/{title}") { backStack ->
+            composable(
+                "chat/{kind}/{id}/{title}",
+                enterTransition = pushEnter,
+                exitTransition = pushExit,
+                popEnterTransition = popEnter,
+                popExitTransition = popExit,
+            ) { backStack ->
                 val kind = backStack.arguments?.getString("kind").orEmpty()
                 val id = backStack.arguments?.getString("id").orEmpty()
                 val title = backStack.arguments?.getString("title").orEmpty()

@@ -244,7 +244,7 @@ private fun Header(scopeLabel: String, title: String, onClose: () -> Unit) {
         }
         Box(
             Modifier
-                .size(30.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .background(Brand.SheetBg.copy(alpha = 0.75f))
                 .clickable { onClose() },

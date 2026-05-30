@@ -477,14 +477,20 @@ private fun SearchBar(
             )
         }
         if (query.isNotEmpty()) {
-            Icon(
-                Lucide.X,
-                null,
-                tint = Brand.TextFaint,
-                modifier = Modifier
-                    .size(13.dp)
+            Box(
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
                     .clickable { onClear() },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Lucide.X,
+                    null,
+                    tint = Brand.TextFaint,
+                    modifier = Modifier.size(13.dp),
+                )
+            }
         }
     }
 }
@@ -638,17 +644,23 @@ private fun DocumentRow(
                 style = BrandType.mono(10),
                 color = Brand.TextFaint,
             )
-            Icon(
-                Lucide.Upload,
-                null,
-                tint = Brand.TextFaint,
-                modifier = Modifier
-                    .size(13.dp)
+            Box(
+                Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
                     .clickable {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         shareUrl(context, url)
                     },
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Lucide.Upload,
+                    null,
+                    tint = Brand.TextFaint,
+                    modifier = Modifier.size(13.dp),
+                )
+            }
         }
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             DropdownMenuItem(

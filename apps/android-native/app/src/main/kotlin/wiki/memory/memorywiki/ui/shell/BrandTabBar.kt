@@ -204,7 +204,6 @@ private fun TabItem(
             Text(
                 text = spec.label.uppercase(),
                 style = BrandType.mono(9, FontWeight.Medium),
-                fontSize = 9.sp,
                 color = if (selected) Brand.TextPrimary else Brand.TextFaint,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.wrapContentWidth(),
