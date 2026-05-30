@@ -90,6 +90,7 @@ import wiki.memory.memorywiki.util.compactTime
 class DocumentDetailViewModel @Inject constructor(
     val api: ApiClient,
     val cache: DocCache,
+    val pinned: wiki.memory.memorywiki.data.PinnedStore,
 ) : ViewModel() {
     private val _detail = MutableStateFlow<DocumentDetail?>(null)
     val detail: StateFlow<DocumentDetail?> = _detail.asStateFlow()
@@ -97,6 +98,8 @@ class DocumentDetailViewModel @Inject constructor(
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+    private val _saving = MutableStateFlow(false)
+    val saving: StateFlow<Boolean> = _saving.asStateFlow()
 
     fun load(id: String) = viewModelScope.launch {
         _detail.value = cache.prefetch(id) ?: _detail.value
@@ -107,6 +110,27 @@ class DocumentDetailViewModel @Inject constructor(
                 _loading.value = false
                 if (_detail.value == null) _error.value = it.message ?: "Couldn't load this doc."
             }
+    }
+
+    fun save(id: String, markdown: String, onDone: (Boolean) -> Unit) = viewModelScope.launch {
+        _saving.value = true
+        val ok = runCatching { api.updateDocument(id, markdown) }.isSuccess
+        if (ok) {
+            _detail.value = _detail.value?.copy(markdown = markdown)
+        }
+        _saving.value = false
+        onDone(ok)
+    }
+
+    fun setVisibility(id: String, makePublic: Boolean) = viewModelScope.launch {
+        runCatching { api.setDocumentVisibility(id, makePublic) }.onSuccess {
+            _detail.value = _detail.value?.copy(isDraft = !makePublic)
+        }
+    }
+
+    fun delete(id: String, onDone: (Boolean) -> Unit) = viewModelScope.launch {
+        val ok = runCatching { api.deleteDocument(id) }.isSuccess
+        onDone(ok)
     }
 }
 
@@ -125,15 +149,21 @@ fun DocumentDetailScreen(
     val detail by vm.detail.collectAsState()
     val loading by vm.loading.collectAsState()
     val errorMsg by vm.error.collectAsState()
+    val saving by vm.saving.collectAsState()
+    val pinnedIds by vm.pinned.docIds.collectAsState()
     val clipboard = LocalClipboardManager.current
     val haptics = LocalHapticFeedback.current
     var menuOpen by remember { mutableStateOf(false) }
     var copied by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf(false) }
+    var editedMarkdown by remember { mutableStateOf("") }
+    var confirmDelete by remember { mutableStateOf(false) }
     LaunchedEffect(copied) {
         if (copied) { delay(1400); copied = false }
     }
 
     LaunchedEffect(docId) { vm.load(docId) }
+    val isPinnedHere = docId in pinnedIds
 
     val ownerAccent = detail
         ?.takeIf { !it.isOwner }
@@ -146,39 +176,89 @@ fun DocumentDetailScreen(
                 Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Lucide.ArrowLeft, null, tint = Brand.TextPrimary)
-                }
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(Lucide.Ellipsis, null, tint = Brand.TextPrimary)
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    val url = "${BuildConfig.API_BASE.removeSuffix("/")}/$docId"
-                    DropdownMenuItem(
-                        text = { Text("Chat with this doc") },
-                        onClick = {
-                            menuOpen = false
-                            val title = detail?.title ?: "Document"
-                            navController.navigate("chat/doc/$docId/$title")
-                        },
+                if (editing) {
+                    Text(
+                        "Cancel",
+                        style = BrandType.body(14, FontWeight.Medium),
+                        color = Brand.TextMuted,
+                        modifier = Modifier
+                            .clickable { editing = false }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
                     )
-                    DropdownMenuItem(text = { Text("Copy as AI prompt") }, onClick = {
-                        menuOpen = false
-                        clipboard.setText(AnnotatedString("Use $url as my context."))
-                    })
-                    DropdownMenuItem(text = { Text("Copy URL") }, onClick = {
-                        menuOpen = false
-                        clipboard.setText(AnnotatedString(url))
-                    })
-                    DropdownMenuItem(text = { Text("Share…") }, onClick = {
-                        menuOpen = false
-                        shareDocUrl(ctx, url)
-                    })
-                    DropdownMenuItem(text = { Text("Open on memory.wiki") }, onClick = {
-                        menuOpen = false
-                        ctx.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                    })
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        if (saving) "Saving…" else "Save",
+                        style = BrandType.body(14, FontWeight.SemiBold),
+                        color = if (saving) Brand.TextFaint else Brand.TextPrimary,
+                        modifier = Modifier
+                            .clickable(enabled = !saving) {
+                                vm.save(docId, editedMarkdown) { ok ->
+                                    if (ok) editing = false
+                                }
+                            }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                    )
+                } else {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Lucide.ArrowLeft, null, tint = Brand.TextPrimary)
+                    }
+                    Spacer(Modifier.weight(1f))
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(Lucide.Ellipsis, null, tint = Brand.TextPrimary)
+                    }
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        val url = "${BuildConfig.API_BASE.removeSuffix("/")}/$docId"
+                        val d = detail
+                        if (d?.isOwner == true) {
+                            DropdownMenuItem(text = { Text("Edit") }, onClick = {
+                                menuOpen = false
+                                editedMarkdown = d.markdown
+                                editing = true
+                            })
+                        }
+                        DropdownMenuItem(
+                            text = { Text(if (isPinnedHere) "Unstar" else "Star") },
+                            onClick = { menuOpen = false; vm.pinned.toggleDoc(docId) },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Chat with this doc") },
+                            onClick = {
+                                menuOpen = false
+                                val title = detail?.title ?: "Document"
+                                navController.navigate("chat/doc/$docId/$title")
+                            },
+                        )
+                        DropdownMenuItem(text = { Text("Copy as AI prompt") }, onClick = {
+                            menuOpen = false
+                            clipboard.setText(AnnotatedString("Use $url as my context."))
+                        })
+                        DropdownMenuItem(text = { Text("Copy URL") }, onClick = {
+                            menuOpen = false
+                            clipboard.setText(AnnotatedString(url))
+                        })
+                        DropdownMenuItem(text = { Text("Share…") }, onClick = {
+                            menuOpen = false
+                            shareDocUrl(ctx, url)
+                        })
+                        if (d?.isOwner == true) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(if (d.isDraft) "Make public" else "Make private")
+                                },
+                                onClick = { menuOpen = false; vm.setVisibility(docId, makePublic = d.isDraft) },
+                            )
+                        }
+                        DropdownMenuItem(text = { Text("Open on memory.wiki") }, onClick = {
+                            menuOpen = false
+                            ctx.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                        })
+                        if (d?.isOwner == true) {
+                            DropdownMenuItem(
+                                text = { Text("Delete", color = Brand.MicroRed) },
+                                onClick = { menuOpen = false; confirmDelete = true },
+                            )
+                        }
+                    }
                 }
             }
 
@@ -255,7 +335,28 @@ fun DocumentDetailScreen(
                     )
                 }
 
-                if (d.markdown.isBlank()) {
+                if (editing) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            "EDITING (MARKDOWN)",
+                            style = BrandType.mono(9, FontWeight.Medium),
+                            color = Brand.TextFaint,
+                        )
+                        androidx.compose.foundation.text.BasicTextField(
+                            value = editedMarkdown,
+                            onValueChange = { editedMarkdown = it },
+                            textStyle = BrandType.mono(13).copy(color = Brand.TextPrimary),
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(Brand.TextPrimary),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 360.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Brand.SheetBg.copy(alpha = 0.75f))
+                                .border(0.5.dp, Brand.BorderDim, RoundedCornerShape(10.dp))
+                                .padding(12.dp),
+                        )
+                    }
+                } else if (d.markdown.isBlank()) {
                     Text(
                         "This doc is empty.",
                         style = BrandType.body(14),
@@ -264,6 +365,47 @@ fun DocumentDetailScreen(
                 } else {
                     MarkdownBody(markdown = d.markdown, markwon = markwon)
                 }
+            }
+
+            // Delete confirmation dialog
+            if (confirmDelete) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { confirmDelete = false },
+                    title = { Text("Delete this doc?") },
+                    text = {
+                        Text(
+                            "It moves to Trash on memory.wiki — recoverable for 30 days.",
+                            style = BrandType.body(13),
+                            color = Brand.TextMuted,
+                        )
+                    },
+                    confirmButton = {
+                        Text(
+                            "Delete",
+                            style = BrandType.body(14, FontWeight.SemiBold),
+                            color = Brand.MicroRed,
+                            modifier = Modifier
+                                .clickable {
+                                    confirmDelete = false
+                                    vm.delete(docId) { ok ->
+                                        if (ok) navController.popBackStack()
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                        )
+                    },
+                    dismissButton = {
+                        Text(
+                            "Cancel",
+                            style = BrandType.body(14, FontWeight.Medium),
+                            color = Brand.TextMuted,
+                            modifier = Modifier
+                                .clickable { confirmDelete = false }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                        )
+                    },
+                    containerColor = Brand.SheetBg,
+                )
             }
         }
     }

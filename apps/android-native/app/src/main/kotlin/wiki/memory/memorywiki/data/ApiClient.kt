@@ -115,6 +115,29 @@ class ApiClient @Inject constructor(
         if (!res.status.isSuccess()) error("HTTP ${res.status.value} updateDocument $id")
     }
 
+    /** Flip the publish bit on a doc. `makePublic=false` puts it
+     *  back in the user's private timeline. Mirrors the iOS
+     *  toggleVisibility(makePublic:) path. */
+    suspend fun setDocumentVisibility(id: String, makePublic: Boolean) {
+        val res = http.patch("$base/api/docs/$id") {
+            authHeaders()
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("is_draft" to !makePublic, "action" to "publish"))
+        }
+        if (!res.status.isSuccess()) error("HTTP ${res.status.value} setVisibility $id")
+    }
+
+    /** Soft-delete (moves to Trash, recoverable for 30 days on
+     *  the web). Matches /api/docs/<id> DELETE. */
+    suspend fun deleteDocument(id: String) {
+        val res = http.prepareRequest {
+            method = HttpMethod.Delete
+            url("$base/api/docs/$id")
+            authHeaders()
+        }.execute()
+        if (!res.status.isSuccess()) error("HTTP ${res.status.value} deleteDocument $id")
+    }
+
     suspend fun semanticSearch(query: String, limit: Int = 8): SearchResponse {
         val res = http.post("$base/api/search") {
             authHeaders()
