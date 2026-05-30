@@ -59,19 +59,19 @@ private val cards = listOf(
     OnboardCard(
         label = "01 / CAPTURE",
         title = "Save anything, in one tap.",
-        body = "From the browser, Notes, a photo, a thought spoken out loud — every input becomes a memory in your hub. Never lose an idea to 'I'll write that down later.'",
+        body = "From the browser, Notes, a photo, a thought spoken out loud. Every input becomes a memory in your hub. Never lose an idea to 'I'll write that down later.'",
         glyph = Lucide.Upload,
     ),
     OnboardCard(
         label = "02 / FEED YOUR AI",
         title = "Stop re-explaining yourself.",
-        body = "Paste memory.wiki/@you into Claude, ChatGPT, or Cursor — they all read the same memory. One link, every model already knows who you are and what you've learned.",
+        body = "Paste memory.wiki/@you into Claude, ChatGPT, or Cursor. They all read the same memory. One link, every model already knows who you are and what you've learned.",
         glyph = Lucide.Sparkles,
     ),
     OnboardCard(
         label = "03 / ALWAYS WITHIN REACH",
         title = "Your hub follows you everywhere.",
-        body = "Home-screen widget, voice capture, system share sheet — Android keeps your memory one tap away. Full editor + collaboration + bundles live on the web.",
+        body = "Home-screen widget, voice capture, system share sheet. Android keeps your memory one tap away. Full editor + collaboration + bundles live on the web.",
         glyph = Lucide.Smartphone,
     ),
 )

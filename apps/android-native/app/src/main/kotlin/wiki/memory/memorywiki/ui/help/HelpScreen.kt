@@ -68,7 +68,7 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.Zap,
                 title = "App Shortcuts",
-                body = "Long-press the memory.wiki launcher icon to jump straight to Capture, Ask hub, Search, or Paste — the four most-used flows.",
+                body = "Long-press the memory.wiki launcher icon to jump straight to Capture, Ask hub, Search, or Paste. The four most-used flows.",
             ),
         ),
     ),
@@ -78,7 +78,7 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.Share,
                 title = "Save from Chrome / any app",
-                body = "Tap the system Share button → pick memory.wiki from the share sheet. Shared text + URL land in the Capture screen as a pre-filled draft.",
+                body = "Tap the system Share button, pick memory.wiki from the share sheet. Shared text + URL land in the Capture screen as a pre-filled draft.",
             ),
             HelpItem(
                 icon = Lucide.Image,
@@ -88,7 +88,7 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.Globe,
                 title = "What gets saved",
-                body = "Whatever the sending app passes: URL, title, selected text. The original page isn't re-uploaded — we keep the link.",
+                body = "Whatever the sending app passes: URL, title, selected text. The original page isn't re-uploaded. We keep the link.",
             ),
         ),
     ),
@@ -98,7 +98,7 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.LayoutGrid,
                 title = "Add the widget",
-                body = "Long-press an empty home-screen spot → Widgets → search 'memory.wiki' → drag it out. Four quick actions: Capture, Ask, Search, Paste.",
+                body = "Long-press an empty home-screen spot, open Widgets, search 'memory.wiki', drag it out. Four quick actions: Capture, Ask, Search, Paste.",
             ),
             HelpItem(
                 icon = Lucide.RefreshCw,
@@ -118,7 +118,7 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.ExternalLink,
                 title = "App Links",
-                body = "Tapping any memory.wiki/<id> URL in Chrome opens the doc reader inside this app — auto-verified via /.well-known/assetlinks.json once Android first launches it.",
+                body = "Tapping any memory.wiki/<id> URL in Chrome opens the doc reader inside this app. Auto-verified via /.well-known/assetlinks.json once Android first launches it.",
             ),
         ),
     ),
@@ -148,12 +148,12 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.User,
                 title = "What's my @username?",
-                body = "Open Settings → 'Open hub'. The first time you visit your hub on the web, you claim your username. Settings then shows your canonical URL — the one you paste into AI.",
+                body = "Open Settings, tap 'Open hub'. The first time you visit your hub on the web, you claim your username. Settings then shows your canonical URL. Paste it into any AI.",
             ),
             HelpItem(
                 icon = Lucide.Shield,
                 title = "Public vs private",
-                body = "Docs are private by default. Open one → ellipsis → Make public to publish at memory.wiki/<short-id>. Private docs are visible only to you.",
+                body = "Docs are private by default. Open one, tap the ellipsis, then Make public to publish at memory.wiki/<short-id>. Private docs are visible only to you.",
             ),
             HelpItem(
                 icon = Lucide.LogOut,
@@ -163,7 +163,7 @@ private val sections: List<HelpSection> = listOf(
             HelpItem(
                 icon = Lucide.CircleHelp,
                 title = "Found a bug?",
-                body = "Settings → Send feedback opens an email pre-filled with version + device info. We read every one.",
+                body = "Settings, Send feedback opens an email pre-filled with version + device info. We read every one.",
             ),
         ),
     ),
@@ -219,7 +219,7 @@ private fun Intro() {
             color = Brand.TextFaint,
         )
         Text(
-            "Capture anywhere → AI organises → paste one URL.",
+            "Capture anywhere. AI organises. Paste one URL.",
             style = BrandType.display(22),
             color = Brand.TextPrimary,
         )
