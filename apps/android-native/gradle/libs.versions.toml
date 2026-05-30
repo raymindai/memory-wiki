@@ -16,7 +16,7 @@ work = "2.10.0"
 browser = "1.8.0"
 biometric = "1.2.0-alpha05"
 camerax = "1.4.0"
-mlkitText = "19.0.1"
+mlkitText = "16.0.1"
 mlkitTextKorean = "16.0.1"
 
 # Compose
