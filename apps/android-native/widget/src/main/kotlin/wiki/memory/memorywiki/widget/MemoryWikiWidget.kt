@@ -70,25 +70,33 @@ object MemoryWikiWidget : GlanceAppWidget() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(BG)
+                .cornerRadius(16.dp)
                 .padding(14.dp),
         ) {
             Column(modifier = GlanceModifier.fillMaxSize()) {
-                Text(
-                    "memory.wiki",
-                    style = TextStyle(color = ColorProvider(day = INK, night = INK), fontWeight = FontWeight.Medium, fontSize = 13.sp),
-                )
-                Spacer(GlanceModifier.height(2.dp))
-                Text(
-                    "RECENTLY UPDATED",
-                    style = TextStyle(color = ColorProvider(day = FAINT, night = FAINT), fontWeight = FontWeight.Medium, fontSize = 9.sp),
-                )
-                Spacer(GlanceModifier.height(8.dp))
+                // Header: brand wordmark + tiny mono caption so the
+                // widget reads as the brand without forcing a static
+                // image (Glance can't render WebView / SVG).
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "memory.wiki",
+                        style = TextStyle(
+                            color = ColorProvider(day = INK, night = INK),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                        ),
+                    )
+                }
+                Spacer(GlanceModifier.height(10.dp))
 
-                // Capture (always present)
+                // Primary action — full-width ink capsule, opens
+                // Capture in Write mode. Always present even on the
+                // Small breakpoint where the quick-pill row is
+                // off-screen.
                 Row(
                     modifier = GlanceModifier
                         .fillMaxWidth()
-                        .height(40.dp)
+                        .height(42.dp)
                         .background(INK)
                         .cornerRadius(14.dp)
                         .clickable(actionStartActivity(deepLinkIntent("memorywiki://capture"))),
@@ -97,19 +105,32 @@ object MemoryWikiWidget : GlanceAppWidget() {
                 ) {
                     Text(
                         "+ New capture",
-                        style = TextStyle(color = ColorProvider(day = BG, night = BG), fontWeight = FontWeight.Medium, fontSize = 13.sp),
+                        style = TextStyle(
+                            color = ColorProvider(day = BG, night = BG),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                        ),
                     )
                 }
 
                 Spacer(GlanceModifier.height(10.dp))
 
-                // Quick action pills (Ask / Search / Paste). Render
-                // unconditionally; SizeMode breakpoints will clip the
-                // pill row on Small/Medium sizes via the wrapping Box.
+                // Quick-action row. Three tiles fill the bottom of
+                // the Medium/Large breakpoints; on Small the parent
+                // size constraints clip them.
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    QuickPill("Ask",    "memorywiki://chat-hub",      modifier = GlanceModifier.defaultWeight().padding(end = 6.dp))
-                    QuickPill("Search", "memorywiki://search",        modifier = GlanceModifier.defaultWeight().padding(horizontal = 3.dp))
-                    QuickPill("Paste",  "memorywiki://capture-paste", modifier = GlanceModifier.defaultWeight().padding(start = 6.dp))
+                    QuickPill(
+                        "Ask", "memorywiki://chat-hub",
+                        modifier = GlanceModifier.defaultWeight().padding(end = 4.dp),
+                    )
+                    QuickPill(
+                        "Search", "memorywiki://search",
+                        modifier = GlanceModifier.defaultWeight().padding(horizontal = 2.dp),
+                    )
+                    QuickPill(
+                        "Paste", "memorywiki://capture-paste",
+                        modifier = GlanceModifier.defaultWeight().padding(start = 4.dp),
+                    )
                 }
             }
         }
@@ -120,7 +141,7 @@ object MemoryWikiWidget : GlanceAppWidget() {
 private fun QuickPill(label: String, uri: String, modifier: GlanceModifier) {
     Box(
         modifier = modifier
-            .height(72.dp)
+            .height(36.dp)
             .background(SHEET)
             .cornerRadius(14.dp)
             .clickable(actionStartActivity(deepLinkIntent(uri))),
@@ -128,7 +149,11 @@ private fun QuickPill(label: String, uri: String, modifier: GlanceModifier) {
     ) {
         Text(
             label,
-            style = TextStyle(color = ColorProvider(day = INK, night = INK), fontWeight = FontWeight.Medium, fontSize = 13.sp),
+            style = TextStyle(
+                color = ColorProvider(day = INK, night = INK),
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+            ),
         )
     }
 }

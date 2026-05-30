@@ -9,4 +9,5 @@
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:widgetFeatures="reconfigurable|configuration_optional"
+    android:previewLayout="@layout/widget_preview"
     android:description="@string/widget_description" />

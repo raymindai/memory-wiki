@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 14dp-corner ink-filled button used for the primary 'New
+     capture' action in the widget preview. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFFAFAFA" />
+    <corners android:radius="14dp" />
+</shape>
