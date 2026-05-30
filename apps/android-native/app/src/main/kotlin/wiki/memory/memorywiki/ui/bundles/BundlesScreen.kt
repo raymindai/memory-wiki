@@ -234,6 +234,16 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
                 )
                 else -> {
                     val pinnedIds by vm.pinned.bundleIds.collectAsState()
+                    // STARRED section only when the user is on the All
+                    // filter with no active query — same rule as the
+                    // Markdowns tab + iOS BundlesView.
+                    val showStarred = filter == BundlesViewModel.Filter.All && query.isBlank()
+                    val pinnedBundles = remember(visible, pinnedIds, showStarred) {
+                        if (showStarred) visible.filter { it.id in pinnedIds } else emptyList()
+                    }
+                    val rest = remember(visible, pinnedIds, showStarred) {
+                        if (showStarred) visible.filter { it.id !in pinnedIds } else visible
+                    }
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -241,7 +251,23 @@ fun BundlesScreen(navController: NavController, vm: BundlesViewModel = hiltViewM
                         contentPadding = PaddingValues(top = 6.dp, bottom = 140.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        items(visible, key = { it.id }) { b ->
+                        if (pinnedBundles.isNotEmpty()) {
+                            item(key = "header-pinned") {
+                                BucketHeader("STARRED", pinnedBundles.size)
+                            }
+                            items(pinnedBundles, key = { "pin-${it.id}" }) { b ->
+                                BundleRow(
+                                    bundle = b,
+                                    pinned = true,
+                                    onClick = { navController.navigate("bundles/${b.id}") },
+                                    onTogglePin = { vm.pinned.toggleBundle(b.id) },
+                                )
+                            }
+                            item(key = "header-all") {
+                                BucketHeader("ALL", rest.size)
+                            }
+                        }
+                        items(rest, key = { it.id }) { b ->
                             BundleRow(
                                 bundle = b,
                                 pinned = b.id in pinnedIds,
@@ -624,5 +650,28 @@ private fun emptyGlyph(filter: BundlesViewModel.Filter, q: String): androidx.com
         BundlesViewModel.Filter.Private -> Lucide.Layers
         BundlesViewModel.Filter.Shared -> Lucide.Users
         BundlesViewModel.Filter.Public -> Lucide.Globe
+    }
+}
+
+@Composable
+private fun BucketHeader(label: String, count: Int) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(Brand.Background)
+            .padding(start = 6.dp, top = 14.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            label,
+            style = BrandType.mono(9, FontWeight.Medium),
+            color = Brand.TextFaint,
+        )
+        Text(
+            count.toString(),
+            style = BrandType.mono(10),
+            color = Brand.TextFaint,
+        )
     }
 }
