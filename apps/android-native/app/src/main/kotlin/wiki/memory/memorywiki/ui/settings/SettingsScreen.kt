@@ -183,8 +183,26 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
         SectionLabel("LEARN")
         LinkCardGroup(
             rows = listOf(
-                LinkRow(Lucide.Info, "About Memory.Wiki", Brand.MicroInfo) { openUrl("$baseUrl/about") },
-                LinkRow(Lucide.BookOpen, "How it works", Brand.MicroWarn) { openUrl("$baseUrl/how") },
+                LinkRow(Lucide.Info, "About Memory.Wiki", Brand.MicroInfo) {
+                    navController.navigate("about")
+                },
+                LinkRow(Lucide.BookOpen, "How it works", Brand.MicroWarn) {
+                    openUrl("$baseUrl/how")
+                },
+                LinkRow(Lucide.RotateCcw, "Replay welcome tour", Brand.TextMuted) {
+                    // Clears mw.onboarded so RootShell shows the
+                    // 3-card pager again on next cold start.
+                    val prefs = context.getSharedPreferences(
+                        "memorywiki.prefs",
+                        android.content.Context.MODE_PRIVATE,
+                    )
+                    prefs.edit().putBoolean("mw.onboarded", false).apply()
+                    android.widget.Toast.makeText(
+                        context,
+                        "Onboarding will play next launch",
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+                },
             ),
         )
 

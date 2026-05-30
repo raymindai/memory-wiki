@@ -130,7 +130,8 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
     val hideTabBar = currentRoute?.startsWith("chat/") == true ||
         currentRoute == "markdowns/doc/{id}" ||
         currentRoute == "bundles/doc/{id}" ||
-        currentRoute == "bundles/{id}"
+        currentRoute == "bundles/{id}" ||
+        currentRoute == "about"
 
     Box(Modifier.fillMaxSize()) {
         NavHost(
@@ -165,6 +166,9 @@ private fun SignedInShell(router: AppRouter, auth: AuthManager) {
             }
             composable(AppTab.Capture.route) { CaptureScreen(navController) }
             composable(AppTab.Settings.route) { SettingsScreen(navController) }
+            composable("about") {
+                wiki.memory.memorywiki.ui.about.AboutScreen(navController)
+            }
 
             composable("chat/{kind}/{id}/{title}") { backStack ->
                 val kind = backStack.arguments?.getString("kind").orEmpty()
