@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { ACCENT_KEYS } from "@/lib/_accent.generated";
 
 /**
  * GET /api/user/profile
@@ -56,15 +57,6 @@ export async function GET(req: NextRequest) {
  * Empty body is a no-op (200, profile unchanged) — keeps the client
  * resilient to dropping all known fields.
  */
-// Union of every accent key any client (web + Android + iOS later)
-// can persist. Web has had the full vivid 10 for a while; muted 6
-// are new in this turn. Keep in sync with apps/web/src/lib/theme-options.ts.
-const ACCENT_KEYS = new Set([
-  "lime", "orange", "blue", "purple", "pink",
-  "green", "teal", "red", "yellow", "gray",
-  "sage", "slate", "sand", "mauve", "rose", "iris",
-]);
-
 export async function PATCH(req: NextRequest) {
   const verified = await verifyAuthToken(req.headers.get("authorization"));
   const userId = verified?.userId || req.headers.get("x-user-id");

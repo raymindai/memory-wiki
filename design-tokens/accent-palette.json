@@ -1,0 +1,21 @@
+{
+  "$description": "Accent picker palette — user-selectable colors that paint chrome on their own surfaces (link, blockquote border, task-list check, Android Material `secondary`). Single source of truth for: apps/web/src/app/_accent.generated.css, apps/web/src/lib/_accent.generated.ts, apps/android-native/.../ui/theme/_AccentCatalog.generated.kt. Run `npm run tokens:build` after editing to refresh the three generated files. ACCENT_KEYS whitelist in apps/web/src/app/api/user/profile/route.ts imports from the generated TS, so adding an item here propagates automatically — no more 4-mirror sync risk.",
+  "items": [
+    { "key": "lime",   "label": "Lime",   "dark": "#B5FF1A", "light": "#5BC700", "group": "vivid", "note": "v8 lime, app default until user overrides" },
+    { "key": "orange", "label": "Orange", "dark": "#fb923c", "light": "#ea580c", "group": "vivid" },
+    { "key": "blue",   "label": "Blue",   "dark": "#60a5fa", "light": "#2563eb", "group": "vivid" },
+    { "key": "purple", "label": "Purple", "dark": "#a78bfa", "light": "#7c3aed", "group": "vivid" },
+    { "key": "pink",   "label": "Pink",   "dark": "#f472b6", "light": "#ec4899", "group": "vivid" },
+    { "key": "green",  "label": "Green",  "dark": "#4ade80", "light": "#16a34a", "group": "vivid", "note": "web only — Android picker omits" },
+    { "key": "teal",   "label": "Teal",   "dark": "#2dd4bf", "light": "#0d9488", "group": "vivid", "note": "web only" },
+    { "key": "red",    "label": "Red",    "dark": "#f87171", "light": "#dc2626", "group": "vivid", "note": "web only" },
+    { "key": "yellow", "label": "Yellow", "dark": "#fbbf24", "light": "#d97706", "group": "vivid", "note": "web only" },
+    { "key": "gray",   "label": "Gray",   "dark": "#a1a1aa", "light": "#52525b", "group": "vivid", "note": "neutral default (v8) when accent has no saved value" },
+    { "key": "sage",   "label": "Sage",   "dark": "#94B49F", "light": "#5E8669", "group": "muted" },
+    { "key": "slate",  "label": "Slate",  "dark": "#7C8DA8", "light": "#536175", "group": "muted" },
+    { "key": "sand",   "label": "Sand",   "dark": "#C7B299", "light": "#8C7656", "group": "muted" },
+    { "key": "mauve",  "label": "Mauve",  "dark": "#B193A6", "light": "#7B5E72", "group": "muted" },
+    { "key": "rose",   "label": "Rose",   "dark": "#C99595", "light": "#965C5C", "group": "muted" },
+    { "key": "iris",   "label": "Iris",   "dark": "#7E7FB0", "light": "#52537A", "group": "muted" }
+  ]
+}
