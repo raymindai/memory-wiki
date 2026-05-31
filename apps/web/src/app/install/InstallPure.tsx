@@ -125,7 +125,7 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   { code: "mw login", lang: "bash" },
                 ]}
                 download={{
-                  label: "npm · v1.4.2",
+                  label: "npm, v1.4.3",
                   href: "https://www.npmjs.com/package/memory-wiki-cli",
                 }}
                 guide={{
@@ -142,13 +142,13 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                 title={isKo ? "MCP 서버" : "MCP server"}
                 blurb={isKo
                   ? "Claude Code, Cursor, Codex, Windsurf 등 MCP 호환 도구에 연결. 28개 툴 (read, write, search, append, version) 즉시 사용."
-                  : "Plugs into Claude Code, Cursor, Codex, Windsurf, and any MCP-compatible tool. 28 tools (read, write, search, append, version) ready to use."}
+                  : "Plugs into Claude Code, Cursor, Codex, Windsurf, and any MCP-compatible tool. 29 tools (read, write, search, append, version, hub + bundle constellations) ready to use."}
                 codeBlocks={[{ code: MCP_CONFIG_JSON, lang: "json" }]}
                 note={isKo
-                  ? "위 블록을 도구의 MCP config에 추가 — Claude Code는 ~/.claude/mcp.json, Cursor는 Settings → MCP."
-                  : "Add the block above to your tool’s MCP config — ~/.claude/mcp.json for Claude Code, Settings → MCP for Cursor."}
+                  ? "위 블록을 도구의 MCP config에 추가 (Claude Code는 ~/.claude/mcp.json, Cursor는 Settings → MCP)."
+                  : "Add the block above to your tool’s MCP config (~/.claude/mcp.json for Claude Code, Settings → MCP for Cursor)."}
                 download={{
-                  label: "npm · memory-wiki-mcp v1.5.1",
+                  label: "npm, memory-wiki-mcp v1.5.4",
                   href: "https://www.npmjs.com/package/memory-wiki-mcp",
                 }}
                 guide={{
@@ -164,13 +164,13 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                 brand="vscode"
                 title={isKo ? "VS Code 확장" : "VS Code extension"}
                 blurb={isKo
-                  ? "에디터에서 바로 WYSIWYG 프리뷰 + 클라우드 sync. 사이드바에서 허브 문서를 검색하고 열기."
-                  : "WYSIWYG preview right in the editor, plus cloud sync. Browse and open hub docs from the sidebar."}
+                  ? "사이드바에서 클라우드 문서 (public, shared, private, view-only) 둘러보고 별표, 양방향 sync, WYSIWYG 프리뷰. 한 번 발행하면 Claude, ChatGPT, Cursor가 같은 URL을 그대로 읽음."
+                  : "Sidebar to your cloud docs (public, shared, private, view-only) with starring, two-way sync, and WYSIWYG preview. Publish once and Claude, ChatGPT, Cursor read the same URL."}
                 codeBlocks={[
                   { code: "code --install-extension raymindai.memory-wiki-vscode", lang: "bash" },
                 ]}
                 download={{
-                  label: "Marketplace · v1.4.3",
+                  label: "Marketplace, v1.4.26",
                   href: "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode",
                 }}
                 guide={{

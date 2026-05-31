@@ -166,8 +166,8 @@ const texts = {
 
     vscode: {
       title: "VS Code Extension",
-      subtitle: "Memory.Wiki \u2014 Markdown Publisher",
-      desc: "WYSIWYG preview with Memory.Wiki rendering quality, cloud sync, and real-time collaboration. Edit directly in the rendered view, auto-push on save, and resolve conflicts with the built-in diff editor.",
+      subtitle: "memory.wiki Markdown Publisher",
+      desc: "Sidebar to your memory.wiki cloud right inside VS Code. Browse cloud docs by state (public, shared, private, view-only), star the ones you keep going back to, two-way sync, WYSIWYG preview. Publish once and Claude, ChatGPT, Cursor, and Gemini all read the same URL.",
       ctaLabel: "Install Extension",
       downloadVsixLabel: "Download .vsix",
       features: [
@@ -471,8 +471,8 @@ const texts = {
 
     vscode: {
       title: "VS Code Extension",
-      subtitle: "Memory.Wiki \u2014 Markdown Publisher",
-      desc: "Memory.Wiki 렌더링 품질의 WYSIWYG 미리보기, 클라우드 싱크, 실시간 협업. 렌더된 뷰에서 직접 편집하고, 저장 시 자동 push, 내장 diff 에디터로 충돌을 해결합니다.",
+      subtitle: "memory.wiki Markdown Publisher",
+      desc: "VS Code 안에서 memory.wiki 클라우드를 그대로. 사이드바에서 상태별 (public, shared, private, view-only) 문서를 탐색하고, 자주 여는 건 별표, 양방향 sync, WYSIWYG 프리뷰. 한 번 발행하면 Claude, ChatGPT, Cursor, Gemini가 같은 URL을 그대로 읽음.",
       ctaLabel: "Install Extension",
       downloadVsixLabel: "Download .vsix",
       features: [

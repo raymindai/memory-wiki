@@ -178,7 +178,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.vscode.features} />
               <PluginInstall heading={t.vscode.installHeading} steps={t.vscode.installSteps} />
               <PluginDownload
-                primary={{ label: "Install v1.4.3 from Marketplace", href: "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" }}
+                primary={{ label: "Install v1.4.26 from Marketplace", href: "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" }}
                 secondary={{ label: t.vscode.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
@@ -188,7 +188,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.desktop.features} />
               <PluginInstall heading={t.desktop.installHeading} steps={t.desktop.installSteps} />
               <PluginDownload
-                primary={{ label: "Download v2.3.5 (Apple Silicon)", href: "https://github.com/raymindai/memory-wiki/releases/latest" }}
+                primary={{ label: "Download v2.3.6 (Apple Silicon)", href: "https://github.com/raymindai/memory-wiki/releases/latest" }}
                 secondary={{ label: t.desktop.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
@@ -206,7 +206,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               </div>
               <PluginDownload
                 primary={{ label: t.cli.guideLabel, href: locale === "ko" ? "/ko/docs/cli" : "/docs/cli" }}
-                secondary={{ label: `${t.cli.npmLabel} · v1.4.2`, href: "https://www.npmjs.com/package/memory-wiki-cli" }}
+                secondary={{ label: `${t.cli.npmLabel}, v1.4.3`, href: "https://www.npmjs.com/package/memory-wiki-cli" }}
               />
             </PluginBlock>
 
