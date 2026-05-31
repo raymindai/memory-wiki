@@ -2,7 +2,7 @@
   "name": "memory-wiki-vscode",
   "displayName": "memory.wiki Markdown Publisher",
   "description": "WYSIWYG preview and publish Markdown documents to memory.wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "publisher": "raymindai",
   "license": "MIT",
   "repository": {
@@ -125,6 +125,11 @@
         "command": "memorywiki.aiChat",
         "title": "memory.wiki: Ask AI to Edit",
         "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "memorywiki.copyForAi",
+        "title": "memory.wiki: Copy for AI",
+        "icon": "$(sparkle)"
       }
     ],
     "menus": {
@@ -180,6 +185,11 @@
           "command": "memorywiki.aiChat",
           "when": "editorLangId == markdown",
           "group": "memorywiki@9"
+        },
+        {
+          "command": "memorywiki.copyForAi",
+          "when": "editorLangId == markdown",
+          "group": "memorywiki@10"
         }
       ]
     },

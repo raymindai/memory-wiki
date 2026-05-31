@@ -181,11 +181,11 @@ body { max-width: 820px; margin: 0 auto; padding: 40px 24px; font-family: -apple
 h1,h2,h3,h4,h5,h6 { font-weight: 700; line-height: 1.3; margin-top: 1.5em; margin-bottom: 0.5em; }
 h1 { font-size: 2em; border-bottom: 1px solid #27272a; padding-bottom: 0.3em; }
 h2 { font-size: 1.5em; border-bottom: 1px solid #27272a; padding-bottom: 0.25em; }
-a { color: #fb923c; text-decoration: none; }
+a { color: var(--accent); text-decoration: none; }
 code { font-family: "SF Mono","Fira Code",Consolas,monospace; font-size: 0.9em; background: #27272a; padding: 0.15em 0.4em; border-radius: 4px; }
 pre { padding: 16px; background: #1e1e2e; border-radius: 8px; overflow-x: auto; border: 1px solid #27272a; }
 pre code { background: transparent; padding: 0; }
-blockquote { border-left: 4px solid #fb923c; padding: 0.5em 1em; color: #a1a1aa; background: rgba(251,146,60,0.05); }
+blockquote { border-left: 4px solid var(--accent); padding: 0.5em 1em; color: #a1a1aa; background: var(--accent-dim); }
 table { width: 100%; border-collapse: collapse; }
 th,td { padding: 8px 12px; border: 1px solid #27272a; }
 th { background: #18181b; font-weight: 600; }
@@ -446,7 +446,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
             <span>This is a cloud document. View only — to edit, sync to local or open in Memory.Wiki.</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:#fb923c;color:#0a0a0c;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
+            <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:var(--accent);color:var(--bg);border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
             <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in Memory.Wiki</button>
           </div>
         </div>`
@@ -1010,7 +1010,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
             <span>This is a cloud document. View only — to edit, sync to local or open in Memory.Wiki.</span>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:#fb923c;color:#0a0a0c;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
+            <button onclick="vscode.postMessage({type:'syncToLocal'})" style="background:var(--accent);color:var(--bg);border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Sync to Local</button>
             <button onclick="vscode.postMessage({type:'openInBrowser'})" style="background:transparent;color:#60a5fa;border:1px solid #334155;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer">Open in Memory.Wiki</button>
           </div>
         </div>`

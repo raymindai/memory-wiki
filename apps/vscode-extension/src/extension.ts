@@ -334,6 +334,31 @@ export function activate(context: vscode.ExtensionContext): void {
     })
   );
 
+  // Command: Copy for AI — canonical "Use <url> as my context."
+  // sentence to clipboard. Brand spec section 14. Same source as
+  // copyUrl (statusBar.publishedUrl) so it requires the file to
+  // already be published.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("memorywiki.copyForAi", async () => {
+      const url = statusBar?.getPublishedUrl();
+      if (!url) {
+        const choice = await vscode.window.showInformationMessage(
+          "Publish this file first, then it can be pasted into any AI.",
+          "Publish"
+        );
+        if (choice === "Publish") {
+          vscode.commands.executeCommand("memorywiki.publish");
+        }
+        return;
+      }
+      const sentence = url.includes("/b/")
+        ? `Use ${url} as my context bundle.`
+        : `Use ${url} as my context.`;
+      await vscode.env.clipboard.writeText(sentence);
+      vscode.window.showInformationMessage("Copied for AI. Paste into Cursor / ChatGPT / Claude / Gemini.");
+    })
+  );
+
   // Command: Login
   context.subscriptions.push(
     vscode.commands.registerCommand("memorywiki.login", async () => {

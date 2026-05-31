@@ -580,7 +580,7 @@ body {
   font-weight: 800;
   letter-spacing: -0.3px;
 }
-.logo-md { color: #fb923c; }
+.logo-md { color: #B5FF1A; }
 .logo-fy { color: var(--vscode-foreground); }
 .header-actions { display: flex; gap: 4px; }
 .icon-btn {
@@ -620,7 +620,7 @@ body {
   transition: background 0.12s, color 0.12s;
 }
 .filter-btn:hover { background: var(--vscode-toolbar-hoverBackground); color: var(--vscode-foreground); }
-.filter-btn.active { background: rgba(251,146,60,0.15); color: #fb923c; }
+.filter-btn.active { background: var(--vscode-list-activeSelectionBackground); color: var(--vscode-list-activeSelectionForeground); }
 
 /* Search */
 .search-box { margin: 0 14px 8px; position: relative; }
@@ -663,14 +663,14 @@ body {
   flex-shrink: 0; width: 16px; height: 16px;
   display: flex; align-items: center; justify-content: center;
 }
-.doc-icon.published { color: #22c55e; }
-.doc-icon.shared { color: #4ade80; }
+.doc-icon.published { color: #B5FF1A; }
+.doc-icon.shared { color: #B5FF1A; }
 .doc-icon.restricted { color: #60a5fa; }
 .doc-icon.readonly { color: var(--vscode-descriptionForeground); }
 .doc-icon.local { color: var(--vscode-descriptionForeground); }
 .doc-icon.cloud { color: #60a5fa; }
 .doc-icon { position: relative; }
-.doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: #B5FF1A; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .doc-icon .sync-badge svg { width: 6px; height: 6px; }
 .doc-info { flex: 1; min-width: 0; overflow: hidden; }
 .doc-name {
@@ -720,8 +720,8 @@ body {
   margin: 8px 14px;
   padding: 10px 12px;
   border-radius: 6px;
-  background: rgba(251,146,60,0.08);
-  border: 1px solid rgba(251,146,60,0.2);
+  background: rgba(181, 255, 26, 0.08);
+  border: 1px solid rgba(181, 255, 26, 0.2);
   text-align: center;
 }
 .login-prompt p {
@@ -732,7 +732,7 @@ body {
   padding: 4px 16px;
   font-size: 11px; font-weight: 600;
   border: none; border-radius: 4px;
-  background: #fb923c; color: #000;
+  background: #B5FF1A; color: #000;
   cursor: pointer;
 }
 .login-btn:hover { background: #f97316; }
@@ -780,7 +780,7 @@ body {
   background: var(--vscode-panel-border, rgba(255,255,255,0.08));
 }
 .help-btn { transition: color 0.15s; }
-.help-btn.open { color: #fb923c; }
+.help-btn.open { color: #B5FF1A; }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
@@ -803,7 +803,7 @@ body {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   width: 100%; padding: 7px 0;
   font-size: 12px; font-weight: 600;
-  background: #fb923c; color: #000;
+  background: #B5FF1A; color: #000;
   border: none; border-radius: 6px;
   cursor: pointer; transition: background 0.12s;
 }
@@ -874,10 +874,10 @@ body {
 }
 .user-avatar {
   width: 24px; height: 24px; border-radius: 50%;
-  background: rgba(251,146,60,0.15);
+  background: rgba(181, 255, 26, 0.15);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: #fb923c; font-size: 11px; font-weight: 700;
+  color: #B5FF1A; font-size: 11px; font-weight: 700;
 }
 .user-details {
   flex: 1; min-width: 0; overflow: hidden;
@@ -892,7 +892,7 @@ body {
   font-size: 10px; color: var(--vscode-descriptionForeground);
 }
 .user-status-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: #22c55e;
+  width: 5px; height: 5px; border-radius: 50%; background: #B5FF1A;
 }
 .user-logout-btn {
   padding: 3px 8px;
@@ -943,7 +943,7 @@ body {
   </div>
 
   <div class="help-panel hidden" id="help-panel">
-    <div class="help-row"><span class="help-icon" style="color:#22c55e"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
+    <div class="help-row"><span class="help-icon" style="color:#B5FF1A"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Sync to upload to memory.wiki.</span></div></div>
     <div class="help-row"><span class="help-icon" style="color:#60a5fa"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
     <div class="help-divider"></div>
@@ -1112,7 +1112,7 @@ body {
       if (box) {
         box.classList.toggle('hidden');
         var isOpen = !box.classList.contains('hidden');
-        if (btn) btn.style.color = isOpen ? '#fb923c' : '';
+        if (btn) btn.style.color = isOpen ? '#B5FF1A' : '';
         if (isOpen) {
           box.querySelector('input').focus();
         } else {
@@ -1260,7 +1260,7 @@ body {
     }
 
     function secHeader(type, label, count) {
-      var colors = { sync: '#22c55e', file: 'currentColor', globe: '#60a5fa', image: '#a78bfa' };
+      var colors = { sync: '#B5FF1A', file: 'currentColor', globe: '#60a5fa', image: '#a78bfa' };
       var names = { sync: 'sync', file: 'file', globe: 'cloud', image: 'file' };
       var ic = icon(names[type] || type, 12).replace('stroke="currentColor"', 'stroke="' + (colors[type]||'currentColor') + '"');
       if (type === 'image') ic = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><circle cx="5.5" cy="6.5" r="1.5"/><path d="M14.5 10.5l-3.5-3.5-6 6"/></svg>';
