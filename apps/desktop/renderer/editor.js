@@ -749,6 +749,25 @@
     starFilled: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   };
 
+  // Pretty label for the `source` field on a synced/cloud doc — this
+  // is the channel that last wrote to the cloud copy (web / VS Code /
+  // CLI / MCP / Chrome / Desktop). Used in tooltip text so a hover
+  // over the sync icon explains where the doc is being synced from.
+  function formatSource(source) {
+    if (!source) return "the web";
+    var map = {
+      web: "the web",
+      vscode: "VS Code",
+      desktop: "Desktop",
+      cli: "CLI",
+      mcp: "MCP",
+      chrome: "Chrome",
+      ios: "iOS",
+      android: "Android",
+    };
+    return map[source] || source;
+  }
+
   function starBtn(docId) {
     if (!docId) return "";
     var pinned = sidebarState.pinnedIds && sidebarState.pinnedIds.has(docId);
@@ -771,6 +790,7 @@
     var isDraft = doc.is_draft || false;
     var isSynced = source === 'vscode' || source === 'desktop' || source === 'cli' || source === 'mcp';
     var badge = isSynced ? syncBadgeHtml : '';
+    var srcText = isSynced ? "\nLast edited from " + formatSource(source) : "";
 
     // Web canonical mapping (MdEditor.tsx L8484-8488):
     //   View only → Eye   (purple)  shared with you
@@ -779,16 +799,16 @@
     //   Private   → Cloud (blue)    cloud-only, owner-only
     //   Local     → File  (neutral) local-only, no cloud copy
     if (editMode === 'readonly') {
-      return '<div class="file-icon view-only" title="View only (shared with you)">' + SBI.eye + badge + '</div>';
+      return '<div class="file-icon view-only" title="View only (shared with you)' + esc(srcText) + '">' + SBI.eye + badge + '</div>';
     }
     if (allowedEmails && allowedEmails.length > 0) {
-      return '<div class="file-icon shared" title="Shared (restricted to specific people)">' + SBI.users + badge + '</div>';
+      return '<div class="file-icon shared" title="Shared (restricted to specific people)' + esc(srcText) + '">' + SBI.users + badge + '</div>';
     }
     if (!isDraft) {
-      return '<div class="file-icon public" title="Public (anyone with the link can read)">' + SBI.globe + badge + '</div>';
+      return '<div class="file-icon public" title="Public (anyone with the link can read)' + esc(srcText) + '">' + SBI.globe + badge + '</div>';
     }
     if (doc.id || doc.docId) {
-      return '<div class="file-icon private" title="Private (cloud-only, only you can read)">' + SBI.cloud + badge + '</div>';
+      return '<div class="file-icon private" title="Private (cloud-only, only you can read)' + esc(srcText) + '">' + SBI.cloud + badge + '</div>';
     }
     return '<div class="file-icon local" title="Local (not yet synced)">' + SBI.file + badge + '</div>';
   }
@@ -797,12 +817,15 @@
     var synced = f.config && f.config.lastSyncedAt ? timeAgo(f.config.lastSyncedAt) : timeAgo(f.modifiedAt);
     var meta = synced ? "synced " + synced : f.relativePath;
     var active = f.filePath === currentFilePath ? " active" : "";
-    // Synced rows use the Public globe glyph plus the sync-badge
-    // overlay — same web-canonical mapping as docStatusIcon. If the
-    // server config later distinguishes restricted/public, we can
-    // branch here.
-    return '<div class="file-item' + active + '" data-path="' + esc(f.filePath) + '">' +
-      '<div class="file-icon public" title="Synced with memory.wiki">' + SBI.globe + syncBadgeHtml + '</div>' +
+    // Tooltip surfaces which channel last wrote to the cloud copy so
+    // the user understands "this is the desktop version" vs "this was
+    // edited on VS Code 3 min ago".
+    var srcLabel = formatSource(f.config && f.config.source);
+    var rowTitle = "Synced from " + srcLabel +
+      (f.config && f.config.lastSyncedAt ? "\nLast sync " + timeAgo(f.config.lastSyncedAt) : "") +
+      "\n" + f.filePath;
+    return '<div class="file-item' + active + '" data-path="' + esc(f.filePath) + '" title="' + esc(rowTitle) + '">' +
+      '<div class="file-icon public" title="Synced with memory.wiki from ' + esc(srcLabel) + '">' + SBI.globe + syncBadgeHtml + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
         starBtn(f.config && f.config.docId) +
@@ -1510,9 +1533,11 @@
     }
 
     var fileIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-    var starIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
-    // ─── Starred ─── pinned doc/synced rows pulled from /api/user/pins.
+    // ─── Starred ─── pinned doc rows pulled from /api/user/pins.
+    // Per UX feedback, rows here use the plain file glyph rather than
+    // a star icon — the section header is "Starred", so star-per-row
+    // was redundant.
     var starredSection = document.getElementById("home-starred-section");
     var starredList = document.getElementById("home-starred-list");
     var pinSet = sidebarState.pinnedIds || new Set();
@@ -1552,7 +1577,7 @@
             ? ' data-filepath="' + esc(r.filePath) + '"'
             : ' data-cloudid="' + esc(r.id) + '"';
           return '<button class="home-list-item"' + attr + '>' +
-            '<span class="home-list-icon star">' + starIconSvg + '</span>' +
+            '<span class="home-list-icon">' + fileIconSvg + '</span>' +
             '<span class="home-list-name">' + esc(r.title) + '</span>' +
             '<span class="home-list-time">' + timeAgo(r.time) + '</span>' +
           '</button>';
@@ -1560,54 +1585,62 @@
       }
     }
 
-    // ─── Recent ───
+    // ─── Recent ─── union of three sources, deduped by stable key:
+    //  1. local workspace files (modifiedAt)
+    //  2. OS-level recent files we tracked on open (openedAt)
+    //  3. cloud docs sorted by updated_at — so even a fresh install
+    //     with zero local files still has a real Recent surface.
     var recentList = document.getElementById("home-recent-list");
     var recentSection = document.getElementById("home-recent-section");
     if (recentList) {
-      var allFiles = [];
-      var seenPaths = new Set();
-      for (var i = 0; i < sidebarState.workspaceFiles.length; i++) {
-        var wf = sidebarState.workspaceFiles[i];
-        if (!seenPaths.has(wf.filePath)) {
-          seenPaths.add(wf.filePath);
-          allFiles.push({
-            filePath: wf.filePath,
-            fileName: wf.fileName,
-            modifiedAt: wf.modifiedAt,
-            config: wf.config,
-          });
-        }
+      var allRecent = [];
+      var seenKeys = new Set();
+      function addRecent(row) {
+        if (!row || seenKeys.has(row.key)) return;
+        seenKeys.add(row.key);
+        allRecent.push(row);
       }
-      for (var j = 0; j < sidebarState.recentFiles.length; j++) {
-        var rf = sidebarState.recentFiles[j];
-        if (!seenPaths.has(rf.path)) {
-          seenPaths.add(rf.path);
-          var parts = rf.path.split("/");
-          allFiles.push({
-            filePath: rf.path,
-            fileName: parts[parts.length - 1],
-            modifiedAt: rf.modifiedAt || rf.openedAt,
-            config: rf.config,
-          });
-        }
-      }
-      allFiles.sort(function(a, b) {
-        return new Date(b.modifiedAt || 0).getTime() - new Date(a.modifiedAt || 0).getTime();
+      (sidebarState.workspaceFiles || []).forEach(function(wf) {
+        addRecent({
+          key: "ws:" + wf.filePath,
+          filePath: wf.filePath,
+          title: wf.fileName,
+          time: wf.modifiedAt,
+        });
       });
-      allFiles = allFiles.slice(0, 6);
+      (sidebarState.recentFiles || []).forEach(function(rf) {
+        var parts = (rf.path || "").split("/");
+        addRecent({
+          key: "rf:" + rf.path,
+          filePath: rf.path,
+          title: parts[parts.length - 1] || rf.path,
+          time: rf.modifiedAt || rf.openedAt,
+        });
+      });
+      (sidebarState.cloudDocs || []).forEach(function(cd) {
+        addRecent({
+          key: "cd:" + cd.id,
+          cloudId: cd.id,
+          title: cd.title || "Untitled",
+          time: cd.updated_at,
+        });
+      });
+      allRecent.sort(function(a, b) {
+        return new Date(b.time || 0).getTime() - new Date(a.time || 0).getTime();
+      });
+      allRecent = allRecent.slice(0, 6);
 
-      if (allFiles.length === 0) {
-        if (recentSection) recentSection.style.display = "none";
-      } else {
-        if (recentSection) recentSection.style.display = "";
-        recentList.innerHTML = allFiles.map(function(f) {
-          return '<button class="home-list-item" data-filepath="' + esc(f.filePath) + '">' +
-            '<span class="home-list-icon">' + fileIconSvg + '</span>' +
-            '<span class="home-list-name">' + esc(f.fileName) + '</span>' +
-            '<span class="home-list-time">' + timeAgo(f.modifiedAt) + '</span>' +
-          '</button>';
-        }).join("");
-      }
+      if (recentSection) recentSection.style.display = allRecent.length === 0 ? "none" : "";
+      recentList.innerHTML = allRecent.map(function(r) {
+        var attr = r.filePath
+          ? ' data-filepath="' + esc(r.filePath) + '"'
+          : ' data-cloudid="' + esc(r.cloudId) + '"';
+        return '<button class="home-list-item"' + attr + '>' +
+          '<span class="home-list-icon">' + fileIconSvg + '</span>' +
+          '<span class="home-list-name">' + esc(r.title) + '</span>' +
+          '<span class="home-list-time">' + timeAgo(r.time) + '</span>' +
+        '</button>';
+      }).join("");
     }
 
     // ─── Click delegation for both lists (synced filepath OR cloud id) ───
