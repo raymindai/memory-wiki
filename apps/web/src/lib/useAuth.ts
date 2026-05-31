@@ -327,6 +327,14 @@ export function useAuth() {
     });
   }, [supabase]);
 
+  const signInWithApple = useCallback(async () => {
+    if (!supabase) return;
+    await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }, [supabase]);
+
   const signInWithEmail = useCallback(
     async (email: string) => {
       if (!supabase) return { error: "Supabase not configured" };
@@ -397,6 +405,7 @@ export function useAuth() {
     isAuthenticated: !!state.user,
     signInWithGoogle,
     signInWithGitHub,
+    signInWithApple,
     signInWithEmail,
     signOut,
   };
