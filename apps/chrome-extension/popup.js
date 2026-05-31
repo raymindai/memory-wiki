@@ -123,7 +123,7 @@ async function openInMemoryWiki(markdown) {
     } catch { }
     chrome.tabs.create({ url: MDFY_URL });
     if (copied) {
-      setStatus("Content copied — paste into Memory.Wiki", "success");
+      setStatus("Content copied. Paste into Memory.Wiki.", "success");
     } else {
       setStatus("Content too large for URL. Please copy manually.", "error");
     }
@@ -217,7 +217,7 @@ function showNotOnAiPage() {
   document.getElementById("platform-hint").textContent = "Capture this page as Markdown";
   btnCapture.disabled = false;
   const labelEl = btnCapture.querySelector(".label");
-  if (labelEl) labelEl.innerHTML = 'Capture This Page<span class="desc">Page content → clean Markdown document</span>';
+  if (labelEl) labelEl.innerHTML = 'Capture This Page<span class="desc">Page content as a clean Markdown document</span>';
   btnCapture.dataset.mode = "page";
   rangeSelector.style.display = "none";
 }
@@ -346,7 +346,7 @@ document.querySelectorAll('input[name="range"]').forEach((radio) => {
     const descEl = labelEl.querySelector(".desc");
     // Remove old text, keep .desc span
     const newText = val === 0 ? "Capture Full Conversation" : "Capture Last " + val + " Exchanges";
-    const newDesc = val === 0 ? "All messages → Markdown document" : "Recent " + val + " Q&A pairs → Markdown document";
+    const newDesc = val === 0 ? "All messages as a Markdown document" : "Recent " + val + " Q&A pairs as a Markdown document";
     labelEl.innerHTML = newText + '<span class="desc">' + newDesc + '</span>';
   });
 });
