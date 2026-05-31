@@ -50,7 +50,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: "mw-send-selection",
-      title: "Send selection to Memory.Wiki",
+      title: "Send selection to memory.wiki",
       contexts: ["selection"],
     });
     chrome.contextMenus.create({

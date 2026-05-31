@@ -95,12 +95,21 @@ async function openInMemoryWiki(markdown) {
         const { id, editToken } = parsed;
         const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
         chrome.tabs.create({ url: MDFY_URL + "/?from=" + id + tokenParam });
-        setStatus("Published to Memory.Wiki", "success");
+        // Brand spec section 14: canonical "for AI" paste sentence.
+        // Drop it into the clipboard so the user can paste it
+        // straight into the next AI tool (Cursor / ChatGPT / Claude).
+        // The browser tab also opens so the user sees the doc;
+        // clipboard carries the AI form because that's the
+        // higher-value paste-target right after capturing an AI
+        // conversation.
+        const aiSentence = "Use " + MDFY_URL + "/" + id + " as my context.";
+        try { await navigator.clipboard.writeText(aiSentence); } catch { /* ignore */ }
+        setStatus("Published. URL copied for AI.", "success");
         return;
       }
       // Check for auth failure
       if (res.status === 401 || res.status === 403) {
-        setStatus("Session expired. Log in at Memory.Wiki to sync.", "error");
+        setStatus("Session expired. Log in at memory.wiki to sync.", "error");
         chrome.storage.local.remove("mw-was-logged-in");
       }
     } catch (err) {
@@ -114,7 +123,7 @@ async function openInMemoryWiki(markdown) {
 
   if (url.length <= MAX_URL_BYTES) {
     chrome.tabs.create({ url });
-    setStatus("Opened in Memory.Wiki", "success");
+    setStatus("Opened. URL copied for AI.", "success");
   } else {
     let copied = false;
     try {
@@ -123,7 +132,7 @@ async function openInMemoryWiki(markdown) {
     } catch { }
     chrome.tabs.create({ url: MDFY_URL });
     if (copied) {
-      setStatus("Content copied. Paste into Memory.Wiki.", "success");
+      setStatus("Content copied. Paste into memory.wiki.", "success");
     } else {
       setStatus("Content too large for URL. Please copy manually.", "error");
     }
@@ -158,7 +167,7 @@ async function detectPlatform() {
     }
 
     // Check if on Memory.Wiki
-    if (url.includes("Memory.Wiki")) {
+    if (url.includes("memory.wiki")) {
       showOnMdfy();
       return null;
     }
@@ -170,7 +179,7 @@ async function detectPlatform() {
       platformNameEl.classList.add("active");
       platformNameEl.textContent = "GitHub Markdown detected";
       btnCapture.disabled = true;
-      setStatus("Use the 'Open in Memory.Wiki' button on the page", "");
+      setStatus("Use the 'Open in memory.wiki' button on the page", "");
       return null;
     }
 
@@ -196,15 +205,15 @@ function showOnMdfy() {
   if (platformDot) {
     platformDot.classList.remove("inactive");
     platformDot.classList.add("active");
-    platformDot.style.background = "#fb923c";
+    platformDot.style.background = "#B5FF1A";
   }
   if (platformNameEl) {
     platformNameEl.classList.add("active");
-    platformNameEl.textContent = "Memory.Wiki";
+    platformNameEl.textContent = "memory.wiki";
   }
   btnCapture.disabled = true;
   const labelEl = btnCapture.querySelector(".label");
-  if (labelEl) labelEl.innerHTML = 'You\'re on Memory.Wiki<span class="desc">Create and edit documents directly here</span>';
+  if (labelEl) labelEl.innerHTML = 'You\'re on memory.wiki<span class="desc">Create and edit documents directly here</span>';
   rangeSelector.style.display = "none";
 }
 
@@ -378,7 +387,7 @@ chkFloat.addEventListener("change", () => {
   chrome.storage.local.get(["mw-was-logged-in"], (data) => {
     if (!userId && data["mw-was-logged-in"]) {
       // User was logged in before but no longer — session expired
-      setStatus("Session expired. Log in at Memory.Wiki to sync.", "error");
+      setStatus("Session expired. Log in at memory.wiki to sync.", "error");
       chrome.storage.local.remove("mw-was-logged-in");
     } else if (userId) {
       chrome.storage.local.set({ "mw-was-logged-in": "1" });

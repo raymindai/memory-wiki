@@ -28,7 +28,7 @@
   gap: 5px;
   height: 30px;
   padding: 0 10px;
-  border: 1px solid rgba(251, 146, 60, 0.25);
+  border: 1px solid rgba(181, 255, 26, 0.25);
   border-right: none;
   border-radius: 15px 0 0 15px;
   background: #09090b;
@@ -55,8 +55,8 @@
   justify-content: center;
   height: 30px;
   width: 22px;
-  border: 1px solid rgba(251, 146, 60, 0.25);
-  border-left: 1px solid rgba(251, 146, 60, 0.1);
+  border: 1px solid rgba(181, 255, 26, 0.25);
+  border-left: 1px solid rgba(181, 255, 26, 0.1);
   border-radius: 0 15px 15px 0;
   background: #09090b;
   cursor: pointer;
@@ -68,7 +68,7 @@
 }
 
 #mw-float-toggle:hover {
-  color: #fb923c;
+  color: #B5FF1A;
   background: #18181b;
 }
 
@@ -87,7 +87,7 @@
 
 #mw-float-container.mw-loading #mw-float-btn,
 #mw-float-container.mw-loading #mw-float-toggle {
-  border-color: rgba(251, 146, 60, 0.3);
+  border-color: rgba(181, 255, 26, 0.3);
 }
 
 #mw-float-container.mw-done #mw-float-btn,
@@ -100,7 +100,7 @@
   border-color: rgba(248, 113, 113, 0.4);
 }
 
-.mw-btn-status-done { color: #4ade80 !important; }
+.mw-btn-status-done { color: #B5FF1A !important; }
 .mw-btn-status-error { color: #f87171 !important; }
 
 /* ─── Floating Button Dropdown Menu ─── */
@@ -143,7 +143,7 @@
 
 .mw-menu-item:first-child { border-radius: 9px 9px 0 0; }
 .mw-menu-item:last-child { border-radius: 0 0 9px 9px; }
-.mw-menu-accent { color: #fb923c; }
+.mw-menu-accent { color: #B5FF1A; }
 
 /* ─── Floating Button Logo & Label ─── */
 
@@ -154,7 +154,7 @@
   display: inline-flex;
 }
 
-.mw-logo-md { color: #fb923c; }
+.mw-logo-md { color: #B5FF1A; }
 .mw-logo-dot { color: #fafafa; }
 .mw-logo-fy { color: #fafafa; }
 
@@ -179,7 +179,7 @@
   gap: 3px;
   height: 24px;
   padding: 0 8px;
-  border: 1px solid rgba(251, 146, 60, 0.15);
+  border: 1px solid rgba(181, 255, 26, 0.15);
   border-radius: 12px;
   background: #09090b;
   cursor: pointer;
@@ -201,7 +201,7 @@
 }
 
 .mw-mini-btn:hover {
-  border-color: rgba(251, 146, 60, 0.4);
+  border-color: rgba(181, 255, 26, 0.4);
   transform: scale(1.05);
 }
 
@@ -212,7 +212,7 @@
 .mw-mini-btn.mw-loading {
   pointer-events: none;
   opacity: 1;
-  border-color: rgba(251, 146, 60, 0.3);
+  border-color: rgba(181, 255, 26, 0.3);
 }
 
 .mw-mini-btn.mw-done {
@@ -230,12 +230,12 @@
 }
 
 .mw-mini-logo { display: inline-flex; letter-spacing: -0.5px; }
-.mw-mini-md { color: #fb923c; }
+.mw-mini-md { color: #B5FF1A; }
 .mw-mini-dot { color: #fafafa; }
 .mw-mini-fy { color: #fafafa; }
 .mw-mini-label { color: #737373; margin-left: 4px; font-weight: 500; }
 .mw-mini-status { color: #a1a1aa; margin-left: 2px; font-weight: 400; font-size: 9px; }
-.mw-mini-status-done { color: #4ade80; }
+.mw-mini-status-done { color: #B5FF1A; }
 .mw-mini-status-error { color: #f87171; }
 
 @keyframes mw-pulse {
@@ -279,6 +279,6 @@
 }
 
 .mw-toast-icon {
-  color: #fb923c;
+  color: #B5FF1A;
   flex-shrink: 0;
 }

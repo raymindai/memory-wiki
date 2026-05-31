@@ -46,7 +46,7 @@
       height: 5px;
       border-radius: 50%;
     }
-    .detection-dot.active { background: #4ade80; }
+    .detection-dot.active { background: #B5FF1A; }
     .detection-dot.inactive { background: #27272a; }
 
     .detection-text {
@@ -103,12 +103,12 @@
     }
 
     .range-options input[type="radio"]:checked + span {
-      color: #fb923c;
+      color: #B5FF1A;
     }
 
     .range-options label:has(input:checked) {
-      border-color: rgba(251, 146, 60, 0.2);
-      background: rgba(251, 146, 60, 0.05);
+      border-color: rgba(181, 255, 26, 0.2);
+      background: rgba(181, 255, 26, 0.05);
     }
 
     /* ─── Capture Button ─── */
@@ -120,7 +120,7 @@
       padding: 11px 12px;
       background: none;
       border: none;
-      color: #fb923c;
+      color: #B5FF1A;
       font-size: 12px;
       font-weight: 600;
       font-family: inherit;
@@ -128,8 +128,8 @@
       transition: background 0.1s;
       text-align: left;
     }
-    .capture-btn:hover:not(:disabled) { background: rgba(251, 146, 60, 0.06); }
-    .capture-btn:active:not(:disabled) { background: rgba(251, 146, 60, 0.1); }
+    .capture-btn:hover:not(:disabled) { background: rgba(181, 255, 26, 0.06); }
+    .capture-btn:active:not(:disabled) { background: rgba(181, 255, 26, 0.1); }
     .capture-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     .capture-btn svg {
@@ -144,7 +144,7 @@
       display: block;
       font-size: 9px;
       font-weight: 400;
-      color: rgba(251, 146, 60, 0.5);
+      color: rgba(181, 255, 26, 0.5);
       margin-top: 1px;
     }
 
@@ -199,7 +199,7 @@
       margin-top: 6px;
       transition: color 0.15s;
     }
-    .status.success { color: #4ade80; }
+    .status.success { color: #B5FF1A; }
     .status.error { color: #ef4444; }
 
     /* ─── How it works ─── */
@@ -240,7 +240,7 @@
       font-size: 9px;
       flex-shrink: 0;
     }
-    .how-pill .md { color: #fb923c; font-weight: 800; }
+    .how-pill .md { color: #B5FF1A; font-weight: 800; }
     .how-pill .dot { color: #fafafa; font-weight: 800; }
     .how-pill .fy { color: #fafafa; font-weight: 800; }
     .how-pill .lbl {
@@ -318,11 +318,11 @@
       transition: transform 0.15s, background 0.15s;
     }
     .settings-toggle input:checked + .settings-switch {
-      background: rgba(251, 146, 60, 0.25);
+      background: rgba(181, 255, 26, 0.25);
     }
     .settings-toggle input:checked + .settings-switch::after {
       transform: translateX(12px);
-      background: #fb923c;
+      background: #B5FF1A;
     }
 
     /* ─── Footer ─── */
@@ -339,13 +339,13 @@
       text-decoration: none;
       transition: color 0.1s;
     }
-    .footer a:hover { color: #fb923c; }
+    .footer a:hover { color: #B5FF1A; }
   </style>
 </head>
 <body>
   <div class="header">
     <a class="logo" href="https://memory.wiki" target="_blank">
-      <img src="icons/logo-full-dark.svg" alt="Memory.Wiki">
+      <img src="icons/logo-full-dark.svg" alt="memory.wiki">
     </a>
     <div class="header-meta">
       <div class="tagline">Your AI memory, deployable to any AI</div>
@@ -405,7 +405,7 @@
       </div>
       <div class="how-item">
         <span class="how-icon">→</span>
-        <span class="how-text">Published on Memory.Wiki with a permanent URL</span>
+        <span class="how-text">Published on memory.wiki with a permanent URL</span>
       </div>
     </div>
   </div>
@@ -418,14 +418,14 @@
   <div class="settings">
     <div class="settings-label">Settings</div>
     <label class="settings-toggle" id="toggle-float">
-      <span class="settings-text">Show <span style="color:#fb923c;font-weight:700">Memory.Wiki All</span> button on chat pages</span>
+      <span class="settings-text">Show <span style="color:#B5FF1A;font-weight:700">memory.wiki all</span> button on chat pages</span>
       <input type="checkbox" id="chk-float">
       <span class="settings-switch"></span>
     </label>
   </div>
 
   <div class="footer">
-    <a href="https://memory.wiki" target="_blank">Memory.Wiki</a>
+    <a href="https://memory.wiki" target="_blank">memory.wiki</a>
     <a href="https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" target="_blank">VS Code</a>
     <a href="https://memory.wiki/about" target="_blank">About</a>
   </div>

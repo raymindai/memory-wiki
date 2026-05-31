@@ -2,7 +2,7 @@
  * Memory.Wiki Chrome Extension — Content Script
  *
  * Injected into ChatGPT, Claude, and Gemini pages.
- * Adds a floating "Memory.Wiki" button and per-message mini buttons.
+ * Adds a floating "memory.wiki" button and per-message mini buttons.
  * Extracts conversation content as Markdown and sends to Memory.Wiki.
  */
 
@@ -960,7 +960,7 @@
     // Filter to uploadable images (include data: URLs from captured diagrams)
     const uploadable = matches.filter((match) => {
       const url = match[2];
-      if (url.includes("supabase") || url.includes("Memory.Wiki")) return false;
+      if (url.includes("supabase") || url.includes("memory.wiki")) return false;
       if (url.startsWith("data:")) return true; // captured diagram screenshots
       if (!url.startsWith("http")) return false;
       return true;
@@ -1030,7 +1030,7 @@
         }
         // Check for auth failure
         if (res.status === 401 || res.status === 403) {
-          showToast("Session expired. Log in at Memory.Wiki to sync.", 5000);
+          showToast("Session expired. Log in at memory.wiki to sync.", 5000);
         }
       } catch (err) {
         console.warn("[Memory.Wiki] Authenticated share failed, falling back to hash URL:", err);
@@ -1069,7 +1069,7 @@
     const btn = document.createElement("button");
     btn.id = "mw-float-btn";
     btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">M</span><span class="mw-logo-dot">.</span><span class="mw-logo-fy">W</span></span><span class="mw-btn-label">All</span>';
-    btn.title = "Capture entire conversation and publish on Memory.Wiki";
+    btn.title = "Capture entire conversation and publish on memory.wiki";
 
     const toggle = document.createElement("button");
     toggle.id = "mw-float-toggle";
@@ -1233,7 +1233,7 @@
       const miniBtn = document.createElement("button");
       miniBtn.className = "mw-mini-btn";
       miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
-      miniBtn.title = "Send this Q&A to Memory.Wiki";
+      miniBtn.title = "Send this Q&A to memory.wiki";
 
       const resetMini = () => {
         miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
@@ -1349,7 +1349,7 @@
   document.documentElement.style.setProperty("--mw-header-h", layout.headerH + "px");
   document.documentElement.style.setProperty("--mw-input-h", layout.inputH + "px");
 
-  // Align Memory.Wiki All to the right edge of the message content area
+  // Align memory.wiki all to the right edge of the message content area
   function measureContentRight() {
     const msgSelectors = {
       chatgpt: "[data-message-author-role='assistant']",
@@ -1367,7 +1367,7 @@
 
   // ─── Initialize ───
 
-  // Only show floating "Memory.Wiki All" button if user opted in (default: hidden)
+  // Only show floating "memory.wiki all" button if user opted in (default: hidden)
   try {
     chrome.storage.sync.get({ showFloatingButton: false }, (data) => {
       if (data && data.showFloatingButton) {
