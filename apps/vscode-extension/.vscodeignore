@@ -1,7 +1,6 @@
 .vscode/**
 .vscode-test/**
 src/**
-node_modules/**
 .gitignore
 tsconfig.json
 **/*.ts
@@ -9,3 +8,19 @@ tsconfig.json
 out/**/*.map
 package-lock.json
 mdfy-vscode-*.vsix
+memory-wiki-vscode-*.vsix
+
+# Trim runtime node_modules — keep only what's actually require'd
+# at extension runtime. Excluding `node_modules/**` whole-sale (which
+# the file did through 1.4.6) was the cause of the silent activation
+# failure "Cannot find module 'markdown-it'": VSIX shipped zero
+# runtime deps and the extension host crashed the moment activate()
+# touched render.ts. Now runtime deps (markdown-it, highlight.js,
+# katex, yjs, supabase-js, markdown-it-footnote) ship and only the
+# dev-time tooling is stripped.
+node_modules/.bin/**
+node_modules/.cache/**
+node_modules/.package-lock.json
+node_modules/@types/**
+node_modules/@vscode/vsce/**
+node_modules/typescript/**

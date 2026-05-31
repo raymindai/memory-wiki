@@ -5,7 +5,7 @@
      small 16px tab icon stays readable when VS Code renders it on a
      dark titlebar. The legacy MW wordmark this replaces read as
      letterforms at 16px, which collapsed into illegible scribble. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#fafafa">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3 2 26 28" fill="#fafafa">
   <path d="M26.77,16.03c-.99,0-1.8.81-1.8,1.8s.81,1.8,1.8,1.8,1.8-.81,1.8-1.8-.81-1.8-1.8-1.8Z"/>
   <circle cx="16.4" cy="5.27" r="2.82"/>
   <path d="M7.35,22.79c-.88.34-1.12,1.33-.77,2.05.35.7,1.15.99,1.92.7.79-.3,1.08-1.09.77-1.94-.25-.68-1.08-1.15-1.92-.82h0Z"/>
