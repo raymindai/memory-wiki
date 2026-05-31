@@ -778,11 +778,11 @@ body {
   color: var(--vscode-foreground);
 }
 
-/* Tooltip — multi-line wrap for row state (`Public (anyone…)
-   \n Synced from this editor \n Starred \n id…`). max-width
-   keeps it from spanning the editor area when the sidebar is
-   narrow. pre-line honours the `\n` separators that docStateText
-   emits in place of middle-dots. */
+/* Tooltip — multi-line wrap for the row-state hover string
+   (Public (anyone…) / Synced from this editor / Starred / id…).
+   max-width keeps it from spilling beyond the sidebar when
+   the panel is narrow. pre-line honours the newline separators
+   that docStateText emits in place of middle-dots. */
 .sb-tooltip {
   position: fixed;
   z-index: 9999;
