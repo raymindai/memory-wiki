@@ -4567,21 +4567,33 @@ export default function MdEditor() {
               return;
             }
 
-            // Local is dirty if autosave is mid-flight. We can't compare
-            // localMd against any "last saved" body cheaply (tabs.markdown
-            // is load-time, not last-saved), but updated_at advanced past
-            // lastKnown already proved someone else wrote — so the choice
-            // is just: overwrite or notify. Overwrite is safe iff the
-            // autosave queue is empty.
-            const localIsDirty = autoSave.isSaving;
+            // Local is dirty if EITHER an autosave is in flight OR the
+            // live markdown differs from the baseline we know matches
+            // server. The previous check used `autoSave.isSaving` alone,
+            // which is FALSE during the 2.5s debounce window after a
+            // keystroke. A realtime payload landing in that window would
+            // overwrite the user's typing without a conflict notice —
+            // exact data-loss bug founder reported (input vanishes,
+            // cursor jumps to end via setMarkdown -> setContent).
+            // Baseline: last successfully saved body, or — if we haven't
+            // saved this session — the body the tab loaded with.
+            const lastSaved = autoSave.getLastSavedMarkdown();
+            const loadedBody = currentTab?.markdown ?? "";
+            const baseline = lastSaved !== "" ? lastSaved : loadedBody;
+            const localIsDirty = autoSave.isSaving || localMd !== baseline;
 
             if (!localIsDirty) {
-              // Server changed, local clean → auto-pull silently
+              // Server changed, local clean → auto-pull silently.
+              // Also push into Tiptap so the Live tab stays in sync
+              // with the parent's markdown state (previously this
+              // path only updated parent state, leaving Tiptap on
+              // the old content until the user switched tabs).
               const oldMd = localMd;
               setMarkdownRaw(serverMd);
               if (serverTitle) setTitle(serverTitle);
               doRender(serverMd);
               cmSetDocRef.current?.(serverMd);
+              tiptapRef.current?.setMarkdown(serverMd);
               if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
               setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: serverTitle || t.title } : t));
               highlightDiff(oldMd, serverMd);
@@ -4639,9 +4651,17 @@ export default function MdEditor() {
           if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
           return;
         }
-        // Genuine external advance. If autosave is mid-flight, the
-        // user has uncommitted edits we shouldn't overwrite.
-        const localIsDirty = autoSave.isSaving;
+        // Genuine external advance. The dirty check is the SAME shape
+        // as the realtime channel above: isSaving alone misses the
+        // 2.5s debounce window where the user just typed but the
+        // PATCH hasn't fired yet. Compare against the last persisted
+        // body, or — if we haven't saved this session — the body the
+        // tab loaded with, so a focus-return mid-typing never wipes
+        // the buffer.
+        const lastSaved = autoSave.getLastSavedMarkdown();
+        const loadedBody = currentTab?.markdown ?? "";
+        const baseline = lastSaved !== "" ? lastSaved : loadedBody;
+        const localIsDirty = autoSave.isSaving || localMd !== baseline;
         if (localIsDirty) {
           showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
           return;

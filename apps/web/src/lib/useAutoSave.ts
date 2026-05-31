@@ -406,6 +406,17 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
   const getLastServerUpdatedAt = useCallback(() => lastServerUpdatedAtRef.current, []);
 
   /**
+   * Read the last markdown body we successfully persisted to the server.
+   * Callers compare this against their live markdownRef to know whether
+   * local content has un-saved keystrokes — `isSaving` alone is FALSE
+   * for the entire 2.5s debounce window between the last keystroke and
+   * the next PATCH, so any background refetch / realtime auto-pull
+   * that gates only on `isSaving` ends up clobbering the user's
+   * in-flight typing.
+   */
+  const getLastSavedMarkdown = useCallback(() => lastSavedMdRef.current, []);
+
+  /**
    * Clear the sticky `error` (and any conflict). Used when switching
    * tabs / loading a new doc, since a stale error from a previous
    * tab's failed save shouldn't keep showing in the header on a doc
@@ -423,6 +434,7 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
     dismissConflict,
     setLastServerUpdatedAt,
     getLastServerUpdatedAt,
+    getLastSavedMarkdown,
     clearError,
     cancel,
   };
