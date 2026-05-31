@@ -1,5 +1,5 @@
 /* =========================================================
-   Memory.Wiki for Mac — Electron + Local WASM + Sidebar + Sync
+   memory.wiki for Mac — Electron + Local WASM + Sidebar + Sync
    Architecture: mirrors VS Code extension model
    - Sidebar with file list (ALL/SYNCED/LOCAL/CLOUD)
    - SyncEngine (push/pull/conflict/offline queue/polling)
@@ -1121,7 +1121,7 @@ function openFileInApp(filePath) {
   const ext = path.extname(absolutePath).toLowerCase();
 
   if (!ALL_SUPPORTED_EXTENSIONS.has(ext)) {
-    dialog.showErrorBox("Unsupported Format", `Memory.Wiki does not support ${ext} files.`);
+    dialog.showErrorBox("Unsupported Format", `memory.wiki does not support ${ext} files.`);
     return;
   }
 
@@ -1151,7 +1151,7 @@ function openFileInApp(filePath) {
       });
     } else {
       // Non-text: show import message
-      const msg = `Import ${ext} files by opening them on Memory.Wiki.`;
+      const msg = `Import ${ext} files by opening them on memory.wiki.`;
       const md = `# ${path.basename(absolutePath)}\n\n${msg}`;
       const result = renderMarkdown(md);
       mainWindow.webContents.send("load-document", {
@@ -1996,7 +1996,7 @@ function buildMenu() {
   const isMac = process.platform === "darwin";
   const template = [
     ...(isMac ? [{
-      label: "Memory.Wiki",
+      label: "memory.wiki",
       submenu: [
         { role: "about" },
         { type: "separator" },
@@ -2061,7 +2061,7 @@ function buildMenu() {
         },
         { type: "separator" },
         {
-          label: "Publish to Memory.Wiki",
+          label: "Publish to memory.wiki",
           accelerator: "CmdOrCtrl+Shift+P",
           click: () => {
             if (mainWindow) mainWindow.webContents.send("trigger-publish");
@@ -2100,8 +2100,8 @@ function buildMenu() {
     {
       label: "Help",
       submenu: [
-        { label: "Memory.Wiki", click: () => shell.openExternal("https://memory.wiki") },
-        { label: "About Memory.Wiki", click: () => shell.openExternal("https://memory.wiki/about") },
+        { label: "memory.wiki", click: () => shell.openExternal("https://memory.wiki") },
+        { label: "About memory.wiki", click: () => shell.openExternal("https://memory.wiki/about") },
       ],
     },
   ];
@@ -2153,10 +2153,10 @@ app.on("open-file", (event, filePath) => {
 
 app.whenReady().then(() => {
   app.setAboutPanelOptions({
-    applicationName: "Memory.Wiki",
+    applicationName: "memory.wiki",
     applicationVersion: app.getVersion(),
     version: `Electron ${process.versions.electron}`,
-    copyright: "Copyright 2024-2026 Memory.Wiki",
+    copyright: "Copyright 2024-2026 memory.wiki",
     website: "https://memory.wiki",
     iconPath: path.join(__dirname, "assets", "icon.png"),
   });

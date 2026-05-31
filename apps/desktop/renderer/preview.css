@@ -337,7 +337,7 @@ html, body {
 
 /* =========================================================
    DOCUMENT STYLES (.mdcore-rendered)
-   Synced with Memory.Wiki globals.css
+   Synced with memory.wiki globals.css
    ========================================================= */
 
 .mdcore-rendered {
@@ -1472,7 +1472,7 @@ body {
   cursor: pointer;
 }
 .sidebar-logo img {
-  /* Memory.Wiki wordmark viewBox is 135.5×20.81 (wider aspect than
+  /* memory.wiki wordmark viewBox is 135.5×20.81 (wider aspect than
      the prior mdfy.app at 119.33×26.53). At the old 18px height the
      wordmark renders ~117px wide and pushes the action icons off
      the right side of the sidebar header. 12px brings the rendered

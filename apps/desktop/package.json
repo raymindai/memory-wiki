@@ -1,7 +1,7 @@
 {
   "name": "memory-wiki-desktop",
-  "version": "2.3.6",
-  "description": "memory.wiki for Mac: Markdown publishing with sidebar, sync, and local rendering.",
+  "version": "2.4.0",
+  "description": "Native macOS app for memory.wiki: sidebar to your cloud docs, two-way sync, WYSIWYG preview, drag-and-drop import, offline-ready. Same shareable URL Claude, ChatGPT, Cursor, and Gemini all read.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -25,7 +25,7 @@
   },
   "build": {
     "appId": "cc.memorywiki.desktop",
-    "productName": "Memory.Wiki",
+    "productName": "memory.wiki",
     "directories": {
       "output": "dist"
     },
@@ -48,7 +48,7 @@
     ],
     "protocols": [
       {
-        "name": "Memory.Wiki",
+        "name": "memory.wiki",
         "schemes": [
           "memorywiki"
         ]
@@ -84,7 +84,7 @@
       "type": "distribution"
     },
     "dmg": {
-      "title": "Memory.Wiki",
+      "title": "memory.wiki",
       "contents": [
         {
           "x": 130,

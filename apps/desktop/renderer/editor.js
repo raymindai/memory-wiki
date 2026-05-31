@@ -1,5 +1,5 @@
 /* =========================================================
-   Memory.Wiki for Mac — Unified Editor + Sidebar
+   memory.wiki for Mac — Unified Editor + Sidebar
    Architecture mirrors VS Code extension:
    - Left sidebar: file list (ALL/SYNCED/LOCAL/CLOUD)
    - Right: WYSIWYG editor with toolbar
@@ -335,12 +335,12 @@
       }
     } else if (currentFilter === "synced") {
       if (!sidebarState.authState.loggedIn) {
-        html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to Memory.Wiki to sync them across devices</p><button class="login-prompt-btn" onclick="window.mwDesktop.login()">Sign in</button></div>';
+        html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to memory.wiki to sync them across devices</p><button class="login-prompt-btn" onclick="window.mwDesktop.login()">Sign in</button></div>';
       } else if (synced.length > 0) {
         html += secHeader("synced", "Synced", synced.length);
         for (var s = 0; s < synced.length; s++) html += renderSyncedItem(synced[s]);
       } else {
-        html += '<div class="sidebar-empty"><p>No synced documents</p><p class="sidebar-empty-hint">Publish a file to sync it with Memory.Wiki</p></div>';
+        html += '<div class="sidebar-empty"><p>No synced documents</p><p class="sidebar-empty-hint">Publish a file to sync it with memory.wiki</p></div>';
       }
 
     } else if (currentFilter === "local") {
@@ -652,7 +652,7 @@
     var meta = synced ? "synced " + synced : f.relativePath;
     var active = f.filePath === currentFilePath ? " active" : "";
     return '<div class="file-item' + active + '" data-path="' + esc(f.filePath) + '">' +
-      '<div class="file-icon shared" title="Synced with Memory.Wiki">' + SBI.share + syncBadgeHtml + '</div>' +
+      '<div class="file-icon shared" title="Synced with memory.wiki">' + SBI.share + syncBadgeHtml + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
         '<button data-action="copy-url" data-path="' + esc(f.filePath) + '" title="Copy URL">' + SBI.copy + '</button>' +
@@ -670,7 +670,7 @@
       '<div class="file-icon local">' + SBI.file + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(f.relativePath) + '</div></div>' +
       '<div class="file-actions">' +
-        '<button data-action="publish" data-path="' + esc(f.filePath) + '" title="Sync to Memory.Wiki">' + SBI.upload + '</button>' +
+        '<button data-action="publish" data-path="' + esc(f.filePath) + '" title="Sync to memory.wiki">' + SBI.upload + '</button>' +
       '</div>' +
       '<span class="file-time">' + timeAgo(f.modifiedAt) + '</span>' +
     '</div>';
@@ -806,7 +806,7 @@
         '<div class="user-signin-wrap">' +
           '<button class="user-signin" id="btn-signin">' +
             '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3 2.5-5 6-5s6 2 6 5"/></svg>' +
-            'Sign in to Memory.Wiki' +
+            'Sign in to memory.wiki' +
           '</button>' +
           '<div class="user-signin-hint">Sync, publish, and access cloud documents</div>' +
         '</div>';
@@ -857,7 +857,7 @@
         window.mwDesktop.openInBrowser("https://memory.wiki/" +pathOrId);
         break;
       case "delete-synced":
-        if (confirm("Delete this document from Memory.Wiki? The local file will remain.")) {
+        if (confirm("Delete this document from memory.wiki? The local file will remain.")) {
           await window.mwDesktop.syncDelete(pathOrId);
           await refreshSidebarData();
           renderSidebar();
@@ -865,7 +865,7 @@
         }
         break;
       case "delete-cloud":
-        if (confirm("Delete this document from Memory.Wiki?")) {
+        if (confirm("Delete this document from memory.wiki?")) {
           await window.mwDesktop.deleteCloudDoc(pathOrId);
           await refreshSidebarData();
           renderSidebar();
@@ -1648,7 +1648,7 @@
 
     var authState = await window.mwDesktop.getAuthState();
     if (!authState.loggedIn) {
-      if (confirm("Sign in required to publish.\n\nYour document will be published as a shareable URL on Memory.Wiki.\n\nSign in now?")) {
+      if (confirm("Sign in required to publish.\n\nYour document will be published as a shareable URL on memory.wiki.\n\nSign in now?")) {
         window.mwDesktop.login();
       }
       return;
@@ -1657,7 +1657,7 @@
     // Confirm first publish
     var isUpdate = currentConfig && currentConfig.docId;
     if (!isUpdate) {
-      if (!confirm("Publish to Memory.Wiki?\n\nA shareable URL will be created and copied to your clipboard.")) return;
+      if (!confirm("Publish to memory.wiki?\n\nA shareable URL will be created and copied to your clipboard.")) return;
     }
 
     // Save first if needed
@@ -2500,7 +2500,7 @@
         temp.querySelectorAll("*").forEach(function(el) {
           el.removeAttribute("class"); el.removeAttribute("id"); el.removeAttribute("style");
         });
-        // Convert to markdown then re-render to get clean Memory.Wiki HTML
+        // Convert to markdown then re-render to get clean memory.wiki HTML
         var pastedMd = htmlToMarkdown(temp).trim();
         if (pastedMd) {
           window.mwDesktop.renderMarkdown(pastedMd).then(function(r) {
@@ -3077,7 +3077,7 @@
 
   // ─── Tooltips ───
 
-  // ─── Custom Instant Tooltips (Memory.Wiki style) ───
+  // ─── Custom Instant Tooltips (memory.wiki style) ───
   var tipEl = null;
   var tipHideTimer = null;
 
@@ -3321,14 +3321,14 @@
         await refreshSidebarData(); renderSidebar();
       }});
       items.push({ label: "Delete from Cloud", danger: true, action: async function() {
-        if (confirm("Delete from Memory.Wiki? Local file stays.")) {
+        if (confirm("Delete from memory.wiki? Local file stays.")) {
           await window.mwDesktop.syncDelete(filePath);
           await refreshSidebarData(); renderSidebar();
           showToast("Deleted from cloud");
         }
       }});
     } else {
-      items.push({ label: "Publish to Memory.Wiki", action: function() {
+      items.push({ label: "Publish to memory.wiki", action: function() {
         window.mwDesktop.openFilePath(filePath);
         setTimeout(function() { doPublish(); }, 500);
       }});
@@ -3388,7 +3388,7 @@
 
     items.push({ divider: true });
     items.push({ label: "Delete from Cloud", danger: true, action: async function() {
-      if (confirm("Delete from Memory.Wiki?")) {
+      if (confirm("Delete from memory.wiki?")) {
         await window.mwDesktop.deleteCloudDoc(docId);
         await refreshSidebarData(); renderSidebar();
         showToast("Deleted");
