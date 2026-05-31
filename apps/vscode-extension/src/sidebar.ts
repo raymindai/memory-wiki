@@ -1179,7 +1179,7 @@ body {
       if (showSynced) {
         if (!isLoggedIn && (currentFilter === 'all' || currentFilter === 'synced')) {
           html += secHeader('sync', 'Synced', '');
-          html += '<div class="login-prompt"><p>Sign in to sync your documents between VS Code and memory.wiki.</p><button class="login-btn" id="login-btn">Sign in to memory.wiki</button></div>';
+          html += '<div class="login-prompt"><p>Sign in to see your synced files.</p></div>';
         } else if (synced.length > 0) {
           html += secHeader('sync', 'Synced', synced.length);
           html += '<ul class="doc-list">';
@@ -1200,7 +1200,7 @@ body {
       if (showCloud) {
         if (!isLoggedIn) {
           html += secHeader('globe', 'Cloud', '');
-          html += '<div class="login-prompt"><p>Sign in to access your cloud documents and pull them to your workspace.</p><button class="login-btn" id="login-btn">Sign in to memory.wiki</button></div>';
+          html += '<div class="login-prompt"><p>Sign in to load your cloud documents.</p></div>';
         } else if (cloudFiltered.length > 0) {
           html += secHeader('globe', 'Cloud', cloudFiltered.length);
           // Docs without folder
