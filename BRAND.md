@@ -39,6 +39,7 @@ These are the rules most often broken:
 | Copy for AI sentence | `Use https://memory.wiki/<id> as my context.` | invented phrasings |
 | Picker selection | quiet (surface lift + ink check + mono `01 02 03` order) | colored fills, numbered pills |
 | Document data safety | dirty check = `markdown !== baseline` (NOT `isSaving` alone) | clobbering local typing on refetch |
+| Accent picker keys | full 16 (10 vivid + 6 muted: sage/slate/sand/mauve/rose/iris) in **all four** SOT files (theme-options.ts, globals.css, profile/route.ts ACCENT_KEYS, Brand.kt enum) | editing only one or two — server whitelist drops native PATCHes silently |
 
 Everything else is in the wiki doc.
 
@@ -71,4 +72,4 @@ delegate to `BrandTokens` (the generated file). Translucent
 variants (`accentDim`, `borderDim`) compose on top of generated
 opaque hex via `.opacity()` / `.copy(alpha = ...)`.
 
-*Last refreshed: 2026-05-31*
+*Last refreshed: 2026-05-31 (added accent picker SOT row to cheat sheet; wiki section 2.6 has the full palette)*

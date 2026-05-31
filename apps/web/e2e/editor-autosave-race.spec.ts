@@ -22,6 +22,12 @@ import { test, expect } from "@playwright/test";
 import { setupEditableTab } from "./_helpers";
 
 test.describe("Editor autosave race — Google Docs-level data safety", () => {
+  // setupEditableTab's cold-start can eat 15s+ of the default 30s
+  // budget on CI (Tiptap mount + first-page hydration). Bump to 60s
+  // so the assertion phase has comfortable headroom; tests still
+  // assert within their own 2s expect timeouts.
+  test.describe.configure({ timeout: 60_000 });
+
   test.beforeEach(async ({ page }) => {
     await setupEditableTab(page);
   });
