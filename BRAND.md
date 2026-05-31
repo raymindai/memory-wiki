@@ -3,6 +3,11 @@
 **Canonical source (web, always up-to-date):**
 <https://memory.wiki/L2SHNVir>
 
+**Design tokens (single source of truth):** `/design-tokens/` at
+repo root. JSON files (DTCG format) for color / typography /
+spacing / radii / motion. Run `npm run tokens:build` to emit
+per-platform files. Every visual decision flows from here.
+
 This file is a pointer, not a mirror. The wiki version is the
 source of truth. Read it before:
 
@@ -41,10 +46,29 @@ Everything else is in the wiki doc.
 
 ## Updating
 
+### Brand decisions (visual, tone, copy)
+
 1. Edit the wiki at <https://memory.wiki/L2SHNVir>
-2. If the change touches tokens, update `globals.css` (web),
-   `Brand.swift` (iOS), `Brand.kt` (Android) in lockstep
-3. Bump the wiki doc's "Updated" date
-4. (Optional) refresh this stub's date below
+2. Bump the wiki doc's "Updated" date
+3. (Optional) refresh this stub's date below
+
+### Design tokens (colors, typography, spacing, radii, motion)
+
+1. Edit the JSON under `/design-tokens/` (DTCG format)
+2. Run `npm run tokens:build` at repo root
+3. Style Dictionary emits to every platform automatically:
+   - `apps/web/src/app/_tokens.{dark,light}.generated.css`
+   - `apps/ios-native/MemoryWiki/BrandTokens.generated.swift`
+   - `apps/android-native/.../ui/theme/BrandTokens.generated.kt`
+   - `apps/vscode-extension/media/_tokens.{dark,light}.generated.css`
+   - `apps/desktop/renderer/_tokens.{dark,light}.generated.css`
+4. Commit both the JSON source AND the regenerated outputs so
+   contributors don't have to run the build to consume tokens
+5. No more 4-mirror hand-sync. One edit propagates everywhere.
+
+The `Brand.swift` / `Brand.kt` files are thin facades that
+delegate to `BrandTokens` (the generated file). Translucent
+variants (`accentDim`, `borderDim`) compose on top of generated
+opaque hex via `.opacity()` / `.copy(alpha = ...)`.
 
 *Last refreshed: 2026-05-31*
