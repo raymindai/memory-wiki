@@ -1,6 +1,6 @@
 {
   "name": "memory-wiki-desktop",
-  "version": "2.4.10",
+  "version": "2.4.11",
   "description": "Native macOS app for memory.wiki: sidebar to your cloud docs, two-way sync, WYSIWYG preview, drag-and-drop import, offline-ready. Same shareable URL Claude, ChatGPT, Cursor, and Gemini all read.",
   "main": "main.js",
   "scripts": {

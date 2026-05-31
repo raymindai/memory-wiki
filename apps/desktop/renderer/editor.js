@@ -217,6 +217,41 @@
       });
     }
 
+    // Home QuickLook banner — adaptive. Renders "Enable" CTA when
+    // the extension isn't registered yet, "On" status when it is.
+    // installQuickLook() already runs on every launch in main.js,
+    // but the user may need to flip the toggle in System Settings
+    // → Extensions if macOS auto-disabled the .appex.
+    var qlBanner = document.getElementById("home-quicklook-banner");
+    var qlTitle = document.getElementById("home-quicklook-title");
+    var qlDesc = document.getElementById("home-quicklook-desc");
+    var qlAction = document.getElementById("home-quicklook-action");
+    if (qlBanner && window.mwDesktop.isQuickLookInstalled) {
+      window.mwDesktop.isQuickLookInstalled().then(function(installed) {
+        qlBanner.style.display = "flex";
+        if (installed) {
+          qlBanner.classList.add("active");
+          if (qlTitle) qlTitle.textContent = "QuickLook Preview is on";
+          if (qlDesc) qlDesc.textContent = "Press Space on any .md file in Finder to preview it instantly.";
+          if (qlAction) qlAction.textContent = "Active";
+        } else {
+          qlBanner.classList.remove("active");
+          if (qlTitle) qlTitle.textContent = "Enable QuickLook Preview";
+          if (qlDesc) qlDesc.textContent = "Press Space on .md files in Finder to preview them without opening.";
+          if (qlAction) qlAction.textContent = "Enable";
+        }
+      });
+      qlBanner.addEventListener("click", function() {
+        window.mwDesktop.openQuickLookSettings();
+      });
+      qlBanner.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          window.mwDesktop.openQuickLookSettings();
+        }
+      });
+    }
+
     // Sidebar logo → open memory.wiki in the system browser. Matches
     // the web's own wordmark behavior. "Back to home in app" is now
     // the Home view-switcher tab in the header, not the brand mark.

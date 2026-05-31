@@ -3883,17 +3883,17 @@ body.sidebar-resizing * {
    illustration. */
 .home-blob-bg {
   position: absolute;
-  right: -260px;
-  bottom: -300px;
-  width: 1100px;
-  height: 1100px;
+  right: -160px;
+  bottom: -200px;
+  width: 760px;
+  height: 760px;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.18;
-  /* Heavy blur turns the SVG into an ambient glow rather than a
-     recognizable shape — combined with backdrop-filter on the cards
-     above, the result reads like the web's depth pattern. */
-  filter: blur(80px) saturate(1.1);
+  opacity: 0.11;
+  /* Soft blur — the blob still reads as a blob but bleeds enough
+     that backdrop-filter on the glass cards above picks up a real
+     gradient instead of a flat fill. */
+  filter: blur(36px) saturate(1.1);
 }
 .home-blob-bg img {
   position: absolute;
@@ -3904,7 +3904,96 @@ body.sidebar-resizing * {
 .home-blob-bg .blob-lighttheme { display: none; }
 [data-theme="light"] .home-blob-bg .blob-darktheme { display: none; }
 [data-theme="light"] .home-blob-bg .blob-lighttheme { display: block; }
-[data-theme="light"] .home-blob-bg { opacity: 0.12; }
+[data-theme="light"] .home-blob-bg { opacity: 0.08; }
+
+/* QuickLook (and future) horizontal banner: glass surface, icon
+   left, copy middle, action chip right. Reuses the same depth
+   plane as the home-list / home-create-card so the page reads as
+   a coherent set of glass tiles. */
+.home-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(24, 24, 27, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.15s;
+}
+[data-theme="light"] .home-banner {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.65);
+}
+.home-banner:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+[data-theme="light"] .home-banner:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+.home-banner.active {
+  /* Subtle green tint when QuickLook is already on so the user
+     reads it as a status badge rather than a CTA. */
+  border-color: rgba(34, 197, 94, 0.25);
+}
+.home-banner-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.home-banner.active .home-banner-icon {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+}
+.home-banner-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.home-banner-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.home-banner-desc {
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+.home-banner-action {
+  flex-shrink: 0;
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+[data-theme="light"] .home-banner-action {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.home-banner.active .home-banner-action {
+  color: #22c55e;
+  background: transparent;
+  border-color: transparent;
+}
 
 /* Make sure scrollable content sits above the ornament. */
 .home-screen .home-scroll {

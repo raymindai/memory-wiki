@@ -2013,8 +2013,16 @@ ipcMain.handle("open-quicklook-settings", () => {
 });
 
 ipcMain.handle("is-quicklook-installed", () => {
-  const marker = path.join(USER_DATA_DIR, ".quicklook-installed");
-  return fs.existsSync(marker);
+  // True if either the legacy marker, the version-specific marker
+  // (set by installQuickLook on launch), or the actual extension host
+  // bundle in ~/Applications exists. The legacy versionless marker
+  // alone was unreliable — once installQuickLook auto-installs, only
+  // the versioned marker gets written, so the old check returned
+  // false even though the .appex was registered with LaunchServices.
+  const legacy = path.join(USER_DATA_DIR, ".quicklook-installed");
+  const versioned = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
+  const installedBundle = path.join(app.getPath("home"), "Applications", "MdfyQuickLook.app");
+  return fs.existsSync(legacy) || fs.existsSync(versioned) || fs.existsSync(installedBundle);
 });
 
 ipcMain.handle("read-clipboard", () => {
