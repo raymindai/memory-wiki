@@ -202,7 +202,7 @@ export function activate(context: vscode.ExtensionContext): void {
       // Require login for publish
       if (!await authManager?.isLoggedIn()) {
         const choice = await vscode.window.showWarningMessage(
-          "Sign in to Memory.Wiki to publish documents.",
+          "Sign in to memory.wiki to publish documents.",
           "Sign In"
         );
         if (choice === "Sign In") { vscode.commands.executeCommand("memorywiki.login"); }
@@ -526,14 +526,14 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("memorywiki.sync", async () => {
       const items: vscode.QuickPickItem[] = [
-        { label: "$(cloud-upload) Publish", description: "Publish current file to Memory.Wiki" },
-        { label: "$(arrow-up) Push", description: "Push local changes to Memory.Wiki" },
-        { label: "$(arrow-down) Pull", description: "Pull latest from Memory.Wiki" },
-        { label: "$(sign-in) Login", description: "Login to Memory.Wiki" },
+        { label: "$(cloud-upload) Publish", description: "Publish current file to memory.wiki" },
+        { label: "$(arrow-up) Push", description: "Push local changes to memory.wiki" },
+        { label: "$(arrow-down) Pull", description: "Pull latest from memory.wiki" },
+        { label: "$(sign-in) Login", description: "Login to memory.wiki" },
       ];
 
       const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: "Memory.Wiki Sync Actions",
+        placeHolder: "memory.wiki Sync Actions",
       });
 
       if (!selected) {return;}
@@ -621,7 +621,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
         // Auto-open preview if enabled (skip if sidebar just opened it)
         if (!suppressAutoPreview) {
-          const autoPreview = vscode.workspace.getConfiguration("Memory.Wiki").get<boolean>("autoPreview", true);
+          const autoPreview = vscode.workspace.getConfiguration("memorywiki").get<boolean>("autoPreview", true);
           if (autoPreview) {
             PreviewPanel.createIfNotExists(context.extensionUri, editor.document);
           }
@@ -671,7 +671,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Always start sync polling — published files need cloud change detection
   {
-    const config = vscode.workspace.getConfiguration("Memory.Wiki");
+    const config = vscode.workspace.getConfiguration("memorywiki");
     const interval = config.get<number>("syncInterval") ?? 30;
     syncEngine.startPolling(interval);
   }
@@ -695,7 +695,7 @@ export function activate(context: vscode.ExtensionContext): void {
         );
       }
     });
-    const autoPreview = vscode.workspace.getConfiguration("Memory.Wiki").get<boolean>("autoPreview", true);
+    const autoPreview = vscode.workspace.getConfiguration("memorywiki").get<boolean>("autoPreview", true);
     if (autoPreview) {
       PreviewPanel.createIfNotExists(context.extensionUri, vscode.window.activeTextEditor.document);
     }
@@ -728,7 +728,7 @@ export function getAuthManager(): AuthManager | undefined {
 }
 
 export function getApiBaseUrl(): string {
-  const config = vscode.workspace.getConfiguration("Memory.Wiki");
+  const config = vscode.workspace.getConfiguration("memorywiki");
   return config.get<string>("apiBaseUrl") ?? "https://memory.wiki";
 }
 

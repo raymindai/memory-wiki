@@ -9,22 +9,22 @@ window.MDFY_EXAMPLES = {
 
 ## Get Started
 
-1. **Type or paste** anything — Markdown, plain text, Claude Code output
-2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
+1. **Type or paste** anything: Markdown, plain text, Claude Code output
+2. **Import** files: PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
 3. **Edit** inline in the Live view, or use Source for raw Markdown
-4. **Share** with one click — generates a short URL like \`memory.wiki/abc123\`
+4. **Share** with one click: generates a short URL like \`memory.wiki/abc123\`
 
 ## What You Can Do
 
-- **WYSIWYG editing** — click any text in the Live view and start typing
-- **AI Tools** — Polish, Summary, TL;DR, Translate, Chat (right panel)
-- **Document Outline** — heading structure panel on the right
-- **Image Gallery** — upload, manage, and insert images (right panel)
-- **Multi-format import** — drag & drop PDF, DOCX, PPTX, XLSX, or 10+ other formats
-- **Export anywhere** — download as MD/HTML/TXT, print PDF, copy for Docs/Email/Slack
-- **Flavor conversion** — click the flavor badge (GFM ▾) to convert between formats
-- **Folders + Trash** — organize with folders, drag to move, soft delete with restore
-- **Cross-platform sync** — edit on Web, VS Code, Mac Desktop, or CLI. Same URL everywhere
+- **WYSIWYG editing**: click any text in the Live view and start typing
+- **AI Tools**: Polish, Summary, TL;DR, Translate, Chat (right panel)
+- **Document Outline**: heading structure panel on the right
+- **Image Gallery**: upload, manage, and insert images (right panel)
+- **Multi-format import**: drag & drop PDF, DOCX, PPTX, XLSX, or 10+ other formats
+- **Export anywhere**: download as MD/HTML/TXT, print PDF, copy for Docs/Email/Slack
+- **Flavor conversion**: click the flavor badge (GFM ▾) to convert between formats
+- **Folders + Trash**: organize with folders, drag to move, soft delete with restore
+- **Cross-platform sync**: edit on Web, VS Code, Mac Desktop, or CLI. Same URL everywhere
 
 ## Keyboard Shortcuts
 
@@ -40,13 +40,13 @@ window.MDFY_EXAMPLES = {
 
 ## Try It Now
 
-- **Drop a PDF here** — see AI Memory.Wiki turn it into clean Markdown
+- **Drop a PDF here**: see AI memory.wiki turn it into clean Markdown
 - **Click +** in the sidebar to start a new doc from a template
-- **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during the beta, no credit card
+- **Sign in** (sidebar bottom) for cloud sync and short URL sharing: free during the beta, no credit card
 
 ---
 
-*Powered by **mdcore engine** — Rust + WASM*`,
+*Powered by **mdcore engine**: Rust + WASM*`,
 
   syntax: `# Markdown Syntax Guide
 
@@ -137,9 +137,9 @@ Markdown
 : A lightweight markup language for creating formatted text.
 
 WASM
-: WebAssembly — a binary instruction format for a stack-based virtual machine.`,
+: WebAssembly: a binary instruction format for a stack-based virtual machine.`,
 
-  diagrams: `# Mermaid Diagrams — All 19 Types
+  diagrams: `# Mermaid Diagrams: All 19 Types
 
 > **Tip:** Double-click any diagram to open the visual editor.
 
@@ -389,7 +389,7 @@ xychart-beta
 
 ## Free During Beta
 
-Everything is unlocked while we're testing — no credit card required.
+Everything is unlocked while we're testing: no credit card required.
 
 \`\`\`
 ┌─ Beta (everyone) ──────┐
@@ -397,14 +397,14 @@ Everything is unlocked while we're testing — no credit card required.
 │ Documents never expire │
 │ Cloud sync             │
 │ Short URL sharing      │
-│ AI Memory.Wiki structuring    │
+│ AI memory.wiki structuring    │
 │ All formats supported  │
 └────────────────────────┘
 \`\`\``,
 
   import: `# Import & Export Guide
 
-## Import — 13+ Formats
+## Import: 13+ Formats
 
 Drop any file onto Memory.Wiki or click **IMPORT** in the sidebar.
 
@@ -421,7 +421,7 @@ Drop any file onto Memory.Wiki or click **IMPORT** in the sidebar.
 
 ### AI Memory.Wiki Structuring
 
-After importing, you'll see **"Memory.Wiki this document?"** — click **Memory.Wiki it** to let AI:
+After importing, you'll see **"memory.wiki this document?"**: click **memory.wiki it** to let AI:
 
 - Detect headings from context
 - Rebuild lists, tables, code blocks
@@ -430,23 +430,23 @@ After importing, you'll see **"Memory.Wiki this document?"** — click **Memory.
 
 > Works great for PDF imports where formatting is lost during text extraction.
 
-## Export — Every Destination
+## Export: Every Destination
 
 Click the **Export** icon in the Live view header.
 
 ### Download
-- **Markdown (.md)** — raw source
-- **HTML (.html)** — styled, self-contained
-- **Plain Text (.txt)** — formatting stripped
+- **Markdown (.md)**: raw source
+- **HTML (.html)**: styled, self-contained
+- **Plain Text (.txt)**: formatting stripped
 
 ### Print
-- **PDF** — via browser print dialog
+- **PDF**: via browser print dialog
 
 ### Clipboard
-- **Raw HTML** — for web use
-- **Rich Text** — paste into Google Docs, Email, Word
-- **Slack (mrkdwn)** — formatted for Slack
-- **Plain Text** — no formatting`,
+- **Raw HTML**: for web use
+- **Rich Text**: paste into Google Docs, Email, Word
+- **Slack (mrkdwn)**: formatted for Slack
+- **Plain Text**: no formatting`,
 
   features: `# Key Features
 
@@ -460,17 +460,17 @@ Click anywhere in the **Live** view to start editing. Format with the toolbar or
 
 Memory.Wiki auto-detects your Markdown flavor:
 
-- **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
-- **CommonMark** — Standard, maximum compatibility
-- **Obsidian** — Wikilinks, callouts, embeds
-- **MDX** — Markdown + JSX components
-- **Pandoc** — Citations, footnotes, definition lists
+- **GFM**: GitHub Flavored Markdown (tables, task lists, strikethrough)
+- **CommonMark**: Standard, maximum compatibility
+- **Obsidian**: Wikilinks, callouts, embeds
+- **MDX**: Markdown + JSX components
+- **Pandoc**: Citations, footnotes, definition lists
 
 Click the **flavor badge** (e.g. \`GFM ▾\`) in the Source header to convert between flavors.
 
 ## CLI Output Support
 
-Paste output from **Claude Code** or any terminal — unicode tables and checkmarks auto-convert:
+Paste output from **Claude Code** or any terminal: unicode tables and checkmarks auto-convert:
 
 Before (terminal output):
 
@@ -494,11 +494,11 @@ After (auto-converted):
 
 Click the **AI** button in the header to open the AI panel:
 
-- **Polish** — improve writing quality and clarity
-- **Summary** — generate a concise summary at the top
-- **TL;DR** — extract key bullet points
-- **Translate** — translate to any language
-- **Chat** — type a natural language instruction to edit the document
+- **Polish**: improve writing quality and clarity
+- **Summary**: generate a concise summary at the top
+- **TL;DR**: extract key bullet points
+- **Translate**: translate to any language
+- **Chat**: type a natural language instruction to edit the document
 
 Changes are highlighted in orange and fade after 3 seconds.
 
@@ -529,12 +529,12 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 Your documents sync across all Memory.Wiki channels:
 
-- **Web** — Memory.Wiki
-- **VS Code** — Extension with WYSIWYG preview
-- **Mac Desktop** — Native app with sidebar
-- **CLI** — \`npm install -g memory-wiki-cli\`
-- **Chrome Extension** — Capture from ChatGPT, Claude, Gemini
-- **MCP Server** — AI agents create/read/update documents`,
+- **Web**: Memory.Wiki
+- **VS Code**: Extension with WYSIWYG preview
+- **Mac Desktop**: Native app with sidebar
+- **CLI**: \`npm install -g memory-wiki-cli\`
+- **Chrome Extension**: Capture from ChatGPT, Claude, Gemini
+- **MCP Server**: AI agents create/read/update documents`,
 
   math: `# Math with KaTeX
 

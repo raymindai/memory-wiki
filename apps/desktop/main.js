@@ -1141,7 +1141,7 @@ function openFileInApp(filePath) {
       const result = renderMarkdown(content);
       const config = loadMdfyConfig(absolutePath);
 
-      mainWindow.setTitle(`${path.basename(absolutePath)} — Memory.Wiki`);
+      mainWindow.setTitle(`${path.basename(absolutePath)}: memory.wiki`);
       mainWindow.webContents.send("load-document", {
         html: result.html,
         markdown: content,
@@ -1258,7 +1258,7 @@ async function openCloudDocumentInApp(docId) {
     const markdown = data.markdown || data.content || "";
     const result = renderMarkdown(markdown);
     currentFilePath = null;
-    mainWindow.setTitle((data.title || docId) + " — Memory.Wiki");
+    mainWindow.setTitle((data.title || docId) + ": memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: result.html,
       markdown,
@@ -1371,7 +1371,7 @@ ipcMain.handle("new-document", async () => {
     // User cancelled — open empty editor without file
     currentFilePath = null;
     stopFileWatcher();
-    mainWindow.setTitle("Untitled — Memory.Wiki");
+    mainWindow.setTitle("Untitled: memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: "<p><br></p>", markdown: "", filePath: null, flavor: "gfm", config: null,
     });
@@ -1382,7 +1382,7 @@ ipcMain.handle("new-document", async () => {
   currentFilePath = filePath;
   startFileWatcher(filePath);
   addToRecentFiles(filePath);
-  mainWindow.setTitle(`${path.basename(filePath)} — Memory.Wiki`);
+  mainWindow.setTitle(`${path.basename(filePath)}: memory.wiki`);
   mainWindow.webContents.send("load-document", {
     html: "<p><br></p>", markdown: "", filePath, flavor: "gfm", config: null,
   });
@@ -1421,7 +1421,7 @@ ipcMain.handle("save-file", async (event, markdown) => {
         mainWindow?.webContents.send("save-error", { path: result.filePath, message: err.message });
         return null;
       }
-      mainWindow.setTitle(`${path.basename(result.filePath)} — Memory.Wiki`);
+      mainWindow.setTitle(`${path.basename(result.filePath)}: memory.wiki`);
       addToRecentFiles(result.filePath);
       startFileWatcher(result.filePath);
       return result.filePath;
@@ -1718,7 +1718,7 @@ ipcMain.handle("duplicate-cloud", async (event, docId, title) => {
     const rendered = renderMarkdown(markdown);
     currentFilePath = null;
     stopFileWatcher();
-    mainWindow.setTitle(newTitle + " — Memory.Wiki");
+    mainWindow.setTitle(newTitle + ": memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: rendered.html,
       markdown,
@@ -1798,7 +1798,7 @@ ipcMain.handle("preview-cloud-doc", async (event, docId, title) => {
     const isOwner = !!(userId && data.user_id && data.user_id === userId);
     const editToken = data.editToken || null;
 
-    mainWindow.setTitle((title || docId) + (isOwner ? "" : " (Cloud)") + " — Memory.Wiki");
+    mainWindow.setTitle((title || docId) + (isOwner ? "" : " (Cloud)") + ": memory.wiki");
     mainWindow.webContents.send("load-document", {
       html: result.html,
       markdown,
@@ -2017,7 +2017,7 @@ function buildMenu() {
             if (!mainWindow) return;
             currentFilePath = null;
             stopFileWatcher();
-            mainWindow.setTitle("Untitled — Memory.Wiki");
+            mainWindow.setTitle("Untitled: memory.wiki");
             mainWindow.webContents.send("load-document", {
               html: "<p><br></p>", markdown: "", filePath: null, flavor: "gfm", config: null,
             });

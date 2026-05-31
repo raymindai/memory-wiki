@@ -1,7 +1,7 @@
 {
   "name": "memory-wiki-vscode",
-  "displayName": "Memory.Wiki Markdown Publisher",
-  "description": "WYSIWYG preview and publish Markdown documents to Memory.Wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
+  "displayName": "memory.wiki Markdown Publisher",
+  "description": "WYSIWYG preview and publish Markdown documents to memory.wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
   "version": "1.4.4",
   "publisher": "raymindai",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "markdown",
     "preview",
     "publish",
-    "Memory.Wiki",
+    "memory.wiki",
     "mermaid",
     "katex",
     "gfm",
@@ -43,7 +43,7 @@
       "activitybar": [
         {
           "id": "memorywiki",
-          "title": "Memory.Wiki",
+          "title": "memory.wiki",
           "icon": "media/sidebar-icon.svg"
         }
       ]
@@ -68,22 +68,22 @@
       },
       {
         "command": "memorywiki.publish",
-        "title": "memory.wiki: Publish to Memory.Wiki",
+        "title": "memory.wiki: Publish to memory.wiki",
         "icon": "$(cloud-upload)"
       },
       {
         "command": "memorywiki.update",
-        "title": "memory.wiki: Push to Memory.Wiki",
+        "title": "memory.wiki: Push to memory.wiki",
         "icon": "$(arrow-up)"
       },
       {
         "command": "memorywiki.pull",
-        "title": "memory.wiki: Pull from Memory.Wiki",
+        "title": "memory.wiki: Pull from memory.wiki",
         "icon": "$(arrow-down)"
       },
       {
         "command": "memorywiki.login",
-        "title": "memory.wiki: Login to Memory.Wiki",
+        "title": "memory.wiki: Login to memory.wiki",
         "icon": "$(sign-in)"
       },
       {
@@ -204,12 +204,12 @@
       }
     ],
     "configuration": {
-      "title": "Memory.Wiki",
+      "title": "memory.wiki",
       "properties": {
         "memorywiki.apiBaseUrl": {
           "type": "string",
           "default": "https://memory.wiki",
-          "description": "Base URL for the Memory.Wiki API"
+          "description": "Base URL for the memory.wiki API"
         },
         "memorywiki.theme": {
           "type": "string",
@@ -229,7 +229,7 @@
         "memorywiki.autoPreview": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically open Memory.Wiki preview when opening a Markdown file"
+          "description": "Automatically open memory.wiki preview when opening a Markdown file"
         },
         "memorywiki.syncInterval": {
           "type": "number",
