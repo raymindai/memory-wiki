@@ -1,6 +1,6 @@
 {
   "name": "memory-wiki-mcp",
-  "version": "1.5.2",
+  "version": "1.5.4",
   "description": "MCP server for memory.wiki: tools for AI agents to create, edit, organize, search, share, version, and paste-anywhere Markdown documents.",
   "type": "module",
   "main": "dist/index.js",

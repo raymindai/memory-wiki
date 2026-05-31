@@ -173,7 +173,7 @@ async function fetchDoc(id: string): Promise<DocRecord> {
 
 const server = new McpServer({
   name: "memory.wiki",
-  version: "1.5.2",
+  version: "1.5.4",
 });
 
 // ──────────────────────────────────────────────────────────────────
@@ -230,14 +230,18 @@ server.tool(
   },
   async ({ target }) => {
     // Normalise: accept full URL, bare id, b/<id>, or @username.
-    let url: string;
-    if (/^https?:\/\//i.test(target)) {
-      url = target;
-    } else if (target.startsWith("@") || target.startsWith("b/")) {
-      url = `${BASE_URL}/${target}`;
-    } else {
-      url = `${BASE_URL}/${target}`;
-    }
+    // Strip leading protocol + bare-domain prefixes ("memory.wiki/")
+    // and any leading slashes so the BASE_URL prefix join below
+    // never double-stamps the domain. 1.5.2 reproduced this as
+    // "Use https://memory.wiki/memory.wiki/abc123 as my context."
+    // because the input "memory.wiki/abc123" matched neither the
+    // https branch nor the @/b/ branch and fell through to a raw
+    // join.
+    let path = target.trim();
+    path = path.replace(/^https?:\/\//i, "");
+    path = path.replace(/^memory\.wiki\//i, "");
+    path = path.replace(/^\/+/, "");
+    const url = `${BASE_URL}/${path}`;
     const sentence = url.includes("/b/")
       ? `Use ${url} as my context bundle.`
       : `Use ${url} as my context.`;
@@ -278,7 +282,7 @@ server.tool(
       const docs = data.documents || [];
       if (docs.length === 0) return textResult("No documents found.");
       const lines = docs.map((d, i) =>
-        `${i + 1}. ${d.title || "Untitled"} (${d.id}) — ${d.is_draft ? "private" : "shared"} — ${d.view_count} views — ${d.updated_at}`
+        `${i + 1}. ${d.title || "Untitled"} (${d.id}) / ${d.is_draft ? "private" : "shared"} / ${d.view_count} views / ${d.updated_at}`
       );
       return textResult(`Found ${docs.length} documents:\n\n${lines.join("\n")}`);
     } catch (err) { return errorResult(err); }
@@ -324,7 +328,7 @@ server.tool(
       const results = data.results || [];
       if (results.length === 0) return textResult(`No documents found matching "${query}".`);
       const lines = results.map((r, i) =>
-        `${i + 1}. **${r.title}** (${r.id}) — ${r.isDraft ? "private" : "shared"} — ${r.viewCount} views — ${r.updatedAt}\n   ${r.snippet}`
+        `${i + 1}. **${r.title}** (${r.id}) / ${r.isDraft ? "private" : "shared"} / ${r.viewCount} views / ${r.updatedAt}\n   ${r.snippet}`
       );
       return textResult(`Found ${results.length} document(s) matching "${query}":\n\n${lines.join("\n\n")}`);
     } catch (err) { return errorResult(err); }
@@ -334,8 +338,8 @@ server.tool(
 server.tool(
   "mw_hub_constellation",
   "Get the user's hub as a structured graph (concept nodes + typed edges + doc clusters). " +
-    "Use this when an answer needs to navigate the user's knowledge by relationship — e.g. " +
-    "'what depends on X', 'which docs cover X and Y together', 'what's at the center of this hub'. " +
+    "Use this when an answer needs to navigate the user's knowledge by relationship (e.g. " +
+    "'what depends on X', 'which docs cover X and Y together', 'what's at the center of this hub'). " +
     "URL-fetch (memory.wiki/@<username>) gives the same data rendered as markdown; this returns the " +
     "underlying JSON so you can traverse it programmatically.",
   {
@@ -429,7 +433,7 @@ server.tool(
   "mw_bundle_constellation",
   "Get a single bundle as a structured concept graph (nodes + edges) scoped to " +
     "the concepts whose docs are bundle members. Returns the same shape as " +
-    "mw_hub_constellation but bounded to one bundle — use this when an answer " +
+    "mw_hub_constellation but bounded to one bundle. Use this when an answer " +
     "needs to reason within a curated set, e.g. 'how do the ideas in this bundle " +
     "connect', 'which concept is central to this bundle'. URL-fetch " +
     "(memory.wiki/b/<id>) gives you the LLM-extracted graph_data narrative; this " +
@@ -690,7 +694,7 @@ server.tool(
       return textResult(
         emails.length > 0
           ? `Restricted ${id} to ${emails.length} email(s): ${emails.join(", ")}.`
-          : `Restriction removed from ${id} — anyone with the link can view.`
+          : `Restriction removed from ${id}. Anyone with the link can view.`
       );
     } catch (err) { return errorResult(err); }
   }
@@ -761,7 +765,7 @@ server.tool(
       const versions = data.versions || [];
       if (versions.length === 0) return textResult(`No version history for ${id}.`);
       const lines = versions.map((v) =>
-        `v${v.version_number} (${v.id.slice(0, 8)}) — ${v.created_at} — ${v.byte_size}b — ${v.change_summary || "no summary"}`
+        `v${v.version_number} (${v.id.slice(0, 8)}) / ${v.created_at} / ${v.byte_size}b / ${v.change_summary || "no summary"}`
       );
       return textResult(`${versions.length} version(s):\n\n${lines.join("\n")}`);
     } catch (err) { return errorResult(err); }
@@ -857,7 +861,7 @@ server.tool(
       if (visits.length === 0) return textResult("No recent visits.");
       const lines = visits.map((v, i) => {
         const title = v.documents?.title || "Untitled";
-        return `${i + 1}. ${title} (${v.document_id}) — visited ${v.last_visited_at}`;
+        return `${i + 1}. ${title} (${v.document_id}) / visited ${v.last_visited_at}`;
       });
       return textResult(`Recent visits:\n\n${lines.join("\n")}`);
     } catch (err) { return errorResult(err); }
