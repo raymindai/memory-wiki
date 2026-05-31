@@ -769,20 +769,16 @@ body {
 }
 .sb-tooltip.show { opacity: 1; }
 
-/* Login prompt — neutral surface card per brand 2.4 (no accent fills
-   on cards). Sign-in button uses VS Code button theme tokens so it
-   inherits whatever theme the user has + stays brand-quiet (ink). */
+/* Login prompt — plain inline guidance, no card chrome. The sticky
+   bottom Sign-in button is the action; this is just text telling
+   the user what each empty section will hold once signed in. */
 .login-prompt {
-  margin: 8px 14px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: var(--vscode-textBlockQuote-background, rgba(255,255,255,0.03));
-  border: 1px solid var(--vscode-panel-border, rgba(255,255,255,0.08));
+  padding: 6px 14px 10px;
   text-align: center;
 }
 .login-prompt p {
   font-size: 11px; color: var(--vscode-descriptionForeground);
-  margin-bottom: 8px;
+  margin: 0;
 }
 .login-btn {
   padding: 4px 16px;

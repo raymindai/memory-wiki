@@ -360,14 +360,13 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   // Command: Login
+  // authManager.login() already wraps the OAuth round-trip in its
+  // own withProgress (auth.ts), so a second outer wrap here stacked
+  // two "Opening browser…" toasts on every login attempt. Removed —
+  // delegate the progress UI to the auth layer where it belongs.
   context.subscriptions.push(
     vscode.commands.registerCommand("memorywiki.login", async () => {
-      await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: "memory.wiki: Opening browser for login...", cancellable: false },
-        async () => {
-          await authManager?.login();
-        }
-      );
+      await authManager?.login();
     })
   );
 
