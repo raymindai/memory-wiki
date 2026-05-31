@@ -404,15 +404,17 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
       lastSynced: d.config?.lastSyncedAt,
     }));
 
-    // Fetch cloud documents + folders + images if logged in
+    // Fetch cloud documents + folders + images + pins if logged in
     const isLoggedIn = await this._authManager.isLoggedIn();
     let cloudDocs: CloudDoc[] = [];
     let cloudFolders: CloudFolder[] = [];
     let imageData: { images: Array<{ url: string; name: string }>; quota: { used: number; total: number } } | null = null;
+    let pinnedDocIds: string[] = [];
     if (isLoggedIn) {
       cloudDocs = await this.fetchCloudDocuments();
       cloudFolders = await this.fetchCloudFolders();
       imageData = await this.fetchImages();
+      pinnedDocIds = await this.fetchPinnedDocIds();
       // Exclude documents already linked locally
       const linkedIds = new Set(items.filter((i) => i.docId).map((i) => i.docId));
       cloudDocs = cloudDocs.filter((c) => !linkedIds.has(c.id));
@@ -442,9 +444,33 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
         collapsed: f.collapsed || false,
       })),
       imageData: imageData || null,
+      pinnedDocIds,
       isLoggedIn,
       userEmail: userEmail || null,
     });
+  }
+
+  /**
+   * Fetch the set of document IDs the user has starred (pinned) on
+   * memory.wiki. Sidebar's STARRED filter pivots on this set.
+   * Bundles can also be pinned but the sidebar doesn't surface
+   * bundles yet, so we ignore those rows here.
+   */
+  private async fetchPinnedDocIds(): Promise<string[]> {
+    try {
+      const baseUrl = getApiBaseUrl();
+      const userId = await this._authManager.getUserId();
+      const token = await this._authManager.getToken();
+      if (!userId) return [];
+      const headers: Record<string, string> = { "x-user-id": userId };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch(`${baseUrl}/api/user/pins`, { headers });
+      if (!res.ok) return [];
+      const data = (await res.json()) as { pins: Array<{ kind: string; id: string }> };
+      return (data.pins || []).filter((p) => p.kind === "document").map((p) => p.id);
+    } catch {
+      return [];
+    }
   }
 
   private async fetchCloudDocuments(): Promise<CloudDoc[]> {
@@ -545,11 +571,31 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private getHtml(webview: vscode.Webview): string {
+    // Wire the generated design tokens into the sidebar webview so
+    // CSS rules below can reference --micro-lime / --micro-info /
+    // --accent / etc. and a single edit to design-tokens/ propagates
+    // here without code-side changes. Both theme files load — only
+    // the rule matching VS Code's current html[data-theme] applies,
+    // but the webview itself inherits VS Code's theme via
+    // vscode-foreground etc., so we keep both available for any
+    // future explicit-theme dual swatches.
+    const tokenDark = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "_tokens.dark.generated.css")
+    );
+    const tokenLight = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "_tokens.light.generated.css")
+    );
+    const accentCss = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "_accent.generated.css")
+    );
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="${tokenDark}">
+<link rel="stylesheet" href="${tokenLight}">
+<link rel="stylesheet" href="${accentCss}">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -627,6 +673,8 @@ body {
 }
 .filter-btn:hover { background: var(--vscode-toolbar-hoverBackground); color: var(--vscode-foreground); }
 .filter-btn.active { background: var(--vscode-list-activeSelectionBackground); color: var(--vscode-list-activeSelectionForeground); }
+.filter-btn.filter-icon { flex: 0 0 28px; padding: 4px 0; display: inline-flex; align-items: center; justify-content: center; }
+.filter-btn.filter-icon svg { width: 12px; height: 12px; display: block; }
 
 /* Search */
 .search-box { margin: 0 14px 8px; position: relative; }
@@ -669,14 +717,14 @@ body {
   flex-shrink: 0; width: 16px; height: 16px;
   display: flex; align-items: center; justify-content: center;
 }
-.doc-icon.published { color: #B5FF1A; }
-.doc-icon.shared { color: #B5FF1A; }
-.doc-icon.restricted { color: #60a5fa; }
+.doc-icon.published { color: var(--micro-lime); }
+.doc-icon.shared { color: var(--micro-lime); }
+.doc-icon.restricted { color: var(--micro-info); }
 .doc-icon.readonly { color: var(--vscode-descriptionForeground); }
 .doc-icon.local { color: var(--vscode-descriptionForeground); }
-.doc-icon.cloud { color: #60a5fa; }
+.doc-icon.cloud { color: var(--micro-info); }
 .doc-icon { position: relative; }
-.doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: #B5FF1A; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: var(--micro-lime); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .doc-icon .sync-badge svg { width: 6px; height: 6px; }
 .doc-info { flex: 1; min-width: 0; overflow: hidden; }
 .doc-name {
@@ -789,7 +837,7 @@ body {
   background: var(--vscode-panel-border, rgba(255,255,255,0.08));
 }
 .help-btn { transition: color 0.15s; }
-.help-btn.open { color: #B5FF1A; }
+.help-btn.open { color: var(--micro-lime); }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
@@ -862,8 +910,8 @@ body {
   margin: 8px 14px;
   padding: 14px 12px;
   border-radius: 6px;
-  background: rgba(167,139,250,0.06);
-  border: 1px solid rgba(167,139,250,0.15);
+  background: color-mix(in srgb, var(--micro-ai) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--micro-ai) 20%, transparent);
   text-align: center;
 }
 .auth-prompt p {
@@ -874,7 +922,7 @@ body {
   padding: 5px 16px;
   font-size: 11px; font-weight: 600;
   border: none; border-radius: 4px;
-  background: #a78bfa; color: #000;
+  background: var(--micro-ai); color: #000;
   cursor: pointer;
   transition: background 0.12s;
 }
@@ -903,7 +951,7 @@ body {
   font-size: 10px; color: var(--vscode-descriptionForeground);
 }
 .user-status-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: #B5FF1A;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--micro-lime);
 }
 .user-logout-btn {
   padding: 3px 8px;
@@ -941,6 +989,7 @@ body {
   <div class="filters">
     <div class="filter-group">
       <button class="filter-btn active" data-filter="all" title="Show all documents">ALL</button>
+      <button class="filter-btn filter-icon" data-filter="starred" title="Starred (pinned on memory.wiki)" aria-label="Starred"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1l2.09 4.26L15 6l-3.5 3.41.83 4.84L8 12l-4.33 2.25.83-4.84L1 6l4.91-.74L8 1z"/></svg></button>
       <button class="filter-btn" data-filter="synced" title="Local files linked to memory.wiki">SYNCED</button>
       <button class="filter-btn" data-filter="local" title="Local files not yet published">LOCAL</button>
       <button class="filter-btn" data-filter="cloud" title="Cloud documents not synced locally">CLOUD</button>
@@ -954,9 +1003,9 @@ body {
   </div>
 
   <div class="help-panel hidden" id="help-panel">
-    <div class="help-row"><span class="help-icon" style="color:#B5FF1A"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
+    <div class="help-row"><span class="help-icon" style="color:var(--micro-lime)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Sync to upload to memory.wiki.</span></div></div>
-    <div class="help-row"><span class="help-icon" style="color:#60a5fa"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
+    <div class="help-row"><span class="help-icon" style="color:var(--micro-info)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
     <div class="help-divider"></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg></span><div><strong>Copy URL</strong><span class="help-desc">Copy the memory.wiki link to clipboard.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 10V2"/><path d="M5 4.5L8 1.5l3 3"/></svg></span><div><strong>Sync Up</strong><span class="help-desc">Upload local file to memory.wiki and get a shareable URL.</span></div></div>
@@ -995,6 +1044,7 @@ body {
     var cloudDocs = [];
     var cloudFolders = [];
     var imageData = null;
+    var pinnedDocIds = new Set(); // populated from message
     var isLoggedIn = false;
     var currentFilter = 'all';
     var searchQuery = '';
@@ -1075,6 +1125,7 @@ body {
         cloudDocs = e.data.cloudDocs || [];
         cloudFolders = e.data.cloudFolders || [];
         imageData = e.data.imageData || null;
+        pinnedDocIds = new Set(e.data.pinnedDocIds || []);
         isLoggedIn = e.data.isLoggedIn || false;
         currentUserId = e.data.userEmail || null;
         render();
@@ -1123,7 +1174,7 @@ body {
       if (box) {
         box.classList.toggle('hidden');
         var isOpen = !box.classList.contains('hidden');
-        if (btn) btn.style.color = isOpen ? '#B5FF1A' : '';
+        if (btn) btn.style.color = isOpen ? 'var(--micro-lime)' : '';
         if (isOpen) {
           box.querySelector('input').focus();
         } else {
@@ -1151,15 +1202,18 @@ body {
       var localOnlyDocs = allDocs.filter(function(d) { return !d.published; });
 
       // Filter logic: synced is in both LOCAL and CLOUD
-      var showSynced, showLocal, showCloud;
+      // 'starred' is its own surface — only pinned cloud + synced rows.
+      var showSynced, showLocal, showCloud, showStarredOnly;
       if (currentFilter === 'all') {
-        showSynced = true; showLocal = true; showCloud = true;
+        showSynced = true; showLocal = true; showCloud = true; showStarredOnly = false;
+      } else if (currentFilter === 'starred') {
+        showSynced = true; showLocal = false; showCloud = true; showStarredOnly = true;
       } else if (currentFilter === 'synced') {
-        showSynced = true; showLocal = false; showCloud = false;
+        showSynced = true; showLocal = false; showCloud = false; showStarredOnly = false;
       } else if (currentFilter === 'local') {
-        showSynced = true; showLocal = true; showCloud = false; // synced has local files
+        showSynced = true; showLocal = true; showCloud = false; showStarredOnly = false; // synced has local files
       } else if (currentFilter === 'cloud') {
-        showSynced = true; showLocal = false; showCloud = true; // synced is on cloud
+        showSynced = true; showLocal = false; showCloud = true; showStarredOnly = false; // synced is on cloud
       }
 
       // Apply search
@@ -1173,6 +1227,11 @@ body {
       var cloudFiltered = cloudDocs;
       if (searchQuery) {
         cloudFiltered = cloudFiltered.filter(function(d) { return d.title.toLowerCase().includes(searchQuery) || d.docId.toLowerCase().includes(searchQuery); });
+      }
+      if (showStarredOnly) {
+        // Limit to pinned cloud + synced rows.
+        cloudFiltered = cloudFiltered.filter(function(d) { return pinnedDocIds.has(d.docId); });
+        synced = synced.filter(function(d) { return d.docId && pinnedDocIds.has(d.docId); });
       }
 
       // Synced section
@@ -1271,10 +1330,10 @@ body {
     }
 
     function secHeader(type, label, count) {
-      var colors = { sync: '#B5FF1A', file: 'currentColor', globe: '#60a5fa', image: '#a78bfa' };
+      var colors = { sync: 'var(--micro-lime)', file: 'currentColor', globe: 'var(--micro-info)', image: 'var(--micro-ai)' };
       var names = { sync: 'sync', file: 'file', globe: 'cloud', image: 'file' };
       var ic = icon(names[type] || type, 12).replace('stroke="currentColor"', 'stroke="' + (colors[type]||'currentColor') + '"');
-      if (type === 'image') ic = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><circle cx="5.5" cy="6.5" r="1.5"/><path d="M14.5 10.5l-3.5-3.5-6 6"/></svg>';
+      if (type === 'image') ic = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--micro-ai)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><circle cx="5.5" cy="6.5" r="1.5"/><path d="M14.5 10.5l-3.5-3.5-6 6"/></svg>';
       return '<div class="section-header">' + ic + ' ' + label + ' <span class="section-count">' + (count === '' ? '' : count) + '</span></div>';
     }
 
@@ -1286,7 +1345,7 @@ body {
         + '<button class="doc-action" data-action="copy" data-url="' + esc(doc.url) + '" title="Copy URL">' + icon('copy', 14) + '</button>'
         + '<button class="doc-action" data-action="browser" data-url="' + esc(doc.url) + '" title="Open in browser">' + icon('externalLink', 14) + '</button>'
         + '<button class="doc-action" data-action="unsync" data-path="' + esc(doc.filePath) + '" title="Remove sync link (cloud copy remains)">' + icon('unsync', 14) + '</button>'
-        + '<button class="doc-action" data-action="deleteSynced" data-path="' + esc(doc.filePath) + '" title="Delete from cloud" style="color:#ef4444">' + icon('trash', 14) + '</button>';
+        + '<button class="doc-action" data-action="deleteSynced" data-path="' + esc(doc.filePath) + '" title="Delete from cloud" style="color:var(--micro-red)">' + icon('trash', 14) + '</button>';
       return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
@@ -1310,7 +1369,7 @@ body {
       var actions = '<button class="doc-action" data-action="pull" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Sync to local">' + icon('download', 14) + '</button>'
         + '<button class="doc-action" data-action="duplicateCloud" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Duplicate">' + icon('copy', 14) + '</button>'
         + '<button class="doc-action" data-action="browser" data-url="' + esc(doc.url) + '" title="Open in browser">' + icon('externalLink', 14) + '</button>'
-        + '<button class="doc-action" data-action="deleteCloud" data-docid="' + esc(doc.docId) + '" title="Delete from cloud" style="color:#ef4444">' + icon('trash', 14) + '</button>';
+        + '<button class="doc-action" data-action="deleteCloud" data-docid="' + esc(doc.docId) + '" title="Delete from cloud" style="color:var(--micro-red)">' + icon('trash', 14) + '</button>';
       return '<li class="doc-item" data-action="openCloud" data-url="' + esc(doc.url) + '" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.title) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'

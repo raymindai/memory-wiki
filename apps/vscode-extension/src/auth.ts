@@ -36,30 +36,40 @@ export class AuthManager {
 
     vscode.env.openExternal(vscode.Uri.parse(authUrl));
 
-    vscode.window.showInformationMessage(
-      "Opening memory.wiki login in your browser. Complete login there to continue."
+    // Use withProgress so the "Opening browser…" toast is bound to
+    // the in-flight callback Promise and auto-dismisses the moment
+    // the OAuth round-trip resolves (success or fail). The previous
+    // plain showInformationMessage stuck around forever because info
+    // messages have no auto-dismiss and the extension never disposed
+    // them. Founder reported the toast staying open after a clean
+    // login.
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "memory.wiki: opening browser for login",
+        cancellable: false,
+      },
+      async () => {
+        try {
+          const token = await new Promise<string>((resolve, reject) => {
+            this.pendingAuthResolve = resolve;
+            // Timeout after 5 minutes
+            setTimeout(() => {
+              this.pendingAuthResolve = undefined;
+              reject(new Error("Login timed out. Please try again."));
+            }, 5 * 60 * 1000);
+          });
+
+          await this.storeToken(token);
+          this._onDidLogin.fire();
+          vscode.window.showInformationMessage("Signed in to memory.wiki.");
+        } catch (err) {
+          vscode.window.showErrorMessage(
+            `Login failed: ${err instanceof Error ? err.message : String(err)}`
+          );
+        }
+      }
     );
-
-    // Wait for the callback
-    try {
-      const token = await new Promise<string>((resolve, reject) => {
-        this.pendingAuthResolve = resolve;
-
-        // Timeout after 5 minutes
-        setTimeout(() => {
-          this.pendingAuthResolve = undefined;
-          reject(new Error("Login timed out. Please try again."));
-        }, 5 * 60 * 1000);
-      });
-
-      await this.storeToken(token);
-      this._onDidLogin.fire();
-      vscode.window.showInformationMessage("Successfully logged in to memory.wiki.");
-    } catch (err) {
-      vscode.window.showErrorMessage(
-        `Login failed: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
   }
 
   /**

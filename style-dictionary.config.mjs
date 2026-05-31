@@ -287,7 +287,16 @@ ${entries}
 async function buildAccentPalette() {
   const data = JSON.parse(readFileSync("design-tokens/accent-palette.json", "utf-8"));
   const items = data.items;
-  writeFileSync("apps/web/src/app/_accent.generated.css", emitAccentCss(items), "utf-8");
+  const css = emitAccentCss(items);
+  writeFileSync("apps/web/src/app/_accent.generated.css", css, "utf-8");
+  // VS Code + Desktop webviews consume the same accent rules so a
+  // single edit to design-tokens/accent-palette.json propagates to
+  // every surface, not just web. Without this mirror the sidebar
+  // and preview panes stayed on hand-typed hex literals and drifted
+  // (founder report: "라임이 키컬러로 쓰이고 있음" — lime hard-coded
+  // in sidebar.ts even though the SOT was already neutral).
+  writeFileSync("apps/vscode-extension/media/_accent.generated.css", css, "utf-8");
+  writeFileSync("apps/desktop/renderer/_accent.generated.css", css, "utf-8");
   writeFileSync("apps/web/src/lib/_accent.generated.ts", emitAccentTs(items), "utf-8");
   writeFileSync(
     "apps/android-native/app/src/main/kotlin/wiki/memory/memorywiki/ui/theme/_AccentCatalog.generated.kt",
