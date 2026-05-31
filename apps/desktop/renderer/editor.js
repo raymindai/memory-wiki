@@ -86,7 +86,48 @@
 
   // ─── Sidebar: Init ───
 
+  // Sidebar width is user-resizable via a 6px hit area on the right
+  // edge of the sidebar. Width persisted to localStorage so the next
+  // launch keeps the user's choice. CSS clamps to [200, 520].
+  function initSidebarResize() {
+    var sidebar = document.getElementById("sidebar");
+    var handle = document.getElementById("sidebar-resize-handle");
+    if (!sidebar || !handle) return;
+
+    var MIN = 200, MAX = 520;
+    var stored = parseInt(localStorage.getItem("mw.sidebar.width") || "260", 10);
+    if (!isNaN(stored) && stored >= MIN && stored <= MAX) {
+      sidebar.style.setProperty("--sidebar-width", stored + "px");
+    }
+
+    function onMove(e) {
+      var w = Math.min(MAX, Math.max(MIN, e.clientX));
+      sidebar.style.setProperty("--sidebar-width", w + "px");
+    }
+    function onUp() {
+      handle.classList.remove("dragging");
+      document.body.classList.remove("sidebar-resizing");
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      var current = parseInt(getComputedStyle(sidebar).width, 10);
+      if (!isNaN(current)) localStorage.setItem("mw.sidebar.width", String(current));
+    }
+    handle.addEventListener("mousedown", function(e) {
+      e.preventDefault();
+      handle.classList.add("dragging");
+      document.body.classList.add("sidebar-resizing");
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    });
+    // Double-click resets to 260
+    handle.addEventListener("dblclick", function() {
+      sidebar.style.setProperty("--sidebar-width", "260px");
+      localStorage.setItem("mw.sidebar.width", "260");
+    });
+  }
+
   async function initSidebar() {
+    initSidebarResize();
     await refreshSidebarData();
     renderSidebar();
 
@@ -596,7 +637,7 @@
     // For "Files" section, add sort + new doc buttons (like VS Code)
     var actions = "";
     if (type === "local") {
-      var sortLabels = { newest: "Newest", oldest: "Oldest", az: "A→Z", za: "Z→A" };
+      var sortLabels = { newest: "Newest", oldest: "Oldest", az: "A to Z", za: "Z to A" };
       actions = '<div class="sec-actions">' +
         '<button class="sec-action-btn" id="sec-sort" title="Sort: ' + (sortLabels[sortMode] || sortMode) + '"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg></button>' +
         '<button class="sec-action-btn" id="sec-new-doc" title="New Document"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg></button>' +
@@ -1495,11 +1536,11 @@
         banner.id = "cloud-banner";
         banner.className = "cloud-banner";
         banner.innerHTML = isOwnerDoc
-          ? '<span class="cloud-banner-text">Cloud document — sync to edit locally</span>' +
+          ? '<span class="cloud-banner-text">Cloud document. Sync to edit locally.</span>' +
             '<div class="cloud-banner-actions">' +
               '<button class="cloud-banner-btn" id="cloud-sync-local">Sync to Local</button>' +
             '</div>'
-          : '<span class="cloud-banner-text">Cloud document — read only</span>' +
+          : '<span class="cloud-banner-text">Cloud document, read only.</span>' +
           '<div class="cloud-banner-actions">' +
             '<button class="cloud-banner-btn" id="cloud-duplicate-edit">Duplicate to Edit</button>' +
             '<button class="cloud-banner-btn secondary" id="cloud-sync-local">Sync to Local</button>' +

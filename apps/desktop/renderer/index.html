@@ -24,6 +24,10 @@
   <aside id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
+        <span class="sidebar-brand-blob" aria-hidden>
+          <img src="blob.svg" alt="" class="blob-darktheme" draggable="false">
+          <img src="blob-dark.svg" alt="" class="blob-lighttheme" draggable="false">
+        </span>
         <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark" height="12">
         <img src="logo-light.svg" alt="memory.wiki" class="logo-light" height="12">
       </div>
@@ -57,6 +61,7 @@
     </div>
     <div class="sidebar-files" id="file-list"></div>
     <div class="sidebar-user" id="user-bar"></div>
+    <div id="sidebar-resize-handle" aria-hidden></div>
   </aside>
 
   <!-- ════════════════ MAIN AREA ════════════════ -->
@@ -65,15 +70,6 @@
     <!-- ──── TOP HEADER (always visible when doc open) ──── -->
     <div id="app-header" style="display:none">
       <div class="header-left">
-        <span class="header-brand" aria-label="memory.wiki">
-          <span class="header-brand-blob" aria-hidden>
-            <img src="blob.svg" alt="" class="blob-darktheme" draggable="false">
-            <img src="blob-dark.svg" alt="" class="blob-lighttheme" draggable="false">
-          </span>
-          <img src="logo-dark.svg" alt="memory.wiki" class="header-brand-wordmark logo-dark" height="13">
-          <img src="logo-light.svg" alt="memory.wiki" class="header-brand-wordmark logo-light" height="13">
-        </span>
-        <span class="header-divider"></span>
         <span class="header-title" id="header-title">Untitled</span>
         <span class="header-sync" id="header-sync"></span>
       </div>

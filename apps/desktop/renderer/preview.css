@@ -1400,9 +1400,11 @@ body {
    ========================================================= */
 
 #sidebar {
-  width: 260px;
-  min-width: 260px;
-  max-width: 260px;
+  /* Width is user-resizable. JS writes --sidebar-width on the host element,
+     min/max enforced both here (CSS clamp safety) and in the drag handler. */
+  width: var(--sidebar-width, 260px);
+  min-width: 200px;
+  max-width: 520px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -1411,6 +1413,28 @@ body {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
+}
+
+#sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 50;
+  -webkit-app-region: no-drag;
+  background: transparent;
+  transition: background 0.15s;
+}
+#sidebar-resize-handle:hover,
+#sidebar-resize-handle.dragging {
+  background: var(--accent-dim, rgba(127, 127, 127, 0.18));
+}
+body.sidebar-resizing,
+body.sidebar-resizing * {
+  cursor: ew-resize !important;
+  user-select: none !important;
 }
 
 /* Subtle inner glow for depth */
@@ -1467,6 +1491,7 @@ body {
   user-select: none;
   display: flex;
   align-items: center;
+  gap: 6px;
   height: 100%;
   -webkit-app-region: no-drag;
   cursor: pointer;
@@ -1483,6 +1508,25 @@ body {
   transition: opacity 0.15s;
 }
 .sidebar-logo:hover img { opacity: 1; }
+
+.sidebar-brand-blob {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.sidebar-brand-blob img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.95;
+}
+.sidebar-brand-blob .blob-lighttheme { display: none; }
+[data-theme="light"] .sidebar-brand-blob .blob-darktheme { display: none; }
+[data-theme="light"] .sidebar-brand-blob .blob-lighttheme { display: inline; }
 
 .logo-light { display: none; }
 .logo-dark { display: block; }
@@ -2567,46 +2611,6 @@ body {
   cursor: default;
 }
 
-.header-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  user-select: none;
-  -webkit-app-region: no-drag;
-}
-
-.header-brand-blob {
-  position: relative;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-.header-brand-blob img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.header-brand-blob .blob-lighttheme { display: none; }
-[data-theme="light"] .header-brand-blob .blob-darktheme { display: none; }
-[data-theme="light"] .header-brand-blob .blob-lighttheme { display: inline; }
-
-.header-brand-wordmark {
-  display: block;
-  height: 13px;
-  width: auto;
-}
-
-.header-divider {
-  width: 1px;
-  height: 14px;
-  background: var(--border-dim, var(--border));
-  opacity: 0.6;
-  flex-shrink: 0;
-}
 
 .header-title {
   font-size: 12px;
