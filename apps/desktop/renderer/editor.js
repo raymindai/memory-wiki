@@ -90,17 +90,24 @@
   // direct cross-origin fetch to memory.wiki, so main.js owns the
   // network call via AuthManager. See ipcMain.handle("get-pins") etc.
   async function fetchPins() {
-    if (!sidebarState.authState.loggedIn || !window.mwDesktop?.getPins) return;
+    if (!sidebarState.authState.loggedIn || !window.mwDesktop || !window.mwDesktop.getPins) {
+      sidebarState.pinnedIds = new Set();
+      return;
+    }
     try {
       var pins = await window.mwDesktop.getPins();
       var ids = new Set();
       (pins || []).forEach(function(p) {
         // API shape: { kind, id, createdAt } (see route.ts mapping).
-        if (p.kind === "document" && p.id) ids.add(p.id);
+        // We pin both kinds — the Starred sidebar tab filters to
+        // documents (synced + cloud), the home Starred list will
+        // surface bundles too once we have a bundle viewer hook.
+        if (p && p.id) ids.add(p.id);
       });
       sidebarState.pinnedIds = ids;
-      renderFileList();
-    } catch {}
+    } catch (e) {
+      sidebarState.pinnedIds = new Set();
+    }
   }
 
   async function togglePin(docId, makePinned) {
@@ -278,19 +285,23 @@
     sidebarState.authState = results[2] || { loggedIn: false };
 
     if (sidebarState.authState.loggedIn) {
+      // Pull cloud docs + pins + profile in parallel so first paint
+      // already has Starred populated. Failures are tolerated (each
+      // catches into its own neutral default).
       var cloudResults = await Promise.all([
         window.mwDesktop.getCloudDocuments().catch(function() { return []; }),
         window.mwDesktop.getCloudFolders().catch(function() { return []; }),
+        fetchPins(),
+        (window.mwDesktop.getUserProfile ? window.mwDesktop.getUserProfile().catch(function() { return null; }) : Promise.resolve(null)),
       ]);
       sidebarState.cloudDocs = cloudResults[0] || [];
       sidebarState.cloudFolders = cloudResults[1] || [];
-      // Pull pinned ids in parallel; failure is silent so the Starred
-      // filter just shows empty until the next refresh succeeds.
-      fetchPins();
+      if (cloudResults[3]) sidebarState.userProfile = cloudResults[3];
     } else {
       sidebarState.cloudDocs = [];
       sidebarState.cloudFolders = [];
       sidebarState.pinnedIds = new Set();
+      sidebarState.userProfile = null;
     }
   }
 
@@ -1468,6 +1479,36 @@
   }
 
   function renderHomeScreen() {
+    // ─── Greeting ─── Display name from /api/user/profile, falls back to
+    // the local part of the user's email so the home screen always
+    // feels personal even before the profile fetch lands.
+    var greetEl = document.getElementById("home-greeting");
+    var greetSubEl = document.getElementById("home-greeting-sub");
+    if (greetEl) {
+      var hour = new Date().getHours();
+      var period = hour < 5 ? "Up late" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+      var profile = sidebarState.userProfile || {};
+      var email = sidebarState.authState.email || "";
+      var name = profile.display_name || (email ? email.split("@")[0] : "");
+      greetEl.textContent = sidebarState.authState.loggedIn && name
+        ? period + ", " + name
+        : "Your AI memory, deployable to any AI.";
+    }
+    if (greetSubEl) {
+      var localCount = (sidebarState.workspaceFiles || []).length;
+      var cloudCount = (sidebarState.cloudDocs || []).length;
+      var pinCount = (sidebarState.pinnedIds || new Set()).size;
+      if (sidebarState.authState.loggedIn) {
+        greetSubEl.textContent =
+          cloudCount + (cloudCount === 1 ? " doc" : " docs") +
+          " on memory.wiki   " +
+          pinCount + " starred   " +
+          localCount + " local";
+      } else {
+        greetSubEl.textContent = "Sign in from the sidebar to sync, publish, and share.";
+      }
+    }
+
     var fileIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
     var starIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
 
