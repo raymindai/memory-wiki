@@ -778,20 +778,25 @@ body {
   color: var(--vscode-foreground);
 }
 
-/* Tooltip */
+/* Tooltip — wraps multi-line so the row-state hover string
+   ("Public, anyone with the link can read / Synced / Starred /
+   id…") doesn't clip at the sidebar's left edge. */
 .sb-tooltip {
   position: fixed;
   z-index: 9999;
-  padding: 3px 8px;
+  padding: 5px 9px;
+  max-width: 240px;
   font-size: 11px;
   font-weight: 500;
+  line-height: 1.45;
   color: var(--vscode-foreground);
   background: var(--vscode-editorWidget-background, #1e1e1e);
   border: 1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.1));
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   pointer-events: none;
-  white-space: nowrap;
+  white-space: pre-line;
+  word-break: break-word;
   opacity: 0;
   transition: opacity 0.1s;
 }
@@ -1171,20 +1176,23 @@ body {
       var pinned = doc.docId && pinnedDocIds.has(doc.docId);
       var parts = [];
       if (editMode === 'readonly') {
-        parts.push('View only — shared with you');
+        parts.push('View only (shared with you)');
       } else if (allowedEmails && allowedEmails.length > 0) {
-        parts.push('Shared — restricted to ' + allowedEmails.length + ' email(s)');
+        parts.push('Shared (restricted to ' + allowedEmails.length + ' email' + (allowedEmails.length === 1 ? '' : 's') + ')');
       } else if (!isDraft) {
-        parts.push('Public — anyone with the link can read');
+        parts.push('Public (anyone with the link can read)');
       } else if (doc.docId) {
-        parts.push('Private — cloud-only, only you can read');
+        parts.push('Private (cloud-only, only you can read)');
       } else {
-        parts.push('Local — not yet synced to memory.wiki');
+        parts.push('Local (not yet synced to memory.wiki)');
       }
       if (isSynced) parts.push('Synced from this editor');
       if (pinned) parts.push('Starred');
       if (doc.docId) parts.push(doc.docId);
-      return parts.join(' · ');
+      // Per brand voice rule (no middle-dot / em-dash / arrow in
+      // user-visible strings): join with line breaks so tooltip
+      // reads as multi-line state list instead of inline mash.
+      return parts.join('\n');
     }
 
     function docStatusIcon(doc) {
@@ -1522,7 +1530,7 @@ body {
       var ic = '<div class="doc-icon local">' + icon('file', 14) + '</div>';
       var meta = doc.relativePath || doc.fileName;
       var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to memory.wiki">' + icon('upload', 14) + '</button>';
-      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + ' · ' + (doc.relativePath || doc.fileName)) + '">'
+      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + '\n' + (doc.relativePath || doc.fileName)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
@@ -1530,8 +1538,8 @@ body {
 
     function renderCloudDoc(doc) {
       var ic = docStatusIcon(doc);
-      var viewStr = doc.viewCount > 0 ? ' · ' + doc.viewCount + ' views' : '';
-      var meta = relTime(doc.updatedAt) + (doc.isDraft ? ' · draft' : '') + viewStr;
+      var viewStr = doc.viewCount > 0 ? ', ' + doc.viewCount + ' views' : '';
+      var meta = relTime(doc.updatedAt) + (doc.isDraft ? ', draft' : '') + viewStr;
       var pinned = pinnedDocIds.has(doc.docId);
       var actions = '<button class="doc-action" data-action="pull" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Sync to local">' + icon('download', 14) + '</button>'
         + '<button class="doc-action" data-action="duplicateCloud" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Duplicate">' + icon('copy', 14) + '</button>'
@@ -1666,21 +1674,40 @@ body {
       setSigninPending(true);
       vscode.postMessage({ type: 'login' });
     });
-    function setSigninPending(pending) {
+    // Two independent reasons the signin button can be unavailable:
+    // (a) sidebar is fetching the initial document list (we don't
+    //     yet know if the user is even logged out — let alone if
+    //     they should be clicking sign in), and
+    // (b) an auth round-trip is already in flight.
+    // Track them separately + recompute the disabled state from
+    // the union so a state change in one doesn't accidentally
+    // overwrite the other.
+    var _signinBlocked = { loading: false, authPending: false };
+    function setSigninBlocked(reason, value) {
+      _signinBlocked[reason] = !!value;
+      var pending = _signinBlocked.loading || _signinBlocked.authPending;
       var btn = document.getElementById('signin-btn');
       if (!btn) return;
-      btn.disabled = !!pending;
+      btn.disabled = pending;
       btn.style.opacity = pending ? '0.6' : '';
       btn.style.cursor = pending ? 'default' : '';
-      // Cache + restore the original label so the "Signing in…"
-      // state doesn't permanently overwrite it.
+      // `disabled` alone is sometimes bypassed inside webviews when
+      // pointer-events isn't blocked too (we saw a stale click land
+      // mid-flight). Belt-and-suspenders.
+      btn.style.pointerEvents = pending ? 'none' : '';
       if (pending) {
         if (!btn.dataset.originalLabel) btn.dataset.originalLabel = btn.innerHTML;
-        btn.innerHTML = '<span style="opacity:0.85">Signing in…</span>';
+        var label = _signinBlocked.authPending ? 'Signing in…' : 'Loading…';
+        btn.innerHTML = '<span style="opacity:0.85">' + label + '</span>';
       } else if (btn.dataset.originalLabel) {
         btn.innerHTML = btn.dataset.originalLabel;
         delete btn.dataset.originalLabel;
       }
+    }
+    // Backwards-compatible alias — call sites that just want the
+    // auth-pending semantic stay readable.
+    function setSigninPending(pending) {
+      setSigninBlocked('authPending', pending);
     }
     document.getElementById('logout-btn').addEventListener('click', function() {
       vscode.postMessage({ type: 'logout' });
