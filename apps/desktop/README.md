@@ -1,6 +1,6 @@
-# Memory.Wiki for Mac
+# memory.wiki for Mac
 
-Native macOS app wrapping Memory.Wiki with file integration and offline support.
+Native macOS app wrapping memory.wiki with file integration and offline support.
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ Output: `dist/memory-wiki-{version}-universal.dmg`
 
 ## What It Does
 
-Memory.Wiki for Mac loads the Memory.Wiki web app inside a native Electron shell, adding:
+memory.wiki for Mac loads the memory.wiki web app inside a native Electron shell, adding:
 
 - Native macOS title bar with traffic lights
 - File associations (md, txt, pdf, docx, pptx, xlsx, html, csv, json)
@@ -33,6 +33,7 @@ Memory.Wiki for Mac loads the Memory.Wiki web app inside a native Electron shell
 - Offline detection with retry
 - Dark/Light mode follows system preference
 - Single instance (prevents duplicate windows)
+- Right-click any sidebar doc for **Copy URL** / **Copy for AI** / **Open in Browser** (Copy for AI puts the canonical `Use https://memory.wiki/<id> as my context.` sentence on the clipboard)
 
 ## Architecture
 
@@ -55,7 +56,7 @@ build/
 ## How File Opening Works
 
 - **Text files** (.md, .txt): Read content, encode as base64, load `memory.wiki/#md={base64}`
-- **Binary files** (.pdf, .docx, etc.): Load Memory.Wiki, then inject a synthetic drag-drop event with the file data
+- **Binary files** (.pdf, .docx, etc.): Load memory.wiki, then inject a synthetic drag-drop event with the file data
 
 ## Keyboard Shortcuts
 

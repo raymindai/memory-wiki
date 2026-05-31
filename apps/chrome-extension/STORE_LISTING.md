@@ -1,8 +1,8 @@
-# Web Store Listing — Memory.Wiki
+# Web Store Listing: memory.wiki
 
 ## Extension Name
 
-Memory.Wiki — One URL for your markdown, everywhere
+memory.wiki: One URL for your markdown, everywhere
 
 ## Short Description (132 chars max)
 
@@ -17,15 +17,15 @@ Capture AI conversations, import any file, edit in WYSIWYG, share with a permane
 WHAT IT DOES
 
 – Capture full conversations from ChatGPT, Claude, and Gemini
-– Capture individual messages with per-message "Memory.Wiki this" buttons
+– Capture individual messages with per-message "memory.wiki this" buttons
 – Capture selected text from any webpage
-– Open GitHub .md files directly in Memory.Wiki for beautiful rendering
+– Open GitHub .md files directly in memory.wiki for beautiful rendering
 – Publish instantly and get a permanent URL (memory.wiki/abc123)
 
 HOW IT WORKS
 
 1. Chat with any AI assistant as usual
-2. Click the Memory.Wiki button (floating or per-message)
+2. Click the memory.wiki button (floating or per-message)
 3. Your conversation is published as a formatted document
 4. Share the URL — anyone can view it, any AI can read it
 
@@ -43,7 +43,7 @@ Conversation Capture
 - Full conversation with proper User/Assistant formatting
 - Range selection: capture last 3, 5, or 10 exchanges
 - Per-message mini buttons on hover
-- Floating "Memory.Wiki All" button with quick access
+- Floating "memory.wiki all" button with quick access
 
 Smart Formatting
 
@@ -66,14 +66,14 @@ Publishing Options
 
 GitHub Integration
 
-- "Open in Memory.Wiki" button on any .md file
+- "Open in memory.wiki" button on any .md file
 - Beautiful rendering with code highlighting, math, and diagrams
 - Works on repository file views
 
 PRIVACY
 
 - No data is collected or stored by the extension itself
-- Documents are published to Memory.Wiki servers only when you click publish
+- Documents are published to memory.wiki servers only when you click publish
 - No tracking, no analytics in the extension
 - Open source: github.com/raymindai/memory-wiki
 
@@ -81,14 +81,14 @@ PERMISSIONS EXPLAINED
 
 - activeTab: Access the current tab to extract content
 - tabs: Detect which AI platform you're on
-- contextMenus: Right-click "Publish selection to Memory.Wiki"
+- contextMenus: Right-click "Publish selection to memory.wiki"
 - storage: Save your preferences (floating button visibility)
 - scripting: Inject capture functionality into AI pages
-- cookies: Check Memory.Wiki login status for authenticated publishing
+- cookies: Check memory.wiki login status for authenticated publishing
 
 ---
 
-Memory.Wiki — One URL for your markdown, everywhere.
+memory.wiki: One URL for your markdown, everywhere.
 
 ## Category
 
@@ -100,7 +100,7 @@ English
 
 ## Single Purpose Description (required by Chrome policy)
 
-Captures AI conversation content from ChatGPT, Claude, and Gemini, and publishes it as a formatted document on Memory.Wiki.
+Captures AI conversation content from ChatGPT, Claude, and Gemini, and publishes it as a formatted document on memory.wiki.
 
 ---
 
@@ -113,7 +113,7 @@ Captures AI conversation content from ChatGPT, Claude, and Gemini, and publishes
 ### Screenshots (1280x800 or 640x400, min 1, max 5)
 
 Screenshot 1 — "Capture from ChatGPT"
-Show: ChatGPT page with floating Memory.Wiki button visible, conversation in background.
+Show: ChatGPT page with floating memory.wiki button visible, conversation in background.
 Caption: One-click capture from ChatGPT
 
 Screenshot 2 — "Capture from Claude"
@@ -121,12 +121,12 @@ Show: Claude.ai page with per-message mini buttons visible on hover.
 Caption: Per-message capture from Claude
 
 Screenshot 3 — "Published Document"
-Show: Memory.Wiki page with a beautifully rendered document (code blocks, headings, etc).
+Show: memory.wiki page with a beautifully rendered document (code blocks, headings, etc).
 Caption: Beautiful, shareable documents
 
 Screenshot 4 — "GitHub Integration"
-Show: GitHub .md file page with "Open in Memory.Wiki" button visible.
-Caption: Open GitHub Markdown in Memory.Wiki
+Show: GitHub .md file page with "Open in memory.wiki" button visible.
+Caption: Open GitHub Markdown in memory.wiki
 
 Screenshot 5 — "Extension Popup"
 Show: The popup UI with platform detection indicator and capture options.
@@ -134,7 +134,7 @@ Caption: Smart platform detection
 
 ### Promotional Tile (1280x800)
 
-Hero image with Memory.Wiki branding + "One URL for your markdown, everywhere" tagline.
+Hero image with memory.wiki branding + "One URL for your markdown, everywhere" tagline.
 
 ---
 
@@ -142,7 +142,7 @@ Hero image with Memory.Wiki branding + "One URL for your markdown, everywhere" t
 
 ### Single Purpose
 
-Captures AI conversation content and publishes it as formatted documents on Memory.Wiki.
+Captures AI conversation content and publishes it as formatted documents on memory.wiki.
 
 ### Permission Justifications
 
@@ -150,15 +150,15 @@ activeTab: Required to read conversation content from the current AI chat page (
 
 tabs: Required to detect which AI platform the user is currently on, to show the correct platform indicator in the popup and apply platform-specific extraction logic.
 
-contextMenus: Required to add a right-click menu option "Publish selection to Memory.Wiki" for capturing selected text on any page.
+contextMenus: Required to add a right-click menu option "Publish selection to memory.wiki" for capturing selected text on any page.
 
 storage: Required to persist user preferences such as floating button visibility setting across browser sessions.
 
 scripting: Required to inject the content capture script into AI platform pages to enable conversation extraction.
 
-cookies: Required to check if the user is logged into Memory.Wiki, enabling authenticated publishing that saves documents to their account.
+cookies: Required to check if the user is logged into memory.wiki, enabling authenticated publishing that saves documents to their account.
 
-host_permissions (<all_urls>): Required for the context menu "Publish selection" feature to work on any webpage, and for the background service worker to make API calls to Memory.Wiki on behalf of the content script (CORS bypass).
+host_permissions (<all_urls>): Required for the context menu "Publish selection" feature to work on any webpage, and for the background service worker to make API calls to memory.wiki on behalf of the content script (CORS bypass).
 
 ### Data Usage Disclosure
 
@@ -170,7 +170,7 @@ host_permissions (<all_urls>): Required for the context menu "Publish selection"
 - Location: No
 - Web history: No
 - User activity: No
-- Website content: Yes — conversation content is sent to Memory.Wiki servers only when the user explicitly clicks publish
+- Website content: Yes — conversation content is sent to memory.wiki servers only when the user explicitly clicks publish
 
 ### Data Sale
 
@@ -178,4 +178,4 @@ We do not sell user data.
 
 ### Data Use Purposes
 
-- Conversation content is sent to Memory.Wiki solely to create a shareable document at the user's explicit request.
+- Conversation content is sent to memory.wiki solely to create a shareable document at the user's explicit request.

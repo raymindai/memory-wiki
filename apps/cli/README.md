@@ -1,8 +1,8 @@
-# Memory.Wiki CLI
+# memory.wiki CLI
 
-Publish Markdown from anywhere — terminal, scripts, CI/CD, tmux. Every output becomes a permanent, shareable URL.
+Publish Markdown from anywhere: terminal, scripts, CI/CD, tmux. Every output becomes a permanent, shareable URL that any AI can read.
 
-Part of the [Memory.Wiki](https://memory.wiki) ecosystem.
+Part of the [memory.wiki](https://memory.wiki) ecosystem.
 
 ## Install
 
@@ -13,47 +13,58 @@ npm install -g memory-wiki-cli
 ## Quick Start
 
 ```bash
-# Publish a file → get a URL
-Memory.Wiki publish README.md
-# → https://memory.wiki/d/abc123 (copied to clipboard)
+# Publish a file and get a URL
+mw publish README.md
+# Output:
+#   https://memory.wiki/abc123
+#   Paste into any AI:  Use https://memory.wiki/abc123 as my context.
+#   URL copied to clipboard
 
 # Publish from pipe
-echo "# Hello World" | Memory.Wiki publish
+echo "# Hello World" | mw publish
 
 # Publish clipboard
-pbpaste | Memory.Wiki publish
+pbpaste | mw publish
 
 # Read a document in terminal
-Memory.Wiki read abc123
+mw read abc123
+
+# Get the canonical "for AI" sentence for any existing doc / hub / bundle
+mw ai abc123
+# Output: Use https://memory.wiki/abc123 as my context. (also copied on macOS)
+
+mw ai @raymind
+# Output: Use https://memory.wiki/@raymind as my context.
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `Memory.Wiki publish <file>` | Publish a .md file and get a URL |
-| `Memory.Wiki publish` | Publish from stdin (pipe) |
-| `Memory.Wiki read <id>` | Read a document in the terminal with formatting |
-| `Memory.Wiki capture [source]` | Capture terminal/AI output and publish |
-| `Memory.Wiki update <id> <file>` | Update an existing document |
-| `Memory.Wiki pull <id> [-o file]` | Download a document |
-| `Memory.Wiki delete <id>` | Delete a document |
-| `Memory.Wiki list` | List your documents |
-| `Memory.Wiki open <id>` | Open document in browser |
-| `Memory.Wiki login` | Authenticate with Memory.Wiki |
-| `Memory.Wiki logout` | Clear stored credentials |
-| `Memory.Wiki whoami` | Show current user |
+| `mw publish <file>` | Publish a .md file and get a URL |
+| `mw publish` | Publish from stdin (pipe) |
+| `mw read <id>` | Read a document in the terminal with formatting |
+| `mw capture [source]` | Capture terminal/AI output and publish |
+| `mw update <id> <file>` | Update an existing document |
+| `mw pull <id> [-o file]` | Download a document |
+| `mw delete <id>` | Delete a document |
+| `mw list` | List your documents |
+| `mw open <id>` | Open document in browser |
+| `mw ai <id\|url\|@username>` | Print the canonical "for AI" paste sentence (copied to clipboard on macOS) |
+| `mw login` | Authenticate with memory.wiki |
+| `mw logout` | Clear stored credentials |
+| `mw whoami` | Show current user |
 
 ### Short Aliases
 
 | Short | Full |
 |-------|------|
-| `Memory.Wiki p` | `Memory.Wiki publish` |
-| `Memory.Wiki up` | `Memory.Wiki update` |
-| `Memory.Wiki ls` | `Memory.Wiki list` |
-| `Memory.Wiki rm` | `Memory.Wiki delete` |
-| `Memory.Wiki cat` | `Memory.Wiki read` |
-| `Memory.Wiki c` | `Memory.Wiki capture` |
+| `mw p` | `mw publish` |
+| `mw up` | `mw update` |
+| `mw ls` | `mw list` |
+| `mw rm` | `mw delete` |
+| `mw cat` | `mw read` |
+| `mw c` | `mw capture` |
 
 ## Use Cases
 
@@ -61,31 +72,31 @@ Memory.Wiki read abc123
 
 ```bash
 # AI assistant output
-claude "explain React hooks" | Memory.Wiki publish
+claude "explain React hooks" | mw publish
 
 # Git log
-git log --oneline -20 | Memory.Wiki publish
+git log --oneline -20 | mw publish
 
 # System info
-system_profiler SPHardwareDataType | Memory.Wiki publish
+system_profiler SPHardwareDataType | mw publish
 
 # Man pages
-man grep | Memory.Wiki publish
+man grep | mw publish
 
 # Command output
-curl -s https://api.example.com/status | Memory.Wiki publish
+curl -s https://api.example.com/status | mw publish
 ```
 
 ### Capture terminal sessions
 
 ```bash
 # Auto-detect: tmux pane if in tmux, clipboard otherwise
-Memory.Wiki capture
+mw capture
 
 # Explicit sources
-Memory.Wiki capture tmux        # Current tmux pane
-Memory.Wiki capture clipboard   # System clipboard
-Memory.Wiki capture last        # Pipe: some-cmd | Memory.Wiki capture last
+mw capture tmux        # Current tmux pane
+mw capture clipboard   # System clipboard
+mw capture last        # Pipe: some-cmd | mw capture last
 ```
 
 AI conversations (Claude Code, ChatGPT CLI, Ollama) are auto-detected and formatted with User/Assistant roles.
@@ -94,10 +105,10 @@ AI conversations (Claude Code, ChatGPT CLI, Ollama) are auto-detected and format
 
 ```bash
 # By ID
-Memory.Wiki read abc123
+mw read abc123
 
 # By URL
-Memory.Wiki read https://memory.wiki/d/abc123
+mw read https://memory.wiki/abc123
 
 # Output includes: color-coded headings, bold, code, blockquotes, lists
 ```
@@ -107,7 +118,7 @@ Memory.Wiki read https://memory.wiki/d/abc123
 Add to `~/.tmux.conf`:
 
 ```bash
-bind-key M run-shell "tmux capture-pane -p -S -1000 | Memory.Wiki publish"
+bind-key M run-shell "tmux capture-pane -p -S -1000 | mw publish"
 ```
 
 Press `prefix + M` to publish the current pane.
@@ -117,28 +128,40 @@ Press `prefix + M` to publish the current pane.
 Add to `~/.zshrc` or `~/.bashrc`:
 
 ```bash
-alias mp="Memory.Wiki publish"
-alias mpc="pbpaste | Memory.Wiki publish"
+alias mp="mw publish"
+alias mpc="pbpaste | mw publish"
 ```
 
 ## Authentication
 
 ```bash
-Memory.Wiki login     # Opens browser for OAuth → paste token
-Memory.Wiki whoami    # Show current user
-Memory.Wiki list      # List your published documents
-Memory.Wiki logout    # Clear credentials
+mw login     # Opens browser for OAuth, paste token
+mw whoami    # Show current user
+mw list      # List your published documents
+mw logout    # Clear credentials
 ```
 
 Credentials stored in `~/.memory.wiki/config.json`. Edit tokens in `~/.memory.wiki/tokens.json`.
 
+## URL forms
+
+| Form | Pattern | When |
+| --- | --- | --- |
+| Doc | `memory.wiki/<id>` | A single document. 12-char nanoid. |
+| Bundle | `memory.wiki/b/<id>` | A bundle (curated set of docs). |
+| Hub | `memory.wiki/@<username>` | Your full hub. Pulls every public doc + bundle. |
+| Raw | `memory.wiki/<id>.md` | Markdown payload for AI fetchers. |
+
+Every form fetches as clean markdown for any AI (Claude / ChatGPT / Gemini / Cursor) when called with the right Accept header. The CLI's `mw ai` command wraps any of these into the canonical "Use ... as my context." sentence so you can paste straight into any AI tool.
+
 ## How It Works
 
-1. `Memory.Wiki publish` sends Markdown to Memory.Wiki API
-2. Returns a permanent short URL (`memory.wiki/d/...`)
-3. URL is copied to clipboard (macOS)
-4. Edit token is saved locally for future updates
-5. Documents render with syntax highlighting, math (KaTeX), and Mermaid diagrams
+1. `mw publish` sends Markdown to memory.wiki's API.
+2. Returns a permanent short URL (`memory.wiki/<id>`).
+3. URL is copied to clipboard (macOS).
+4. The "for AI" paste sentence is printed below the URL so you can copy it manually for chat-tool pastes.
+5. Edit token is saved locally for future updates.
+6. Documents render with syntax highlighting, math (KaTeX), and Mermaid diagrams.
 
 ## Other Channels
 
@@ -156,7 +179,8 @@ Credentials stored in `~/.memory.wiki/config.json`. Edit tokens in `~/.memory.wi
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MDFY_URL` | `https://memory.wiki` | API base URL |
+| `MEMORY_WIKI_URL` | `https://memory.wiki` | API base URL (canonical) |
+| `MDFY_URL` | (same) | Deprecated alias, accepted for legacy shells |
 
 ## License
 
