@@ -1501,6 +1501,19 @@
     renderHomeScreen();
   }
 
+  // Pick the right SBI glyph for a doc based on its state. Mirrors
+  // docStatusIcon() (which returns wrapped HTML for sidebar rows) but
+  // is leaner for the home list — just the glyph + a CSS class for
+  // tinting. Same web canonical mapping (MdEditor.tsx L8484-8488).
+  function homeDocIcon(doc) {
+    if (!doc) return { svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>', cls: "local" };
+    if (doc.edit_mode === "readonly") return { svg: SBI.eye, cls: "view-only" };
+    if (doc.allowed_emails && doc.allowed_emails.length > 0) return { svg: SBI.users, cls: "shared" };
+    if (doc.is_draft === false) return { svg: SBI.globe, cls: "public" };
+    if (doc.id || doc.docId) return { svg: SBI.cloud, cls: "private" };
+    return { svg: SBI.file, cls: "local" };
+  }
+
   function renderHomeScreen() {
     // ─── Greeting ─── Display name from /api/user/profile, falls back to
     // the local part of the user's email so the home screen always
@@ -1532,12 +1545,16 @@
       }
     }
 
-    var fileIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    // Build an id → cloud-doc lookup so Starred + Recent rows can
+    // pull live metadata (edit_mode, allowed_emails, is_draft) and
+    // render the correct status glyph instead of a generic file icon.
+    var cloudById = {};
+    (sidebarState.cloudDocs || []).forEach(function(cd) { cloudById[cd.id] = cd; });
 
     // ─── Starred ─── pinned doc rows pulled from /api/user/pins.
-    // Per UX feedback, rows here use the plain file glyph rather than
-    // a star icon — the section header is "Starred", so star-per-row
-    // was redundant.
+    // Per UX feedback, no per-row star (the section header already
+    // says "Starred") — instead each row uses the doc's actual
+    // status icon (globe / cloud / users / eye / file).
     var starredSection = document.getElementById("home-starred-section");
     var starredList = document.getElementById("home-starred-list");
     var pinSet = sidebarState.pinnedIds || new Set();
@@ -1552,6 +1569,7 @@
             title: wf.fileName,
             time: wf.modifiedAt,
             filePath: wf.filePath,
+            cloud: cloudById[wf.config.docId] || null,
           };
         }
       });
@@ -1563,6 +1581,7 @@
             id: cd.id,
             title: cd.title || "Untitled",
             time: cd.updated_at,
+            cloud: cd,
           });
         }
       });
@@ -1576,8 +1595,9 @@
           var attr = r.kind === "synced"
             ? ' data-filepath="' + esc(r.filePath) + '"'
             : ' data-cloudid="' + esc(r.id) + '"';
+          var icon = homeDocIcon(r.cloud);
           return '<button class="home-list-item"' + attr + '>' +
-            '<span class="home-list-icon">' + fileIconSvg + '</span>' +
+            '<span class="home-list-icon ' + icon.cls + '">' + icon.svg + '</span>' +
             '<span class="home-list-name">' + esc(r.title) + '</span>' +
             '<span class="home-list-time">' + timeAgo(r.time) + '</span>' +
           '</button>';
@@ -1606,15 +1626,20 @@
           filePath: wf.filePath,
           title: wf.fileName,
           time: wf.modifiedAt,
+          cloud: wf.config && wf.config.docId ? cloudById[wf.config.docId] : null,
+          local: !(wf.config && wf.config.docId),
         });
       });
       (sidebarState.recentFiles || []).forEach(function(rf) {
         var parts = (rf.path || "").split("/");
+        var cfgId = rf.config && rf.config.docId;
         addRecent({
           key: "rf:" + rf.path,
           filePath: rf.path,
           title: parts[parts.length - 1] || rf.path,
           time: rf.modifiedAt || rf.openedAt,
+          cloud: cfgId ? cloudById[cfgId] : null,
+          local: !cfgId,
         });
       });
       (sidebarState.cloudDocs || []).forEach(function(cd) {
@@ -1623,6 +1648,7 @@
           cloudId: cd.id,
           title: cd.title || "Untitled",
           time: cd.updated_at,
+          cloud: cd,
         });
       });
       allRecent.sort(function(a, b) {
@@ -1635,8 +1661,9 @@
         var attr = r.filePath
           ? ' data-filepath="' + esc(r.filePath) + '"'
           : ' data-cloudid="' + esc(r.cloudId) + '"';
+        var icon = homeDocIcon(r.cloud);
         return '<button class="home-list-item"' + attr + '>' +
-          '<span class="home-list-icon">' + fileIconSvg + '</span>' +
+          '<span class="home-list-icon ' + icon.cls + '">' + icon.svg + '</span>' +
           '<span class="home-list-name">' + esc(r.title) + '</span>' +
           '<span class="home-list-time">' + timeAgo(r.time) + '</span>' +
         '</button>';

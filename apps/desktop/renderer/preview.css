@@ -3878,20 +3878,20 @@ body.sidebar-resizing * {
 .home-scroll {
   flex: 1;
   overflow-y: auto;
-  /* Vertically centered when content fits; scroll naturally if it
-     overflows. The flex column + min-height makes the inner block
-     sit at the visual center without breaking long-content scroll. */
+  /* Flex column + margin:auto on the inner block = vertically
+     centered when content fits, scroll-from-top when it overflows.
+     justify-content:center would have hidden the top of the content
+     once it exceeds viewport height (scroll couldn't reach above
+     the centered position). */
   display: flex;
   flex-direction: column;
-  justify-content: center;
   padding: 48px 32px 60px;
-  min-height: 0;
 }
 
 .home-inner {
   max-width: 640px;
   width: 100%;
-  margin: 0 auto;
+  margin: auto;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -3990,7 +3990,14 @@ body.sidebar-resizing * {
   align-items: center;
   justify-content: center;
 }
-.home-list-icon.star { color: var(--micro-warn, #f59e0b); }
+/* Web canonical doc-state colors so the home list reads with the
+   same semantic palette as the sidebar + viewer chrome. */
+.home-list-icon.public    { color: #22c55e; }
+.home-list-icon.private   { color: #60a5fa; }
+.home-list-icon.shared    { color: #60a5fa; }
+.home-list-icon.view-only { color: #a78bfa; }
+.home-list-icon.local     { color: var(--text-muted); }
+.home-list-icon.star      { color: var(--micro-warn, #f59e0b); }
 .home-list-name {
   flex: 1;
   min-width: 0;
