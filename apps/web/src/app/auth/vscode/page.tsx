@@ -105,7 +105,7 @@ export default function VSCodeAuthPage() {
 
         {status === "success" && (
           <>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--micro-lime)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <circle cx="12" cy="12" r="10" />
               <path d="M8 12l3 3 5-5" />
             </svg>
@@ -126,13 +126,13 @@ export default function VSCodeAuthPage() {
               className="text-center leading-relaxed"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Your Memory.Wiki account is now linked. You can close this tab and return to VS Code.
+              Your memory.wiki account is now linked. You can close this tab and return to VS Code.
             </p>
             <p
               className="font-mono text-center"
               style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", marginTop: 0 }}
             >
-              Didn&apos;t work? Make sure the Memory.Wiki extension is installed in VS Code.
+              Didn&apos;t work? Make sure the memory.wiki extension is installed in VS Code.
             </p>
           </>
         )}
@@ -156,7 +156,7 @@ export default function VSCodeAuthPage() {
               className="text-center"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Use the same account you use on Memory.Wiki.
+              Use the same account you use on memory.wiki.
             </p>
             <AuthProviderStack redirectTo={`${typeof window !== "undefined" ? window.location.origin : ""}/auth/vscode`} />
             <p
@@ -192,7 +192,7 @@ export default function VSCodeAuthPage() {
               className="text-center"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Please sign in to Memory.Wiki first, then try again from VS Code.
+              Please sign in to memory.wiki first, then try again from VS Code.
             </p>
             <Link
               href="/"
@@ -207,7 +207,7 @@ export default function VSCodeAuthPage() {
                 fontWeight: 500,
               }}
             >
-              Go to Memory.Wiki
+              Go to memory.wiki
             </Link>
           </>
         )}

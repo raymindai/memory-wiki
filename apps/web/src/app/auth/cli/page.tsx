@@ -44,7 +44,7 @@ export default function CliAuthPage() {
       }
 
       // We surface the raw access_token on this page so CLI users +
-      // MCP users can paste it into `Memory.Wiki login`. The legacy Electron
+      // MCP users can paste it into `memory.wiki login`. The legacy Electron
       // desktop app's `memorywiki://` URL scheme handler used to grab the
       // token automatically via a forced redirect — but a) most users
       // don't run that app, b) the redirect would launch the
@@ -72,7 +72,7 @@ export default function CliAuthPage() {
     status === "success" ? "Token ready"
     : status === "error" ? "Couldn't connect"
     : status === "choose-provider" ? "Sign in to continue"
-    : "Connecting to Memory.Wiki";
+    : "Connecting to memory.wiki";
 
   return (
     <div
@@ -100,7 +100,7 @@ export default function CliAuthPage() {
 
         {status === "success" && (
           <>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--micro-lime)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <circle cx="12" cy="12" r="10" />
               <path d="M8 12l3 3 5-5" />
             </svg>
@@ -126,7 +126,7 @@ export default function CliAuthPage() {
                 className="font-mono"
                 style={{ background: "var(--surface)", padding: "1px 6px", borderRadius: 3, fontSize: 12, color: "var(--text-primary)" }}
               >
-                Memory.Wiki login
+                memory.wiki login
               </code>{" "}
               is waiting. The same token authenticates the CLI and any MCP server (Claude Code, Cursor, Claude Desktop) you wire up.
             </p>
@@ -191,13 +191,13 @@ export default function CliAuthPage() {
                 margin: 0,
               }}
             >
-              Sign in to connect Memory.Wiki for Mac
+              Sign in to connect memory.wiki for Mac
             </h1>
             <p
               className="text-center"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Use the same account you use on Memory.Wiki.
+              Use the same account you use on memory.wiki.
             </p>
             <AuthProviderStack redirectTo={redirectTo} />
           </>
@@ -237,7 +237,7 @@ export default function CliAuthPage() {
                 fontWeight: 500,
               }}
             >
-              Go to Memory.Wiki
+              Go to memory.wiki
             </Link>
           </>
         )}

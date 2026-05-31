@@ -1,10 +1,10 @@
 "use client";
 
-// /auth/desktop — auth flow for the Memory.Wiki Electron desktop app.
+// /auth/desktop — auth flow for the memory.wiki Electron desktop app.
 //
 // Lifecycle: main.js's "login" IPC handler opens this URL in the system
 // browser with redirect=memorywiki://auth. If the visitor already has an
-// Memory.Wiki Supabase session, we immediately bounce to the memorywiki:// URI
+// memory.wiki Supabase session, we immediately bounce to the memorywiki:// URI
 // scheme with token + refresh_token attached as query params — the
 // Electron AuthManager.handleProtocolUrl() picks them up and signs the
 // app in.
@@ -58,7 +58,7 @@ export default function DesktopAuthPage() {
     status === "success" ? "Connected to desktop"
     : status === "error" ? "Couldn't connect"
     : status === "choose-provider" ? "Sign in to continue"
-    : "Connecting to Memory.Wiki for Mac";
+    : "Connecting to memory.wiki for Mac";
 
   return (
     <div
@@ -86,7 +86,7 @@ export default function DesktopAuthPage() {
 
         {status === "success" && (
           <>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--micro-lime)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <circle cx="12" cy="12" r="10" />
               <path d="M8 12l3 3 5-5" />
             </svg>
@@ -101,13 +101,13 @@ export default function DesktopAuthPage() {
                 margin: 0,
               }}
             >
-              Connected to Memory.Wiki for Mac
+              Connected to memory.wiki for Mac
             </h1>
             <p
               className="text-center leading-relaxed"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Your Memory.Wiki account is now linked. You can close this tab and return to the app.
+              Your memory.wiki account is now linked. You can close this tab and return to the app.
             </p>
           </>
         )}
@@ -125,13 +125,13 @@ export default function DesktopAuthPage() {
                 margin: 0,
               }}
             >
-              Sign in to connect Memory.Wiki for Mac
+              Sign in to connect memory.wiki for Mac
             </h1>
             <p
               className="text-center"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Use the same account you use on Memory.Wiki.
+              Use the same account you use on memory.wiki.
             </p>
             <AuthProviderStack redirectTo={typeof window !== "undefined" ? `${window.location.origin}/auth/desktop` : "/auth/desktop"} />
           </>
@@ -171,7 +171,7 @@ export default function DesktopAuthPage() {
                 fontWeight: 500,
               }}
             >
-              Go to Memory.Wiki
+              Go to memory.wiki
             </Link>
           </>
         )}
