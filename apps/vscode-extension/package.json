@@ -1,8 +1,8 @@
 {
   "name": "memory-wiki-vscode",
   "displayName": "memory.wiki Markdown Publisher",
-  "description": "WYSIWYG preview and publish Markdown documents to memory.wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
-  "version": "1.4.25",
+  "description": "Sidebar to your memory.wiki cloud right inside VS Code. Publish a Markdown file, get a permanent URL Claude, ChatGPT, Cursor, and Gemini all read the same way. Sidebar lists every cloud doc by state (public, shared, private, view-only), supports starring, and syncs both ways. WYSIWYG preview, GFM, KaTeX math, Mermaid, and 190+ language highlighting via the same markdown-it pipeline that runs the web app.",
+  "version": "1.4.26",
   "publisher": "raymindai",
   "license": "MIT",
   "repository": {
