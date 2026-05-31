@@ -96,9 +96,9 @@
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .ic-new { background: rgba(251, 146, 60, 0.1); color: #fb923c; }
+    .ic-new { background: rgba(251, 146, 60, 0.1); color: var(--micro-orange,#fb923c); }
     .ic-open { background: rgba(96, 165, 250, 0.1); color: #60a5fa; }
-    .ic-import { background: rgba(74, 222, 128, 0.1); color: #4ade80; }
+    .ic-import { background: rgba(74, 222, 128, 0.1); color: var(--micro-lime,#4ade80); }
     .ic-paste { background: rgba(167, 139, 250, 0.1); color: #a78bfa; }
 
     .action-text { flex: 1; }
@@ -158,16 +158,16 @@
     }
     .example-card:hover .card-name { color: #d4d4d8; }
 
-    .c-ai .card-label { color: #fb923c; }
-    .c-ai .card-accent { background: #fb923c; }
-    .c-code .card-label { color: #4ade80; }
-    .c-code .card-accent { background: #4ade80; }
+    .c-ai .card-label { color: var(--micro-orange,#fb923c); }
+    .c-ai .card-accent { background: var(--micro-orange,#fb923c); }
+    .c-code .card-label { color: var(--micro-lime,#4ade80); }
+    .c-code .card-accent { background: var(--micro-lime,#4ade80); }
     .c-math .card-label { color: #c4b5fd; }
     .c-math .card-accent { background: #c4b5fd; }
     .c-diag .card-label { color: #f472b6; }
     .c-diag .card-accent { background: #f472b6; }
     .c-tbl .card-label { color: #60a5fa; }
-    .c-tbl .card-accent { background: #60a5fa; }
+    .c-tbl .card-accent { background: var(--micro-info,#60a5fa); }
     .c-import .card-label { color: #fbbf24; }
     .c-import .card-accent { background: #fbbf24; }
 
@@ -230,7 +230,7 @@
       padding: 20px; border: 1px dashed #27272a; border-radius: 10px;
       text-align: center; font-size: 11px; color: #737373; transition: all 0.15s;
     }
-    .dropzone.active { border-color: #fb923c; background: rgba(251, 146, 60, 0.03); color: #fb923c; }
+    .dropzone.active { border-color: var(--micro-orange,#fb923c); background: rgba(251, 146, 60, 0.03); color: var(--micro-orange,#fb923c); }
     .dropzone-sub { font-family: "SF Mono", ui-monospace, monospace; font-size: 9px; margin-top: 3px; color: #3f3f46; }
 
     /* Footer */

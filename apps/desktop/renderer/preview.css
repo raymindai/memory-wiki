@@ -1735,20 +1735,27 @@ body {
 .file-item[draggable="true"] { cursor: grab; }
 .file-item[draggable="true"]:active { cursor: grabbing; }
 
-.file-icon.synced { color: #22c55e; }
-.file-icon.shared { color: #4ade80; }
-.file-icon.restricted { color: #60a5fa; }
-.file-icon.readonly { color: var(--fg-muted); }
-.file-icon.local { color: var(--fg-muted); }
+/* Row icons mirror web canonical mapping (MdEditor.tsx L8484-8488):
+   Public → Globe (#22c55e green), Shared → Users (#60a5fa blue),
+   Private → Cloud (#60a5fa blue), View only → Eye (#a78bfa purple),
+   Local → File (neutral). Sync-badge overlay = neutral ring with a
+   green check inside (the SVG carries its own colour). */
+.file-icon.public { color: #22c55e; }
+.file-icon.shared,
+.file-icon.private,
+.file-icon.restricted,
 .file-icon.cloud { color: #60a5fa; }
+.file-icon.view-only,
+.file-icon.readonly { color: #a78bfa; }
+.file-icon.synced { color: #22c55e; }
+.file-icon.local { color: var(--fg-muted); }
 .file-icon { position: relative; }
 .file-icon .sync-badge {
   position: absolute; bottom: -2px; right: -3px;
-  width: 8px; height: 8px; background: #22c55e;
-  border-radius: 50%; display: flex;
+  width: 9px; height: 9px; display: flex;
   align-items: center; justify-content: center;
 }
-.file-icon .sync-badge svg { width: 6px; height: 6px; }
+.file-icon .sync-badge svg { width: 9px; height: 9px; display: block; }
 
 
 /* File info */
@@ -3719,13 +3726,27 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
 }
 
-.loading-logo {
-  opacity: 0.8;
+/* BrandLoader: blob.svg (SMIL morph carries the motion) + LOADING
+   mono caption. Replaces the prior wordmark + progress bar so every
+   loading surface in the app reads as the same brand mark. */
+.loading-blob {
+  display: block;
+  opacity: 0.92;
 }
 
+.loading-caption {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  color: var(--fg-muted);
+}
+
+/* Legacy progress bar — kept for any future surface that needs an
+   inline loader; LOADING overlay no longer uses it. */
 .loading-bar {
   width: 120px;
   height: 2px;
@@ -3733,7 +3754,6 @@ body {
   border-radius: 2px;
   overflow: hidden;
 }
-
 .loading-bar-fill {
   width: 0%;
   height: 100%;

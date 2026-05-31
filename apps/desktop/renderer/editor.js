@@ -620,9 +620,17 @@
     share: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
     users: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
     eye: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    // Lucide Globe (lucide-react source) — Public doc state per web canonical mapping.
+    globe: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+    // Lucide Lock — password-protected docs.
+    lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
   };
 
-  var syncBadgeHtml = '<span class="sync-badge"><svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span>';
+  // Sync badge mirrors web's overlay (MdEditor.tsx L8492): neutral
+  // surface ring with a small green check inside. Same #22c55e as
+  // the Public Globe so the "synced + on memory.wiki" pair reads
+  // as one consistent green semantic.
+  var syncBadgeHtml = '<span class="sync-badge"><svg viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="var(--bg)" stroke="var(--border)" stroke-width="0.6"/><path d="M2.5 4.2L3.5 5.2L5.5 3" stroke="#22c55e" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span>';
 
   function docStatusIcon(doc) {
     var editMode = doc.edit_mode || null;
@@ -632,33 +640,43 @@
     var isSynced = source === 'vscode' || source === 'desktop' || source === 'cli' || source === 'mcp';
     var badge = isSynced ? syncBadgeHtml : '';
 
+    // Web canonical mapping (MdEditor.tsx L8484-8488):
+    //   View only → Eye   (purple)  shared with you
+    //   Shared    → Users (blue)    specific people
+    //   Public    → Globe (green)   anyone with link
+    //   Private   → Cloud (blue)    cloud-only, owner-only
+    //   Local     → File  (neutral) local-only, no cloud copy
     if (editMode === 'readonly') {
-      return '<div class="file-icon readonly" title="View only">' + SBI.eye + badge + '</div>';
-    }
-    if (editMode === 'view' || editMode === 'public') {
-      return '<div class="file-icon shared" title="Shared publicly">' + SBI.share + badge + '</div>';
+      return '<div class="file-icon view-only" title="View only (shared with you)">' + SBI.eye + badge + '</div>';
     }
     if (allowedEmails && allowedEmails.length > 0) {
-      return '<div class="file-icon restricted" title="Shared with specific people">' + SBI.users + badge + '</div>';
+      return '<div class="file-icon shared" title="Shared (restricted to specific people)">' + SBI.users + badge + '</div>';
+    }
+    if (!isDraft) {
+      return '<div class="file-icon public" title="Public (anyone with the link can read)">' + SBI.globe + badge + '</div>';
     }
     if (doc.id || doc.docId) {
-      return '<div class="file-icon cloud" title="Cloud">' + SBI.cloud + badge + '</div>';
+      return '<div class="file-icon private" title="Private (cloud-only, only you can read)">' + SBI.cloud + badge + '</div>';
     }
-    return '<div class="file-icon local" title="Local">' + SBI.file + badge + '</div>';
+    return '<div class="file-icon local" title="Local (not yet synced)">' + SBI.file + badge + '</div>';
   }
 
   function renderSyncedItem(f) {
     var synced = f.config && f.config.lastSyncedAt ? timeAgo(f.config.lastSyncedAt) : timeAgo(f.modifiedAt);
     var meta = synced ? "synced " + synced : f.relativePath;
     var active = f.filePath === currentFilePath ? " active" : "";
+    // Synced rows use the Public globe glyph plus the sync-badge
+    // overlay — same web-canonical mapping as docStatusIcon. If the
+    // server config later distinguishes restricted/public, we can
+    // branch here.
     return '<div class="file-item' + active + '" data-path="' + esc(f.filePath) + '">' +
-      '<div class="file-icon shared" title="Synced with memory.wiki">' + SBI.share + syncBadgeHtml + '</div>' +
+      '<div class="file-icon public" title="Synced with memory.wiki">' + SBI.globe + syncBadgeHtml + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
         '<button data-action="copy-url" data-path="' + esc(f.filePath) + '" title="Copy URL">' + SBI.copy + '</button>' +
         '<button data-action="open-browser" data-path="' + esc(f.filePath) + '" title="Open in browser">' + SBI.extLink + '</button>' +
         '<button data-action="unlink" data-path="' + esc(f.filePath) + '" title="Unsync">' + SBI.unsync + '</button>' +
-        '<button data-action="delete-synced" data-path="' + esc(f.filePath) + '" title="Delete from cloud" style="color:#ef4444">' + SBI.trash + '</button>' +
+        '<button data-action="delete-synced" data-path="' + esc(f.filePath) + '" title="Delete from cloud" style="color:var(--micro-red,#ef4444)">' + SBI.trash + '</button>' +
       '</div>' +
       '<span class="file-time">' + timeAgo(f.modifiedAt) + '</span>' +
     '</div>';
@@ -678,15 +696,15 @@
 
   function renderCloudItem(cd) {
     var title = cd.title || "Untitled";
-    var viewStr = cd.view_count > 0 ? " · " + cd.view_count + " views" : "";
-    var meta = timeAgo(cd.updated_at) + (cd.is_draft ? " · draft" : "") + viewStr;
+    var viewStr = cd.view_count > 0 ? ", " + cd.view_count + " views" : "";
+    var meta = timeAgo(cd.updated_at) + (cd.is_draft ? ", draft" : "") + viewStr;
     return '<div class="file-item" data-cloud-id="' + esc(cd.id) + '">' +
       docStatusIcon(cd) +
       '<div class="file-info"><div class="file-name">' + esc(title) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
         '<button data-action="pull-cloud" data-id="' + esc(cd.id) + '" data-title="' + esc(title) + '" title="Sync to local">' + SBI.download + '</button>' +
         '<button data-action="open-cloud-browser" data-id="' + esc(cd.id) + '" title="Open in browser">' + SBI.extLink + '</button>' +
-        '<button data-action="delete-cloud" data-id="' + esc(cd.id) + '" title="Delete from cloud" style="color:#ef4444">' + SBI.trash + '</button>' +
+        '<button data-action="delete-cloud" data-id="' + esc(cd.id) + '" title="Delete from cloud" style="color:var(--micro-red,#ef4444)">' + SBI.trash + '</button>' +
       '</div>' +
       '<span class="file-time">' + timeAgo(cd.updated_at) + '</span>' +
     '</div>';
