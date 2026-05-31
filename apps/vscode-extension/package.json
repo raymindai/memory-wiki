@@ -2,7 +2,7 @@
   "name": "memory-wiki-vscode",
   "displayName": "memory.wiki Markdown Publisher",
   "description": "WYSIWYG preview and publish Markdown documents to memory.wiki with bidirectional cloud sync. Beautiful rendering with GFM, KaTeX math, Mermaid diagrams, and code highlighting.",
-  "version": "1.4.21",
+  "version": "1.4.22",
   "publisher": "raymindai",
   "license": "MIT",
   "repository": {

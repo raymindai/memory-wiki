@@ -1675,6 +1675,20 @@ body {
     // state, blocking re-click (founder report 2026-06-01: "사이드
     // 바에서 클릭후 로그인이 안됨"). Extension's auth-pending
     // round-trip is fast enough to feel synchronous.
+    // Defensive: nuke any stuck inline styles from prior buggy
+    // versions (1.4.19-20 set disabled + pointer-events:none in a
+    // state machine that occasionally got stuck). Forces clean
+    // state on every webview boot.
+    (function resetSigninBtnOnBoot() {
+      var btn = document.getElementById('signin-btn');
+      if (!btn) return;
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.style.pointerEvents = '';
+      delete btn.dataset.originalLabel;
+    })();
+
     document.getElementById('signin-btn').addEventListener('click', function() {
       vscode.postMessage({ type: 'login' });
     });
