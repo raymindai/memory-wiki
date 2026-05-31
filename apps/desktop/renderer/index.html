@@ -255,6 +255,13 @@
 
     <!-- ──── HOME SCREEN (mirrors web Start: Starred / Recent / Create) ──── -->
     <div id="home-screen" class="home-screen" style="display:none">
+      <!-- Ambient brand blob — same morphing SMIL svg the auth pages use,
+           scaled up and faded so it sits behind the home content as
+           ornament. Two copies for theme-aware tint. -->
+      <div class="home-blob-bg" aria-hidden>
+        <img src="blob.svg" alt="" class="blob-darktheme" draggable="false">
+        <img src="blob-dark.svg" alt="" class="blob-lighttheme" draggable="false">
+      </div>
       <div class="home-scroll">
         <div class="home-inner">
 
