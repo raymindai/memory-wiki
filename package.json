@@ -7,12 +7,16 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
-    "build": "npm run build --workspace=apps/web"
+    "build": "npm run build --workspace=apps/web",
+    "tokens:build": "node style-dictionary.config.mjs"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
     "lucide-react": "^1.16.0"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.4.0"
   }
 }

@@ -1,0 +1,10 @@
+{
+  "radius": {
+    "$description": "Corner radius scale. Same number across web/iOS/Android.",
+    "sm":   { "$value": "4",    "$type": "dimension", "$description": "inline tags, micro badges" },
+    "md":   { "$value": "8",    "$type": "dimension", "$description": "input fields, small buttons" },
+    "lg":   { "$value": "12",   "$type": "dimension", "$description": "provider buttons, code blocks" },
+    "xl":   { "$value": "14",   "$type": "dimension", "$description": "card / row / sheet" },
+    "pill": { "$value": "9999", "$type": "dimension", "$description": "capsules, tab bar pill, status pills" }
+  }
+}

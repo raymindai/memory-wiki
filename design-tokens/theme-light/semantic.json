@@ -1,0 +1,27 @@
+{
+  "semantic": {
+    "$description": "Theme-aware semantic tokens (LIGHT). Same shape as theme-dark/semantic.json so consumers can swap themes via :root selector.",
+    "background":    { "$value": "{color.ink.page-light}",   "$type": "color" },
+    "surface":       { "$value": "{color.ink.zinc-50}",      "$type": "color" },
+    "surface-hover": { "$value": "rgba(0, 0, 0, 0.03)",      "$type": "color" },
+    "sheet-bg":      { "$value": "{color.ink.zinc-50}",      "$type": "color" },
+    "border":        { "$value": "#e4e4e7",                   "$type": "color", "$description": "zinc-200" },
+    "border-dim":    { "$value": "rgba(228, 228, 231, 0.6)", "$type": "color" },
+
+    "text-primary":   { "$value": "{color.ink.zinc-900}",  "$type": "color" },
+    "text-secondary": { "$value": "{color.ink.zinc-700}",  "$type": "color" },
+    "text-muted":     { "$value": "{color.ink.zinc-600}",  "$type": "color" },
+    "text-faint":     { "$value": "{color.ink.zinc-500}",  "$type": "color" },
+
+    "accent":         { "$value": "{color.ink.zinc-900}",            "$type": "color", "$description": "neutral ink default; matches text-primary on light theme" },
+    "accent-dim":     { "$value": "rgba(0, 0, 0, 0.06)",             "$type": "color" },
+
+    "micro-lime":   { "$value": "{color.micro.lime-light}",   "$type": "color" },
+    "micro-orange": { "$value": "{color.micro.orange-light}", "$type": "color" },
+    "micro-ai":     { "$value": "{color.micro.ai-light}",     "$type": "color" },
+    "micro-info":   { "$value": "{color.micro.info-light}",   "$type": "color" },
+    "micro-warn":   { "$value": "{color.micro.warn-light}",   "$type": "color" },
+    "micro-red":    { "$value": "{color.micro.red-light}",    "$type": "color" },
+    "micro-pink":   { "$value": "{color.micro.pink-light}",   "$type": "color" }
+  }
+}

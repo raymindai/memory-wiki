@@ -1,0 +1,22 @@
+{
+  "font": {
+    "family": {
+      "display": { "$value": "Cal Sans, Pretendard Variable, Pretendard, system-ui, sans-serif", "$type": "fontFamily", "$description": "Display: Cal Sans + Pretendard for CJK fallback" },
+      "body":    { "$value": "Noto Sans, Noto Sans KR, -apple-system, system-ui, sans-serif",     "$type": "fontFamily" },
+      "mono":    { "$value": "JetBrains Mono, ui-monospace, SF Mono, Menlo, monospace",          "$type": "fontFamily" }
+    },
+    "size": {
+      "caption": { "$value": "9",  "$type": "dimension", "$description": "uppercase mono section labels" },
+      "mono-s":  { "$value": "10", "$type": "dimension" },
+      "mono":    { "$value": "11", "$type": "dimension" },
+      "body-s":  { "$value": "12", "$type": "dimension", "$description": "helper text" },
+      "body":    { "$value": "13", "$type": "dimension", "$description": "row title, button label" },
+      "body-l":  { "$value": "14", "$type": "dimension", "$description": "comfortable reading body" },
+      "body-xl": { "$value": "15", "$type": "dimension", "$description": "auth tagline, prose" },
+      "display": { "$value": "20", "$type": "dimension", "$description": "sheet title" },
+      "h1":      { "$value": "22", "$type": "dimension", "$description": "section H1" },
+      "page":    { "$value": "26", "$type": "dimension", "$description": "page title" },
+      "hero":    { "$value": "36", "$type": "dimension", "$description": "splash / auth wordmark" }
+    }
+  }
+}

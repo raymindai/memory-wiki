@@ -1,0 +1,23 @@
+{
+  "motion": {
+    "duration": {
+      "fast":   { "$value": "120ms", "$type": "duration", "$description": "button press, micro-interactions" },
+      "base":   { "$value": "200ms", "$type": "duration", "$description": "generic in/out" },
+      "slow":   { "$value": "350ms", "$type": "duration", "$description": "page transitions" },
+      "push":   { "$value": "280ms", "$type": "duration", "$description": "iOS-style detail-screen slide" },
+      "fade":   { "$value": "180ms", "$type": "duration", "$description": "fade-in companion to push" },
+      "shake":  { "$value": "320ms", "$type": "duration", "$description": "tab re-tap shake on root" }
+    },
+    "easing": {
+      "default": { "$value": "cubic-bezier(0.32, 0.72, 0, 1)", "$type": "cubicBezier", "$description": "snappy out-of-elastic" }
+    },
+    "stagger": {
+      "$description": "Splash + auth-screen entry stagger (delays from t=0). Same values across iOS + Android for brand parity.",
+      "wordmark":   { "$value": "160ms", "$type": "duration" },
+      "tagline":    { "$value": "280ms", "$type": "duration" },
+      "companion":  { "$value": "380ms", "$type": "duration" },
+      "providers":  { "$value": "450ms", "$type": "duration" },
+      "footer":     { "$value": "700ms", "$type": "duration" }
+    }
+  }
+}

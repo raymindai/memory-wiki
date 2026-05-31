@@ -1,0 +1,11 @@
+{
+  "space": {
+    "$description": "Spacing scale used across web (px), iOS (pt), Android (dp). Same number, different unit per platform.",
+    "1": { "$value": "4",  "$type": "dimension" },
+    "2": { "$value": "8",  "$type": "dimension" },
+    "3": { "$value": "12", "$type": "dimension" },
+    "4": { "$value": "16", "$type": "dimension" },
+    "6": { "$value": "24", "$type": "dimension" },
+    "8": { "$value": "32", "$type": "dimension" }
+  }
+}

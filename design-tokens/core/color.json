@@ -1,0 +1,36 @@
+{
+  "color": {
+    "$description": "Core palette. Primitive hex values, not themed. Semantic tokens in theme-dark / theme-light reference these.",
+    "ink": {
+      "white":     { "$value": "#fafafa", "$type": "color", "$description": "zinc-50, brand text-primary on dark" },
+      "zinc-900":  { "$value": "#18181b", "$type": "color", "$description": "brand text-primary on light, dark surface" },
+      "zinc-800":  { "$value": "#27272a", "$type": "color", "$description": "border-dim base" },
+      "zinc-700":  { "$value": "#3f3f46", "$type": "color" },
+      "zinc-600":  { "$value": "#52525b", "$type": "color" },
+      "zinc-500":  { "$value": "#71717a", "$type": "color" },
+      "zinc-400":  { "$value": "#8a8a91", "$type": "color", "$description": "text-faint on dark" },
+      "zinc-300":  { "$value": "#a1a1aa", "$type": "color", "$description": "text-muted" },
+      "zinc-200":  { "$value": "#d4d4d8", "$type": "color", "$description": "text-secondary on dark" },
+      "zinc-50":   { "$value": "#fafafa", "$type": "color" },
+      "page-dark": { "$value": "#15151a", "$type": "color", "$description": "brand background dark, slightly lifted from pure-black so editor doesn't feel OLED void" },
+      "page-light":{ "$value": "#ffffff", "$type": "color" }
+    },
+    "micro": {
+      "$description": "Status / category indicator hues. Brand spec section 2.4: use ONLY for small dots, badges, micro-icons. Never as button fills or body text color.",
+      "lime-dark":   { "$value": "#B5FF1A", "$type": "color", "$description": "live / shipped / success / toggle-on (dark theme)" },
+      "lime-light":  { "$value": "#5BC700", "$type": "color", "$description": "lime light-theme variant for AA contrast on white" },
+      "orange-dark": { "$value": "#FF6B1A", "$type": "color", "$description": "capture / paste-from-AI signals (dark)" },
+      "orange-light":{ "$value": "#E84500", "$type": "color" },
+      "ai-dark":     { "$value": "#8B5CF6", "$type": "color", "$description": "AI-generated / Sparkles / vision (dark)" },
+      "ai-light":    { "$value": "#7C3AFF", "$type": "color" },
+      "info-dark":   { "$value": "#60A5FA", "$type": "color", "$description": "sync / cloud / informational (dark)" },
+      "info-light":  { "$value": "#1565FF", "$type": "color" },
+      "warn-dark":   { "$value": "#FBBF24", "$type": "color", "$description": "warning / attention (mild)" },
+      "warn-light":  { "$value": "#C68800", "$type": "color" },
+      "red-dark":    { "$value": "#EF4444", "$type": "color", "$description": "error / stale / off / notification" },
+      "red-light":   { "$value": "#DC2626", "$type": "color" },
+      "pink-dark":   { "$value": "#FF2A7D", "$type": "color", "$description": "highlight / urgent" },
+      "pink-light":  { "$value": "#DB1A60", "$type": "color" }
+    }
+  }
+}

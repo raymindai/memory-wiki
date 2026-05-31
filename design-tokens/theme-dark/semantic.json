@@ -1,0 +1,27 @@
+{
+  "semantic": {
+    "$description": "Theme-aware semantic tokens (DARK). Each value references a core/color primitive so the palette stays single-source.",
+    "background":    { "$value": "{color.ink.page-dark}",   "$type": "color" },
+    "surface":       { "$value": "{color.ink.zinc-900}",    "$type": "color" },
+    "surface-hover": { "$value": "rgba(255, 255, 255, 0.03)", "$type": "color" },
+    "sheet-bg":      { "$value": "#111114",                  "$type": "color", "$description": "one tone above background for sheets/modals" },
+    "border":        { "$value": "{color.ink.zinc-800}",    "$type": "color" },
+    "border-dim":    { "$value": "rgba(39, 39, 42, 0.6)",   "$type": "color" },
+
+    "text-primary":   { "$value": "{color.ink.white}",     "$type": "color" },
+    "text-secondary": { "$value": "{color.ink.zinc-200}",  "$type": "color" },
+    "text-muted":     { "$value": "{color.ink.zinc-300}",  "$type": "color" },
+    "text-faint":     { "$value": "{color.ink.zinc-400}",  "$type": "color" },
+
+    "accent":         { "$value": "{color.ink.white}",                "$type": "color", "$description": "v8 brand decision: no key color, neutral default. Accent role uses text-primary ink. Status semantics live in micro-* below; users can opt into a personal key color in Settings -> Appearance." },
+    "accent-dim":     { "$value": "rgba(255, 255, 255, 0.08)",        "$type": "color" },
+
+    "micro-lime":   { "$value": "{color.micro.lime-dark}",   "$type": "color" },
+    "micro-orange": { "$value": "{color.micro.orange-dark}", "$type": "color" },
+    "micro-ai":     { "$value": "{color.micro.ai-dark}",     "$type": "color" },
+    "micro-info":   { "$value": "{color.micro.info-dark}",   "$type": "color" },
+    "micro-warn":   { "$value": "{color.micro.warn-dark}",   "$type": "color" },
+    "micro-red":    { "$value": "{color.micro.red-dark}",    "$type": "color" },
+    "micro-pink":   { "$value": "{color.micro.pink-dark}",   "$type": "color" }
+  }
+}
