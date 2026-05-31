@@ -778,25 +778,20 @@ body {
   color: var(--vscode-foreground);
 }
 
-/* Tooltip — wraps multi-line so the row-state hover string
-   ("Public, anyone with the link can read / Synced / Starred /
-   id…") doesn't clip at the sidebar's left edge. */
+/* Tooltip */
 .sb-tooltip {
   position: fixed;
   z-index: 9999;
-  padding: 5px 9px;
-  max-width: 240px;
+  padding: 3px 8px;
   font-size: 11px;
   font-weight: 500;
-  line-height: 1.45;
   color: var(--vscode-foreground);
   background: var(--vscode-editorWidget-background, #1e1e1e);
   border: 1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.1));
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   pointer-events: none;
-  white-space: pre-line;
-  word-break: break-word;
+  white-space: nowrap;
   opacity: 0;
   transition: opacity 0.1s;
 }
@@ -1176,23 +1171,20 @@ body {
       var pinned = doc.docId && pinnedDocIds.has(doc.docId);
       var parts = [];
       if (editMode === 'readonly') {
-        parts.push('View only (shared with you)');
+        parts.push('View only — shared with you');
       } else if (allowedEmails && allowedEmails.length > 0) {
-        parts.push('Shared (restricted to ' + allowedEmails.length + ' email' + (allowedEmails.length === 1 ? '' : 's') + ')');
+        parts.push('Shared — restricted to ' + allowedEmails.length + ' email(s)');
       } else if (!isDraft) {
-        parts.push('Public (anyone with the link can read)');
+        parts.push('Public — anyone with the link can read');
       } else if (doc.docId) {
-        parts.push('Private (cloud-only, only you can read)');
+        parts.push('Private — cloud-only, only you can read');
       } else {
-        parts.push('Local (not yet synced to memory.wiki)');
+        parts.push('Local — not yet synced to memory.wiki');
       }
       if (isSynced) parts.push('Synced from this editor');
       if (pinned) parts.push('Starred');
       if (doc.docId) parts.push(doc.docId);
-      // Per brand voice rule (no middle-dot / em-dash / arrow in
-      // user-visible strings): join with line breaks so tooltip
-      // reads as multi-line state list instead of inline mash.
-      return parts.join('\n');
+      return parts.join(' · ');
     }
 
     function docStatusIcon(doc) {
@@ -1530,7 +1522,7 @@ body {
       var ic = '<div class="doc-icon local">' + icon('file', 14) + '</div>';
       var meta = doc.relativePath || doc.fileName;
       var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to memory.wiki">' + icon('upload', 14) + '</button>';
-      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + '\n' + (doc.relativePath || doc.fileName)) + '">'
+      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + ' · ' + (doc.relativePath || doc.fileName)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
@@ -1538,8 +1530,8 @@ body {
 
     function renderCloudDoc(doc) {
       var ic = docStatusIcon(doc);
-      var viewStr = doc.viewCount > 0 ? ', ' + doc.viewCount + ' views' : '';
-      var meta = relTime(doc.updatedAt) + (doc.isDraft ? ', draft' : '') + viewStr;
+      var viewStr = doc.viewCount > 0 ? ' · ' + doc.viewCount + ' views' : '';
+      var meta = relTime(doc.updatedAt) + (doc.isDraft ? ' · draft' : '') + viewStr;
       var pinned = pinnedDocIds.has(doc.docId);
       var actions = '<button class="doc-action" data-action="pull" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Sync to local">' + icon('download', 14) + '</button>'
         + '<button class="doc-action" data-action="duplicateCloud" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Duplicate">' + icon('copy', 14) + '</button>'
@@ -1667,42 +1659,21 @@ body {
       }
     }
 
-    // Bind sign in / sign out buttons. The extension responds to
-    // the 'login' message with auth-pending:true → button flips to
-    // "Signing in…" via the message handler. We deliberately do NOT
-    // disable optimistically here because a prior version did, and
-    // a single misordered branch left the button stuck in pending
-    // state, blocking re-click (founder report 2026-06-01: "사이드
-    // 바에서 클릭후 로그인이 안됨"). Extension's auth-pending
-    // round-trip is fast enough to feel synchronous.
-    // Defensive: nuke any stuck inline styles from prior buggy
-    // versions (1.4.19-20 set disabled + pointer-events:none in a
-    // state machine that occasionally got stuck). Forces clean
-    // state on every webview boot.
-    (function resetSigninBtnOnBoot() {
-      var btn = document.getElementById('signin-btn');
-      if (!btn) return;
-      btn.disabled = false;
-      btn.style.opacity = '';
-      btn.style.cursor = '';
-      btn.style.pointerEvents = '';
-      delete btn.dataset.originalLabel;
-    })();
-
+    // Bind sign in / sign out buttons
     document.getElementById('signin-btn').addEventListener('click', function() {
+      // Optimistic disable — extension also posts auth-pending, but
+      // disabling here removes the click-during-flight race.
+      setSigninPending(true);
       vscode.postMessage({ type: 'login' });
     });
-    // Sign-in button pending state. Toggled by the auth-pending
-    // message from the extension (which fires the moment a login
-    // command starts + clears in a finally after it resolves).
-    // Single-flag, no compound state, no optimistic toggling —
-    // every prior attempt to be clever here left the button stuck.
     function setSigninPending(pending) {
       var btn = document.getElementById('signin-btn');
       if (!btn) return;
       btn.disabled = !!pending;
       btn.style.opacity = pending ? '0.6' : '';
       btn.style.cursor = pending ? 'default' : '';
+      // Cache + restore the original label so the "Signing in…"
+      // state doesn't permanently overwrite it.
       if (pending) {
         if (!btn.dataset.originalLabel) btn.dataset.originalLabel = btn.innerHTML;
         btn.innerHTML = '<span style="opacity:0.85">Signing in…</span>';
