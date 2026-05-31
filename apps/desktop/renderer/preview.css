@@ -1,91 +1,79 @@
 /* =========================================================
-   Memory.Wiki for Mac — Complete Stylesheet
-   Dark/Light theme, sidebar, editor, document styles
+   memory.wiki for Mac — Complete Stylesheet
+
+   Semantic tokens (--background, --surface, --accent, --text-*,
+   --micro-*) come from /design-tokens. Edit JSON under
+   /design-tokens at repo root and `npm run tokens:build`.
+   This file holds desktop-only aliases (--bg, --fg) + helper
+   vars (sidebar, toolbar, editor) that don't need to live in
+   the SOT yet.
    ========================================================= */
 
-/* ─── Design Tokens ─── */
+@import "./_tokens.dark.generated.css";
+@import "./_tokens.light.generated.css";
 
 :root {
-  --bg: #09090b;
-  --fg: #fafafa;
-  --fg-muted: #a1a1aa;
-  --border: #27272a;
-  --accent: #B5FF1A;
-  --accent-hover: #f97316;
-  --accent-dim: rgba(181, 255, 26, 0.15);
-  --surface: #18181b;
-  --surface-hover: #27272a;
-  --toggle-bg: rgba(39, 39, 42, 0.5);
-  --text-faint: #737373;
-  --code-bg: #18181b;
-  --inline-code-bg: #27272a;
-  --blockquote-border: #B5FF1A;
-  --blockquote-bg: rgba(181, 255, 26, 0.05);
-  --link-color: #B5FF1A;
-  --table-border: #27272a;
-  --table-header-bg: #18181b;
-  --table-stripe-bg: rgba(255, 255, 255, 0.02);
-  --toolbar-bg: #18181b;
-  --toolbar-border: #27272a;
-  --syncbar-bg: #18181b;
-  --selection-bg: rgba(181, 255, 26, 0.2);
+  /* Legacy desktop-scoped names mapped onto canonical tokens. */
+  --bg: var(--background);
+  --fg: var(--text-primary);
+  --fg-muted: var(--text-muted);
+  --accent-hover: var(--accent);
+  --link-color: var(--accent);
+  --blockquote-border: var(--border);
+  --blockquote-bg: var(--accent-dim);
+  --selection-bg: var(--accent-dim);
+  --h2-color: var(--text-secondary);
 
-  /* Web-parity semantic colors */
-  --text-primary: #fafafa;
-  --text-secondary: #d4d4d8;
-  --text-tertiary: #a1a1aa;
-  --text-muted: #71717a;
-  --h2-color: #e4e4e7;
-  --border-dim: rgba(39, 39, 42, 0.6);
+  /* Desktop-specific surfaces (not in SOT). */
+  --surface-hover: var(--border);
+  --toggle-bg: rgba(39, 39, 42, 0.5);
+  --code-bg: var(--surface);
+  --inline-code-bg: var(--border);
+  --table-border: var(--border);
+  --table-header-bg: var(--surface);
+  --table-stripe-bg: rgba(255, 255, 255, 0.02);
+  --toolbar-bg: var(--surface);
+  --toolbar-border: var(--border);
+  --syncbar-bg: var(--surface);
   --math-color: #c4b5fd;
-  --editor-text: #d4d4d8;
+  --editor-text: var(--text-secondary);
 
   /* Sidebar-specific tokens */
   --sidebar-bg: #111113;
   --sidebar-hover: rgba(255, 255, 255, 0.04);
-  --sidebar-active: rgba(181, 255, 26, 0.10);
+  --sidebar-active: var(--accent-dim);
   --sidebar-active-border: var(--accent);
   --sidebar-section: #3f3f46;
   --sidebar-depth: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
 }
 
 [data-theme="light"] {
-  --bg: #faf9f7;
-  --fg: #18181b;
-  --fg-muted: #71717a;
-  --border: #e4e4e7;
-  --accent: #ea580c;
-  --accent-hover: #c2410c;
-  --accent-dim: rgba(234, 88, 12, 0.1);
-  --surface: #f4f4f5;
+  --bg: var(--background);
+  --fg: var(--text-primary);
+  --fg-muted: var(--text-muted);
+  --accent-hover: var(--accent);
+  --link-color: var(--accent);
+  --blockquote-border: var(--border);
+  --blockquote-bg: var(--accent-dim);
+  --selection-bg: var(--accent-dim);
+  --h2-color: var(--text-secondary);
+
   --surface-hover: #e4e4e7;
   --toggle-bg: #e4e4e7;
-  --text-faint: #a1a1aa;
   --code-bg: #f4f4f5;
   --inline-code-bg: #f4f4f5;
-  --blockquote-border: #ea580c;
-  --blockquote-bg: rgba(234, 88, 12, 0.05);
-  --link-color: #ea580c;
   --table-border: #e4e4e7;
   --table-header-bg: #f4f4f5;
   --table-stripe-bg: rgba(0, 0, 0, 0.02);
   --toolbar-bg: #f4f4f5;
   --toolbar-border: #e4e4e7;
   --syncbar-bg: #f4f4f5;
-  --selection-bg: rgba(234, 88, 12, 0.15);
-
-  --text-primary: #09090b;
-  --text-secondary: #3f3f46;
-  --text-tertiary: #71717a;
-  --text-muted: #71717a;
-  --h2-color: #27272a;
-  --border-dim: rgba(228, 228, 231, 0.6);
   --math-color: #7c3aed;
-  --editor-text: #3f3f46;
+  --editor-text: var(--text-secondary);
 
   --sidebar-bg: #f0efed;
   --sidebar-hover: rgba(0, 0, 0, 0.04);
-  --sidebar-active: rgba(234, 88, 12, 0.08);
+  --sidebar-active: var(--accent-dim);
   --sidebar-active-border: var(--accent);
   --sidebar-section: #a1a1aa;
   --sidebar-depth: 0 1px 0 rgba(255, 255, 255, 0.5) inset;

@@ -1,65 +1,64 @@
 /* =========================================================
-   Memory.Wiki VS Code Preview — Dark/Light theme
-   Ported from Memory.Wiki globals.css + mdcore-rendered styles
+   memory.wiki VS Code Preview — Dark/Light theme
+
+   Semantic tokens (--background, --surface, --accent, --text-*,
+   --micro-*) come from /design-tokens. To change a brand value:
+   edit design-tokens/* at repo root and `npm run tokens:build`.
+   This file holds VS Code preview-specific aliases + helper
+   vars (--bg, --fg, --link-color, --toolbar-bg, etc.) that map
+   the preview's legacy names onto the canonical tokens so the
+   downstream rules don't have to be renamed.
    ========================================================= */
 
-/*
- * Brand palette mirrors the v8 spec at memory.wiki/L2SHNVir
- * section 2. v8 accent is lime #B5FF1A in dark, #5BC700 in light
- * (darker for AA contrast on white). Background sits at #15151a
- * (web brand bg, not native #09090B) so the preview pane reads
- * the same as the live site behind VS Code's chrome.
- */
+@import "./_tokens.dark.generated.css";
+@import "./_tokens.light.generated.css";
+
 :root {
-  --bg: #15151a;
-  --fg: #fafafa;
-  --fg-muted: #a1a1aa;
-  --border: #27272a;
-  --accent: #B5FF1A;
-  --accent-hover: #C7FF52;
-  --accent-dim: rgba(181, 255, 26, 0.15);
-  --surface: #18181b;
-  --surface-hover: #27272a;
+  /* Legacy preview-scoped names mapped onto canonical tokens. */
+  --bg: var(--background);
+  --fg: var(--text-primary);
+  --fg-muted: var(--text-muted);
+  --accent-hover: var(--accent);
+  --link-color: var(--accent);
+  --blockquote-border: var(--border);
+  --blockquote-bg: var(--accent-dim);
+  --selection-bg: var(--accent-dim);
+
+  /* Preview-specific surfaces that aren't in the SOT yet. */
+  --surface-hover: var(--border);
   --toggle-bg: rgba(39, 39, 42, 0.5);
-  --text-faint: #8a8a91;
-  --code-bg: #18181b;
-  --inline-code-bg: #27272a;
-  --blockquote-border: #B5FF1A;
-  --blockquote-bg: rgba(181, 255, 26, 0.05);
-  --link-color: #B5FF1A;
-  --table-border: #27272a;
-  --table-header-bg: #18181b;
+  --code-bg: var(--surface);
+  --inline-code-bg: var(--border);
+  --table-border: var(--border);
+  --table-header-bg: var(--surface);
   --table-stripe-bg: rgba(255, 255, 255, 0.02);
-  --toolbar-bg: #18181b;
-  --toolbar-border: #27272a;
-  --syncbar-bg: #18181b;
-  --selection-bg: rgba(181, 255, 26, 0.2);
+  --toolbar-bg: var(--surface);
+  --toolbar-border: var(--border);
+  --syncbar-bg: var(--surface);
 }
 
 [data-theme="light"] {
-  --bg: #ffffff;
-  --fg: #18181b;
-  --fg-muted: #52525b;
-  --border: #e4e4e7;
-  --accent: #5BC700;
-  --accent-hover: #4FAB00;
-  --accent-dim: rgba(91, 199, 0, 0.10);
-  --surface: #fafafa;
+  /* Same alias shape; the canonical tokens flip themselves via
+     the imported light file above. */
+  --bg: var(--background);
+  --fg: var(--text-primary);
+  --fg-muted: var(--text-muted);
+  --accent-hover: var(--accent);
+  --link-color: var(--accent);
+  --blockquote-border: var(--border);
+  --blockquote-bg: var(--accent-dim);
+  --selection-bg: var(--accent-dim);
+
   --surface-hover: #f4f4f5;
   --toggle-bg: #e4e4e7;
-  --text-faint: #71717a;
   --code-bg: #f4f4f5;
   --inline-code-bg: #f4f4f5;
-  --blockquote-border: #5BC700;
-  --blockquote-bg: rgba(91, 199, 0, 0.05);
-  --link-color: #5BC700;
   --table-border: #e4e4e7;
   --table-header-bg: #f4f4f5;
   --table-stripe-bg: rgba(0, 0, 0, 0.02);
   --toolbar-bg: #f4f4f5;
   --toolbar-border: #e4e4e7;
   --syncbar-bg: #f4f4f5;
-  --selection-bg: rgba(91, 199, 0, 0.15);
 }
 
 /* === Base Reset === */
