@@ -778,20 +778,27 @@ body {
   color: var(--vscode-foreground);
 }
 
-/* Tooltip */
+/* Tooltip — multi-line wrap for row state (`Public (anyone…)
+   \n Synced from this editor \n Starred \n id…`). max-width
+   keeps it from spanning the editor area when the sidebar is
+   narrow. pre-line honours the `\n` separators that docStateText
+   emits in place of middle-dots. */
 .sb-tooltip {
   position: fixed;
   z-index: 9999;
-  padding: 3px 8px;
+  padding: 5px 9px;
+  max-width: 240px;
   font-size: 11px;
   font-weight: 500;
+  line-height: 1.45;
   color: var(--vscode-foreground);
   background: var(--vscode-editorWidget-background, #1e1e1e);
   border: 1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.1));
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   pointer-events: none;
-  white-space: nowrap;
+  white-space: pre-line;
+  word-break: break-word;
   opacity: 0;
   transition: opacity 0.1s;
 }
@@ -1171,20 +1178,23 @@ body {
       var pinned = doc.docId && pinnedDocIds.has(doc.docId);
       var parts = [];
       if (editMode === 'readonly') {
-        parts.push('View only — shared with you');
+        parts.push('View only (shared with you)');
       } else if (allowedEmails && allowedEmails.length > 0) {
-        parts.push('Shared — restricted to ' + allowedEmails.length + ' email(s)');
+        parts.push('Shared (restricted to ' + allowedEmails.length + ' email' + (allowedEmails.length === 1 ? '' : 's') + ')');
       } else if (!isDraft) {
-        parts.push('Public — anyone with the link can read');
+        parts.push('Public (anyone with the link can read)');
       } else if (doc.docId) {
-        parts.push('Private — cloud-only, only you can read');
+        parts.push('Private (cloud-only, only you can read)');
       } else {
-        parts.push('Local — not yet synced to memory.wiki');
+        parts.push('Local (not yet synced to memory.wiki)');
       }
       if (isSynced) parts.push('Synced from this editor');
       if (pinned) parts.push('Starred');
       if (doc.docId) parts.push(doc.docId);
-      return parts.join(' · ');
+      // Newline-joined so the tooltip CSS (white-space: pre-line)
+      // renders each fact on its own line. Drops the · separator
+      // per brand voice rule.
+      return parts.join('\n');
     }
 
     function docStatusIcon(doc) {
@@ -1522,7 +1532,7 @@ body {
       var ic = '<div class="doc-icon local">' + icon('file', 14) + '</div>';
       var meta = doc.relativePath || doc.fileName;
       var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to memory.wiki">' + icon('upload', 14) + '</button>';
-      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + ' · ' + (doc.relativePath || doc.fileName)) + '">'
+      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + '\n' + (doc.relativePath || doc.fileName)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
