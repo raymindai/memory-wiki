@@ -307,7 +307,7 @@ server.tool(
   "Get the user's hub as a structured graph (concept nodes + typed edges + doc clusters). " +
     "Use this when an answer needs to navigate the user's knowledge by relationship — e.g. " +
     "'what depends on X', 'which docs cover X and Y together', 'what's at the center of this hub'. " +
-    "URL-fetch (memory.wiki/hub/<slug>) gives the same data rendered as markdown; this returns the " +
+    "URL-fetch (memory.wiki/@<username>) gives the same data rendered as markdown; this returns the " +
     "underlying JSON so you can traverse it programmatically.",
   {
     limit_concepts: z.number().int().min(1).max(200).optional()

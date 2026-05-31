@@ -1,7 +1,7 @@
 {
   "name": "memory-wiki-cli",
-  "version": "1.4.2",
-  "description": "Memory.Wiki CLI — publish Markdown from anywhere",
+  "version": "1.4.3",
+  "description": "Memory.Wiki CLI (mw). Publish Markdown from anywhere.",
   "bin": {
     "mw": "./bin/mw.js"
   },

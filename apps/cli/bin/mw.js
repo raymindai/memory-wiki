@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 
 /* =========================================================
-   Memory.Wiki CLI — Publish Markdown from anywhere
+   Memory.Wiki CLI (mw). Publish Markdown from anywhere.
 
    Usage:
-     Memory.Wiki publish <file>          Publish a .md file → get URL
-     Memory.Wiki publish                 Publish from stdin
-     Memory.Wiki update <id> <file>      Update an existing document
-     Memory.Wiki pull <id>               Download a document
-     Memory.Wiki pull <id> -o <file>     Download and save to file
-     Memory.Wiki delete <id>             Delete a document
-     Memory.Wiki list                    List your documents
-     Memory.Wiki open <id>               Open document in browser
-     Memory.Wiki render <file>           Render markdown to HTML
-     Memory.Wiki login                   Authenticate with Memory.Wiki
-     Memory.Wiki logout                  Clear stored credentials
-     Memory.Wiki whoami                  Show current user
+     mw publish <file>          Publish a .md file and print the URL
+     mw publish                 Publish from stdin
+     mw update <id> <file>      Update an existing document
+     mw pull <id>               Download a document
+     mw pull <id> -o <file>     Download and save to file
+     mw delete <id>             Delete a document
+     mw list                    List your documents
+     mw open <id>               Open document in browser
+     mw render <file>           Render markdown to HTML
+     mw login                   Authenticate with Memory.Wiki
+     mw logout                  Clear stored credentials
+     mw whoami                  Show current user
 
    Pipe support:
-     echo "# Hello" | Memory.Wiki publish
-     cat README.md | Memory.Wiki publish
-     tmux capture-pane -p | Memory.Wiki publish
-     pbpaste | Memory.Wiki publish
+     echo "# Hello" | mw publish
+     cat README.md | mw publish
+     tmux capture-pane -p | mw publish
+     pbpaste | mw publish
    ========================================================= */
 
 const fs = require("fs");
@@ -108,8 +108,8 @@ async function cmdPublish(args) {
   } else {
     markdown = await readStdin();
     if (!markdown) {
-      console.error("Usage: Memory.Wiki publish <file>");
-      console.error("       echo '# Hello' | Memory.Wiki publish");
+      console.error("Usage: mw publish <file>");
+      console.error("       echo '# Hello' | mw publish");
       process.exit(1);
     }
   }
@@ -148,14 +148,14 @@ async function cmdPublish(args) {
 async function cmdUpdate(args) {
   const id = args[0];
   const file = args[1];
-  if (!id) { console.error("Usage: Memory.Wiki update <id> <file>"); process.exit(1); }
+  if (!id) { console.error("Usage: mw update <id> <file>"); process.exit(1); }
 
   let markdown;
   if (file) {
     markdown = fs.readFileSync(file, "utf8");
   } else {
     markdown = await readStdin();
-    if (!markdown) { console.error("Usage: Memory.Wiki update <id> <file>"); process.exit(1); }
+    if (!markdown) { console.error("Usage: mw update <id> <file>"); process.exit(1); }
   }
 
   const tokens = loadTokens();
@@ -177,7 +177,7 @@ async function cmdUpdate(args) {
 
 async function cmdPull(args) {
   const id = args[0];
-  if (!id) { console.error("Usage: Memory.Wiki pull <id> [-o file]"); process.exit(1); }
+  if (!id) { console.error("Usage: mw pull <id> [-o file]"); process.exit(1); }
 
   try {
     const doc = await api("GET", `/api/docs/${id}`);
@@ -198,7 +198,7 @@ async function cmdPull(args) {
 
 async function cmdDelete(args) {
   const id = args[0];
-  if (!id) { console.error("Usage: Memory.Wiki delete <id>"); process.exit(1); }
+  if (!id) { console.error("Usage: mw delete <id>"); process.exit(1); }
 
   const tokens = loadTokens();
   const editToken = tokens[id];
@@ -218,7 +218,7 @@ async function cmdDelete(args) {
 
 async function cmdList() {
   const config = loadConfig();
-  if (!config.userId) { console.error("Not logged in. Run: Memory.Wiki login"); process.exit(1); }
+  if (!config.userId) { console.error("Not logged in. Run: mw login"); process.exit(1); }
 
   try {
     const data = await api("GET", "/api/user/documents");
@@ -241,7 +241,7 @@ async function cmdList() {
 
 async function cmdOpen(args) {
   const id = args[0];
-  if (!id) { console.error("Usage: Memory.Wiki open <id>"); process.exit(1); }
+  if (!id) { console.error("Usage: mw open <id>"); process.exit(1); }
   const url = `${BASE_URL}/${id}`;
   if (process.platform === "darwin") {
     require("child_process").exec(`open "${url}"`);
@@ -358,38 +358,38 @@ function cmdWhoami() {
   } else if (config.userId) {
     console.log(config.userId);
   } else {
-    console.log("Not logged in. Run: Memory.Wiki login");
+    console.log("Not logged in. Run: mw login");
   }
 }
 
 function cmdHelp() {
-  console.log(`Memory.Wiki — Publish Markdown from anywhere
+  console.log(`Memory.Wiki CLI (mw). Publish Markdown from anywhere.
 
 Usage:
-  Memory.Wiki publish <file>          Publish a .md file and get a URL
-  Memory.Wiki publish                 Publish from stdin (pipe support)
-  Memory.Wiki search <query>           Search your documents
-  Memory.Wiki read <id>               Read a document in terminal
-  Memory.Wiki capture "<text>"        Capture inline text and publish
-  Memory.Wiki capture [source]        Capture from tmux / clipboard / last / file
-  Memory.Wiki update <id> <file>      Update an existing document
-  Memory.Wiki pull <id>               Download a document to stdout
-  Memory.Wiki pull <id> -o <file>     Download and save to file
-  Memory.Wiki delete <id>             Delete a document
-  Memory.Wiki list                    List your documents
-  Memory.Wiki open <id>               Open document in browser
-  Memory.Wiki login                   Authenticate with Memory.Wiki
-  Memory.Wiki logout                  Clear stored credentials
-  Memory.Wiki whoami                  Show current user
-  Memory.Wiki claim [ids...]          Claim anonymous docs by edit token (auto-runs after login)
+  mw publish <file>          Publish a .md file and get a URL
+  mw publish                 Publish from stdin (pipe support)
+  mw search <query>           Search your documents
+  mw read <id>               Read a document in terminal
+  mw capture "<text>"        Capture inline text and publish
+  mw capture [source]        Capture from tmux / clipboard / last / file
+  mw update <id> <file>      Update an existing document
+  mw pull <id>               Download a document to stdout
+  mw pull <id> -o <file>     Download and save to file
+  mw delete <id>             Delete a document
+  mw list                    List your documents
+  mw open <id>               Open document in browser
+  mw login                   Authenticate with Memory.Wiki
+  mw logout                  Clear stored credentials
+  mw whoami                  Show current user
+  mw claim [ids...]          Claim anonymous docs by edit token (auto-runs after login)
 
 Examples:
-  echo "# Hello World" | Memory.Wiki publish
-  cat README.md | Memory.Wiki publish
-  tmux capture-pane -p | Memory.Wiki publish
-  pbpaste | Memory.Wiki publish
-  Memory.Wiki publish ./notes/meeting.md
-  Memory.Wiki pull abc123 -o meeting.md
+  echo "# Hello World" | mw publish
+  cat README.md | mw publish
+  tmux capture-pane -p | mw publish
+  pbpaste | mw publish
+  mw publish ./notes/meeting.md
+  mw pull abc123 -o meeting.md
 
 Environment:
   MEMORY_WIKI_URL    Base URL (default: https://memory.wiki)
@@ -404,10 +404,20 @@ Tokens:  ~/.memory.wiki/tokens.json
 
 async function cmdRead(args) {
   let id = args[0];
-  if (!id) { console.error("Usage: Memory.Wiki read <id>"); process.exit(1); }
+  if (!id) { console.error("Usage: mw read <id>"); process.exit(1); }
 
-  // Accept full URL or just ID
-  id = id.replace(/^https?:\/\/memory.wiki\.(cc|app)\/\?doc=/, "").replace(/^https?:\/\/memory.wiki\.(cc|app)\/d\//, "").replace(/^https?:\/\/memory.wiki\.(cc|app)\//, "").replace(/^Memory.Wiki\.(cc|app)\/\?doc=/, "").replace(/^Memory.Wiki\.(cc|app)\/d\//, "").replace(/^Memory.Wiki\.(cc|app)\//, "");
+  // Accept full URL or just ID.
+  // The earlier sed-rename from mdfy → memory.wiki produced regexes that
+  // tried to match `memory.wiki.cc` / `memory.wiki.app` (literal dot +
+  // tld), which never exists. Strip the canonical memory.wiki forms +
+  // historical mdfy.app / mdfy.cc that some users may still paste.
+  id = id
+    .replace(/^https?:\/\/(www\.)?memory\.wiki\/\?doc=/i, "")
+    .replace(/^https?:\/\/(www\.)?memory\.wiki\/d\//i, "")
+    .replace(/^https?:\/\/(www\.)?memory\.wiki\//i, "")
+    .replace(/^https?:\/\/(www\.)?mdfy\.(app|cc)\/\?doc=/i, "")
+    .replace(/^https?:\/\/(www\.)?mdfy\.(app|cc)\/d\//i, "")
+    .replace(/^https?:\/\/(www\.)?mdfy\.(app|cc)\//i, "");
 
   try {
     const doc = await api("GET", `/api/docs/${id}`);
@@ -498,7 +508,7 @@ async function cmdCapture(args) {
   } else if (target === "last") {
     // Read stdin for piped last command
     raw = await readStdin();
-    if (!raw) { console.error("Usage: some-command 2>&1 | Memory.Wiki capture last"); process.exit(1); }
+    if (!raw) { console.error("Usage: some-command 2>&1 | mw capture last"); process.exit(1); }
   } else if (!target) {
     // Auto: try stdin, then clipboard
     raw = await readStdin();
@@ -506,7 +516,7 @@ async function cmdCapture(args) {
       try { raw = require("child_process").execSync("pbpaste", { encoding: "utf8" }); }
       catch {}
     }
-    if (!raw) { console.error("Usage: Memory.Wiki capture [tmux|clipboard|last]"); process.exit(1); }
+    if (!raw) { console.error("Usage: mw capture [tmux|clipboard|last]"); process.exit(1); }
   } else {
     // Treat as file if it exists, otherwise treat as inline markdown
     // text (gbrain-style `mw capture "the thought I want to remember"`).
@@ -646,10 +656,10 @@ function formatCliSession(text) {
 
 async function cmdSearch(args) {
   const query = args.join(" ").trim();
-  if (!query) { console.error("Usage: Memory.Wiki search <query>"); process.exit(1); }
+  if (!query) { console.error("Usage: mw search <query>"); process.exit(1); }
 
   const config = loadConfig();
-  if (!config.userId && !config.token) { console.error("Not logged in. Run: Memory.Wiki login"); process.exit(1); }
+  if (!config.userId && !config.token) { console.error("Not logged in. Run: mw login"); process.exit(1); }
 
   try {
     const data = await api("GET", `/api/search?q=${encodeURIComponent(query)}`);
