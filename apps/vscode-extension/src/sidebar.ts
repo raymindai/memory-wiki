@@ -974,6 +974,9 @@ body {
   <div class="header">
     <a class="logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><svg class="logo-mark" viewBox="3 2 26 28" fill="currentColor" aria-hidden="true"><path d="M26.77,16.03c-.99,0-1.8.81-1.8,1.8s.81,1.8,1.8,1.8,1.8-.81,1.8-1.8-.81-1.8-1.8-1.8Z"/><circle cx="16.4" cy="5.27" r="2.82"/><path d="M7.35,22.79c-.88.34-1.12,1.33-.77,2.05.35.7,1.15.99,1.92.7.79-.3,1.08-1.09.77-1.94-.25-.68-1.08-1.15-1.92-.82h0Z"/><path d="M24.02,14.59c1.59-1.32,1.55-3.61.3-5.03-1.24-1.39-3.5-1.59-4.97-.21-1.39,1.32-3.59,1.84-5.23.5-.81-.66-1.67-1.25-2.83-.9-.9.26-1.67.98-2.01,2.02-.28.85-1.25,1.14-2.09,1.15-1.34.02-2.5.88-3.1,1.83-.77,1.22-.88,2.58-.35,3.85.7,1.68,2.35,2.71,4.19,2.43,1.19-.18,2.47.1,3.2,1.22.51.78.71,1.9.42,2.74-.45,1.33-.46,2.72.43,3.83,1.02,1.28,2.6,1.81,4.2,1.36,1.41-.39,2.28-1.59,2.73-3.09.32-1.06,1.65-1.47,2.63-1.52,1.23-.06,2.1-1.06,2.41-2,.44-1.28-.18-2.29-.92-3.19-1.36-1.65-.48-3.81.97-5.01h0l.02.02ZM19.6,19.68c-.67.41-1.3-.54-2.44-.97-.37,1.14.3,2.21-.3,2.58-.3.19-.77.2-1.01.02-.61-.46.15-1.48-.28-2.61-1.24.45-1.97,1.69-2.63.75-.28-.4-.21-.94.3-1.15.61-.25,1.08-.48,1.75-.88l-1.85-1.1c-.31-.19-.34-.62-.21-.89.17-.35.64-.55.98-.33l1.68,1.12c.35-.99-.23-2.1.25-2.53.19-.17.67-.2.97-.08.65.26.06,1.51.32,2.59l1.61-1.07c.34-.23.79-.09,1.01.21.25.34.22.83-.23,1.04-.61.28-1.1.55-1.73,1,.89.74,2.11.8,2.17,1.51.03.27-.18.66-.39.79h.03Z"/></svg>memory.wiki</a>
     <div class="header-actions">
+      <button class="icon-btn" id="btn-toggle-folders" title="Expand all folders">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4,6 8,2 12,6"/><polyline points="4,10 8,14 12,10"/></svg>
+      </button>
       <button class="icon-btn" id="btn-search-toggle" title="Search">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
       </button>
@@ -1166,6 +1169,39 @@ body {
 
     document.getElementById('btn-refresh').addEventListener('click', function() {
       vscode.postMessage({ type: 'refresh' });
+    });
+
+    // Expand / collapse every folder (cloud + local-relative) in one
+    // shot. If any folder is currently collapsed → expand all; else
+    // collapse all. localFolderState is the truth + render() reads
+    // it on every paint, so we just rewrite + render. Tooltip flips
+    // to reflect what the NEXT click will do.
+    document.getElementById('btn-toggle-folders').addEventListener('click', function() {
+      var anyCollapsed = false;
+      // Cloud folders use ids
+      (cloudFolders || []).forEach(function(f) {
+        if (localFolderState[f.id] === true) anyCollapsed = true;
+      });
+      // Local folders use folder names — gather distinct names from
+      // current allDocs so we cover what's actually on screen.
+      var localNames = {};
+      (allDocs || []).forEach(function(d) {
+        if (d.relativePath) {
+          var parts = d.relativePath.split('/');
+          if (parts.length > 1) localNames[parts.slice(0, -1).join('/')] = true;
+        }
+      });
+      Object.keys(localNames).forEach(function(n) {
+        if (localFolderState[n] === true) anyCollapsed = true;
+      });
+
+      var nextState = anyCollapsed ? false : true; // expand all OR collapse all
+      (cloudFolders || []).forEach(function(f) { localFolderState[f.id] = nextState; });
+      Object.keys(localNames).forEach(function(n) { localFolderState[n] = nextState; });
+
+      var btn = document.getElementById('btn-toggle-folders');
+      if (btn) btn.title = nextState ? 'Expand all folders' : 'Collapse all folders';
+      render();
     });
 
     document.getElementById('btn-search-toggle').addEventListener('click', function() {
