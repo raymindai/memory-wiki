@@ -150,21 +150,15 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
       }
     });
 
-    // Start periodic refresh when sidebar is first shown
-    this._startPeriodicRefresh();
-
+    // Periodic auto-refresh removed (founder report 2026-06-01:
+    // "왜 자꾸 사이드바에서 자동으로 리프레쉬를 하지?"). Sidebar
+    // already refreshes on workspace file events + on explicit
+    // user action (refresh button, login, sidebar reveal). The
+    // 15-second timer added noise + made the loading skeleton
+    // flash repeatedly. Pull-not-push for cloud staleness.
     webviewView.onDidDispose(() => {
       this._stopPeriodicRefresh();
     });
-  }
-
-  private _startPeriodicRefresh(): void {
-    this._stopPeriodicRefresh();
-    this._refreshInterval = setInterval(() => {
-      if (this._view?.visible) {
-        this.sendDocuments();
-      }
-    }, 15000);
   }
 
   private _stopPeriodicRefresh(): void {
@@ -596,6 +590,9 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     const accentCss = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "_accent.generated.css")
     );
+    const blobUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, "media", "blob.svg")
+    );
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -725,16 +722,21 @@ body {
   flex-shrink: 0; width: 16px; height: 16px;
   display: flex; align-items: center; justify-content: center;
 }
-/* All per-row doc icons stay quiet ink per brand v8 (sec 2.4
-   "list rows → ink, colour only in small dots/badges"). Status
-   semantics live in the small overlays (sync-badge 8px,
-   user-status-dot 5px) below — not in the 14px row glyph. */
-.doc-icon.published,
+/* Row icon colours mirror the web canonical mapping
+   (MdEditor.tsx L8484-8488). One colour per semantic state so
+   the sidebar reads identical to memory.wiki's own sidebar.
+     Public    → Globe (green #22c55e)  anyone with link
+     Shared    → Users (blue  #60a5fa)  specific people / password
+     Private   → Cloud (blue  #60a5fa)  cloud-only, owner-only
+     View only → Eye   (purple #a78bfa) shared with you, read
+     Local     → File   neutral          local-only, no cloud copy */
+.doc-icon.public    { color: #22c55e; }
 .doc-icon.shared,
-.doc-icon.restricted,
-.doc-icon.readonly,
-.doc-icon.local,
-.doc-icon.cloud { color: var(--vscode-descriptionForeground); }
+.doc-icon.private,
+.doc-icon.restricted { color: #60a5fa; }
+.doc-icon.view-only,
+.doc-icon.readonly  { color: #a78bfa; }
+.doc-icon.local     { color: var(--vscode-descriptionForeground); }
 .doc-icon { position: relative; }
 .doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: var(--micro-lime); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .doc-icon .sync-badge svg { width: 6px; height: 6px; }
@@ -849,27 +851,22 @@ body {
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* Skeleton loading rows — shown while the cloud fetch is in flight
-   so first-login users see motion instead of an empty list. */
-@keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: 200px 0; }
+/* Brand blob loading state — the SMIL morph animation inside
+   blob.svg carries the motion; we just centre the asset with a
+   soft fade-in. Used while the first cloud fetch is in flight. */
+@keyframes blobFadeIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
 }
-.skeleton-row { cursor: default; pointer-events: none; }
-.skel-line, .skel-icon {
-  background: linear-gradient(90deg,
-    var(--vscode-list-hoverBackground, rgba(255,255,255,0.04)) 0%,
-    var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.08)) 50%,
-    var(--vscode-list-hoverBackground, rgba(255,255,255,0.04)) 100%);
-  background-size: 200px 100%;
-  background-repeat: no-repeat;
-  animation: shimmer 1.2s linear infinite;
-  border-radius: 3px;
+.blob-loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 14px;
+  animation: blobFadeIn 0.32s ease-out both;
 }
-.skel-icon { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; }
-.skel-title { height: 11px; width: 70%; margin-bottom: 4px; }
-.skel-meta  { height: 9px;  width: 40%; }
-.skel-section { display: inline-block; height: 9px; width: 60px; vertical-align: middle; }
+.blob-loading img {
+  display: block;
+  opacity: 0.9;
+}
 .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
 
 /* User bar — always visible at bottom */
@@ -1073,6 +1070,7 @@ body {
 
   <script>
     var vscode = acquireVsCodeApi();
+    var BLOB_URI = ${JSON.stringify(blobUri.toString())};
     var allDocs = [];
     var cloudDocs = [];
     var cloudFolders = [];
@@ -1102,6 +1100,11 @@ body {
       share:        '<svg width="S" height="S" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
       users:        '<svg width="S" height="S" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
       eye:          '<svg width="S" height="S" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+      // Lucide Globe (lucide-react source) — used by web for the
+      // "Public — anyone with the link can read" doc state.
+      globe:        '<svg width="S" height="S" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+      // Lucide Lock — used for password-protected docs.
+      lock:         '<svg width="S" height="S" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
     };
     function icon(name, size) {
       size = size || 14;
@@ -1123,23 +1126,26 @@ body {
       var isSynced = source === 'vscode' || source === 'desktop' || source === 'cli' || source === 'mcp';
       var badge = isSynced ? syncBadge : '';
 
-      // Readonly
+      // Mirror web's iconography (see MdEditor.tsx L8484-8488,
+      // founder ask 2026-06-01 "문서 아이콘들이 웹이랑 같아야함").
+      //
+      //   View only  → Eye   (purple)  shared with you
+      //   Shared     → Users (blue)    specific people / password
+      //   Public     → Globe (green)   anyone with link
+      //   Private    → Cloud (blue)    cloud-only, owner-only
+      //   Local      → File             local-only, no cloud copy
       if (editMode === 'readonly') {
-        return '<div class="doc-icon readonly">' + icon('eye', 14) + badge + '</div>';
+        return '<div class="doc-icon view-only">' + icon('eye', 14) + badge + '</div>';
       }
-      // Shared publicly
-      if (editMode === 'view' || editMode === 'public') {
-        return '<div class="doc-icon shared">' + icon('share', 14) + badge + '</div>';
-      }
-      // Shared with specific people
       if (allowedEmails && allowedEmails.length > 0) {
-        return '<div class="doc-icon restricted">' + icon('users', 14) + badge + '</div>';
+        return '<div class="doc-icon shared">' + icon('users', 14) + badge + '</div>';
       }
-      // Cloud (has docId)
+      if (!isDraft) {
+        return '<div class="doc-icon public">' + icon('globe', 14) + badge + '</div>';
+      }
       if (doc.docId) {
-        return '<div class="doc-icon cloud">' + icon('cloud', 14) + badge + '</div>';
+        return '<div class="doc-icon private">' + icon('cloud', 14) + badge + '</div>';
       }
-      // Local file
       return '<div class="doc-icon local">' + icon('file', 14) + badge + '</div>';
     }
 
@@ -1153,17 +1159,16 @@ body {
         return;
       }
       if (e.data.type === 'loading') {
-        // Server is fetching cloud docs + folders + pins. Show a
-        // skeleton so the user sees progress instead of an empty
-        // list. Cleared when 'documents' message arrives.
+        // Brand blob fade-in while the cloud fetch is in flight.
+        // SMIL animation inside blob.svg runs the morph; we just
+        // drop the asset centered with a soft fade. Replaces the
+        // earlier skeleton-shimmer which the founder flagged as
+        // "너무 못생김". Cleared by the 'documents' message via
+        // render() overwriting #doc-container's HTML.
         if (e.data.state) {
           var ctr = document.getElementById('doc-container');
-          if (ctr && !ctr.querySelector('.skeleton-row')) {
-            var rows = '';
-            for (var i = 0; i < 4; i++) {
-              rows += '<li class="doc-item skeleton-row"><div class="skel-icon"></div><div class="doc-info"><div class="skel-line skel-title"></div><div class="skel-line skel-meta"></div></div></li>';
-            }
-            ctr.innerHTML = '<div class="section-header"><span class="skel-line skel-section"></span></div><ul class="doc-list">' + rows + '</ul>';
+          if (ctr && !ctr.querySelector('.blob-loading')) {
+            ctr.innerHTML = '<div class="blob-loading"><img src="' + BLOB_URI + '" alt="loading" width="56" height="56"/></div>';
           }
         }
         return;
