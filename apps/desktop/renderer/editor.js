@@ -802,19 +802,39 @@
     if (sidebarState.authState.loggedIn) {
       var email = sidebarState.authState.email || "User";
       var initial = email.charAt(0).toUpperCase();
+      // Avatar is enriched async: render initial first, then swap to OAuth
+      // picture (Google/GitHub/Apple) when /api/user/profile responds.
+      var profile = sidebarState.userProfile || {};
+      var avatarUrl = profile.avatar_url || "";
+      var displayName = profile.display_name || email;
+      var avatarHtml = avatarUrl
+        ? '<img class="user-avatar-img" src="' + esc(avatarUrl) + '" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML=\'<div class=\\\'user-avatar-circle\\\'>' + esc(initial) + '\\\'</div>\'">'
+        : '<div class="user-avatar-circle">' + esc(initial) + '</div>';
       bar.innerHTML =
         '<div class="user-loggedin">' +
-          '<div class="user-avatar-circle">' + initial + '</div>' +
+          avatarHtml +
           '<div class="user-details">' +
-            '<span class="user-email">' + esc(email) + '</span>' +
+            '<span class="user-email">' + esc(displayName) + '</span>' +
             '<span class="user-status"><span class="status-dot"></span> Connected</span>' +
           '</div>' +
           '<button class="user-logout-btn" id="btn-signout">Sign out</button>' +
         '</div>';
 
+      // First paint above runs sync; async-fetch the avatar + display name
+      // and repaint once when they arrive. Cached on main side so subsequent
+      // sidebar re-renders are zero-cost.
+      if (!sidebarState.userProfile && window.mwDesktop.getUserProfile) {
+        window.mwDesktop.getUserProfile().then(function(p) {
+          if (!p) return;
+          sidebarState.userProfile = p;
+          renderUserBar();
+        }).catch(function() {});
+      }
+
       document.getElementById("btn-signout").addEventListener("click", function() {
         window.mwDesktop.logout();
         sidebarState.authState = { loggedIn: false };
+        sidebarState.userProfile = null;
         sidebarState.cloudDocs = [];
         sidebarState.cloudFolders = [];
         renderSidebar();

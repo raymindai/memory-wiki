@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld("mwDesktop", {
   login: () => ipcRenderer.invoke("login"),
   logout: () => ipcRenderer.invoke("logout"),
   getAuthState: () => ipcRenderer.invoke("get-auth-state"),
+  getUserProfile: () => ipcRenderer.invoke("get-user-profile"),
 
   // ─── Sync ───
   publish: (markdown) => ipcRenderer.invoke("publish", markdown),

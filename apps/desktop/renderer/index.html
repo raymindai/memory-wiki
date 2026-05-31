@@ -65,6 +65,15 @@
     <!-- ──── TOP HEADER (always visible when doc open) ──── -->
     <div id="app-header" style="display:none">
       <div class="header-left">
+        <span class="header-brand" aria-label="memory.wiki">
+          <span class="header-brand-blob" aria-hidden>
+            <img src="blob.svg" alt="" class="blob-darktheme" draggable="false">
+            <img src="blob-dark.svg" alt="" class="blob-lighttheme" draggable="false">
+          </span>
+          <img src="logo-dark.svg" alt="memory.wiki" class="header-brand-wordmark logo-dark" height="13">
+          <img src="logo-light.svg" alt="memory.wiki" class="header-brand-wordmark logo-light" height="13">
+        </span>
+        <span class="header-divider"></span>
         <span class="header-title" id="header-title">Untitled</span>
         <span class="header-sync" id="header-sync"></span>
       </div>
@@ -333,21 +342,14 @@
     <div id="bottom-bar" style="display:none">
       <div class="bar-left">
         <span class="bar-link" id="footer-help" title="Cmd+B Bold, Cmd+I Italic, Cmd+K Link, Cmd+S Save">Help</span>
-        <span class="bar-sep">·</span>
         <span class="bar-link" onclick="window.mwDesktop.openInBrowser('https://memory.wiki/about')">About</span>
-        <span class="bar-sep">·</span>
         <span class="bar-link" onclick="window.mwDesktop.openInBrowser('https://memory.wiki/plugins')">Plugins</span>
       </div>
       <div class="bar-right">
         <span class="bar-stat" id="stat-views" style="display:none"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5S1 8 1 8z"/><circle cx="8" cy="8" r="2"/></svg><span id="stat-views-count">0</span> views</span>
-        <span class="bar-sep" id="stat-views-sep" style="display:none">·</span>
         <span class="bar-stat" id="stat-words">0 words</span>
-        <span class="bar-sep">·</span>
         <span class="bar-stat" id="stat-chars">0 chars</span>
-        <span class="bar-sep">·</span>
         <span class="bar-stat" id="stat-lines">0 lines</span>
-        <span class="bar-sep">·</span>
-        <span class="bar-badge">RUST+WASM</span>
         <span class="bar-render" id="render-time"><svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v5l3 3"/></svg><span id="render-ms">0ms</span></span>
       </div>
     </div>

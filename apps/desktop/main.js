@@ -1562,6 +1562,7 @@ ipcMain.handle("login", () => {
 
 ipcMain.handle("logout", () => {
   AuthManager.clear();
+  profileCache = null;
   SyncEngine.stopPolling();
   sendToRenderer("auth-changed", { loggedIn: false });
 });
@@ -1572,6 +1573,27 @@ ipcMain.handle("get-auth-state", () => {
     email: AuthManager.getEmail(),
     userId: AuthManager.getUserId(),
   };
+});
+
+// One-shot profile cache so we don't refetch /api/user/profile on
+// every sidebar repaint. Cleared on logout via the auth-changed event.
+let profileCache = null;
+ipcMain.handle("get-user-profile", async () => {
+  if (!AuthManager.isLoggedIn()) {
+    profileCache = null;
+    return null;
+  }
+  if (profileCache) return profileCache;
+  try {
+    const headers = await AuthManager.getHeadersWithRefresh();
+    const resp = await net.fetch(`${MDFY_URL}/api/user/profile`, { headers });
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    profileCache = json?.profile || null;
+    return profileCache;
+  } catch {
+    return null;
+  }
 });
 
 // --- Sync ---

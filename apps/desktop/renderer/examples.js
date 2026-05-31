@@ -46,7 +46,7 @@ window.MDFY_EXAMPLES = {
 
 ---
 
-*Powered by **mdcore engine**: Rust + WASM*`,
+*Same renderer the web viewer uses, so what you preview is what your shared URL renders.*`,
 
   syntax: `# Markdown Syntax Guide
 
@@ -136,8 +136,8 @@ Created by John Gruber[^1]. Most popular flavor: GFM[^2].
 Markdown
 : A lightweight markup language for creating formatted text.
 
-WASM
-: WebAssembly: a binary instruction format for a stack-based virtual machine.`,
+memory.wiki
+: A markdown publisher that turns any document into a short URL Claude, ChatGPT, Cursor, and Gemini all read.`,
 
   diagrams: `# Mermaid Diagrams: All 19 Types
 
@@ -147,11 +147,11 @@ WASM
 
 \`\`\`mermaid
 graph LR
-    A[Markdown] --> B[mdcore Engine]
-    B --> C[WASM]
-    B --> D[Native Binary]
+    A[Markdown] --> B[memory.wiki]
+    B --> C[Short URL]
+    B --> D[Cross-AI render]
     C --> E[Browser]
-    D --> F[CLI]
+    D --> F[Claude, ChatGPT, Cursor, Gemini]
     style B fill:#fb923c,stroke:#ea580c,color:#000
 \`\`\`
 
@@ -171,11 +171,11 @@ sequenceDiagram
 ## Pie Chart
 
 \`\`\`mermaid
-pie title Tech Stack
-    "Rust" : 40
-    "TypeScript" : 35
-    "CSS" : 15
-    "Other" : 10
+pie title What ships in a memory.wiki URL
+    "Markdown body" : 60
+    "Footnotes + math" : 15
+    "Mermaid diagrams" : 15
+    "Code blocks" : 10
 \`\`\`
 
 ## Gantt Chart
@@ -196,15 +196,17 @@ gantt
 
 \`\`\`mermaid
 classDiagram
-    class Engine {
-        +render(md) HTML
-        +detectFlavor() Flavor
+    class Document {
+        +id String
+        +markdown String
+        +publish() URL
     }
-    class Renderer {
-        +highlight() void
-        +katex() void
+    class Bundle {
+        +id String
+        +docs Document[]
+        +graph() Graph
     }
-    Engine <|-- Renderer
+    Bundle o-- Document
 \`\`\`
 
 ## State Diagram
@@ -238,29 +240,36 @@ erDiagram
 
 \`\`\`mermaid
 mindmap
-  root((mdcore))
-    Product
-      memory.wiki
-      Chrome Extension
-    Engine
-      Rust
-      WASM
-    Features
-      GFM
+  root((memory.wiki))
+    Channels
+      Web
+      VS Code
+      Desktop
+      Chrome
+      CLI
+      MCP
+    Renderer
+      Markdown
       KaTeX
       Mermaid
+    Audience
+      Claude
+      ChatGPT
+      Cursor
+      Gemini
 \`\`\`
 
 ## Timeline
 
 \`\`\`mermaid
 timeline
-    title mdcore Milestones
-    2026 Q1 : Engine v0.1
-             : memory.wiki launch
-    2026 Q2 : npm package
-             : CLI tool
-    2026 Q3 : API platform
+    title memory.wiki Milestones
+    2026 Q1 : Web launch
+             : VS Code extension
+    2026 Q2 : Chrome extension
+             : Desktop + CLI + MCP
+    2026 Q3 : Mac App Store
+             : iOS + Android native
 \`\`\`
 
 ## User Journey
@@ -295,12 +304,12 @@ quadrantChart
 gitGraph
     commit id: "init"
     branch feature
-    commit id: "add engine"
-    commit id: "add wasm"
+    commit id: "draft post"
+    commit id: "polish"
     checkout main
-    commit id: "hotfix"
+    commit id: "fix typo"
     merge feature
-    commit id: "v0.1"
+    commit id: "publish"
 \`\`\`
 
 ## XY Chart
@@ -336,10 +345,10 @@ xychart-beta
 │  └─────────────────────────────────────┘ │
 │                    │                      │
 │                    ▼                      │
-│  ┌─ Engine (mdcore) ───────────────────┐ │
+│  ┌─ memory.wiki renderer ──────────────┐ │
 │  │ AI noise removal                    │ │
-│  │ Code + Math + Diagram rendering     │ │
-│  │ Format detection                    │ │
+│  │ Code, math, diagram, table          │ │
+│  │ Footnote, KaTeX, Mermaid            │ │
 │  └─────────────────────────────────────┘ │
 │                    │                      │
 │                    ▼                      │
@@ -360,8 +369,8 @@ xychart-beta
 │  Style    █████████░ 92%     │
 │  Clarity  ██████░░░░ 63%     │
 │                              │
-│  — Analyzed by mdcore        │
-│  memory.wiki                     │
+│  — Analyzed by memory.wiki   │
+│  memory.wiki/{id}            │
 └─────────────────────────────┘
 \`\`\`
 
