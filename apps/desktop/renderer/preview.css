@@ -10,25 +10,25 @@
   --fg: #fafafa;
   --fg-muted: #a1a1aa;
   --border: #27272a;
-  --accent: #fb923c;
+  --accent: #B5FF1A;
   --accent-hover: #f97316;
-  --accent-dim: rgba(251, 146, 60, 0.15);
+  --accent-dim: rgba(181, 255, 26, 0.15);
   --surface: #18181b;
   --surface-hover: #27272a;
   --toggle-bg: rgba(39, 39, 42, 0.5);
   --text-faint: #737373;
   --code-bg: #18181b;
   --inline-code-bg: #27272a;
-  --blockquote-border: #fb923c;
-  --blockquote-bg: rgba(251, 146, 60, 0.05);
-  --link-color: #fb923c;
+  --blockquote-border: #B5FF1A;
+  --blockquote-bg: rgba(181, 255, 26, 0.05);
+  --link-color: #B5FF1A;
   --table-border: #27272a;
   --table-header-bg: #18181b;
   --table-stripe-bg: rgba(255, 255, 255, 0.02);
   --toolbar-bg: #18181b;
   --toolbar-border: #27272a;
   --syncbar-bg: #18181b;
-  --selection-bg: rgba(251, 146, 60, 0.2);
+  --selection-bg: rgba(181, 255, 26, 0.2);
 
   /* Web-parity semantic colors */
   --text-primary: #fafafa;
@@ -43,7 +43,7 @@
   /* Sidebar-specific tokens */
   --sidebar-bg: #111113;
   --sidebar-hover: rgba(255, 255, 255, 0.04);
-  --sidebar-active: rgba(251, 146, 60, 0.10);
+  --sidebar-active: rgba(181, 255, 26, 0.10);
   --sidebar-active-border: var(--accent);
   --sidebar-section: #3f3f46;
   --sidebar-depth: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
@@ -1163,7 +1163,7 @@ pre.ascii-original.hidden {
 
 @keyframes flavorFlash {
   0%, 100% { background: transparent; }
-  30% { background: rgba(251, 146, 60, 0.15); }
+  30% { background: rgba(181, 255, 26, 0.15); }
   60% { background: transparent; }
 }
 
@@ -1559,7 +1559,7 @@ body {
 }
 #search-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.12);
+  box-shadow: 0 0 0 2px rgba(181, 255, 26, 0.12);
 }
 [data-theme="light"] #search-input:focus {
   box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.10);
@@ -1872,8 +1872,8 @@ body {
   margin: 4px 6px 8px;
   padding: 10px 12px;
   border-radius: 6px;
-  background: rgba(251, 146, 60, 0.08);
-  border: 1px solid rgba(251, 146, 60, 0.2);
+  background: rgba(181, 255, 26, 0.08);
+  border: 1px solid rgba(181, 255, 26, 0.2);
   text-align: center;
 }
 .login-prompt p {
@@ -2032,7 +2032,7 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: rgba(251, 146, 60, 0.15);
+  background: rgba(181, 255, 26, 0.15);
   color: var(--accent);
   font-size: 11px;
   font-weight: 700;
@@ -2171,7 +2171,7 @@ body {
   margin-left: auto;
   background: var(--accent-dim) !important;
   color: var(--accent) !important;
-  border: 1px solid rgba(251, 146, 60, 0.25) !important;
+  border: 1px solid rgba(181, 255, 26, 0.25) !important;
   border-radius: 6px !important;
   font-size: 11px !important;
   font-weight: 600 !important;
@@ -2593,7 +2593,7 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.header-url:hover { background: rgba(251, 146, 60, 0.25); }
+.header-url:hover { background: rgba(181, 255, 26, 0.25); }
 
 .header-center {
   flex-shrink: 0;
@@ -2616,7 +2616,7 @@ body {
   font-weight: 600;
   background: var(--accent-dim);
   color: var(--accent);
-  border: 1px solid rgba(251, 146, 60, 0.25);
+  border: 1px solid rgba(181, 255, 26, 0.25);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.12s;
@@ -2748,7 +2748,7 @@ body {
   cursor: pointer;
   transition: background 0.12s;
 }
-.flavor-badge:hover { background: rgba(251, 146, 60, 0.25); }
+.flavor-badge:hover { background: rgba(181, 255, 26, 0.25); }
 
 /* ─── Formatting Toolbar (below pane header) ─── */
 
@@ -3494,7 +3494,7 @@ body {
 }
 
 @keyframes outlineHighlight {
-  0% { background: rgba(251, 146, 60, 0.25); }
+  0% { background: rgba(181, 255, 26, 0.25); }
   100% { background: transparent; }
 }
 

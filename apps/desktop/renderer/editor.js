@@ -1116,7 +1116,7 @@
         var snippet = text.substring(0, Math.min(text.length, 60));
         if (!oldMd.includes(snippet)) {
           el.style.transition = "background 1.5s ease-out";
-          el.style.background = "rgba(251, 146, 60, 0.12)";
+          el.style.background = "rgba(181, 255, 26, 0.12)";
           el.style.borderRadius = "4px";
           setTimeout(function() { el.style.background = ""; }, 3000);
         }
@@ -1837,7 +1837,7 @@
       btn.className = "ascii-convert-btn";
       btn.textContent = "Convert to Mermaid";
       btn.title = "Convert this ASCII diagram to Mermaid using AI";
-      btn.style.cssText = "position:absolute;top:6px;right:6px;padding:3px 10px;font-size:10px;font-family:ui-monospace,monospace;background:var(--accent-dim,rgba(251,146,60,0.15));color:var(--accent,#fb923c);border:1px solid var(--accent,#fb923c);border-radius:4px;cursor:pointer;z-index:5;line-height:14px";
+      btn.style.cssText = "position:absolute;top:6px;right:6px;padding:3px 10px;font-size:10px;font-family:ui-monospace,monospace;background:var(--accent-dim,rgba(251,146,60,0.15));color:var(--accent,#B5FF1A);border:1px solid var(--accent,#B5FF1A);border-radius:4px;cursor:pointer;z-index:5;line-height:14px";
       pre.style.position = "relative";
       pre.appendChild(btn);
 
@@ -1877,7 +1877,7 @@
             btn.textContent = "Convert to Mermaid";
             btn.disabled = false;
             btn.style.opacity = "1";
-            btn.style.color = "var(--accent,#fb923c)";
+            btn.style.color = "var(--accent,#B5FF1A)";
           }, 2000);
         }
       });
@@ -3307,6 +3307,11 @@
         window.mwDesktop.writeClipboard("https://memory.wiki/" + config.docId);
         showToast("URL copied");
       }});
+      items.push({ label: "Copy for AI", action: function() {
+        // Brand spec section 14: canonical paste sentence
+        window.mwDesktop.writeClipboard("Use https://memory.wiki/" + config.docId + " as my context.");
+        showToast("Copied for AI. Paste into Cursor / ChatGPT / Claude.");
+      }});
       items.push({ label: "Open in Browser", action: function() {
         window.mwDesktop.openInBrowser("https://memory.wiki/" +config.docId);
       }});
@@ -3354,6 +3359,11 @@
       { label: "Copy URL", action: function() {
         window.mwDesktop.writeClipboard("https://memory.wiki/" + docId);
         showToast("URL copied");
+      }},
+      { label: "Copy for AI", action: function() {
+        // Brand spec section 14: canonical paste sentence
+        window.mwDesktop.writeClipboard("Use https://memory.wiki/" + docId + " as my context.");
+        showToast("Copied for AI. Paste into Cursor / ChatGPT / Claude.");
       }},
     ];
 
