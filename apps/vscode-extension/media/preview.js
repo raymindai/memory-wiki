@@ -53,6 +53,15 @@
     }
     var narrowToggle = document.getElementById('btn-toggle-narrow');
     if (narrowToggle) {
+      // Initial DOM had `class="pane-icon-btn active"` on the button
+      // but content had no `narrow` class, so the icon read as "ON"
+      // while the content was actually wide. Sync on boot — when the
+      // button starts active, force narrow ON to match. (Default
+      // behaviour: narrow ON, which the auth-screen + brand spec
+      // both expect as the reading column.)
+      if (narrowToggle.classList.contains('active')) {
+        content.classList.add('narrow');
+      }
       narrowToggle.addEventListener('click', function() {
         content.classList.toggle('narrow');
         narrowToggle.classList.toggle('active');
@@ -565,6 +574,14 @@
 
   function initCodeMirror() {
     if (cmEditor || typeof CodeMirror === 'undefined') return;
+    // Cloud-preview docs (someone else's, or our own viewed as read-
+    // only) must not accept typing in Source / Split view either.
+    // The MD pane already sets contenteditable=false based on the
+    // same isCloudPreview flag; mirror it here. Without this guard,
+    // founder reported: "View only 파일이 split/Source view 에서는
+    // 타이핑이 가능함." 'nocursor' prevents focus + the cursor so
+    // the read-only state is visually obvious.
+    var isReadOnly = document.body.dataset.readOnly === 'true';
     cmEditor = CodeMirror(sourceEditorContainer, {
       value: currentMarkdown,
       mode: 'gfm',
@@ -574,14 +591,16 @@
       indentUnit: 2,
       tabSize: 2,
       indentWithTabs: false,
-      autofocus: true,
+      autofocus: !isReadOnly,
       viewportMargin: Infinity,
+      readOnly: isReadOnly ? 'nocursor' : false,
       extraKeys: {
         'Tab': function(cm) { cm.replaceSelection('  ', 'end'); }
       }
     });
 
     cmEditor.on('change', function() {
+      if (isReadOnly) return; // belt-and-suspenders — CM shouldn't fire change in nocursor mode, but guard anyway
       currentMarkdown = cmEditor.getValue();
       if (sourceDebounce) clearTimeout(sourceDebounce);
       sourceDebounce = setTimeout(function() {

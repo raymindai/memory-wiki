@@ -390,6 +390,14 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
   private async sendDocuments(): Promise<void> {
     if (!this._view) { return; }
 
+    // Tell the webview a fetch is in flight so it can render a
+    // loading skeleton instead of "no docs". Cleared in the same
+    // postMessage below once data lands. Without this the sidebar
+    // showed an empty list for the 1-3 seconds the cloud fetch +
+    // pin fetch + folder fetch take after first login (founder
+    // report: "처음 로그인후 등 로딩스테이트가 없는듯").
+    this._view.webview.postMessage({ type: "loading", state: true });
+
     const localDocs = await this.scanWorkspace();
     const baseUrl = getApiBaseUrl();
 
@@ -840,6 +848,28 @@ body {
 .help-btn.open { color: var(--vscode-foreground); }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Skeleton loading rows — shown while the cloud fetch is in flight
+   so first-login users see motion instead of an empty list. */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+.skeleton-row { cursor: default; pointer-events: none; }
+.skel-line, .skel-icon {
+  background: linear-gradient(90deg,
+    var(--vscode-list-hoverBackground, rgba(255,255,255,0.04)) 0%,
+    var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.08)) 50%,
+    var(--vscode-list-hoverBackground, rgba(255,255,255,0.04)) 100%);
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 3px;
+}
+.skel-icon { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; }
+.skel-title { height: 11px; width: 70%; margin-bottom: 4px; }
+.skel-meta  { height: 9px;  width: 40%; }
+.skel-section { display: inline-block; height: 9px; width: 60px; vertical-align: middle; }
 .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
 
 /* User bar — always visible at bottom */
@@ -1079,6 +1109,11 @@ body {
     }
 
     var syncBadge = '<span class="sync-badge"><svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span>';
+    // Inline star prefix for starred (pinned) rows. 10px so it tucks
+    // under the doc title without competing with the row icon. Uses
+    // --micro-warn (subdued gold) so the row reads "this one is
+    // flagged" without the lime "live" semantic collision.
+    var starInline = '<svg width="10" height="10" viewBox="0 0 16 16" fill="var(--micro-warn)" style="vertical-align:-1px;margin-right:1px" aria-label="Starred"><path d="M8 1l2.09 4.26L15 6l-3.5 3.41.83 4.84L8 12l-4.33 2.25.83-4.84L1 6l4.91-.74L8 1z"/></svg>';
 
     function docStatusIcon(doc) {
       var editMode = doc.editMode || null;
@@ -1114,6 +1149,22 @@ body {
         if (refreshBtn) {
           if (e.data.state) refreshBtn.classList.add('spinning');
           else { refreshBtn.classList.remove('spinning'); }
+        }
+        return;
+      }
+      if (e.data.type === 'loading') {
+        // Server is fetching cloud docs + folders + pins. Show a
+        // skeleton so the user sees progress instead of an empty
+        // list. Cleared when 'documents' message arrives.
+        if (e.data.state) {
+          var ctr = document.getElementById('doc-container');
+          if (ctr && !ctr.querySelector('.skeleton-row')) {
+            var rows = '';
+            for (var i = 0; i < 4; i++) {
+              rows += '<li class="doc-item skeleton-row"><div class="skel-icon"></div><div class="doc-info"><div class="skel-line skel-title"></div><div class="skel-line skel-meta"></div></div></li>';
+            }
+            ctr.innerHTML = '<div class="section-header"><span class="skel-line skel-section"></span></div><ul class="doc-list">' + rows + '</ul>';
+          }
         }
         return;
       }
@@ -1377,6 +1428,7 @@ body {
       var ic = '<div class="doc-icon shared">' + icon('share', 14) + syncBadge + '</div>';
       var synced = doc.lastSynced ? relTime(doc.lastSynced) : '';
       var meta = synced ? 'synced ' + synced : doc.docId;
+      var pinned = doc.docId && pinnedDocIds.has(doc.docId);
       var actions = ''
         + '<button class="doc-action" data-action="copy" data-url="' + esc(doc.url) + '" title="Copy URL">' + icon('copy', 14) + '</button>'
         + '<button class="doc-action" data-action="browser" data-url="' + esc(doc.url) + '" title="Open in browser">' + icon('externalLink', 14) + '</button>'
@@ -1384,7 +1436,7 @@ body {
         + '<button class="doc-action" data-action="deleteSynced" data-path="' + esc(doc.filePath) + '" title="Delete from cloud" style="color:var(--micro-red)">' + icon('trash', 14) + '</button>';
       return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '">'
         + ic
-        + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
+        + '<div class="doc-info"><div class="doc-name">' + (pinned ? starInline + ' ' : '') + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
     }
 
@@ -1402,13 +1454,14 @@ body {
       var ic = docStatusIcon(doc);
       var viewStr = doc.viewCount > 0 ? ' · ' + doc.viewCount + ' views' : '';
       var meta = relTime(doc.updatedAt) + (doc.isDraft ? ' · draft' : '') + viewStr;
+      var pinned = pinnedDocIds.has(doc.docId);
       var actions = '<button class="doc-action" data-action="pull" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Sync to local">' + icon('download', 14) + '</button>'
         + '<button class="doc-action" data-action="duplicateCloud" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Duplicate">' + icon('copy', 14) + '</button>'
         + '<button class="doc-action" data-action="browser" data-url="' + esc(doc.url) + '" title="Open in browser">' + icon('externalLink', 14) + '</button>'
         + '<button class="doc-action" data-action="deleteCloud" data-docid="' + esc(doc.docId) + '" title="Delete from cloud" style="color:var(--micro-red)">' + icon('trash', 14) + '</button>';
       return '<li class="doc-item" data-action="openCloud" data-url="' + esc(doc.url) + '" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '">'
         + ic
-        + '<div class="doc-info"><div class="doc-name">' + esc(doc.title) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
+        + '<div class="doc-info"><div class="doc-name">' + (pinned ? starInline + ' ' : '') + esc(doc.title) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
     }
 

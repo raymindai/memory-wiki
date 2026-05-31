@@ -1056,7 +1056,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   </style>` : ""}
   <title>memory.wiki Preview</title>
 </head>
-<body${this.isCloudPreview ? ' class="live-mode"' : ""}>
+<body${this.isCloudPreview ? ' class="live-mode"' : ""} data-read-only="${this.isCloudPreview ? "true" : "false"}">
   <!-- Loading state -->
   <div id="loading-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:1000;transition:opacity 0.3s">
     <div style="text-align:center">
@@ -1065,10 +1065,12 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     </div>
   </div>
   <style>@keyframes loadbar{0%{transform:translateX(-100%)}50%{transform:translateX(100%)}100%{transform:translateX(-100%)}}</style>
-  <!-- Global toolbar: logo + view mode only -->
+  <!-- Global toolbar: view mode toggle only. Wordmark removed per
+       founder ask 2026-06-01 — preview tab already shows the brand
+       blob in its title bar, so a second wordmark in the body was
+       redundant chrome. -->
   <div id="toolbar">
-    <a class="toolbar-logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><span style="color:var(--accent)">Memory</span><span style="color:var(--fg)">.Wiki</span></a>
-    <div class="view-switcher" style="margin-left:6px">
+    <div class="view-switcher">
       <button class="view-btn active" data-view="live" title="MD preview"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5.5 6l2.5 2-2.5 2"/><line x1="9" y1="10" x2="11.5" y2="10"/></svg> MD</button>
       <button class="view-btn" data-view="split" title="Split view"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="8" y1="2" x2="8" y2="14"/></svg> Split</button>
       <button class="view-btn" data-view="source" title="Source view"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 3.5L1.5 6L4 8.5M12 3.5l2.5 2.5L12 8.5M9 2l-2 12"/></svg> Source</button>
