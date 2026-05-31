@@ -2021,7 +2021,7 @@ ipcMain.handle("is-quicklook-installed", () => {
   // false even though the .appex was registered with LaunchServices.
   const legacy = path.join(USER_DATA_DIR, ".quicklook-installed");
   const versioned = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
-  const installedBundle = path.join(app.getPath("home"), "Applications", "MdfyQuickLook.app");
+  const installedBundle = path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app");
   return fs.existsSync(legacy) || fs.existsSync(versioned) || fs.existsSync(installedBundle);
 });
 
@@ -2185,7 +2185,7 @@ function buildMenu() {
 }
 
 // ─── QuickLook Extension Installer ───
-// Copies MdfyQuickLook.app to ~/Applications/ so macOS can discover the .appex plugin.
+// Copies memory.wiki QuickLook.app to ~/Applications/ so macOS can discover the .appex plugin.
 // Extensions in Contents/Resources/ of another app are NOT discovered by macOS.
 
 function installQuickLook() {
@@ -2196,11 +2196,11 @@ function installQuickLook() {
   const marker = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
   if (fs.existsSync(marker)) return;
 
-  const qlSource = path.join(process.resourcesPath, "MdfyQuickLook.app");
+  const qlSource = path.join(process.resourcesPath, "memory.wiki QuickLook.app");
   if (!fs.existsSync(qlSource)) return;
 
   const userApps = path.join(app.getPath("home"), "Applications");
-  const qlDest = path.join(userApps, "MdfyQuickLook.app");
+  const qlDest = path.join(userApps, "memory.wiki QuickLook.app");
 
   try {
     if (!fs.existsSync(userApps)) fs.mkdirSync(userApps, { recursive: true });

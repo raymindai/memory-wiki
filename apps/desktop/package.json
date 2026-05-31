@@ -1,6 +1,6 @@
 {
   "name": "memory-wiki-desktop",
-  "version": "2.4.12",
+  "version": "2.4.13",
   "description": "Native macOS app for memory.wiki: sidebar to your cloud docs, two-way sync, WYSIWYG preview, drag-and-drop import, offline-ready. Same shareable URL Claude, ChatGPT, Cursor, and Gemini all read.",
   "main": "main.js",
   "scripts": {
@@ -42,8 +42,8 @@
     ],
     "extraResources": [
       {
-        "from": "../quicklook/MemoryWikiQuickLook/build/MdfyQuickLook.app",
-        "to": "MdfyQuickLook.app"
+        "from": "../quicklook/MemoryWikiQuickLook/build/memory.wiki QuickLook.app",
+        "to": "memory.wiki QuickLook.app"
       }
     ],
     "protocols": [
@@ -61,9 +61,9 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "identity": "Hyunsang Cho (W7NL89YGSD)",
-      "x64ArchFiles": "Contents/Resources/MdfyQuickLook.app/**/*",
+      "x64ArchFiles": "Contents/Resources/memory.wiki QuickLook.app/**/*",
       "signIgnore": [
-        "Contents/Resources/MdfyQuickLook.app"
+        "Contents/Resources/memory.wiki QuickLook.app"
       ],
       "target": [
         {

@@ -37,7 +37,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
             var markdown: String
             if fileSize > maxSize {
                 let truncatedData = try Data(contentsOf: url).prefix(Int(maxSize))
-                markdown = (String(data: truncatedData, encoding: .utf8) ?? "") + "\n\n---\n\n> **Note:** This file was truncated for preview (original size: \(fileSize / 1_000_000)MB). Open in Memory.Wiki for the full document."
+                markdown = (String(data: truncatedData, encoding: .utf8) ?? "") + "\n\n---\n\n> **Note:** This file was truncated for preview (original size: \(fileSize / 1_000_000)MB). Open in memory.wiki for the full document."
             } else {
                 markdown = try String(contentsOf: url, encoding: .utf8)
             }
@@ -642,20 +642,20 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       // Override CSS variables manually since prefers-color-scheme won't change
       var root = document.documentElement.style;
       if (isDark) {
-        root.setProperty('--background', '#09090b');
+        root.setProperty('--background', '#15151a');
         root.setProperty('--foreground', '#fafafa');
-        root.setProperty('--accent', '#fb923c');
+        root.setProperty('--accent', '#fafafa');
         root.setProperty('--surface', '#18181b');
         root.setProperty('--border', '#27272a');
         root.setProperty('--border-dim', 'rgba(39,39,42,0.6)');
         root.setProperty('--text-primary', '#fafafa');
         root.setProperty('--text-secondary', '#d4d4d8');
-        root.setProperty('--text-muted', '#71717a');
-        root.setProperty('--text-faint', '#737373');
+        root.setProperty('--text-muted', '#a1a1aa');
+        root.setProperty('--text-faint', '#8a8a91');
         root.setProperty('--fg', '#fafafa');
-        root.setProperty('--muted', '#737373');
-        root.setProperty('--accent-dim', 'rgba(251, 146, 60, 0.15)');
-        root.setProperty('--surface-hover', 'rgba(251, 146, 60, 0.03)');
+        root.setProperty('--muted', '#8a8a91');
+        root.setProperty('--accent-dim', 'rgba(255, 255, 255, 0.08)');
+        root.setProperty('--surface-hover', 'rgba(255, 255, 255, 0.03)');
         root.setProperty('--text-tertiary', '#a1a1aa');
         root.setProperty('--math-color', '#c4b5fd');
         root.setProperty('--math-display-color', '#ddd6fe');
@@ -665,18 +665,18 @@ class PreviewViewController: NSViewController, QLPreviewingController {
       } else {
         root.setProperty('--background', '#faf9f7');
         root.setProperty('--foreground', '#18181b');
-        root.setProperty('--accent', '#ea580c');
+        root.setProperty('--accent', '#09090b');
         root.setProperty('--surface', '#f4f4f5');
         root.setProperty('--border', '#e4e4e7');
         root.setProperty('--border-dim', 'rgba(228,228,231,0.6)');
         root.setProperty('--text-primary', '#09090b');
         root.setProperty('--text-secondary', '#3f3f46');
-        root.setProperty('--text-muted', '#71717a');
+        root.setProperty('--text-muted', '#a1a1aa');
         root.setProperty('--text-faint', '#a1a1aa');
         root.setProperty('--fg', '#18181b');
         root.setProperty('--muted', '#a1a1aa');
-        root.setProperty('--accent-dim', 'rgba(234, 88, 12, 0.1)');
-        root.setProperty('--surface-hover', 'rgba(234, 88, 12, 0.04)');
+        root.setProperty('--accent-dim', 'rgba(0, 0, 0, 0.06)');
+        root.setProperty('--surface-hover', 'rgba(0, 0, 0, 0.04)');
         root.setProperty('--text-tertiary', '#71717a');
         root.setProperty('--math-color', '#7c3aed');
         root.setProperty('--math-display-color', '#6d28d9');
@@ -684,7 +684,7 @@ class PreviewViewController: NSViewController, QLPreviewingController {
         root.setProperty('--scrollbar-thumb', '#a1a1aa');
         root.setProperty('--scrollbar-hover', '#a1a1aa');
       }
-      document.body.style.background = isDark ? '#09090b' : '#faf9f7';
+      document.body.style.background = isDark ? '#15151a' : '#faf9f7';
       updateThemeIcons();
     }
     updateThemeIcons();

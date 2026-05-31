@@ -1705,7 +1705,12 @@
       }).join("");
     }
 
-    // ─── Click delegation for both lists (synced filepath OR cloud id) ───
+    // ─── Click delegation ─── mirror the sidebar's click flow exactly:
+    // local/synced rows use openFilePath; cloud-only rows switch to the
+    // editor view first, show a loading state, then previewCloudDoc.
+    // Previously we used syncPullCloud here, which downloads to local
+    // but never actually navigates into the doc — that's why home
+    // clicks "did nothing visible".
     function bindList(list) {
       if (!list) return;
       list.onclick = function(e) {
@@ -1713,8 +1718,20 @@
         if (!item) return;
         if (item.dataset.filepath) {
           window.mwDesktop.openFilePath(item.dataset.filepath);
-        } else if (item.dataset.cloudid) {
-          window.mwDesktop.syncPullCloud(item.dataset.cloudid, null);
+          return;
+        }
+        if (item.dataset.cloudid) {
+          var t = item.querySelector(".home-list-name");
+          var title = t ? t.textContent : item.dataset.cloudid;
+          showEditor();
+          var c = document.getElementById("content");
+          if (c) {
+            c.innerHTML = '<div class="cloud-loading"><div class="cloud-loading-spinner"></div><p>Loading ' + esc(title) + '...</p></div>';
+            c.setAttribute("contenteditable", "false");
+          }
+          var ht = document.getElementById("header-title");
+          if (ht) ht.textContent = title + " (Cloud)";
+          window.mwDesktop.previewCloudDoc(item.dataset.cloudid, title);
         }
       };
     }
