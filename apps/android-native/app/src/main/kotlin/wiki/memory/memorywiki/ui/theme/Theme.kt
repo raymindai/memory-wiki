@@ -25,17 +25,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 
 /** The visitor's own saved accent (set from profile / localStorage equivalent). */
-val LocalUserAccent = staticCompositionLocalOf<AccentColorChoice> { AccentColorChoice.Lime }
+val LocalUserAccent = staticCompositionLocalOf<AccentColorChoice> { AccentColorChoice.Gray }
 
 /** Owner-of-active-doc accent override. Null means "use LocalUserAccent." */
 val LocalActiveOwnerAccent = staticCompositionLocalOf<AccentColorChoice?> { null }
 
 /** Effective accent — owner override wins when present, else visitor's own. */
-val LocalEffectiveAccent = staticCompositionLocalOf<AccentColorChoice> { AccentColorChoice.Lime }
+val LocalEffectiveAccent = staticCompositionLocalOf<AccentColorChoice> { AccentColorChoice.Gray }
 
 @Composable
 fun MemoryWikiTheme(
-    userAccent: AccentColorChoice = AccentColorChoice.Lime,
+    userAccent: AccentColorChoice = AccentColorChoice.Gray,
     ownerAccentOverride: AccentColorChoice? = null,
     content: @Composable () -> Unit,
 ) {
