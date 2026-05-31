@@ -86,7 +86,7 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!res.ok) {
     if (res.status === 401 || res.status === 403) {
       throw new Error(
-        "Authentication expired. Run 'Memory.Wiki login' in your terminal to re-authenticate."
+        "Authentication expired. Run 'mw login' in your terminal to re-authenticate."
       );
     }
     const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
@@ -115,7 +115,7 @@ function loginRequiredResult() {
   return {
     content: [{
       type: "text" as const,
-      text: "Not logged in. Run `Memory.Wiki login` in your terminal first to authenticate with Memory.Wiki.",
+      text: "Not logged in. Run `mw login` in your terminal first to authenticate with memory.wiki.",
     }],
     isError: true as const,
   };
@@ -172,8 +172,8 @@ async function fetchDoc(id: string): Promise<DocRecord> {
 // ─── MCP Server ───
 
 const server = new McpServer({
-  name: "Memory.Wiki",
-  version: "1.4.0",
+  name: "memory.wiki",
+  version: "1.5.2",
 });
 
 // ──────────────────────────────────────────────────────────────────
@@ -182,7 +182,7 @@ const server = new McpServer({
 
 server.tool(
   "mw_create",
-  "Create a new Markdown document on Memory.Wiki and get a shareable URL",
+  "Create a new Markdown document on memory.wiki and get a shareable URL",
   {
     markdown: z.string().describe("Markdown content for the document"),
     title: z.string().optional().describe("Document title (extracted from H1 if omitted)"),
@@ -206,7 +206,7 @@ server.tool(
 
 server.tool(
   "mw_read",
-  "Fetch a document's markdown content from Memory.Wiki",
+  "Fetch a document's markdown content from memory.wiki",
   { id: z.string().describe("Document ID (the short code from the URL)") },
   async ({ id }) => {
     try {
@@ -217,8 +217,37 @@ server.tool(
 );
 
 server.tool(
+  "mw_for_ai",
+  "Return the canonical 'paste into any AI' sentence for a memory.wiki URL. " +
+    "Use this when the user wants the document presented as context to another AI " +
+    "tool (Cursor, ChatGPT, Claude, Gemini). Accepts a bare id, a full memory.wiki URL, " +
+    "a bundle id (b/<id>), or a hub @username. Returns one line the user can paste " +
+    "verbatim into the next AI's prompt.",
+  {
+    target: z.string().describe(
+      "Document id, full memory.wiki URL, bundle id with b/ prefix, or @username"
+    ),
+  },
+  async ({ target }) => {
+    // Normalise: accept full URL, bare id, b/<id>, or @username.
+    let url: string;
+    if (/^https?:\/\//i.test(target)) {
+      url = target;
+    } else if (target.startsWith("@") || target.startsWith("b/")) {
+      url = `${BASE_URL}/${target}`;
+    } else {
+      url = `${BASE_URL}/${target}`;
+    }
+    const sentence = url.includes("/b/")
+      ? `Use ${url} as my context bundle.`
+      : `Use ${url} as my context.`;
+    return textResult(sentence);
+  }
+);
+
+server.tool(
   "mw_update",
-  "Update an existing document's content on Memory.Wiki",
+  "Update an existing document's content on memory.wiki",
   {
     id: z.string().describe("Document ID"),
     markdown: z.string().describe("New markdown content"),
@@ -238,7 +267,7 @@ server.tool(
 
 server.tool(
   "mw_list",
-  "List all documents owned by the current user on Memory.Wiki",
+  "List all documents owned by the current user on memory.wiki",
   {},
   async () => {
     if (!isLoggedIn()) return loginRequiredResult();
@@ -258,7 +287,7 @@ server.tool(
 
 server.tool(
   "mw_delete",
-  "Delete a document from Memory.Wiki (moves to trash, can be restored)",
+  "Delete a document from memory.wiki (moves to trash, can be restored)",
   {
     id: z.string().describe("Document ID to delete"),
     permanent: z.boolean().optional().describe("If true, permanently delete (default: false = soft delete / trash)"),
@@ -284,7 +313,7 @@ server.tool(
 
 server.tool(
   "mw_search",
-  "Search your documents on Memory.Wiki by keyword (full-text search)",
+  "Search your documents on memory.wiki by keyword (full-text search)",
   { query: z.string().describe("Search query (keywords to find in your documents)") },
   async ({ query }) => {
     if (!isLoggedIn()) return loginRequiredResult();
@@ -581,7 +610,7 @@ server.tool(
 
 server.tool(
   "mw_import_url",
-  "Fetch a webpage and import it as a new Memory.Wiki document",
+  "Fetch a webpage and import it as a new memory.wiki document",
   {
     url: z.string().describe("URL to fetch"),
     title: z.string().optional().describe("Document title (extracted from <title> if omitted)"),
@@ -622,7 +651,7 @@ server.tool(
 
 server.tool(
   "mw_publish",
-  "Toggle a document between public (shared) and private (draft) on Memory.Wiki",
+  "Toggle a document between public (shared) and private (draft) on memory.wiki",
   {
     id: z.string().describe("Document ID"),
     published: z.boolean().describe("true = make publicly accessible, false = make private"),

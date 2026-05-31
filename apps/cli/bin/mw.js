@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /* =========================================================
-   Memory.Wiki CLI (mw). Publish Markdown from anywhere.
+   memory.wiki CLI (mw). Publish Markdown from anywhere.
 
    Usage:
      mw publish <file>          Publish a .md file and print the URL
@@ -13,7 +13,7 @@
      mw list                    List your documents
      mw open <id>               Open document in browser
      mw render <file>           Render markdown to HTML
-     mw login                   Authenticate with Memory.Wiki
+     mw login                   Authenticate with memory.wiki
      mw logout                  Clear stored credentials
      mw whoami                  Show current user
 
@@ -131,6 +131,16 @@ async function cmdPublish(args) {
     const tokens = loadTokens();
     tokens[result.id] = result.editToken;
     saveTokens(tokens);
+
+    // The "for AI" canonical sentence is part of the brand voice
+    // (see https://memory.wiki/L2SHNVir section 14). Always print
+    // it after the URL so users see both forms and can pick the one
+    // they want. macOS clipboard defaults to the bare URL since
+    // most channels read clipboard as a link; the AI sentence is
+    // an extra line the user can manually copy if pasting into a
+    // chat.
+    const aiSentence = `Use ${url} as my context.`;
+    console.error(`  Paste into any AI:  ${aiSentence}`);
 
     // Copy to clipboard (macOS)
     if (process.platform === "darwin") {
@@ -253,8 +263,41 @@ async function cmdOpen(args) {
   console.log(url);
 }
 
+// `mw ai <id>` — emit the canonical "Use ... as my context."
+// sentence so the user can paste it into any AI tool. Accepts
+// either a bare id, a full memory.wiki URL, or a hub `@username`.
+// On macOS, also copies the sentence to the clipboard.
+async function cmdAi(args) {
+  let arg = args[0];
+  if (!arg) { console.error("Usage: mw ai <id|url|@username>"); process.exit(1); }
+
+  // Normalise: accept full URL, bare id, or @username.
+  let target;
+  if (/^https?:\/\//i.test(arg)) {
+    target = arg;
+  } else if (arg.startsWith("@")) {
+    target = `${BASE_URL}/${arg}`;
+  } else if (arg.startsWith("b/")) {
+    target = `${BASE_URL}/${arg}`;
+  } else {
+    target = `${BASE_URL}/${arg}`;
+  }
+  // Bundle URLs carry slightly different copy.
+  const sentence = target.includes("/b/")
+    ? `Use ${target} as my context bundle.`
+    : `Use ${target} as my context.`;
+
+  console.log(sentence);
+  if (process.platform === "darwin") {
+    try {
+      require("child_process").execSync(`echo -n ${JSON.stringify(sentence)} | pbcopy`);
+      console.error("  Copied to clipboard. Paste into any AI.");
+    } catch { /* ignore */ }
+  }
+}
+
 async function cmdLogin() {
-  console.log("Opening Memory.Wiki in your browser...");
+  console.log("Opening memory.wiki in your browser...");
   console.log("After signing in, click 'Copy token' and paste it below.");
   console.log("");
 
@@ -363,7 +406,7 @@ function cmdWhoami() {
 }
 
 function cmdHelp() {
-  console.log(`Memory.Wiki CLI (mw). Publish Markdown from anywhere.
+  console.log(`memory.wiki CLI (mw). Publish Markdown from anywhere.
 
 Usage:
   mw publish <file>          Publish a .md file and get a URL
@@ -378,7 +421,8 @@ Usage:
   mw delete <id>             Delete a document
   mw list                    List your documents
   mw open <id>               Open document in browser
-  mw login                   Authenticate with Memory.Wiki
+  mw ai <id|url|@username>   Print the "for AI" paste sentence (copies on macOS)
+  mw login                   Authenticate with memory.wiki
   mw logout                  Clear stored credentials
   mw whoami                  Show current user
   mw claim [ids...]          Claim anonymous docs by edit token (auto-runs after login)
@@ -737,6 +781,9 @@ async function main() {
     case "claim":
       await cmdClaim(args.slice(1));
       break;
+    case "ai": case "for-ai":
+      await cmdAi(args.slice(1));
+      break;
     case "whoami":
       cmdWhoami();
       break;
@@ -759,7 +806,7 @@ async function main() {
         }
       } else {
         console.error(`Unknown command: ${cmd}`);
-        console.error("Run 'Memory.Wiki help' for usage.");
+        console.error("Run 'mw help' for usage.");
         process.exit(1);
       }
   }
