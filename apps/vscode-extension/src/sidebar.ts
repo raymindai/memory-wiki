@@ -737,8 +737,13 @@ body {
 .doc-icon.readonly  { color: #a78bfa; }
 .doc-icon.local     { color: var(--vscode-descriptionForeground); }
 .doc-icon { position: relative; }
-.doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: var(--micro-lime); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.doc-icon .sync-badge svg { width: 6px; height: 6px; }
+/* Sync-badge mirrors web's overlay exactly — small ring with a
+   green check inside (MdEditor.tsx L8492). Web spec: outer circle
+   uses neutral surface tone so the check itself carries the
+   colour. Previously had a solid lime fill, which read as "lime
+   on every synced doc" instead of the subtle green check. */
+.doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 9px; height: 9px; display: flex; align-items: center; justify-content: center; }
+.doc-icon .sync-badge svg { width: 9px; height: 9px; }
 .doc-info { flex: 1; min-width: 0; overflow: hidden; }
 .doc-name {
   font-size: 12px; font-weight: 500;
@@ -850,21 +855,44 @@ body {
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* Brand blob loading state — the SMIL morph animation inside
-   blob.svg carries the motion; we just centre the asset with a
-   soft fade-in. Used while the first cloud fetch is in flight. */
+/* Brand blob loading state — vertically centred in the sidebar
+   body region. The SMIL morph animation inside blob.svg carries
+   the motion; we just fade-in the asset + the mono LOADING
+   caption below (canonical BrandLoader pattern from brand wiki
+   sec 12.2: blob + "LOADING" mono(10) Medium, tracking 1.4 sp,
+   18 px gap). */
 @keyframes blobFadeIn {
   from { opacity: 0; transform: scale(0.94); }
   to   { opacity: 1; transform: scale(1); }
 }
 .blob-loading {
-  display: flex; align-items: center; justify-content: center;
-  padding: 48px 14px;
+  /* Anchored to the sidebar viewport so the blob sits at the
+     middle of the available body area regardless of how much
+     content might land below. Top inset = header + filter strip
+     (~108 px). Bottom inset = sticky user-bar (~50 px). */
+  position: fixed;
+  left: 0; right: 0;
+  top: 108px;
+  bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  pointer-events: none;
   animation: blobFadeIn 0.32s ease-out both;
+  z-index: 1;
 }
 .blob-loading img {
   display: block;
-  opacity: 0.9;
+  opacity: 0.92;
+}
+.blob-loading-caption {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  color: var(--vscode-descriptionForeground);
 }
 .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
 
@@ -1110,7 +1138,11 @@ body {
       return (I[name] || '').replace(/S/g, size);
     }
 
-    var syncBadge = '<span class="sync-badge"><svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span>';
+    // Sync badge mirrors web's overlay (MdEditor.tsx L8492): neutral
+    // surface ring + small green check. Greens match the Public
+    // globe colour (#22c55e) so the "this lives on memory.wiki + is
+    // synced locally" pair reads as one consistent green semantic.
+    var syncBadge = '<span class="sync-badge"><svg viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="3.5" fill="var(--vscode-sideBar-background)" stroke="var(--vscode-panel-border, rgba(255,255,255,0.12))" stroke-width="0.6"/><path d="M2.5 4.2L3.5 5.2L5.5 3" stroke="#22c55e" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span>';
     // Inline star prefix for starred (pinned) rows. 10px so it tucks
     // under the doc title without competing with the row icon. Uses
     // --micro-warn (subdued gold) so the row reads "this one is
@@ -1167,7 +1199,7 @@ body {
         if (e.data.state) {
           var ctr = document.getElementById('doc-container');
           if (ctr && !ctr.querySelector('.blob-loading')) {
-            ctr.innerHTML = '<div class="blob-loading"><img src="' + BLOB_URI + '" alt="loading" width="56" height="56"/></div>';
+            ctr.innerHTML = '<div class="blob-loading"><img src="' + BLOB_URI + '" alt="" width="64" height="64"/><span class="blob-loading-caption">LOADING</span></div>';
           }
         }
         return;
