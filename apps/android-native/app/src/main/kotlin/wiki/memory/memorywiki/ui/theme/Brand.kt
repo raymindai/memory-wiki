@@ -90,6 +90,8 @@ enum class AccentColorChoice(val key: String, val dark: Color, val light: Color)
 
     companion object {
         fun from(key: String?): AccentColorChoice =
-            entries.firstOrNull { it.key.equals(key, ignoreCase = true) } ?: Lime
+            // Default = Gray (neutral) per v8 brand decision 2026-05-31.
+            // Lime stays in the picker as an opt-in choice.
+            entries.firstOrNull { it.key.equals(key, ignoreCase = true) } ?: Gray
     }
 }

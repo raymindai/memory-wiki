@@ -183,7 +183,7 @@ fun SettingsScreen(navController: NavController, vm: SettingsViewModel = hiltVie
         SectionLabel("LEARN")
         LinkCardGroup(
             rows = listOf(
-                LinkRow(Lucide.Info, "About Memory.Wiki", Brand.MicroInfo) {
+                LinkRow(Lucide.Info, "About memory.wiki", Brand.MicroInfo) {
                     navController.navigate("about")
                 },
                 LinkRow(Lucide.BookOpen, "Help & Shortcuts", Brand.MicroWarn) {
