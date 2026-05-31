@@ -717,12 +717,16 @@ body {
   flex-shrink: 0; width: 16px; height: 16px;
   display: flex; align-items: center; justify-content: center;
 }
-.doc-icon.published { color: var(--micro-lime); }
-.doc-icon.shared { color: var(--micro-lime); }
-.doc-icon.restricted { color: var(--micro-info); }
-.doc-icon.readonly { color: var(--vscode-descriptionForeground); }
-.doc-icon.local { color: var(--vscode-descriptionForeground); }
-.doc-icon.cloud { color: var(--micro-info); }
+/* All per-row doc icons stay quiet ink per brand v8 (sec 2.4
+   "list rows → ink, colour only in small dots/badges"). Status
+   semantics live in the small overlays (sync-badge 8px,
+   user-status-dot 5px) below — not in the 14px row glyph. */
+.doc-icon.published,
+.doc-icon.shared,
+.doc-icon.restricted,
+.doc-icon.readonly,
+.doc-icon.local,
+.doc-icon.cloud { color: var(--vscode-descriptionForeground); }
 .doc-icon { position: relative; }
 .doc-icon .sync-badge { position: absolute; bottom: -2px; right: -3px; width: 8px; height: 8px; background: var(--micro-lime); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .doc-icon .sync-badge svg { width: 6px; height: 6px; }
@@ -833,7 +837,7 @@ body {
   background: var(--vscode-panel-border, rgba(255,255,255,0.08));
 }
 .help-btn { transition: color 0.15s; }
-.help-btn.open { color: var(--micro-lime); }
+.help-btn.open { color: var(--vscode-foreground); }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
@@ -999,9 +1003,9 @@ body {
   </div>
 
   <div class="help-panel hidden" id="help-panel">
-    <div class="help-row"><span class="help-icon" style="color:var(--micro-lime)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
+    <div class="help-row"><span class="help-icon" ><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg></span><div><strong>Synced</strong><span class="help-desc">Local file linked to memory.wiki. Edits can be pushed/pulled.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg></span><div><strong>Local</strong><span class="help-desc">Only on your machine. Sync to upload to memory.wiki.</span></div></div>
-    <div class="help-row"><span class="help-icon" style="color:var(--micro-info)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
+    <div class="help-row"><span class="help-icon" ><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13h7.1a3.2 3.2 0 00.6-6.35 4.5 4.5 0 00-8.7 1.1A2.8 2.8 0 004.5 13z"/></svg></span><div><strong>Cloud</strong><span class="help-desc">Only on memory.wiki. Sync to download a local copy.</span></div></div>
     <div class="help-divider"></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg></span><div><strong>Copy URL</strong><span class="help-desc">Copy the memory.wiki link to clipboard.</span></div></div>
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11v2.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V11"/><path d="M8 10V2"/><path d="M5 4.5L8 1.5l3 3"/></svg></span><div><strong>Sync Up</strong><span class="help-desc">Upload local file to memory.wiki and get a shareable URL.</span></div></div>
@@ -1170,7 +1174,7 @@ body {
       if (box) {
         box.classList.toggle('hidden');
         var isOpen = !box.classList.contains('hidden');
-        if (btn) btn.style.color = isOpen ? 'var(--micro-lime)' : '';
+        if (btn) btn.style.color = isOpen ? 'var(--vscode-foreground)' : '';
         if (isOpen) {
           box.querySelector('input').focus();
         } else {
@@ -1326,10 +1330,10 @@ body {
     }
 
     function secHeader(type, label, count) {
-      var colors = { sync: 'var(--micro-lime)', file: 'currentColor', globe: 'var(--micro-info)', image: 'var(--micro-ai)' };
+      var colors = { sync: 'currentColor', file: 'currentColor', globe: 'currentColor', image: 'currentColor' };
       var names = { sync: 'sync', file: 'file', globe: 'cloud', image: 'file' };
       var ic = icon(names[type] || type, 12).replace('stroke="currentColor"', 'stroke="' + (colors[type]||'currentColor') + '"');
-      if (type === 'image') ic = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--micro-ai)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><circle cx="5.5" cy="6.5" r="1.5"/><path d="M14.5 10.5l-3.5-3.5-6 6"/></svg>';
+      if (type === 'image') ic = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><circle cx="5.5" cy="6.5" r="1.5"/><path d="M14.5 10.5l-3.5-3.5-6 6"/></svg>';
       return '<div class="section-header">' + ic + ' ' + label + ' <span class="section-count">' + (count === '' ? '' : count) + '</span></div>';
     }
 
