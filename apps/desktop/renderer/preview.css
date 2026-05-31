@@ -3918,8 +3918,8 @@ body.sidebar-resizing * {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   background: rgba(24, 24, 27, 0.55);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
   cursor: pointer;
   transition: background 0.12s, border-color 0.15s;
 }
@@ -4092,8 +4092,8 @@ body.sidebar-resizing * {
   border-radius: 12px;
   overflow: hidden;
   background: rgba(24, 24, 27, 0.55);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
 }
 [data-theme="light"] .home-list {
   border-color: rgba(0, 0, 0, 0.08);
@@ -4266,8 +4266,8 @@ body.sidebar-resizing * {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   background: rgba(24, 24, 27, 0.55);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
   cursor: pointer;
   transition: background 0.12s, border-color 0.15s, transform 0.08s;
   font-family: inherit;
@@ -4346,8 +4346,8 @@ body.sidebar-resizing * {
   border: 1.5px dashed rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   background: rgba(24, 24, 27, 0.35);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
   color: var(--text-faint);
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }

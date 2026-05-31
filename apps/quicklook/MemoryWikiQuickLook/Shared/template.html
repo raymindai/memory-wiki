@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{FILE_NAME}} - Memory.Wiki Preview</title>
+<title>{{FILE_NAME}} — memory.wiki preview</title>
 
 <!-- marked.js — Markdown parser (GFM + tables + task lists) -->
 <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
@@ -25,7 +25,7 @@
 
 <style>
 /* ================================================================
-   Memory.Wiki QuickLook Preview — Base Styles
+   memory.wiki QuickLook preview — base styles
    ================================================================ */
 
 /* System font stack */
@@ -37,20 +37,23 @@
 /* ================================================================
    Theme: Dark (default on macOS dark mode)
    ================================================================ */
+/* v8 ink token set — matches /apps/desktop/renderer/_tokens.dark
+   and _tokens.light. accent is now neutral (text-primary), not
+   the legacy mdfy.cc orange. */
 :root {
-  --background: #09090b;
+  --background: #15151a;
   --foreground: #fafafa;
-  --accent: #fb923c;
-  --accent-dim: rgba(251, 146, 60, 0.15);
+  --accent: #fafafa;
+  --accent-dim: rgba(255, 255, 255, 0.08);
   --surface: #18181b;
-  --surface-hover: rgba(251, 146, 60, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.03);
   --border: #27272a;
   --border-dim: rgba(39, 39, 42, 0.6);
   --text-primary: #fafafa;
   --text-secondary: #d4d4d8;
   --text-tertiary: #a1a1aa;
-  --text-muted: #71717a;
-  --text-faint: #737373;
+  --text-muted: #a1a1aa;
+  --text-faint: #8a8a91;
   --math-color: #c4b5fd;
   --math-display-color: #ddd6fe;
   --h2-color: #e4e4e7;
@@ -58,17 +61,14 @@
   --scrollbar-hover: #3f3f46;
 }
 
-/* ================================================================
-   Theme: Light (macOS light mode)
-   ================================================================ */
 @media (prefers-color-scheme: light) {
   :root {
     --background: #faf9f7;
-    --foreground: #18181b;
-    --accent: #ea580c;
-    --accent-dim: rgba(234, 88, 12, 0.1);
+    --foreground: #09090b;
+    --accent: #09090b;
+    --accent-dim: rgba(0, 0, 0, 0.06);
     --surface: #f4f4f5;
-    --surface-hover: rgba(234, 88, 12, 0.04);
+    --surface-hover: rgba(0, 0, 0, 0.04);
     --border: #e4e4e7;
     --border-dim: rgba(228, 228, 231, 0.6);
     --text-primary: #09090b;
@@ -129,25 +129,26 @@ body {
 }
 
 .mw-logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-}
-
-.mw-logo svg {
-  width: 18px;
-  height: 18px;
-}
-
-.mw-logo span {
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-primary);
 }
-.mw-logo .logo-md { color: var(--accent); }
-.mw-logo .logo-fy { color: var(--text-primary); }
-.mw-logo .logo-app { color: var(--text-faint); }
+.mw-logo-blob {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--text-primary);
+  /* Use the SVG as a CSS mask so the blob inherits theme color
+     without shipping two image variants in QL Resources. */
+  -webkit-mask: url("blob.svg") center / contain no-repeat;
+  mask: url("blob.svg") center / contain no-repeat;
+}
 
 .mw-filename {
   font-size: 12px;
@@ -350,8 +351,9 @@ body {
 <!-- Top Bar -->
 <div class="mw-topbar">
   <div class="mw-topbar-left">
-    <div class="mw-logo">
-      <span><span class="logo-md">Memory</span><span class="logo-fy">.Wiki</span></span>
+    <div class="mw-logo" aria-label="memory.wiki">
+      <span class="mw-logo-blob" aria-hidden></span>
+      <span>memory.wiki</span>
     </div>
     <span class="mw-filename">{{FILE_NAME}}</span>
   </div>
@@ -361,7 +363,7 @@ body {
         <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M9 1h6m0 0v6m0-6L8 8"
               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Open in Memory.Wiki
+      Open in memory.wiki
     </a>
     <a class="mw-btn mw-btn-primary" href="https://memory.wiki" target="_blank" rel="noopener">
       Publish
