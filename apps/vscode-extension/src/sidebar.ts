@@ -1691,9 +1691,9 @@ body {
       btn.disabled = pending;
       btn.style.opacity = pending ? '0.6' : '';
       btn.style.cursor = pending ? 'default' : '';
-      // `disabled` alone is sometimes bypassed inside webviews when
-      // pointer-events isn't blocked too (we saw a stale click land
-      // mid-flight). Belt-and-suspenders.
+      // The disabled property alone is sometimes bypassed inside
+      // webviews when pointer-events isn't blocked too (we saw a
+      // stale click land mid-flight). Belt-and-suspenders.
       btn.style.pointerEvents = pending ? 'none' : '';
       if (pending) {
         if (!btn.dataset.originalLabel) btn.dataset.originalLabel = btn.innerHTML;

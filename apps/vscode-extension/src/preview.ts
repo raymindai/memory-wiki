@@ -1000,6 +1000,9 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const jsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.extensionUri, "media", "preview.js")
     );
+    const blobUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "media", "blob.svg")
+    );
 
     const nonce = getNonce();
     const result = renderMarkdownWithFlavor(markdown);
@@ -1154,7 +1157,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
             </button>
           </div>
           <div id="image-panel-content" style="padding:8px">
-            <div style="text-align:center;padding:24px 8px;color:var(--fg-muted);font-size:11px">Loading...</div>
+            <div class="mw-brand-loader" style="padding:48px 8px;display:flex;flex-direction:column;align-items:center;gap:14px"><img src="${blobUri}" alt="" width="56" height="56" style="opacity:0.92"/><span style="font-family:'SF Mono','Fira Code',monospace;font-size:10px;font-weight:500;letter-spacing:1.4px;color:var(--fg-muted)">LOADING</span></div>
           </div>
         </div>
         <div id="outline-panel" class="outline-panel">
