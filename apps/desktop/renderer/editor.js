@@ -80,9 +80,63 @@
     cloudDocs: [],
     cloudFolders: [],
     authState: { loggedIn: false, email: null },
+    pinnedIds: new Set(), // doc ids the user has starred
+    userProfile: null,
   };
   var collapsedFolders = {}; // { relativePath: true/false }
   var collapsedCloudFolders = {}; // { folderId: true/false }
+
+  // Resolve memory.wiki base URL via main.js (mirrors MDFY_URL there).
+  // Renderer can't reach process.env, so we hardcode the production
+  // base. Same value the auth callback uses.
+  var MW_BASE_URL = "https://memory.wiki";
+
+  function authHeaders() {
+    // Build authorization headers from the stored auth state so the
+    // pins endpoint accepts our request the same way the iOS/Android
+    // clients do (x-user-id + x-user-email; no JWT needed for write).
+    var h = { "Content-Type": "application/json" };
+    if (sidebarState.authState.loggedIn) {
+      if (sidebarState.authState.userId) h["x-user-id"] = sidebarState.authState.userId;
+      if (sidebarState.authState.email) h["x-user-email"] = sidebarState.authState.email;
+    }
+    return h;
+  }
+
+  async function fetchPins() {
+    if (!sidebarState.authState.loggedIn) return;
+    try {
+      var resp = await fetch(MW_BASE_URL + "/api/user/pins", { headers: authHeaders() });
+      if (!resp.ok) return;
+      var json = await resp.json();
+      var ids = new Set();
+      (json.pins || []).forEach(function(p) {
+        if (p.kind === "document" && p.id) ids.add(p.id);
+      });
+      sidebarState.pinnedIds = ids;
+    } catch {}
+  }
+
+  async function togglePin(docId, makePinned) {
+    if (!sidebarState.authState.loggedIn || !docId) return;
+    try {
+      if (makePinned) {
+        await fetch(MW_BASE_URL + "/api/user/pins", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ kind: "document", id: docId }),
+        });
+        sidebarState.pinnedIds.add(docId);
+      } else {
+        await fetch(MW_BASE_URL + "/api/user/pins?kind=document&id=" + encodeURIComponent(docId), {
+          method: "DELETE",
+          headers: authHeaders(),
+        });
+        sidebarState.pinnedIds.delete(docId);
+      }
+      renderFileList();
+    } catch {}
+  }
 
   // ─── Sidebar: Init ───
 
@@ -243,9 +297,13 @@
       ]);
       sidebarState.cloudDocs = cloudResults[0] || [];
       sidebarState.cloudFolders = cloudResults[1] || [];
+      // Pull pinned ids in parallel; failure is silent so the Starred
+      // filter just shows empty until the next refresh succeeds.
+      fetchPins();
     } else {
       sidebarState.cloudDocs = [];
       sidebarState.cloudFolders = [];
+      sidebarState.pinnedIds = new Set();
     }
   }
 
@@ -374,6 +432,29 @@
         html += secHeader("cloud", "Cloud", cloud.length);
         html += renderCloudDocsGrouped(cloud);
       }
+    } else if (currentFilter === "starred") {
+      if (!sidebarState.authState.loggedIn) {
+        html += '<div class="sidebar-empty"><p>Sign in to see starred documents</p><p class="sidebar-empty-hint">Star a doc from any device to find it here.</p><button class="login-prompt-btn" onclick="window.mwDesktop.login()">Sign in</button></div>';
+      } else {
+        // Synced files whose cloud copy is starred + cloud-only that
+        // are starred. Use the same secHeaders so the layout reads
+        // like the other tabs, just filtered down.
+        var pin = sidebarState.pinnedIds || new Set();
+        var syncedStarred = synced.filter(function(f) { return f.config && f.config.docId && pin.has(f.config.docId); });
+        var cloudStarred = cloud.filter(function(cd) { return pin.has(cd.id); });
+        if (syncedStarred.length > 0) {
+          html += secHeader("synced", "Synced", syncedStarred.length);
+          for (var ss = 0; ss < syncedStarred.length; ss++) html += renderSyncedItem(syncedStarred[ss]);
+        }
+        if (cloudStarred.length > 0) {
+          html += secHeader("cloud", "Cloud", cloudStarred.length);
+          html += renderCloudDocsGrouped(cloudStarred);
+        }
+        if (syncedStarred.length === 0 && cloudStarred.length === 0) {
+          html += '<div class="sidebar-empty"><p>No starred documents</p><p class="sidebar-empty-hint">Hover any cloud doc and click the star to pin it here.</p></div>';
+        }
+      }
+
     } else if (currentFilter === "synced") {
       if (!sidebarState.authState.loggedIn) {
         html += '<div class="sidebar-empty"><p>Sign in to see synced documents</p><p class="sidebar-empty-hint">Publish files to memory.wiki to sync them across devices</p><button class="login-prompt-btn" onclick="window.mwDesktop.login()">Sign in</button></div>';
@@ -665,7 +746,19 @@
     globe: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
     // Lucide Lock — password-protected docs.
     lock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    // Star outline + filled — toggled per pin state.
+    starOutline: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    starFilled: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   };
+
+  function starBtn(docId) {
+    if (!docId) return "";
+    var pinned = sidebarState.pinnedIds && sidebarState.pinnedIds.has(docId);
+    var glyph = pinned ? SBI.starFilled : SBI.starOutline;
+    var cls = pinned ? "is-starred" : "";
+    var title = pinned ? "Unstar" : "Star";
+    return '<button class="' + cls + '" data-action="toggle-star" data-id="' + esc(docId) + '" title="' + title + '">' + glyph + '</button>';
+  }
 
   // Sync badge mirrors web's overlay (MdEditor.tsx L8492): neutral
   // surface ring with a small green check inside. Same #22c55e as
@@ -714,6 +807,7 @@
       '<div class="file-icon public" title="Synced with memory.wiki">' + SBI.globe + syncBadgeHtml + '</div>' +
       '<div class="file-info"><div class="file-name">' + esc(f.fileName) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
+        starBtn(f.config && f.config.docId) +
         '<button data-action="copy-url" data-path="' + esc(f.filePath) + '" title="Copy URL">' + SBI.copy + '</button>' +
         '<button data-action="open-browser" data-path="' + esc(f.filePath) + '" title="Open in browser">' + SBI.extLink + '</button>' +
         '<button data-action="unlink" data-path="' + esc(f.filePath) + '" title="Unsync">' + SBI.unsync + '</button>' +
@@ -743,6 +837,7 @@
       docStatusIcon(cd) +
       '<div class="file-info"><div class="file-name">' + esc(title) + '</div><div class="file-meta">' + esc(meta) + '</div></div>' +
       '<div class="file-actions">' +
+        starBtn(cd.id) +
         '<button data-action="pull-cloud" data-id="' + esc(cd.id) + '" data-title="' + esc(title) + '" title="Sync to local">' + SBI.download + '</button>' +
         '<button data-action="open-cloud-browser" data-id="' + esc(cd.id) + '" title="Open in browser">' + SBI.extLink + '</button>' +
         '<button data-action="delete-cloud" data-id="' + esc(cd.id) + '" title="Delete from cloud" style="color:var(--micro-red,#ef4444)">' + SBI.trash + '</button>' +
@@ -900,6 +995,21 @@
 
   async function handleFileAction(action, pathOrId, title) {
     switch (action) {
+      case "toggle-star": {
+        // pathOrId can be either a cloud doc id (for renderCloudItem) or
+        // a local synced path. For synced rows we look up the docId from
+        // the sidecar config; for cloud rows the id is already what we
+        // want.
+        var docId = pathOrId;
+        if (pathOrId && pathOrId.indexOf("/") !== -1) {
+          var cfg = findConfigByPath(pathOrId);
+          docId = cfg ? cfg.docId : null;
+        }
+        if (!docId) break;
+        var makePinned = !sidebarState.pinnedIds.has(docId);
+        togglePin(docId, makePinned);
+        break;
+      }
       case "copy-url": {
         var config = findConfigByPath(pathOrId);
         if (config) {
@@ -977,6 +1087,23 @@
       document.getElementById("search-input").value = "";
       renderFileList();
     }
+  });
+
+  // Collapse / expand all folders. If any folder is currently expanded
+  // the button collapses everything; otherwise it expands everything.
+  // Acts on both workspace folders (collapsedFolders) and cloud folder
+  // groups (collapsedCloudFolders) for a consistent feel.
+  document.getElementById("btn-collapse-all").addEventListener("click", function() {
+    var wsKeys = (sidebarState.workspaceFiles || [])
+      .map(function(f) { return f.parentFolder; })
+      .filter(function(p) { return !!p; });
+    wsKeys = Array.from(new Set(wsKeys));
+    var cloudKeys = (sidebarState.cloudFolders || []).map(function(f) { return f.id; });
+    var anyExpanded = wsKeys.some(function(k) { return !collapsedFolders[k]; })
+                   || cloudKeys.some(function(k) { return !collapsedCloudFolders[k]; });
+    wsKeys.forEach(function(k) { collapsedFolders[k] = anyExpanded; });
+    cloudKeys.forEach(function(k) { collapsedCloudFolders[k] = anyExpanded; });
+    renderFileList();
   });
 
   document.getElementById("search-input").addEventListener("input", function(e) {

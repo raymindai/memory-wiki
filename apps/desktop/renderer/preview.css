@@ -1402,9 +1402,9 @@ body {
 #sidebar {
   /* Width is user-resizable. JS writes --sidebar-width on the host element,
      min/max enforced both here (CSS clamp safety) and in the drag handler. */
-  width: var(--sidebar-width, 260px);
-  min-width: 200px;
-  max-width: 520px;
+  width: var(--sidebar-width, 320px);
+  min-width: 220px;
+  max-width: 560px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -1497,14 +1497,14 @@ body.sidebar-resizing * {
   cursor: pointer;
 }
 .sidebar-logo img {
-  /* memory.wiki wordmark viewBox is 135.5×20.81 (wider aspect than
-     the prior mdfy.app at 119.33×26.53). At the old 18px height the
-     wordmark renders ~117px wide and pushes the action icons off
-     the right side of the sidebar header. 12px brings the rendered
-     width back to ~78px — same footprint as mdfy.app at 18px. */
-  height: 12px;
+  /* memory.wiki wordmark sized to read clearly at the wider 320px
+     default. Wordmark stays on a single line because the sidebar
+     never wraps it (whitespace: nowrap on the parent + room left
+     of the action icons). */
+  height: 16px;
   width: auto;
-  opacity: 0.8;
+  white-space: nowrap;
+  opacity: 0.92;
   transition: opacity 0.15s;
 }
 .sidebar-logo:hover img { opacity: 1; }
@@ -1512,8 +1512,8 @@ body.sidebar-resizing * {
 .sidebar-brand-blob {
   position: relative;
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 .sidebar-brand-blob img {
@@ -1640,9 +1640,19 @@ body.sidebar-resizing * {
 }
 
 .filter-tab.active {
-  background: var(--accent-dim);
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--text-primary, var(--fg));
 }
+
+.filter-tab-icon {
+  flex: 0 0 28px;
+  padding: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.filter-tab-icon svg { display: block; }
+.filter-tab-icon.active svg { fill: currentColor; }
 
 
 /* ─── File List ─── */
@@ -1860,8 +1870,15 @@ body.sidebar-resizing * {
   color: var(--fg);
 }
 .file-actions button:active {
-  background: var(--accent-dim);
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--text-primary, var(--fg));
+}
+
+/* Star toggle keeps the warm amber fill when active so it stays
+   legible against both light + dark sidebar backgrounds. */
+.file-actions button.is-starred,
+.file-actions button.is-starred:hover {
+  color: #f59e0b;
 }
 
 /* Timestamp (hidden on hover, replaced by actions) */

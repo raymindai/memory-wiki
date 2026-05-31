@@ -28,10 +28,11 @@
           <img src="blob.svg" alt="" class="blob-darktheme" draggable="false">
           <img src="blob-dark.svg" alt="" class="blob-lighttheme" draggable="false">
         </span>
-        <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark" height="12">
-        <img src="logo-light.svg" alt="memory.wiki" class="logo-light" height="12">
+        <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark" height="16">
+        <img src="logo-light.svg" alt="memory.wiki" class="logo-light" height="16">
       </div>
       <div class="sidebar-actions">
+        <button class="sidebar-icon-btn" id="btn-collapse-all" title="Collapse all folders"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6l3-3 3 3"/><path d="M5 13l3-3 3 3"/></svg></button>
         <button class="sidebar-icon-btn" id="btn-search-toggle" title="Search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg></button>
         <button class="sidebar-icon-btn" id="btn-help-toggle" title="Help"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M6.2 6.2a2 2 0 013.6.8c0 1.2-1.8 1.2-1.8 2.4"/><circle cx="8" cy="12" r="0.6" fill="currentColor" stroke="none"/></svg></button>
         <button class="sidebar-icon-btn" id="btn-refresh" title="Refresh"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8A6 6 0 004.8 3.3L2 6"/><path d="M2 2v4h4"/><path d="M2 8a6 6 0 009.2 4.7L14 10"/><path d="M14 14v-4h-4"/></svg></button>
@@ -55,6 +56,7 @@
 
     <div class="sidebar-filters">
       <button class="filter-tab active" data-filter="all" title="All documents">All</button>
+      <button class="filter-tab filter-tab-icon" data-filter="starred" title="Starred"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
       <button class="filter-tab" data-filter="synced" title="Files linked to memory.wiki">Synced</button>
       <button class="filter-tab" data-filter="local" title="All files on your machine">Local</button>
       <button class="filter-tab" data-filter="cloud" title="All documents on memory.wiki">Cloud</button>
