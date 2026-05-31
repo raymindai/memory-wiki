@@ -131,7 +131,17 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "login":
-          vscode.commands.executeCommand("memorywiki.login");
+          // Tell the webview the OAuth round-trip is in-flight so
+          // the bottom signin-btn renders as disabled "Signing in…"
+          // instead of a clickable green-light. Cleared regardless
+          // of outcome (success → refresh re-renders the whole user
+          // bar; failure → finally branch flips the flag back).
+          this._view?.webview.postMessage({ type: "auth-pending", state: true });
+          try {
+            await vscode.commands.executeCommand("memorywiki.login");
+          } finally {
+            this._view?.webview.postMessage({ type: "auth-pending", state: false });
+          }
           break;
         case "logout":
           await this._authManager.logout();
@@ -1149,6 +1159,34 @@ body {
     // flagged" without the lime "live" semantic collision.
     var starInline = '<svg width="10" height="10" viewBox="0 0 16 16" fill="var(--micro-warn)" style="vertical-align:-1px;margin-right:1px" aria-label="Starred"><path d="M8 1l2.09 4.26L15 6l-3.5 3.41.83 4.84L8 12l-4.33 2.25.83-4.84L1 6l4.91-.74L8 1z"/></svg>';
 
+    /** Human-readable state shown on row hover. Mirrors the
+     *  visual icon mapping but spells the semantics out so the
+     *  user doesn't have to memorise the glyph palette. */
+    function docStateText(doc) {
+      var editMode = doc.editMode || null;
+      var allowedEmails = doc.allowedEmails || null;
+      var source = doc.source || null;
+      var isDraft = doc.isDraft || false;
+      var isSynced = source === 'vscode' || source === 'desktop' || source === 'cli' || source === 'mcp';
+      var pinned = doc.docId && pinnedDocIds.has(doc.docId);
+      var parts = [];
+      if (editMode === 'readonly') {
+        parts.push('View only — shared with you');
+      } else if (allowedEmails && allowedEmails.length > 0) {
+        parts.push('Shared — restricted to ' + allowedEmails.length + ' email(s)');
+      } else if (!isDraft) {
+        parts.push('Public — anyone with the link can read');
+      } else if (doc.docId) {
+        parts.push('Private — cloud-only, only you can read');
+      } else {
+        parts.push('Local — not yet synced to memory.wiki');
+      }
+      if (isSynced) parts.push('Synced from this editor');
+      if (pinned) parts.push('Starred');
+      if (doc.docId) parts.push(doc.docId);
+      return parts.join(' · ');
+    }
+
     function docStatusIcon(doc) {
       var editMode = doc.editMode || null;
       var allowedEmails = doc.allowedEmails || null;
@@ -1187,6 +1225,10 @@ body {
           if (e.data.state) refreshBtn.classList.add('spinning');
           else { refreshBtn.classList.remove('spinning'); }
         }
+        return;
+      }
+      if (e.data.type === 'auth-pending') {
+        setSigninPending(!!e.data.state);
         return;
       }
       if (e.data.type === 'loading') {
@@ -1470,7 +1512,7 @@ body {
         + '<button class="doc-action" data-action="browser" data-url="' + esc(doc.url) + '" title="Open in browser">' + icon('externalLink', 14) + '</button>'
         + '<button class="doc-action" data-action="unsync" data-path="' + esc(doc.filePath) + '" title="Remove sync link (cloud copy remains)">' + icon('unsync', 14) + '</button>'
         + '<button class="doc-action" data-action="deleteSynced" data-path="' + esc(doc.filePath) + '" title="Delete from cloud" style="color:var(--micro-red)">' + icon('trash', 14) + '</button>';
-      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '">'
+      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + (pinned ? starInline + ' ' : '') + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
@@ -1480,7 +1522,7 @@ body {
       var ic = '<div class="doc-icon local">' + icon('file', 14) + '</div>';
       var meta = doc.relativePath || doc.fileName;
       var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to memory.wiki">' + icon('upload', 14) + '</button>';
-      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(doc.relativePath || doc.fileName) + '">'
+      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + ' · ' + (doc.relativePath || doc.fileName)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
@@ -1495,7 +1537,7 @@ body {
         + '<button class="doc-action" data-action="duplicateCloud" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="Duplicate">' + icon('copy', 14) + '</button>'
         + '<button class="doc-action" data-action="browser" data-url="' + esc(doc.url) + '" title="Open in browser">' + icon('externalLink', 14) + '</button>'
         + '<button class="doc-action" data-action="deleteCloud" data-docid="' + esc(doc.docId) + '" title="Delete from cloud" style="color:var(--micro-red)">' + icon('trash', 14) + '</button>';
-      return '<li class="doc-item" data-action="openCloud" data-url="' + esc(doc.url) + '" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '">'
+      return '<li class="doc-item" data-action="openCloud" data-url="' + esc(doc.url) + '" data-docid="' + esc(doc.docId) + '" data-title="' + esc(doc.title) + '" title="' + esc(docStateText(doc)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + (pinned ? starInline + ' ' : '') + esc(doc.title) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
@@ -1619,8 +1661,27 @@ body {
 
     // Bind sign in / sign out buttons
     document.getElementById('signin-btn').addEventListener('click', function() {
+      // Optimistic disable — extension also posts auth-pending, but
+      // disabling here removes the click-during-flight race.
+      setSigninPending(true);
       vscode.postMessage({ type: 'login' });
     });
+    function setSigninPending(pending) {
+      var btn = document.getElementById('signin-btn');
+      if (!btn) return;
+      btn.disabled = !!pending;
+      btn.style.opacity = pending ? '0.6' : '';
+      btn.style.cursor = pending ? 'default' : '';
+      // Cache + restore the original label so the "Signing in…"
+      // state doesn't permanently overwrite it.
+      if (pending) {
+        if (!btn.dataset.originalLabel) btn.dataset.originalLabel = btn.innerHTML;
+        btn.innerHTML = '<span style="opacity:0.85">Signing in…</span>';
+      } else if (btn.dataset.originalLabel) {
+        btn.innerHTML = btn.dataset.originalLabel;
+        delete btn.dataset.originalLabel;
+      }
+    }
     document.getElementById('logout-btn').addEventListener('click', function() {
       vscode.postMessage({ type: 'logout' });
     });
