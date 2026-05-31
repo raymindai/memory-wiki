@@ -14,7 +14,16 @@ export type AccentColor =
   | "teal"
   | "red"
   | "yellow"
-  | "gray";
+  | "gray"
+  // Muted tones (v8 quiet-by-default direction). Picker groups
+  // these under a "Muted" section so existing users don't lose
+  // their saved vivid choice.
+  | "sage"
+  | "slate"
+  | "sand"
+  | "mauve"
+  | "rose"
+  | "iris";
 
 export type ColorScheme =
   | "default"
@@ -33,6 +42,9 @@ export interface AccentColorOption {
   dark: string;
   /** Color used when the doc/app is in light mode. */
   light: string;
+  /** Picker group. Pickers render `vivid` first, then `muted`
+   *  under a section header. */
+  group: "vivid" | "muted";
 }
 
 export interface ColorSchemeOption {
@@ -50,19 +62,28 @@ export interface ColorSchemeOption {
 export const ACCENT_COLORS: AccentColorOption[] = [
   // Lime first — new app default (replaces orange as the accent that
   // drives editor links / blockquotes / task-list checks).
-  { name: "lime",   label: "Lime",   dark: "#B5FF1A", light: "#5BC700" },
-  { name: "orange", label: "Orange", dark: "#fb923c", light: "#ea580c" },
-  { name: "blue",   label: "Blue",   dark: "#60a5fa", light: "#2563eb" },
-  { name: "purple", label: "Purple", dark: "#a78bfa", light: "#7c3aed" },
-  { name: "pink",   label: "Pink",   dark: "#f472b6", light: "#ec4899" },
-  { name: "green",  label: "Green",  dark: "#4ade80", light: "#16a34a" },
-  { name: "teal",   label: "Teal",   dark: "#2dd4bf", light: "#0d9488" },
-  { name: "red",    label: "Red",    dark: "#f87171", light: "#dc2626" },
-  { name: "yellow", label: "Yellow", dark: "#fbbf24", light: "#d97706" },
+  { name: "lime",   label: "Lime",   dark: "#B5FF1A", light: "#5BC700", group: "vivid" },
+  { name: "orange", label: "Orange", dark: "#fb923c", light: "#ea580c", group: "vivid" },
+  { name: "blue",   label: "Blue",   dark: "#60a5fa", light: "#2563eb", group: "vivid" },
+  { name: "purple", label: "Purple", dark: "#a78bfa", light: "#7c3aed", group: "vivid" },
+  { name: "pink",   label: "Pink",   dark: "#f472b6", light: "#ec4899", group: "vivid" },
+  { name: "green",  label: "Green",  dark: "#4ade80", light: "#16a34a", group: "vivid" },
+  { name: "teal",   label: "Teal",   dark: "#2dd4bf", light: "#0d9488", group: "vivid" },
+  { name: "red",    label: "Red",    dark: "#f87171", light: "#dc2626", group: "vivid" },
+  { name: "yellow", label: "Yellow", dark: "#fbbf24", light: "#d97706", group: "vivid" },
   // Neutral gray — accent essentially turned off. Useful when the
   // user wants a monochrome editor where links + blockquotes don't
   // pull the eye away from body text.
-  { name: "gray",   label: "Gray",   dark: "#a1a1aa", light: "#52525b" },
+  { name: "gray",   label: "Gray",   dark: "#a1a1aa", light: "#52525b", group: "vivid" },
+  // Muted set — desaturated tones around HSL 18-32% saturation,
+  // 55-69% lightness on dark, matched darker on light. Reads as
+  // "intentional colour" without competing with body text.
+  { name: "sage",   label: "Sage",   dark: "#94B49F", light: "#5E8669", group: "muted" },
+  { name: "slate",  label: "Slate",  dark: "#7C8DA8", light: "#536175", group: "muted" },
+  { name: "sand",   label: "Sand",   dark: "#C7B299", light: "#8C7656", group: "muted" },
+  { name: "mauve",  label: "Mauve",  dark: "#B193A6", light: "#7B5E72", group: "muted" },
+  { name: "rose",   label: "Rose",   dark: "#C99595", light: "#965C5C", group: "muted" },
+  { name: "iris",   label: "Iris",   dark: "#7E7FB0", light: "#52537A", group: "muted" },
 ];
 
 export const COLOR_SCHEMES: ColorSchemeOption[] = [

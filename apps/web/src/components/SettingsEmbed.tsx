@@ -1121,6 +1121,10 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
               const isSelected = keyColor === c.name;
               const isLast = idx === ACCENT_COLORS.length - 1;
               const order = String(idx + 1).padStart(2, "0");
+              // Section header before the first muted swatch — splits
+              // vivid (existing 10) from muted (new 6, v8 direction).
+              const prev = idx > 0 ? ACCENT_COLORS[idx - 1] : null;
+              const isFirstMuted = c.group === "muted" && prev?.group !== "muted";
               // Lime is the implicit scheme-default — selecting it
               // removes the data-accent override so the root value
               // applies. The row's swatches mirror the current
@@ -1133,8 +1137,23 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                 ? (skinScheme === "default" ? "Default (Lime)" : `Default (${display.label})`)
                 : c.label;
               return (
+                <div key={c.name}>
+                  {isFirstMuted && (
+                    <div
+                      className="font-mono px-3 py-1.5"
+                      style={{
+                        fontSize: 10,
+                        letterSpacing: "0.08em",
+                        color: "var(--text-faint)",
+                        background: "var(--background)",
+                        borderTop: "1px solid var(--border-dim)",
+                        borderBottom: "1px solid var(--border-dim)",
+                      }}
+                    >
+                      MUTED
+                    </div>
+                  )}
                 <button
-                  key={c.name}
                   onClick={() => selectAccent(c.name)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors"
                   style={{
@@ -1174,6 +1193,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
                     />
                   )}
                 </button>
+                </div>
               );
             })}
           </div>

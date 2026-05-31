@@ -326,6 +326,32 @@
 [data-accent="yellow"] { --accent: #fbbf24; --accent-dim: rgba(251, 191, 36, 0.15); --surface-hover: rgba(251, 191, 36, 0.03); --badge-bg: rgba(251, 191, 36, 0.15); }
 [data-accent="yellow"][data-theme="light"] { --accent: #d97706; --accent-dim: rgba(217, 119, 6, 0.1); --surface-hover: rgba(217, 119, 6, 0.04); --badge-bg: rgba(217, 119, 6, 0.1); }
 
+/* ---- Muted tones (v8 quiet-by-default direction) ---- */
+
+/* Sage */
+[data-accent="sage"] { --accent: #94B49F; --accent-dim: rgba(148, 180, 159, 0.15); --surface-hover: rgba(148, 180, 159, 0.04); --badge-bg: rgba(148, 180, 159, 0.15); }
+[data-accent="sage"][data-theme="light"] { --accent: #5E8669; --accent-dim: rgba(94, 134, 105, 0.10); --surface-hover: rgba(94, 134, 105, 0.04); --badge-bg: rgba(94, 134, 105, 0.10); }
+
+/* Slate */
+[data-accent="slate"] { --accent: #7C8DA8; --accent-dim: rgba(124, 141, 168, 0.15); --surface-hover: rgba(124, 141, 168, 0.04); --badge-bg: rgba(124, 141, 168, 0.15); }
+[data-accent="slate"][data-theme="light"] { --accent: #536175; --accent-dim: rgba(83, 97, 117, 0.10); --surface-hover: rgba(83, 97, 117, 0.04); --badge-bg: rgba(83, 97, 117, 0.10); }
+
+/* Sand */
+[data-accent="sand"] { --accent: #C7B299; --accent-dim: rgba(199, 178, 153, 0.15); --surface-hover: rgba(199, 178, 153, 0.04); --badge-bg: rgba(199, 178, 153, 0.15); }
+[data-accent="sand"][data-theme="light"] { --accent: #8C7656; --accent-dim: rgba(140, 118, 86, 0.10); --surface-hover: rgba(140, 118, 86, 0.04); --badge-bg: rgba(140, 118, 86, 0.10); }
+
+/* Mauve */
+[data-accent="mauve"] { --accent: #B193A6; --accent-dim: rgba(177, 147, 166, 0.15); --surface-hover: rgba(177, 147, 166, 0.04); --badge-bg: rgba(177, 147, 166, 0.15); }
+[data-accent="mauve"][data-theme="light"] { --accent: #7B5E72; --accent-dim: rgba(123, 94, 114, 0.10); --surface-hover: rgba(123, 94, 114, 0.04); --badge-bg: rgba(123, 94, 114, 0.10); }
+
+/* Rose */
+[data-accent="rose"] { --accent: #C99595; --accent-dim: rgba(201, 149, 149, 0.15); --surface-hover: rgba(201, 149, 149, 0.04); --badge-bg: rgba(201, 149, 149, 0.15); }
+[data-accent="rose"][data-theme="light"] { --accent: #965C5C; --accent-dim: rgba(150, 92, 92, 0.10); --surface-hover: rgba(150, 92, 92, 0.04); --badge-bg: rgba(150, 92, 92, 0.10); }
+
+/* Iris */
+[data-accent="iris"] { --accent: #7E7FB0; --accent-dim: rgba(126, 127, 176, 0.15); --surface-hover: rgba(126, 127, 176, 0.04); --badge-bg: rgba(126, 127, 176, 0.15); }
+[data-accent="iris"][data-theme="light"] { --accent: #52537A; --accent-dim: rgba(82, 83, 122, 0.10); --surface-hover: rgba(82, 83, 122, 0.04); --badge-bg: rgba(82, 83, 122, 0.10); }
+
 /* ========================================
    Color Schemes (full theme overrides)
    ======================================== */

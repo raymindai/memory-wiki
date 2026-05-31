@@ -79,14 +79,37 @@ object Brand {
     val SheetCorner: CornerSize = CornerSize(28.dp)
 }
 
-/** Optional accent palette (matches the web SettingsEmbed picker). */
-enum class AccentColorChoice(val key: String, val dark: Color, val light: Color) {
-    Lime("lime", Color(0xFFB5FF1A), Color(0xFF5BC700)),
-    Orange("orange", Color(0xFFFB923C), Color(0xFFEA580C)),
-    Blue("blue", Color(0xFF60A5FA), Color(0xFF2563EB)),
-    Purple("purple", Color(0xFFA78BFA), Color(0xFF7C3AED)),
-    Pink("pink", Color(0xFFF472B6), Color(0xFFDB2777)),
-    Gray("gray", Color(0xFFA1A1AA), Color(0xFF52525B));
+/** Picker group. Pickers render Vivid first, then Muted under a section
+ *  header. Keep in sync with apps/web/src/lib/theme-options.ts. */
+enum class AccentGroup { Vivid, Muted }
+
+/** Optional accent palette (matches the web SettingsEmbed picker).
+ *
+ *  Two groups: Vivid (saturated, legacy) + Muted (v8 quiet direction).
+ *  Web has more vivid entries (green/teal/red/yellow) — Android keeps
+ *  the original 6 to avoid swamping the small picker; if a user picks
+ *  one of those on web, Android's `from(...)` falls back to Gray.
+ *
+ *  Adding/removing entries here also requires:
+ *   - apps/web/src/lib/theme-options.ts (AccentColor + ACCENT_COLORS)
+ *   - apps/web/src/app/globals.css ([data-accent="..."] blocks)
+ *   - apps/web/src/app/api/user/profile/route.ts (ACCENT_KEYS whitelist)
+ */
+enum class AccentColorChoice(val key: String, val dark: Color, val light: Color, val group: AccentGroup) {
+    // ── Vivid (legacy palette) ──
+    Lime("lime", Color(0xFFB5FF1A), Color(0xFF5BC700), AccentGroup.Vivid),
+    Orange("orange", Color(0xFFFB923C), Color(0xFFEA580C), AccentGroup.Vivid),
+    Blue("blue", Color(0xFF60A5FA), Color(0xFF2563EB), AccentGroup.Vivid),
+    Purple("purple", Color(0xFFA78BFA), Color(0xFF7C3AED), AccentGroup.Vivid),
+    Pink("pink", Color(0xFFF472B6), Color(0xFFDB2777), AccentGroup.Vivid),
+    Gray("gray", Color(0xFFA1A1AA), Color(0xFF52525B), AccentGroup.Vivid),
+    // ── Muted (v8 quiet-by-default direction) ──
+    Sage("sage", Color(0xFF94B49F), Color(0xFF5E8669), AccentGroup.Muted),
+    Slate("slate", Color(0xFF7C8DA8), Color(0xFF536175), AccentGroup.Muted),
+    Sand("sand", Color(0xFFC7B299), Color(0xFF8C7656), AccentGroup.Muted),
+    Mauve("mauve", Color(0xFFB193A6), Color(0xFF7B5E72), AccentGroup.Muted),
+    Rose("rose", Color(0xFFC99595), Color(0xFF965C5C), AccentGroup.Muted),
+    Iris("iris", Color(0xFF7E7FB0), Color(0xFF52537A), AccentGroup.Muted);
 
     companion object {
         fun from(key: String?): AccentColorChoice =

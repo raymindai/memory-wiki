@@ -47,6 +47,7 @@ import wiki.memory.memorywiki.auth.AuthManager
 import wiki.memory.memorywiki.data.model.BundleSummary
 import wiki.memory.memorywiki.data.model.DocSummary
 import wiki.memory.memorywiki.ui.theme.AccentColorChoice
+import wiki.memory.memorywiki.ui.theme.AccentGroup
 import wiki.memory.memorywiki.ui.theme.Brand
 import wiki.memory.memorywiki.ui.theme.BrandType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -431,8 +432,36 @@ private fun Divider() {
 
 @Composable
 private fun AccentPicker(selected: AccentColorChoice, onSelect: (AccentColorChoice) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Mini preview row — shows where the chosen accent actually
+        // lands (link colour, chip background, selected card border)
+        // so a tap on a swatch teaches what's about to change.
+        AccentPreviewRow(selected)
+
+        SectionLabel("VIVID")
+        AccentSwatchRow(
+            entries = AccentColorChoice.entries.filter { it.group == AccentGroup.Vivid },
+            selected = selected,
+            onSelect = onSelect,
+        )
+
+        SectionLabel("MUTED")
+        AccentSwatchRow(
+            entries = AccentColorChoice.entries.filter { it.group == AccentGroup.Muted },
+            selected = selected,
+            onSelect = onSelect,
+        )
+    }
+}
+
+@Composable
+private fun AccentSwatchRow(
+    entries: List<AccentColorChoice>,
+    selected: AccentColorChoice,
+    onSelect: (AccentColorChoice) -> Unit,
+) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        AccentColorChoice.entries.forEach { choice ->
+        entries.forEach { choice ->
             Box(
                 Modifier
                     .size(36.dp)
@@ -445,6 +474,40 @@ private fun AccentPicker(selected: AccentColorChoice, onSelect: (AccentColorChoi
                     .clickable { onSelect(choice) },
             )
         }
+    }
+}
+
+@Composable
+private fun AccentPreviewRow(selected: AccentColorChoice) {
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Chip — solid accent fill (small, low-contrast surrounds).
+        Box(
+            Modifier
+                .background(selected.dark.copy(alpha = 0.18f), RoundedCornerShape(6.dp))
+                .border(0.5.dp, selected.dark.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+        ) {
+            Text("Chip", style = BrandType.mono(10, FontWeight.Medium), color = selected.dark)
+        }
+        // Link — sample text painted with the accent (the most common
+        // place an accent shows up in body content).
+        Text(
+            "Link text",
+            style = BrandType.body(12),
+            color = selected.dark,
+        )
+        // Selected card hint — thin border to show how a selected
+        // surface (e.g. a tab, a row) outlines itself.
+        Box(
+            Modifier
+                .height(20.dp)
+                .width(36.dp)
+                .border(1.dp, selected.dark, RoundedCornerShape(4.dp)),
+        )
     }
 }
 
