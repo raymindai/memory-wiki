@@ -1,6 +1,6 @@
-# Memory.Wiki QuickLook
+# memory.wiki QuickLook
 
-A macOS QuickLook preview generator for Markdown files, styled to match [Memory.Wiki](https://memory.wiki).
+A macOS QuickLook preview generator for Markdown files, styled to match [memory.wiki](https://memory.wiki).
 
 Press **Space** in Finder to preview any `.md` file with full rendering: syntax highlighting, KaTeX math, Mermaid diagrams, GFM tables, and task lists.
 
@@ -11,9 +11,9 @@ Press **Space** in Finder to preview any `.md` file with full rendering: syntax 
 - Math equations (via KaTeX)
 - Mermaid diagrams
 - Automatic dark/light mode (follows macOS system appearance)
-- "Open in Memory.Wiki" button for one-click publishing
+- "Open in memory.wiki" button for one-click publishing
 - Copy buttons on code blocks
-- Identical styling to Memory.Wiki
+- Identical styling to memory.wiki
 
 ## Quick Start (CLI Tool)
 
@@ -69,7 +69,7 @@ For native Finder Space-bar preview, you need a QuickLook App Extension. This re
 
 ### Option B: Use with Existing QuickLook Plugins
 
-If you already have a QuickLook Markdown plugin installed (like [qlmarkdown](https://github.com/toland/qlmarkdown)), you can use the Memory.Wiki HTML template + CSS as a custom style:
+If you already have a QuickLook Markdown plugin installed (like [qlmarkdown](https://github.com/toland/qlmarkdown)), you can use the memory.wiki HTML template + CSS as a custom style:
 
 1. Generate a preview with the CLI tool
 2. Use the output HTML as a template for your plugin's rendering
@@ -86,8 +86,8 @@ Create a Finder Quick Action that previews Markdown files:
        memory-wiki-quicklook "$f" --open
    done
    ```
-4. Save as "Preview with Memory.Wiki"
-5. Now right-click any `.md` file in Finder and select **Quick Actions > Preview with Memory.Wiki**
+4. Save as "Preview with memory.wiki"
+5. Now right-click any `.md` file in Finder and select **Quick Actions > Preview with memory.wiki**
 
 ## Architecture
 
@@ -104,7 +104,7 @@ User presses Space on .md file
   -> Beautiful preview displayed in Finder
 ```
 
-The rendering pipeline matches Memory.Wiki exactly because it uses the same client-side libraries and CSS variables.
+The rendering pipeline matches memory.wiki exactly because it uses the same client-side libraries and CSS variables.
 
 ## File Structure
 
@@ -117,7 +117,7 @@ apps/quicklook/
 │   │       ├── PreviewProvider.swift   # CLI tool + extension provider
 │   │       └── template.html          # HTML template with JS renderers
 │   └── Resources/
-│       └── preview.css            # Memory.Wiki rendering styles
+│       └── preview.css            # memory.wiki rendering styles
 ├── install.sh                     # Build & install script
 └── README.md                      # This file
 ```
@@ -128,7 +128,7 @@ apps/quicklook/
 
 The rendering styles live in `Resources/preview.css` and are injected into the HTML template at build time. These are a direct port of the `.mdcore-rendered` styles from `apps/web/src/app/globals.css`.
 
-To update after changing Memory.Wiki styles:
+To update after changing memory.wiki styles:
 
 1. Edit `Resources/preview.css` to match the updated `globals.css`
 2. Rebuild with `./install.sh`
@@ -139,7 +139,7 @@ The HTML template at `Sources/PreviewExtension/template.html` includes:
 
 - CDN links for marked.js, highlight.js, KaTeX, and Mermaid
 - Rendering script that processes the injected Markdown
-- Top bar with Memory.Wiki branding and action buttons
+- Top bar with memory.wiki branding and action buttons
 - Placeholder `{{MARKDOWN_CONTENT}}` replaced at runtime
 
 ### Test Locally

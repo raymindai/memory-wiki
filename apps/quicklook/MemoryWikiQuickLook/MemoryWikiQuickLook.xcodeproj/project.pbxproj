@@ -10,7 +10,7 @@
 		A1000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* AppDelegate.swift */; };
 		A1000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000002 /* Assets.xcassets */; };
 		A1000003 /* PreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* PreviewViewController.swift */; };
-		A1000004 /* MdfyQLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A3000002 /* MdfyQLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1000004 /* MemoryWikiQLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A3000002 /* MemoryWikiQLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -19,7 +19,7 @@
 			containerPortal = A5000001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = A3000001;
-			remoteInfo = MdfyQLExtension;
+			remoteInfo = MemoryWikiQLExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -30,7 +30,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				A1000004 /* MdfyQLExtension.appex in Embed Foundation Extensions */,
+				A1000004 /* MemoryWikiQLExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -43,8 +43,8 @@
 		A2000003 /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
 		A2000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A3000002 /* MdfyQLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MdfyQLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		A3000003 /* MdfyQuickLook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MdfyQuickLook.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3000002 /* MemoryWikiQLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MemoryWikiQLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3000003 /* MemoryWikiQuickLook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemoryWikiQuickLook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,8 +96,8 @@
 		A8000004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A3000003 /* MdfyQuickLook.app */,
-				A3000002 /* MdfyQLExtension.appex */,
+				A3000003 /* MemoryWikiQuickLook.app */,
+				A3000002 /* MemoryWikiQLExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -105,9 +105,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A3000001 /* MdfyQLExtension */ = {
+		A3000001 /* MemoryWikiQLExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A9000002 /* Build configuration list for PBXNativeTarget "MdfyQLExtension" */;
+			buildConfigurationList = A9000002 /* Build configuration list for PBXNativeTarget "MemoryWikiQLExtension" */;
 			buildPhases = (
 				AA000003 /* Sources */,
 				A7000002 /* Frameworks */,
@@ -117,14 +117,14 @@
 			);
 			dependencies = (
 			);
-			name = MdfyQLExtension;
-			productName = MdfyQLExtension;
-			productReference = A3000002 /* MdfyQLExtension.appex */;
+			name = MemoryWikiQLExtension;
+			productName = MemoryWikiQLExtension;
+			productReference = A3000002 /* MemoryWikiQLExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		A3000004 /* MdfyQuickLook */ = {
+		A3000004 /* MemoryWikiQuickLook */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A9000001 /* Build configuration list for PBXNativeTarget "MdfyQuickLook" */;
+			buildConfigurationList = A9000001 /* Build configuration list for PBXNativeTarget "MemoryWikiQuickLook" */;
 			buildPhases = (
 				AA000001 /* Sources */,
 				A7000001 /* Frameworks */,
@@ -136,9 +136,9 @@
 			dependencies = (
 				A4000002 /* PBXTargetDependency */,
 			);
-			name = MdfyQuickLook;
-			productName = MdfyQuickLook;
-			productReference = A3000003 /* MdfyQuickLook.app */;
+			name = MemoryWikiQuickLook;
+			productName = MemoryWikiQuickLook;
+			productReference = A3000003 /* MemoryWikiQuickLook.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -159,7 +159,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A9000003 /* Build configuration list for PBXProject "MdfyQuickLook" */;
+			buildConfigurationList = A9000003 /* Build configuration list for PBXProject "MemoryWikiQuickLook" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -172,8 +172,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A3000004 /* MdfyQuickLook */,
-				A3000001 /* MdfyQLExtension */,
+				A3000004 /* MemoryWikiQuickLook */,
+				A3000001 /* MemoryWikiQLExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -218,7 +218,7 @@
 /* Begin PBXTargetDependency section */
 		A4000002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A3000001 /* MdfyQLExtension */;
+			target = A3000001 /* MemoryWikiQLExtension */;
 			targetProxy = A4000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -276,7 +276,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = HostApp/MdfyQuickLook.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HostApp/MemoryWikiQuickLook.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -303,7 +303,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = HostApp/MdfyQuickLook.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HostApp/MemoryWikiQuickLook.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -329,7 +329,7 @@
 		AB000005 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/MdfyQLExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/MemoryWikiQLExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -353,7 +353,7 @@
 		AB000006 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/MdfyQLExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = QuickLookExtension/MemoryWikiQLExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -377,7 +377,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A9000001 /* Build configuration list for PBXNativeTarget "MdfyQuickLook" */ = {
+		A9000001 /* Build configuration list for PBXNativeTarget "MemoryWikiQuickLook" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB000003 /* Debug */,
@@ -386,7 +386,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A9000002 /* Build configuration list for PBXNativeTarget "MdfyQLExtension" */ = {
+		A9000002 /* Build configuration list for PBXNativeTarget "MemoryWikiQLExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB000005 /* Debug */,
@@ -395,7 +395,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A9000003 /* Build configuration list for PBXProject "MdfyQuickLook" */ = {
+		A9000003 /* Build configuration list for PBXProject "MemoryWikiQuickLook" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AB000001 /* Debug */,

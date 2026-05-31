@@ -17,9 +17,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A3000001"
-               BuildableName = "MdfyQLExtension.appex"
-               BlueprintName = "MdfyQLExtension"
-               ReferencedContainer = "container:MdfyQuickLook.xcodeproj">
+               BuildableName = "MemoryWikiQLExtension.appex"
+               BlueprintName = "MemoryWikiQLExtension"
+               ReferencedContainer = "container:MemoryWikiQuickLook.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,9 +31,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A3000004"
-               BuildableName = "MdfyQuickLook.app"
-               BlueprintName = "MdfyQuickLook"
-               ReferencedContainer = "container:MdfyQuickLook.xcodeproj">
+               BuildableName = "MemoryWikiQuickLook.app"
+               BlueprintName = "MemoryWikiQuickLook"
+               ReferencedContainer = "container:MemoryWikiQuickLook.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -63,9 +63,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A3000004"
-            BuildableName = "MdfyQuickLook.app"
-            BlueprintName = "MdfyQuickLook"
-            ReferencedContainer = "container:MdfyQuickLook.xcodeproj">
+            BuildableName = "MemoryWikiQuickLook.app"
+            BlueprintName = "MemoryWikiQuickLook"
+            ReferencedContainer = "container:MemoryWikiQuickLook.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -82,9 +82,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "A3000004"
-            BuildableName = "MdfyQuickLook.app"
-            BlueprintName = "MdfyQuickLook"
-            ReferencedContainer = "container:MdfyQuickLook.xcodeproj">
+            BuildableName = "MemoryWikiQuickLook.app"
+            BlueprintName = "MemoryWikiQuickLook"
+            ReferencedContainer = "container:MemoryWikiQuickLook.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

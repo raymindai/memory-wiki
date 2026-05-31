@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ================================================================
-# Memory.Wiki QuickLook — Build & Install Script
+# memory.wiki QuickLook — Build & Install Script
 # ================================================================
 #
 # Builds the memory-wiki-quicklook CLI tool and installs it to /usr/local/bin.
@@ -19,7 +19,7 @@ INSTALL_DIR="/usr/local/bin"
 TOOL_NAME="memory-wiki-quicklook"
 
 echo ""
-echo "  Memory.Wiki QuickLook — Build & Install"
+echo "  memory.wiki QuickLook — Build & Install"
 echo "  ================================="
 echo ""
 

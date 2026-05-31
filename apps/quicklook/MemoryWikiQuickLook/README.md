@@ -1,4 +1,4 @@
-# MdfyQuickLook - macOS QuickLook Extension
+# MemoryWikiQuickLook - macOS QuickLook Extension
 
 A native macOS App Extension (.appex) that provides beautiful Markdown previews when you press Space on a `.md` file in Finder.
 
@@ -22,8 +22,8 @@ A native macOS App Extension (.appex) that provides beautiful Markdown previews 
 
 ### Option A: Xcode (recommended)
 
-1. Open `MdfyQuickLook.xcodeproj` in Xcode
-2. Select the **MdfyQuickLook** scheme
+1. Open `MemoryWikiQuickLook.xcodeproj` in Xcode
+2. Select the **MemoryWikiQuickLook** scheme
 3. Product > Build (Cmd+B)
 4. Product > Archive for distribution, or just Run to test
 
@@ -39,24 +39,24 @@ chmod +x build.sh
 
 ## Install
 
-1. Copy `MdfyQuickLook.app` to `/Applications/`
+1. Copy `MemoryWikiQuickLook.app` to `/Applications/`
 2. Open it once (this registers the QuickLook extension with macOS)
 3. Go to System Settings > Privacy & Security > Extensions > QuickLook
-4. Make sure "MdfyQuickLook" is enabled
+4. Make sure "MemoryWikiQuickLook" is enabled
 5. Press Space on any `.md` file in Finder
 
 ### Manual install after build:
 
 ```bash
-cp -R build/MdfyQuickLook.app /Applications/
-open /Applications/MdfyQuickLook.app
+cp -R build/MemoryWikiQuickLook.app /Applications/
+open /Applications/MemoryWikiQuickLook.app
 ```
 
 ## Architecture
 
 ```
-MdfyQuickLook/
-├── MdfyQuickLook.xcodeproj/     # Xcode project
+MemoryWikiQuickLook/
+├── MemoryWikiQuickLook.xcodeproj/     # Xcode project
 │   └── project.pbxproj
 ├── HostApp/                      # Minimal host app (required container)
 │   ├── AppDelegate.swift
@@ -74,7 +74,7 @@ MdfyQuickLook/
 ### How it works
 
 1. User presses Space on a `.md` file in Finder
-2. macOS loads the QuickLook extension (MdfyQLExtension.appex)
+2. macOS loads the QuickLook extension (MemoryWikiQLExtension.appex)
 3. `PreviewViewController` reads the markdown file
 4. Markdown content is escaped and injected into an HTML template
 5. The template is loaded into a WKWebView
