@@ -19,17 +19,55 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { setupEditableTab } from "./_helpers";
 
 test.describe("Editor autosave race — Google Docs-level data safety", () => {
-  // setupEditableTab's cold-start can eat 15s+ of the default 30s
-  // budget on CI (Tiptap mount + first-page hydration). Bump to 60s
-  // so the assertion phase has comfortable headroom; tests still
-  // assert within their own 2s expect timeouts.
+  // Cold-start CI runs the first describe-block before any other
+  // spec has warmed the dev server. Tiptap mount + first-page
+  // hydration can eat 15s+ of the default 30s budget, leaving very
+  // little for the assertion phase. Bump to 60s so the assertions
+  // have headroom; tests still assert within their own 2s expect
+  // timeouts so signal stays sharp.
   test.describe.configure({ timeout: 60_000 });
 
+  // Inlined setup (not shared setupEditableTab from _helpers): the
+  // refetch path under test in MdEditor.tsx bails at "if (!cloudId)
+  // return", so the scratch tab MUST carry a cloudId or our
+  // `**/api/docs/**` route stub is never hit and the "refetch was
+  // attempted" sanity check fails. The shared helper deliberately
+  // omits cloudId because other specs are testing the cloud-less
+  // flow; this spec needs the opposite.
   test.beforeEach(async ({ page }) => {
-    await setupEditableTab(page);
+    await page.addInitScript(() => {
+      localStorage.setItem("mw-onboarded", "1");
+      localStorage.setItem("mw-welcome-seen", "1");
+      localStorage.setItem("mw-welcome-seen-v7", "1");
+      localStorage.setItem("mw-editor-opened", "1");
+      localStorage.setItem("mw-tabs-version", "10");
+      // Fake Supabase auth token. MdEditor's tabs hydration drops
+      // cloudId-bearing tabs when no `sb-...-auth-token` key
+      // exists in localStorage (signed-out users would otherwise
+      // flash other people's drafts). Our seeded tab below has a
+      // cloudId, so it would get stripped at hydration without
+      // this. Value can be anything — all network calls are
+      // route-stubbed below.
+      localStorage.setItem("sb-e2e-auth-token", JSON.stringify({ access_token: "e2e-fake", user: { id: "e2e-user" } }));
+      const tab = {
+        id: "tab-e2e-scratch",
+        title: "E2E Scratch",
+        markdown: "# E2E Scratch\n\nstart here\n",
+        readonly: false,
+        permission: "mine",
+        isDraft: false,
+        // Cloud-bound — required for the refetch path under test
+        // (MdEditor.tsx L4625: `if (!cloudId) return;`).
+        cloudId: "stub-cloud-id",
+      };
+      localStorage.setItem("mw-tabs", JSON.stringify([tab]));
+      localStorage.setItem("mw-active-tab", "tab-e2e-scratch");
+    });
+    await page.goto("/?e2e=1");
+    await page.waitForSelector(".ProseMirror[contenteditable='true']", { timeout: 20000 });
+    await page.waitForTimeout(300);
   });
 
   test("typed content survives a visibility-change mid-debounce", async ({ page }) => {
