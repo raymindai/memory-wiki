@@ -422,7 +422,7 @@ struct TimelineView: View {
     }
     private var emptyCaptionForFilter: LocalizedStringKey {
         switch filter {
-        case .all:     return "Try a shorter query — meaning-based search needs at least 3 characters."
+        case .all:     return "Try a shorter query. Meaning-based search needs at least 3 characters."
         case .private: return "Memories you keep to yourself land here."
         case .shared:  return "Memories you've shared with specific people land here."
         case .synced:  return "Memories captured from VS Code, Desktop, Chrome, CLI or MCP land here."

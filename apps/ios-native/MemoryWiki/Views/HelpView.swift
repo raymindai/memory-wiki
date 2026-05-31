@@ -112,7 +112,7 @@ struct HelpView: View {
         HelpItem(icon: "ellipsis.circle", title: "Don't see Memory.Wiki?",
                  body: "Open the Share Sheet → scroll right → tap More → switch on Memory.Wiki + drag it up. iOS only shows enabled extensions."),
         HelpItem(icon: "globe", title: "What gets saved",
-                 body: "Whatever the sending app passes us: the URL, the page title, and any selected text. The original page isn't re-uploaded — we keep the link."),
+                 body: "Whatever the sending app passes us: the URL, the page title, and any selected text. The original page isn't re-uploaded. We keep the link."),
     ] }
 
     private var widgetItems: [HelpItem] { [
@@ -121,7 +121,7 @@ struct HelpView: View {
         HelpItem(icon: "arrow.clockwise", title: "When it refreshes",
                  body: "On every doc create/edit/delete inside the app, on app foreground, and roughly every 30 minutes via background refresh."),
         HelpItem(icon: "lock", title: "Lock screen widget",
-                 body: "Same long-press flow on the lock screen (iOS 16+). The widget reads your session from a shared keychain — no second sign-in."),
+                 body: "Same long-press flow on the lock screen (iOS 16+). The widget reads your session from a shared keychain (no second sign-in)."),
     ] }
 
     private var spotlightItems: [HelpItem] { [
@@ -158,7 +158,7 @@ struct HelpView: View {
 
     private var faqItems: [HelpItem] { [
         HelpItem(icon: "person", title: "What's my @username?",
-                 body: "Visit memory.wiki on the web once to claim your username. The Settings screen will then show your canonical URL — the one you paste into AI."),
+                 body: "Visit memory.wiki on the web once to claim your username. The Settings screen will then show your canonical URL, the one you paste into AI."),
         HelpItem(icon: "lock.shield", title: "Public vs private",
                  body: "Docs are private by default. Open one → ellipsis → Make public to publish at memory.wiki/<short-id>. Private docs are visible only to you."),
         HelpItem(icon: "rectangle.portrait.and.arrow.right", title: "Why sign out then back in?",

@@ -244,7 +244,7 @@ struct BundlesView: View {
         } else if model.bundles.isEmpty {
             EmptyBundleState(
                 title: "No bundles yet",
-                caption: "Bundles group docs that share a topic. Create one on memory.wiki — each bundle gets its own URL you can deploy to AI.",
+                caption: "Bundles group docs that share a topic. Create one on memory.wiki. Each bundle gets its own URL you can deploy to AI.",
                 glyph: "square.stack.3d.up",
                 action: ("What's a bundle?", {
                     Haptics.tap()

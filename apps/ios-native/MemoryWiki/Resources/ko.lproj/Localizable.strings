@@ -27,7 +27,7 @@
 "Couldn't load timeline"   = "타임라인을 불러오지 못했어요";
 "Try again"                = "다시 시도";
 "No matches"               = "결과 없음";
-"Try a shorter query — meaning-based search needs at least 3 characters." = "더 짧은 검색어로 시도해보세요. 의미 기반 검색은 최소 3글자가 필요합니다.";
+"Try a shorter query. Meaning-based search needs at least 3 characters." = "더 짧은 검색어로 시도해보세요. 의미 기반 검색은 최소 3글자가 필요합니다.";
 "TODAY"      = "오늘";
 "YESTERDAY"  = "어제";
 "THIS WEEK"  = "이번 주";
@@ -77,7 +77,7 @@
 
 /* ============ BUNDLES ============ */
 "No bundles yet"   = "아직 번들이 없어요";
-"Bundles group docs that share a topic. Create one on memory.wiki — each bundle gets its own URL you can deploy to AI." = "번들은 주제별로 노트를 묶어요. memory.wiki에서 만들면 AI에 통째로 넘길 수 있는 URL이 생깁니다.";
+"Bundles group docs that share a topic. Create one on memory.wiki. Each bundle gets its own URL you can deploy to AI." = "번들은 주제별로 노트를 묶어요. memory.wiki에서 만들면 AI에 통째로 넘길 수 있는 URL이 생깁니다.";
 "What's a bundle?" = "번들이 뭐예요?";
 "Couldn't load bundles" = "번들을 불러오지 못했어요";
 "Search bundles"   = "번들 검색";
@@ -186,11 +186,11 @@
 "02 / FEED YOUR AI"      = "02 / AI에 전달";
 "03 / ALWAYS WITHIN REACH" = "03 / 어디서나 한 손에";
 "Save anything, in one tap." = "한 번의 탭으로 무엇이든.";
-"From Safari, Notes, a photo, a thought spoken out loud — every input becomes a memory in your hub. Never lose an idea to “I'll write that down later.”" = "Safari, 메모, 사진, 입 밖으로 꺼낸 생각 — 무엇이든 허브의 메모리가 됩니다. \"나중에 적어야지\" 하고 잊어버리는 일은 끝.";
+"From Safari, Notes, a photo, a thought spoken out loud. Every input becomes a memory in your hub. Never lose an idea to “I'll write that down later.”" = "Safari, 메모, 사진, 입 밖으로 꺼낸 생각. 무엇이든 허브의 메모리가 됩니다. \"나중에 적어야지\" 하고 잊어버리는 일은 끝.";
 "Stop re-explaining yourself." = "AI에게 똑같은 설명을 그만.";
-"Paste memory.wiki/@you into Claude, ChatGPT, Cursor — they all read the same memory. One link, every model already knows who you are and what you've learned." = "memory.wiki/@당신을 Claude, ChatGPT, Cursor에 붙여넣으세요 — 모두 같은 메모리를 읽습니다. 링크 하나로 모든 모델이 당신을 알고 시작합니다.";
+"Paste memory.wiki/@you into Claude, ChatGPT, Cursor. They all read the same memory. One link, every model already knows who you are and what you've learned." = "memory.wiki/@당신을 Claude, ChatGPT, Cursor에 붙여넣으세요. 모두 같은 메모리를 읽습니다. 링크 하나로 모든 모델이 당신을 알고 시작합니다.";
 "Your hub follows you everywhere." = "허브가 어디든 따라옵니다.";
-"Home-screen widget, Siri voice capture, Spotlight search, Shortcuts — iOS keeps your memory one tap away. Full editor + collaboration + bundles live on the web." = "홈 화면 위젯, Siri 음성 캡쳐, Spotlight 검색, Shortcuts — iOS는 메모리를 한 손가락 거리에. 전체 에디터, 협업, 번들은 웹에 있습니다.";
+"Home-screen widget, Siri voice capture, Spotlight search, Shortcuts. iOS keeps your memory one tap away. Full editor + collaboration + bundles live on the web." = "홈 화면 위젯, Siri 음성 캡쳐, Spotlight 검색, Shortcuts. iOS는 메모리를 한 손가락 거리에. 전체 에디터, 협업, 번들은 웹에 있습니다.";
 
 /* ============ AUTH ============ */
 "Continue with Apple"  = "Apple로 계속하기";

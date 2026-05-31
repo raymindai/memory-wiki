@@ -1357,7 +1357,7 @@ private struct ImportInfoSheet: View {
 
                         ImportLinkRow(icon: "square.and.arrow.up",
                                       title: "iOS Share Sheet",
-                                      detail: "From Safari, Notes, Mail, anywhere — tap Share → Memory.Wiki.",
+                                      detail: "From Safari, Notes, Mail, anywhere. Share to memory.wiki.",
                                       url: URL(string: "https://memory.wiki/install")!)
                         ImportLinkRow(icon: "globe",
                                       title: "Web upload (memory.wiki)",
@@ -1365,7 +1365,7 @@ private struct ImportInfoSheet: View {
                                       url: URL(string: "https://memory.wiki/how")!)
                         ImportLinkRow(icon: "doc.text",
                                       title: "VS Code / Desktop / CLI / MCP",
-                                      detail: "Capture from your editor or terminal — same hub.",
+                                      detail: "Capture from your editor or terminal, same hub.",
                                       url: URL(string: "https://memory.wiki/plugins")!)
                     }
                     .padding(.horizontal, 22)

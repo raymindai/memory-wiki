@@ -19,19 +19,19 @@ struct OnboardingView: View {
         Card(
             label: "01 / CAPTURE",
             title: "Save anything, in one tap.",
-            body: "From Safari, Notes, a photo, a thought spoken out loud — every input becomes a memory in your hub. Never lose an idea to “I'll write that down later.”",
+            body: "From Safari, Notes, a photo, a thought spoken out loud. Every input becomes a memory in your hub. Never lose an idea to “I'll write that down later.”",
             glyph: "square.and.arrow.up"
         ),
         Card(
             label: "02 / FEED YOUR AI",
             title: "Stop re-explaining yourself.",
-            body: "Paste memory.wiki/@you into Claude, ChatGPT, Cursor — they all read the same memory. One link, every model already knows who you are and what you've learned.",
+            body: "Paste memory.wiki/@you into Claude, ChatGPT, Cursor. They all read the same memory. One link, every model already knows who you are and what you've learned.",
             glyph: "sparkles"
         ),
         Card(
             label: "03 / ALWAYS WITHIN REACH",
             title: "Your hub follows you everywhere.",
-            body: "Home-screen widget, Siri voice capture, Spotlight search, Shortcuts — iOS keeps your memory one tap away. Full editor + collaboration + bundles live on the web.",
+            body: "Home-screen widget, Siri voice capture, Spotlight search, Shortcuts. iOS keeps your memory one tap away. Full editor + collaboration + bundles live on the web.",
             glyph: "iphone.gen3"
         ),
     ]
