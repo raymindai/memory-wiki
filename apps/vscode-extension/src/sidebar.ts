@@ -207,7 +207,7 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     const base = path.basename(filePath, ext);
     const configPath = path.join(path.dirname(filePath), `.${base}.memorywiki.json`);
     try {
-      // Clear source on server so Memory.Wiki no longer shows it as synced
+      // Clear source on server so memory.wiki no longer shows it as synced
       const configBytes = await vscode.workspace.fs.readFile(vscode.Uri.file(configPath));
       const config = JSON.parse(Buffer.from(configBytes).toString("utf-8"));
       if (config.docId && this._authManager) {
@@ -579,9 +579,8 @@ body {
   font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.3px;
+  color: var(--vscode-foreground);
 }
-.logo-md { color: #B5FF1A; }
-.logo-fy { color: var(--vscode-foreground); }
 .header-actions { display: flex; gap: 4px; }
 .icon-btn {
   width: 24px; height: 24px;
@@ -913,7 +912,7 @@ body {
 <body>
   <div class="sticky-top">
   <div class="header">
-    <a class="logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer"><span class="logo-md">Memory</span><span class="logo-fy">.Wiki</span></a>
+    <a class="logo" href="https://memory.wiki" target="_blank" style="text-decoration:none;cursor:pointer">memory.wiki</a>
     <div class="header-actions">
       <button class="icon-btn" id="btn-search-toggle" title="Search">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>

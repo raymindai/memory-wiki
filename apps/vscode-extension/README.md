@@ -303,7 +303,7 @@ Use the [CLI](https://www.npmjs.com/package/memory-wiki-cli) in your pipeline to
 
 ### Cross-AI knowledge base
 
-Publish a document from VS Code. Paste the URL into any AI conversation. Claude, ChatGPT, and Gemini can all read memory.wiki URLs. For programmatic access from Claude Web, Cursor, or Windsurf, point them at the [hosted MCP](https://memory.wiki/docs/mcp) at `https://memory.wiki/api/mcp` — or install the [local stdio MCP](https://www.npmjs.com/package/memory-wiki-mcp) for Claude Desktop.
+Publish a document from VS Code. Paste the URL into any AI conversation. Claude, ChatGPT, and Gemini can all read memory.wiki URLs. For programmatic access from Claude Web, Cursor, or Windsurf, point them at the [hosted MCP](https://memory.wiki/docs/mcp) at `https://memory.wiki/api/mcp`, or install the [local stdio MCP](https://www.npmjs.com/package/memory-wiki-mcp) for Claude Desktop.
 
 ### Meeting notes to shareable document
 
@@ -321,9 +321,9 @@ memory.wiki is a cross-platform document publishing system. All platforms share 
 | **VS Code** | Preview, publish, sync from your editor | You are here |
 | **[Mac Desktop](https://memory.wiki/plugins)** | Native app with sidebar, file import (PDF, DOCX, PPTX) | [Download DMG](https://github.com/raymindai/memory-wiki/releases) |
 | **[Chrome Extension](https://memory.wiki/plugins)** | Capture from ChatGPT, Claude, Gemini, GitHub | [Download](https://memory.wiki/plugins) |
-| **[CLI](https://www.npmjs.com/package/memory-wiki-cli)** | `memory.wiki publish`, pipe support, tmux capture | `npm i -g memory-wiki-cli` |
-| **[Hosted MCP](https://memory.wiki/docs/mcp)** | AI agents (Claude Web, Cursor) — 25 tools | URL: `https://memory.wiki/api/mcp` |
-| **[Local MCP](https://www.npmjs.com/package/memory-wiki-mcp)** | AI agents (Claude Desktop, Code) — 6 core tools | `npx memory-wiki-mcp` |
+| **[CLI](https://www.npmjs.com/package/memory-wiki-cli)** | `mw publish`, pipe support, tmux capture, `mw ai` for-AI sentence | `npm i -g memory-wiki-cli` |
+| **[Hosted MCP](https://memory.wiki/docs/mcp)** | AI agents (Claude Web, Cursor): 29 tools | URL: `https://memory.wiki/api/mcp` |
+| **[Local MCP](https://www.npmjs.com/package/memory-wiki-mcp)** | AI agents (Claude Desktop, Code): 29 tools | `npx memory-wiki-mcp` |
 | **[QuickLook](https://memory.wiki/plugins)** | Press Space on .md in Finder for rendered preview | [Download](https://github.com/raymindai/memory-wiki/releases) |
 | **tmux** | Capture pane output and publish | [Install guide](https://github.com/raymindai/memory-wiki/tree/main/apps/tmux) |
 
