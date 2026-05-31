@@ -144,10 +144,9 @@ export class MdfySidebarProvider implements vscode.WebviewViewProvider {
     webviewView.onDidChangeVisibility(() => {
       if (webviewView.visible) {
         this.sendDocuments();
-        this._startPeriodicRefresh();
-      } else {
-        this._stopPeriodicRefresh();
       }
+      // Periodic poll removed (see _stopPeriodicRefresh comment) —
+      // visibility flip just triggers a single refresh, no timer.
     });
 
     // Periodic auto-refresh removed (founder report 2026-06-01:
