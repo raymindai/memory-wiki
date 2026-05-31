@@ -200,6 +200,21 @@ npm run dev    # → http://localhost:3000
 - **새 마크다운 기능 추가 시**: markdown-it 플러그인 추가 → `lib/render.ts`에 wire → 같은 인스턴스를
   TipTap 측 `tiptap-markdown` config에도 반영 (DOM 정합).
 
+### 브랜드 + UI/UX 시스템 (필수 참조)
+
+모든 시각/인터랙션/카피 결정 전에 **canonical 브랜드 시스템 문서**부터 확인:
+
+- **Wiki (canonical)**: <https://memory.wiki/L2SHNVir>
+- **Repo stub**: `BRAND.md` at project root
+
+색상 토큰, 타이포그래피, 스페이싱, 라디우스, 모션, 보이스 룰
+(no `·`/`—`/`→`/emoji), URL 아키텍처, Lucide 아이콘 사이즈, 탭바/BrandLoader/
+auth 화면 스펙, 픽커/카드/시트 패턴, 햅틱, 접근성, anti-pattern,
+새 채널 surface checklist 까지 전부 한 곳에 정리됨.
+
+**새 패턴 추가 시: 위키 문서 먼저 업데이트 → 코드 ship.** 토큰 변경 시
+`globals.css` (web) + `Brand.swift` (iOS) + `Brand.kt` (Android) 동시 업데이트.
+
 ---
 
 ## 핵심 원칙
