@@ -1424,6 +1424,19 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
         if (!editor) return;
         const { frontmatter: fm, body } = extractFrontmatter(md);
         frontmatterRef.current = fm;
+        // Defensive equality short-circuit. setContent rebuilds the
+        // ProseMirror document and resets the selection to the doc
+        // end. If the caller is pushing the SAME body the editor
+        // already holds (e.g. a server refetch that matched local
+        // because the user happened to type the exact server delta,
+        // or a redundant cache rehydrate), there's no actual change
+        // to apply and the only effect would be to jolt the cursor.
+        // The guard saves one cursor jolt per redundant call without
+        // changing any legitimate update behaviour.
+        try {
+          const currentBody = (editor.storage as { markdown?: { getMarkdown?: () => string } }).markdown?.getMarkdown?.() ?? "";
+          if (currentBody === body) return;
+        } catch { /* editor may have been destroyed mid-render */ }
         isSettingContent.current = true;
         // markdown-it renderer is patched (no <thead>/<tbody>)
         editor.commands.setContent(body || "<p></p>");
