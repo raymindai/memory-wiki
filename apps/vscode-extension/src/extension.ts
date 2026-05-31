@@ -372,7 +372,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (selected.label.includes("for email/docs")) {
         const html = PreviewPanel.renderToHtml(markdown);
         await vscode.env.clipboard.writeText(html);
-        vscode.window.showInformationMessage("HTML copied — paste into Google Docs, Email, or Word.");
+        vscode.window.showInformationMessage("HTML copied. Paste into Google Docs, Email, or Word.");
       } else if (selected.label.includes("Copy as HTML")) {
         const html = PreviewPanel.renderToHtml(markdown);
         await vscode.env.clipboard.writeText(html);

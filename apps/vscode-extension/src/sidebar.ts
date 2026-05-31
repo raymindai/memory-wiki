@@ -953,8 +953,8 @@ body {
     <div class="help-row"><span class="help-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8A6 6 0 004.8 3.3L2 6"/><path d="M2 8a6 6 0 009.2 4.7L14 10"/><path d="M4 4l8 8"/></svg></span><div><strong>Unsync</strong><span class="help-desc">Remove sync connection. File stays local, moves back to Local.</span></div></div>
     <div class="help-divider"></div>
     <div style="font-size:10px;color:var(--fg-muted);line-height:1.6">
-      <a href="https://memory.wiki" style="color:var(--accent);text-decoration:none">Memory.Wiki</a> — Web editor &amp; sharing<br>
-      <a href="https://chrome.google.com/webstore" style="color:var(--fg-muted);text-decoration:none">Chrome Extension</a> — Capture from ChatGPT/Claude
+      <a href="https://memory.wiki" style="color:var(--accent);text-decoration:none">Memory.Wiki</a>: Web editor and sharing<br>
+      <a href="https://chrome.google.com/webstore" style="color:var(--fg-muted);text-decoration:none">Chrome Extension</a>: Capture from ChatGPT/Claude
     </div>
   </div>
 
