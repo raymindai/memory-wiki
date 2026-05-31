@@ -127,7 +127,7 @@ Gemini, Perplexity, Cursor, your terminal.
 
 **Push + pull (MCP).** `memory-wiki-mcp` is a published npm package. Hosts
 that speak MCP — Claude Desktop, Cursor, Cline, Windsurf — load it
-once and get **26 tools** the LLM can call by itself: `mw_create`,
+once and get **29 tools** the LLM can call by itself: `mw_create`,
 `mw_append`, `mw_search`, `mw_outline`, `mw_versions`,
 `mw_publish`, `mw_diff`, `mw_render_preview`, … This is where
 embeddings earn their keep — `mw_search` is vector similarity,
@@ -220,7 +220,7 @@ the same underlying graph**. The graph is the product.
 | AI gets pre-built navigation + summary  | ✗             | ✗                   | ✓ (bundle / hub)      |
 | Single URL composes many docs           | ✗             | ✗                   | ✓ (bundle, hub)       |
 | Cross-AI portable                       | re-upload     | re-share            | one URL, every AI     |
-| LLM can write back via standard tools   | ✗             | ✗                   | ✓ (MCP, 26 tools)     |
+| LLM can write back via standard tools   | ✗             | ✗                   | ✓ (MCP, 29 tools)     |
 
 The thing AI companies cannot copy is the **delivery model**: a
 universal URL that any LLM fetches into its context, carrying both
@@ -270,7 +270,7 @@ a script, or an LLM following an inline link.
   I made this") or to a doc-in-bundle ("why this belongs"). Both
   feed the LLM analysis prompt and the rendered digest.
 - **MCP** — Model Context Protocol. The standard hosts use to give
-  LLMs structured tool access. memory-wiki-mcp ships 26 tools.
+  LLMs structured tool access. memory-wiki-mcp ships 29 tools.
 
 ---
 

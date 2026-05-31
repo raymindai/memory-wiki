@@ -29,7 +29,7 @@ Each saved doc is a markdown URL. Group them into a Bundle URL. Group bundles in
 
 **What v6 ships beyond the wedge** (everything's free, no signup to try):
 
-- **Capture** — Chrome extension for ChatGPT / Claude / Gemini; MCP server (26 tools) for Claude Code, Cursor, Claude Desktop; ingest from GitHub repos, Notion pages, Obsidian vaults, any URL, files (PDF/DOCX/code).
+- **Capture** — Chrome extension for ChatGPT / Claude / Gemini; MCP server (29 tools) for Claude Code, Cursor, Claude Desktop; ingest from GitHub repos, Notion pages, Obsidian vaults, any URL, files (PDF/DOCX/code).
 - **Hub auto-organises** — saved docs cluster into a concept index. Cross-doc themes surface as you add. Recall API at `POST /api/hub/<slug>/recall` (hybrid BM25 + pgvector + optional Haiku reranker). Per-hub auto-published `index.md`, `SCHEMA.md`, `log.md`, `llms.txt`.
 - **Bundle as thinking surface** — group N docs, add an Intent, AI synthesises tensions/gaps/threads across them. The bundle URL ships the analysis inline — receiving AIs inherit the prior synthesis for free, no re-computation.
 

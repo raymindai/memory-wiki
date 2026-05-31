@@ -21,7 +21,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
 
 ### 2. Add to your AI tool
 
-**Claude Code / Cursor** — create `.mcp.json` in your project root:
+**Claude Code / Cursor**: create `.mcp.json` in your project root.
 
 ```json
 {
@@ -34,7 +34,7 @@ Opens your browser for OAuth. Credentials are stored locally in `~/.memory.wiki/
 }
 ```
 
-**Claude Desktop** — add to `claude_desktop_config.json`:
+**Claude Desktop**: add to `claude_desktop_config.json`.
 
 ```json
 {
@@ -51,38 +51,92 @@ No API keys or environment variables needed. Authentication is handled via `mw l
 
 ## Tools
 
+29 tools, same surface on the local stdio (this package) and the hosted HTTP MCP (`memory.wiki/api/mcp`).
+
+**Core CRUD**
+
 | Tool | Description | Auth |
 |------|-------------|------|
 | `mw_create` | Create a new document and get a shareable URL | Optional |
 | `mw_read` | Fetch document content by ID or URL | No |
 | `mw_update` | Update an existing document's content | Edit token (auto-managed) |
-| `mw_list` | List all your documents with metadata | Yes |
 | `mw_publish` | Toggle a document between public and private | Edit token (auto-managed) |
 | `mw_delete` | Soft-delete or permanently delete a document | Edit token (auto-managed) |
-| `mw_for_ai` | Return the canonical "Use https://memory.wiki/&lt;id&gt; as my context." sentence for any id / URL / `@username` / bundle. Lets one AI hand a doc to another. | No |
+| `mw_list` | List all your documents with metadata | Yes |
 
-(Hosted HTTP MCP at `memory.wiki/api/mcp` exposes the full set: search, version history, folders, bundles, hub queries, AI re-analyse triggers, etc.)
+**Cross-AI handoff**
+
+| Tool | Description | Auth |
+|------|-------------|------|
+| `mw_for_ai` | Return the canonical `Use https://memory.wiki/<id> as my context.` sentence for any id / URL / `@username` / `b/<id>`. Lets one AI hand a doc to another. | No |
+| `mw_get_share_url` | Build a public viewer URL for a doc, bundle, or hub | No |
+
+**Search + discovery**
+
+| Tool | Description | Auth |
+|------|-------------|------|
+| `mw_search` | Full-text search across your documents | Yes |
+| `mw_recent` | Recently visited documents | Yes |
+| `mw_stats` | Per-document stats (views, last-edited, byte size) | Yes |
+| `mw_hub_constellation` | Hub-wide knowledge graph (concepts + typed edges + doc clusters) | Yes |
+| `mw_bundle_constellation` | Bundle-scoped knowledge graph | Yes |
+
+**Content surgery (no full re-write)**
+
+| Tool | Description | Auth |
+|------|-------------|------|
+| `mw_outline` | Parse and return heading structure | No |
+| `mw_extract_section` | Pull one heading's section as markdown | No |
+| `mw_replace_section` | Replace one heading's section | Edit token |
+| `mw_append` | Append text to the end of a document | Edit token |
+| `mw_prepend` | Prepend text to the top of a document | Edit token |
+| `mw_duplicate` | Copy a document into a new draft | Yes |
+| `mw_import_url` | Import any URL as a new memory.wiki document | Yes |
+| `mw_render_preview` | Render markdown to HTML preview (no save) | No |
+
+**Sharing + access**
+
+| Tool | Description | Auth |
+|------|-------------|------|
+| `mw_set_allowed_emails` | Restrict access to a specific email list | Edit token |
+| `mw_set_expiry` | Set or clear document expiry | Edit token |
+
+**Versioning**
+
+| Tool | Description | Auth |
+|------|-------------|------|
+| `mw_versions` | List version history | Yes |
+| `mw_diff` | Diff between two versions | Yes |
+| `mw_restore_version` | Restore a previous version | Edit token |
+
+**Folders (workspace organisation)**
+
+| Tool | Description | Auth |
+|------|-------------|------|
+| `mw_folder_list` | List your folders | Yes |
+| `mw_folder_create` | Create a folder | Yes |
+| `mw_move_to_folder` | Move a document into a folder | Yes |
 
 ## What You Can Do
 
 ```
 You: "Create a document with my meeting notes"
-AI:  mw_create → https://memory.wiki/abc123 (URL copied!)
+AI:  mw_create  =>  https://memory.wiki/abc123 (URL copied)
 
 You: "List my documents"
-AI:  mw_list → 8 documents found
+AI:  mw_list  =>  8 documents found
 
 You: "Read the system design doc"
-AI:  mw_read → (full markdown content)
+AI:  mw_read  =>  (full markdown content)
 
 You: "Update it with the new architecture section"
-AI:  mw_update → Document updated
+AI:  mw_update  =>  Document updated
 
 You: "Make it private"
-AI:  mw_publish (published: false) → Now private
+AI:  mw_publish (published: false)  =>  Now private
 
 You: "Delete the draft"
-AI:  mw_delete → Moved to trash
+AI:  mw_delete  =>  Moved to trash
 ```
 
 ### Cross-AI Workflow

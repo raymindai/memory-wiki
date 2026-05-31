@@ -88,12 +88,12 @@ Auxiliary surfaces:
 ### Multi-channel app surfaces
 | Channel                     | Status                                  |
 | --------------------------- | --------------------------------------- |
-| `Memory.Wiki` web              | Live on Vercel                          |
-| VS Code (memory-wiki-vscode)       | Marketplace v1.4.0                      |
-| Desktop (DMG)               | v2.2.0, Developer ID signed + notarized |
-| Chrome Web Store            | v2.x                                    |
-| CLI (memory-wiki-cli)              | npm v1.3.x                              |
-| MCP server (memory-wiki-mcp)       | npm v1.3.x                              |
+| `memory.wiki` web              | Live on Vercel                          |
+| VS Code (memory-wiki-vscode)       | Marketplace v1.4.5                      |
+| Desktop (DMG)               | v2.3.6, Developer ID signed + notarized |
+| Chrome Web Store            | v2.2.4                                  |
+| CLI (memory-wiki-cli)              | npm v1.4.3                              |
+| MCP server (memory-wiki-mcp)       | npm v1.5.4 (29 tools)                   |
 | macOS QuickLook plugin      | Bundled inside Desktop DMG              |
 
 ### Misc UX

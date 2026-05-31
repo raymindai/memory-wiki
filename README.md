@@ -1,4 +1,4 @@
-# Memory.Wiki
+# memory.wiki
 
 ## The fastest way from thought to shared document.
 
@@ -13,7 +13,7 @@
 
 ## What is this?
 
-**Memory.Wiki** is a document platform with one promise: every document gets a permanent short URL (`memory.wiki/abc123`) that works everywhere — browsers, AI chats, Slack, email, embeds. No login to view. No paywall.
+**memory.wiki** is a document platform with one promise: every document gets a permanent short URL (`memory.wiki/abc123`) that works everywhere — browsers, AI chats, Slack, email, embeds. No login to view. No paywall.
 
 It ships across 7 channels, all driven by the same shared rendering pipeline (markdown-it + highlight.js + KaTeX + Mermaid) so a doc looks identical wherever you open it.
 
@@ -21,13 +21,13 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 
 | Channel | Status | Install |
 |---------|--------|---------|
-| [**Web**](https://memory.wiki) | Live | Just open Memory.Wiki |
-| [**VS Code**](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) | v1.4.0 | Marketplace |
-| **Desktop (Mac)** | v2.2.0 | DMG from releases |
-| [**CLI**](https://www.npmjs.com/package/memory-wiki-cli) | v1.3.x | `npm install -g memory-wiki-cli` |
-| [**MCP Server**](https://www.npmjs.com/package/memory-wiki-mcp) | v1.3.x | `npx memory-wiki-mcp` or hosted `memory.wiki/api/mcp` |
-| **Chrome Extension** | v2.x | Web Store |
-| **QuickLook (Mac)** | Bundled with Desktop DMG | — |
+| [**Web**](https://memory.wiki) | Live | Just open memory.wiki |
+| [**VS Code**](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) | v1.4.5 | Marketplace |
+| **Desktop (Mac)** | v2.3.6 | DMG from releases |
+| [**CLI**](https://www.npmjs.com/package/memory-wiki-cli) | v1.4.3 | `npm install -g memory-wiki-cli` |
+| [**MCP Server**](https://www.npmjs.com/package/memory-wiki-mcp) | v1.5.4 | `npx memory-wiki-mcp` or hosted `memory.wiki/api/mcp` |
+| **Chrome Extension** | v2.2.4 | Web Store |
+| **QuickLook (Mac)** | Bundled with Desktop DMG | (auto-installed) |
 | **API** | Live | `https://memory.wiki/api/docs` |
 
 ## Features
@@ -74,19 +74,23 @@ It ships across 7 channels, all driven by the same shared rendering pipeline (ma
 
 ```bash
 # Publish a file
-Memory.Wiki publish README.md
+mw publish README.md
 
 # Pipe from any command
-echo "# Hello" | Memory.Wiki publish
-tmux capture-pane -p | Memory.Wiki publish
-pbpaste | Memory.Wiki publish
+echo "# Hello" | mw publish
+tmux capture-pane -p | mw publish
+pbpaste | mw publish
 
 # Manage documents
-Memory.Wiki list
-Memory.Wiki read abc123
-Memory.Wiki update abc123 updated.md
-Memory.Wiki search "meeting notes"
-Memory.Wiki pull abc123 -o doc.md
+mw list
+mw read abc123
+mw update abc123 updated.md
+mw search "meeting notes"
+mw pull abc123 -o doc.md
+
+# Print the canonical "for AI" paste sentence for any id / URL / @user / b/<id>
+mw ai abc123
+# Use https://memory.wiki/abc123 as my context.
 ```
 
 ## MCP Server
@@ -96,7 +100,7 @@ Connect any AI tool to memory.wiki:
 ```json
 {
   "mcpServers": {
-    "Memory.Wiki": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["memory-wiki-mcp"]
     }
@@ -106,7 +110,7 @@ Connect any AI tool to memory.wiki:
 
 Or use the hosted endpoint: `https://memory.wiki/api/mcp`
 
-25 tools: create, read, update, delete, list, search, append, prepend, sections, sharing, versions, folders, stats, and more.
+29 tools: create, read, update, delete, list, search, append, prepend, sections, sharing, versions, folders, stats, hub + bundle constellations, `mw_for_ai` (canonical paste sentence for any id / URL / `@user` / `b/<id>`), and more.
 
 ## Tech Stack
 
@@ -148,7 +152,7 @@ npx @vscode/vsce publish
 ```text
 mdcore/
 ├── apps/
-│   ├── web/                  # Next.js 15 (Memory.Wiki)
+│   ├── web/                  # Next.js 15 (memory.wiki)
 │   ├── desktop/              # Electron Mac app
 │   ├── vscode-extension/     # VS Code extension
 │   ├── chrome-extension/     # Chrome extension
@@ -181,6 +185,6 @@ MIT
 
 ---
 
-**Memory.Wiki** — *The fastest way from thought to shared document.*
+**memory.wiki** — *The fastest way from thought to shared document.*
 
-[Memory.Wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/memory-wiki)
+[memory.wiki](https://memory.wiki) · [Docs](https://memory.wiki/docs) · [Plugins](https://memory.wiki/plugins) · [GitHub](https://github.com/raymindai/memory-wiki)
