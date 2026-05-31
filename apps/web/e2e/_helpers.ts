@@ -65,14 +65,24 @@ export async function getEditorHTML(page: Page): Promise<string> {
 }
 
 /**
- * View-mode buttons — match by both visible text AND the icon-only fallback.
- * In the current build, view-mode toggles use icon buttons inside the toolbar
- * with `title` attributes ("MD", "Split", "Source"). The WYSIWYG pane was
- * relabelled from "Live" → "MD" in 1ace7945; tests now select "MD".
+ * View-mode switcher. The dedicated toolbar buttons (`title="MD"` /
+ * `title="Source"` etc.) were removed in a recent refactor — view
+ * mode now toggles via Alt+1/2/3 keyboard shortcuts (see
+ * MdEditor.tsx L6803-6805). This helper drives those shortcuts:
+ *   Alt+1 → preview (MD / WYSIWYG pane)
+ *   Alt+2 → split
+ *   Alt+3 → editor (Source / CM6)
+ *
+ * Before the switch this helper was clicking a button selector
+ * that no longer matched any DOM element, so callers (notably
+ * setViaSource) silently no-op'd, leaving content unchanged.
+ * deep-verify Math spec's "1 flaky" CI signal was tracing back
+ * here: when content didn't update, the editor still held the
+ * scratch-tab seed instead of the math-laden body the test set.
  */
 export async function clickView(page: Page, mode: "MD" | "Split" | "Source") {
-  // Buttons have title="MD (Alt+1)" etc. — prefix match against the title attr.
-  await page.locator(`button[title^="${mode}"]`).first().click();
+  const altKey = mode === "MD" ? "1" : mode === "Split" ? "2" : "3";
+  await page.keyboard.press(`Alt+${altKey}`);
   await page.waitForTimeout(250);
 }
 

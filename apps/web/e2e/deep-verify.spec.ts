@@ -3,6 +3,13 @@ import { setupEditableTab, setViaSource, getEditorText } from "./_helpers";
 
 // ─── Math editing continuity ───
 test.describe("Math editing continuity", () => {
+  // setupEditableTab + setViaSource (Source-mode round-trip with
+  // CM6 mount, full markdown re-paint, view switch) burns 5-10s of
+  // the default 30s budget on a cold dev-server boot. The first
+  // test in this describe hits that cold path and flaked on every
+  // CI run before this bump. Same pattern as editor-autosave-race.
+  test.describe.configure({ timeout: 60_000 });
+
   test.beforeEach(async ({ page }) => { await setupEditableTab(page); });
 
   test("can type text AFTER inline math without breaking it", async ({ page }) => {
