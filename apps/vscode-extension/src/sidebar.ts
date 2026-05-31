@@ -1667,47 +1667,35 @@ body {
       }
     }
 
-    // Bind sign in / sign out buttons
+    // Bind sign in / sign out buttons. The extension responds to
+    // the 'login' message with auth-pending:true → button flips to
+    // "Signing in…" via the message handler. We deliberately do NOT
+    // disable optimistically here because a prior version did, and
+    // a single misordered branch left the button stuck in pending
+    // state, blocking re-click (founder report 2026-06-01: "사이드
+    // 바에서 클릭후 로그인이 안됨"). Extension's auth-pending
+    // round-trip is fast enough to feel synchronous.
     document.getElementById('signin-btn').addEventListener('click', function() {
-      // Optimistic disable — extension also posts auth-pending, but
-      // disabling here removes the click-during-flight race.
-      setSigninPending(true);
       vscode.postMessage({ type: 'login' });
     });
-    // Two independent reasons the signin button can be unavailable:
-    // (a) sidebar is fetching the initial document list (we don't
-    //     yet know if the user is even logged out — let alone if
-    //     they should be clicking sign in), and
-    // (b) an auth round-trip is already in flight.
-    // Track them separately + recompute the disabled state from
-    // the union so a state change in one doesn't accidentally
-    // overwrite the other.
-    var _signinBlocked = { loading: false, authPending: false };
-    function setSigninBlocked(reason, value) {
-      _signinBlocked[reason] = !!value;
-      var pending = _signinBlocked.loading || _signinBlocked.authPending;
+    // Sign-in button pending state. Toggled by the auth-pending
+    // message from the extension (which fires the moment a login
+    // command starts + clears in a finally after it resolves).
+    // Single-flag, no compound state, no optimistic toggling —
+    // every prior attempt to be clever here left the button stuck.
+    function setSigninPending(pending) {
       var btn = document.getElementById('signin-btn');
       if (!btn) return;
-      btn.disabled = pending;
+      btn.disabled = !!pending;
       btn.style.opacity = pending ? '0.6' : '';
       btn.style.cursor = pending ? 'default' : '';
-      // The disabled property alone is sometimes bypassed inside
-      // webviews when pointer-events isn't blocked too (we saw a
-      // stale click land mid-flight). Belt-and-suspenders.
-      btn.style.pointerEvents = pending ? 'none' : '';
       if (pending) {
         if (!btn.dataset.originalLabel) btn.dataset.originalLabel = btn.innerHTML;
-        var label = _signinBlocked.authPending ? 'Signing in…' : 'Loading…';
-        btn.innerHTML = '<span style="opacity:0.85">' + label + '</span>';
+        btn.innerHTML = '<span style="opacity:0.85">Signing in…</span>';
       } else if (btn.dataset.originalLabel) {
         btn.innerHTML = btn.dataset.originalLabel;
         delete btn.dataset.originalLabel;
       }
-    }
-    // Backwards-compatible alias — call sites that just want the
-    // auth-pending semantic stay readable.
-    function setSigninPending(pending) {
-      setSigninBlocked('authPending', pending);
     }
     document.getElementById('logout-btn').addEventListener('click', function() {
       vscode.postMessage({ type: 'logout' });
