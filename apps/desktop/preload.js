@@ -29,6 +29,9 @@ contextBridge.exposeInMainWorld("mwDesktop", {
   logout: () => ipcRenderer.invoke("logout"),
   getAuthState: () => ipcRenderer.invoke("get-auth-state"),
   getUserProfile: () => ipcRenderer.invoke("get-user-profile"),
+  getPins: () => ipcRenderer.invoke("get-pins"),
+  pinDocument: (docId) => ipcRenderer.invoke("pin-document", docId),
+  unpinDocument: (docId) => ipcRenderer.invoke("unpin-document", docId),
 
   // ─── Sync ───
   publish: (markdown) => ipcRenderer.invoke("publish", markdown),

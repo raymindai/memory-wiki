@@ -1401,9 +1401,12 @@ body {
 
 #sidebar {
   /* Width is user-resizable. JS writes --sidebar-width on the host element,
-     min/max enforced both here (CSS clamp safety) and in the drag handler. */
-  width: var(--sidebar-width, 320px);
-  min-width: 220px;
+     min/max enforced both here (CSS clamp safety) and in the drag handler.
+     Min 280 = enough room for traffic-light reserve + blob + 4 action icons
+     without anything truncating. Wordmark auto-hides via the container
+     query below when the sidebar is dragged narrower than 320. */
+  width: var(--sidebar-width, 340px);
+  min-width: 280px;
   max-width: 560px;
   height: 100vh;
   display: flex;
@@ -1413,6 +1416,11 @@ body {
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
+  container-type: inline-size;
+}
+@container (max-width: 319px) {
+  .sidebar-logo .logo-dark,
+  .sidebar-logo .logo-light { display: none !important; }
 }
 
 #sidebar-resize-handle {
@@ -1486,15 +1494,25 @@ body.sidebar-resizing * {
   /*
     Traffic lights occupy ~16px(left) + 54px(3 buttons) = 70px.
     Add 8px gap after last button → logo starts at 78px.
+    Renders as a <button> so clicking opens memory.wiki in the system
+    browser (handled in editor.js).
   */
   padding-left: 78px;
+  padding-right: 8px;
+  background: transparent;
+  border: none;
   user-select: none;
   display: flex;
   align-items: center;
   gap: 6px;
   height: 100%;
+  min-width: 0;
   -webkit-app-region: no-drag;
   cursor: pointer;
+  color: inherit;
+}
+.sidebar-logo:hover .sidebar-brand-blob img {
+  opacity: 1;
 }
 .sidebar-logo img {
   /* memory.wiki wordmark sized to read clearly at the wider 320px
@@ -1875,10 +1893,11 @@ body.sidebar-resizing * {
 }
 
 /* Star toggle keeps the warm amber fill when active so it stays
-   legible against both light + dark sidebar backgrounds. */
+   legible against both light + dark sidebar backgrounds. Token comes
+   from design-tokens so the color tracks the theme. */
 .file-actions button.is-starred,
 .file-actions button.is-starred:hover {
-  color: #f59e0b;
+  color: var(--micro-warn, #f59e0b);
 }
 
 /* Timestamp (hidden on hover, replaced by actions) */
@@ -3858,6 +3877,14 @@ body.sidebar-resizing * {
   margin-bottom: 36px;
 }
 
+.home-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
 .home-section-title {
   font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
   font-size: 10px;
@@ -3865,8 +3892,85 @@ body.sidebar-resizing * {
   letter-spacing: 0.08em;
   color: var(--text-faint);
   text-transform: uppercase;
-  margin-bottom: 12px;
-  padding-left: 2px;
+  margin: 0;
+}
+
+.home-section-action {
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+}
+.home-section-action:hover {
+  color: var(--text-primary);
+  background: var(--surface);
+}
+
+/* Unified list (Starred + Recent share this shape) */
+.home-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.home-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  color: var(--fg);
+  transition: background 0.1s;
+}
+.home-list-item:hover {
+  background: var(--surface);
+}
+.home-list-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-list-icon.star { color: var(--micro-warn, #f59e0b); }
+.home-list-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-list-time {
+  flex-shrink: 0;
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+}
+.home-list-empty {
+  padding: 16px;
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+  background: var(--bg);
 }
 
 /* ─── Recent List ─── */
@@ -3959,7 +4063,7 @@ body.sidebar-resizing * {
 
 .home-create-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
@@ -3996,13 +4100,19 @@ body.sidebar-resizing * {
   justify-content: center;
   border-radius: 8px;
   background: var(--surface);
-  color: var(--fg-muted);
-  transition: color 0.12s, background 0.12s;
+  color: var(--text-primary);
+  transition: color 0.12s, background 0.12s, transform 0.12s;
 }
+/* Action tints — pulled from --micro-* tokens. Each icon adopts the
+   color of its micro-color when hovered, so the grid reads as a
+   palette rather than four identical neutrals. */
+.home-card-icon[data-tint="orange"] { color: var(--micro-orange, #FF6B1A); }
+.home-card-icon[data-tint="lime"]   { color: var(--micro-lime,   #B5FF1A); }
+.home-card-icon[data-tint="info"]   { color: var(--micro-info,   #60A5FA); }
+.home-card-icon[data-tint="ai"]     { color: var(--micro-ai,     #8B5CF6); }
 
 .home-create-card:hover .home-card-icon {
-  color: var(--accent);
-  background: var(--accent-dim);
+  transform: scale(1.05);
 }
 
 .home-card-text {

@@ -1575,6 +1575,51 @@ ipcMain.handle("get-auth-state", () => {
   };
 });
 
+// Pins (starred docs). Renderer CSP blocks cross-origin fetch to
+// memory.wiki, so all three pin verbs route through the main process,
+// which has net.fetch + AuthManager available.
+ipcMain.handle("get-pins", async () => {
+  if (!AuthManager.isLoggedIn()) return [];
+  try {
+    const headers = await AuthManager.getHeadersWithRefresh();
+    const resp = await net.fetch(`${MDFY_URL}/api/user/pins`, { headers });
+    if (!resp.ok) return [];
+    const json = await resp.json();
+    return json?.pins || [];
+  } catch {
+    return [];
+  }
+});
+
+ipcMain.handle("pin-document", async (_event, docId) => {
+  if (!AuthManager.isLoggedIn() || !docId) return false;
+  try {
+    const headers = await AuthManager.getHeadersWithRefresh();
+    const resp = await net.fetch(`${MDFY_URL}/api/user/pins`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ kind: "document", id: docId }),
+    });
+    return resp.ok;
+  } catch {
+    return false;
+  }
+});
+
+ipcMain.handle("unpin-document", async (_event, docId) => {
+  if (!AuthManager.isLoggedIn() || !docId) return false;
+  try {
+    const headers = await AuthManager.getHeadersWithRefresh();
+    const resp = await net.fetch(
+      `${MDFY_URL}/api/user/pins?kind=document&id=${encodeURIComponent(docId)}`,
+      { method: "DELETE", headers }
+    );
+    return resp.ok;
+  } catch {
+    return false;
+  }
+});
+
 // One-shot profile cache so we don't refetch /api/user/profile on
 // every sidebar repaint. Cleared on logout via the auth-changed event.
 let profileCache = null;

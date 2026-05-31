@@ -23,16 +23,16 @@
   <!-- ════════════════ SIDEBAR ════════════════ -->
   <aside id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-logo">
+      <button class="sidebar-logo" id="sidebar-logo-link" title="Open memory.wiki in browser">
         <span class="sidebar-brand-blob" aria-hidden>
           <img src="blob.svg" alt="" class="blob-darktheme" draggable="false">
           <img src="blob-dark.svg" alt="" class="blob-lighttheme" draggable="false">
         </span>
         <img src="logo-dark.svg" alt="memory.wiki" class="logo-dark" height="16">
         <img src="logo-light.svg" alt="memory.wiki" class="logo-light" height="16">
-      </div>
+      </button>
       <div class="sidebar-actions">
-        <button class="sidebar-icon-btn" id="btn-collapse-all" title="Collapse all folders"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6l3-3 3 3"/><path d="M5 13l3-3 3 3"/></svg></button>
+        <button class="sidebar-icon-btn" id="btn-collapse-all" title="Collapse or expand all folders"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg></button>
         <button class="sidebar-icon-btn" id="btn-search-toggle" title="Search"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg></button>
         <button class="sidebar-icon-btn" id="btn-help-toggle" title="Help"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M6.2 6.2a2 2 0 013.6.8c0 1.2-1.8 1.2-1.8 2.4"/><circle cx="8" cy="12" r="0.6" fill="currentColor" stroke="none"/></svg></button>
         <button class="sidebar-icon-btn" id="btn-refresh" title="Refresh"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8A6 6 0 004.8 3.3L2 6"/><path d="M2 2v4h4"/><path d="M2 8a6 6 0 009.2 4.7L14 10"/><path d="M14 14v-4h-4"/></svg></button>
@@ -78,7 +78,7 @@
       <div class="header-center">
         <div class="view-switcher">
           <button class="view-btn" data-view="home" title="Home"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5L8 3l6 5.5"/><path d="M3.5 7.5V13.5h3.5V10.5h2V13.5h3.5V7.5"/></svg><span>Home</span></button>
-          <button class="view-btn active" data-view="live" title="Live preview"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 8s3-5.5 7-5.5S15 8 15 8s-3 5.5-7 5.5S1 8 1 8z"/><circle cx="8" cy="8" r="2.5"/></svg><span>Live</span></button>
+          <button class="view-btn active" data-view="live" title="Markdown preview"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M6 15V9l3 4 3-4v6"/><path d="M16 13l2 2 2-2"/><path d="M18 9v6"/></svg><span>MD</span></button>
           <button class="view-btn" data-view="split" title="Split view"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="8" y1="2" x2="8" y2="14"/></svg><span>Split</span></button>
           <button class="view-btn" data-view="source" title="Source"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M5 4L2 8l3 4M11 4l3 4-3 4"/></svg><span>Source</span></button>
         </div>
@@ -253,82 +253,67 @@
       </div>
     </div>
 
-    <!-- ──── HOME SCREEN ──── -->
+    <!-- ──── HOME SCREEN (mirrors web Start: Starred / Recent / Create) ──── -->
     <div id="home-screen" class="home-screen" style="display:none">
       <div class="home-scroll">
         <div class="home-inner">
 
+          <!-- STARRED -->
+          <section class="home-section" id="home-starred-section" style="display:none">
+            <div class="home-section-header">
+              <h3 class="home-section-title">Starred</h3>
+            </div>
+            <div class="home-list" id="home-starred-list"></div>
+          </section>
+
           <!-- RECENT -->
           <section class="home-section" id="home-recent-section">
-            <h3 class="home-section-title">RECENT</h3>
-            <div class="home-recent-list" id="home-recent-list"></div>
+            <div class="home-section-header">
+              <h3 class="home-section-title">Recent</h3>
+              <button class="home-section-action" id="home-recent-clear" title="Clear recent">Clear</button>
+            </div>
+            <div class="home-list" id="home-recent-list"></div>
           </section>
 
           <!-- CREATE -->
           <section class="home-section">
-            <h3 class="home-section-title">CREATE</h3>
+            <div class="home-section-header">
+              <h3 class="home-section-title">Create</h3>
+            </div>
             <div class="home-create-grid">
               <button class="home-create-card" id="home-new">
-                <div class="home-card-icon"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg></div>
+                <div class="home-card-icon" data-tint="orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></div>
                 <div class="home-card-text">
                   <span class="home-card-title">New Document</span>
                   <span class="home-card-desc">Start with a blank page</span>
                 </div>
               </button>
               <button class="home-create-card" id="home-paste">
-                <div class="home-card-icon"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="10" height="10" rx="1.5"/><path d="M6 4V2.5A.5.5 0 016.5 2h3a.5.5 0 01.5.5V4"/></svg></div>
+                <div class="home-card-icon" data-tint="lime"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></div>
                 <div class="home-card-text">
                   <span class="home-card-title">Paste</span>
-                  <span class="home-card-desc">Create from clipboard content</span>
+                  <span class="home-card-desc">From clipboard</span>
+                </div>
+              </button>
+              <button class="home-create-card" id="home-open">
+                <div class="home-card-icon" data-tint="info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                <div class="home-card-text">
+                  <span class="home-card-title">Open File</span>
+                  <span class="home-card-desc">md, txt</span>
                 </div>
               </button>
               <button class="home-create-card" id="home-import">
-                <div class="home-card-icon"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 5h5l1.5-2H14v9H2z"/></svg></div>
+                <div class="home-card-icon" data-tint="ai"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
                 <div class="home-card-text">
                   <span class="home-card-title">Import</span>
-                  <span class="home-card-desc">PDF, Word, Excel, HTML, CSV, JSON</span>
+                  <span class="home-card-desc">PDF, Word, Excel, HTML, CSV</span>
                 </div>
               </button>
             </div>
-          </section>
-
-          <!-- DROP ZONE -->
-          <section class="home-section">
             <div class="home-dropzone" id="home-dropzone">
-              <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V3"/><path d="M5 5.5L8 2.5l3 3"/><path d="M2 10v3h12v-3"/></svg>
-              <span class="home-dropzone-text">Drop files here to open</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="home-dropzone-text">Drop a file anywhere to open</span>
               <span class="home-dropzone-formats">md, txt, pdf, docx, pptx, xlsx, html, csv, json</span>
-            </div>
-          </section>
-
-          <!-- EXAMPLES -->
-          <section class="home-section">
-            <h3 class="home-section-title">EXAMPLES</h3>
-            <div class="home-examples-grid" id="home-examples-grid">
-              <a class="home-example-card" data-example="welcome">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M6 5h4M6 8h4M6 11h2"/></svg>
-                <span>Welcome</span>
-              </a>
-              <a class="home-example-card" data-example="features">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z" transform="scale(0.65) translate(2,1)"/><path d="M2 11v2a1 1 0 001 1h3l2 1v-1h3a1 1 0 001-1V6a1 1 0 00-1-1H3a1 1 0 00-1 1v2"/></svg>
-                <span>Key Features</span>
-              </a>
-              <a class="home-example-card" data-example="syntax">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M5 4L2 8l3 4M11 4l3 4-3 4"/></svg>
-                <span>Markdown Syntax</span>
-              </a>
-              <a class="home-example-card" data-example="diagrams">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="1" width="5" height="4" rx="1"/><rect x="10" y="1" width="5" height="4" rx="1"/><rect x="5.5" y="11" width="5" height="4" rx="1"/><path d="M3.5 5v3h9V5M8 8v3"/></svg>
-                <span>Mermaid Diagrams</span>
-              </a>
-              <a class="home-example-card" data-example="math">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M5 6h6M5 10h6M6 4v8"/></svg>
-                <span>Math (KaTeX)</span>
-              </a>
-              <a class="home-example-card" data-example="import">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12" rx="1.5"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/><line x1="6" y1="2" x2="6" y2="14"/><line x1="10" y1="2" x2="10" y2="14"/></svg>
-                <span>Import & Export</span>
-              </a>
             </div>
           </section>
 

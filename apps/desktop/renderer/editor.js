@@ -86,56 +86,36 @@
   var collapsedFolders = {}; // { relativePath: true/false }
   var collapsedCloudFolders = {}; // { folderId: true/false }
 
-  // Resolve memory.wiki base URL via main.js (mirrors MDFY_URL there).
-  // Renderer can't reach process.env, so we hardcode the production
-  // base. Same value the auth callback uses.
-  var MW_BASE_URL = "https://memory.wiki";
-
-  function authHeaders() {
-    // Build authorization headers from the stored auth state so the
-    // pins endpoint accepts our request the same way the iOS/Android
-    // clients do (x-user-id + x-user-email; no JWT needed for write).
-    var h = { "Content-Type": "application/json" };
-    if (sidebarState.authState.loggedIn) {
-      if (sidebarState.authState.userId) h["x-user-id"] = sidebarState.authState.userId;
-      if (sidebarState.authState.email) h["x-user-email"] = sidebarState.authState.email;
-    }
-    return h;
-  }
-
+  // Pins (starred docs) cross the IPC boundary. Renderer CSP blocks
+  // direct cross-origin fetch to memory.wiki, so main.js owns the
+  // network call via AuthManager. See ipcMain.handle("get-pins") etc.
   async function fetchPins() {
-    if (!sidebarState.authState.loggedIn) return;
+    if (!sidebarState.authState.loggedIn || !window.mwDesktop?.getPins) return;
     try {
-      var resp = await fetch(MW_BASE_URL + "/api/user/pins", { headers: authHeaders() });
-      if (!resp.ok) return;
-      var json = await resp.json();
+      var pins = await window.mwDesktop.getPins();
       var ids = new Set();
-      (json.pins || []).forEach(function(p) {
+      (pins || []).forEach(function(p) {
+        // API shape: { kind, id, createdAt } (see route.ts mapping).
         if (p.kind === "document" && p.id) ids.add(p.id);
       });
       sidebarState.pinnedIds = ids;
+      renderFileList();
     } catch {}
   }
 
   async function togglePin(docId, makePinned) {
-    if (!sidebarState.authState.loggedIn || !docId) return;
-    try {
-      if (makePinned) {
-        await fetch(MW_BASE_URL + "/api/user/pins", {
-          method: "POST",
-          headers: authHeaders(),
-          body: JSON.stringify({ kind: "document", id: docId }),
-        });
-        sidebarState.pinnedIds.add(docId);
-      } else {
-        await fetch(MW_BASE_URL + "/api/user/pins?kind=document&id=" + encodeURIComponent(docId), {
-          method: "DELETE",
-          headers: authHeaders(),
-        });
-        sidebarState.pinnedIds.delete(docId);
-      }
+    if (!sidebarState.authState.loggedIn || !docId || !window.mwDesktop) return;
+    // Optimistic update so the star feels instant; main.js syncs to
+    // memory.wiki and on failure we silently revert on next fetchPins.
+    if (makePinned) {
+      sidebarState.pinnedIds.add(docId);
       renderFileList();
-    } catch {}
+      try { await window.mwDesktop.pinDocument(docId); } catch {}
+    } else {
+      sidebarState.pinnedIds.delete(docId);
+      renderFileList();
+      try { await window.mwDesktop.unpinDocument(docId); } catch {}
+    }
   }
 
   // ─── Sidebar: Init ───
@@ -185,6 +165,7 @@
     await refreshSidebarData();
     renderSidebar();
 
+
     // Welcome buttons
     var welcomeNew = document.getElementById("welcome-new");
     var welcomeOpen = document.getElementById("welcome-open");
@@ -207,7 +188,9 @@
     // Home screen buttons
     var homeNew = document.getElementById("home-new");
     var homePaste = document.getElementById("home-paste");
+    var homeOpen = document.getElementById("home-open");
     var homeImport = document.getElementById("home-import");
+    var homeRecentClear = document.getElementById("home-recent-clear");
 
     if (homeNew) homeNew.addEventListener("click", function() { window.mwDesktop.newDocument(); });
     if (homePaste) homePaste.addEventListener("click", function() {
@@ -217,22 +200,26 @@
         }
       });
     });
+    if (homeOpen) homeOpen.addEventListener("click", function() { window.mwDesktop.openFile(); });
     if (homeImport) homeImport.addEventListener("click", function() { window.mwDesktop.openFile(); });
+    if (homeRecentClear && window.mwDesktop.clearRecentFiles) {
+      homeRecentClear.addEventListener("click", async function() {
+        await window.mwDesktop.clearRecentFiles();
+        await refreshSidebarData();
+        renderHomeScreen();
+      });
+    }
 
-    // Sidebar logo → back to home
+    // Sidebar logo → open memory.wiki in the system browser. Matches
+    // the web's own wordmark behavior. "Back to home in app" is now
+    // the Home view-switcher tab in the header, not the brand mark.
     var sidebarLogo = document.querySelector(".sidebar-logo");
     if (sidebarLogo) {
-      sidebarLogo.style.cursor = "pointer";
-      sidebarLogo.title = "Home";
-      sidebarLogo.addEventListener("click", function() {
-        if (isDirty && currentFilePath && window.mwDesktop) {
-          var md = htmlToMarkdown(content);
-          window.mwDesktop.autoSave(md);
+      sidebarLogo.addEventListener("click", function(e) {
+        e.preventDefault();
+        if (window.mwDesktop && window.mwDesktop.openInBrowser) {
+          window.mwDesktop.openInBrowser("https://memory.wiki");
         }
-        isDirty = false;
-        currentFilePath = null;
-        currentConfig = null;
-        showHomeScreen();
       });
     }
 
@@ -1481,11 +1468,61 @@
   }
 
   function renderHomeScreen() {
+    var fileIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    var starIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+    // ─── Starred ─── pinned doc/synced rows pulled from /api/user/pins.
+    var starredSection = document.getElementById("home-starred-section");
+    var starredList = document.getElementById("home-starred-list");
+    var pinSet = sidebarState.pinnedIds || new Set();
+    var starredRows = [];
+    if (sidebarState.authState.loggedIn && pinSet.size > 0) {
+      var pinnedSyncedById = {};
+      sidebarState.workspaceFiles.forEach(function(wf) {
+        if (wf.config && wf.config.docId && pinSet.has(wf.config.docId)) {
+          pinnedSyncedById[wf.config.docId] = {
+            kind: "synced",
+            id: wf.config.docId,
+            title: wf.fileName,
+            time: wf.modifiedAt,
+            filePath: wf.filePath,
+          };
+        }
+      });
+      Object.keys(pinnedSyncedById).forEach(function(id) { starredRows.push(pinnedSyncedById[id]); });
+      sidebarState.cloudDocs.forEach(function(cd) {
+        if (pinSet.has(cd.id) && !pinnedSyncedById[cd.id]) {
+          starredRows.push({
+            kind: "cloud",
+            id: cd.id,
+            title: cd.title || "Untitled",
+            time: cd.updated_at,
+          });
+        }
+      });
+    }
+    if (starredSection && starredList) {
+      if (starredRows.length === 0) {
+        starredSection.style.display = "none";
+      } else {
+        starredSection.style.display = "";
+        starredList.innerHTML = starredRows.slice(0, 8).map(function(r) {
+          var attr = r.kind === "synced"
+            ? ' data-filepath="' + esc(r.filePath) + '"'
+            : ' data-cloudid="' + esc(r.id) + '"';
+          return '<button class="home-list-item"' + attr + '>' +
+            '<span class="home-list-icon star">' + starIconSvg + '</span>' +
+            '<span class="home-list-name">' + esc(r.title) + '</span>' +
+            '<span class="home-list-time">' + timeAgo(r.time) + '</span>' +
+          '</button>';
+        }).join("");
+      }
+    }
+
     // ─── Recent ───
     var recentList = document.getElementById("home-recent-list");
     var recentSection = document.getElementById("home-recent-section");
     if (recentList) {
-      // Merge workspace + recent files, dedupe
       var allFiles = [];
       var seenPaths = new Set();
       for (var i = 0; i < sidebarState.workspaceFiles.length; i++) {
@@ -1495,7 +1532,6 @@
           allFiles.push({
             filePath: wf.filePath,
             fileName: wf.fileName,
-            relativePath: wf.relativePath || wf.filePath.replace(/^\/Users\/[^/]+/, "~"),
             modifiedAt: wf.modifiedAt,
             config: wf.config,
           });
@@ -1509,68 +1545,45 @@
           allFiles.push({
             filePath: rf.path,
             fileName: parts[parts.length - 1],
-            relativePath: rf.path.replace(/^\/Users\/[^/]+/, "~"),
             modifiedAt: rf.modifiedAt || rf.openedAt,
             config: rf.config,
           });
         }
       }
-      // Sort by newest first
       allFiles.sort(function(a, b) {
         return new Date(b.modifiedAt || 0).getTime() - new Date(a.modifiedAt || 0).getTime();
       });
-      // Limit to 8
-      allFiles = allFiles.slice(0, 8);
+      allFiles = allFiles.slice(0, 6);
 
       if (allFiles.length === 0) {
         if (recentSection) recentSection.style.display = "none";
       } else {
         if (recentSection) recentSection.style.display = "";
-        var html = "";
-        for (var k = 0; k < allFiles.length; k++) {
-          var f = allFiles[k];
-          var isSynced = f.config && f.config.docId;
-          var iconSvg = isSynced
-            ? '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.5 3.5L13 5"/></svg>'
-            : '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M6 5h4M6 8h4M6 11h2"/></svg>';
-          html +=
-            '<button class="home-recent-item" data-filepath="' + f.filePath.replace(/"/g, '&quot;') + '">' +
-              '<div class="home-recent-icon">' + iconSvg + '</div>' +
-              '<div class="home-recent-info">' +
-                '<span class="home-recent-name">' + escapeHtml(f.fileName) + '</span>' +
-                '<span class="home-recent-path">' + escapeHtml(f.relativePath) + '</span>' +
-              '</div>' +
-              '<span class="home-recent-time">' + timeAgo(f.modifiedAt) + '</span>' +
-            '</button>';
-        }
-        recentList.innerHTML = html;
+        recentList.innerHTML = allFiles.map(function(f) {
+          return '<button class="home-list-item" data-filepath="' + esc(f.filePath) + '">' +
+            '<span class="home-list-icon">' + fileIconSvg + '</span>' +
+            '<span class="home-list-name">' + esc(f.fileName) + '</span>' +
+            '<span class="home-list-time">' + timeAgo(f.modifiedAt) + '</span>' +
+          '</button>';
+        }).join("");
       }
     }
 
-    // ─── Examples click — load from examples.js ───
-    var EXAMPLES = window.MDFY_EXAMPLES || {};
-    var exGrid = document.getElementById("home-examples-grid");
-    if (exGrid) {
-      exGrid.onclick = function(e) {
-        var card = e.target.closest(".home-example-card");
-        if (card && card.dataset.example && EXAMPLES[card.dataset.example]) {
-          var md = EXAMPLES[card.dataset.example];
-          currentFilePath = null;
-          loadDocumentContent(md, null);
-          showEditor();
-        }
-      };
-    }
-
-    // ─── Recent item click ───
-    if (recentList) {
-      recentList.onclick = function(e) {
-        var item = e.target.closest(".home-recent-item");
-        if (item && item.dataset.filepath) {
+    // ─── Click delegation for both lists (synced filepath OR cloud id) ───
+    function bindList(list) {
+      if (!list) return;
+      list.onclick = function(e) {
+        var item = e.target.closest(".home-list-item");
+        if (!item) return;
+        if (item.dataset.filepath) {
           window.mwDesktop.openFilePath(item.dataset.filepath);
+        } else if (item.dataset.cloudid) {
+          window.mwDesktop.syncPullCloud(item.dataset.cloudid, null);
         }
       };
     }
+    bindList(starredList);
+    bindList(recentList);
 
     // ─── Drop zone ───
     var dropzone = document.getElementById("home-dropzone");
