@@ -1994,7 +1994,7 @@
         collabPeerCount + (collabPeerCount === 1 ? " peer" : " peers");
     } else if (isCollaborating) {
       indicator.style.display = "inline-flex";
-      indicator.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span> Live';
+      indicator.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span> Synced';
     } else {
       indicator.style.display = "none";
     }
