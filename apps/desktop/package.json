@@ -4,13 +4,16 @@
   "description": "Native macOS app for memory.wiki: sidebar to your cloud docs, two-way sync, WYSIWYG preview, drag-and-drop import, offline-ready. Same shareable URL Claude, ChatGPT, Cursor, and Gemini all read.",
   "main": "main.js",
   "scripts": {
+    "vendor:editor": "./scripts/vendor-editor.sh",
+    "prestart": "./scripts/vendor-editor.sh",
+    "prebuild": "./scripts/vendor-editor.sh",
     "start": "electron .",
     "build": "electron-builder",
-    "build:dmg": "electron-builder --mac dmg",
-    "build:mas": "electron-builder --mac mas",
+    "build:dmg": "./scripts/vendor-editor.sh && electron-builder --mac dmg",
+    "build:mas": "./scripts/vendor-editor.sh && electron-builder --mac mas",
     "build:mas:pkg": "./scripts/build-mas.sh",
-    "build:all": "electron-builder --mac dmg mas",
-    "build:universal": "electron-builder --mac --universal"
+    "build:all": "./scripts/vendor-editor.sh && electron-builder --mac dmg mas",
+    "build:universal": "./scripts/vendor-editor.sh && electron-builder --mac --universal"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
@@ -35,6 +38,7 @@
       "preload.js",
       "mime-types.js",
       "render.js",
+      "vendor-editor/**/*",
       "renderer/**/*",
       "assets/**/*",
       "node_modules/**/*",

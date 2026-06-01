@@ -1,3 +1,7 @@
 node_modules/
 dist/
 *.dmg
+
+# v3.0: vendored copy of @mdcore/editor, regenerated each build
+vendor-editor/
+renderer/vendor-editor/
