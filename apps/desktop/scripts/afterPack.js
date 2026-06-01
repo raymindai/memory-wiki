@@ -1,88 +1,123 @@
-// electron-builder afterPack hook: copy the QuickLook .appex into
-// the host app's Contents/PlugIns/ so macOS LaunchServices auto-
-// discovers it on launch. This is the model Mac App Store requires
-// (no runtime copy out of the sandbox into ~/Applications) and it
-// also simplifies the DMG path — one source of truth.
+// electron-builder afterPack hook for shipping the QuickLook extension.
 //
-// The .appex itself was built separately by Xcode (see
-// apps/quicklook/MemoryWikiQuickLook). We just embed + re-sign here.
+// Split by target because the two channels have incompatible constraints:
+//
+//   DMG (Developer ID, unnotarized today):
+//     Drop the WHOLE standalone "memory.wiki QuickLook.app" into the host's
+//     Contents/Resources/. main.js installQuickLook() then copies it to
+//     ~/Applications/ on first launch (v2.4.x model). macOS picks the
+//     embedded .appex up via LaunchServices because the standalone host
+//     is its proper parent (wiki.memory.quicklook → wiki.memory.quicklook.qlextension).
+//     We do NOT embed the .appex inside the host's own Contents/PlugIns/
+//     because the parent ids don't match (host = wiki.memory.desktop) and
+//     pluginkit silently refuses to register a mismatched child without
+//     notarization to vouch for it.
+//
+//   MAS (Apple Distribution, provisioning profile + App Store review):
+//     Embed .appex inside Contents/PlugIns/ — required by Apple. The bundle
+//     id must be a child of the host (wiki.memory.desktop.qlextension). We
+//     re-sign in-place with Apple Distribution + the MAS entitlements. App
+//     Store review is the implicit "notarization" that lets the embedded
+//     extension load on user machines.
+//
+// The .appex / standalone host is pre-built by Xcode (apps/quicklook/MemoryWikiQuickLook).
 
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-const APPEX_SRC = path.resolve(
+const QL_BUILT_HOST = path.resolve(
   __dirname,
   "..",
   "..",
   "quicklook",
   "MemoryWikiQuickLook",
   "build",
-  "memory.wiki QuickLook.app",
-  "Contents",
-  "PlugIns",
-  "MemoryWikiQLExtension.appex"
+  "derived",
+  "Build",
+  "Products",
+  "Release",
+  "MemoryWikiQuickLook.app"
+);
+
+const QL_LEGACY_HOST = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "quicklook",
+  "MemoryWikiQuickLook",
+  "build",
+  "memory.wiki QuickLook.app"
 );
 
 module.exports = async function afterPack(context) {
-  // Mac only — electron-builder uses platform name "darwin" for DMG
-  // and "mas" for the Mac App Store target. Both need the embed.
-  if (context.electronPlatformName !== "darwin" && context.electronPlatformName !== "mas") return;
+  const platform = context.electronPlatformName;
+  if (platform !== "darwin" && platform !== "mas") return;
 
   const appOutDir = context.appOutDir;
-  const productName = context.packager.appInfo.productFilename; // "memory.wiki"
+  const productName = context.packager.appInfo.productFilename;
   const hostApp = path.join(appOutDir, `${productName}.app`);
+
+  const qlHostSrc = fs.existsSync(QL_BUILT_HOST) ? QL_BUILT_HOST : QL_LEGACY_HOST;
+  if (!fs.existsSync(qlHostSrc)) {
+    console.warn(`[afterPack] QL host not found. Build it via:`);
+    console.warn(`  cd apps/quicklook/MemoryWikiQuickLook && xcodebuild -scheme MemoryWikiQuickLook -configuration Release -derivedDataPath build/derived`);
+    return;
+  }
+
+  const target = (context.targets || []).map((t) => t.name).join(",");
+
+  if (target.includes("mas") || platform === "mas") {
+    embedForMas({ hostApp, qlHostSrc });
+  } else {
+    sidecarForDmg({ hostApp, qlHostSrc });
+  }
+};
+
+function sidecarForDmg({ hostApp, qlHostSrc }) {
+  const resourcesDir = path.join(hostApp, "Contents", "Resources");
+  const qlDest = path.join(resourcesDir, "memory.wiki QuickLook.app");
+
+  fs.mkdirSync(resourcesDir, { recursive: true });
+  if (fs.existsSync(qlDest)) execSync(`rm -rf "${qlDest}"`);
+  execSync(`cp -R "${qlHostSrc}" "${qlDest}"`);
+  console.log(`[afterPack] DMG: bundled QL host at ${qlDest}`);
+}
+
+function embedForMas({ hostApp, qlHostSrc }) {
   const pluginsDir = path.join(hostApp, "Contents", "PlugIns");
+  const appexSrc = path.join(qlHostSrc, "Contents", "PlugIns", "MemoryWikiQLExtension.appex");
   const appexDest = path.join(pluginsDir, "MemoryWikiQLExtension.appex");
 
-  if (!fs.existsSync(APPEX_SRC)) {
-    console.warn(`[afterPack] QL .appex not found at ${APPEX_SRC} — skipping embed. Rebuild via:`);
-    console.warn(`  cd apps/quicklook/MemoryWikiQuickLook && xcodebuild -scheme MemoryWikiQLExtension -configuration Release -derivedDataPath build`);
+  if (!fs.existsSync(appexSrc)) {
+    console.warn(`[afterPack] MAS: .appex not found at ${appexSrc}`);
     return;
   }
 
   fs.mkdirSync(pluginsDir, { recursive: true });
+  if (fs.existsSync(appexDest)) execSync(`rm -rf "${appexDest}"`);
+  execSync(`cp -R "${appexSrc}" "${appexDest}"`);
 
-  // Wipe any prior copy so we never end up with two .appex variants.
-  if (fs.existsSync(appexDest)) {
-    execSync(`rm -rf "${appexDest}"`);
-  }
-  execSync(`cp -R "${APPEX_SRC}" "${appexDest}"`);
-  console.log(`[afterPack] Embedded QL extension at ${appexDest}`);
+  // Rewrite bundle id to be a child of the MAS host id, then re-sign +
+  // sync CFBundleVersion with host so App Store validation passes.
+  const masChildId = "wiki.memory.desktop.qlextension";
+  const hostPlistPath = path.join(hostApp, "Contents", "Info.plist");
+  const hostShortVer = execSync(`/usr/bin/plutil -extract CFBundleShortVersionString raw "${hostPlistPath}"`).toString().trim();
+  const buildVersion = `${hostShortVer.split(".").slice(0, 2).join(".")}.${Math.floor(Date.now() / 1000)}`;
 
-  // Re-sign the .appex with the same identity the host will be
-  // signed with. electron-builder signs the host after afterPack
-  // runs but only walks its own known plugin layout — for .appex
-  // we need to do it ourselves. Identity comes from the build
-  // target (mas uses 3rd Party Mac Developer; dmg/Developer ID).
-  const target = (context.targets || []).map((t) => t.name).join(",");
-  let identity = process.env.CSC_NAME || null;
-  let entitlements = path.resolve(__dirname, "..", "build", "entitlements.mac.inherit.plist");
-  if (target.includes("mas")) {
-    // Modern (2021+) Apple unified the Mac App Store distribution
-    // cert as "Apple Distribution: <Name> (<TeamID>)". The legacy
-    // "3rd Party Mac Developer Application" name no longer exists
-    // in newer keychains. Team W7NL89YGSD is the memory.wiki team.
-    identity = identity || "Apple Distribution: Hyunsang Cho (W7NL89YGSD)";
-    entitlements = path.resolve(__dirname, "..", "build", "entitlements.mas.inherit.plist");
-  } else {
-    identity = identity || "Developer ID Application: Hyunsang Cho (W7NL89YGSD)";
-  }
+  const appexPlist = path.join(appexDest, "Contents", "Info.plist");
+  execSync(`/usr/bin/plutil -replace CFBundleIdentifier -string "${masChildId}" "${appexPlist}"`);
+  execSync(`/usr/bin/plutil -replace CFBundleVersion -string "${buildVersion}" "${appexPlist}"`);
+  execSync(`/usr/bin/plutil -replace CFBundleShortVersionString -string "${hostShortVer}" "${appexPlist}"`);
+  execSync(`/usr/bin/plutil -replace CFBundleVersion -string "${buildVersion}" "${hostPlistPath}"`);
 
-  // Re-sign the .appex's nested executables first (deep sign), then
-  // the .appex bundle itself. --force lets us replace the Xcode
-  // signature; --options runtime + --timestamp is required for
-  // notarization on the DMG track and harmless on MAS.
-  try {
-    execSync(
-      `codesign --force --deep --timestamp --options runtime ` +
-      `--entitlements "${entitlements}" ` +
-      `--sign "${identity}" "${appexDest}"`,
-      { stdio: "inherit" }
-    );
-    console.log(`[afterPack] Re-signed .appex with identity: ${identity}`);
-  } catch (err) {
-    console.error(`[afterPack] Failed to sign .appex: ${err.message}`);
-    throw err;
-  }
-};
+  const identity = process.env.CSC_NAME || "Apple Distribution: Hyunsang Cho (W7NL89YGSD)";
+  const entitlements = path.resolve(__dirname, "..", "build", "entitlements.mas.inherit.plist");
+  execSync(
+    `codesign --force --deep --timestamp --options runtime ` +
+    `--entitlements "${entitlements}" ` +
+    `--sign "${identity}" "${appexDest}"`,
+    { stdio: "inherit" }
+  );
+  console.log(`[afterPack] MAS: embedded + signed .appex at ${appexDest} (id ${masChildId}, ver ${buildVersion})`);
+}
