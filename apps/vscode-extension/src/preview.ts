@@ -1000,6 +1000,25 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const jsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.extensionUri, "media", "preview.js")
     );
+    // v1.6.0 — TipTap editor stack vendored from @mdcore/editor.
+    // Load order matters: render UMD first (some shared helpers),
+    // then tiptap-config UMD (exposes Editor + buildExtensions),
+    // then tiptap-mount.js (defines window.MemoryWikiTipTap), then
+    // preview-tiptap.js (wires the editor into #content and the
+    // toolbar). preview.js still loads last but its editor logic
+    // is guarded behind window.__mwTipTapActive.
+    const renderUmdUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "media", "vendor-editor", "render.umd.js")
+    );
+    const tiptapConfigUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "media", "vendor-editor", "tiptap-config.umd.js")
+    );
+    const tiptapMountUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "media", "tiptap-mount.js")
+    );
+    const previewTiptapUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "media", "preview-tiptap.js")
+    );
 
     const nonce = getNonce();
     const result = renderMarkdownWithFlavor(markdown);
@@ -1015,7 +1034,9 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
           </div>
         </div>`
       : "";
-    const renderedHtml = cloudBanner + result.html;
+    // v1.6.0 — the cloud banner now sits OUTSIDE <article id="content">
+    // because TipTap wipes content.innerHTML when it mounts. Banner
+    // is interpolated separately at the wrapper level below.
 
     const themeSetting = vscode.workspace
       .getConfiguration("memory.wiki")
@@ -1142,8 +1163,9 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
       </div>
       <div id="content-wrapper">
         <div id="content-scroll">
+        ${cloudBanner}
         <article id="content" class="mdcore-rendered narrow" contenteditable="${this.isCloudPreview ? "false" : "true"}">
-          ${renderedHtml}
+          ${result.html}
         </article>
         </div><!-- end content-scroll -->
         <div id="image-panel" style="display:none;width:260px;flex-shrink:0;border-left:1px solid var(--border);overflow-y:auto;background:var(--bg)">
@@ -1317,6 +1339,15 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     var loadingEl = document.getElementById('loading-overlay');
     if (loadingEl) { loadingEl.style.opacity = '0'; setTimeout(function() { loadingEl.remove(); }, 300); }
   </script>
+
+  <!-- v1.6.0: @mdcore/editor TipTap stack (vendored).
+       MUST load BEFORE preview.js so window.__mwTipTapActive is
+       set before preview.js binds its legacy contentEditable
+       handlers (they short-circuit when the flag is true). -->
+  <script nonce="${nonce}" src="${renderUmdUri}"></script>
+  <script nonce="${nonce}" src="${tiptapConfigUri}"></script>
+  <script nonce="${nonce}" src="${tiptapMountUri}"></script>
+  <script nonce="${nonce}" src="${previewTiptapUri}"></script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;
