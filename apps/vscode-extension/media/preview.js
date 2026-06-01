@@ -245,6 +245,23 @@
       case "update":
         // Skip if we're the ones who triggered the change
         if (isUpdatingFromWebview) break;
+        // v1.6.0: when TipTap owns the editor, preview-tiptap.js
+        // handles `update` (it replays the markdown via
+        // editor.commands.setContent). preview.js still needs to
+        // refresh the flavor badge + outline panel, but it MUST
+        // NOT touch #content.innerHTML or it would clobber the
+        // ProseMirror tree TipTap is managing.
+        if (window.__mwTipTapActive) {
+          if (message.markdown !== undefined) currentMarkdown = message.markdown;
+          if (message.flavor !== undefined) {
+            currentFlavor = message.flavor.primary || currentFlavor;
+            updateFlavorBadge(currentFlavor);
+          }
+          if (typeof updateOutlinePanel === "function") {
+            try { updateOutlinePanel(); } catch (e) { /* outline runs from #content; TipTap may still be mounting */ }
+          }
+          break;
+        }
         // Extension sent new rendered HTML (from .md file change)
         isUpdatingFromExtension = true;
         if (message.markdown !== undefined) {
@@ -393,6 +410,11 @@
   // ─── WYSIWYG Editing ───
 
   content.addEventListener("input", function () {
+    // v1.6.0: TipTap owns the editor surface. ProseMirror does not
+    // fire raw `input` events on its rendered DOM, but we guard
+    // anyway in case a future TipTap version does. preview-tiptap.js
+    // wires editor.on('update') → postMessage instead.
+    if (window.__mwTipTapActive) return;
     if (isUpdatingFromExtension) return;
 
     // Debounce: wait 500ms after last edit before sending to extension
@@ -414,6 +436,9 @@
 
   // Keyboard shortcuts inside contentEditable
   content.addEventListener("keydown", function (e) {
+    // v1.6.0: TipTap StarterKit binds cmd-b / cmd-i / cmd-z
+    // internally and preview-tiptap.js handles cmd-k → link.
+    if (window.__mwTipTapActive) return;
     if ((e.metaKey || e.ctrlKey) && !e.shiftKey) {
       switch (e.key) {
         case "b":
@@ -435,6 +460,11 @@
   // ─── Toolbar Handling ───
 
   toolbar.addEventListener("click", function (e) {
+    // v1.6.0: preview-tiptap.js owns toolbar dispatch (capture
+    // phase) and stops propagation. This bubble-phase listener
+    // would re-fire the action on top of TipTap's command,
+    // double-applying it.
+    if (window.__mwTipTapActive) return;
     const button = e.target.closest("button");
     if (!button) return;
 
@@ -1713,6 +1743,10 @@
     });
 
     selToolbar.addEventListener('click', function(e) {
+      // v1.6.0: preview-tiptap.js owns toolbar dispatch (capture
+      // phase + stopPropagation). Skip the legacy contentEditable
+      // routing.
+      if (window.__mwTipTapActive) return;
       var button = e.target.closest('button');
       if (!button) return;
       var action = button.getAttribute('data-action');
