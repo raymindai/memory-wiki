@@ -98,14 +98,10 @@
       var pins = await window.mwDesktop.getPins();
       var ids = new Set();
       (pins || []).forEach(function(p) {
-        // API shape: { kind, id, createdAt } (see route.ts mapping).
-        // We pin both kinds — the Starred sidebar tab filters to
-        // documents (synced + cloud), the home Starred list will
-        // surface bundles too once we have a bundle viewer hook.
         if (p && p.id) ids.add(p.id);
       });
       sidebarState.pinnedIds = ids;
-    } catch (e) {
+    } catch {
       sidebarState.pinnedIds = new Set();
     }
   }
@@ -1578,7 +1574,14 @@
         : "Your AI memory, deployable to any AI.";
     }
     if (greetSubEl) {
-      var localCount = (sidebarState.workspaceFiles || []).length;
+      // Local count includes BOTH workspace files (folder tree) and
+      // os-recents (files opened ad-hoc outside a workspace).
+      // Counting only workspaceFiles dropped to 0 for users who haven't
+      // opened a folder yet, even though they had several recents.
+      var localPaths = new Set();
+      (sidebarState.workspaceFiles || []).forEach(function(f) { if (f.filePath) localPaths.add(f.filePath); });
+      (sidebarState.recentFiles || []).forEach(function(f) { if (f.path) localPaths.add(f.path); });
+      var localCount = localPaths.size;
       var cloudCount = (sidebarState.cloudDocs || []).length;
       var pinCount = (sidebarState.pinnedIds || new Set()).size;
       if (sidebarState.authState.loggedIn) {
