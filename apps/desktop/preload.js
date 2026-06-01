@@ -85,6 +85,8 @@ contextBridge.exposeInMainWorld("mwDesktop", {
   onThemeChanged: (cb) => ipcRenderer.on("theme-changed", (_, t) => cb(t)),
   onTriggerSave: (cb) => ipcRenderer.on("trigger-save", () => cb()),
   onTriggerPublish: (cb) => ipcRenderer.on("trigger-publish", () => cb()),
+  onMenuUndo: (cb) => ipcRenderer.on("menu-undo", () => cb()),
+  onMenuRedo: (cb) => ipcRenderer.on("menu-redo", () => cb()),
   onCollabRemoteChange: (cb) => ipcRenderer.on("collab-remote-change", (_, d) => cb(d)),
   onCollabStatus: (cb) => ipcRenderer.on("collab-status", (_, d) => cb(d)),
   onCollabPeers: (cb) => ipcRenderer.on("collab-peers", (_, d) => cb(d)),

@@ -46,6 +46,156 @@
   var collabPeerCount = 0;
   var isApplyingRemoteCollab = false;
 
+  // ─── Live Editor History (snapshot-based undo/redo) ───
+  // contentEditable's built-in CMD+Z only undoes operations performed via
+  // execCommand. Every toolbar action, list op, table insert, etc. in this
+  // editor is direct DOM mutation and bypasses that stack, so we run our
+  // own history: a MutationObserver coalesces edits into snapshots of
+  // innerHTML + caret offset, and undo/redo restore them wholesale.
+
+  var liveUndoStack = [];
+  var liveRedoStack = [];
+  var LIVE_HISTORY_MAX = 100;
+  var isApplyingLiveHistory = false;
+  var lastCommittedSnapshot = null;
+  var pendingCommitTimer = null;
+  var suppressConflictUntil = 0;
+
+  function snapshotLive() {
+    return { html: content.innerHTML, caret: getCaretCharacterOffset(content) };
+  }
+
+  function commitLivePending() {
+    if (pendingCommitTimer) { clearTimeout(pendingCommitTimer); pendingCommitTimer = null; }
+    if (!lastCommittedSnapshot) { lastCommittedSnapshot = snapshotLive(); return; }
+    var current = snapshotLive();
+    if (current.html === lastCommittedSnapshot.html) return;
+    liveUndoStack.push(lastCommittedSnapshot);
+    if (liveUndoStack.length > LIVE_HISTORY_MAX) liveUndoStack.shift();
+    liveRedoStack.length = 0;
+    lastCommittedSnapshot = current;
+  }
+
+  function scheduleLiveCommit() {
+    if (isApplyingLiveHistory || isReadOnly) return;
+    if (pendingCommitTimer) return;
+    pendingCommitTimer = setTimeout(function () {
+      pendingCommitTimer = null;
+      commitLivePending();
+    }, 350);
+  }
+
+  function restoreLive(snap) {
+    if (!snap) return;
+    isApplyingLiveHistory = true;
+    content.innerHTML = snap.html;
+    if (snap.caret != null) restoreCaretPosition(content, snap.caret);
+    isApplyingLiveHistory = false;
+    lastCommittedSnapshot = snapshotLive();
+    // Undo/redo replays a known-local snapshot; sync conflict dialog
+    // during the next auto-save window is almost always a false alarm
+    // (the server hasn't actually diverged), so silence it briefly.
+    suppressConflictUntil = Date.now() + 8000;
+    triggerEditDebounce();
+    currentMarkdown = htmlToMarkdown(content);
+    updateDocStats(currentMarkdown);
+    if (cmEditor && sourceVisible) {
+      cmChanging = true;
+      var info = cmEditor.getScrollInfo ? cmEditor.getScrollInfo() : null;
+      cmEditor.setValue(currentMarkdown);
+      if (info) cmEditor.scrollTo(info.left, info.top);
+      cmChanging = false;
+    }
+  }
+
+  function resetLiveHistory() {
+    liveUndoStack.length = 0;
+    liveRedoStack.length = 0;
+    if (pendingCommitTimer) { clearTimeout(pendingCommitTimer); pendingCommitTimer = null; }
+    lastCommittedSnapshot = snapshotLive();
+  }
+
+  function undoLive() {
+    if (pendingCommitTimer) commitLivePending();
+    if (!liveUndoStack.length) return;
+    var current = snapshotLive();
+    var prev = liveUndoStack.pop();
+    liveRedoStack.push(current);
+    restoreLive(prev);
+  }
+
+  function redoLive() {
+    if (pendingCommitTimer) commitLivePending();
+    if (!liveRedoStack.length) return;
+    var current = snapshotLive();
+    var next = liveRedoStack.pop();
+    liveUndoStack.push(current);
+    restoreLive(next);
+  }
+
+  function setLiveContent(html) {
+    isApplyingLiveHistory = true;
+    content.innerHTML = html;
+    Promise.resolve().then(function () {
+      isApplyingLiveHistory = false;
+      resetLiveHistory();
+    });
+  }
+
+  // MutationObserver runs the commit pipeline for every DOM change inside
+  // the editor so toolbar ops, paste handlers, and direct innerHTML edits
+  // all funnel through the same history.
+  if (content) {
+    var liveMO = new MutationObserver(function () { scheduleLiveCommit(); });
+    liveMO.observe(content, { childList: true, subtree: true, characterData: true, attributes: true });
+    setTimeout(function () { resetLiveHistory(); }, 0);
+  }
+
+  function isInLiveEditor(t) { return !!(t && content && (t === content || content.contains(t))); }
+  function isInCodeMirror(t) {
+    if (!t || !cmEditor || !cmEditor.getWrapperElement) return false;
+    var w = cmEditor.getWrapperElement();
+    return !!(w && w.contains(t));
+  }
+  function isInNativeInput(t) {
+    if (!t) return false;
+    var tag = t.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return true;
+    if (t.isContentEditable && !isInLiveEditor(t)) return true;
+    return false;
+  }
+
+  function dispatchUndo() {
+    var a = document.activeElement;
+    if (isInLiveEditor(a)) { undoLive(); return; }
+    if (isInCodeMirror(a)) { try { cmEditor.undo(); } catch (e) {} return; }
+    if (isInNativeInput(a)) { document.execCommand("undo"); return; }
+    undoLive();
+  }
+
+  function dispatchRedo() {
+    var a = document.activeElement;
+    if (isInLiveEditor(a)) { redoLive(); return; }
+    if (isInCodeMirror(a)) { try { cmEditor.redo(); } catch (e) {} return; }
+    if (isInNativeInput(a)) { document.execCommand("redo"); return; }
+    redoLive();
+  }
+
+  if (window.mwDesktop && window.mwDesktop.onMenuUndo) {
+    window.mwDesktop.onMenuUndo(dispatchUndo);
+    window.mwDesktop.onMenuRedo(dispatchRedo);
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    var k = (e.key || "").toLowerCase();
+    if (k === "z" && !e.shiftKey) {
+      if (isInLiveEditor(document.activeElement)) { e.preventDefault(); undoLive(); }
+    } else if ((k === "z" && e.shiftKey) || (k === "y" && !e.shiftKey)) {
+      if (isInLiveEditor(document.activeElement)) { e.preventDefault(); redoLive(); }
+    }
+  }, true);
+
   // ─── Theme ───
 
   (function initTheme() {
@@ -702,7 +852,7 @@
           var t = docTitle ? docTitle.textContent : docId;
           // Show loading state
           showEditor();
-          content.innerHTML = '<div class="cloud-loading"><div class="cloud-loading-spinner"></div><p>Loading ' + esc(t) + '...</p></div>';
+          setLiveContent('<div class="cloud-loading"><div class="cloud-loading-spinner"></div><p>Loading ' + esc(t) + '...</p></div>');
           content.setAttribute("contenteditable", "false");
           if (headerTitle) headerTitle.textContent = t + " (Cloud)";
           window.mwDesktop.previewCloudDoc(docId, t);
@@ -1480,6 +1630,7 @@
     });
 
     window.mwDesktop.onSyncConflict(function(data) {
+      if (Date.now() < suppressConflictUntil) return;
       showConflictDialog(data);
     });
   }
@@ -1789,7 +1940,7 @@
 
     window.mwDesktop.renderMarkdown(currentMarkdown).then(function(result) {
       if (result && result.html !== undefined) {
-        content.innerHTML = result.html;
+        setLiveContent(result.html);
         postProcessAll(content);
         if (result.flavor && result.flavor.primary) {
           currentFlavor = result.flavor.primary;
@@ -1820,11 +1971,11 @@
 
       if (!currentMarkdown && !data.html) {
         showEditor();
-        content.innerHTML = "";
+        setLiveContent("");
       } else {
         showEditor();
         if (data.html) {
-          content.innerHTML = data.html;
+          setLiveContent(data.html);
           postProcessAll(content);
         }
         if (data.flavor) {
@@ -1923,7 +2074,7 @@
       if (data.markdown !== undefined && data.markdown !== currentMarkdown) {
         currentMarkdown = data.markdown;
         if (data.html) {
-          content.innerHTML = data.html;
+          setLiveContent(data.html);
           postProcessAll(content);
         }
         if (cmEditor && cmEditor.getValue() !== currentMarkdown) {
@@ -1964,7 +2115,7 @@
         if (result && result.html !== undefined) {
           // Preserve scroll position
           var scrollTop = content.scrollTop;
-          content.innerHTML = result.html;
+          setLiveContent(result.html);
           postProcessAll(content);
           content.scrollTop = scrollTop;
         }
@@ -2279,7 +2430,7 @@
       var result = await window.mwDesktop.renderMarkdown(markdown);
       if (result && result.html !== undefined) {
         var caretOffset = getCaretCharacterOffset(content);
-        content.innerHTML = result.html;
+        setLiveContent(result.html);
         postProcessAll(content);
         if (caretOffset > 0) restoreCaretPosition(content, caretOffset);
         if (result.flavor && result.flavor.primary) {
@@ -2419,8 +2570,8 @@
     content.focus();
 
     switch (action) {
-      case "undo": document.execCommand("undo", false, null); triggerEditDebounce(); break;
-      case "redo": document.execCommand("redo", false, null); triggerEditDebounce(); break;
+      case "undo": dispatchUndo(); break;
+      case "redo": dispatchRedo(); break;
       case "bold": applyInlineFormat("bold"); break;
       case "italic": applyInlineFormat("italic"); break;
       case "strikethrough": applyInlineFormat("strikethrough"); break;
@@ -3336,8 +3487,8 @@
       var action = button.getAttribute("data-action"); if (!action) return;
       e.preventDefault();
       switch (action) {
-        case "undo": document.execCommand("undo", false, null); triggerEditDebounce(); break;
-        case "redo": document.execCommand("redo", false, null); triggerEditDebounce(); break;
+        case "undo": dispatchUndo(); break;
+        case "redo": dispatchRedo(); break;
         case "bold": applyInlineFormat("bold"); break;
         case "italic": applyInlineFormat("italic"); break;
         case "strikethrough": applyInlineFormat("strikethrough"); break;

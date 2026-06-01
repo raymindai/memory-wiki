@@ -2155,7 +2155,17 @@ function buildMenu() {
     {
       label: "Edit",
       submenu: [
-        { role: "undo" }, { role: "redo" }, { type: "separator" },
+        {
+          label: "Undo",
+          accelerator: "CmdOrCtrl+Z",
+          click: () => { if (mainWindow) mainWindow.webContents.send("menu-undo"); },
+        },
+        {
+          label: "Redo",
+          accelerator: "Shift+CmdOrCtrl+Z",
+          click: () => { if (mainWindow) mainWindow.webContents.send("menu-redo"); },
+        },
+        { type: "separator" },
         { role: "cut" }, { role: "copy" }, { role: "paste" },
         { role: "selectAll" },
       ],
