@@ -148,6 +148,7 @@
           <button data-action="table" title="Table"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="2" width="12" height="12" rx="1.5"/><line x1="2" y1="6" x2="14" y2="6"/><line x1="2" y1="10" x2="14" y2="10"/><line x1="6" y1="2" x2="6" y2="14"/><line x1="10" y1="2" x2="10" y2="14"/></svg></button>
           <button data-action="codeblock" title="Code Block"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M5 4L2 8l3 4M11 4l3 4-3 4M9 2l-2 12"/></svg></button>
           <button data-action="math" title="Math: $...$ or $$...$$"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><text x="2" y="12" font-size="11" font-family="serif" font-style="italic">fx</text></svg></button>
+          <button data-action="mermaid" title="Mermaid diagram"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="4" y="1" width="8" height="4" rx="1"/><rect x="1" y="11" width="5" height="4" rx="1"/><rect x="10" y="11" width="5" height="4" rx="1"/><path d="M8 5v3M8 8L3.5 11M8 8l4.5 3"/></svg></button>
           <span class="toolbar-divider"></span>
           <button data-action="ai-tools" title="AI Tools" id="btn-ai-tools"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M18 14l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/></svg></button>
         </div>
@@ -368,8 +369,15 @@
     </div>
   </main>
 
-  <!-- ──── FLOATING SELECTION TOOLBAR ──── -->
-  <div id="selection-toolbar">
+  <!-- ──── FLOATING SELECTION TOOLBAR ────
+       v2.7.0: the floating bar is now built + positioned by
+       @mdcore/editor's mountSelectionToolbar() helper. The legacy
+       static HTML stays for backward compat (CSS still targets
+       #selection-toolbar) but is hidden via inline display:none —
+       the live toolbar appended to body by the helper handles every
+       click, including the AI menu + inline link input.
+       TODO: drop this stub once we're sure no other code reads it. -->
+  <div id="selection-toolbar" style="display:none">
     <button data-action="undo" title="Undo"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 7h7a3 3 0 010 6H8"/><path d="M6 4L3 7l3 3"/></svg></button>
     <button data-action="redo" title="Redo"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 7H6a3 3 0 000 6h2"/><path d="M10 4l3 3-3 3"/></svg></button>
     <span class="sel-divider"></span>

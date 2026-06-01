@@ -1860,7 +1860,88 @@
         return uploadPastedImage(file);
       },
     });
+    // v2.7.0 — mount the @mdcore/editor toolbar parity helpers now
+    // that we have a live editor. Each helper is a no-op if its
+    // dependency (toolbar element / window helper) is missing, so
+    // this is safe even in stripped-down preview surfaces.
+    mountToolbarParity();
     return liveEditor;
+  }
+
+  // ─── v2.7.0 toolbar parity helpers ───
+  // attaches: active-state binder, hover previews, table menu,
+  //           selection toolbar (with AI menu + inline link input).
+  // grid picker + link input are mounted lazily inside toolbarAction()
+  // because they need the clicked button as positioning anchor.
+  var toolbarStateHandle = null;
+  var hoverPreviewHandle = null;
+  var tableMenuHandle = null;
+  var selToolbarHandle = null;
+  var tablePicker = null;        // built lazily on first table click
+  var permanentLinkInput = null; // built lazily on first link click
+  function mountToolbarParity() {
+    var helpers = window.MemoryWikiEditor || {};
+    if (!liveEditor || !liveEditor.raw) return;
+    var rawEditor = liveEditor.raw;
+
+    // 1. paint aria-pressed/data-active on the permanent toolbar
+    try {
+      if (helpers.attachToolbarState && toolbar) {
+        if (toolbarStateHandle) { try { toolbarStateHandle.detach(); } catch (e) {} }
+        toolbarStateHandle = helpers.attachToolbarState(rawEditor, toolbar);
+      }
+    } catch (err) { console.warn("[toolbar parity] attachToolbarState failed:", err); }
+
+    // 2. hover-preview popover for data-preview buttons (H1/H2/H3/B/I/S/code/etc)
+    try {
+      if (helpers.attachHoverPreviews && toolbar) {
+        if (hoverPreviewHandle) { try { hoverPreviewHandle.detach(); } catch (e) {} }
+        hoverPreviewHandle = helpers.attachHoverPreviews(toolbar);
+      }
+    } catch (err) { console.warn("[toolbar parity] attachHoverPreviews failed:", err); }
+
+    // 3. floating table context menu (above the active table)
+    try {
+      if (helpers.mountTableMenu) {
+        if (tableMenuHandle) { try { tableMenuHandle.destroy(); } catch (e) {} }
+        tableMenuHandle = helpers.mountTableMenu(rawEditor);
+      }
+    } catch (err) { console.warn("[toolbar parity] mountTableMenu failed:", err); }
+
+    // 4. floating selection toolbar (web-parity buttons + AI menu)
+    try {
+      if (helpers.mountSelectionToolbar) {
+        if (selToolbarHandle) { try { selToolbarHandle.destroy(); } catch (e) {} }
+        selToolbarHandle = helpers.mountSelectionToolbar(rawEditor, {
+          runAi: desktopSelectionAi,
+        });
+      }
+    } catch (err) { console.warn("[toolbar parity] mountSelectionToolbar failed:", err); }
+  }
+
+  // AI runner the selection toolbar's ✦ menu calls. Bridges to the
+  // existing ai-action IPC (apps/desktop/main.js line 1938) — that
+  // handler already supports the selection_* action names because
+  // they pass straight through to memory.wiki/api/ai. Payload shape:
+  //   { markdown, language?, instruction? }
+  // We forward language for selection_translate, instruction for
+  // selection_rewrite, neither for polish/shorten/expand.
+  function desktopSelectionAi(action, payload) {
+    if (!window.mwDesktop || !window.mwDesktop.aiAction) {
+      return Promise.resolve({ error: "Desktop IPC unavailable" });
+    }
+    var extra = null;
+    if (action === "selection_translate") extra = payload && payload.language || null;
+    if (action === "selection_rewrite")   extra = payload && payload.instruction || null;
+    return Promise.resolve(
+      window.mwDesktop.aiAction(action, (payload && payload.markdown) || "", extra)
+    ).then(function (resp) {
+      if (!resp) return { error: "No response" };
+      if (resp.error) return { error: resp.error };
+      return { result: resp.result || "" };
+    }).catch(function (err) {
+      return { error: (err && err.message) || String(err) };
+    });
   }
 
   function onLiveEditorChange(md) {
@@ -2586,7 +2667,7 @@
     catch (e) { console.error("[toolbar] command failed:", e); }
   }
 
-  function toolbarAction(action) {
+  function toolbarAction(action, button) {
     switch (action) {
       case "undo": dispatchUndo(); return;
       case "redo": dispatchRedo(); return;
@@ -2616,7 +2697,29 @@
           else c.liftListItem("listItem").run();
         });
       case "link": {
+        // v2.7.0 — replaces prompt() with the @mdcore/editor inline
+        // link input. If the editor cursor is on an existing link
+        // the input prefills with that href; Apply sets/updates,
+        // Remove unsets, Esc cancels. Built lazily so the anchor
+        // button can position the popover.
         if (isReadOnly || !liveEditor) return;
+        var helpers = window.MemoryWikiEditor || {};
+        if (helpers.buildInlineLinkInput) {
+          if (!permanentLinkInput || permanentLinkInput.__editor !== liveEditor.raw) {
+            try {
+              permanentLinkInput = helpers.buildInlineLinkInput(liveEditor.raw, toolbar);
+              permanentLinkInput.__editor = liveEditor.raw;
+            } catch (err) {
+              console.warn("[toolbar] link input helper failed, falling back to prompt:", err);
+              permanentLinkInput = null;
+            }
+          }
+          if (permanentLinkInput) {
+            permanentLinkInput.open(button || null);
+            return;
+          }
+        }
+        // Fallback — should never hit unless helpers UMD is missing
         var url = prompt("URL:");
         if (url == null) return;
         if (url === "") return tiptapDo(function (c) { c.unsetLink().run(); });
@@ -2629,19 +2732,43 @@
         var alt = prompt("Alt text:", "image") || "image";
         return tiptapDo(function (c) { c.setImage({ src: src, alt: alt }).run(); });
       }
-      case "table":
-        // Toolbar table picker — for v2.6.0 we ship a fixed 3×3 with
-        // header row; web has a grid picker, mirror it here in a later
-        // pass (it lives in WysiwygToolbar.tsx).
+      case "table": {
+        // v2.7.0 — replaces the fixed 3×3 fallback with web's 6×6
+        // hover grid picker. Click commits insertTable({rows,cols,
+        // withHeaderRow:true}) on the live editor.
+        if (isReadOnly || !liveEditor) return;
+        var helpers2 = window.MemoryWikiEditor || {};
+        if (helpers2.buildTableGridPicker) {
+          if (!tablePicker || tablePicker.__editor !== liveEditor.raw) {
+            try {
+              tablePicker = helpers2.buildTableGridPicker(liveEditor.raw, toolbar);
+              tablePicker.__editor = liveEditor.raw;
+            } catch (err) {
+              console.warn("[toolbar] grid picker helper failed, falling back to 3×3:", err);
+              tablePicker = null;
+            }
+          }
+          if (tablePicker) {
+            tablePicker.toggle(button || null);
+            return;
+          }
+        }
+        // Fallback — fixed 3×3 (matches v2.6.x behaviour).
         return tiptapDo(function (c) {
           c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         });
+      }
       case "codeblock":
         return tiptapDo(function (c) { c.toggleCodeBlock().run(); });
       case "math":
         // mwMath is a decoration plugin, not a node — insert raw
         // delimiter text and let the plugin render the KaTeX widget.
         return tiptapDo(function (c) { c.insertContent("$E = mc^2$").run(); });
+      case "mermaid":
+        // Convert the current line into a fenced mermaid block.
+        // setCodeBlock with language=mermaid triggers the NodeView's
+        // mermaid render branch in @mdcore/editor.
+        return tiptapDo(function (c) { c.setCodeBlock({ language: "mermaid" }).run(); });
       case "hr":
         return tiptapDo(function (c) { c.setHorizontalRule().run(); });
       case "removeFormat":
@@ -2656,7 +2783,7 @@
     if (!action) return;
     if (action === "ai-tools") return; // Handled by its own click listener
     e.preventDefault();
-    toolbarAction(action);
+    toolbarAction(action, button);
   });
 
   // ─── Toggle Pills ───
@@ -2910,42 +3037,14 @@
   }
 
   // ─── Selection Toolbar ───
-
+  // v2.7.0: the floating selection toolbar is now built + positioned
+  // by @mdcore/editor's mountSelectionToolbar() helper (see
+  // mountToolbarParity above). The legacy static #selection-toolbar
+  // HTML stub is hidden via inline display:none in index.html. We
+  // keep a soft reference here for any code path that still reaches
+  // for `selToolbar` (none should, but the guard costs nothing).
   var selToolbar = document.getElementById("selection-toolbar");
-  function showSelectionToolbar() {
-    if (isReadOnly) { hideSelectionToolbar(); return; }
-    var sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !sel.rangeCount) { hideSelectionToolbar(); return; }
-    var text = sel.toString().trim(); if (!text) { hideSelectionToolbar(); return; }
-    var range = sel.getRangeAt(0);
-    if (!content.contains(range.commonAncestorContainer)) { hideSelectionToolbar(); return; }
-    var ancestor = range.commonAncestorContainer;
-    var node = ancestor.nodeType === 3 ? ancestor.parentElement : ancestor;
-    if (node && (node.closest("pre") || node.closest(".mermaid") || node.closest(".katex-display"))) { hideSelectionToolbar(); return; }
-    var rect = range.getBoundingClientRect(); if (!selToolbar) return;
-    selToolbar.classList.add("visible");
-    var tbRect = selToolbar.getBoundingClientRect();
-    var left = rect.left + (rect.width / 2) - (tbRect.width / 2);
-    var top = rect.top - tbRect.height - 8;
-    if (left < 8) left = 8;
-    if (left + tbRect.width > window.innerWidth - 8) left = window.innerWidth - tbRect.width - 8;
-    if (top < 8) top = rect.bottom + 8;
-    selToolbar.style.left = left + "px"; selToolbar.style.top = top + "px";
-  }
-  function hideSelectionToolbar() { if (selToolbar) selToolbar.classList.remove("visible"); }
-  document.addEventListener("selectionchange", showSelectionToolbar);
-  if (selToolbar) {
-    selToolbar.addEventListener("mousedown", function(e) { e.preventDefault(); });
-    selToolbar.addEventListener("click", function(e) {
-      var button = e.target.closest("button"); if (!button) return;
-      var action = button.getAttribute("data-action"); if (!action) return;
-      e.preventDefault();
-      // Same dispatcher as the formatting toolbar — every action routes
-      // through toolbarAction() which calls TipTap chain commands.
-      toolbarAction(action);
-      hideSelectionToolbar();
-    });
-  }
+  if (selToolbar) selToolbar.style.display = "none";
 
   // ─── Table Editing ───
   //

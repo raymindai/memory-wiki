@@ -1942,9 +1942,14 @@ ipcMain.handle("ai-action", async (event, action, markdown, extra) => {
 
   try {
     const body = { action, markdown };
-    if (action === "chat" && extra) {
+    // v2.7.0 — extra now also covers the new selection_* actions
+    // routed from the floating selection toolbar (mountSelectionToolbar
+    // in @mdcore/editor). chat + selection_rewrite both carry a free-
+    // form instruction; translate + selection_translate carry a target
+    // language. polish/shorten/expand/summary/tldr take no extra.
+    if ((action === "chat" || action === "selection_rewrite") && extra) {
       body.instruction = extra;
-    } else if (extra) {
+    } else if ((action === "translate" || action === "selection_translate") && extra) {
       body.language = extra;
     }
 
