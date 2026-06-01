@@ -24,7 +24,7 @@
     "electron-builder": "^25.0.0"
   },
   "build": {
-    "appId": "cc.memorywiki.desktop",
+    "appId": "wiki.memory.desktop",
     "productName": "memory.wiki",
     "directories": {
       "output": "dist"
