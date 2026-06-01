@@ -37,6 +37,14 @@ cp "$EDITOR_DIST/render.umd.global.js" "$DESKTOP_DIR/renderer/vendor-editor/rend
 # TipTap + ProseMirror + tiptap-markdown stack (~2MB).
 cp "$EDITOR_DIST/tiptap-config.umd.global.js" "$DESKTOP_DIR/renderer/vendor-editor/tiptap-config.umd.js"
 
+# Shared TipTap stylesheet (web parity). Without this the editor
+# renders unstyled .tiptap-* selectors — code blocks have no header
+# chrome, tables have no borders, math/mermaid containers are
+# invisible. Loaded from index.html AFTER preview.css so the
+# editor selectors win when they conflict with the surrounding
+# preview chrome.
+cp "$EDITOR_DIST/editor.css" "$DESKTOP_DIR/renderer/vendor-editor/editor.css"
+
 # Sync KaTeX CSS + fonts from the same npm package render.cjs binds
 # to. Drifting CSS/JS versions show up as half-rendered formulas
 # where the katex-mathml twin stacks visibly under the katex-html

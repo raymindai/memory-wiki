@@ -2427,6 +2427,12 @@
       blocks.forEach(function (codeEl) {
         var pre = codeEl.closest("pre");
         if (!pre || pre.dataset.mwMermaidDone === "1") return;
+        // v2.6.1: the shared @mdcore/editor CodeBlock NodeView now
+        // renders mermaid SVGs into a sibling .tiptap-mermaid-render
+        // container itself (see packages/editor/src/tiptap-config.ts).
+        // Skip those blocks here so we don't stack a second sibling
+        // .mermaid-rendered wrapper on top of the NodeView's render.
+        if (pre.closest(".tiptap-codeblock-wrapper")) return;
         var code = codeEl.textContent || "";
         if (!code.trim()) return;
         var id = "mw-mermaid-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);

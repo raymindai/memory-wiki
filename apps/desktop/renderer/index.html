@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="lib/codemirror/codemirror.min.css">
   <link rel="stylesheet" href="lib/codemirror/material-darker.css">
   <link rel="stylesheet" href="preview.css">
+  <!-- v2.6.1: shared TipTap stylesheet from @mdcore/editor. MUST
+       sit AFTER preview.css so the .tiptap-* selectors win when they
+       conflict with preview chrome (border-radius, code header, etc.).
+       Source: packages/editor/src/editor.css → vendored each build. -->
+  <link rel="stylesheet" href="vendor-editor/editor.css">
   <title>memory.wiki</title>
 </head>
 <body>
@@ -426,6 +431,22 @@
   <!-- v3.0 shared @mdcore/editor UMD bundles (vendored each build) -->
   <script src="vendor-editor/render.umd.js"></script>
   <script src="vendor-editor/tiptap-config.umd.js"></script>
+  <!-- v2.6.1: initialize Mermaid with memory.wiki theme variables.
+       Uses the local vendored mermaid.min.js loaded above; the helper
+       just calls mermaid.initialize() with the shared config so SVGs
+       match what web renders (orange edges, dark themeVariables, etc).
+       Re-runs on data-theme flip via internal MutationObserver. -->
+  <script>
+    (function () {
+      try {
+        if (window.MemoryWikiEditor && window.MemoryWikiEditor.initMermaid) {
+          window.MemoryWikiEditor.initMermaid();
+        }
+      } catch (e) {
+        console.warn("[mermaid-init]", e);
+      }
+    })();
+  </script>
   <script src="tiptap-mount.js"></script>
   <script src="editor.js"></script>
 </body>
