@@ -233,78 +233,77 @@ function showNotOnAiPage() {
 
 // ─── Actions ───
 
+async function ensureContentScript(tabId, kind /* "page" | "ai" */) {
+  // Try a no-op ping; if no response, inject the appropriate files.
+  try {
+    const pingAction = kind === "ai" ? "get-platform" : "ping-page";
+    const reply = await chrome.tabs.sendMessage(tabId, { action: pingAction });
+    if (reply) return true;
+  } catch { /* not injected */ }
+  const files = kind === "ai"
+    ? ["content.js"]
+    : ["lib/readability.js", "lib/html-to-markdown.js", "content-page.js"];
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files });
+    await new Promise((r) => setTimeout(r, 150));
+    return true;
+  } catch (err) {
+    console.warn("[memory.wiki] inject failed:", err);
+    return false;
+  }
+}
+
 btnCapture.addEventListener("click", async () => {
   const isPageMode = btnCapture.dataset.mode === "page";
   const lastN = parseInt(rangeSelect.value) || 0;
-  setStatus("Capturing...");
+  setStatus("capturing...");
   btnCapture.disabled = true;
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (isPageMode) {
-      const [result] = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          const title = document.title;
-          const url = window.location.href;
-          const main = document.querySelector("main, article, [role='main'], .content, .post-content, .entry-content") || document.body;
-          const clone = main.cloneNode(true);
-          clone.querySelectorAll("nav, footer, header, aside, script, style, noscript, iframe, .sidebar, .nav, .menu, .ad, [role='navigation'], [role='banner']").forEach(el => el.remove());
-
-          clone.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(h => { h.textContent = "\n" + "#".repeat(parseInt(h.tagName[1])) + " " + h.textContent.trim() + "\n"; });
-          clone.querySelectorAll("pre").forEach(pre => { const code = pre.querySelector("code"); const text = code ? code.textContent : pre.textContent; let lang = ""; const lc = (code || pre).className.match(/language-(\w+)|lang-(\w+)/); if (lc) lang = lc[1] || lc[2]; pre.textContent = "\n```" + lang + "\n" + text.trim() + "\n```\n"; });
-          clone.querySelectorAll("code").forEach(c => { if (!c.closest("pre")) c.textContent = "`" + c.textContent + "`"; });
-          clone.querySelectorAll("strong, b").forEach(el => { el.textContent = "**" + el.textContent + "**"; });
-          clone.querySelectorAll("em, i").forEach(el => { el.textContent = "*" + el.textContent + "*"; });
-          clone.querySelectorAll("a").forEach(a => { let href = a.getAttribute("href"); const t = a.textContent; if (href && t) { try { href = new URL(href, document.baseURI).href; } catch { /* keep original */ } a.textContent = "[" + t + "](" + href + ")"; } });
-          clone.querySelectorAll("ul > li").forEach(li => { li.textContent = "- " + li.textContent.trim(); });
-          clone.querySelectorAll("ol > li").forEach((li, i) => { li.textContent = (i + 1) + ". " + li.textContent.trim(); });
-          clone.querySelectorAll("table").forEach(table => { let m = "\n"; table.querySelectorAll("tr").forEach((row, ri) => { const cells = Array.from(row.querySelectorAll("th, td")).map(c => c.textContent.trim()); m += "| " + cells.join(" | ") + " |\n"; if (ri === 0) m += "| " + cells.map(() => "---").join(" | ") + " |\n"; }); table.textContent = m; });
-          clone.querySelectorAll("blockquote").forEach(bq => { bq.textContent = bq.textContent.trim().split("\n").map(l => "> " + l).join("\n"); });
-
-          let md = "# " + title + "\n\n> Source: " + url + "\n\n---\n\n";
-          let text = (clone.innerText || clone.textContent || "").replace(/\n{3,}/g, "\n\n").trim();
-          return md + text;
-        },
-      });
-      if (result?.result) {
-        await openInMemoryWiki(result.result);
+      // General web page — route through the content-page.js script
+      // (manifest already injects it; we still ensure for first-load safety).
+      await ensureContentScript(tab.id, "page");
+      const response = await chrome.tabs.sendMessage(tab.id, { action: "capture-page" });
+      if (response && response.markdown) {
+        await openInMemoryWiki(response.markdown);
       } else {
-        setStatus("No content found", "error");
+        setStatus("no content found", "error");
       }
     } else {
+      // AI conversation — existing path.
       const response = await chrome.tabs.sendMessage(tab.id, {
         action: "capture-conversation",
         lastN,
       });
-
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
       } else {
-        setStatus("No conversation found", "error");
+        setStatus("no conversation found", "error");
       }
     }
   } catch (err) {
-    setStatus("Retrying...");
+    setStatus("retrying...");
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["content.js"],
-      });
-      await new Promise((r) => setTimeout(r, 200));
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: "capture-conversation",
-        lastN,
-      });
+      const kind = btnCapture.dataset.mode === "page" ? "page" : "ai";
+      const injected = await ensureContentScript(tab.id, kind);
+      if (!injected) {
+        setStatus("cannot capture this page (chrome:// or restricted)", "error");
+        return;
+      }
+      const action = kind === "page" ? "capture-page" : "capture-conversation";
+      const payload = kind === "page" ? { action } : { action, lastN };
+      const response = await chrome.tabs.sendMessage(tab.id, payload);
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
       } else {
-        setStatus("No conversation found", "error");
+        setStatus(kind === "page" ? "no content found" : "no conversation found", "error");
       }
     } catch (retryErr) {
-      setStatus("Failed: " + retryErr.message, "error");
+      setStatus("failed: " + retryErr.message, "error");
     }
   } finally {
     btnCapture.disabled = false;
@@ -312,10 +311,12 @@ btnCapture.addEventListener("click", async () => {
 });
 
 btnSelection.addEventListener("click", async () => {
-  setStatus("Getting selection...");
+  setStatus("getting selection...");
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const isAiPage = /chatgpt\.com|claude\.ai|gemini\.google\.com|chat\.openai\.com/.test(tab.url || "");
+    const kind = isAiPage ? "ai" : "page";
 
     let markdown = null;
     try {
@@ -324,25 +325,24 @@ btnSelection.addEventListener("click", async () => {
       });
       markdown = response?.markdown;
     } catch {
-      const [result] = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return null;
-          return selection.toString();
-        },
-      });
-      markdown = result?.result;
+      // Content script not loaded — inject the right pair and retry.
+      const injected = await ensureContentScript(tab.id, kind);
+      if (!injected) {
+        setStatus("cannot capture this page (chrome:// or restricted)", "error");
+        return;
+      }
+      const response = await chrome.tabs.sendMessage(tab.id, { action: "capture-selection" });
+      markdown = response?.markdown;
     }
 
     if (!markdown) {
-      setStatus("No text selected", "error");
+      setStatus("no text selected", "error");
       return;
     }
 
     await openInMemoryWiki(markdown);
   } catch (err) {
-    setStatus("Failed: " + err.message, "error");
+    setStatus("failed: " + err.message, "error");
   }
 });
 
@@ -379,17 +379,60 @@ chkFloat.addEventListener("change", () => {
   });
 });
 
-// ─── Auth State Check ───
+// ─── Auth state + account chip ───
+
+function getUserInfo() {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage({ action: "get-user-info" }, (response) => {
+      resolve(response || { userId: null });
+    });
+  });
+}
+
+function renderAccountChip({ userId, email }) {
+  const avatar = document.getElementById("account-avatar");
+  const info = document.getElementById("account-info");
+  const action = document.getElementById("account-action");
+  if (!avatar || !info || !action) return;
+
+  if (userId) {
+    const initial = (email || "?").trim().charAt(0).toUpperCase() || "?";
+    avatar.textContent = initial;
+    avatar.classList.add("active");
+    if (email) {
+      info.innerHTML = '<span class="email"></span>';
+      info.querySelector(".email").textContent = email;
+    } else {
+      info.innerHTML = '<span class="label">signed in</span>';
+    }
+    action.textContent = "sign out";
+    action.classList.remove("cta");
+    action.onclick = (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: MDFY_URL + "/auth/signout" });
+    };
+  } else {
+    avatar.textContent = "?";
+    avatar.classList.remove("active");
+    info.innerHTML = '<span class="label">sign in for permanent URLs</span>';
+    action.textContent = "sign in";
+    action.classList.add("cta");
+    action.onclick = (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: MDFY_URL });
+    };
+  }
+}
 
 (async function checkAuthState() {
-  const userId = await getUserId();
-  // Check if user was previously logged in
+  const info = await getUserInfo();
+  renderAccountChip(info);
   chrome.storage.local.get(["mw-was-logged-in"], (data) => {
-    if (!userId && data["mw-was-logged-in"]) {
-      // User was logged in before but no longer — session expired
-      setStatus("Session expired. Log in at memory.wiki to sync.", "error");
+    if (!info.userId && data["mw-was-logged-in"]) {
+      // Session expired — flag once, don't keep nagging.
+      setStatus("session expired. sign in at memory.wiki to sync.", "error");
       chrome.storage.local.remove("mw-was-logged-in");
-    } else if (userId) {
+    } else if (info.userId) {
       chrome.storage.local.set({ "mw-was-logged-in": "1" });
     }
   });

@@ -340,9 +340,70 @@
       transition: color 0.1s;
     }
     .footer a:hover { color: #B5FF1A; }
+
+    /* ─── Account chip (top of popup) ─── */
+    .account-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-bottom: 1px solid #141416;
+      background: #0d0d10;
+      font-size: 10px;
+      color: #a1a1aa;
+      min-height: 32px;
+    }
+    .account-chip .avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      background: #1c1c20;
+      color: #a1a1aa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .account-chip .avatar.active {
+      background: rgba(181, 255, 26, 0.15);
+      color: #B5FF1A;
+    }
+    .account-chip .info {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .account-chip .info .email {
+      color: #e4e4e7;
+      font-weight: 500;
+    }
+    .account-chip .info .label { color: #71717a; }
+    .account-chip .action {
+      color: #71717a;
+      text-decoration: none;
+      font-size: 10px;
+      flex-shrink: 0;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: color 0.1s, background 0.1s;
+    }
+    .account-chip .action:hover { color: #e4e4e7; background: rgba(255,255,255,0.04); }
+    .account-chip .action.cta {
+      color: #B5FF1A;
+    }
+    .account-chip .action.cta:hover { background: rgba(181, 255, 26, 0.08); }
   </style>
 </head>
 <body>
+  <div class="account-chip" id="account-chip">
+    <span class="avatar" id="account-avatar">?</span>
+    <span class="info" id="account-info"><span class="label">checking sign-in</span></span>
+    <a class="action" id="account-action" href="#"></a>
+  </div>
   <div class="header">
     <a class="logo" href="https://memory.wiki" target="_blank">
       <img src="icons/logo-full-dark.svg" alt="memory.wiki">

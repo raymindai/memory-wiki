@@ -93,7 +93,7 @@
       sendResponse(out);
       return true;
     }
-    if (request && request.action === "capture-page-selection") {
+    if (request && (request.action === "capture-page-selection" || request.action === "capture-selection")) {
       const out = captureSelection();
       sendResponse(out);
       return true;
