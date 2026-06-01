@@ -25,8 +25,9 @@ const APPEX_SRC = path.resolve(
 );
 
 module.exports = async function afterPack(context) {
-  // Mac only.
-  if (context.electronPlatformName !== "darwin") return;
+  // Mac only — electron-builder uses platform name "darwin" for DMG
+  // and "mas" for the Mac App Store target. Both need the embed.
+  if (context.electronPlatformName !== "darwin" && context.electronPlatformName !== "mas") return;
 
   const appOutDir = context.appOutDir;
   const productName = context.packager.appInfo.productFilename; // "memory.wiki"
@@ -58,11 +59,11 @@ module.exports = async function afterPack(context) {
   let identity = process.env.CSC_NAME || null;
   let entitlements = path.resolve(__dirname, "..", "build", "entitlements.mac.inherit.plist");
   if (target.includes("mas")) {
-    // MAS expects 3rd Party Mac Developer Application identity. If the
-    // identity isn't set via env, we leave it to electron-builder to
-    // discover; the keychain has one trusted "Apple Development" or
-    // "3rd Party Mac Developer Application" entry for the team.
-    identity = identity || "3rd Party Mac Developer Application";
+    // Modern (2021+) Apple unified the Mac App Store distribution
+    // cert as "Apple Distribution: <Name> (<TeamID>)". The legacy
+    // "3rd Party Mac Developer Application" name no longer exists
+    // in newer keychains. Team W7NL89YGSD is the memory.wiki team.
+    identity = identity || "Apple Distribution: Hyunsang Cho (W7NL89YGSD)";
     entitlements = path.resolve(__dirname, "..", "build", "entitlements.mas.inherit.plist");
   } else {
     identity = identity || "Developer ID Application: Hyunsang Cho (W7NL89YGSD)";

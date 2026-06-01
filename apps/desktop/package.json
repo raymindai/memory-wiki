@@ -73,7 +73,9 @@
       "entitlementsInherit": "build/entitlements.mas.inherit.plist",
       "hardenedRuntime": false,
       "type": "distribution",
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "identity": "Apple Distribution: Hyunsang Cho (W7NL89YGSD)",
+      "provisioningProfile": "build/embedded.provisionprofile"
     },
     "dmg": {
       "title": "memory.wiki",
