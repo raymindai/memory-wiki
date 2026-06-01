@@ -37,4 +37,17 @@ cp "$EDITOR_DIST/render.umd.global.js" "$DESKTOP_DIR/renderer/vendor-editor/rend
 # TipTap + ProseMirror + tiptap-markdown stack (~2MB).
 cp "$EDITOR_DIST/tiptap-config.umd.global.js" "$DESKTOP_DIR/renderer/vendor-editor/tiptap-config.umd.js"
 
+# Sync KaTeX CSS + fonts from the same npm package render.cjs binds
+# to. Drifting CSS/JS versions show up as half-rendered formulas
+# where the katex-mathml twin stacks visibly under the katex-html
+# render, so we keep them in lockstep on every vendor pass.
+KATEX_PKG="$ROOT/apps/desktop/node_modules/katex/dist"
+if [ -d "$KATEX_PKG" ]; then
+  cp "$KATEX_PKG/katex.min.css" "$DESKTOP_DIR/renderer/lib/katex/katex.min.css"
+  if [ -d "$KATEX_PKG/fonts" ]; then
+    mkdir -p "$DESKTOP_DIR/renderer/lib/katex/fonts"
+    cp -R "$KATEX_PKG"/fonts/* "$DESKTOP_DIR/renderer/lib/katex/fonts/" 2>/dev/null || true
+  fi
+fi
+
 echo "✓ Vendored @mdcore/editor → apps/desktop/{vendor-editor,renderer/vendor-editor}"

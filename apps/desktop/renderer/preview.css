@@ -12,6 +12,23 @@
 @import "./_tokens.dark.generated.css";
 @import "./_tokens.light.generated.css";
 
+/* KaTeX safety net — visually hide the MathML twin so it doesn't
+   stack on top of the HTML render. The canonical rule lives in
+   lib/katex/katex.min.css; we duplicate it here so a missing/late
+   CSS load still keeps the document readable. */
+.katex .katex-mathml,
+.katex-display .katex-mathml {
+  border: 0 !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  -webkit-clip-path: inset(50%) !important;
+  clip-path: inset(50%) !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important;
+}
+
 /* Cal Sans is the canonical display face across every memory.wiki
    surface (web auth pages, headers, brand mark). We bundle the OFL
    font inside the app so the same lettering renders regardless of
