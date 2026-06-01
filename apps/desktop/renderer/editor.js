@@ -2574,6 +2574,21 @@
     if (action === "ai-tools") return; // Handled by its own click listener
     e.preventDefault();
     content.focus();
+    // contentEditable.focus() doesn't create a Selection if there's no
+    // prior caret in the editor (common case: user clicks a toolbar
+    // button immediately after opening a doc). Every action function
+    // bails on `sel.rangeCount === 0`, so toolbar clicks would silently
+    // do nothing. Place the caret at the end of the editor as the
+    // fallback so block ops (H1-H6, list, table, image, math, codeblock,
+    // hr, quote) all work without first clicking in the editor.
+    (function ensureCaretInEditor() {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && content.contains(sel.anchorNode)) return;
+      var range = document.createRange();
+      range.selectNodeContents(content);
+      range.collapse(false);
+      if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+    })();
 
     switch (action) {
       case "undo": dispatchUndo(); break;
