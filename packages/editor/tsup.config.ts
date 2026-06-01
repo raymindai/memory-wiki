@@ -11,9 +11,9 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig([
-  // Library builds: ESM + CJS + dts
+  // Library builds: ESM + CJS + dts for BOTH render and tiptap-config
   {
-    entry: ["src/render.ts"],
+    entry: ["src/render.ts", "src/tiptap-config.ts"],
     format: ["esm", "cjs"],
     dts: true,
     sourcemap: true,
@@ -21,14 +21,30 @@ export default defineConfig([
     outDir: "dist",
     target: "es2020",
     splitting: false,
-    // Mark heavy deps as external for Node consumers (Electron, vscode).
-    // The UMD build below bundles everything for the browser-only
-    // surfaces (QuickLook, iOS WebView, Android WebView).
+    // Mark heavy deps as external for Node consumers (Electron main,
+    // vscode webview, web bundle). The UMD build below bundles
+    // everything for the browser-only surfaces (QuickLook, iOS
+    // WebView, Android WebView).
     external: [
-      "markdown-it",
-      "markdown-it-footnote",
+      "@tiptap/core",
+      "@tiptap/extension-code-block-lowlight",
+      "@tiptap/extension-image",
+      "@tiptap/extension-link",
+      "@tiptap/extension-placeholder",
+      "@tiptap/extension-table",
+      "@tiptap/extension-table-cell",
+      "@tiptap/extension-table-header",
+      "@tiptap/extension-table-row",
+      "@tiptap/extension-task-item",
+      "@tiptap/extension-task-list",
+      "@tiptap/pm",
+      "@tiptap/starter-kit",
       "highlight.js",
       "katex",
+      "lowlight",
+      "markdown-it",
+      "markdown-it-footnote",
+      "tiptap-markdown",
     ],
   },
   // Browser-ready single-file UMD bundle, deps inlined.
