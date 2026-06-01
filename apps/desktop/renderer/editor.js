@@ -2529,6 +2529,26 @@
       btn.classList.toggle("active", btn.getAttribute("data-view") === mode);
     });
 
+    // CodeMirror's setValue() fires "change" even when the content
+    // hasn't actually changed — that change handler marks isDirty +
+    // queues autoSave + triggers SyncEngine push (which surfaces a
+    // sync-conflict modal if the server moved on in the meantime).
+    // Guard with cmChanging so view-switches don't pretend the user
+    // edited anything.
+    function hydrateCM() {
+      if (!cmEditor) {
+        initCodeMirror();
+        return;
+      }
+      if (cmEditor.getValue() === currentMarkdown) return;
+      cmChanging = true;
+      try {
+        cmEditor.setValue(currentMarkdown);
+      } finally {
+        cmChanging = false;
+      }
+    }
+
     if (mode === "split") {
       renderPane.style.display = "flex";
       renderPane.style.width = splitPercent + "%";
@@ -2538,7 +2558,7 @@
       editorPane.style.flex = "1";
       splitDivider.style.display = "";
       if (toolbar) toolbar.style.display = isToolbarVisible ? "" : "none";
-      if (!cmEditor) initCodeMirror(); else cmEditor.setValue(currentMarkdown);
+      hydrateCM();
       if (cmEditor) setTimeout(function() { cmEditor.refresh(); }, 50);
     } else if (mode === "source") {
       renderPane.style.display = "none";
@@ -2547,7 +2567,7 @@
       editorPane.style.flex = "1";
       splitDivider.style.display = "none";
       if (toolbar) toolbar.style.display = "none";
-      if (!cmEditor) initCodeMirror(); else cmEditor.setValue(currentMarkdown);
+      hydrateCM();
       if (cmEditor) { cmEditor.focus(); setTimeout(function() { cmEditor.refresh(); }, 50); }
     } else {
       // Live
