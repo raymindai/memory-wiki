@@ -496,64 +496,73 @@ const SyncEngine = {
       console.warn("[sync] push skipped: empty content for", filePath);
       return;
     }
-    const config = loadMdfyConfig(filePath);
-    if (!config) return; // Not published
-
-    // Verify ownership before pushing — only the document owner can edit
-    const isOwner = await this.checkOwnership(config.docId);
-    if (!isOwner) {
-      sendToRenderer("sync-status", { filePath, status: "error", message: "You do not own this document. Only the owner can push changes." });
+    // Per-file mutex: if a push is already in flight for this file, queue
+    // the new markdown for after it finishes. Without this the 3s autoSave
+    // loop could fire a second push using a stale lastServerUpdatedAt
+    // (the first push hasn't written it back yet) and the server's check
+    // would see "remote moved" and emit a false-alarm conflict during
+    // ordinary typing.
+    if (this._inflightPushes && this._inflightPushes.has(filePath)) {
+      this._pendingPushes = this._pendingPushes || new Map();
+      this._pendingPushes.set(filePath, markdown);
       return;
     }
-
-    // Conflict check
-    const check = await apiCheckUpdatedAt(config.docId);
-    if (check.status === "deleted") {
-      deleteMdfyConfig(filePath);
-      sendToRenderer("sync-status", { filePath, status: "unlinked" });
-      return;
-    }
-
-    if (
-      check.status === "ok" &&
-      config.lastServerUpdatedAt &&
-      new Date(check.updated_at).getTime() >
-        new Date(config.lastServerUpdatedAt).getTime()
-    ) {
-      // Server has newer changes — notify renderer for conflict resolution
-      sendToRenderer("sync-conflict", {
-        filePath,
-        serverUpdatedAt: check.updated_at,
-        localUpdatedAt: config.lastServerUpdatedAt,
-      });
-      return;
-    }
-
-    const title = extractTitle(markdown) || path.basename(filePath, ".md");
-    sendToRenderer("sync-status", { filePath, status: "syncing" });
+    if (!this._inflightPushes) this._inflightPushes = new Set();
+    this._inflightPushes.add(filePath);
 
     try {
-      // Skip conflict detection when Yjs collaboration is active
-      const collabActive = CollaborationManager._cloudId === config.docId;
-      const result = await apiUpdate(config.docId, config.editToken, markdown, title, collabActive ? undefined : config.lastServerUpdatedAt);
-      config.lastSyncedAt = new Date().toISOString();
-      config.lastServerUpdatedAt = result.updated_at;
-      saveMdfyConfig(filePath, config);
+      const config = loadMdfyConfig(filePath);
+      if (!config) return; // Not published
 
-      sendToRenderer("sync-status", { filePath, status: "synced" });
-    } catch (err) {
-      if (err.conflict) {
-        // Send conflict event to renderer with server data
-        sendToRenderer("sync-conflict", {
-          filePath,
-          serverUpdatedAt: err.serverUpdatedAt,
-          localUpdatedAt: config.lastServerUpdatedAt,
-          serverMarkdown: err.serverMarkdown,
-          conflict: true,
-        });
+      // Verify ownership before pushing — only the document owner can edit
+      const isOwner = await this.checkOwnership(config.docId);
+      if (!isOwner) {
+        sendToRenderer("sync-status", { filePath, status: "error", message: "You do not own this document. Only the owner can push changes." });
         return;
       }
-      throw err;
+
+      // Removed the apiCheckUpdatedAt pre-flight: it raced with autoSave
+      // (a second autoSave would compare against the in-flight push's
+      // stale lastServerUpdatedAt and pop a false conflict during normal
+      // typing). The real if-match check happens inside apiUpdate via
+      // lastServerUpdatedAt as the optimistic-concurrency token, so the
+      // pre-check was both redundant and the source of the race.
+
+      const title = extractTitle(markdown) || path.basename(filePath, ".md");
+      sendToRenderer("sync-status", { filePath, status: "syncing" });
+
+      try {
+        // Skip conflict detection when Yjs collaboration is active
+        const collabActive = CollaborationManager._cloudId === config.docId;
+        const result = await apiUpdate(config.docId, config.editToken, markdown, title, collabActive ? undefined : config.lastServerUpdatedAt);
+        config.lastSyncedAt = new Date().toISOString();
+        config.lastServerUpdatedAt = result.updated_at;
+        saveMdfyConfig(filePath, config);
+
+        sendToRenderer("sync-status", { filePath, status: "synced" });
+      } catch (err) {
+        if (err.conflict) {
+          // Send conflict event to renderer with server data
+          sendToRenderer("sync-conflict", {
+            filePath,
+            serverUpdatedAt: err.serverUpdatedAt,
+            localUpdatedAt: config.lastServerUpdatedAt,
+            serverMarkdown: err.serverMarkdown,
+            conflict: true,
+          });
+          return;
+        }
+        throw err;
+      }
+    } finally {
+      this._inflightPushes.delete(filePath);
+      // Drain any newer markdown queued while we were in flight.
+      if (this._pendingPushes && this._pendingPushes.has(filePath)) {
+        const pendingMd = this._pendingPushes.get(filePath);
+        this._pendingPushes.delete(filePath);
+        // Defer to next tick so this finally returns first.
+        setImmediate(() => { this.push(filePath, pendingMd).catch((e) => console.warn("[sync] drained push failed:", e.message)); });
+      }
     }
   },
 

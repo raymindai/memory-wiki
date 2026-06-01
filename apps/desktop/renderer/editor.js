@@ -3324,9 +3324,18 @@
   // ─── Non-Editable Islands ───
 
   function setupNonEditableIslands(root) {
-    // Minimal approach: only mark mermaid diagrams as non-editable.
-    // Keep everything else editable for smooth typing.
+    // Mermaid diagrams: opaque blobs, never editable inline.
     root.querySelectorAll(".mermaid").forEach(function(el) {
+      el.setAttribute("contenteditable", "false");
+    });
+    // Math widgets: their nested KaTeX HTML has dozens of nested spans
+    // and the load-bearing `data-math-src` attribute on the wrapper.
+    // If the caret lands inside and the user types, Chromium edits the
+    // KaTeX glyphs in place AND can strip the wrapper attribute, which
+    // is what made $ delimiters disappear on save through the v3.0 bug.
+    // Lock the widget so the only way to change math is to delete the
+    // whole node or edit the markdown in the Source pane.
+    root.querySelectorAll(".math-rendered").forEach(function(el) {
       el.setAttribute("contenteditable", "false");
     });
   }
