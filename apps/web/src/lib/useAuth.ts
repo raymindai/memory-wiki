@@ -313,14 +313,23 @@ export function useAuth() {
 
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) return;
+    // prompt=select_account forces Google to show the account chooser
+    // even when the user has an active Google session; without it,
+    // signing in after a memory.wiki sign-out silently re-uses the
+    // last-used Google identity and there's no way to switch.
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+      },
     });
   }, [supabase]);
 
   const signInWithGitHub = useCallback(async () => {
     if (!supabase) return;
+    // GitHub doesn't honor `prompt`; the user has to sign out on
+    // github.com to switch GitHub identities.
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
@@ -329,9 +338,13 @@ export function useAuth() {
 
   const signInWithApple = useCallback(async () => {
     if (!supabase) return;
+    // Apple respects `prompt=select_account` and shows the chooser.
     await supabase.auth.signInWithOAuth({
       provider: "apple",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+      },
     });
   }, [supabase]);
 

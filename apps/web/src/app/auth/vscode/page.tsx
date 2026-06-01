@@ -28,6 +28,15 @@ export default function VSCodeAuthPage() {
         return;
       }
 
+      // ?switch=1 drops the cached session so the user can attach a
+      // different memory.wiki account to VS Code.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("switch") === "1") {
+        await supabase.auth.signOut();
+        setStatus("choose-provider");
+        return;
+      }
+
       // Get current session (any provider)
       const { data: { session } } = await supabase.auth.getSession() as { data: { session: { access_token: string } | null } };
 
@@ -134,6 +143,13 @@ export default function VSCodeAuthPage() {
             >
               Didn&apos;t work? Make sure the memory.wiki extension is installed in VS Code.
             </p>
+            <a
+              href="?switch=1"
+              className="transition-opacity hover:opacity-80"
+              style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "underline" }}
+            >
+              Wrong account? Use a different one
+            </a>
           </>
         )}
 

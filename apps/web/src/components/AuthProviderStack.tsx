@@ -34,9 +34,18 @@ export default function AuthProviderStack({ redirectTo }: Props) {
 
   const signInWith = async (provider: "google" | "github" | "apple") => {
     if (!supabase) return;
+    // Force the provider's account chooser every time. Without this,
+    // Google + Apple silently re-auth as the last-used account whenever
+    // the user is still signed in to the provider, so people on multi-
+    // account browsers couldn't switch identities. GitHub doesn't honor
+    // `prompt`; users on github.com still need to sign out of GitHub
+    // itself to pick a different GitHub identity.
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo },
+      options: {
+        redirectTo,
+        queryParams: { prompt: "select_account" },
+      },
     });
   };
 

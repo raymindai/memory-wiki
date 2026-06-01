@@ -36,6 +36,15 @@ export default function CliAuthPage() {
         return;
       }
 
+      // ?switch=1 lets the user drop the cached browser session and
+      // land in the provider picker for a different account.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("switch") === "1") {
+        await supabase.auth.signOut();
+        setStatus("choose-provider");
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession() as { data: { session: { access_token: string; refresh_token?: string } | null } };
 
       if (!session?.access_token) {
@@ -174,6 +183,13 @@ export default function CliAuthPage() {
               >
                 Saved to ~/.memory.wiki/config.json. Treat it like a password.
               </p>
+              <a
+                href="?switch=1"
+                className="text-center transition-opacity hover:opacity-80"
+                style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "underline" }}
+              >
+                Wrong account? Use a different one
+              </a>
             </div>
           </>
         )}
