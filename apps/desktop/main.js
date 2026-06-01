@@ -237,6 +237,13 @@ const AuthManager = {
 
       this.save({ token, refreshToken, userId, email });
 
+      // Wipe profile cache so the next get-user-profile fetch hits the
+      // server fresh. Without this, switching accounts via the web's
+      // "Use a different one" link saved the new token but kept the
+      // previous account's avatar + display name in the sidebar
+      // because the cache returned the stale entry on the next read.
+      try { profileCache = null; } catch {}
+
       // Notify renderer
       if (mainWindow) {
         mainWindow.webContents.send("auth-changed", {
