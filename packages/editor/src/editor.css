@@ -1,0 +1,414 @@
+/* ============================================================
+   @mdcore/editor — shared TipTap editor stylesheet
+   ============================================================
+
+   Source of truth: apps/web/src/app/globals.css lines ~1862-2220.
+   This file is loaded verbatim by the Desktop renderer (via
+   apps/desktop/renderer/vendor-editor/editor.css) and the VS Code
+   webview (via apps/vscode-extension/media/vendor-editor/editor.css)
+   so every channel renders the same TipTap output as memory.wiki.
+
+   All var(--*) tokens are defined per channel:
+     - web      → apps/web/src/app/globals.css
+     - desktop  → apps/desktop/renderer/preview.css + generated tokens
+     - vscode   → apps/vscode-extension/media/preview.css + generated tokens
+
+   If you add a new .tiptap-* rule on web, port it here in the same
+   pass — web parity is the bar.
+   ============================================================ */
+
+/* ─── Host shim ───
+   The web app inherits paragraph + heading defaults from a global
+   typographic reset (Tailwind preflight + globals.css base layer).
+   Electron's renderer and the VS Code webview do NOT have that
+   reset, so the editor would otherwise show 0-margin paragraphs
+   and tiny browser-default headings. Ship the minimal baseline
+   here so the same selectors look right anywhere this CSS lands.
+   ============================================================ */
+.tiptap,
+.ProseMirror {
+  outline: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.tiptap p {
+  margin: 0.5rem 0;
+}
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  font-family: var(--font-display, ui-sans-serif, system-ui);
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.tiptap h1 { font-size: 1.75rem; }
+.tiptap h2 { font-size: 1.45rem; }
+.tiptap h3 { font-size: 1.2rem; }
+.tiptap h4 { font-size: 1.05rem; }
+.tiptap h5 { font-size: 0.95rem; }
+.tiptap h6 { font-size: 0.85rem; }
+
+/* ========================================
+   Tiptap WYSIWYG Preview
+   ======================================== */
+.tiptap-preview-wrapper {
+  height: 100%;
+}
+.tiptap-preview-wrapper .tiptap {
+  height: 100%;
+  overflow: auto;
+}
+.tiptap-preview-wrapper .tiptap:focus {
+  outline: none;
+}
+/* ── Tiptap editor — restore list/blockquote styles that Tailwind resets ── */
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.tiptap ul ul { list-style-type: circle; }
+.tiptap ul ul ul { list-style-type: square; }
+.tiptap li { margin: 0.15rem 0; }
+.tiptap li p { margin: 0; }
+.tiptap blockquote {
+  /* User-configurable accent (Settings → Appearance → Key Color).
+     Default = lime; users can pick any of the 9 accents and the
+     editor's links / blockquotes / task-list checks all update
+     together. */
+  border-left: 3px solid var(--accent);
+  margin: 0.75rem 0;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border-radius: 0 8px 8px 0;
+}
+.tiptap blockquote p { margin: 0.25rem 0; }
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0;
+}
+.tiptap ul[data-type="taskList"] > li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.25rem 0;
+}
+.tiptap ul[data-type="taskList"] > li {
+  align-items: flex-start;
+}
+.tiptap ul[data-type="taskList"] > li > label {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding-top: 0.35em; /* aligns checkbox with first text line */
+}
+.tiptap ul[data-type="taskList"] > li > label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  max-width: 14px;
+  max-height: 14px;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+.tiptap ul[data-type="taskList"] > li > label input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.tiptap ul[data-type="taskList"] > li > label input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 4px;
+  height: 8px;
+  border: solid #000;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+.tiptap ul[data-type="taskList"] > li > div {
+  flex: 1;
+  min-width: 0;
+}
+.tiptap ul[data-type="taskList"] > li > div p {
+  margin: 0;
+}
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+.tiptap pre {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.tiptap pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+}
+.tiptap code {
+  background: var(--surface);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+}
+.tiptap table {
+  border-collapse: separate;
+  border-spacing: 0;
+  /* Tables now expand to fit their content rather than getting
+     squashed into the editor width. The editor's parent has
+     overflow-x: auto (.tiptap rule below), so wide tables scroll
+     horizontally without truncating cells. Was: width: 100%. */
+  width: auto;
+  max-width: none;
+  min-width: 100%;
+  margin: 0.75rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+/* Editor container — let it scroll horizontally when a child block
+   (typically a wide table or a long line of inline code) exceeds
+   the container width. Paragraphs still wrap normally; only blocks
+   that genuinely overflow trigger the scrollbar. */
+.tiptap {
+  overflow-x: auto;
+}
+.tiptap th, .tiptap td {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  box-sizing: border-box;
+}
+.tiptap th:last-child, .tiptap td:last-child {
+  border-right: none;
+}
+.tiptap tr:last-child td {
+  border-bottom: none;
+}
+.tiptap th {
+  background: var(--surface);
+  font-weight: 600;
+}
+/* ── Tiptap code block (custom NodeView) ── */
+.tiptap-codeblock-wrapper {
+  position: relative;
+  margin: 0.75rem 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.tiptap-codeblock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: var(--toggle-bg);
+  border-bottom: 1px solid var(--border-dim);
+  font-size: 11px;
+  user-select: none;
+}
+.tiptap-codeblock-lang {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-family: ui-monospace, monospace;
+}
+.tiptap-codeblock-copy {
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.tiptap-codeblock-copy:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.tiptap-codeblock-body {
+  display: flex;
+  align-items: stretch;
+  background: var(--background);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.tiptap-codeblock-gutter {
+  flex-shrink: 0;
+  padding: 12px 8px 12px 12px;
+  background: var(--toggle-bg);
+  border-right: 1px solid var(--border-dim);
+  color: var(--text-faint);
+  text-align: right;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+}
+.tiptap-codeblock-lineno {
+  display: block;
+  min-width: 1.5em;
+  font-size: 12px;
+  line-height: 1.55;
+  opacity: 0.6;
+}
+.tiptap-codeblock-wrapper > .tiptap-codeblock-body > pre {
+  flex: 1;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+}
+.tiptap-codeblock-wrapper > .tiptap-codeblock-body > pre > code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+}
+/* ── Conversion progress spinner ── */
+.tiptap-spinner-large {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(251, 146, 60, 0.25);
+  border-top-color: var(--accent);
+  animation: tiptap-spin 0.7s linear infinite;
+}
+@keyframes tiptap-spin {
+  to { transform: rotate(360deg); }
+}
+
+.tiptap-mermaid-render {
+  padding: 12px;
+  background: var(--background);
+  text-align: center;
+  border-top: 1px solid var(--border-dim);
+}
+.tiptap-mermaid-render svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Footnotes (markdown-it-footnote → HTML preserved by tiptap-markdown) ── */
+.tiptap .footnote-ref {
+  font-size: 0.75em;
+  vertical-align: super;
+  color: var(--accent);
+  text-decoration: none;
+  margin: 0 1px;
+}
+.tiptap .footnotes {
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.875em;
+  color: var(--text-secondary);
+}
+.tiptap .footnotes hr { display: none; }
+.tiptap .footnotes ol { padding-left: 1.5rem; }
+.tiptap .footnote-backref { color: var(--accent); text-decoration: none; margin-left: 4px; }
+
+/* ── Tiptap math (KaTeX decorations) ── */
+.tiptap-math-source {
+  display: none;
+}
+.tiptap-math-display {
+  display: block;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+.tiptap-math-inline {
+  display: inline-block;
+}
+
+/* Alternating row backgrounds — Tiptap has no <tbody>, rows are direct table children */
+.tiptap table > tr:nth-child(even) td,
+.tiptap table > tbody > tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+[data-theme="light"] .tiptap table > tr:nth-child(even) td,
+[data-theme="light"] .tiptap table > tbody > tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.015);
+}
+.tiptap td p, .tiptap th p {
+  margin: 0;
+}
+/* Table: suppress ALL outlines and selection artifacts */
+.tiptap table * {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.tiptap .selectedCell {
+  background: rgba(251, 146, 60, 0.08) !important;
+}
+/* Prevent table inside table */
+.tiptap td table, .tiptap th table {
+  display: none;
+}
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0;
+  border: none;
+  outline: none;
+  display: block;
+}
+.tiptap img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.tiptap a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--text-faint);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: italic;
+}

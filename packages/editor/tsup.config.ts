@@ -9,11 +9,34 @@
 //                no module loader required.
 
 import { defineConfig } from "tsup";
+import { copyFileSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+// onSuccess shell command — emit the shared editor.css alongside the
+// other dist artifacts. Channels copy this verbatim through their
+// vendor-editor.sh scripts so Desktop and the VS Code webview render
+// at full web parity (border, gutter, mermaid frame, math widgets,
+// task-list checkboxes, etc.).
+const copyEditorCss = (): void => {
+  const src = resolve(__dirname, "src/editor.css");
+  const dest = resolve(__dirname, "dist/editor.css");
+  mkdirSync(resolve(__dirname, "dist"), { recursive: true });
+  copyFileSync(src, dest);
+  // eslint-disable-next-line no-console
+  console.log("[tsup] copied src/editor.css → dist/editor.css");
+};
 
 export default defineConfig([
-  // Library builds: ESM + CJS + dts for BOTH render and tiptap-config
+  // Library builds: ESM + CJS + dts for render, tiptap-config, and
+  // the standalone mermaid-init helper (so Next.js / web can import
+  // `@mdcore/editor/mermaid-init` directly without dragging in the
+  // whole tiptap-config bundle).
   {
-    entry: ["src/render.ts", "src/tiptap-config.ts"],
+    entry: [
+      "src/render.ts",
+      "src/tiptap-config.ts",
+      "src/mermaid-init.ts",
+    ],
     format: ["esm", "cjs"],
     dts: true,
     sourcemap: true,
@@ -21,6 +44,9 @@ export default defineConfig([
     outDir: "dist",
     target: "es2020",
     splitting: false,
+    onSuccess: async () => {
+      copyEditorCss();
+    },
     // Mark heavy deps as external for Node consumers (Electron main,
     // vscode webview, web bundle). The UMD build below bundles
     // everything for the browser-only surfaces (QuickLook, iOS

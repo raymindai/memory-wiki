@@ -1,6 +1,6 @@
 {
   "name": "@mdcore/editor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared markdown render + TipTap editor config for memory.wiki. Web is the source of truth; this package vendors web's lib/render.ts and components/TiptapLiveEditor.tsx config so every channel (desktop, vscode, quicklook, ios, android) renders identical output.",
   "private": true,
   "main": "./dist/render.js",
@@ -22,7 +22,14 @@
       "types": "./dist/tiptap-config.d.ts",
       "import": "./dist/tiptap-config.mjs",
       "require": "./dist/tiptap-config.js"
-    }
+    },
+    "./tiptap-config.umd": "./dist/tiptap-config.umd.global.js",
+    "./mermaid-init": {
+      "types": "./dist/mermaid-init.d.ts",
+      "import": "./dist/mermaid-init.mjs",
+      "require": "./dist/mermaid-init.js"
+    },
+    "./editor.css": "./dist/editor.css"
   },
   "scripts": {
     "build": "tsup",

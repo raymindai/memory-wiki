@@ -46,6 +46,14 @@ import { Markdown as TiptapMarkdown } from "tiptap-markdown";
 import { common, createLowlight } from "lowlight";
 import katex from "katex";
 
+// Re-export the Mermaid initializer so the UMD build attaches it to
+// the same globalName (MemoryWikiEditor) and the channel-side mount
+// scripts can just call window.MemoryWikiEditor.initMermaid() right
+// after the editor mounts. Web doesn't use this re-export — it
+// imports from "@mdcore/editor/mermaid-init" directly.
+export { initMermaid } from "./mermaid-init";
+export type { InitMermaidOptions, MermaidHandle } from "./mermaid-init";
+
 // ─── Lowlight (syntax highlighting registry) ───
 // Web aliases `tex`/`bibtex` to `latex` so AI-generated code blocks
 // that use those language names don't crash lowlight. Same here.
@@ -199,16 +207,49 @@ export function createCodeBlockExtension(opts: CreateCodeBlockOpts): ReturnType<
   });
 }
 
+// Polished CodeBlock NodeView — matches web's CustomCodeBlock
+// (apps/web/src/components/TiptapLiveEditor.tsx L65-586) for header
+// chrome + line-number gutter + inline Mermaid rendering + the
+// ignoreMutation/update lifecycle that keeps decorations stable when
+// ProseMirror diffs the doc.
+//
+// What's intentionally missing vs web:
+//   - ASCII detect dropdown ("Convert ▾" → Table/List/Paragraph/Mermaid).
+//     The Mermaid branch hits /api/ascii-to-mermaid which only resolves
+//     on web; the others are pure-text transforms but the dropdown
+//     UI is interlocked with the AI conversion overlay, so we ship
+//     all-or-nothing and leave the TODO below.
+//   - AI conversion overlay (spinner / status messages). Same coupling.
+//
+// TODO(@mdcore/editor): port ASCII conversion menu when
+// /api/ascii-to-mermaid is reachable from non-web channels (probably
+// via the auth-token path Desktop + VS Code already use for /api/ai).
+
 function buildSimpleCodeBlockNodeView(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { node }: { node: any },
+  { node, HTMLAttributes }: { node: any; HTMLAttributes?: Record<string, unknown> },
   opts: CreateCodeBlockOpts
-): { dom: HTMLElement; contentDOM: HTMLElement } {
-  const lang = String(node.attrs.language || "").toLowerCase();
+): {
+  dom: HTMLElement;
+  contentDOM: HTMLElement;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ignoreMutation: (mutation: any) => boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  update: (updatedNode: any) => boolean;
+} {
+  // `node` is captured per NodeView and refreshed in update() below
+  // so the inner handlers (copyBtn, gutter rebuild, mermaid render)
+  // always see the latest textContent without us having to reach
+  // back through editor.state.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let currentNode: any = node;
+  const lang = String(currentNode.attrs.language || "").toLowerCase();
+
   const wrapper = document.createElement("div");
   wrapper.className = "tiptap-codeblock-wrapper";
   wrapper.setAttribute("data-language", lang);
 
+  // ─── Header: lang label + copy button ───
   const header = document.createElement("div");
   header.className = "tiptap-codeblock-header";
   header.contentEditable = "false";
@@ -221,13 +262,15 @@ function buildSimpleCodeBlockNodeView(
   copyBtn.type = "button";
   copyBtn.className = "tiptap-codeblock-copy";
   copyBtn.textContent = "Copy";
-  copyBtn.addEventListener("click", () => {
-    const text = node.textContent || "";
+  copyBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const text = currentNode.textContent || "";
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text).then(
         () => {
           copyBtn.textContent = "Copied";
-          setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
+          setTimeout(() => (copyBtn.textContent = "Copy"), 1200);
         },
         () => {
           copyBtn.textContent = "Copy failed";
@@ -239,25 +282,178 @@ function buildSimpleCodeBlockNodeView(
 
   header.appendChild(langLabel);
   header.appendChild(copyBtn);
+  wrapper.appendChild(header);
+
+  // ─── Body: gutter + <pre><code> ───
+  const body = document.createElement("div");
+  body.className = "tiptap-codeblock-body";
+
+  const gutter = document.createElement("div");
+  gutter.className = "tiptap-codeblock-gutter";
+  gutter.contentEditable = "false";
 
   const pre = document.createElement("pre");
-  pre.className = "tiptap-codeblock-pre";
+  if (HTMLAttributes && typeof HTMLAttributes === "object") {
+    for (const [k, v] of Object.entries(HTMLAttributes)) {
+      try {
+        pre.setAttribute(k, String(v));
+      } catch {
+        /* invalid attr name from upstream — skip */
+      }
+    }
+  }
   const code = document.createElement("code");
-  code.className = lang ? `language-${lang}` : "";
+  if (lang) code.className = `language-${lang}`;
   pre.appendChild(code);
 
-  wrapper.appendChild(header);
-  wrapper.appendChild(pre);
+  body.appendChild(gutter);
+  body.appendChild(pre);
+  wrapper.appendChild(body);
 
-  // Mermaid double-click → channel hook (open canvas modal etc.)
+  // Rebuild the gutter only when the line count changes — the most
+  // common edit (typing inside a line) doesn't touch it.
+  const renderGutter = (): void => {
+    const text = currentNode.textContent || "";
+    const lines = Math.max(1, text.split("\n").length);
+    if (gutter.childElementCount === lines) return;
+    const frag = document.createDocumentFragment();
+    for (let i = 1; i <= lines; i++) {
+      const ln = document.createElement("span");
+      ln.className = "tiptap-codeblock-lineno";
+      ln.textContent = String(i);
+      frag.appendChild(ln);
+    }
+    gutter.replaceChildren(frag);
+  };
+  renderGutter();
+
+  // ─── Mermaid inline render ───
+  // Mounts a sibling .tiptap-mermaid-render container under the
+  // wrapper and polls for window.mermaid (loaded by the channel
+  // either via vendor-editor/mermaid.min.js or via initMermaid()
+  // injecting the CDN). 40 attempts × 150 ms = 6 s timeout.
+  //
+  // Token-tracking pattern (renderToken / myToken): if the user
+  // edits the mermaid source while a previous render is still in
+  // flight, only the latest render writes to the DOM. Without
+  // this, a slow first render could overwrite a fresh one and the
+  // diagram would appear stale.
+  let mermaidContainer: HTMLDivElement | null = null;
+  let renderToken = 0;
+  const ensureMermaidContainer = (): void => {
+    if (!mermaidContainer) {
+      mermaidContainer = document.createElement("div");
+      mermaidContainer.className = "tiptap-mermaid-render";
+      mermaidContainer.contentEditable = "false";
+      wrapper.appendChild(mermaidContainer);
+    }
+  };
+  const renderMermaid = (): void => {
+    const src = (currentNode.textContent || "").trim();
+    if (!src) return;
+    ensureMermaidContainer();
+    const myToken = ++renderToken;
+    const tryRender = (attempt = 0): void => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const m = (window as any).mermaid;
+      if (!m || typeof m.render !== "function") {
+        if (attempt < 40) {
+          if (mermaidContainer && attempt === 0) {
+            mermaidContainer.innerHTML = `<div style="color:var(--text-faint);font-size:11px;padding:8px;">Loading diagram…</div>`;
+          }
+          setTimeout(() => tryRender(attempt + 1), 150);
+        } else if (mermaidContainer) {
+          mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;">Mermaid failed to load</div>`;
+        }
+        return;
+      }
+      const id = `mmd-${Math.random().toString(36).slice(2, 8)}`;
+      try {
+        const result = m.render(id, src);
+        Promise.resolve(result)
+          .then((r: unknown) => {
+            if (myToken !== renderToken) return; // stale render — drop
+            const svg =
+              typeof r === "string"
+                ? r
+                : (r as { svg?: string } | null)?.svg || "";
+            if (mermaidContainer) mermaidContainer.innerHTML = svg;
+          })
+          .catch((err: unknown) => {
+            if (myToken !== renderToken) return;
+            if (mermaidContainer)
+              mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String(
+                (err as Error)?.message || err
+              )}</div>`;
+          });
+      } catch (err) {
+        if (mermaidContainer)
+          mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String(
+            (err as Error)?.message || err
+          )}</div>`;
+      }
+    };
+    tryRender();
+  };
+
+  if (lang === "mermaid") {
+    // Hide the editable <pre> body while rendering the SVG —
+    // double-click is the way back into the source (channel hook
+    // below opens a canvas modal / popout / temp editor).
+    body.style.display = "none";
+    renderMermaid();
+  }
+
+  // Mermaid double-click → channel hook. Web opens a canvas modal,
+  // Desktop a popout, VS Code a temp editor with onDidSave wiring.
   if (lang === "mermaid" && opts.onDoubleClickMermaid) {
     wrapper.addEventListener("dblclick", () => {
-      const text = node.textContent || "";
+      const text = currentNode.textContent || "";
       if (text) opts.onDoubleClickMermaid?.(text);
     });
   }
 
-  return { dom: wrapper, contentDOM: code };
+  // ─── NodeView lifecycle ───
+  // ignoreMutation tells ProseMirror to NOT reparse our wrapper when
+  // we mutate the gutter / header / mermaid container — those are
+  // contentEditable=false satellites, not part of the document. Web
+  // hit this exact bug pre-2026-04: every gutter rebuild caused PM
+  // to reparse + destroy + re-mount the NodeView, which made the
+  // line numbers visibly flicker.
+  //
+  // update() returns false when the node TYPE changes (forces a
+  // fresh NodeView), returns false on lang change (re-mount so the
+  // mermaid branch flips correctly), otherwise refreshes our
+  // captured `currentNode` reference, re-renders the gutter, and
+  // debounce-rebuilds the mermaid SVG so typing inside the fenced
+  // block doesn't spam mermaid.render().
+  let mermaidUpdateTimer: ReturnType<typeof setTimeout> | undefined;
+  return {
+    dom: wrapper,
+    contentDOM: code,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ignoreMutation(mutation: any): boolean {
+      if (mutation?.type === "selection") return false;
+      // Any mutation outside contentDOM (our `code` element) is ours
+      // — gutter rebuild, header copy state, mermaid svg swap.
+      if (!code.contains(mutation?.target as Node)) return true;
+      return false;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    update(updatedNode: any): boolean {
+      if (updatedNode.type.name !== currentNode.type.name) return false;
+      const newLang = String(updatedNode.attrs.language || "").toLowerCase();
+      if (newLang !== lang) return false; // re-mount on language change
+      currentNode = updatedNode;
+      if (newLang === "mermaid") {
+        if (mermaidUpdateTimer) clearTimeout(mermaidUpdateTimer);
+        mermaidUpdateTimer = setTimeout(renderMermaid, 400);
+      } else {
+        renderGutter();
+      }
+      return true;
+    },
+  };
 }
 
 // ─── Extension array ─── matches TiptapLiveEditor.tsx L1234-L1271
