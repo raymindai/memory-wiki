@@ -2013,16 +2013,22 @@ ipcMain.handle("open-quicklook-settings", () => {
 });
 
 ipcMain.handle("is-quicklook-installed", () => {
-  // True if either the legacy marker, the version-specific marker
-  // (set by installQuickLook on launch), or the actual extension host
-  // bundle in ~/Applications exists. The legacy versionless marker
-  // alone was unreliable — once installQuickLook auto-installs, only
-  // the versioned marker gets written, so the old check returned
-  // false even though the .appex was registered with LaunchServices.
+  // v2.5.0+: the .appex lives at Contents/PlugIns/ inside the host
+  // bundle (App Store-required layout). That's the source-of-truth
+  // check; if present, LaunchServices has the extension. Fall back
+  // to legacy markers + the ~/Applications copy for DMG installs
+  // that predate the embed.
+  const embeddedAppex = path.join(
+    path.dirname(app.getAppPath()),
+    "..",
+    "PlugIns",
+    "MemoryWikiQLExtension.appex"
+  );
+  if (fs.existsSync(embeddedAppex)) return true;
   const legacy = path.join(USER_DATA_DIR, ".quicklook-installed");
   const versioned = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
-  const installedBundle = path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app");
-  return fs.existsSync(legacy) || fs.existsSync(versioned) || fs.existsSync(installedBundle);
+  const userAppsBundle = path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app");
+  return fs.existsSync(legacy) || fs.existsSync(versioned) || fs.existsSync(userAppsBundle);
 });
 
 ipcMain.handle("read-clipboard", () => {
@@ -2184,15 +2190,33 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-// ─── QuickLook Extension Installer ───
-// Copies memory.wiki QuickLook.app to ~/Applications/ so macOS can discover the .appex plugin.
-// Extensions in Contents/Resources/ of another app are NOT discovered by macOS.
+// ─── QuickLook Extension Installer (legacy DMG fallback only) ───
+// v2.5.0+: the QuickLook .appex is now embedded directly in
+// Contents/PlugIns/ of the host app via scripts/afterPack.js, which
+// is the App Store-required layout. macOS auto-discovers any .appex
+// living there on first launch — no copy step needed.
+//
+// We keep this fallback for two cases only:
+//   1. Legacy DMG builds (pre-2.5.0) where the .appex shipped at
+//      Contents/Resources/memory.wiki QuickLook.app instead.
+//   2. Hand-built local dev runs where the PlugIns embed didn't run.
+// If the PlugIns location already exists we no-op so MAS builds stay
+// sandbox-clean (writes to ~/Applications are blocked under App
+// Sandbox anyway).
 
 function installQuickLook() {
-  // Marker is keyed by Desktop version so each new Desktop release
-  // refreshes the bundled QuickLook copy in ~/Applications. Without
-  // the version suffix a user on v2.3.3 → v2.3.4 would keep the old
-  // QuickLook (whose template still showed mdfy.cc text).
+  // If the .appex is already inside our own bundle at the standard
+  // PlugIns location, LaunchServices has already registered it. Skip.
+  const embeddedAppex = path.join(
+    path.dirname(app.getAppPath()),
+    "..",
+    "PlugIns",
+    "MemoryWikiQLExtension.appex"
+  );
+  if (fs.existsSync(embeddedAppex)) {
+    return;
+  }
+
   const marker = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
   if (fs.existsSync(marker)) return;
 
@@ -2212,7 +2236,7 @@ function installQuickLook() {
     execSync(`cp -R "${qlSource}" "${qlDest}"`);
     execSync(`open "${qlDest}"`);
     fs.writeFileSync(marker, new Date().toISOString());
-    console.log("[quicklook] Installed/refreshed to ~/Applications/");
+    console.log("[quicklook] Legacy install/refresh to ~/Applications/");
   } catch (err) {
     console.log("[quicklook] Install failed (non-critical):", err.message);
   }
