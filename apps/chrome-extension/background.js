@@ -1,15 +1,41 @@
-/**
- * Memory.Wiki Chrome Extension — Background Service Worker
+/*
+ * memory.wiki Chrome extension — background service worker.
  *
- * Handles context menu and message passing.
- * Works on AI chat pages (full conversation capture) and any page (selection/page capture).
+ * Owns:
+ *   - context menu installation
+ *   - keyboard command routing (capture-page, capture-selection)
+ *   - the publish pipeline (compress + POST /api/docs + open URL + clipboard)
+ *     used by command-triggered captures (popup-triggered captures have their
+ *     own copy in popup.js so they can render status in the popup UI)
+ *   - cross-origin proxy fetch + image upload for content scripts
+ *   - reading the memory.wiki Supabase auth cookie for user-id resolution
+ *
+ * Manifest V3 service worker — no DOM, no persistent state.
  */
 
 const MDFY_URL = "https://memory.wiki";
 const MDFY_COOKIE_URL = "https://memory.wiki";
 const MAX_URL_BYTES = 8000;
 
-// ─── Compression (same as content.js / share.ts) ───
+// ─── AI host detection (must match the manifest content_scripts entry) ───
+
+const AI_HOSTS = [
+  "chatgpt.com",
+  "chat.openai.com",
+  "claude.ai",
+  "gemini.google.com",
+];
+
+function isAiHost(url) {
+  try {
+    const u = new URL(url);
+    return AI_HOSTS.some((h) => u.hostname === h || u.hostname.endsWith("." + h));
+  } catch {
+    return false;
+  }
+}
+
+// ─── Compression (mirrors content.js / popup.js / share.ts) ───
 
 function arrayBufferToBase64Url(buffer) {
   const bytes = new Uint8Array(buffer);
@@ -28,23 +54,203 @@ async function compressToBase64Url(text) {
     const compressed = await new Response(stream).arrayBuffer();
     return arrayBufferToBase64Url(compressed);
   } catch (err) {
-    console.warn("[Memory.Wiki] Compression failed, using plain base64:", err);
+    console.warn("[memory.wiki] Compression failed, using plain base64:", err);
     return btoa(unescape(encodeURIComponent(text)));
   }
 }
 
-async function sendToMdfy(text) {
-  if (!text) return;
-  const compressed = await compressToBase64Url(text);
+// ─── Auth ───
+
+function readUserIdFromCookies() {
+  return new Promise((resolve) => {
+    try {
+      chrome.cookies.getAll({ url: MDFY_COOKIE_URL }, (cookies) => {
+        if (!cookies) { resolve(null); return; }
+        const authParts = cookies
+          .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
+          .sort((a, b) => a.name.localeCompare(b.name));
+        if (authParts.length === 0) { resolve(null); return; }
+        try {
+          const combined = authParts.map((c) => c.value).join("").replace(/^base64-/, "");
+          const json = JSON.parse(atob(combined));
+          resolve(json.user?.id || null);
+        } catch {
+          resolve(null);
+        }
+      });
+    } catch (err) {
+      console.warn("[memory.wiki] Cookie access error:", err);
+      resolve(null);
+    }
+  });
+}
+
+// ─── Publish pipeline (used by command-triggered captures) ───
+
+async function publishMarkdown({ markdown, title }) {
+  if (!markdown || !markdown.trim()) {
+    return { ok: false, error: "empty markdown" };
+  }
+
+  const userId = await readUserIdFromCookies();
+  const resolvedTitle = title || "Captured content";
+
+  if (userId) {
+    try {
+      const res = await fetch(MDFY_URL + "/api/docs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          markdown,
+          userId,
+          title: resolvedTitle.slice(0, 100),
+          editMode: "account",
+          source: "chrome",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const { id, editToken } = data;
+        const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
+        // Open the doc.
+        chrome.tabs.create({ url: MDFY_URL + "/?from=" + id + tokenParam });
+        // Clipboard: AI-friendly paste sentence.
+        const aiSentence = "Use " + MDFY_URL + "/" + id + " as my context.";
+        try {
+          await copyToClipboardViaOffscreen(aiSentence);
+        } catch (err) {
+          console.warn("[memory.wiki] clipboard copy failed:", err);
+        }
+        notifyToast("Published. URL copied for AI.");
+        return { ok: true, id };
+      }
+      console.warn("[memory.wiki] /api/docs failed:", res.status);
+    } catch (err) {
+      console.warn("[memory.wiki] publish failed, falling back to hash URL:", err);
+    }
+  }
+
+  // Fallback: anonymous hash URL.
+  const compressed = await compressToBase64Url(markdown);
   const url = MDFY_URL + "/#md=" + compressed;
   if (url.length <= MAX_URL_BYTES) {
     chrome.tabs.create({ url });
-  } else {
-    chrome.tabs.create({ url: MDFY_URL });
+    notifyToast("Opened on memory.wiki.");
+    return { ok: true };
+  }
+  chrome.tabs.create({ url: MDFY_URL });
+  notifyToast("Content too large for URL. Open memory.wiki and paste.");
+  return { ok: false, error: "too large" };
+}
+
+// Service worker has no `navigator.clipboard` access — use the offscreen API.
+// For now we fall through gracefully (the doc still opens in a new tab).
+async function copyToClipboardViaOffscreen(text) {
+  // chrome.offscreen requires creating an offscreen document. For simplicity
+  // we attempt the modern path first; if it isn't available, content scripts
+  // and the popup still own their own clipboard writes, so command-triggered
+  // captures will simply skip the clipboard side-effect.
+  if (!chrome.offscreen) return;
+  try {
+    const existingContexts = await chrome.runtime.getContexts({
+      contextTypes: ["OFFSCREEN_DOCUMENT"],
+    });
+    if (existingContexts.length === 0) {
+      await chrome.offscreen.createDocument({
+        url: chrome.runtime.getURL("offscreen.html"),
+        reasons: ["CLIPBOARD"],
+        justification: "Copy memory.wiki link to clipboard after capture.",
+      });
+    }
+    await chrome.runtime.sendMessage({ target: "offscreen", action: "copy", text });
+  } catch (err) {
+    // Offscreen unavailable — silently skip.
+    console.warn("[memory.wiki] offscreen clipboard unavailable:", err);
   }
 }
 
-// ─── Context Menus ───
+function notifyToast(message) {
+  // Best-effort: surface a short notification. Falls back silently if the
+  // notifications permission isn't granted (we don't request it explicitly).
+  try {
+    if (chrome.notifications && chrome.notifications.create) {
+      chrome.notifications.create({
+        type: "basic",
+        iconUrl: chrome.runtime.getURL("icons/icon128.png"),
+        title: "memory.wiki",
+        message,
+        silent: true,
+      }, () => { /* swallow lastError */ void chrome.runtime.lastError; });
+    }
+  } catch { /* ignore */ }
+}
+
+// ─── Capture dispatch ───
+
+async function ensureGeneralContentScript(tabId) {
+  // Some pages (e.g. chrome:// or extension galleries) refuse content scripts.
+  // We try to ping first; if the content script answers we know it's loaded.
+  try {
+    const reply = await chrome.tabs.sendMessage(tabId, { action: "ping-page" });
+    if (reply && reply.ok) return true;
+  } catch { /* not injected yet */ }
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["lib/readability.js", "lib/html-to-markdown.js", "content-page.js"],
+    });
+    return true;
+  } catch (err) {
+    console.warn("[memory.wiki] could not inject general content script:", err);
+    return false;
+  }
+}
+
+async function dispatchCapture(tab, kind) {
+  if (!tab || !tab.id) return;
+  const isAi = isAiHost(tab.url || "");
+
+  // AI hosts: use the existing conversation capture path (already excellent).
+  if (isAi) {
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: "capture-conversation",
+        lastN: 0,
+      });
+      if (response && response.markdown) {
+        const titleMatch = response.markdown.match(/^#\s+(.+)/m);
+        const title = titleMatch ? titleMatch[1].trim() : "AI conversation";
+        await publishMarkdown({ markdown: response.markdown, title });
+        return;
+      }
+    } catch (err) {
+      console.warn("[memory.wiki] AI conversation capture failed:", err);
+    }
+    notifyToast("Could not capture conversation. Try the popup button.");
+    return;
+  }
+
+  // General page (or selection).
+  const ok = await ensureGeneralContentScript(tab.id);
+  if (!ok) {
+    notifyToast("Cannot capture this page (chrome:// or restricted URL).");
+    return;
+  }
+  try {
+    const action = kind === "selection" ? "capture-page-selection" : "capture-page";
+    const response = await chrome.tabs.sendMessage(tab.id, { action });
+    if (response && response.markdown) {
+      await publishMarkdown({ markdown: response.markdown, title: response.title });
+      return;
+    }
+    notifyToast(kind === "selection" ? "No selection to capture." : "Could not extract page.");
+  } catch (err) {
+    console.warn("[memory.wiki] page capture failed:", err);
+    notifyToast("Capture failed: " + err.message);
+  }
+}
+
+// ─── Context menus ───
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
@@ -55,7 +261,7 @@ chrome.runtime.onInstalled.addListener(() => {
     });
     chrome.contextMenus.create({
       id: "mw-capture-page",
-      title: "Send this page to Memory.Wiki",
+      title: "Send this page to memory.wiki",
       contexts: ["page"],
     });
   });
@@ -63,147 +269,33 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "mw-send-selection") {
-    // Try rich extraction from content script first
-    try {
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: "capture-selection",
-      });
-      if (response && response.markdown) {
-        await sendToMdfy(response.markdown);
-        return;
-      }
-    } catch (err) {
-      console.warn("[Memory.Wiki] Content script not available for selection capture:", err);
-    }
-
-    // Fallback: use plain selection text
-    if (info.selectionText) {
-      await sendToMdfy(info.selectionText);
-    }
+    await dispatchCapture(tab, "selection");
+    return;
   }
-
   if (info.menuItemId === "mw-capture-page") {
-    try {
-      // Try content script first (for AI pages, gets conversation)
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: "capture-page",
-      });
-      if (response && response.markdown) {
-        await sendToMdfy(response.markdown);
-        return;
-      }
-    } catch (err) {
-      console.warn("[Memory.Wiki] Content script not available for page capture:", err);
-    }
-
-    // Fallback: inject a script to extract page content
-    try {
-      const [result] = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          // Lightweight page-to-markdown extraction
-          const title = document.title;
-          const url = window.location.href;
-
-          // Try to find main content area
-          const main = document.querySelector("main, article, [role='main'], .content, .post-content, .entry-content")
-            || document.body;
-
-          // Clone and clean
-          const clone = main.cloneNode(true);
-
-          // Remove noise elements
-          clone.querySelectorAll("nav, footer, header, aside, script, style, noscript, iframe, .sidebar, .nav, .menu, .ad, .advertisement, [role='navigation'], [role='banner'], [role='complementary']").forEach(el => el.remove());
-
-          // Extract text with basic structure
-          let md = "";
-          if (title) md += "# " + title + "\n\n";
-          md += "> Source: " + url + "\n\n---\n\n";
-
-          // Process headings
-          clone.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach(h => {
-            const level = parseInt(h.tagName[1]);
-            h.textContent = "\n" + "#".repeat(level) + " " + h.textContent.trim() + "\n";
-          });
-
-          // Process code blocks
-          clone.querySelectorAll("pre").forEach(pre => {
-            const code = pre.querySelector("code");
-            const text = code ? code.textContent : pre.textContent;
-            let lang = "";
-            const langClass = (code || pre).className.match(/language-(\w+)|lang-(\w+)/);
-            if (langClass) lang = langClass[1] || langClass[2];
-            pre.textContent = "\n```" + lang + "\n" + text.trim() + "\n```\n";
-          });
-
-          // Process inline code
-          clone.querySelectorAll("code").forEach(code => {
-            if (code.closest("pre")) return;
-            code.textContent = "`" + code.textContent + "`";
-          });
-
-          // Process bold/italic
-          clone.querySelectorAll("strong, b").forEach(el => { el.textContent = "**" + el.textContent + "**"; });
-          clone.querySelectorAll("em, i").forEach(el => { el.textContent = "*" + el.textContent + "*"; });
-
-          // Process links (convert relative URLs to absolute)
-          clone.querySelectorAll("a").forEach(a => {
-            let href = a.getAttribute("href");
-            const text = a.textContent;
-            if (href && text) {
-              try { href = new URL(href, document.baseURI).href; } catch { /* keep original */ }
-              a.textContent = "[" + text + "](" + href + ")";
-            }
-          });
-
-          // Process lists
-          clone.querySelectorAll("ul > li").forEach(li => { li.textContent = "- " + li.textContent.trim(); });
-          clone.querySelectorAll("ol > li").forEach((li, i) => { li.textContent = (i + 1) + ". " + li.textContent.trim(); });
-
-          // Process tables
-          clone.querySelectorAll("table").forEach(table => {
-            let tableMd = "\n";
-            const rows = table.querySelectorAll("tr");
-            rows.forEach((row, rowIndex) => {
-              const cells = row.querySelectorAll("th, td");
-              const cellTexts = Array.from(cells).map(c => c.textContent.trim());
-              tableMd += "| " + cellTexts.join(" | ") + " |\n";
-              if (rowIndex === 0) {
-                tableMd += "| " + cellTexts.map(() => "---").join(" | ") + " |\n";
-              }
-            });
-            table.textContent = tableMd;
-          });
-
-          // Process blockquotes
-          clone.querySelectorAll("blockquote").forEach(bq => {
-            const lines = bq.textContent.trim().split("\n");
-            bq.textContent = lines.map(l => "> " + l).join("\n");
-          });
-
-          // Get text
-          let text = clone.innerText || clone.textContent || "";
-          text = text.replace(/\n{3,}/g, "\n\n").trim();
-          md += text;
-
-          return md;
-        },
-      });
-      if (result?.result) {
-        await sendToMdfy(result.result);
-      }
-    } catch (err) {
-      console.warn("[Memory.Wiki] Page extraction failed:", err);
-      // Last resort: just open Memory.Wiki
-      chrome.tabs.create({ url: MDFY_URL });
-    }
+    await dispatchCapture(tab, "page");
   }
 });
 
-// ─── Message Handling ───
+// ─── Keyboard commands ───
+
+chrome.commands.onCommand.addListener(async (command) => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab) return;
+  if (command === "capture-page") {
+    await dispatchCapture(tab, "page");
+  } else if (command === "capture-selection") {
+    await dispatchCapture(tab, "selection");
+  }
+});
+
+// ─── Message handling (from popup + content scripts) ───
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // Capture visible tab as screenshot
+  // Offscreen document is the only recipient of "target: offscreen" messages.
+  if (request && request.target === "offscreen") return;
+
+  // Screenshot the active tab (used by AI conversation capture for diagrams).
   if (request.action === "capture-tab") {
     chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
       if (chrome.runtime.lastError) {
@@ -212,10 +304,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ dataUrl });
       }
     });
-    return true; // async
+    return true;
   }
 
-  // Upload image data URL to Memory.Wiki (bypasses CORS)
+  // Upload an image data URL via the memory.wiki upload endpoint.
   if (request.action === "upload-image") {
     const { dataUrl, userId } = request;
     (async () => {
@@ -248,13 +340,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  // Proxy fetch requests from content script (bypasses CORS)
+  // CORS-free fetch proxy (content scripts can't hit memory.wiki directly
+  // from some hosts without it).
   if (request.action === "proxy-fetch") {
     const { url, options } = request;
     try {
       const parsed = new URL(url);
       if (parsed.origin !== "https://memory.wiki") {
-        sendResponse({ ok: false, error: "Only requests to Memory.Wiki are allowed" });
+        sendResponse({ ok: false, error: "Only requests to memory.wiki are allowed" });
         return true;
       }
     } catch {
@@ -280,37 +373,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "get-user-id") {
-    // Get user ID from Supabase auth cookies on Memory.Wiki
-    // Supabase stores auth as base64-encoded JSON split across multiple cookies:
-    //   sb-{ref}-auth-token.0, sb-{ref}-auth-token.1, etc.
-    // Value format: "base64-" prefix + base64(JSON with {access_token, user: {id}})
-    const cookiePromise = new Promise((resolve) => {
-      try {
-        chrome.cookies.getAll({ url: MDFY_COOKIE_URL }, (cookies) => {
-          if (!cookies) { resolve({ userId: null }); return; }
-
-          // Find all auth token cookie parts
-          const authParts = cookies
-            .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
-            .sort((a, b) => a.name.localeCompare(b.name));
-
-          if (authParts.length === 0) { resolve({ userId: null }); return; }
-
-          try {
-            // Combine cookie values and strip "base64-" prefix
-            const combined = authParts.map((c) => c.value).join("").replace(/^base64-/, "");
-            const json = JSON.parse(atob(combined));
-            resolve({ userId: json.user?.id || null });
-          } catch {
-            console.warn("[Memory.Wiki] Failed to parse auth cookies");
-            resolve({ userId: null });
-          }
-        });
-      } catch (err) {
-        console.warn("[Memory.Wiki] Cookie access error:", err);
-        resolve({ userId: null });
-      }
-    });
+    const cookiePromise = readUserIdFromCookies().then((userId) => ({ userId }));
     const timeoutPromise = new Promise((resolve) => {
       setTimeout(() => resolve({ userId: null }), 5000);
     });
@@ -318,6 +381,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(result);
     }).catch(() => {
       sendResponse({ userId: null });
+    });
+    return true;
+  }
+
+  if (request.action === "get-user-info") {
+    // Returns { userId, email } if signed in, { userId: null } otherwise.
+    chrome.cookies.getAll({ url: MDFY_COOKIE_URL }, (cookies) => {
+      if (!cookies) { sendResponse({ userId: null }); return; }
+      const authParts = cookies
+        .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      if (authParts.length === 0) { sendResponse({ userId: null }); return; }
+      try {
+        const combined = authParts.map((c) => c.value).join("").replace(/^base64-/, "");
+        const json = JSON.parse(atob(combined));
+        sendResponse({
+          userId: json.user?.id || null,
+          email: json.user?.email || null,
+        });
+      } catch {
+        sendResponse({ userId: null });
+      }
     });
     return true;
   }

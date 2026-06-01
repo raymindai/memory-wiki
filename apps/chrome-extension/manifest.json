@@ -1,15 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "memory.wiki: Capture. Edit. Share. One URL for your Markdown.",
-  "version": "2.2.4",
-  "description": "Capture AI conversations from ChatGPT, Claude, and Gemini. Edit in WYSIWYG, share with a permanent link.",
+  "name": "memory.wiki — capture any page or AI chat as a markdown URL",
+  "version": "2.3.0",
+  "description": "Clip any web page or AI conversation (ChatGPT, Claude, Gemini) to a clean markdown URL on memory.wiki. Edit, share, paste into the next AI.",
   "permissions": [
     "activeTab",
     "tabs",
     "contextMenus",
     "storage",
     "scripting",
-    "cookies"
+    "cookies",
+    "notifications",
+    "offscreen"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -24,6 +26,20 @@
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "capture-page": {
+      "suggested_key": { "default": "Ctrl+Shift+E", "mac": "Command+Shift+E" },
+      "description": "memory.wiki: capture current page"
+    },
+    "capture-selection": {
+      "suggested_key": { "default": "Ctrl+Shift+X", "mac": "Command+Shift+X" },
+      "description": "memory.wiki: capture selection"
     }
   },
   "content_scripts": [
@@ -53,6 +69,27 @@
         "github.css"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://memory.wiki/*",
+        "https://memory.wiki.online/*",
+        "https://mdfy.app/*"
+      ],
+      "js": [
+        "lib/readability.js",
+        "lib/html-to-markdown.js",
+        "content-page.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
     }
   ],
   "background": {
