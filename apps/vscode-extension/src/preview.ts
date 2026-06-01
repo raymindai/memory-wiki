@@ -1013,6 +1013,14 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
     const tiptapConfigUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.extensionUri, "media", "vendor-editor", "tiptap-config.umd.js")
     );
+    // v1.6.1 — shared TipTap stylesheet from @mdcore/editor. Without
+    // this the webview was rendering unstyled .tiptap-* selectors —
+    // code blocks lost their header chrome, tables lost borders,
+    // math/mermaid containers were invisible. Injected AFTER
+    // preview.css below so editor selectors win on conflict.
+    const editorCssUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "media", "vendor-editor", "editor.css")
+    );
     const tiptapMountUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.extensionUri, "media", "tiptap-mount.js")
     );
@@ -1067,6 +1075,7 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/material-darker.css">
   <link rel="stylesheet" href="${cssUri}">
+  <link rel="stylesheet" href="${editorCssUri}">
   ${this.isCloudPreview ? `<style>
     #formatting-toolbar, #live-formatting-toolbar, #source-view, #split-divider, .toolbar-group, #selection-toolbar { display: none !important; }
     #live-pane { width: 100% !important; height: 100% !important; }
@@ -1346,6 +1355,22 @@ document.querySelectorAll('[data-math-style]').forEach(el=>{try{katex.render(el.
        handlers (they short-circuit when the flag is true). -->
   <script nonce="${nonce}" src="${renderUmdUri}"></script>
   <script nonce="${nonce}" src="${tiptapConfigUri}"></script>
+  <!-- v1.6.1: theme-aware Mermaid init. Loads mermaid@10 from
+       jsdelivr (already allowed in the CSP) and applies the same
+       themeVariables web uses so fenced \`\`\`mermaid blocks render
+       as SVGs with orange edges + the correct dark/light palette.
+       MutationObserver re-inits when [data-theme] flips. -->
+  <script nonce="${nonce}">
+    (function () {
+      try {
+        if (window.MemoryWikiEditor && window.MemoryWikiEditor.initMermaid) {
+          window.MemoryWikiEditor.initMermaid();
+        }
+      } catch (e) {
+        console.warn("[mermaid-init]", e);
+      }
+    })();
+  </script>
   <script nonce="${nonce}" src="${tiptapMountUri}"></script>
   <script nonce="${nonce}" src="${previewTiptapUri}"></script>
   <script nonce="${nonce}" src="${jsUri}"></script>

@@ -40,8 +40,14 @@ cp "$EDITOR_DIST/render.js.map" "$EXT_DIR/vendor-editor/render.cjs.map"
 mkdir -p "$EXT_DIR/media/vendor-editor"
 cp "$EDITOR_DIST/render.umd.global.js" "$EXT_DIR/media/vendor-editor/render.umd.js"
 cp "$EDITOR_DIST/tiptap-config.umd.global.js" "$EXT_DIR/media/vendor-editor/tiptap-config.umd.js"
+# Shared TipTap stylesheet (web parity). preview.ts injects a
+# <link> tag pointing at this file via webview.asWebviewUri after
+# the existing preview.css link, so editor selectors win on
+# conflicts.
+cp "$EDITOR_DIST/editor.css" "$EXT_DIR/media/vendor-editor/editor.css"
 
 echo "✓ Vendored @mdcore/editor"
 echo "  - $EXT_DIR/vendor-editor/render.cjs (Node)"
 echo "  - $EXT_DIR/media/vendor-editor/render.umd.js (webview)"
 echo "  - $EXT_DIR/media/vendor-editor/tiptap-config.umd.js (webview)"
+echo "  - $EXT_DIR/media/vendor-editor/editor.css (webview)"
