@@ -16,7 +16,7 @@ enum EmbeddedFont {
     static let blobBase64: String = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzOC45OCA0Mi4wMSI+CiAgPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDMwLjQuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDIuMS40IEJ1aWxkIDIyNikgIC0tPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuc3QwIHsKICAgICAgICBmaWxsOiAjZmFmYWZhOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMzYuMTksMjEuMDRjLTEuNTQsMC0yLjc5LDEuMjUtMi43OSwyLjc5czEuMjUsMi43OSwyLjc5LDIuNzksMi43OS0xLjI1LDIuNzktMi43OS0xLjI1LTIuNzktMi43OS0yLjc5WiIvPgogIDxjaXJjbGUgY2xhc3M9InN0MCIgY3g9IjIwLjExIiBjeT0iNC4zNyIgcj0iNC4zNyIvPgogIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02LjA5LDMxLjUzYy0xLjM2LjUzLTEuNzQsMi4wNi0xLjE5LDMuMTguNTQsMS4wOCwxLjc5LDEuNTQsMi45OCwxLjA5LDEuMjItLjQ3LDEuNjctMS42OSwxLjE5LTMtLjM5LTEuMDUtMS42Ny0xLjc4LTIuOTctMS4yN1oiLz4KICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMzEuOTMsMTguODJjMi40Ny0yLjA1LDIuNDEtNS42LjQ3LTcuOC0xLjkyLTIuMTYtNS40My0yLjQ3LTcuNy0uMzItMi4xNSwyLjA0LTUuNTcsMi44NS04LjEuNzgtMS4yNi0xLjAzLTIuNTktMS45My00LjM4LTEuNC0xLjM5LjQxLTIuNTksMS41Mi0zLjExLDMuMTMtLjQzLDEuMzEtMS45MywxLjc3LTMuMjQsMS43OS0yLjA4LjAzLTMuODgsMS4zNi00LjgxLDIuODMtMS4yLDEuODktMS4zNiw0LS41NSw1Ljk3LDEuMDgsMi42MSwzLjY0LDQuMiw2LjUsMy43NywxLjg1LS4yOCwzLjgzLjE1LDQuOTYsMS44OS43OSwxLjIxLDEuMSwyLjk0LjY1LDQuMjUtLjcsMi4wNi0uNzIsNC4yMi42Niw1Ljk0LDEuNTgsMS45OSw0LjAzLDIuOCw2LjUxLDIuMTEsMi4xOS0uNiwzLjUzLTIuNDcsNC4yMy00Ljc5LjUtMS42NSwyLjU1LTIuMjgsNC4wNy0yLjM2LDEuOS0uMDksMy4yNS0xLjY1LDMuNzQtMy4xLjY4LTEuOTgtLjI4LTMuNTUtMS40Mi00Ljk0LTIuMTEtMi41Ni0uNzUtNS45LDEuNTEtNy43N1pNMjUuMDgsMjYuNzFjLTEuMDQuNjQtMi4wMi0uODQtMy43OC0xLjUtLjU3LDEuNzYuNDcsMy40Mi0uNDYsNC0uNDYuMjktMS4xOS4zMS0xLjU2LjAzLS45NS0uNzEuMjMtMi4zLS40My00LjA1LTEuOTIuNy0zLjA1LDIuNjItNC4wOCwxLjE2LS40NC0uNjItLjMyLTEuNDYuNDctMS43OS45NS0uMzksMS42Ny0uNzQsMi43MS0xLjM2bC0yLjg2LTEuN2MtLjQ4LS4yOS0uNTItLjk2LS4zMi0xLjM4LjI2LS41NC45OS0uODYsMS41Mi0uNTFsMi42MSwxLjczYy41NS0xLjU0LS4zNS0zLjI2LjM4LTMuOTIuMy0uMjcsMS4wNC0uMzEsMS41MS0uMTIsMSwuNDEuMDksMi4zNC40OSw0LjAybDIuNDktMS42NmMuNTItLjM1LDEuMjMtLjE0LDEuNTcuMzMuMzguNTIuMzQsMS4yOS0uMzUsMS42MS0uOTQuNDQtMS43MS44Ni0yLjY4LDEuNTUsMS4zOCwxLjE0LDMuMjcsMS4yNCwzLjM3LDIuMzQuMDQuNDItLjI4LDEuMDMtLjYxLDEuMjNaIi8+Cjwvc3ZnPg=="
 }
 
-class PreviewViewController: NSViewController, QLPreviewingController {
+class PreviewViewController: NSViewController, QLPreviewingController, WKNavigationDelegate {
 
     var webView: WKWebView!
 
@@ -25,7 +25,27 @@ class PreviewViewController: NSViewController, QLPreviewingController {
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 800, height: 600), configuration: config)
         webView.autoresizingMask = [.width, .height]
+        // QL extensions run sandboxed — anchor clicks with target=_blank
+        // silently no-op unless we intercept them and hand the URL off
+        // to NSWorkspace. The user-visible "Open in memory.wiki" link
+        // in the topbar depends on this.
+        webView.navigationDelegate = self
         self.view = webView
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        // First navigation (the loadHTMLString itself) is .other and
+        // has no URL or about:blank — allow it. Real anchor clicks
+        // surface as .linkActivated and we route those out to the
+        // user's default browser.
+        if navigationAction.navigationType == .linkActivated,
+           let url = navigationAction.request.url,
+           url.scheme == "http" || url.scheme == "https" {
+            NSWorkspace.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
+        decisionHandler(.allow)
     }
 
     func preparePreviewOfFile(at url: URL, completionHandler handler: @escaping (Error?) -> Void) {
