@@ -244,6 +244,12 @@ const AuthManager = {
       // because the cache returned the stale entry on the next read.
       try { profileCache = null; } catch {}
 
+      // Stop any live collaboration session — the Yjs/Realtime channel
+      // joined under the old user's token has no business outliving
+      // the account switch. Renderer will re-join with new auth when
+      // the user opens a doc again.
+      try { CollaborationManager.stop(); } catch {}
+
       // Notify renderer
       if (mainWindow) {
         mainWindow.webContents.send("auth-changed", {

@@ -283,9 +283,12 @@ function renderMathInTextPart(s: string): string {
     }
   });
   // Inline: $X$ — X starts non-space, ends non-space, no inner $ or newline.
-  // Negative lookbehind/lookahead on word chars avoid matching "$5.00" mid-sentence.
-  r = r.replace(/(?<![\w$])\$([^\s$][^\n$]*?[^\s$])\$(?![\w])/g, (m, tex: string) => {
-    if (/^\d+(?:[.,]\d+)?$/.test(tex)) return m;
+  // Negative lookbehind/lookahead on word chars avoid matching "$5.00" mid-
+  // sentence (an unmatched $ won't match anyway, but the boundary keeps us
+  // from gobbling adjacent word characters). The previous pure-number guard
+  // was dropped because it false-rejected legitimate math like $1$, $-1$,
+  // $0.3$ on math-heavy docs — the user-reported "수식 안 나옴" case.
+  r = r.replace(/(?<![\w$])\$([^\s$][^\n$]*?[^\s$])\$(?![\w])/g, (_m, tex: string) => {
     try {
       const rendered = katex.renderToString(decodeHtmlEntities(tex), {
         displayMode: false,
@@ -298,8 +301,9 @@ function renderMathInTextPart(s: string): string {
       return `<code class="math-error">${tex}</code>`;
     }
   });
-  // Single-character inline math: $x$
-  r = r.replace(/(?<![\w$])\$([^\s$\d])\$(?![\w])/g, (m, tex: string) => {
+  // Single-character inline math: $x$ — digit allowed so $1$, $5$ etc.
+  // also render. Word boundary prevents matching mid-prose like `wins$1`.
+  r = r.replace(/(?<![\w$])\$([^\s$])\$(?![\w])/g, (m, tex: string) => {
     try {
       const rendered = katex.renderToString(tex, {
         displayMode: false,
