@@ -1,0 +1,43 @@
+{
+  "name": "@mdcore/editor",
+  "version": "0.1.0",
+  "description": "Shared markdown render + TipTap editor config for memory.wiki. Web is the source of truth; this package vendors web's lib/render.ts and components/TiptapLiveEditor.tsx config so every channel (desktop, vscode, quicklook, ios, android) renders identical output.",
+  "private": true,
+  "main": "./dist/render.js",
+  "module": "./dist/render.mjs",
+  "types": "./dist/render.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.mjs",
+      "require": "./dist/render.js"
+    },
+    "./render": {
+      "types": "./dist/render.d.ts",
+      "import": "./dist/render.mjs",
+      "require": "./dist/render.js"
+    },
+    "./render.umd": "./dist/render.umd.global.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node --experimental-vm-modules --test src/__tests__/*.test.js"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.46",
+    "markdown-it": "^14.1.1",
+    "markdown-it-footnote": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}
