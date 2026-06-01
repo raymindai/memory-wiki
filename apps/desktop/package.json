@@ -9,7 +9,7 @@
     "prebuild": "./scripts/vendor-editor.sh",
     "start": "electron .",
     "build": "electron-builder",
-    "build:dmg": "./scripts/vendor-editor.sh && electron-builder --mac dmg",
+    "build:dmg": "./scripts/vendor-editor.sh && electron-builder --mac dmg && ./scripts/notarize-dmg.sh",
     "build:mas": "./scripts/vendor-editor.sh && electron-builder --mac mas",
     "build:mas:pkg": "./scripts/build-mas.sh",
     "build:all": "./scripts/vendor-editor.sh && electron-builder --mac dmg mas",
@@ -72,7 +72,7 @@
       ],
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "notarize": true
+      "notarize": false
     },
     "mas": {
       "entitlements": "build/entitlements.mas.plist",
