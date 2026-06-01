@@ -74,11 +74,14 @@ export default function VSCodeAuthPage() {
     })();
   }, [supabase]);
 
+  // Eyebrow stays short + factual; the H1 below carries the status. Don't
+  // duplicate "Connected to VS Code" in both — the prior version did and
+  // the page read as the same line twice stacked.
   const contextLabel =
-    status === "success" ? "Connected to VS Code"
+    status === "success" ? "VS Code"
     : status === "error" ? "Couldn't connect"
-    : status === "choose-provider" ? "Sign in to continue"
-    : "Connecting to VS Code";
+    : status === "choose-provider" ? "VS Code"
+    : "VS Code";
 
   return (
     <div
@@ -129,19 +132,13 @@ export default function VSCodeAuthPage() {
                 margin: 0,
               }}
             >
-              Connected to VS Code
+              You&apos;re signed in
             </h1>
             <p
               className="text-center leading-relaxed"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              Your memory.wiki account is now linked. You can close this tab and return to VS Code.
-            </p>
-            <p
-              className="font-mono text-center"
-              style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", marginTop: 0 }}
-            >
-              Didn&apos;t work? Make sure the memory.wiki extension is installed in VS Code.
+              Return to VS Code to start publishing. This tab is safe to close.
             </p>
             <a
               href="?switch=1"
@@ -150,6 +147,12 @@ export default function VSCodeAuthPage() {
             >
               Wrong account? Use a different one
             </a>
+            <p
+              className="font-mono text-center"
+              style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", marginTop: 0 }}
+            >
+              Nothing happened in VS Code? Install the memory.wiki extension first.
+            </p>
           </>
         )}
 

@@ -71,11 +71,11 @@ export default function DesktopAuthPage() {
     })();
   }, [supabase]);
 
+  // Eyebrow stays short + factual; the H1 below carries the status. Don't
+  // duplicate the same line twice stacked.
   const contextLabel =
-    status === "success" ? "Connected to desktop"
-    : status === "error" ? "Couldn't connect"
-    : status === "choose-provider" ? "Sign in to continue"
-    : "Connecting to memory.wiki for Mac";
+    status === "error" ? "Couldn't connect"
+    : "memory.wiki for Mac";
 
   return (
     <div
@@ -118,14 +118,16 @@ export default function DesktopAuthPage() {
                 margin: 0,
               }}
             >
-              Connected to memory.wiki for Mac
+              You&apos;re signed in
             </h1>
             <p
               className="text-center leading-relaxed"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
-              {email ? <>Signed in as <strong style={{ color: "var(--text-primary)" }}>{email}</strong>. </> : null}
-              Your memory.wiki account is now linked. You can close this tab and return to the app.
+              {email ? (
+                <>Signed in as <strong style={{ color: "var(--text-primary)" }}>{email}</strong>. </>
+              ) : null}
+              Return to the Mac app. This tab is safe to close.
             </p>
             <a
               href="?switch=1"

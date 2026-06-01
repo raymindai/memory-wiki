@@ -77,11 +77,11 @@ export default function CliAuthPage() {
   // Mono context eyebrow — small, uppercase-ish via letter-spacing,
   // text-muted. Tells the user which surface they're connecting to
   // without competing with the title.
+  // Eyebrow stays short + factual; the H1 below carries the status. Don't
+  // duplicate the same line twice stacked.
   const contextLabel =
-    status === "success" ? "Token ready"
-    : status === "error" ? "Couldn't connect"
-    : status === "choose-provider" ? "Sign in to continue"
-    : "Connecting to memory.wiki";
+    status === "error" ? "Couldn't connect"
+    : "CLI / MCP";
 
   return (
     <div
