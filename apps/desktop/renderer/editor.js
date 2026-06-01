@@ -1436,21 +1436,33 @@
     window.mwDesktop.onAuthChanged(function(data) {
       sidebarState.authState = data;
       if (data.loggedIn) {
+        // Pull cloud docs + pins + profile in parallel, then re-render
+        // BOTH sidebar (filter tabs, cloud doc list) AND home (greeting
+        // name, counts caption, Starred list, QL banner). Without the
+        // home re-render the user keeps seeing the logged-out greeting
+        // even though the sidebar correctly switches to signed-in.
         Promise.all([
           window.mwDesktop.getCloudDocuments().catch(function() { return []; }),
           window.mwDesktop.getCloudFolders().catch(function() { return []; }),
+          fetchPins(),
+          (window.mwDesktop.getUserProfile ? window.mwDesktop.getUserProfile().catch(function() { return null; }) : Promise.resolve(null)),
         ]).then(function(results) {
           sidebarState.cloudDocs = results[0] || [];
           sidebarState.cloudFolders = results[1] || [];
+          if (results[3]) sidebarState.userProfile = results[3];
           renderSidebar();
+          if (typeof renderHomeScreen === "function") renderHomeScreen();
         });
       } else {
         sidebarState.cloudDocs = [];
         sidebarState.cloudFolders = [];
+        sidebarState.pinnedIds = new Set();
+        sidebarState.userProfile = null;
         cachedImages = null;
         var imgSection = document.getElementById("image-section");
         if (imgSection) imgSection.remove();
         renderSidebar();
+        if (typeof renderHomeScreen === "function") renderHomeScreen();
         // Notify user if this was an unexpected session expiry
         if (data.reason === "session-expired") {
           showToast("Session expired. Sign in again to sync.");
