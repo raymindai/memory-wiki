@@ -54,6 +54,40 @@ import katex from "katex";
 export { initMermaid } from "./mermaid-init";
 export type { InitMermaidOptions, MermaidHandle } from "./mermaid-init";
 
+// ─── v0.3.0 toolbar parity helpers ───
+// Re-exported here so the UMD bundle (globalName: MemoryWikiEditor)
+// attaches them to the same window object the Desktop renderer and
+// VSCode webview already read for buildExtensions(). Web does NOT
+// import these — its React WysiwygToolbar / TiptapLiveEditor still
+// own the equivalent surface and the v0.3.0 helpers exist solely to
+// give the non-React channels the same UX without forking React.
+//
+// Surface, all vanilla DOM:
+//   attachToolbarState(editor, toolbarEl)        — paint aria-pressed
+//   mountTableMenu(editor, opts)                 — floating table menu
+//   buildInlineLinkInput(editor, mountEl)        — popover URL input
+//   buildTableGridPicker(editor, mountEl)        — 6×6 size picker
+//   attachHoverPreviews(toolbarEl)               — data-preview popover
+//   mountSelectionToolbar(editor, { runAi })     — floating selection bar
+//   buildAiMenu(editor, { runAi })               — AI rewrite popover
+export { attachToolbarState } from "./toolbar-state";
+export type { AttachToolbarStateHandle } from "./toolbar-state";
+export { mountTableMenu } from "./table-menu";
+export type { MountTableMenuOptions, TableMenuHandle } from "./table-menu";
+export { buildInlineLinkInput } from "./link-input";
+export type { InlineLinkInputHandle } from "./link-input";
+export { buildTableGridPicker } from "./grid-picker";
+export type { TableGridPickerHandle } from "./grid-picker";
+export { attachHoverPreviews } from "./hover-preview";
+export type { HoverPreviewHandle } from "./hover-preview";
+export { mountSelectionToolbar } from "./selection-toolbar";
+export type {
+  MountSelectionToolbarOptions,
+  SelectionToolbarHandle,
+} from "./selection-toolbar";
+export { buildAiMenu } from "./ai-menu";
+export type { AiMenuHandle, AiMenuOptions } from "./ai-menu";
+
 // ─── Lowlight (syntax highlighting registry) ───
 // Web aliases `tex`/`bibtex` to `latex` so AI-generated code blocks
 // that use those language names don't crash lowlight. Same here.
