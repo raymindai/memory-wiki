@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "node --experimental-vm-modules --test src/__tests__/*.test.js"
+    "test": "node --test __tests__/*.test.mjs"
   },
   "dependencies": {
     "highlight.js": "^11.11.1",
