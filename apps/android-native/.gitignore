@@ -33,3 +33,6 @@ release-keystore.properties
 # never commit secrets — backups created by sed -i, vim, etc.
 secrets.local.properties*
 *.bak
+
+# v3.0 vendored @mdcore/editor assets
+app/src/main/assets/memorywiki/
