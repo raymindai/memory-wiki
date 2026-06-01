@@ -1631,6 +1631,11 @@
   var selToolbar = document.getElementById('selection-toolbar');
 
   function showSelectionToolbar() {
+    // v1.7.0: when TipTap owns the surface, mountSelectionToolbar
+    // (from @mdcore/editor) is the source of truth for the floating
+    // toolbar. Short-circuit the legacy contentEditable-era
+    // positioner so two bars don't fight for the same selection.
+    if (window.__mwTipTapActive) { hideSelectionToolbar(); return; }
     var sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.rangeCount) {
       hideSelectionToolbar();
@@ -2013,8 +2018,14 @@
   });
 
   // ─── Table Context Menu ───
+  // v1.7.0: when TipTap owns the editor surface, mountTableMenu (from
+  // @mdcore/editor) shows a floating row/col/header/delete bar above
+  // the active table. Let the OS default contextmenu through so the
+  // user still gets Cut/Copy/Paste. The legacy right-click handler
+  // below is kept for the (rare) case where TipTap fails to mount.
 
   content.addEventListener('contextmenu', function(e) {
+    if (window.__mwTipTapActive) return; // let OS default through
     var td = e.target.closest('td, th');
     if (!td) {
       hideTableContextMenu();

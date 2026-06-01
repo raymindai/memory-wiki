@@ -1,15 +1,22 @@
 /* =========================================================
-   memory.wiki VS Code Preview — TipTap editor wiring (v1.6.0)
+   memory.wiki VS Code Preview — TipTap editor wiring (v1.7.0)
 
-   Replaces the old contentEditable + execCommand surface with
-   the @mdcore/editor TipTap mount so the VSCode preview matches
-   the web app's WYSIWYG editor 1:1.
+   v1.7.0 — pulls in the @mdcore/editor v0.3.0 toolbar parity
+   helpers (attachToolbarState / attachHoverPreviews /
+   mountTableMenu / mountSelectionToolbar / buildInlineLinkInput
+   / buildTableGridPicker / buildAiMenu). The Desktop renderer
+   wires the exact same helpers — both surfaces now match web's
+   WysiwygToolbar + floating selection toolbar 1:1 without
+   forking React.
 
-   Loads AFTER tiptap-mount.js (which wraps the UMD bundle) and
-   BEFORE preview.js (which we partially defang via the global
-   flag below — preview.js still owns outline, image panel, AI
-   panel, source view, etc. but its toolbar + contentEditable
-   wiring sit behind a `window.__mwTipTapActive` guard).
+   Load order (set in preview.ts):
+     1. render.umd.js          — markdown-it renderer (shared)
+     2. tiptap-config.umd.js   — TipTap + helpers on
+                                  window.MemoryWikiEditor
+     3. tiptap-mount.js        — defines window.MemoryWikiTipTap
+     4. preview-tiptap.js      — this file
+     5. preview.js             — legacy chrome (outline, AI panel)
+                                  guarded behind __mwTipTapActive
    ========================================================= */
 
 (function () {
@@ -17,8 +24,9 @@
 
   // Flag the legacy preview.js script that TipTap owns the editor
   // surface now. preview.js reads this guard and skips its old
-  // toolbar.click + content.input + content.keydown handlers so
-  // they don't double-fire on top of TipTap commands.
+  // toolbar.click + content.input + content.keydown + the legacy
+  // table context menu handlers so they don't double-fire on top
+  // of TipTap commands.
   window.__mwTipTapActive = true;
 
   // Acquire the VS Code API exactly once. preview.js also calls
@@ -26,8 +34,6 @@
   var vscode = (function () {
     try { return acquireVsCodeApi(); } catch (e) { return null; }
   })();
-  // Stash it so preview.js (which runs after us) gets the same
-  // instance via the cached call.
   if (vscode) window.__mwVscode = vscode;
 
   var contentEl = document.getElementById("content");
@@ -36,24 +42,13 @@
     return;
   }
 
-  // Pull initial markdown straight from the HTML template (set in
-  // preview.ts as `window.__initialMarkdown`). This is the
-  // canonical source — the HTML inside #content was the legacy
-  // markdown-it preview that we're about to throw out.
   var initialMarkdown = typeof window.__initialMarkdown === "string"
     ? window.__initialMarkdown
     : "";
-
-  // body[data-read-only="true"] is set in preview.ts for cloud-only
-  // documents. Honour it so the preview surface stays view-only.
   var readOnly = document.body.getAttribute("data-read-only") === "true";
 
-  // Wipe the legacy rendered HTML and let TipTap take ownership of
-  // #content. TipTap mounts its ProseMirror editor view INTO the
-  // container element, so the rest of preview.js (outline,
-  // selection toolbar) keeps reading from #content unchanged.
   contentEl.innerHTML = "";
-  contentEl.removeAttribute("contenteditable"); // ProseMirror manages this
+  contentEl.removeAttribute("contenteditable");
   contentEl.classList.add("tiptap-host");
 
   // Debounce edit -> postMessage. The extension treats every
@@ -102,13 +97,78 @@
     return;
   }
 
-  window.__mwEditor = mounted; // expose for debugging + preview.js
+  window.__mwEditor = mounted;
   var editor = mounted.raw;
 
+  // ─── v1.7.0 selection AI bridge ───
+  // The selection toolbar's AI menu (buildAiMenu) calls runAi(action,
+  // {markdown, language?, instruction?}) and expects a Promise that
+  // resolves to {result} or {error}. We forward to the extension
+  // host via postMessage and correlate the response with a per-
+  // request id. The extension's handleSelectionAi() posts back a
+  // `selectionAiResult` message with the same requestId.
+  var aiRequestSeq = 0;
+  var pendingAi = Object.create(null);
+  function runSelectionAi(action, payload) {
+    return new Promise(function (resolve) {
+      if (readOnly) { resolve({ error: "Document is read-only" }); return; }
+      if (!vscode) { resolve({ error: "VS Code API unavailable" }); return; }
+      var requestId = String(++aiRequestSeq) + ":" + Date.now();
+      pendingAi[requestId] = resolve;
+      // 30s safety timeout — if the host never replies (offline,
+      // crashed handler, …) we still un-stick the menu.
+      setTimeout(function () {
+        if (pendingAi[requestId]) {
+          delete pendingAi[requestId];
+          resolve({ error: "AI timed out" });
+        }
+      }, 30000);
+      vscode.postMessage({
+        type: "selectionAi",
+        requestId: requestId,
+        action: action,
+        markdown: (payload && payload.markdown) || "",
+        language: (payload && payload.language) || undefined,
+        instruction: (payload && payload.instruction) || undefined,
+      });
+    });
+  }
+
+  // ─── v1.7.0 toolbar parity helpers ───
+  // attachToolbarState   → aria-pressed/data-active on permanent
+  //                        toolbar buttons (bold/italic/headings/...)
+  // attachHoverPreviews  → data-preview popover on hover
+  // mountTableMenu       → floating row/col/header/delete menu above
+  //                        the active table
+  // mountSelectionToolbar→ floating B/I/S/H1-3/lists/quote/link/AI bar
+  //                        above the selection
+  // Built lazily inside the toolbarAction dispatcher:
+  //   buildInlineLinkInput   → inline URL popover (replaces prompt)
+  //   buildTableGridPicker   → 6×6 hover grid (replaces fixed 3×3)
+  var H = window.MemoryWikiEditor || {};
+  var permanentToolbar =
+    document.getElementById("live-formatting-toolbar") ||
+    document.getElementById("toolbar");
+  try { if (H.attachToolbarState && permanentToolbar) H.attachToolbarState(editor, permanentToolbar); }
+  catch (e) { console.warn("[preview-tiptap] attachToolbarState failed:", e); }
+  try { if (H.attachHoverPreviews && permanentToolbar) H.attachHoverPreviews(permanentToolbar); }
+  catch (e) { console.warn("[preview-tiptap] attachHoverPreviews failed:", e); }
+  try { if (H.mountTableMenu) H.mountTableMenu(editor); }
+  catch (e) { console.warn("[preview-tiptap] mountTableMenu failed:", e); }
+  try {
+    if (H.mountSelectionToolbar) {
+      H.mountSelectionToolbar(editor, { runAi: runSelectionAi });
+    }
+  } catch (e) { console.warn("[preview-tiptap] mountSelectionToolbar failed:", e); }
+
   // ─── Toolbar handler — TipTap commands ───
-  // Mirrors the web TipTap toolbar wiring in
-  // apps/web/src/components/TiptapLiveEditor.tsx (around L903-L926).
-  function runAction(action) {
+  // Permanent toolbar (#live-formatting-toolbar). The floating
+  // selection toolbar is owned by mountSelectionToolbar above so
+  // we no longer listen for its clicks here.
+  var permanentLinkInput = null;
+  var permanentTablePicker = null;
+
+  function runAction(action, button) {
     if (!editor) return;
     var chain = editor.chain().focus();
     switch (action) {
@@ -132,18 +192,28 @@
       case "codeblock":       chain.toggleCodeBlock().run(); break;
       case "hr":              chain.setHorizontalRule().run(); break;
       case "indent":
-        // TipTap StarterKit ships nested lists via Enter/Tab. The
-        // toolbar buttons map to sinkListItem / liftListItem so
-        // they only work inside a list — outside a list they are
-        // no-ops, matching VSCode's expected behaviour.
-        try { chain.sinkListItem("listItem").run(); }
-        catch (e) { /* not in list */ }
+        try {
+          if (editor.isActive("taskList")) editor.chain().focus().sinkListItem("taskItem").run();
+          else editor.chain().focus().sinkListItem("listItem").run();
+        } catch (e) { /* not in list */ }
         break;
       case "outdent":
-        try { chain.liftListItem("listItem").run(); }
-        catch (e) { /* not in list */ }
+        try {
+          if (editor.isActive("taskList")) editor.chain().focus().liftListItem("taskItem").run();
+          else editor.chain().focus().liftListItem("listItem").run();
+        } catch (e) { /* not in list */ }
         break;
       case "link": {
+        // v1.7.0 — replace prompt() with the inline link input
+        // popover. If we can't build it (UMD missing), fall back
+        // to prompt() so the button isn't dead.
+        if (H.buildInlineLinkInput && permanentToolbar) {
+          if (!permanentLinkInput) {
+            try { permanentLinkInput = H.buildInlineLinkInput(editor, permanentToolbar); }
+            catch (err) { permanentLinkInput = null; }
+          }
+          if (permanentLinkInput) { permanentLinkInput.open(button || null); break; }
+        }
         if (editor.isActive("link")) {
           editor.chain().focus().unsetLink().run();
         } else {
@@ -154,22 +224,22 @@
         break;
       }
       case "image": {
-        // Reuse the extension-side image flow — it pops a VS Code
-        // input box, then sends back an `insertImage` message we
-        // catch below. Keeps API token handling + URL validation
-        // in the extension host where it belongs.
         if (vscode) vscode.postMessage({ type: "requestImageUrl" });
         break;
       }
-      case "table":
+      case "table": {
+        // v1.7.0 — replace fixed 3×3 with the 6×6 grid picker.
+        if (H.buildTableGridPicker && permanentToolbar) {
+          if (!permanentTablePicker) {
+            try { permanentTablePicker = H.buildTableGridPicker(editor, permanentToolbar); }
+            catch (err) { permanentTablePicker = null; }
+          }
+          if (permanentTablePicker) { permanentTablePicker.toggle(button || null); break; }
+        }
         chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
         break;
+      }
       case "math": {
-        // The math extension is a decoration plugin — it watches
-        // text nodes for $..$ / $$..$$ and renders them as KaTeX
-        // widgets. Inserting raw LaTeX text and letting the plugin
-        // pick it up matches the web flow (web's toolbar inserts
-        // `$E = mc^2$` and the user edits in place).
         chain.insertContent("$E = mc^2$").run();
         break;
       }
@@ -179,27 +249,26 @@
       case "removeFormat":
         chain.clearNodes().unsetAllMarks().run();
         break;
-      // Source view + outline + AI handled by preview.js; ignore here.
       default: break;
     }
   }
 
-  // Bind ALL toolbar buttons (formatting toolbar + selection toolbar)
-  // to the TipTap command dispatch. preview.js's listener for these
-  // is guarded by __mwTipTapActive so it short-circuits.
-  ["live-formatting-toolbar", "selection-toolbar", "toolbar"].forEach(function (id) {
+  // Bind the permanent formatting toolbar — selection toolbar is
+  // now owned by mountSelectionToolbar so we skip it here. Capture
+  // listener beats preview.js's bubbled handler (still guarded by
+  // __mwTipTapActive but defense-in-depth).
+  ["live-formatting-toolbar", "toolbar"].forEach(function (id) {
     var el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("click", function (e) {
       var btn = e.target.closest("button[data-action]");
       if (!btn) return;
       var action = btn.getAttribute("data-action");
-      // Skip view-mode buttons (live/split/source) — handled by preview.js
       if (btn.classList.contains("view-btn")) return;
       e.preventDefault();
       e.stopPropagation();
-      runAction(action);
-    }, true); // capture so we beat preview.js's bubbled listener
+      runAction(action, btn);
+    }, true);
   });
 
   // VS Code-style keyboard shortcuts. TipTap StarterKit binds
@@ -210,7 +279,7 @@
     if (e.shiftKey) return;
     if (e.key === "k") {
       e.preventDefault();
-      runAction("link");
+      runAction("link", null);
     }
   }, true);
 
@@ -219,9 +288,6 @@
     var msg = event.data || {};
     switch (msg.type) {
       case "update": {
-        // The extension sent fresh markdown (file changed on disk or
-        // an AI action rewrote it). Replay into TipTap WITHOUT
-        // re-emitting it as an edit.
         if (typeof msg.markdown === "string") {
           isApplyingExternalUpdate = true;
           try {
@@ -233,26 +299,25 @@
         }
         break;
       }
-      case "insertImage": {
-        if (!msg.url) break;
-        editor.chain().focus()
-          .setImage({ src: msg.url, alt: msg.alt || "image" })
-          .run();
-        break;
-      }
+      case "insertImage":
       case "imageUploaded": {
-        // Old contentEditable flow inserted a `![Uploading...]()`
-        // placeholder and swapped it out on success. With TipTap we
-        // just insert the final image node now.
         if (!msg.url) break;
         editor.chain().focus()
           .setImage({ src: msg.url, alt: msg.alt || "image" })
           .run();
         break;
       }
-      // syncStatus, publishedState, image-data, flavorConvertResult,
-      // asciiRender* are handled by preview.js (panel chrome that
-      // doesn't touch the editor surface).
+      case "selectionAiResult": {
+        // v1.7.0 — resolve the pending runSelectionAi promise.
+        var rid = msg.requestId;
+        if (rid && pendingAi[rid]) {
+          var resolve = pendingAi[rid];
+          delete pendingAi[rid];
+          if (msg.error) resolve({ error: String(msg.error) });
+          else resolve({ result: String(msg.result || "") });
+        }
+        break;
+      }
       default: break;
     }
   });
@@ -263,9 +328,6 @@
   document.addEventListener("keydown", function (e) {
     if (!(e.metaKey || e.ctrlKey)) return;
     if (e.key !== "s") return;
-    // Don't preventDefault — let VS Code handle the actual file
-    // save. We only need to make sure the latest markdown reached
-    // the extension first.
     try {
       var md = mounted.getMarkdown();
       if (editTimer) { clearTimeout(editTimer); editTimer = null; }
