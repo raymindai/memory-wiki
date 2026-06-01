@@ -1194,7 +1194,7 @@ body {
       // Newline-joined so the tooltip CSS (white-space: pre-line)
       // renders each fact on its own line. Drops the · separator
       // per brand voice rule.
-      return parts.join('\n');
+      return parts.join('\\n');
     }
 
     function docStatusIcon(doc) {
@@ -1532,7 +1532,7 @@ body {
       var ic = '<div class="doc-icon local">' + icon('file', 14) + '</div>';
       var meta = doc.relativePath || doc.fileName;
       var actions = '<button class="doc-action" data-action="publish" data-path="' + esc(doc.filePath) + '" title="Sync to memory.wiki">' + icon('upload', 14) + '</button>';
-      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + '\n' + (doc.relativePath || doc.fileName)) + '">'
+      return '<li class="doc-item" data-action="open" data-path="' + esc(doc.filePath) + '" title="' + esc(docStateText(doc) + '\\n' + (doc.relativePath || doc.fileName)) + '">'
         + ic
         + '<div class="doc-info"><div class="doc-name">' + esc(doc.fileName) + '</div><div class="doc-meta">' + esc(meta) + '</div></div>'
         + '<div class="doc-actions">' + actions + '</div></li>';
