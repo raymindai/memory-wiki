@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'">
   <style>
+    @font-face {
+      font-family: "Cal Sans";
+      src: url("fonts/CalSans-Regular.ttf") format("truetype");
+      font-weight: 400 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -14,7 +22,62 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─── Header ─── */
+    /* Account chip (top of popup) */
+    .account-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-bottom: 1px solid #141416;
+      background: #0d0d10;
+      font-size: 10px;
+      color: #a1a1aa;
+      min-height: 34px;
+    }
+    .account-chip .avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      background: #1c1c20;
+      color: #71717a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .account-chip .avatar.active {
+      background: rgba(181, 255, 26, 0.15);
+      color: #B5FF1A;
+    }
+    .account-chip .info {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 10px;
+    }
+    .account-chip .info .email {
+      color: #e4e4e7;
+      font-weight: 500;
+    }
+    .account-chip .info .label { color: #71717a; }
+    .account-chip .action {
+      color: #71717a;
+      text-decoration: none;
+      font-size: 10px;
+      flex-shrink: 0;
+      padding: 3px 7px;
+      border-radius: 4px;
+      transition: color 0.1s, background 0.1s;
+    }
+    .account-chip .action:hover { color: #e4e4e7; background: rgba(255,255,255,0.04); }
+    .account-chip .action.cta { color: #B5FF1A; }
+    .account-chip .action.cta:hover { background: rgba(181, 255, 26, 0.08); }
+
+    /* Header */
     .header {
       display: flex;
       align-items: flex-start;
@@ -22,8 +85,16 @@
       padding: 16px 16px 12px;
     }
 
-    .logo { height: 16px; }
-    .logo img { height: 100%; width: auto; }
+    .wordmark {
+      font-family: "Cal Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #e4e4e7;
+      text-decoration: none;
+      line-height: 1;
+    }
+    .wordmark .dot { color: #B5FF1A; }
 
     .header-meta { text-align: right; }
 
@@ -40,7 +111,6 @@
       justify-content: flex-end;
       margin-top: 3px;
     }
-
     .detection-dot {
       width: 5px;
       height: 5px;
@@ -48,7 +118,6 @@
     }
     .detection-dot.active { background: #B5FF1A; }
     .detection-dot.inactive { background: #27272a; }
-
     .detection-text {
       font-size: 9px;
       color: #71717a;
@@ -57,10 +126,10 @@
 
     .platform-hint { display: none; }
 
-    /* ─── Main ─── */
+    /* Main */
     .main { padding: 0 16px 14px; }
 
-    /* ─── Capture Card ─── */
+    /* Capture card */
     .capture-card {
       border: 1px solid #1c1c20;
       border-radius: 10px;
@@ -68,7 +137,7 @@
       margin-bottom: 6px;
     }
 
-    /* ─── Range Radio ─── */
+    /* Range radio */
     .range-options {
       display: none;
       flex-wrap: wrap;
@@ -77,7 +146,6 @@
       border-bottom: 1px solid #1c1c20;
       background: #0f0f12;
     }
-
     .range-options label {
       flex: 1;
       min-width: calc(50% - 2px);
@@ -92,26 +160,18 @@
       transition: all 0.1s;
       border: 1px solid transparent;
     }
-
     .range-options label:hover {
       color: #71717a;
       background: rgba(255,255,255,0.02);
     }
-
-    .range-options input[type="radio"] {
-      display: none;
-    }
-
-    .range-options input[type="radio"]:checked + span {
-      color: #B5FF1A;
-    }
-
+    .range-options input[type="radio"] { display: none; }
+    .range-options input[type="radio"]:checked + span { color: #B5FF1A; }
     .range-options label:has(input:checked) {
       border-color: rgba(181, 255, 26, 0.2);
       background: rgba(181, 255, 26, 0.05);
     }
 
-    /* ─── Capture Button ─── */
+    /* Capture button */
     .capture-btn {
       width: 100%;
       display: flex;
@@ -131,14 +191,13 @@
     .capture-btn:hover:not(:disabled) { background: rgba(181, 255, 26, 0.06); }
     .capture-btn:active:not(:disabled) { background: rgba(181, 255, 26, 0.1); }
     .capture-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
     .capture-btn svg {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
-      opacity: 0.6;
+      stroke-width: 1.75;
+      opacity: 0.8;
     }
-
     .capture-btn .label { flex: 1; }
     .capture-btn .desc {
       display: block;
@@ -148,14 +207,13 @@
       margin-top: 1px;
     }
 
-    /* ─── Selection Button ─── */
+    /* Selection button */
     .selection-card {
       border: 1px solid #1c1c20;
       border-radius: 10px;
       overflow: hidden;
       margin-bottom: 6px;
     }
-
     .selection-btn {
       width: 100%;
       display: flex;
@@ -174,14 +232,13 @@
     }
     .selection-btn:hover { background: rgba(255,255,255,0.02); }
     .selection-btn:active { background: rgba(255,255,255,0.04); }
-
     .selection-btn svg {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
-      opacity: 0.4;
+      stroke-width: 1.75;
+      opacity: 0.5;
     }
-
     .selection-btn .desc {
       display: block;
       font-size: 9px;
@@ -190,7 +247,7 @@
       margin-top: 1px;
     }
 
-    /* ─── Status ─── */
+    /* Status */
     .status {
       font-size: 10px;
       color: #71717a;
@@ -202,137 +259,80 @@
     .status.success { color: #B5FF1A; }
     .status.error { color: #ef4444; }
 
-    /* ─── How it works ─── */
-    .how {
-      padding: 12px 16px 14px;
+    /* Shortcuts row */
+    .shortcuts {
+      padding: 10px 16px 12px;
       border-top: 1px solid #141416;
-    }
-
-    .how-label {
-      font-size: 8px;
-      font-weight: 700;
-      color: #737373;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 10px;
-    }
-
-    .how-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
-
-    .how-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .how-pill {
-      display: inline-flex;
-      align-items: center;
-      height: 20px;
-      padding: 0 7px;
-      border: 1px solid #1c1c20;
-      border-radius: 10px;
-      background: #0f0f12;
-      font-size: 9px;
-      flex-shrink: 0;
-    }
-    .how-pill .md { color: #B5FF1A; font-weight: 800; }
-    .how-pill .dot { color: #fafafa; font-weight: 800; }
-    .how-pill .fy { color: #fafafa; font-weight: 800; }
-    .how-pill .lbl {
-      color: #71717a;
-      font-weight: 500;
-      margin-left: 3px;
-      padding-left: 4px;
-      border-left: 1px solid #1c1c20;
-    }
-    .how-pill .arrow { color: #71717a; margin-left: 1px; font-size: 7px; }
-
-    .how-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 10px;
-      background: #0f0f12;
-      border: 1px solid #1c1c20;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      color: #71717a;
-      font-size: 10px;
-    }
-
-    .how-text {
-      font-size: 10px;
-      color: #a1a1aa;
-      line-height: 1.3;
-    }
-
-    /* ─── Settings ─── */
-    .settings {
-      padding: 10px 16px;
-      border-top: 1px solid #141416;
-    }
-    .settings-label {
+    .shortcuts-label {
       font-size: 8px;
       font-weight: 700;
       color: #737373;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
-    .settings-toggle {
+    .shortcut-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      cursor: pointer;
-    }
-    .settings-text {
-      flex: 1;
       font-size: 10px;
       color: #a1a1aa;
     }
-    .settings-toggle input { display: none; }
-    .settings-switch {
-      width: 28px;
-      height: 16px;
-      border-radius: 8px;
-      background: #27272a;
-      position: relative;
-      transition: background 0.15s;
+    .shortcut-row .keys {
+      display: inline-flex;
+      gap: 3px;
       flex-shrink: 0;
     }
-    .settings-switch::after {
-      content: "";
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 12px;
-      height: 12px;
-      border-radius: 6px;
-      background: #71717a;
-      transition: transform 0.15s, background 0.15s;
-    }
-    .settings-toggle input:checked + .settings-switch {
-      background: rgba(181, 255, 26, 0.25);
-    }
-    .settings-toggle input:checked + .settings-switch::after {
-      transform: translateX(12px);
-      background: #B5FF1A;
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border: 1px solid #1c1c20;
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      background: #0f0f12;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 9px;
+      color: #a1a1aa;
     }
 
-    /* ─── Footer ─── */
+    /* Search */
+    .search-section {
+      padding: 8px 16px;
+      border-top: 1px solid #141416;
+    }
+    .search-input {
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #27272a;
+      background: #0f0f12;
+      color: #e4e4e7;
+      font-size: 11px;
+      outline: none;
+      font-family: inherit;
+    }
+    .search-input:focus { border-color: rgba(181, 255, 26, 0.3); }
+    .search-results {
+      margin-top: 6px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    /* Footer */
     .footer {
       padding: 8px 16px 10px;
       border-top: 1px solid #18181b;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      gap: 8px;
     }
-
     .footer a {
       color: #737373;
       font-size: 10px;
@@ -340,62 +340,7 @@
       transition: color 0.1s;
     }
     .footer a:hover { color: #B5FF1A; }
-
-    /* ─── Account chip (top of popup) ─── */
-    .account-chip {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 16px;
-      border-bottom: 1px solid #141416;
-      background: #0d0d10;
-      font-size: 10px;
-      color: #a1a1aa;
-      min-height: 32px;
-    }
-    .account-chip .avatar {
-      width: 18px;
-      height: 18px;
-      border-radius: 9px;
-      background: #1c1c20;
-      color: #a1a1aa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-    .account-chip .avatar.active {
-      background: rgba(181, 255, 26, 0.15);
-      color: #B5FF1A;
-    }
-    .account-chip .info {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .account-chip .info .email {
-      color: #e4e4e7;
-      font-weight: 500;
-    }
-    .account-chip .info .label { color: #71717a; }
-    .account-chip .action {
-      color: #71717a;
-      text-decoration: none;
-      font-size: 10px;
-      flex-shrink: 0;
-      padding: 3px 6px;
-      border-radius: 4px;
-      transition: color 0.1s, background 0.1s;
-    }
-    .account-chip .action:hover { color: #e4e4e7; background: rgba(255,255,255,0.04); }
-    .account-chip .action.cta {
-      color: #B5FF1A;
-    }
-    .account-chip .action.cta:hover { background: rgba(181, 255, 26, 0.08); }
+    .footer .footer-right { display: flex; gap: 12px; }
   </style>
 </head>
 <body>
@@ -404,15 +349,14 @@
     <span class="info" id="account-info"><span class="label">checking sign-in</span></span>
     <a class="action" id="account-action" href="#"></a>
   </div>
+
   <div class="header">
-    <a class="logo" href="https://memory.wiki" target="_blank">
-      <img src="icons/logo-full-dark.svg" alt="memory.wiki">
-    </a>
+    <a class="wordmark" href="https://memory.wiki" target="_blank">memory<span class="dot">.</span>wiki</a>
     <div class="header-meta">
-      <div class="tagline">Your AI memory, deployable to any AI</div>
+      <div class="tagline">your AI memory, paste anywhere</div>
       <div class="detection" id="platform-badge">
         <span class="detection-dot inactive" id="platform-dot"></span>
-        <span class="detection-text" id="platform-name">Detecting...</span>
+        <span class="detection-text" id="platform-name">detecting</span>
       </div>
     </div>
   </div>
@@ -421,31 +365,37 @@
   <div class="main">
     <div class="capture-card">
       <div class="range-options" id="range-selector">
-        <label><input type="radio" name="range" value="0" checked><span>All</span></label>
-        <label><input type="radio" name="range" value="3"><span>Last 3</span></label>
-        <label><input type="radio" name="range" value="5"><span>Last 5</span></label>
-        <label><input type="radio" name="range" value="10"><span>Last 10</span></label>
+        <label><input type="radio" name="range" value="0" checked><span>all</span></label>
+        <label><input type="radio" name="range" value="3"><span>last 3</span></label>
+        <label><input type="radio" name="range" value="5"><span>last 5</span></label>
+        <label><input type="radio" name="range" value="10"><span>last 10</span></label>
       </div>
       <button class="capture-btn" id="btn-capture" disabled>
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <rect x="3" y="3" width="14" height="14" rx="2"/>
-          <path d="M7 7h6M7 10h4M7 13h5"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 2v6h6"/>
+          <path d="M8 13h8"/>
+          <path d="M8 17h5"/>
         </svg>
         <span class="label">
-          Capture Full Conversation
-          <span class="desc">All messages → Markdown document</span>
+          capture full conversation
+          <span class="desc">all messages as a markdown document</span>
         </span>
       </button>
     </div>
 
     <div class="selection-card">
       <button class="selection-btn" id="btn-selection">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <path d="M5 3v14M15 3v14M3 5h2M3 15h2M15 5h2M15 15h2"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
+          <path d="M4 16v2a2 2 0 0 0 2 2h2"/>
+          <path d="M16 4h2a2 2 0 0 1 2 2v2"/>
+          <path d="M16 20h2a2 2 0 0 0 2-2v-2"/>
+          <path d="M8 12h8"/>
         </svg>
         <span class="label">
-          Capture Selection
-          <span class="desc">Highlighted text from any page</span>
+          capture selection
+          <span class="desc">highlighted text from any page</span>
         </span>
       </button>
     </div>
@@ -453,42 +403,29 @@
     <div class="status" id="status"></div>
   </div>
 
-  <div class="how">
-    <div class="how-label">How it works</div>
-    <div class="how-list">
-      <div class="how-item">
-        <span class="how-pill"><span class="md">M</span><span class="dot">.</span><span class="fy">W</span><span class="lbl">this</span></span>
-        <span class="how-text">Hover any AI response to capture Q&A</span>
-      </div>
-      <div class="how-item">
-        <span class="how-pill"><span class="md">M</span><span class="dot">.</span><span class="fy">W</span><span class="lbl">All</span><span class="arrow">&#9662;</span></span>
-        <span class="how-text">Capture full conversation or a range</span>
-      </div>
-      <div class="how-item">
-        <span class="how-icon">→</span>
-        <span class="how-text">Published on memory.wiki with a permanent URL</span>
-      </div>
+  <div class="shortcuts">
+    <div class="shortcuts-label">keyboard</div>
+    <div class="shortcut-row">
+      <span>capture page</span>
+      <span class="keys"><span class="kbd" id="kbd-page">Cmd+Shift+E</span></span>
+    </div>
+    <div class="shortcut-row">
+      <span>capture selection</span>
+      <span class="keys"><span class="kbd" id="kbd-sel">Cmd+Shift+X</span></span>
     </div>
   </div>
 
-  <div class="search-section" style="padding:8px 16px;border-top:1px solid #141416">
-    <input type="text" id="search-input" placeholder="Search your documents..." style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid #27272a;background:#0f0f12;color:#e4e4e7;font-size:11px;outline:none" />
-    <div id="search-results" style="margin-top:6px;max-height:160px;overflow-y:auto"></div>
-  </div>
-
-  <div class="settings">
-    <div class="settings-label">Settings</div>
-    <label class="settings-toggle" id="toggle-float">
-      <span class="settings-text">Show <span style="color:#B5FF1A;font-weight:700">memory.wiki all</span> button on chat pages</span>
-      <input type="checkbox" id="chk-float">
-      <span class="settings-switch"></span>
-    </label>
+  <div class="search-section">
+    <input type="text" id="search-input" class="search-input" placeholder="search your documents" />
+    <div id="search-results" class="search-results"></div>
   </div>
 
   <div class="footer">
     <a href="https://memory.wiki" target="_blank">memory.wiki</a>
-    <a href="https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" target="_blank">VS Code</a>
-    <a href="https://memory.wiki/about" target="_blank">About</a>
+    <span class="footer-right">
+      <a href="#" id="link-settings">settings</a>
+      <a href="https://memory.wiki/about" target="_blank">about</a>
+    </span>
   </div>
 
   <script src="popup.js"></script>

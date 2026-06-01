@@ -1,9 +1,9 @@
-/**
- * Memory.Wiki Chrome Extension — Content Script
+/*
+ * memory.wiki chrome extension — AI conversation content script.
  *
  * Injected into ChatGPT, Claude, and Gemini pages.
  * Adds a floating "memory.wiki" button and per-message mini buttons.
- * Extracts conversation content as Markdown and sends to Memory.Wiki.
+ * Extracts conversation content as Markdown and sends to memory.wiki.
  */
 
 (function () {
@@ -1007,7 +1007,7 @@
     if (userId) {
       try {
         const titleMatch = markdown.match(/^#\s+(.+)/m);
-        const title = titleMatch ? titleMatch[1].trim().slice(0, 100) : "Captured from " + platformName();
+        const title = titleMatch ? titleMatch[1].trim().slice(0, 100) : "captured from " + platformName();
 
         const res = await proxyFetch(MDFY_URL + "/api/docs", {
           method: "POST",
@@ -1026,11 +1026,17 @@
           const { id, editToken } = parsed;
           const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
           window.open(MDFY_URL + "/?from=" + id + tokenParam, "memorywiki_" + Date.now());
+          // Brand spec section 14: canonical "for AI" paste sentence.
+          // Copy the short URL so the user can paste it into the next AI tool.
+          try {
+            await navigator.clipboard.writeText("Use " + MDFY_URL + "/" + id + " as my context.");
+            showToast("published. URL copied for AI.", 3000);
+          } catch { /* clipboard may be blocked on some sites; still published */ }
           return;
         }
         // Check for auth failure
         if (res.status === 401 || res.status === 403) {
-          showToast("Session expired. Log in at memory.wiki to sync.", 5000);
+          showToast("session expired. sign in at memory.wiki to sync.", 5000);
         }
       } catch (err) {
         console.warn("[Memory.Wiki] Authenticated share failed, falling back to hash URL:", err);
@@ -1069,12 +1075,12 @@
     const btn = document.createElement("button");
     btn.id = "mw-float-btn";
     btn.innerHTML = '<span class="mw-btn-logo"><span class="mw-logo-md">M</span><span class="mw-logo-dot">.</span><span class="mw-logo-fy">W</span></span><span class="mw-btn-label">All</span>';
-    btn.title = "Capture entire conversation and publish on memory.wiki";
+    btn.title = "capture entire conversation and publish on memory.wiki";
 
     const toggle = document.createElement("button");
     toggle.id = "mw-float-toggle";
     toggle.innerHTML = "&#9662;";
-    toggle.title = "Choose range";
+    toggle.title = "choose range";
 
     const menu = document.createElement("div");
     menu.id = "mw-float-menu";
@@ -1233,7 +1239,7 @@
       const miniBtn = document.createElement("button");
       miniBtn.className = "mw-mini-btn";
       miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
-      miniBtn.title = "Send this Q&A to memory.wiki";
+      miniBtn.title = "send this Q&A to memory.wiki";
 
       const resetMini = () => {
         miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';

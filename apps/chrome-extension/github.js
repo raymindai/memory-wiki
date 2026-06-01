@@ -1,8 +1,9 @@
-/**
- * Memory.Wiki Chrome Extension — GitHub Integration
+/*
+ * memory.wiki chrome extension — github integration.
  *
- * Detects .md files on GitHub and adds an "Open in Memory.Wiki" button.
- * Fetches raw markdown and opens it in Memory.Wiki for beautiful rendering + editing.
+ * Detects .md files on GitHub and adds an "open in memory.wiki" button.
+ * Fetches raw markdown and opens it in memory.wiki for beautiful rendering
+ * and editing.
  */
 
 (function () {
@@ -41,15 +42,15 @@
     const btn = document.createElement("button");
     btn.id = "mw-github-btn";
     btn.className = "mw-github-btn";
-    btn.innerHTML = '<span class="mw-gh-label">Open in Memory.Wiki</span>';
-    btn.title = "Open this Markdown file in Memory.Wiki for beautiful rendering and editing";
+    btn.innerHTML = '<span class="mw-gh-label">open in memory.wiki</span>';
+    btn.title = "open this markdown file in memory.wiki for beautiful rendering and editing";
 
     btn.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       btn.classList.add("mw-gh-loading");
-      btn.querySelector(".mw-gh-label").textContent = "Loading...";
+      btn.querySelector(".mw-gh-label").textContent = "loading...";
 
       try {
         const rawUrl = getRawUrl();
@@ -58,7 +59,7 @@
         const markdown = await res.text();
 
         if (!markdown.trim()) {
-          btn.querySelector(".mw-gh-label").textContent = "Empty file";
+          btn.querySelector(".mw-gh-label").textContent = "empty file";
           setTimeout(() => resetButton(btn), 2000);
           return;
         }
@@ -97,7 +98,7 @@
               window.open(MDFY_URL + "/?from=" + id + tokenParam, "_blank");
               btn.classList.remove("mw-gh-loading");
               btn.classList.add("mw-gh-done");
-              btn.querySelector(".mw-gh-label").textContent = "Opened!";
+              btn.querySelector(".mw-gh-label").textContent = "opened!";
               setTimeout(() => resetButton(btn), 3000);
               return;
             }
@@ -120,13 +121,13 @@
 
         btn.classList.remove("mw-gh-loading");
         btn.classList.add("mw-gh-done");
-        btn.querySelector(".mw-gh-label").textContent = "Opened!";
+        btn.querySelector(".mw-gh-label").textContent = "opened!";
         setTimeout(() => resetButton(btn), 3000);
       } catch (err) {
-        console.error("[Memory.Wiki] GitHub integration error:", err);
+        console.error("[memory.wiki] github integration error:", err);
         btn.classList.remove("mw-gh-loading");
         btn.classList.add("mw-gh-error");
-        btn.querySelector(".mw-gh-label").textContent = "Failed";
+        btn.querySelector(".mw-gh-label").textContent = "failed";
         setTimeout(() => resetButton(btn), 3000);
       }
     });
@@ -214,7 +215,7 @@
 
   function resetButton(btn) {
     btn.classList.remove("mw-gh-loading", "mw-gh-done", "mw-gh-error");
-    btn.innerHTML = '<span class="mw-gh-label">Open in Memory.Wiki</span>';
+    btn.innerHTML = '<span class="mw-gh-label">open in memory.wiki</span>';
   }
 
   // Compression (same as content.js)

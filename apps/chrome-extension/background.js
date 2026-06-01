@@ -121,7 +121,7 @@ async function publishMarkdown({ markdown, title }) {
         } catch (err) {
           console.warn("[memory.wiki] clipboard copy failed:", err);
         }
-        notifyToast("Published. URL copied for AI.");
+        notifyToast("published. URL copied for AI.");
         return { ok: true, id };
       }
       console.warn("[memory.wiki] /api/docs failed:", res.status);
@@ -135,11 +135,12 @@ async function publishMarkdown({ markdown, title }) {
   const url = MDFY_URL + "/#md=" + compressed;
   if (url.length <= MAX_URL_BYTES) {
     chrome.tabs.create({ url });
-    notifyToast("Opened on memory.wiki.");
+    try { await copyToClipboardViaOffscreen("Use " + url + " as my context."); } catch { /* ignore */ }
+    notifyToast("opened on memory.wiki. URL copied for AI.");
     return { ok: true };
   }
   chrome.tabs.create({ url: MDFY_URL });
-  notifyToast("Content too large for URL. Open memory.wiki and paste.");
+  notifyToast("content too large for URL. open memory.wiki and paste.");
   return { ok: false, error: "too large" };
 }
 
@@ -226,14 +227,14 @@ async function dispatchCapture(tab, kind) {
     } catch (err) {
       console.warn("[memory.wiki] AI conversation capture failed:", err);
     }
-    notifyToast("Could not capture conversation. Try the popup button.");
+    notifyToast("could not capture conversation. try the popup button.");
     return;
   }
 
   // General page (or selection).
   const ok = await ensureGeneralContentScript(tab.id);
   if (!ok) {
-    notifyToast("Cannot capture this page (chrome:// or restricted URL).");
+    notifyToast("cannot capture this page (chrome:// or restricted URL).");
     return;
   }
   try {
@@ -243,10 +244,10 @@ async function dispatchCapture(tab, kind) {
       await publishMarkdown({ markdown: response.markdown, title: response.title });
       return;
     }
-    notifyToast(kind === "selection" ? "No selection to capture." : "Could not extract page.");
+    notifyToast(kind === "selection" ? "no selection to capture." : "could not extract page.");
   } catch (err) {
     console.warn("[memory.wiki] page capture failed:", err);
-    notifyToast("Capture failed: " + err.message);
+    notifyToast("capture failed: " + err.message);
   }
 }
 
@@ -256,12 +257,12 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: "mw-send-selection",
-      title: "Send selection to memory.wiki",
+      title: "send selection to memory.wiki",
       contexts: ["selection"],
     });
     chrome.contextMenus.create({
       id: "mw-capture-page",
-      title: "Send this page to memory.wiki",
+      title: "send this page to memory.wiki",
       contexts: ["page"],
     });
   });

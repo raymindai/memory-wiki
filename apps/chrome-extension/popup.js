@@ -1,5 +1,5 @@
-/**
- * Memory.Wiki Chrome Extension — Popup Script
+/*
+ * memory.wiki chrome extension — popup script.
  */
 
 const MDFY_URL = "https://memory.wiki";
@@ -69,11 +69,11 @@ function setStatus(text, type = "") {
   statusEl.className = "status " + type;
 }
 
-// ─── Send to Memory.Wiki ───
+// ─── Send to memory.wiki ───
 
 async function openInMemoryWiki(markdown) {
   if (!markdown || markdown.trim().length === 0) {
-    setStatus("No content found", "error");
+    setStatus("no content found", "error");
     return;
   }
 
@@ -91,50 +91,49 @@ async function openInMemoryWiki(markdown) {
       });
 
       if (res.ok) {
-        let parsed; try { parsed = JSON.parse(res.body); } catch { throw new Error("Invalid response"); }
+        let parsed; try { parsed = JSON.parse(res.body); } catch { throw new Error("invalid response"); }
         const { id, editToken } = parsed;
         const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
         chrome.tabs.create({ url: MDFY_URL + "/?from=" + id + tokenParam });
-        // Brand spec section 14: canonical "for AI" paste sentence.
-        // Drop it into the clipboard so the user can paste it
+        // Brand spec section 14 (canonical "for AI" paste sentence).
+        // Drop the short URL on the clipboard so the user can paste it
         // straight into the next AI tool (Cursor / ChatGPT / Claude).
-        // The browser tab also opens so the user sees the doc;
-        // clipboard carries the AI form because that's the
-        // higher-value paste-target right after capturing an AI
-        // conversation.
+        // The browser tab still opens so the user sees the doc.
         const aiSentence = "Use " + MDFY_URL + "/" + id + " as my context.";
         try { await navigator.clipboard.writeText(aiSentence); } catch { /* ignore */ }
-        setStatus("Published. URL copied for AI.", "success");
+        setStatus("published. URL copied for AI.", "success");
         return;
       }
-      // Check for auth failure
+      // Check for auth failure.
       if (res.status === 401 || res.status === 403) {
-        setStatus("Session expired. Log in at memory.wiki to sync.", "error");
+        setStatus("session expired. sign in at memory.wiki to sync.", "error");
         chrome.storage.local.remove("mw-was-logged-in");
       }
     } catch (err) {
-      console.warn("[Memory.Wiki] Authenticated share failed, falling back to hash URL:", err);
+      console.warn("[memory.wiki] authenticated share failed, falling back to hash URL:", err);
     }
   }
 
-  // Fallback: hash-based URL
+  // Fallback: hash-based URL (anon).
   const compressed = await compressToBase64Url(markdown);
   const url = MDFY_URL + "/#md=" + compressed;
 
   if (url.length <= MAX_URL_BYTES) {
     chrome.tabs.create({ url });
-    setStatus("Opened. URL copied for AI.", "success");
+    // Copy the hash URL as a context sentence too — same paste-target pattern.
+    try { await navigator.clipboard.writeText("Use " + url + " as my context."); } catch { /* ignore */ }
+    setStatus("opened. URL copied for AI.", "success");
   } else {
     let copied = false;
     try {
       await navigator.clipboard.writeText(markdown);
       copied = true;
-    } catch { }
+    } catch { /* ignore */ }
     chrome.tabs.create({ url: MDFY_URL });
     if (copied) {
-      setStatus("Content copied. Paste into memory.wiki.", "success");
+      setStatus("content copied. paste into memory.wiki.", "success");
     } else {
-      setStatus("Content too large for URL. Please copy manually.", "error");
+      setStatus("content too large for URL. copy manually.", "error");
     }
   }
 }
@@ -166,20 +165,20 @@ async function detectPlatform() {
       platform = "gemini";
     }
 
-    // Check if on Memory.Wiki
+    // Check if on memory.wiki itself.
     if (url.includes("memory.wiki")) {
       showOnMdfy();
       return null;
     }
 
-    // Check if on GitHub .md file
+    // Check if on a GitHub .md file.
     if (url.includes("github.com") && /\/blob\/.*\.(md|markdown|mdx)$/i.test(url)) {
       platformDot.classList.remove("inactive");
       platformDot.classList.add("active");
       platformNameEl.classList.add("active");
-      platformNameEl.textContent = "GitHub Markdown detected";
+      platformNameEl.textContent = "github markdown detected";
       btnCapture.disabled = true;
-      setStatus("Use the 'Open in memory.wiki' button on the page", "");
+      setStatus("use the 'open in memory.wiki' button on the page", "");
       return null;
     }
 
@@ -213,7 +212,7 @@ function showOnMdfy() {
   }
   btnCapture.disabled = true;
   const labelEl = btnCapture.querySelector(".label");
-  if (labelEl) labelEl.innerHTML = 'You\'re on memory.wiki<span class="desc">Create and edit documents directly here</span>';
+  if (labelEl) labelEl.innerHTML = 'you\'re on memory.wiki<span class="desc">create and edit documents directly here</span>';
   rangeSelector.style.display = "none";
 }
 
@@ -222,11 +221,11 @@ function showNotOnAiPage() {
   platformDot.classList.add("inactive");
   platformDot.style.background = "#60a5fa";
   platformNameEl.classList.add("active");
-  platformNameEl.textContent = "Any webpage";
-  document.getElementById("platform-hint").textContent = "Capture this page as Markdown";
+  platformNameEl.textContent = "any webpage";
+  document.getElementById("platform-hint").textContent = "capture this page as markdown";
   btnCapture.disabled = false;
   const labelEl = btnCapture.querySelector(".label");
-  if (labelEl) labelEl.innerHTML = 'Capture This Page<span class="desc">Page content as a clean Markdown document</span>';
+  if (labelEl) labelEl.innerHTML = 'capture this page<span class="desc">page content as a clean markdown document</span>';
   btnCapture.dataset.mode = "page";
   rangeSelector.style.display = "none";
 }
@@ -354,30 +353,37 @@ document.querySelectorAll('input[name="range"]').forEach((radio) => {
     const labelEl = btnCapture.querySelector(".label");
     const descEl = labelEl.querySelector(".desc");
     // Remove old text, keep .desc span
-    const newText = val === 0 ? "Capture Full Conversation" : "Capture Last " + val + " Exchanges";
-    const newDesc = val === 0 ? "All messages as a Markdown document" : "Recent " + val + " Q&A pairs as a Markdown document";
+    const newText = val === 0 ? "capture full conversation" : "capture last " + val + " exchanges";
+    const newDesc = val === 0 ? "all messages as a markdown document" : "recent " + val + " Q&A pairs as a markdown document";
     labelEl.innerHTML = newText + '<span class="desc">' + newDesc + '</span>';
   });
 });
 
-// ─── Settings ───
+// ─── Shortcuts (read-only display in popup) ───
 
-const chkFloat = document.getElementById("chk-float");
-chkFloat.disabled = true;
-chrome.storage.sync.get({ showFloatingButton: false }, (data) => {
-  chkFloat.checked = data.showFloatingButton;
-  chkFloat.disabled = false;
-});
-chkFloat.addEventListener("change", () => {
-  const val = chkFloat.checked;
-  chrome.storage.sync.set({ showFloatingButton: val });
-  // Notify content script to show/hide immediately
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]?.id) {
-      chrome.tabs.sendMessage(tabs[0].id, { action: "toggle-float-button", show: val }).catch(() => {});
+const kbdPage = document.getElementById("kbd-page");
+const kbdSel = document.getElementById("kbd-sel");
+if (chrome.commands && chrome.commands.getAll) {
+  chrome.commands.getAll((commands) => {
+    const byName = Object.fromEntries(commands.map((c) => [c.name, c.shortcut]));
+    if (kbdPage) kbdPage.textContent = byName["capture-page"] || "Cmd+Shift+E";
+    if (kbdSel) kbdSel.textContent = byName["capture-selection"] || "Cmd+Shift+X";
+  });
+}
+
+// ─── Settings link ───
+
+const linkSettings = document.getElementById("link-settings");
+if (linkSettings) {
+  linkSettings.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (chrome.runtime.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      chrome.tabs.create({ url: chrome.runtime.getURL("options.html") });
     }
   });
-});
+}
 
 // ─── Auth state + account chip ───
 
@@ -459,7 +465,7 @@ if (searchInput) {
     searchTimer = setTimeout(async () => {
       const userId = await getUserId();
       if (!userId) {
-        searchResultsEl.innerHTML = '<div style="font-size:10px;color:#52525b;padding:4px 0">Sign in to search</div>';
+        searchResultsEl.innerHTML = '<div style="font-size:10px;color:#52525b;padding:4px 0">sign in to search</div>';
         return;
       }
       try {
@@ -474,7 +480,7 @@ if (searchInput) {
         const data = JSON.parse(res.body);
         const results = data.results || [];
         if (results.length === 0) {
-          searchResultsEl.innerHTML = '<div style="font-size:10px;color:#52525b;padding:4px 0">No results</div>';
+          searchResultsEl.innerHTML = '<div style="font-size:10px;color:#52525b;padding:4px 0">no results</div>';
           return;
         }
         searchResultsEl.innerHTML = results.slice(0, 5).map(r =>
