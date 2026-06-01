@@ -26,6 +26,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function DesktopAuthPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error" | "choose-provider">("loading");
+  const [email, setEmail] = useState<string | null>(null);
   const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
@@ -35,7 +36,18 @@ export default function DesktopAuthPage() {
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession() as { data: { session: { access_token: string } | null } };
+      // `?switch=1` from the success screen's "Use a different account"
+      // link, or from the desktop app passing the flag explicitly. Drop
+      // the cached browser session so we land in the provider picker
+      // instead of auto-completing as the previous user.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("switch") === "1") {
+        await supabase.auth.signOut();
+        setStatus("choose-provider");
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession() as { data: { session: { access_token: string; user?: { email?: string } } | null } };
 
       if (!session?.access_token) {
         setStatus("choose-provider");
@@ -48,6 +60,11 @@ export default function DesktopAuthPage() {
       if (refreshToken) {
         desktopUri += `&refresh_token=${encodeURIComponent(refreshToken)}`;
       }
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) setEmail(user.email);
+      } catch {}
 
       window.location.href = desktopUri;
       setStatus("success");
@@ -107,8 +124,16 @@ export default function DesktopAuthPage() {
               className="text-center leading-relaxed"
               style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
             >
+              {email ? <>Signed in as <strong style={{ color: "var(--text-primary)" }}>{email}</strong>. </> : null}
               Your memory.wiki account is now linked. You can close this tab and return to the app.
             </p>
+            <a
+              href="?switch=1"
+              className="transition-opacity hover:opacity-80"
+              style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "underline" }}
+            >
+              Wrong account? Use a different one
+            </a>
           </>
         )}
 
