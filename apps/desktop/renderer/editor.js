@@ -22,7 +22,6 @@
   var flavorDropdown = document.getElementById("flavor-dropdown");
   var headerTitle = document.getElementById("header-title");
   var headerSync = document.getElementById("header-sync");
-  var tableContextMenu = null;
 
   // ─── State ───
 
@@ -32,7 +31,6 @@
   var currentConfig = null;
   var editDebounceTimer = null;
   var isDirty = false;
-  var isRendering = false;
   var hasDocument = false;
   var currentFilter = "all";
   var searchQuery = "";
@@ -46,112 +44,21 @@
   var collabPeerCount = 0;
   var isApplyingRemoteCollab = false;
 
-  // ─── Live Editor History (snapshot-based undo/redo) ───
-  // contentEditable's built-in CMD+Z only undoes operations performed via
-  // execCommand. Every toolbar action, list op, table insert, etc. in this
-  // editor is direct DOM mutation and bypasses that stack, so we run our
-  // own history: a MutationObserver coalesces edits into snapshots of
-  // innerHTML + caret offset, and undo/redo restore them wholesale.
+  // ─── TipTap editor handle (Phase B full, v2.6.0) ───
+  // The Live pane is now a TipTap ProseMirror editor mounted inside
+  // #content via window.MemoryWikiTipTap.mountEditor(). All formatting,
+  // undo/redo, table editing, list ops, paste handling — everything —
+  // is delegated to TipTap commands. The contentEditable + snapshot
+  // history + DOM-mutation toolbar from v2.5.x is gone.
 
-  var liveUndoStack = [];
-  var liveRedoStack = [];
-  var LIVE_HISTORY_MAX = 100;
-  var isApplyingLiveHistory = false;
-  var lastCommittedSnapshot = null;
-  var pendingCommitTimer = null;
+  var liveEditor = null;       // mount handle (see tiptap-mount.js)
   var suppressConflictUntil = 0;
+  var isApplyingRemoteContent = false; // true while loading remote/file content
 
-  function snapshotLive() {
-    return { html: content.innerHTML, caret: getCaretCharacterOffset(content) };
+  function isInLiveEditor(t) {
+    if (!t || !content) return false;
+    return t === content || content.contains(t);
   }
-
-  function commitLivePending() {
-    if (pendingCommitTimer) { clearTimeout(pendingCommitTimer); pendingCommitTimer = null; }
-    if (!lastCommittedSnapshot) { lastCommittedSnapshot = snapshotLive(); return; }
-    var current = snapshotLive();
-    if (current.html === lastCommittedSnapshot.html) return;
-    liveUndoStack.push(lastCommittedSnapshot);
-    if (liveUndoStack.length > LIVE_HISTORY_MAX) liveUndoStack.shift();
-    liveRedoStack.length = 0;
-    lastCommittedSnapshot = current;
-  }
-
-  function scheduleLiveCommit() {
-    if (isApplyingLiveHistory || isReadOnly) return;
-    if (pendingCommitTimer) return;
-    pendingCommitTimer = setTimeout(function () {
-      pendingCommitTimer = null;
-      commitLivePending();
-    }, 350);
-  }
-
-  function restoreLive(snap) {
-    if (!snap) return;
-    isApplyingLiveHistory = true;
-    content.innerHTML = snap.html;
-    if (snap.caret != null) restoreCaretPosition(content, snap.caret);
-    isApplyingLiveHistory = false;
-    lastCommittedSnapshot = snapshotLive();
-    // Undo/redo replays a known-local snapshot; sync conflict dialog
-    // during the next auto-save window is almost always a false alarm
-    // (the server hasn't actually diverged), so silence it briefly.
-    suppressConflictUntil = Date.now() + 8000;
-    triggerEditDebounce();
-    currentMarkdown = htmlToMarkdown(content);
-    updateDocStats(currentMarkdown);
-    if (cmEditor && sourceVisible) {
-      cmChanging = true;
-      var info = cmEditor.getScrollInfo ? cmEditor.getScrollInfo() : null;
-      cmEditor.setValue(currentMarkdown);
-      if (info) cmEditor.scrollTo(info.left, info.top);
-      cmChanging = false;
-    }
-  }
-
-  function resetLiveHistory() {
-    liveUndoStack.length = 0;
-    liveRedoStack.length = 0;
-    if (pendingCommitTimer) { clearTimeout(pendingCommitTimer); pendingCommitTimer = null; }
-    lastCommittedSnapshot = snapshotLive();
-  }
-
-  function undoLive() {
-    if (pendingCommitTimer) commitLivePending();
-    if (!liveUndoStack.length) return;
-    var current = snapshotLive();
-    var prev = liveUndoStack.pop();
-    liveRedoStack.push(current);
-    restoreLive(prev);
-  }
-
-  function redoLive() {
-    if (pendingCommitTimer) commitLivePending();
-    if (!liveRedoStack.length) return;
-    var current = snapshotLive();
-    var next = liveRedoStack.pop();
-    liveUndoStack.push(current);
-    restoreLive(next);
-  }
-
-  function setLiveContent(html) {
-    isApplyingLiveHistory = true;
-    content.innerHTML = html;
-    Promise.resolve().then(function () {
-      isApplyingLiveHistory = false;
-      resetLiveHistory();
-    });
-  }
-
-  // MutationObserver runs the commit pipeline for every DOM change inside
-  // the editor so toolbar ops, paste handlers, and direct innerHTML edits
-  // all funnel through the same history.
-  if (content) {
-    var liveMO = new MutationObserver(function () { scheduleLiveCommit(); });
-    liveMO.observe(content, { childList: true, subtree: true, characterData: true, attributes: true });
-    setTimeout(function () { resetLiveHistory(); }, 0);
-  }
-
-  function isInLiveEditor(t) { return !!(t && content && (t === content || content.contains(t))); }
   function isInCodeMirror(t) {
     if (!t || !cmEditor || !cmEditor.getWrapperElement) return false;
     var w = cmEditor.getWrapperElement();
@@ -167,34 +74,28 @@
 
   function dispatchUndo() {
     var a = document.activeElement;
-    if (isInLiveEditor(a)) { undoLive(); return; }
     if (isInCodeMirror(a)) { try { cmEditor.undo(); } catch (e) {} return; }
-    if (isInNativeInput(a)) { document.execCommand("undo"); return; }
-    undoLive();
+    if (isInNativeInput(a)) { try { document.execCommand("undo"); } catch (e) {} return; }
+    if (liveEditor && liveEditor.raw) {
+      try { liveEditor.raw.commands.undo(); liveEditor.focus(); } catch (e) {}
+    }
   }
-
   function dispatchRedo() {
     var a = document.activeElement;
-    if (isInLiveEditor(a)) { redoLive(); return; }
     if (isInCodeMirror(a)) { try { cmEditor.redo(); } catch (e) {} return; }
-    if (isInNativeInput(a)) { document.execCommand("redo"); return; }
-    redoLive();
+    if (isInNativeInput(a)) { try { document.execCommand("redo"); } catch (e) {} return; }
+    if (liveEditor && liveEditor.raw) {
+      try { liveEditor.raw.commands.redo(); liveEditor.focus(); } catch (e) {}
+    }
   }
 
   if (window.mwDesktop && window.mwDesktop.onMenuUndo) {
     window.mwDesktop.onMenuUndo(dispatchUndo);
     window.mwDesktop.onMenuRedo(dispatchRedo);
   }
-
-  document.addEventListener("keydown", function (e) {
-    if (!(e.metaKey || e.ctrlKey)) return;
-    var k = (e.key || "").toLowerCase();
-    if (k === "z" && !e.shiftKey) {
-      if (isInLiveEditor(document.activeElement)) { e.preventDefault(); undoLive(); }
-    } else if ((k === "z" && e.shiftKey) || (k === "y" && !e.shiftKey)) {
-      if (isInLiveEditor(document.activeElement)) { e.preventDefault(); redoLive(); }
-    }
-  }, true);
+  // No global keydown intercept — TipTap's StarterKit (History extension)
+  // binds CMD+Z / CMD+Shift+Z / CMD+Y inside the editor natively. CM6 has
+  // its own bindings. Native inputs use the browser default.
 
   // ─── Theme ───
 
@@ -850,10 +751,17 @@
         } else if (docId) {
           var docTitle = item.querySelector(".file-name");
           var t = docTitle ? docTitle.textContent : docId;
-          // Show loading state
+          // Show loading state — TipTap takes a markdown string, so just
+          // drop a one-liner. The real content arrives via onLoadDocument
+          // a moment later. canEdit=false locks the editor while we wait.
           showEditor();
-          setLiveContent('<div class="cloud-loading"><div class="cloud-loading-spinner"></div><p>Loading ' + esc(t) + '...</p></div>');
-          content.setAttribute("contenteditable", "false");
+          if (!liveEditor) mountLiveEditor();
+          if (liveEditor) {
+            liveEditor.setEditable(false);
+            isApplyingRemoteContent = true;
+            liveEditor.setMarkdownSilent("_Loading " + t + "..._");
+            isApplyingRemoteContent = false;
+          }
           if (headerTitle) headerTitle.textContent = t + " (Cloud)";
           window.mwDesktop.previewCloudDoc(docId, t);
         }
@@ -1128,7 +1036,7 @@
       el.addEventListener("click", function() {
         var url = el.dataset.url;
         var name = (el.dataset.name || "image").replace(/\.\w+$/, "");
-        insertImageElement(url, name);
+        insertImageInLiveEditor(url, name);
       });
     });
   }
@@ -1464,7 +1372,7 @@
       el.addEventListener("click", function() {
         var url = el.dataset.url;
         var name = (el.dataset.name || "image").replace(/\.\w+$/, "");
-        insertImageElement(url, name);
+        insertImageInLiveEditor(url, name);
       });
     });
   }
@@ -1927,6 +1835,165 @@
 
   var currentViewMode = "live";
 
+  // ─── TipTap mount ───
+  // mountLiveEditor() is called once per session, the first time we have a
+  // document to display. After that we reuse the same editor and just
+  // setMarkdownSilent() new content.
+
+  function mountLiveEditor() {
+    if (liveEditor) return liveEditor;
+    if (!content) content = document.getElementById("content");
+    if (!content || !window.MemoryWikiTipTap || !window.MemoryWikiTipTap.mountEditor) {
+      console.error("[editor.js] TipTap mount unavailable");
+      return null;
+    }
+
+    liveEditor = window.MemoryWikiTipTap.mountEditor(content, {
+      markdown: currentMarkdown || "",
+      canEdit: !isReadOnly,
+      placeholder: "Start writing...",
+      onChange: onLiveEditorChange,
+      onDoubleClickMermaid: function (code) {
+        editMermaidInline(code);
+      },
+      onPasteImage: function (file) {
+        return uploadPastedImage(file);
+      },
+    });
+    return liveEditor;
+  }
+
+  function onLiveEditorChange(md) {
+    if (isReadOnly || isApplyingRemoteContent) return;
+    currentMarkdown = md || "";
+    isDirty = true;
+    updateSyncStatusUI("editing");
+    updateDocStats(currentMarkdown);
+    // Mirror to Source pane (CM6) if visible — user is NOT typing there.
+    if (cmEditor && sourceVisible && cmEditor.getValue() !== currentMarkdown) {
+      cmChanging = true;
+      var scrollInfo = cmEditor.getScrollInfo ? cmEditor.getScrollInfo() : null;
+      cmEditor.setValue(currentMarkdown);
+      if (scrollInfo) cmEditor.scrollTo(scrollInfo.left, scrollInfo.top);
+      cmChanging = false;
+    }
+    // Broadcast to collaboration peers
+    if (isCollaborating && window.mwDesktop && window.mwDesktop.collabLocalChange) {
+      window.mwDesktop.collabLocalChange(currentMarkdown);
+    }
+    // Update outline (debounced via setTimeout 50)
+    setTimeout(updateOutlinePanel, 50);
+    scheduleMermaidRender();
+  }
+
+  // Image paste → upload to memory.wiki API → return URL. The TipTap
+  // mount inserts an <img src=...> at the caret on resolve.
+  function uploadPastedImage(file) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var dataUrl = ev.target.result;
+        var base64 = dataUrl.split(",")[1];
+        var mime = (dataUrl.split(":")[1] || "image/png").split(";")[0];
+        showToast("Uploading image...");
+        window.mwDesktop.uploadImage(base64, mime, file.name || "pasted-image.png").then(function (result) {
+          if (result && result.url) {
+            showToast("Image uploaded");
+            resolve(result.url);
+          } else {
+            // Fallback to inline data URL so user doesn't lose the paste
+            showToast("Image inserted locally (upload failed)");
+            resolve(dataUrl);
+          }
+        }).catch(function () {
+          resolve(dataUrl);
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Mermaid double-click opens the existing modal editor. Re-use the
+  // editMermaidCode() popup but build a synthetic 'el' that updates the
+  // ProseMirror codeBlock node on Apply.
+  function editMermaidInline(originalCode) {
+    if (!liveEditor || !liveEditor.raw) return;
+    var ed = liveEditor.raw;
+    // Find the codeBlock node currently under the selection (set by the
+    // dblclick that triggered us) so Apply can dispatch a precise update.
+    var $pos = ed.state.selection.$from;
+    var nodePos = null, node = null;
+    for (var d = $pos.depth; d >= 0; d--) {
+      var n = $pos.node(d);
+      if (n.type.name === "codeBlock") {
+        node = n;
+        nodePos = $pos.before(d);
+        break;
+      }
+    }
+    if (!node || nodePos == null) return;
+
+    var overlay = document.createElement("div");
+    overlay.className = "mermaid-modal-overlay";
+    overlay.innerHTML =
+      '<div class="mermaid-modal">' +
+        '<div class="mermaid-modal-header">' +
+          '<span class="mermaid-modal-title">Edit Mermaid Diagram</span>' +
+          '<div class="mermaid-modal-actions">' +
+            '<button class="mermaid-modal-btn" id="mm-cancel">Cancel</button>' +
+            '<button class="mermaid-modal-btn primary" id="mm-apply">Apply</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mermaid-modal-body">' +
+          '<div class="mermaid-modal-editor" id="mm-editor"></div>' +
+          '<div class="mermaid-modal-preview" id="mm-preview"></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var mmCm = CodeMirror(document.getElementById("mm-editor"), {
+      value: originalCode, mode: "markdown", theme: "material-darker",
+      lineNumbers: true, lineWrapping: true, autofocus: true,
+    });
+    var previewContainer = document.getElementById("mm-preview");
+    function updatePreview() {
+      var src = mmCm.getValue();
+      previewContainer.innerHTML = "";
+      var div = document.createElement("div");
+      div.className = "mermaid";
+      div.textContent = src;
+      previewContainer.appendChild(div);
+      try {
+        mermaid.initialize({ startOnLoad: false, theme: "dark" });
+        mermaid.run({ nodes: [div] }).catch(function () {
+          previewContainer.innerHTML = '<div style="color:#ef4444;padding:16px;font-size:12px">Syntax error</div>';
+        });
+      } catch (e) {
+        previewContainer.innerHTML = '<div style="color:#ef4444;padding:16px;font-size:12px">Syntax error</div>';
+      }
+    }
+    updatePreview();
+    mmCm.on("change", function () {
+      if (mmCm._previewDebounce) clearTimeout(mmCm._previewDebounce);
+      mmCm._previewDebounce = setTimeout(updatePreview, 400);
+    });
+    setTimeout(function () { mmCm.refresh(); }, 50);
+
+    document.getElementById("mm-cancel").addEventListener("click", function () { overlay.remove(); });
+    document.getElementById("mm-apply").addEventListener("click", function () {
+      var newCode = mmCm.getValue();
+      overlay.remove();
+      if (newCode === originalCode) return;
+      // Replace the codeBlock's children with a single text node.
+      var tr = ed.state.tr;
+      var textNode = ed.schema.text(newCode);
+      tr.replaceWith(nodePos + 1, nodePos + 1 + node.content.size, textNode);
+      ed.view.dispatch(tr);
+    });
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.remove(); });
+    overlay.addEventListener("keydown", function (e) { if (e.key === "Escape") overlay.remove(); });
+  }
+
   function loadDocumentContent(markdown, filePath) {
     showEditor();
     currentMarkdown = markdown || "";
@@ -1935,32 +2002,34 @@
     currentCloudDoc = null;
     var oldBanner = document.getElementById("cloud-banner");
     if (oldBanner) oldBanner.remove();
-    content.setAttribute("contenteditable", "true");
     updateViewCount(null);
 
     var t0 = performance.now();
-    window.mwDesktop.renderMarkdown(currentMarkdown).then(function(result) {
-      if (result && result.html !== undefined) {
-        setLiveContent(result.html);
-        postProcessAll(content);
-        if (result.flavor && result.flavor.primary) {
-          currentFlavor = result.flavor.primary;
-          updateFlavorBadge(currentFlavor);
-        }
-      }
-      updateRenderTime(performance.now() - t0);
-      updateDocStats(currentMarkdown);
-      if (cmEditor) cmEditor.setValue(currentMarkdown);
-      updateSyncStatusUI("ready");
-      renderFileList(); // Update active file highlight
-    });
+    if (!liveEditor) mountLiveEditor();
+    if (liveEditor) {
+      liveEditor.setEditable(true);
+      isApplyingRemoteContent = true;
+      liveEditor.setMarkdownSilent(currentMarkdown);
+      isApplyingRemoteContent = false;
+    }
+    updateRenderTime(performance.now() - t0);
+    updateDocStats(currentMarkdown);
+    if (cmEditor) {
+      cmChanging = true;
+      cmEditor.setValue(currentMarkdown);
+      cmChanging = false;
+    }
+    updateSyncStatusUI("ready");
+    renderFileList();
+    setTimeout(updateOutlinePanel, 50);
+    scheduleMermaidRender();
   }
 
   if (window.mwDesktop) {
     window.mwDesktop.onLoadDocument(function(data) {
       // Save previous file before switching (if dirty)
-      if (isDirty && currentFilePath && window.mwDesktop) {
-        var prevMarkdown = htmlToMarkdown(content);
+      if (isDirty && currentFilePath && window.mwDesktop && liveEditor) {
+        var prevMarkdown = liveEditor.getMarkdown();
         window.mwDesktop.autoSave(prevMarkdown);
       }
       isDirty = false; // Reset BEFORE changing currentFilePath
@@ -1973,25 +2042,21 @@
       currentCloudDoc = data.cloudDoc || null;
 
       var loadStart = performance.now();
-      if (!currentMarkdown && !data.html) {
-        showEditor();
-        setLiveContent("");
-      } else {
-        showEditor();
-        if (data.html) {
-          setLiveContent(data.html);
-          postProcessAll(content);
-        }
-        if (data.flavor) {
-          currentFlavor = data.flavor;
-          updateFlavorBadge(currentFlavor);
-        }
+      showEditor();
+      if (!liveEditor) mountLiveEditor();
+      if (liveEditor) {
+        liveEditor.setEditable(!isReadOnly);
+        isApplyingRemoteContent = true;
+        liveEditor.setMarkdownSilent(currentMarkdown);
+        isApplyingRemoteContent = false;
+      }
+      if (data.flavor) {
+        currentFlavor = data.flavor;
+        updateFlavorBadge(currentFlavor);
       }
       updateDocStats(currentMarkdown);
       updateRenderTime(performance.now() - loadStart);
 
-      // Read-only mode for cloud docs
-      content.setAttribute("contenteditable", isReadOnly ? "false" : "true");
       var oldBanner = document.getElementById("cloud-banner");
       if (oldBanner) oldBanner.remove();
 
@@ -2079,20 +2144,23 @@
       if (isDirty) return; // User is editing, ignore external changes
       if (data.markdown !== undefined && data.markdown !== currentMarkdown) {
         currentMarkdown = data.markdown;
-        if (data.html) {
-          setLiveContent(data.html);
-          postProcessAll(content);
+        if (liveEditor) {
+          isApplyingRemoteContent = true;
+          liveEditor.setMarkdownSilent(currentMarkdown);
+          isApplyingRemoteContent = false;
         }
         if (cmEditor && cmEditor.getValue() !== currentMarkdown) {
+          cmChanging = true;
           cmEditor.setValue(currentMarkdown);
+          cmChanging = false;
         }
       }
     });
 
     // Menu triggers
     window.mwDesktop.onTriggerSave(function() {
-      if (isReadOnly) return;
-      currentMarkdown = htmlToMarkdown(content);
+      if (isReadOnly || !liveEditor) return;
+      currentMarkdown = liveEditor.getMarkdown();
       if (currentMarkdown) {
         window.mwDesktop.saveFile(currentMarkdown).then(function(p) {
           if (p) {
@@ -2116,26 +2184,22 @@
       if (!data || !data.markdown || isApplyingRemoteCollab) return;
       isApplyingRemoteCollab = true;
       currentMarkdown = data.markdown;
-      // Re-render the WYSIWYG content pane
-      window.mwDesktop.renderMarkdown(currentMarkdown).then(function(result) {
-        if (result && result.html !== undefined) {
-          // Preserve scroll position
-          var scrollTop = content.scrollTop;
-          setLiveContent(result.html);
-          postProcessAll(content);
-          content.scrollTop = scrollTop;
-        }
-        if (cmEditor && cmEditor.getValue() !== currentMarkdown) {
-          var scrollInfo = cmEditor.getScrollInfo();
-          cmChanging = true;
-          cmEditor.setValue(currentMarkdown);
-          cmEditor.scrollTo(scrollInfo.left, scrollInfo.top);
-          cmChanging = false;
-        }
-        isApplyingRemoteCollab = false;
-      }).catch(function() {
-        isApplyingRemoteCollab = false;
-      });
+      // Preserve scroll position across the swap
+      var scrollTop = content ? content.scrollTop : 0;
+      if (liveEditor) {
+        isApplyingRemoteContent = true;
+        liveEditor.setMarkdownSilent(currentMarkdown);
+        isApplyingRemoteContent = false;
+      }
+      if (content) content.scrollTop = scrollTop;
+      if (cmEditor && cmEditor.getValue() !== currentMarkdown) {
+        var scrollInfo = cmEditor.getScrollInfo();
+        cmChanging = true;
+        cmEditor.setValue(currentMarkdown);
+        cmEditor.scrollTo(scrollInfo.left, scrollInfo.top);
+        cmChanging = false;
+      }
+      isApplyingRemoteCollab = false;
     });
 
     window.mwDesktop.onCollabStatus(function(data) {
@@ -2184,8 +2248,8 @@
 
   async function doPublish() {
     // Extract fresh markdown from the Live editor before publishing
-    if (hasDocument && content && !isReadOnly) {
-      currentMarkdown = htmlToMarkdown(content);
+    if (hasDocument && liveEditor && !isReadOnly) {
+      currentMarkdown = liveEditor.getMarkdown();
       updateDocStats(currentMarkdown);
     }
     if (!currentMarkdown) return;
@@ -2331,127 +2395,62 @@
   }
 
   // ════════════════════════════════════════════════════════
-  //  POST-PROCESSING
+  //  POST-PROCESSING (Phase B full — most of this moved into TipTap)
   // ════════════════════════════════════════════════════════
+  //
+  // TipTap NodeViews now handle:
+  //   - code-block headers + Copy button (CustomCodeBlock NodeView in
+  //     packages/editor/src/tiptap-config.ts)
+  //   - syntax highlighting via lowlight (CodeBlockLowlight)
+  //   - KaTeX inline + display math (createMathPlugin → ProseMirror
+  //     decorations on $...$ / $$...$$ in text nodes)
+  //   - tables, task lists, links, images, placeholder — all native
+  //
+  // Mermaid still needs a post-render pass because TipTap doesn't render
+  // diagram SVGs inside code blocks. Web does the same — see
+  // TiptapLiveEditor.tsx "Mermaid: replace ```mermaid blocks with SVGs"
+  // useEffect. We run it on every onChange (debounced) + on doc load.
+  //
+  // TODO(post-Phase-B): wire the ASCII-to-mermaid "Convert" button into a
+  // ProseMirror NodeView decoration so it shows up on plain code-blocks
+  // whose textContent contains box-drawing chars. v2.5.x rendered into a
+  // contentEditable DOM where injecting buttons was free; with TipTap we
+  // need a proper plugin. Out of scope for v2.6.0 — punted.
 
-  function postProcessAll(root) {
-    root.querySelectorAll("pre[lang] code").forEach(function(block) {
-      var lang = block.parentElement.getAttribute("lang");
-      if (lang && lang !== "mermaid") block.className = "language-" + lang;
-    });
-    root.querySelectorAll("pre code").forEach(function(block) {
-      if (typeof hljs !== "undefined") hljs.highlightElement(block);
-    });
-
-    root.querySelectorAll("[data-math-style]").forEach(function(el) {
-      if (typeof katex !== "undefined") {
-        try {
-          katex.render(el.textContent || "", el, {
-            displayMode: el.getAttribute("data-math-style") === "display",
-            throwOnError: false,
-            strict: false,
-          });
-        } catch (e) {}
-      }
-    });
-
-    postProcessCodeBlocks(root);
-    postProcessMermaid();
-    postProcessAsciiDiagrams(root);
-    setupNonEditableIslands(root);
-
-    // Update outline panel after content changes
-    setTimeout(updateOutlinePanel, 50);
-  }
-
-  function postProcessAsciiDiagrams(root) {
-    var boxCharsRegex = /[┌┐└┘│─├┤┬┴┼╌═║]/g;
-    root.querySelectorAll("pre[lang] code, pre:not([lang]) code").forEach(function(code) {
-      var pre = code.closest("pre");
-      if (!pre) return;
-      var lang = pre.getAttribute("lang");
-      if (lang === "mermaid") return;
-      if (pre.querySelector(".ascii-convert-btn")) return;
-
-      var text = code.textContent || "";
-      var matches = text.match(boxCharsRegex);
-      if (!matches || matches.length < 5) return;
-
-      var btn = document.createElement("button");
-      btn.className = "ascii-convert-btn";
-      btn.textContent = "Convert to Mermaid";
-      btn.title = "Convert this ASCII diagram to Mermaid using AI";
-      btn.style.cssText = "position:absolute;top:6px;right:6px;padding:3px 10px;font-size:10px;font-family:ui-monospace,monospace;background:var(--accent-dim,rgba(251,146,60,0.15));color:var(--accent,#B5FF1A);border:1px solid var(--accent,#B5FF1A);border-radius:4px;cursor:pointer;z-index:5;line-height:14px";
-      pre.style.position = "relative";
-      pre.appendChild(btn);
-
-      btn.addEventListener("click", async function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        btn.textContent = "Converting...";
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
-
-        try {
-          var res = await fetch("https://memory.wiki/api/ascii-to-mermaid", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ascii: text, context: (currentMarkdown || "").substring(0, 2000) }),
-          });
-          if (!res.ok) throw new Error("API error");
-          var data = await res.json();
-          if (!data.mermaid) throw new Error("No mermaid code");
-
-          // Replace in markdown source
-          var idx = currentMarkdown.indexOf(text);
-          if (idx !== -1) {
-            var before = currentMarkdown.lastIndexOf("```", idx);
-            var after = currentMarkdown.indexOf("```", idx + text.length);
-            if (before !== -1 && after !== -1) {
-              var newMd = currentMarkdown.substring(0, before) + "```mermaid\n" + data.mermaid + "\n" + currentMarkdown.substring(after);
-              currentMarkdown = newMd;
-              if (typeof cm !== "undefined" && cm) cm.dispatch({ changes: { from: 0, to: cm.state.doc.length, insert: newMd } });
-              reRenderMarkdown(newMd);
-            }
-          }
-        } catch (err) {
-          btn.textContent = "Failed";
-          btn.style.color = "#ef4444";
-          setTimeout(function() {
-            btn.textContent = "Convert to Mermaid";
-            btn.disabled = false;
-            btn.style.opacity = "1";
-            btn.style.color = "var(--accent,#B5FF1A)";
-          }, 2000);
-        }
-      });
-    });
-  }
-
-  async function reRenderMarkdown(markdown) {
-    if (isRendering || !window.mwDesktop) return;
-    isRendering = true;
-    var t0 = performance.now();
+  var mermaidRenderDebounce = null;
+  function renderMermaidInLiveEditor() {
+    if (!content || typeof mermaid === "undefined") return;
     try {
-      var result = await window.mwDesktop.renderMarkdown(markdown);
-      if (result && result.html !== undefined) {
-        var caretOffset = getCaretCharacterOffset(content);
-        setLiveContent(result.html);
-        postProcessAll(content);
-        if (caretOffset > 0) restoreCaretPosition(content, caretOffset);
-        if (result.flavor && result.flavor.primary) {
-          currentFlavor = result.flavor.primary;
-          updateFlavorBadge(currentFlavor);
-        }
-      }
-      var elapsed = performance.now() - t0;
-      updateRenderTime(elapsed);
-    } catch (err) {
-      console.error("Render error:", err);
-    } finally {
-      isRendering = false;
-    }
-    updateDocStats(markdown);
+      var blocks = content.querySelectorAll('pre code.language-mermaid, code.language-mermaid');
+      if (!blocks || !blocks.length) return;
+      mermaid.initialize({ startOnLoad: false, theme: "dark" });
+      blocks.forEach(function (codeEl) {
+        var pre = codeEl.closest("pre");
+        if (!pre || pre.dataset.mwMermaidDone === "1") return;
+        var code = codeEl.textContent || "";
+        if (!code.trim()) return;
+        var id = "mw-mermaid-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+        mermaid.render(id, code).then(function (out) {
+          var wrapper = document.createElement("div");
+          wrapper.className = "mermaid-rendered";
+          wrapper.setAttribute("contenteditable", "false");
+          wrapper.innerHTML = out.svg;
+          // Replace the <pre> contents (just the visual) — the underlying
+          // ProseMirror document still owns the fenced ```mermaid block.
+          var existing = pre.parentNode.querySelector(":scope > .mermaid-rendered[data-for=\"" + pre.dataset.mwId + "\"]");
+          if (existing) existing.remove();
+          pre.dataset.mwMermaidDone = "1";
+          pre.dataset.mwId = id;
+          wrapper.setAttribute("data-for", id);
+          pre.style.display = "none";
+          pre.parentNode.insertBefore(wrapper, pre.nextSibling);
+        }).catch(function () { /* syntax error in user's mermaid — leave the fenced block visible */ });
+      });
+    } catch (e) { /* ignore */ }
+  }
+  function scheduleMermaidRender() {
+    if (mermaidRenderDebounce) clearTimeout(mermaidRenderDebounce);
+    mermaidRenderDebounce = setTimeout(renderMermaidInLiveEditor, 250);
   }
 
   function updateDocStats(md) {
@@ -2473,144 +2472,185 @@
   }
 
   // ════════════════════════════════════════════════════════
-  //  WYSIWYG EDITING (kept from original editor.js)
+  //  EDITOR EVENTS (Phase B full)
   // ════════════════════════════════════════════════════════
+  //
+  // TipTap's onChange fires onLiveEditorChange() which already marks
+  // isDirty + mirrors to CM6 + broadcasts collab. We just add the
+  // global save (CMD+S) and link (CMD+K) bindings, plus the 3-second
+  // autosave interval.
 
-  // Save on blur (focus lost) to prevent data loss
-  content.addEventListener("blur", function() {
-    if (isDirty && hasDocument && currentFilePath && window.mwDesktop && !isReadOnly) {
-      currentMarkdown = htmlToMarkdown(content);
-      window.mwDesktop.autoSave(currentMarkdown);
-      isDirty = false;
-    }
-  });
-
-  // On input in Live pane: extract markdown and sync to Source pane.
-  // Never re-render the Live pane itself (user is typing there).
-  var liveInputDebounce = null;
-  content.addEventListener("input", function() {
-    if (isReadOnly) return;
-    isDirty = true;
-    updateSyncStatusUI("editing");
-    if (liveInputDebounce) clearTimeout(liveInputDebounce);
-    liveInputDebounce = setTimeout(function() {
-      currentMarkdown = htmlToMarkdown(content);
+  // CMD+S / CMD+K — bound globally so they work whether the focus is
+  // in the editor, sidebar input, or anywhere else in the chrome.
+  document.addEventListener("keydown", function (e) {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.shiftKey || e.altKey) return;
+    var k = (e.key || "").toLowerCase();
+    if (k === "s") {
+      // Save current document. Only fire when the editor (live or source)
+      // owns focus — otherwise the user might be typing in a chat / search.
+      if (isReadOnly) return;
+      var a = document.activeElement;
+      if (!isInLiveEditor(a) && !isInCodeMirror(a)) return;
+      if (!window.mwDesktop || !liveEditor) return;
+      e.preventDefault();
+      // Always source from CM6 if the user is typing there; otherwise
+      // from TipTap.
+      currentMarkdown = isInCodeMirror(a) ? cmEditor.getValue() : liveEditor.getMarkdown();
       updateDocStats(currentMarkdown);
-      // Sync to Source pane if visible (user is NOT typing there)
-      if (cmEditor && sourceVisible) {
-        cmChanging = true;
-        var scrollInfo = cmEditor.getScrollInfo();
-        cmEditor.setValue(currentMarkdown);
-        cmEditor.scrollTo(scrollInfo.left, scrollInfo.top);
-        cmChanging = false;
-      }
-      // Broadcast to collaboration peers
-      if (isCollaborating && !isApplyingRemoteCollab && window.mwDesktop) {
-        window.mwDesktop.collabLocalChange(currentMarkdown);
-      }
-    }, 400);
-  });
-
-  content.addEventListener("keydown", function(e) {
-    if ((e.metaKey || e.ctrlKey) && !e.shiftKey) {
-      switch (e.key) {
-        case "b": e.preventDefault(); applyInlineFormat("bold"); break;
-        case "i": e.preventDefault(); applyInlineFormat("italic"); break;
-        case "k": e.preventDefault(); insertLink(); break;
-        case "s":
-          e.preventDefault();
-          if (window.mwDesktop && !isReadOnly) {
-            currentMarkdown = htmlToMarkdown(content);
-            updateDocStats(currentMarkdown);
-            if (!currentFilePath) {
-              // New file — trigger save dialog
-              window.mwDesktop.saveFile(currentMarkdown).then(function(p) {
-                if (p) {
-                  currentFilePath = p;
-                  isDirty = false;
-                  updateSyncStatusUI("synced");
-                  if (headerTitle) headerTitle.textContent = p.split("/").pop();
-                  refreshSidebarData().then(renderSidebar);
-                }
-              });
-            } else {
-              window.mwDesktop.autoSave(currentMarkdown);
-              isDirty = false;
-              updateSyncStatusUI("synced");
-            }
+      if (!currentFilePath) {
+        window.mwDesktop.saveFile(currentMarkdown).then(function (p) {
+          if (p) {
+            currentFilePath = p;
+            isDirty = false;
+            updateSyncStatusUI("synced");
+            if (headerTitle) headerTitle.textContent = p.split("/").pop();
+            refreshSidebarData().then(renderSidebar);
           }
-          break;
+        });
+      } else {
+        window.mwDesktop.autoSave(currentMarkdown);
+        isDirty = false;
+        updateSyncStatusUI("synced");
+      }
+    } else if (k === "k") {
+      if (isReadOnly) return;
+      if (!liveEditor) return;
+      if (!isInLiveEditor(document.activeElement)) return;
+      e.preventDefault();
+      var url = prompt("URL:");
+      if (url == null) return;
+      if (url === "") {
+        liveEditor.raw.chain().focus().unsetLink().run();
+      } else {
+        liveEditor.raw.chain().focus().setLink({ href: url }).run();
       }
     }
   });
 
-  // Auto-save every 3 seconds
-  // Auto-save: extract markdown from DOM only at save time, not during typing.
-  setInterval(function() {
-    if (isDirty && hasDocument && window.mwDesktop && !isReadOnly && currentFilePath) {
-      currentMarkdown = htmlToMarkdown(content);
-      updateDocStats(currentMarkdown);
-      window.mwDesktop.autoSave(currentMarkdown);
-      isDirty = false;
-      updateSyncStatusUI("synced");
-      // Sync source editor if visible (with loop guard)
-      if (cmEditor && sourceVisible && cmEditor.getValue() !== currentMarkdown) {
-        cmChanging = true;
-        var cursor = cmEditor.getCursor();
-        cmEditor.setValue(currentMarkdown);
-        cmEditor.setCursor(cursor);
-        cmChanging = false;
-      }
+  // Auto-save every 3 seconds — drains TipTap's current markdown.
+  setInterval(function () {
+    if (!isDirty || !hasDocument || isReadOnly) return;
+    if (!window.mwDesktop || !currentFilePath || !liveEditor) return;
+    currentMarkdown = liveEditor.getMarkdown();
+    updateDocStats(currentMarkdown);
+    window.mwDesktop.autoSave(currentMarkdown);
+    isDirty = false;
+    updateSyncStatusUI("synced");
+    if (cmEditor && sourceVisible && cmEditor.getValue() !== currentMarkdown) {
+      cmChanging = true;
+      var cursor = cmEditor.getCursor();
+      cmEditor.setValue(currentMarkdown);
+      cmEditor.setCursor(cursor);
+      cmChanging = false;
     }
   }, 3000);
 
-  // ─── Toolbar ───
+  // Save on window blur as a last-line-of-defence (TipTap doesn't fire
+  // a single 'blur' for us — the editor's view.dom can lose focus
+  // hundreds of times during normal use — so we tie this to the OS
+  // window blur via main.js's existing autosave channel). For now we
+  // also do a best-effort flush on window blur here.
+  window.addEventListener("blur", function () {
+    if (!isDirty || isReadOnly || !liveEditor || !currentFilePath || !window.mwDesktop) return;
+    currentMarkdown = liveEditor.getMarkdown();
+    window.mwDesktop.autoSave(currentMarkdown);
+    isDirty = false;
+  });
 
-  toolbar.addEventListener("click", function(e) {
+  // Image-panel insertion helper (Phase B: replaces insertImageElement).
+  // Called from the side panel + popover thumbnails; just dispatches to
+  // TipTap's setImage command at the current selection.
+  function insertImageInLiveEditor(url, alt) {
+    if (!liveEditor || !liveEditor.raw || isReadOnly || !url) return;
+    try {
+      liveEditor.raw.chain().focus()
+        .setImage({ src: url, alt: alt || "image" })
+        .run();
+    } catch (e) { console.error("[insertImageInLiveEditor] failed:", e); }
+  }
+
+  // ─── Toolbar (all dispatches to TipTap commands) ───
+
+  // Map of toolbar `data-action` → TipTap chain factory. We build the
+  // chain lazily so the focus + .run() always run on the live editor.
+  function tiptapDo(fn) {
+    if (!liveEditor || !liveEditor.raw || isReadOnly) return;
+    try { fn(liveEditor.raw.chain().focus()); }
+    catch (e) { console.error("[toolbar] command failed:", e); }
+  }
+
+  function toolbarAction(action) {
+    switch (action) {
+      case "undo": dispatchUndo(); return;
+      case "redo": dispatchRedo(); return;
+      case "bold":          return tiptapDo(function (c) { c.toggleBold().run(); });
+      case "italic":        return tiptapDo(function (c) { c.toggleItalic().run(); });
+      case "strikethrough": return tiptapDo(function (c) { c.toggleStrike().run(); });
+      case "code":          return tiptapDo(function (c) { c.toggleCode().run(); });
+      case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
+        return tiptapDo(function (c) {
+          c.toggleHeading({ level: parseInt(action.slice(1), 10) }).run();
+        });
+      case "p":
+        return tiptapDo(function (c) { c.setParagraph().run(); });
+      case "ul":         return tiptapDo(function (c) { c.toggleBulletList().run(); });
+      case "ol":         return tiptapDo(function (c) { c.toggleOrderedList().run(); });
+      case "task":       return tiptapDo(function (c) { c.toggleTaskList().run(); });
+      case "blockquote": return tiptapDo(function (c) { c.toggleBlockquote().run(); });
+      case "indent":
+        return tiptapDo(function (c) {
+          // Task lists need taskItem; regular lists need listItem.
+          if (liveEditor.isActive("taskList")) c.sinkListItem("taskItem").run();
+          else c.sinkListItem("listItem").run();
+        });
+      case "outdent":
+        return tiptapDo(function (c) {
+          if (liveEditor.isActive("taskList")) c.liftListItem("taskItem").run();
+          else c.liftListItem("listItem").run();
+        });
+      case "link": {
+        if (isReadOnly || !liveEditor) return;
+        var url = prompt("URL:");
+        if (url == null) return;
+        if (url === "") return tiptapDo(function (c) { c.unsetLink().run(); });
+        return tiptapDo(function (c) { c.setLink({ href: url }).run(); });
+      }
+      case "image": {
+        if (isReadOnly || !liveEditor) return;
+        var src = prompt("Image URL:");
+        if (!src) return;
+        var alt = prompt("Alt text:", "image") || "image";
+        return tiptapDo(function (c) { c.setImage({ src: src, alt: alt }).run(); });
+      }
+      case "table":
+        // Toolbar table picker — for v2.6.0 we ship a fixed 3×3 with
+        // header row; web has a grid picker, mirror it here in a later
+        // pass (it lives in WysiwygToolbar.tsx).
+        return tiptapDo(function (c) {
+          c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+        });
+      case "codeblock":
+        return tiptapDo(function (c) { c.toggleCodeBlock().run(); });
+      case "math":
+        // mwMath is a decoration plugin, not a node — insert raw
+        // delimiter text and let the plugin render the KaTeX widget.
+        return tiptapDo(function (c) { c.insertContent("$E = mc^2$").run(); });
+      case "hr":
+        return tiptapDo(function (c) { c.setHorizontalRule().run(); });
+      case "removeFormat":
+        return tiptapDo(function (c) { c.unsetAllMarks().clearNodes().run(); });
+    }
+  }
+
+  toolbar.addEventListener("click", function (e) {
     var button = e.target.closest("button[data-action]");
     if (!button) return;
     var action = button.getAttribute("data-action");
     if (!action) return;
     if (action === "ai-tools") return; // Handled by its own click listener
     e.preventDefault();
-    content.focus();
-    // contentEditable.focus() doesn't create a Selection if there's no
-    // prior caret in the editor (common case: user clicks a toolbar
-    // button immediately after opening a doc). Every action function
-    // bails on `sel.rangeCount === 0`, so toolbar clicks would silently
-    // do nothing. Place the caret at the end of the editor as the
-    // fallback so block ops (H1-H6, list, table, image, math, codeblock,
-    // hr, quote) all work without first clicking in the editor.
-    (function ensureCaretInEditor() {
-      var sel = window.getSelection();
-      if (sel && sel.rangeCount > 0 && content.contains(sel.anchorNode)) return;
-      var range = document.createRange();
-      range.selectNodeContents(content);
-      range.collapse(false);
-      if (sel) { sel.removeAllRanges(); sel.addRange(range); }
-    })();
-
-    switch (action) {
-      case "undo": dispatchUndo(); break;
-      case "redo": dispatchRedo(); break;
-      case "bold": applyInlineFormat("bold"); break;
-      case "italic": applyInlineFormat("italic"); break;
-      case "strikethrough": applyInlineFormat("strikethrough"); break;
-      case "code": applyInlineFormat("code"); break;
-      case "h1": case "h2": case "h3": case "h4": case "h5": case "h6": case "p":
-        applyBlockFormat(action); break;
-      case "ul": case "ol": case "task": case "blockquote":
-        applyBlockFormat(action); break;
-      case "indent": applyIndent(); break;
-      case "outdent": applyOutdent(); break;
-      case "link": insertLink(); break;
-      case "image": insertImagePrompt(); break;
-      case "table": showTableGridSelector(button); break;
-      case "codeblock": insertCodeBlock(); break;
-      case "math": insertMathBlock(); break;
-      case "hr": insertHorizontalRule(); break;
-      case "removeFormat": removeFormatting(); break;
-    }
+    toolbarAction(action);
   });
 
   // ─── Toggle Pills ───
@@ -2693,11 +2733,16 @@
       currentMarkdown = cmEditor.getValue();
       isDirty = true;
       updateSyncStatusUI("editing");
-      // Update Live pane preview immediately (user is typing in Source, not Live)
+      // Update Live pane (TipTap) preview — user is typing in Source.
       if (sourceDebounce) clearTimeout(sourceDebounce);
       sourceDebounce = setTimeout(function() {
-        reRenderMarkdown(currentMarkdown);
+        if (liveEditor) {
+          isApplyingRemoteContent = true;
+          liveEditor.setMarkdownSilent(currentMarkdown);
+          isApplyingRemoteContent = false;
+        }
         updateDocStats(currentMarkdown);
+        scheduleMermaidRender();
         // Broadcast to collaboration peers
         if (isCollaborating && !isApplyingRemoteCollab && window.mwDesktop) {
           window.mwDesktop.collabLocalChange(currentMarkdown);
@@ -2764,7 +2809,7 @@
       editorPane.style.display = "none";
       splitDivider.style.display = "none";
       if (toolbar) toolbar.style.display = isToolbarVisible ? "" : "none";
-      content.focus();
+      if (liveEditor) liveEditor.focus(); else if (content) content.focus();
     }
   }
 
@@ -2820,508 +2865,30 @@
   });
 
   // ════════════════════════════════════════════════════════
-  //  FORMATTING FUNCTIONS (unchanged from original)
+  //  v2.6.0 Phase B full — removed in this migration:
+  //
+  //   applyInlineFormat, applyBlockFormat, insertLink,
+  //   insertImagePrompt, insertImageElement, insertMathBlock,
+  //   insertCodeBlock, insertHorizontalRule, insertTable,
+  //   applyIndent, applyOutdent, removeFormatting,
+  //   showTableGridSelector / hideTableGridSelector,
+  //   htmlToMarkdown + nodeToMarkdown family,
+  //   findBlockParent, findParentByTag,
+  //   getCaretCharacterOffset, restoreCaretPosition,
+  //   setupNonEditableIslands,
+  //   postProcessCodeBlocks, postProcessMermaid,
+  //   editMermaidCode (modal),
+  //   the paste / drop / dblclick / contextmenu listeners that
+  //   ran on #content,
+  //   the showTableContextMenu / handleTableAction pair.
+  //
+  // All of the above are now handled by TipTap commands + the
+  // CustomCodeBlock NodeView + the Table extension + tiptap-markdown.
+  // See packages/editor/src/tiptap-config.ts for the canonical list.
+  //
+  // editMermaidInline() (above) replaces editMermaidCode() and dispatches
+  // a ProseMirror transaction instead of mutating innerHTML.
   // ════════════════════════════════════════════════════════
-
-  function applyInlineFormat(format) {
-    var sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var text = range.toString();
-    if (!text) return;
-    var wrapper;
-    switch (format) {
-      case "bold": wrapper = document.createElement("strong"); break;
-      case "italic": wrapper = document.createElement("em"); break;
-      case "strikethrough": wrapper = document.createElement("del"); break;
-      case "code": wrapper = document.createElement("code"); break;
-      default: return;
-    }
-    var parentTag = range.commonAncestorContainer.parentElement;
-    if (parentTag && parentTag.tagName === wrapper.tagName && parentTag !== content) {
-      var textNode = document.createTextNode(parentTag.textContent || "");
-      parentTag.parentNode.replaceChild(textNode, parentTag);
-    } else { range.surroundContents(wrapper); }
-    triggerEditDebounce();
-  }
-
-  function applyBlockFormat(format) {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var blockNode = findBlockParent(range.startContainer);
-    if (!blockNode || blockNode === content) {
-      // No block parent — wrap in a paragraph first
-      blockNode = document.createElement("p");
-      blockNode.textContent = range.startContainer.textContent || "";
-      if (range.startContainer.nodeType === Node.TEXT_NODE && range.startContainer.parentNode === content) {
-        content.replaceChild(blockNode, range.startContainer);
-      } else if (content.childNodes.length === 0) {
-        blockNode.innerHTML = "<br>";
-        content.appendChild(blockNode);
-      } else {
-        return;
-      }
-    }
-    var newNode;
-    switch (format) {
-      case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
-        newNode = document.createElement(format); newNode.textContent = blockNode.textContent; break;
-      case "p": newNode = document.createElement("p"); newNode.textContent = blockNode.textContent; break;
-      case "blockquote":
-        newNode = document.createElement("blockquote");
-        var p = document.createElement("p"); p.textContent = blockNode.textContent;
-        newNode.appendChild(p); break;
-      case "ul": { newNode = document.createElement("ul"); var li = document.createElement("li"); li.textContent = blockNode.textContent; newNode.appendChild(li); break; }
-      case "ol": { newNode = document.createElement("ol"); var li2 = document.createElement("li"); li2.textContent = blockNode.textContent; newNode.appendChild(li2); break; }
-      case "task": {
-        newNode = document.createElement("ul"); newNode.className = "contains-task-list";
-        var tli = document.createElement("li"); tli.className = "task-list-item";
-        var cb = document.createElement("input"); cb.type = "checkbox"; cb.disabled = false;
-        tli.appendChild(cb); tli.appendChild(document.createTextNode(" " + blockNode.textContent));
-        newNode.appendChild(tli); break;
-      }
-      default: return;
-    }
-    blockNode.parentNode.replaceChild(newNode, blockNode);
-    triggerEditDebounce();
-  }
-
-  function insertLink() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var text = range.toString() || "link text";
-    var link = document.createElement("a"); link.href = "https://"; link.textContent = text;
-    range.deleteContents(); range.insertNode(link);
-    sel.selectAllChildren(link); triggerEditDebounce();
-  }
-
-  function insertImagePrompt() {
-    var url = prompt("Image URL:"); if (!url) return;
-    var alt = prompt("Alt text:", "image") || "image";
-    insertImageElement(url, alt);
-  }
-
-  function insertImageElement(url, alt) {
-    var sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) {
-      var img = document.createElement("img"); img.src = url; img.alt = alt || "image";
-      var p2 = document.createElement("p"); p2.appendChild(img); content.appendChild(p2);
-    } else {
-      var range = sel.getRangeAt(0);
-      var img2 = document.createElement("img"); img2.src = url; img2.alt = alt || "image";
-      range.deleteContents(); range.insertNode(img2); sel.collapseToEnd();
-    }
-    triggerEditDebounce();
-  }
-
-  function insertMathBlock() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var blockNode = findBlockParent(range.startContainer);
-    var p = document.createElement("p");
-    p.textContent = "$$\nE = mc^2\n$$";
-    if (blockNode && blockNode !== content) { blockNode.parentNode.insertBefore(p, blockNode.nextSibling); }
-    else { content.appendChild(p); }
-    triggerEditDebounce();
-  }
-
-  function insertCodeBlock() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var blockNode = findBlockParent(range.startContainer);
-    var pre = document.createElement("pre"); var code = document.createElement("code");
-    code.textContent = range.toString() || "code here"; pre.appendChild(code);
-    if (blockNode && blockNode !== content) { blockNode.parentNode.insertBefore(pre, blockNode.nextSibling); }
-    else { content.appendChild(pre); }
-    triggerEditDebounce();
-  }
-
-  function insertHorizontalRule() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var blockNode = findBlockParent(range.startContainer);
-    var hr = document.createElement("hr");
-    if (blockNode && blockNode !== content) { blockNode.parentNode.insertBefore(hr, blockNode.nextSibling); }
-    else { content.appendChild(hr); }
-    triggerEditDebounce();
-  }
-
-  function insertTable(cols, rows) {
-    cols = cols || 3; rows = rows || 3;
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0);
-    var blockNode = findBlockParent(range.startContainer);
-    var table = document.createElement("table");
-    var thead = document.createElement("thead"); var headerRow = document.createElement("tr");
-    for (var h = 0; h < cols; h++) { var th = document.createElement("th"); th.textContent = "Header " + (h + 1); headerRow.appendChild(th); }
-    thead.appendChild(headerRow); table.appendChild(thead);
-    var tbody = document.createElement("tbody");
-    var bodyRows = Math.max(1, rows - 1); // First row is the header
-    for (var r = 0; r < bodyRows; r++) { var row = document.createElement("tr"); for (var c = 0; c < cols; c++) { var td = document.createElement("td"); td.textContent = ""; row.appendChild(td); } tbody.appendChild(row); }
-    table.appendChild(tbody);
-    if (blockNode && blockNode !== content) { blockNode.parentNode.insertBefore(table, blockNode.nextSibling); }
-    else { content.appendChild(table); }
-    triggerEditDebounce();
-  }
-
-  function applyIndent() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var li = findParentByTag(sel.getRangeAt(0).startContainer, "LI");
-    if (!li) return;
-    var prevLi = li.previousElementSibling;
-    if (!prevLi || prevLi.tagName !== "LI") return;
-    var parentList = li.parentNode;
-    var nestedList = prevLi.querySelector(parentList.tagName.toLowerCase());
-    if (!nestedList) { nestedList = document.createElement(parentList.tagName.toLowerCase()); prevLi.appendChild(nestedList); }
-    nestedList.appendChild(li); triggerEditDebounce();
-  }
-
-  function applyOutdent() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var li = findParentByTag(sel.getRangeAt(0).startContainer, "LI");
-    if (!li) return;
-    var parentList = li.parentNode; if (!parentList) return;
-    var grandparentLi = parentList.parentNode;
-    if (!grandparentLi || grandparentLi.tagName !== "LI") return;
-    var outerList = grandparentLi.parentNode; if (!outerList) return;
-    outerList.insertBefore(li, grandparentLi.nextSibling);
-    if (parentList.children.length === 0) parentList.parentNode.removeChild(parentList);
-    triggerEditDebounce();
-  }
-
-  function removeFormatting() {
-    var sel = window.getSelection(); if (!sel || sel.rangeCount === 0) return;
-    var range = sel.getRangeAt(0); var text = range.toString(); if (!text) return;
-    range.deleteContents(); range.insertNode(document.createTextNode(text));
-    sel.collapseToEnd(); triggerEditDebounce();
-  }
-
-  // ─── Table Grid Selector ───
-  var activeGridSelector = null;
-  function showTableGridSelector(button) {
-    hideTableGridSelector();
-    var rect = button.getBoundingClientRect();
-    var grid = document.createElement("div"); grid.className = "table-grid-selector";
-    grid.style.left = rect.left + "px"; grid.style.top = (rect.bottom + 4) + "px";
-    var label = document.createElement("div"); label.className = "grid-label"; label.textContent = "Select size";
-    grid.appendChild(label);
-    var gc = document.createElement("div"); gc.className = "grid-cells";
-    for (var r = 0; r < 5; r++) for (var c = 0; c < 6; c++) {
-      var cell = document.createElement("div"); cell.className = "grid-cell";
-      cell.setAttribute("data-row", String(r)); cell.setAttribute("data-col", String(c));
-      gc.appendChild(cell);
-    }
-    grid.appendChild(gc);
-    gc.addEventListener("mouseover", function(e) {
-      var cell2 = e.target.closest(".grid-cell"); if (!cell2) return;
-      var hr2 = parseInt(cell2.getAttribute("data-row")), hc2 = parseInt(cell2.getAttribute("data-col"));
-      label.textContent = (hc2 + 1) + " x " + (hr2 + 1);
-      gc.querySelectorAll(".grid-cell").forEach(function(c2) {
-        c2.classList.toggle("active", parseInt(c2.getAttribute("data-row")) <= hr2 && parseInt(c2.getAttribute("data-col")) <= hc2);
-      });
-    });
-    gc.addEventListener("click", function(e) {
-      var cell3 = e.target.closest(".grid-cell"); if (!cell3) return;
-      hideTableGridSelector(); content.focus();
-      insertTable(parseInt(cell3.getAttribute("data-col")) + 1, parseInt(cell3.getAttribute("data-row")) + 1);
-    });
-    document.body.appendChild(grid); activeGridSelector = grid;
-    setTimeout(function() { document.addEventListener("click", hideTableGridSelector, { once: true }); }, 0);
-  }
-  function hideTableGridSelector() { if (activeGridSelector) { activeGridSelector.remove(); activeGridSelector = null; } }
-
-  // ─── Paste & Drop ───
-
-  content.addEventListener("paste", function(e) {
-    if (isReadOnly) return;
-    var cd = e.clipboardData; if (!cd) return;
-
-    // Check for image paste first
-    var items = cd.items;
-    if (items) {
-      for (var idx = 0; idx < items.length; idx++) {
-        if (items[idx].type.startsWith("image/")) {
-          e.preventDefault();
-          var file = items[idx].getAsFile();
-          if (!file) return;
-          var reader = new FileReader();
-          reader.onload = function(ev) {
-            var dataUrl = ev.target.result;
-            var base64 = dataUrl.split(",")[1];
-            var mime = dataUrl.split(":")[1].split(";")[0];
-            // Upload to API
-            showToast("Uploading image...");
-            window.mwDesktop.uploadImage(base64, mime, "pasted-image.png").then(function(result) {
-              if (result.url) {
-                insertImageElement(result.url, "image");
-                showToast("Image uploaded");
-              } else if (result.error) {
-                // Fallback: insert as data URL
-                insertImageElement(dataUrl, "image");
-                showToast("Image inserted locally (upload failed)");
-              }
-            });
-          };
-          reader.readAsDataURL(file);
-          return;
-        }
-      }
-    }
-
-    // HTML paste — sanitize and insert as HTML (preserving structure)
-    var htmlData = cd.getData("text/html");
-    if (htmlData && htmlData.trim()) {
-      if (/<(h[1-6]|p|ul|ol|li|table|tr|td|th|blockquote|pre|code|a|strong|em|b|i|img)\b/i.test(htmlData)) {
-        e.preventDefault();
-        var temp = document.createElement("div"); temp.innerHTML = htmlData;
-        temp.querySelectorAll("style, script, meta, link, svg").forEach(function(el) { el.remove(); });
-        // Strip all class/id/style attributes to get clean HTML
-        temp.querySelectorAll("*").forEach(function(el) {
-          el.removeAttribute("class"); el.removeAttribute("id"); el.removeAttribute("style");
-        });
-        // Convert to markdown then re-render to get clean memory.wiki HTML
-        var pastedMd = htmlToMarkdown(temp).trim();
-        if (pastedMd) {
-          window.mwDesktop.renderMarkdown(pastedMd).then(function(r) {
-            if (r && r.html) {
-              document.execCommand("insertHTML", false, r.html);
-            } else {
-              document.execCommand("insertText", false, pastedMd);
-            }
-            triggerEditDebounce();
-          });
-        }
-        return;
-      }
-    }
-  });
-
-  content.addEventListener("dragover", function(e) { e.preventDefault(); });
-  content.addEventListener("drop", function(e) {
-    var files = e.dataTransfer && e.dataTransfer.files;
-    if (!files || files.length === 0) return;
-    for (var i = 0; i < files.length; i++) {
-      if (files[i].type.startsWith("image/")) {
-        e.preventDefault();
-        var file = files[i];
-        var reader = new FileReader();
-        reader.onload = function(ev) { insertImageElement(ev.target.result, file.name); };
-        reader.readAsDataURL(file); break;
-      }
-    }
-  });
-
-  // ════════════════════════════════════════════════════════
-  //  HTML → MARKDOWN CONVERSION (unchanged)
-  // ════════════════════════════════════════════════════════
-
-  function htmlToMarkdown(root) {
-    var result = "";
-    for (var i = 0; i < root.childNodes.length; i++) {
-      var child = root.childNodes[i];
-      if (child.nodeType === 1 && child.classList && child.classList.contains("ce-spacer")) continue;
-      if (child.nodeType === 1 && child.classList && (child.classList.contains("code-header") || child.classList.contains("mermaid-edit-btn"))) continue;
-      result += nodeToMarkdown(child, 0);
-    }
-    return result.replace(/\n{3,}/g, "\n\n").trim() + "\n";
-  }
-
-  function nodeToMarkdown(node, depth) {
-    if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
-    if (node.nodeType !== Node.ELEMENT_NODE) return "";
-    // Skip UI elements injected by postProcessAll
-    if (node.classList && (node.classList.contains("ce-spacer") || node.classList.contains("code-header") || node.classList.contains("mermaid-edit-btn") || node.classList.contains("cloud-banner"))) return "";
-    var tag = node.tagName.toLowerCase();
-    var innerText = node.textContent || "";
-    var childMd = "";
-    switch (tag) {
-      case "h1": return "# " + innerText.trim() + "\n\n";
-      case "h2": return "## " + innerText.trim() + "\n\n";
-      case "h3": return "### " + innerText.trim() + "\n\n";
-      case "h4": return "#### " + innerText.trim() + "\n\n";
-      case "h5": return "##### " + innerText.trim() + "\n\n";
-      case "h6": return "###### " + innerText.trim() + "\n\n";
-      case "p": return inlineChildrenToMd(node) + "\n\n";
-      case "br": return "\n";
-      case "strong": case "b": return "**" + inlineChildrenToMd(node) + "**";
-      case "em": case "i": return "*" + inlineChildrenToMd(node) + "*";
-      case "del": case "s": return "~~" + inlineChildrenToMd(node) + "~~";
-      case "code":
-        if (node.parentElement && node.parentElement.tagName.toLowerCase() === "pre") return innerText;
-        return "`" + innerText.replace(/`/g, "\\`") + "`";
-      case "pre": {
-        var lang = node.getAttribute("lang") || "";
-        var codeEl = node.querySelector("code");
-        return "```" + lang + "\n" + (codeEl ? codeEl.textContent : innerText) + "\n```\n\n";
-      }
-      case "a": return "[" + inlineChildrenToMd(node) + "](" + (node.getAttribute("href") || "") + ")";
-      case "img": return "![" + (node.getAttribute("alt") || "") + "](" + (node.getAttribute("src") || "") + ")\n\n";
-      case "blockquote":
-        childMd = blockChildrenToMd(node);
-        return childMd.split("\n").map(function(line) { return "> " + line; }).join("\n") + "\n\n";
-      case "ul": return listToMarkdown(node, "ul", depth) + "\n";
-      case "ol": return listToMarkdown(node, "ol", depth) + "\n";
-      case "li": return inlineChildrenToMd(node);
-      case "hr": return "---\n\n";
-      case "table": return tableToMarkdown(node) + "\n\n";
-      case "input":
-        if (node.type === "checkbox") return node.checked ? "[x] " : "[ ] ";
-        return "";
-      case "details": {
-        var summary = node.querySelector("summary");
-        var summaryText = summary ? summary.textContent.trim() : "Details";
-        for (var c2 = 0; c2 < node.childNodes.length; c2++) {
-          if (node.childNodes[c2] !== summary) childMd += nodeToMarkdown(node.childNodes[c2], depth);
-        }
-        return "<details>\n<summary>" + summaryText + "</summary>\n\n" + childMd.trim() + "\n</details>\n\n";
-      }
-      case "div":
-        // Mermaid diagrams: preserve original code
-        if (node.classList && node.classList.contains("mermaid") && node.getAttribute("data-original-code")) {
-          return "```mermaid\n" + node.getAttribute("data-original-code") + "\n```\n\n";
-        }
-        // v3.0 display math widget: <div class="math-rendered" data-math-mode="display" data-math-src="<urlenc LaTeX>">
-        if (node.classList && node.classList.contains("math-rendered") && node.getAttribute("data-math-src")) {
-          var dsrc = decodeURIComponent(node.getAttribute("data-math-src"));
-          var dmode = node.getAttribute("data-math-mode");
-          if (dmode === "display") return "$$\n" + dsrc + "\n$$\n\n";
-          return "$" + dsrc + "$";
-        }
-        for (var j = 0; j < node.childNodes.length; j++) childMd += nodeToMarkdown(node.childNodes[j], depth);
-        return childMd;
-      case "section": case "article": case "main": case "aside": case "header": case "footer": case "nav":
-        for (var j2 = 0; j2 < node.childNodes.length; j2++) childMd += nodeToMarkdown(node.childNodes[j2], depth);
-        return childMd;
-      case "span":
-        // v3.0 inline math widget: <span class="math-rendered" data-math-mode="inline" data-math-src="<urlenc LaTeX>">
-        if (node.classList && node.classList.contains("math-rendered") && node.getAttribute("data-math-src")) {
-          var ssrc = decodeURIComponent(node.getAttribute("data-math-src"));
-          var smode = node.getAttribute("data-math-mode");
-          if (smode === "display") return "$$\n" + ssrc + "\n$$\n\n";
-          return "$" + ssrc + "$";
-        }
-        if (node.getAttribute("data-math-style") === "display") return "$$\n" + innerText.trim() + "\n$$\n\n";
-        if (node.getAttribute("data-math-style") === "inline") return "$" + innerText.trim() + "$";
-        // KaTeX-rendered spans have class "katex" or "katex-display"
-        if (node.classList && (node.classList.contains("katex") || node.classList.contains("katex-display"))) {
-          var mathEl = node.closest("[data-math-style], .math-rendered");
-          if (mathEl) return ""; // Already handled by parent
-        }
-        return inlineChildrenToMd(node);
-      default: return innerText;
-    }
-  }
-
-  function inlineChildrenToMd(node) {
-    var result = "";
-    for (var i = 0; i < node.childNodes.length; i++) {
-      var c = node.childNodes[i];
-      result += c.nodeType === Node.TEXT_NODE ? (c.textContent || "") : nodeToMarkdown(c, 0);
-    }
-    return result;
-  }
-
-  function blockChildrenToMd(node) {
-    var result = "";
-    for (var i = 0; i < node.childNodes.length; i++) result += nodeToMarkdown(node.childNodes[i], 0);
-    return result.trim();
-  }
-
-  function listToMarkdown(listNode, type, depth) {
-    var result = "", items = listNode.children, indent = "  ".repeat(depth);
-    for (var i = 0; i < items.length; i++) {
-      var li = items[i]; if (li.tagName.toLowerCase() !== "li") continue;
-      var prefix;
-      if (type === "ol") { prefix = (i + 1) + ". "; }
-      else {
-        var checkbox = li.querySelector("input[type='checkbox']");
-        prefix = checkbox ? (checkbox.checked ? "- [x] " : "- [ ] ") : "- ";
-      }
-      var textContent = "", nestedList = "";
-      for (var j = 0; j < li.childNodes.length; j++) {
-        var child = li.childNodes[j];
-        if (child.nodeType === Node.ELEMENT_NODE) {
-          var ct = child.tagName.toLowerCase();
-          if (ct === "ul" || ct === "ol") { nestedList += listToMarkdown(child, ct, depth + 1); }
-          else if (ct === "input" && child.type === "checkbox") { /* skip */ }
-          else { textContent += nodeToMarkdown(child, depth); }
-        } else if (child.nodeType === Node.TEXT_NODE) { textContent += child.textContent || ""; }
-      }
-      result += indent + prefix + textContent.trim() + "\n";
-      if (nestedList) result += nestedList;
-    }
-    return result;
-  }
-
-  function tableToMarkdown(tableNode) {
-    var rows = tableNode.querySelectorAll("tr"); if (rows.length === 0) return "";
-    var result = "", colCount = 0;
-    for (var i = 0; i < rows.length; i++) {
-      var cells = rows[i].querySelectorAll("th, td");
-      if (i === 0) colCount = cells.length;
-      var row = "|";
-      for (var j = 0; j < cells.length; j++) row += " " + (cells[j].textContent || "").trim() + " |";
-      result += row + "\n";
-      if (i === 0) {
-        var sep = "|"; for (var k = 0; k < colCount; k++) sep += " --- |";
-        result += sep + "\n";
-      }
-    }
-    return result;
-  }
-
-  // ════════════════════════════════════════════════════════
-  //  HELPERS
-  // ════════════════════════════════════════════════════════
-
-  function findBlockParent(node) {
-    var blockTags = ["P","H1","H2","H3","H4","H5","H6","LI","BLOCKQUOTE","PRE","DIV","TABLE","UL","OL","HR","DETAILS"];
-    var current = node;
-    while (current && current !== content) {
-      if (current.nodeType === Node.ELEMENT_NODE && blockTags.indexOf(current.tagName) !== -1) return current;
-      current = current.parentNode;
-    }
-    return null;
-  }
-
-  function findParentByTag(node, tagName) {
-    var current = node;
-    while (current && current !== content) {
-      if (current.nodeType === Node.ELEMENT_NODE && current.tagName === tagName) return current;
-      current = current.parentNode;
-    }
-    return null;
-  }
-
-  function triggerEditDebounce() {
-    // Just mark dirty. Markdown extraction happens at auto-save time.
-    isDirty = true;
-    updateSyncStatusUI("editing");
-  }
-
-  function getCaretCharacterOffset(element) {
-    var sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      var range = sel.getRangeAt(0);
-      var pre = range.cloneRange(); pre.selectNodeContents(element); pre.setEnd(range.endContainer, range.endOffset);
-      return pre.toString().length;
-    }
-    return 0;
-  }
-
-  function restoreCaretPosition(element, offset) {
-    var walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
-    var currentOffset = 0, node;
-    while ((node = walker.nextNode())) {
-      var len = (node.textContent || "").length;
-      if (currentOffset + len >= offset) {
-        var sel = window.getSelection();
-        if (sel) { var range = document.createRange(); range.setStart(node, Math.min(offset - currentOffset, len)); range.collapse(true); sel.removeAllRanges(); sel.addRange(range); }
-        return;
-      }
-      currentOffset += len;
-    }
-  }
 
   function updateSyncStatusUI(status) {
     // Update header sync indicator
@@ -3334,169 +2901,6 @@
         default: headerSync.textContent = ""; break;
       }
     }
-  }
-
-  // ─── Non-Editable Islands ───
-
-  function setupNonEditableIslands(root) {
-    // Mermaid diagrams: opaque blobs, never editable inline.
-    root.querySelectorAll(".mermaid").forEach(function(el) {
-      el.setAttribute("contenteditable", "false");
-    });
-    // Math widgets: their nested KaTeX HTML has dozens of nested spans
-    // and the load-bearing `data-math-src` attribute on the wrapper.
-    // If the caret lands inside and the user types, Chromium edits the
-    // KaTeX glyphs in place AND can strip the wrapper attribute, which
-    // is what made $ delimiters disappear on save through the v3.0 bug.
-    // Lock the widget so the only way to change math is to delete the
-    // whole node or edit the markdown in the Source pane.
-    root.querySelectorAll(".math-rendered").forEach(function(el) {
-      el.setAttribute("contenteditable", "false");
-    });
-  }
-
-  function postProcessCodeBlocks(root) {
-    root.querySelectorAll("pre[lang]").forEach(function(pre) {
-      if (pre.querySelector(".code-header")) return;
-      var lang = pre.getAttribute("lang"); if (lang === "mermaid") return;
-      var header = document.createElement("div"); header.className = "code-header";
-      var langLabel = document.createElement("span"); langLabel.className = "code-lang"; langLabel.textContent = lang;
-      header.appendChild(langLabel);
-      var copyBtn = document.createElement("button"); copyBtn.className = "code-copy-btn";
-      copyBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg> Copy';
-      copyBtn.addEventListener("click", function(e) {
-        e.stopPropagation(); e.preventDefault();
-        var code = pre.querySelector("code");
-        navigator.clipboard.writeText((code || pre).textContent || "").then(function() {
-          copyBtn.textContent = "Copied!"; copyBtn.classList.add("copied");
-          setTimeout(function() {
-            copyBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="6" width="8" height="8" rx="1.5"/><path d="M6 10H4.5A1.5 1.5 0 013 8.5v-5A1.5 1.5 0 014.5 2h5A1.5 1.5 0 0111 3.5V6"/></svg> Copy';
-            copyBtn.classList.remove("copied");
-          }, 2000);
-        });
-      });
-      header.appendChild(copyBtn); pre.insertBefore(header, pre.firstChild);
-    });
-  }
-
-  function postProcessMermaid() {
-    if (typeof mermaid === "undefined") return;
-    content.querySelectorAll('pre[lang="mermaid"] code, code.language-mermaid').forEach(function(el) {
-      var container = document.createElement("div"); container.className = "mermaid";
-      var originalCode = el.textContent || "";
-      container.setAttribute("data-original-code", originalCode);
-      container.textContent = originalCode;
-      var pre = el.closest("pre"); if (pre) pre.replaceWith(container);
-    });
-    mermaid.initialize({ startOnLoad: false, theme: "dark" });
-    mermaid.run().then(function() {
-      // Add edit buttons to rendered mermaid diagrams
-      content.querySelectorAll(".mermaid").forEach(function(el) {
-        if (el.querySelector(".mermaid-edit-btn")) return;
-        var editBtn = document.createElement("button");
-        editBtn.className = "mermaid-edit-btn";
-        editBtn.textContent = "Edit";
-        editBtn.addEventListener("click", function(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          var code = el.getAttribute("data-original-code") || "";
-          editMermaidCode(el, code);
-        });
-        el.appendChild(editBtn);
-      });
-    }).catch(function() {});
-  }
-
-  function editMermaidCode(el, code) {
-    // Full-screen modal with CodeMirror editor + live preview
-    var overlay = document.createElement("div");
-    overlay.className = "mermaid-modal-overlay";
-    overlay.innerHTML =
-      '<div class="mermaid-modal">' +
-        '<div class="mermaid-modal-header">' +
-          '<span class="mermaid-modal-title">Edit Mermaid Diagram</span>' +
-          '<div class="mermaid-modal-actions">' +
-            '<button class="mermaid-modal-btn" id="mm-cancel">Cancel</button>' +
-            '<button class="mermaid-modal-btn primary" id="mm-apply">Apply</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="mermaid-modal-body">' +
-          '<div class="mermaid-modal-editor" id="mm-editor"></div>' +
-          '<div class="mermaid-modal-preview" id="mm-preview"></div>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(overlay);
-
-    // Init CodeMirror for mermaid code
-    var editorContainer = document.getElementById("mm-editor");
-    var previewContainer = document.getElementById("mm-preview");
-    var mmCm = CodeMirror(editorContainer, {
-      value: code,
-      mode: "markdown",
-      theme: "material-darker",
-      lineNumbers: true,
-      lineWrapping: true,
-      autofocus: true,
-    });
-
-    // Live preview
-    function updatePreview() {
-      var src = mmCm.getValue();
-      previewContainer.innerHTML = "";
-      var div = document.createElement("div");
-      div.className = "mermaid";
-      div.textContent = src;
-      previewContainer.appendChild(div);
-      try {
-        mermaid.initialize({ startOnLoad: false, theme: "dark" });
-        mermaid.run({ nodes: [div] }).catch(function() {
-          previewContainer.innerHTML = '<div style="color:#ef4444;padding:16px;font-size:12px">Syntax error</div>';
-        });
-      } catch (e) {
-        previewContainer.innerHTML = '<div style="color:#ef4444;padding:16px;font-size:12px">Syntax error</div>';
-      }
-    }
-    updatePreview();
-    mmCm.on("change", function() {
-      if (mmCm._previewDebounce) clearTimeout(mmCm._previewDebounce);
-      mmCm._previewDebounce = setTimeout(updatePreview, 400);
-    });
-    setTimeout(function() { mmCm.refresh(); }, 50);
-
-    // Cancel
-    document.getElementById("mm-cancel").addEventListener("click", function() {
-      overlay.remove();
-    });
-
-    // Apply
-    document.getElementById("mm-apply").addEventListener("click", function() {
-      var newCode = mmCm.getValue();
-      overlay.remove();
-      if (newCode !== code) {
-        el.setAttribute("data-original-code", newCode);
-        el.textContent = newCode;
-        el.removeAttribute("data-processed");
-        mermaid.run({ nodes: [el] }).then(function() {
-          var editBtn = document.createElement("button");
-          editBtn.className = "mermaid-edit-btn";
-          editBtn.textContent = "Edit";
-          editBtn.addEventListener("click", function(e) {
-            e.stopPropagation(); e.preventDefault();
-            editMermaidCode(el, el.getAttribute("data-original-code") || "");
-          });
-          el.appendChild(editBtn);
-        }).catch(function() {});
-        triggerEditDebounce();
-      }
-    });
-
-    // Close on Escape
-    overlay.addEventListener("keydown", function(e) {
-      if (e.key === "Escape") overlay.remove();
-    });
-    overlay.addEventListener("click", function(e) {
-      if (e.target === overlay) overlay.remove();
-    });
   }
 
   // ─── Selection Toolbar ───
@@ -3530,122 +2934,22 @@
       var button = e.target.closest("button"); if (!button) return;
       var action = button.getAttribute("data-action"); if (!action) return;
       e.preventDefault();
-      switch (action) {
-        case "undo": dispatchUndo(); break;
-        case "redo": dispatchRedo(); break;
-        case "bold": applyInlineFormat("bold"); break;
-        case "italic": applyInlineFormat("italic"); break;
-        case "strikethrough": applyInlineFormat("strikethrough"); break;
-        case "code": applyInlineFormat("code"); break;
-        case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
-        case "p": case "blockquote": case "ul": case "ol": case "task":
-          applyBlockFormat(action); break;
-        case "indent": applyIndent(); break;
-        case "outdent": applyOutdent(); break;
-        case "link": insertLink(); break;
-        case "image": insertImagePrompt(); break;
-        case "hr": insertHorizontalRule(); break;
-        case "removeFormat": removeFormatting(); break;
-      }
+      // Same dispatcher as the formatting toolbar — every action routes
+      // through toolbarAction() which calls TipTap chain commands.
+      toolbarAction(action);
       hideSelectionToolbar();
     });
   }
 
   // ─── Table Editing ───
-
-  content.addEventListener("dblclick", function(e) {
-    var td = e.target.closest("td, th");
-    if (td) {
-      if (td.getAttribute("contenteditable") === "true") return;
-      e.stopPropagation(); td.setAttribute("contenteditable", "true");
-      td.classList.add("table-cell-editing"); td.focus();
-      var range = document.createRange(); range.selectNodeContents(td);
-      var sel = window.getSelection(); if (sel) { sel.removeAllRanges(); sel.addRange(range); }
-      td.addEventListener("blur", function onBlur() {
-        td.removeAttribute("contenteditable"); td.classList.remove("table-cell-editing");
-        td.removeEventListener("blur", onBlur); triggerEditDebounce();
-      });
-      td.addEventListener("keydown", function(ev) {
-        if (ev.key === "Enter" || ev.key === "Escape") { ev.preventDefault(); td.blur(); }
-        if (ev.key === "Tab") {
-          ev.preventDefault(); td.blur();
-          var next = ev.shiftKey ? td.previousElementSibling : td.nextElementSibling;
-          if (next && (next.tagName === "TD" || next.tagName === "TH")) next.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
-        }
-      });
-      return;
-    }
-    // Code block editing
-    var pre = e.target.closest("pre[lang]");
-    if (pre) {
-      var lang = pre.getAttribute("lang"); if (lang === "mermaid") return;
-      var codeEl = pre.querySelector("code"); if (!codeEl) return;
-      e.stopPropagation(); e.preventDefault();
-      var currentCode = codeEl.textContent || "";
-      editCodeBlock(pre, codeEl, lang, currentCode);
-    }
-  });
-
-  content.addEventListener("contextmenu", function(e) {
-    var td = e.target.closest("td, th");
-    if (!td) { hideTableContextMenu(); return; }
-    e.preventDefault(); e.stopPropagation(); showTableContextMenu(e.clientX, e.clientY, td);
-  });
-
-  function showTableContextMenu(x, y, td) {
-    hideTableContextMenu();
-    var menu = document.createElement("div"); menu.className = "table-context-menu";
-    var items = [
-      { label: "Add Row Above", action: "addRowAbove" }, { label: "Add Row Below", action: "addRowBelow" },
-      { label: "Add Column Left", action: "addColLeft" }, { label: "Add Column Right", action: "addColRight" },
-      { label: "---" }, { label: "Delete Row", action: "deleteRow" }, { label: "Delete Column", action: "deleteCol" },
-    ];
-    items.forEach(function(item) {
-      if (item.label === "---") { var sep = document.createElement("div"); sep.className = "table-ctx-separator"; menu.appendChild(sep); return; }
-      var btn = document.createElement("button"); btn.className = "table-ctx-item"; btn.textContent = item.label;
-      btn.addEventListener("click", function(e2) { e2.stopPropagation(); handleTableAction(item.action, td); hideTableContextMenu(); });
-      menu.appendChild(btn);
-    });
-    menu.style.left = x + "px"; menu.style.top = y + "px";
-    document.body.appendChild(menu); tableContextMenu = menu;
-    var rect = menu.getBoundingClientRect();
-    if (rect.right > window.innerWidth) menu.style.left = (x - rect.width) + "px";
-    if (rect.bottom > window.innerHeight) menu.style.top = (y - rect.height) + "px";
-    setTimeout(function() { document.addEventListener("click", hideTableContextMenu, { once: true }); }, 0);
-  }
-  function hideTableContextMenu() { if (tableContextMenu) { tableContextMenu.remove(); tableContextMenu = null; } }
-
-  function handleTableAction(action, td) {
-    var tr = td.closest("tr"), table = td.closest("table"); if (!tr || !table) return;
-    var cellIndex = Array.prototype.indexOf.call(tr.children, td);
-    var allRows = table.querySelectorAll("tr");
-    var colCount = allRows.length > 0 ? allRows[0].children.length : 0;
-    switch (action) {
-      case "addRowAbove": case "addRowBelow": {
-        var newRow = document.createElement("tr");
-        for (var c = 0; c < colCount; c++) { var newTd = document.createElement("td"); newTd.textContent = ""; newRow.appendChild(newTd); }
-        tr.parentNode.insertBefore(newRow, action === "addRowAbove" ? tr : tr.nextSibling); break;
-      }
-      case "addColLeft": case "addColRight":
-        allRows.forEach(function(row) {
-          var isHeader = row.children[0] && row.children[0].tagName === "TH";
-          var newCell = document.createElement(isHeader ? "th" : "td"); newCell.textContent = isHeader ? "Header" : "";
-          var refCell = row.children[cellIndex];
-          if (action === "addColLeft" && refCell) row.insertBefore(newCell, refCell);
-          else if (refCell) row.insertBefore(newCell, refCell.nextSibling);
-          else row.appendChild(newCell);
-        }); break;
-      case "deleteRow": {
-        var rowIndex = Array.prototype.indexOf.call(allRows, tr);
-        if (rowIndex === 0 || allRows.length <= 2) return;
-        tr.remove(); break;
-      }
-      case "deleteCol":
-        if (colCount <= 1) return;
-        allRows.forEach(function(row) { var cell = row.children[cellIndex]; if (cell) cell.remove(); }); break;
-    }
-    triggerEditDebounce();
-  }
+  //
+  // Removed in v2.6.0. TipTap's Table extension already supports inline
+  // cell editing (just click into a cell), Tab / Shift+Tab to navigate,
+  // and the row/column ops are available as chain commands (addRowAfter,
+  // deleteRow, addColumnAfter, ...). A custom context menu that wires
+  // those commands is on the v2.7.0 roadmap — for v2.6.0 users right-
+  // click invokes the OS's default menu (Cut/Copy/Paste) which is the
+  // same thing every other TipTap-based editor does out of the box.
 
   // ─── Flavor Badge ───
 
@@ -3887,7 +3191,6 @@
     if (flavorDropdown) flavorDropdown.classList.add("hidden");
     var ed = document.getElementById("export-dropdown");
     if (ed) ed.remove();
-    hideTableContextMenu();
   });
 
   // ─── File Context Menu ───
@@ -4090,39 +3393,9 @@
   }
 
   // ─── Code Block Editor Modal ───
-
-  function editCodeBlock(pre, codeEl, lang, code) {
-    var overlay = document.createElement("div");
-    overlay.className = "mermaid-modal-overlay";
-    overlay.innerHTML =
-      '<div class="mermaid-modal" style="width:70vw;height:70vh;max-width:900px">' +
-        '<div class="mermaid-modal-header">' +
-          '<span class="mermaid-modal-title">Edit Code' + (lang ? ' (' + esc(lang) + ')' : '') + '</span>' +
-          '<div class="mermaid-modal-actions">' +
-            '<button class="mermaid-modal-btn" id="cb-cancel">Cancel</button>' +
-            '<button class="mermaid-modal-btn primary" id="cb-apply">Apply</button>' +
-          '</div>' +
-        '</div>' +
-        '<div style="flex:1;min-height:0;overflow:auto" id="cb-editor"></div>' +
-      '</div>';
-    document.body.appendChild(overlay);
-
-    var modeMap = { js: "javascript", ts: "javascript", jsx: "javascript", tsx: "javascript", css: "css", html: "xml", xml: "xml", yaml: "yaml", yml: "yaml" };
-    var cmMode = modeMap[lang] || "gfm";
-    var cbCm = CodeMirror(document.getElementById("cb-editor"), {
-      value: code, mode: cmMode, theme: "material-darker", lineNumbers: true, lineWrapping: true, autofocus: true, indentUnit: 2, tabSize: 2,
-    });
-    setTimeout(function() { cbCm.refresh(); }, 50);
-
-    document.getElementById("cb-cancel").addEventListener("click", function() { overlay.remove(); });
-    document.getElementById("cb-apply").addEventListener("click", function() {
-      var newCode = cbCm.getValue();
-      overlay.remove();
-      if (newCode !== code) { codeEl.textContent = newCode; triggerEditDebounce(); }
-    });
-    overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.remove(); });
-    overlay.addEventListener("keydown", function(e) { if (e.key === "Escape") overlay.remove(); });
-  }
+  // Removed in v2.6.0. TipTap's CustomCodeBlock NodeView edits code
+  // blocks inline (just click in the block). The dbl-click → modal
+  // pathway only survives for mermaid blocks now (see editMermaidInline).
 
   // ─── Markdown → Slack mrkdwn ───
 
@@ -4361,7 +3634,7 @@
       return;
     }
 
-    var md = htmlToMarkdown(content);
+    var md = liveEditor ? liveEditor.getMarkdown() : "";
     if (!md || !md.trim()) {
       showAiSideLoading(false);
       addAiSideChatMessage("error", "No content to process.");
@@ -4507,7 +3780,7 @@
     }
 
     // Get latest markdown from the editor
-    var md = htmlToMarkdown(content);
+    var md = liveEditor ? liveEditor.getMarkdown() : "";
     if (!md || !md.trim()) { showToast("No content to process"); return; }
 
     showToast("AI processing...");
