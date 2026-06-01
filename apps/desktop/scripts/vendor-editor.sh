@@ -32,4 +32,9 @@ cp "$EDITOR_DIST/render.js.map" "$DESKTOP_DIR/vendor-editor/render.cjs.map"
 # the renderer can call window.MemoryWikiRender.render(md) directly.
 cp "$EDITOR_DIST/render.umd.global.js" "$DESKTOP_DIR/renderer/vendor-editor/render.umd.js"
 
+# TipTap editor config UMD — renderer mounts the editor via
+# window.MemoryWikiEditor.buildExtensions(...). Includes the full
+# TipTap + ProseMirror + tiptap-markdown stack (~2MB).
+cp "$EDITOR_DIST/tiptap-config.umd.global.js" "$DESKTOP_DIR/renderer/vendor-editor/tiptap-config.umd.js"
+
 echo "✓ Vendored @mdcore/editor → apps/desktop/{vendor-editor,renderer/vendor-editor}"

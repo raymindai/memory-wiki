@@ -59,4 +59,19 @@ export default defineConfig([
     noExternal: [/.*/],
     dts: false,
   },
+  // Browser-ready TipTap config bundle for Desktop renderer +
+  // VSCode webview. Includes the full TipTap + ProseMirror stack
+  // inline (~5MB) so consumers just <script> it and call
+  // window.MemoryWikiEditor.buildExtensions(...).
+  {
+    entry: { "tiptap-config.umd": "src/tiptap-config.ts" },
+    format: ["iife"],
+    globalName: "MemoryWikiEditor",
+    sourcemap: false,
+    clean: false,
+    outDir: "dist",
+    target: "es2020",
+    noExternal: [/.*/],
+    dts: false,
+  },
 ]);

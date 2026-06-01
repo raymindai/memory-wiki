@@ -23,7 +23,12 @@
 // Each channel mounts buildExtensions() then adds its own
 // channel-specific extensions / toolbars on top.
 
-import { Extension } from "@tiptap/core";
+import { Editor, Extension } from "@tiptap/core";
+// Re-export Editor + Extension so UMD consumers (Desktop renderer,
+// VSCode webview) can construct the editor without separately
+// loading @tiptap/core. tsup's iife bundle attaches every named
+// export onto the globalName object.
+export { Editor, Extension };
 import StarterKit from "@tiptap/starter-kit";
 import { Image as TiptapImage } from "@tiptap/extension-image";
 import { Link as TiptapLink } from "@tiptap/extension-link";
