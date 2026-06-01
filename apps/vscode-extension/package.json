@@ -252,11 +252,12 @@
     }
   },
   "scripts": {
+    "vendor:editor": "./scripts/vendor-editor.sh",
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./tsconfig.json",
-    "watch": "tsc -watch -p ./tsconfig.json",
+    "compile": "./scripts/vendor-editor.sh && tsc -p ./tsconfig.json",
+    "watch": "./scripts/vendor-editor.sh && tsc -watch -p ./tsconfig.json",
     "lint": "eslint src --ext ts",
-    "package": "npx @vscode/vsce package"
+    "package": "./scripts/vendor-editor.sh && npx @vscode/vsce package"
   },
   "devDependencies": {
     "@types/katex": "^0.16.8",
