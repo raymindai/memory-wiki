@@ -1938,6 +1938,7 @@
     content.setAttribute("contenteditable", "true");
     updateViewCount(null);
 
+    var t0 = performance.now();
     window.mwDesktop.renderMarkdown(currentMarkdown).then(function(result) {
       if (result && result.html !== undefined) {
         setLiveContent(result.html);
@@ -1947,6 +1948,8 @@
           updateFlavorBadge(currentFlavor);
         }
       }
+      updateRenderTime(performance.now() - t0);
+      updateDocStats(currentMarkdown);
       if (cmEditor) cmEditor.setValue(currentMarkdown);
       updateSyncStatusUI("ready");
       renderFileList(); // Update active file highlight
@@ -1969,6 +1972,7 @@
       isReadOnly = data.readOnly || false;
       currentCloudDoc = data.cloudDoc || null;
 
+      var loadStart = performance.now();
       if (!currentMarkdown && !data.html) {
         showEditor();
         setLiveContent("");
@@ -1983,6 +1987,8 @@
           updateFlavorBadge(currentFlavor);
         }
       }
+      updateDocStats(currentMarkdown);
+      updateRenderTime(performance.now() - loadStart);
 
       // Read-only mode for cloud docs
       content.setAttribute("contenteditable", isReadOnly ? "false" : "true");
@@ -3159,17 +3165,31 @@
         if (node.classList && node.classList.contains("mermaid") && node.getAttribute("data-original-code")) {
           return "```mermaid\n" + node.getAttribute("data-original-code") + "\n```\n\n";
         }
+        // v3.0 display math widget: <div class="math-rendered" data-math-mode="display" data-math-src="<urlenc LaTeX>">
+        if (node.classList && node.classList.contains("math-rendered") && node.getAttribute("data-math-src")) {
+          var dsrc = decodeURIComponent(node.getAttribute("data-math-src"));
+          var dmode = node.getAttribute("data-math-mode");
+          if (dmode === "display") return "$$\n" + dsrc + "\n$$\n\n";
+          return "$" + dsrc + "$";
+        }
         for (var j = 0; j < node.childNodes.length; j++) childMd += nodeToMarkdown(node.childNodes[j], depth);
         return childMd;
       case "section": case "article": case "main": case "aside": case "header": case "footer": case "nav":
         for (var j2 = 0; j2 < node.childNodes.length; j2++) childMd += nodeToMarkdown(node.childNodes[j2], depth);
         return childMd;
       case "span":
+        // v3.0 inline math widget: <span class="math-rendered" data-math-mode="inline" data-math-src="<urlenc LaTeX>">
+        if (node.classList && node.classList.contains("math-rendered") && node.getAttribute("data-math-src")) {
+          var ssrc = decodeURIComponent(node.getAttribute("data-math-src"));
+          var smode = node.getAttribute("data-math-mode");
+          if (smode === "display") return "$$\n" + ssrc + "\n$$\n\n";
+          return "$" + ssrc + "$";
+        }
         if (node.getAttribute("data-math-style") === "display") return "$$\n" + innerText.trim() + "\n$$\n\n";
         if (node.getAttribute("data-math-style") === "inline") return "$" + innerText.trim() + "$";
         // KaTeX-rendered spans have class "katex" or "katex-display"
         if (node.classList && (node.classList.contains("katex") || node.classList.contains("katex-display"))) {
-          var mathEl = node.closest("[data-math-style]");
+          var mathEl = node.closest("[data-math-style], .math-rendered");
           if (mathEl) return ""; // Already handled by parent
         }
         return inlineChildrenToMd(node);
