@@ -50,6 +50,58 @@ export default function AuthProviderStack({ redirectTo }: Props) {
     }
     setEmailStatus("sending");
     setEmailError(null);
+
+    // Demo-account fast path — mirrors useAuth.ts L343. The same three
+    // allowlisted emails bypass the magic-link round-trip and sign in
+    // immediately via /api/auth/demo-signin. Without this branch, the
+    // /auth/<channel> pages reject `demo@memory.wiki` outright because
+    // Supabase's email validator doesn't accept the `.wiki` TLD.
+    if (
+      normalized === "yc@mdfy.app"
+      || normalized === "demo@mdfy.app"
+      || normalized === "demo@memory.wiki"
+    ) {
+      try {
+        const res = await fetch("/api/auth/demo-signin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalized }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          setEmailStatus("error");
+          setEmailError(err.error || `Demo sign-in failed (${res.status})`);
+          return;
+        }
+        const data = await res.json();
+        if (!data.access_token || !data.refresh_token) {
+          setEmailStatus("error");
+          setEmailError("Demo sign-in returned no session");
+          return;
+        }
+        const { error: setErr } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+        if (setErr) {
+          setEmailStatus("error");
+          setEmailError(setErr.message);
+          return;
+        }
+        // Session is set in the browser. The channel handoff page's
+        // own useEffect (in /auth/desktop, /auth/vscode, etc.) reads
+        // supabase.auth.getSession() and forwards token + refresh
+        // to the app — so just navigate back to redirectTo and let
+        // that effect fire again with the fresh session.
+        window.location.href = redirectTo;
+        return;
+      } catch (err) {
+        setEmailStatus("error");
+        setEmailError(err instanceof Error ? err.message : "Demo sign-in error");
+        return;
+      }
+    }
+
     const { error } = await supabase.auth.signInWithOtp({
       email: normalized,
       options: { emailRedirectTo: redirectTo },
