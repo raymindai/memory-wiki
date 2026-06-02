@@ -193,59 +193,132 @@ function extractTitleFromMd(md: string): string {
   return m ? m[1].trim().slice(0, 100) : "";
 }
 
+// Model cascade, cheapest first:
+//   1. GPT-5-nano             — ~$0.00065 per capture
+//   2. Gemini 3.1 Flash Lite  — ~$0.0009  per capture
+//   3. Claude Haiku 4.5       — ~$0.01    per capture
+// Each rung only fires if the previous one threw (network / rate-limit /
+// 5xx / empty response). Most captures hit nano + cost almost nothing;
+// Haiku is the quality safety net for the rare case both cheap tiers fail.
 async function callTransformer(intent: string, sourceMd: string, system: string = SYSTEM_BASE): Promise<string> {
   const userMsg =
     `Instruction:\n${intent}\n\n---\n\nSource markdown (clipped from a webpage or AI chat):\n\n${sourceMd}`;
 
-  if (process.env.ANTHROPIC_API_KEY) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 8192,
-        system,
-        messages: [{ role: "user", content: userMsg }],
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      throw new Error(`Anthropic ${res.status}: ${t.slice(0, 200)}`);
-    }
-    const data = await res.json();
-    type Block = { type: string; text?: string };
-    const blocks: Block[] = data.content || [];
-    return blocks.filter((b) => b.type === "text").map((b) => b.text || "").join("").trim();
-  }
+  const errors: string[] = [];
 
   if (process.env.OPENAI_API_KEY) {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: userMsg },
-        ],
-        temperature: 0.3,
-        max_tokens: 8192,
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      throw new Error(`OpenAI ${res.status}: ${t.slice(0, 200)}`);
+    try { return await callOpenAINano(system, userMsg); }
+    catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[transform] gpt-5-nano failed, escalating:", msg);
+      errors.push(`OpenAI nano: ${msg}`);
     }
-    const data = await res.json();
-    return (data.choices?.[0]?.message?.content || "").trim();
   }
 
-  throw new Error("No LLM provider configured");
+  if (process.env.GOOGLE_API_KEY) {
+    try { return await callGeminiFlashLite(system, userMsg); }
+    catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[transform] gemini-3.1-flash-lite failed, escalating:", msg);
+      errors.push(`Gemini: ${msg}`);
+    }
+  }
+
+  if (process.env.ANTHROPIC_API_KEY) {
+    try { return await callAnthropicHaiku(system, userMsg); }
+    catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[transform] claude-haiku-4-5 failed:", msg);
+      errors.push(`Anthropic Haiku: ${msg}`);
+    }
+  }
+
+  throw new Error(
+    errors.length
+      ? `All providers failed — ${errors.join(" | ")}`
+      : "No LLM provider configured"
+  );
+}
+
+async function callGeminiFlashLite(system: string, userMsg: string): Promise<string> {
+  // Gemini's generateContent API: system instruction is a separate
+  // field, user message goes in contents.
+  const model = "gemini-3.1-flash-lite";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(process.env.GOOGLE_API_KEY as string)}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: system }] },
+      contents: [{ role: "user", parts: [{ text: userMsg }] }],
+      generationConfig: { maxOutputTokens: 8192 },
+    }),
+  });
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`Gemini ${res.status}: ${t.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  type Part = { text?: string };
+  type Candidate = { content?: { parts?: Part[] } };
+  const cands: Candidate[] = data.candidates || [];
+  const text = (cands[0]?.content?.parts || []).map((p) => p.text || "").join("").trim();
+  if (!text) throw new Error("Gemini returned empty content");
+  return text;
+}
+
+async function callAnthropicHaiku(system: string, userMsg: string): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": process.env.ANTHROPIC_API_KEY as string,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 8192,
+      system,
+      messages: [{ role: "user", content: userMsg }],
+    }),
+  });
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`Anthropic ${res.status}: ${t.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  type Block = { type: string; text?: string };
+  const blocks: Block[] = data.content || [];
+  const text = blocks.filter((b) => b.type === "text").map((b) => b.text || "").join("").trim();
+  if (!text) throw new Error("Anthropic returned empty content");
+  return text;
+}
+
+async function callOpenAINano(system: string, userMsg: string): Promise<string> {
+  // gpt-5-nano via the Responses API. Doesn't accept `temperature`
+  // tuning the way chat-completions did; defaults are fine for our
+  // structured-extraction task.
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY as string}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "gpt-5-nano",
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: userMsg },
+      ],
+      max_completion_tokens: 8192,
+    }),
+  });
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error(`OpenAI ${res.status}: ${t.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  const text = (data.choices?.[0]?.message?.content || "").trim();
+  if (!text) throw new Error("OpenAI returned empty content");
+  return text;
 }
