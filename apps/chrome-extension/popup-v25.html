@@ -167,10 +167,10 @@
       padding: 14px 24px 0;
     }
     .brand-left {
-      display: inline-flex; align-items: center; gap: 9px;
+      display: inline-flex; align-items: baseline; gap: 5px;
       text-decoration: none;
     }
-    .brand-mark { width: 22px; height: 22px; color: var(--ink); display: inline-flex; }
+    .brand-mark { width: 20px; height: 20px; color: var(--ink); display: inline-flex; align-self: center; }
     .brand-mark svg { width: 100%; height: 100%; display: block; }
     .brand-word {
       color: var(--ink);
@@ -178,14 +178,16 @@
       font-size: 15px;
       font-weight: 600;
       letter-spacing: -0.01em;
+      margin-left: 2px;
     }
     .brand-product {
       color: var(--muted);
-      font-family: var(--font-display);
-      font-size: 15px;
+      font-family: var(--font-mono);
+      font-size: 10px;
       font-weight: 500;
-      letter-spacing: -0.005em;
-      margin-left: 2px;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      margin-left: 4px;
     }
     .brand-v {
       font-family: var(--font-mono);
@@ -269,8 +271,8 @@
       transition: border-color 140ms, box-shadow 140ms;
     }
     .ask-input-wrap:focus-within {
-      border-color: var(--micro-lime);
-      box-shadow: 0 0 0 3px rgba(181,255,26,0.08);
+      border-color: var(--hair-strong);
+      background: rgba(13, 13, 17, 0.75);
     }
     .ask-input-wrap textarea {
       width: 100%;
@@ -405,28 +407,43 @@
     .recent-wrap { display: none; }
     .recent-wrap.visible { display: block; }
     .recent-list { margin: 0 24px; display: flex; flex-direction: column; }
-    .recent {
+    /* popup.js renders rows as .recent-item (not .recent). Style both. */
+    .recent, .recent-item {
       position: relative;
       display: flex; align-items: center; gap: 11px;
       margin: 0 -10px;
-      padding: 8px 10px;
+      padding: 7px 10px;
       border-radius: var(--r-sm);
       cursor: pointer;
       transition: background 120ms;
-    }
-    .recent:hover { background: rgba(13, 13, 17, 0.6); }
-    .recent .stack { flex: 1; min-width: 0; }
-    .recent .t {
+      text-decoration: none;
       color: var(--ink);
       font-size: 12.5px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       line-height: 1.35;
     }
-    .recent .ago {
+    .recent:hover, .recent-item:hover { background: rgba(13, 13, 17, 0.6); }
+    .recent .stack, .recent-item .title { flex: 1; min-width: 0; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .recent .t { color: var(--ink); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
+    .recent .ago, .recent-item .ago {
       font-family: var(--font-mono);
       font-size: 10px; color: var(--faint); letter-spacing: 0.06em;
       flex-shrink: 0;
     }
+    /* The src-dot / open-arrow popup.js inserts — keep tiny. */
+    .recent-item .src-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--faint);
+      flex-shrink: 0;
+    }
+    .recent-item .open-arrow {
+      width: 12px; height: 12px;
+      color: var(--faint);
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 120ms;
+    }
+    .recent-item:hover .open-arrow { opacity: 1; }
+    .recent-item .open-arrow svg { width: 100%; height: 100%; display: block; stroke-width: 1.8; }
 
     .library-row {
       display: flex; align-items: center; gap: 10px;
@@ -453,11 +470,14 @@
     .library-row .arrow { transition: transform 140ms; }
     .library-row:hover .arrow { transform: translateX(2px); }
 
-    /* ─── Cross-promo — small chip buttons (below footer when signed in) ─── */
+    /* ─── Cross-promo — label on its own line, chips below ─── */
     .promo-strip {
       margin: 0 24px;
       padding: 12px 0 16px;
-      display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+    }
+    .promo-strip-chips {
+      display: flex; flex-wrap: wrap; gap: 5px;
     }
     .promo-strip .label {
       color: var(--faint);
@@ -465,7 +485,6 @@
       font-size: 9.5px;
       letter-spacing: 0.16em;
       text-transform: uppercase;
-      margin-right: 4px;
     }
     .promo-strip a {
       display: inline-flex; align-items: center;
@@ -495,13 +514,21 @@
     }
     .foot:hover { background: rgba(13,13,17,0.4); }
 
-    /* Avatar — only shown when signed in */
+    /* Avatar — only shown when signed in. popup.js fills it with the
+       user's initial as plain text, or replaces with <img src=avatar_url>
+       once the OAuth profile loads. */
     .foot .av {
-      width: 26px; height: 26px; border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       overflow: hidden;
       flex-shrink: 0;
-      background: linear-gradient(135deg, var(--micro-orange), var(--micro-ai));
+      background: var(--bg-card);
+      border: 1px solid var(--hair);
+      color: var(--ink);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 13px; font-weight: 500;
     }
+    .foot .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .foot .av svg { width: 100%; height: 100%; display: block; }
     .foot .stack { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; }
     .foot .name {
@@ -562,7 +589,7 @@
       </svg>
       </span>
       <span class="brand-word">memory.wiki</span>
-      <span class="brand-product">Clipper</span>
+      <span class="brand-product">clipper</span>
     </a>
     <span class="brand-v">v2.5</span>
   </div>
@@ -638,14 +665,7 @@
   </div>
 
   <a class="foot signin" id="account-chip" href="#">
-    <span class="av" id="account-avatar">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-        <defs><linearGradient id="av-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6B1A"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
-        <rect width="100" height="100" fill="url(#av-g)"/>
-        <circle cx="50" cy="42" r="18" fill="rgba(255,255,255,0.18)"/>
-        <ellipse cx="50" cy="100" rx="34" ry="28" fill="rgba(255,255,255,0.18)"/>
-      </svg>
-    </span>
+    <span class="av" id="account-avatar"></span>
     <span class="stack">
       <span class="name" id="account-info">Sign in to memory.wiki</span>
       <span class="plan" id="account-plan">free during beta</span>
@@ -655,12 +675,14 @@
 
   <div class="promo-strip">
     <span class="label">Also on</span>
-    <a href="https://github.com/raymindai/memory-wiki/releases?q=desktop" target="_blank" rel="noopener">QuickLook</a>
-    <a href="https://memory.wiki/ios" target="_blank" rel="noopener">iOS</a>
-    <a href="https://github.com/raymindai/memory-wiki/releases?q=desktop" target="_blank" rel="noopener">Mac</a>
-    <a href="https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" target="_blank" rel="noopener">VS Code</a>
-    <a href="https://www.npmjs.com/package/memory-wiki-cli" target="_blank" rel="noopener">CLI</a>
-    <a href="https://www.npmjs.com/package/memory-wiki-mcp" target="_blank" rel="noopener">MCP</a>
+    <div class="promo-strip-chips">
+      <a href="https://github.com/raymindai/memory-wiki/releases?q=desktop" target="_blank" rel="noopener">QuickLook</a>
+      <a href="https://memory.wiki/ios" target="_blank" rel="noopener">iOS</a>
+      <a href="https://github.com/raymindai/memory-wiki/releases?q=desktop" target="_blank" rel="noopener">Mac</a>
+      <a href="https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" target="_blank" rel="noopener">VS Code</a>
+      <a href="https://www.npmjs.com/package/memory-wiki-cli" target="_blank" rel="noopener">CLI</a>
+      <a href="https://www.npmjs.com/package/memory-wiki-mcp" target="_blank" rel="noopener">MCP</a>
+    </div>
   </div>
 
   <!-- popup.js compatibility stubs -->
@@ -675,7 +697,7 @@
   <span class="hidden-stub" id="platform-dot"></span>
   <span class="hidden-stub" id="platform-name"></span>
   <span class="hidden-stub" id="platform-hint"></span>
-  <span class="hidden-stub" id="status"></span>
+  <span style="display:none !important;position:absolute;left:-9999px" id="status"></span>
   <span class="hidden-stub" id="link-settings"></span>
 
   <script src="popup.js"></script>
