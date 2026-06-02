@@ -19,52 +19,56 @@
       font-display: swap;
     }
 
+    /* ════════════════════════════════════════════════════════════════
+       Pure design tokens — copied verbatim from
+       apps/web/src/components/pure/styles/tokens.css so the popup
+       reads as a slice of memory.wiki's /about page, not a one-off.
+       ══════════════════════════════════════════════════════════════ */
     :root {
-      /* Pure ink palette. No lime anywhere. Warm orange is the
-         canonical brand color (mark uses it) — used here only on a
-         single 5 px "live" dot and the success state ring. Buttons,
-         text, surfaces stay ink. */
-      --canvas:        #09090b;
-      --surface:       rgba(255,255,255,0.04);
-      --surface-hover: rgba(255,255,255,0.06);
-      --surface-press: rgba(255,255,255,0.10);
-      --border-faint:  rgba(255,255,255,0.06);
-      --border:        rgba(255,255,255,0.12);
-      --border-strong: rgba(255,255,255,0.22);
-      --text-primary:  #fafafa;
-      --text-secondary:#a1a1aa;
-      --text-muted:    #71717a;
-      --text-faint:    #52525b;
-      --brand:         #fb923c;
-      --brand-tint:    rgba(251, 146, 60, 0.18);
-      --radius-window: 18px;
-      --radius-card:   12px;
-      --radius-pill:   999px;
-      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --bg:          #08080a;
+      --bg-deep:     #04040a;
+      --hair:        rgba(255, 255, 255, 0.08);
+      --hair-strong: rgba(255, 255, 255, 0.14);
+      --hair-soft:   rgba(255, 255, 255, 0.04);
+      --ink:    #fafafa;
+      --strong: #ededed;
+      --body:   #c2c2c5;
+      --muted:  #8a8a92;
+      --faint:  #5a5a62;
+      --micro-lime:   #B5FF1A;  /* live / shipped / success — small dot only */
+      --micro-orange: #FF6B1A;  /* beta / pending — unused here */
+      --r-sm:   10px;
+      --r-md:   14px;
+      --r-lg:   20px;
+      --r-pill: 9999px;
+      --font-display: "Cal Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans:    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html {
       background: transparent;
-      width: 372px;
+      width: 384px;
     }
     body {
-      width: 360px;
+      width: 372px;
       margin: 6px;
-      background: var(--canvas);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      font-family: var(--font-sans);
       font-size: 13px;
-      letter-spacing: 0;
-      line-height: 1.5;
+      line-height: 1.55;
+      letter-spacing: -0.005em;
       -webkit-font-smoothing: antialiased;
-      border-radius: var(--radius-window);
+      -moz-osx-font-smoothing: grayscale;
+      border-radius: var(--r-lg);
       overflow: hidden;
       position: relative;
       box-shadow:
         0 1px 0 rgba(255,255,255,0.04) inset,
-        0 20px 60px rgba(0,0,0,0.55),
+        0 24px 64px rgba(0,0,0,0.55),
         0 4px 12px rgba(0,0,0,0.35);
       animation: pop-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -73,127 +77,135 @@
       to   { opacity: 1; transform: none; }
     }
 
-    a, button { font-family: inherit; letter-spacing: 0; color: inherit; }
+    a, button { font-family: inherit; letter-spacing: -0.005em; color: inherit; }
 
-    /* ─── header — wordmark only, no account chip up here ─── */
+    /* ─── header — eyebrow + wordmark, /about hero shape ─── */
     .header {
+      padding: 22px 22px 4px;
+    }
+    .eyebrow {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 18px 20px 12px;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
     }
+    .eyebrow .num {
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .eyebrow .sep {
+      color: var(--faint);
+    }
+
     .wordmark {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      font-family: "Cal Sans", -apple-system, sans-serif;
-      font-size: 17px;
+      font-family: var(--font-display);
+      font-size: 22px;
       font-weight: 600;
-      letter-spacing: 0;
-      color: var(--text-primary);
+      color: var(--ink);
       text-decoration: none;
-      line-height: 1;
-      flex: 1;
-      min-width: 0;
+      line-height: 1.1;
+      letter-spacing: 0;
     }
     .wordmark .mark {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       flex-shrink: 0;
-      display: inline-block;
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
     }
     .wordmark .mark img { width: 100%; height: 100%; display: block; }
-    .wordmark .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .wordmark .sub {
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 400;
-      color: var(--text-muted);
-      margin-left: 2px;
-      letter-spacing: 0;
+    .wordmark .product {
+      color: var(--muted);
+      font-weight: 500;
+      font-family: var(--font-display);
     }
 
     /* ─── context line ─── */
     .context {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 0 20px 14px;
-      font-size: 12px;
-      color: var(--text-secondary);
+      gap: 9px;
+      padding: 16px 22px 18px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: -0.005em;
     }
     .context .dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--text-faint);
+      background: var(--faint);
       flex-shrink: 0;
-      transition: background 0.2s, box-shadow 0.2s;
     }
-    .context .dot.live {
-      background: var(--brand);
-      box-shadow: 0 0 0 3px var(--brand-tint);
-    }
+    .context .dot.live { background: var(--micro-lime); }
     .context em {
       font-style: normal;
-      color: var(--text-primary);
+      color: var(--ink);
       font-weight: 500;
     }
 
-    /* ─── actions ─── */
-    .actions { padding: 0 20px 16px; }
+    /* ─── primary CTA — Pure /about hover-invert pill ─── */
+    .actions { padding: 0 22px 14px; }
 
-    /* PRIMARY: ink-filled. Reads as the most confident action. */
     .btn-primary {
       display: flex;
       width: 100%;
       align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      background: #f4f4f5;
-      border: 1px solid #f4f4f5;
-      border-radius: var(--radius-card);
-      color: #18181b;
+      gap: 12px;
+      padding: 16px 20px;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--hair-strong);
+      border-radius: var(--r-md);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       text-align: left;
-      transition: background 0.14s, border-color 0.14s, transform 0.08s, box-shadow 0.14s;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease;
     }
     .btn-primary:hover:not(:disabled) {
-      background: #ffffff;
-      border-color: #ffffff;
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
     }
     .btn-primary:active:not(:disabled) { transform: scale(0.992); }
     .btn-primary:disabled {
-      background: var(--surface);
-      border-color: var(--border-faint);
-      color: var(--text-muted);
+      opacity: 0.4;
       cursor: not-allowed;
-      box-shadow: none;
     }
     .btn-primary .icon {
       width: 18px;
       height: 18px;
       flex-shrink: 0;
-      color: #18181b;
+      color: currentColor;
     }
-    .btn-primary:disabled .icon { color: var(--text-muted); }
     .btn-primary .icon svg { width: 100%; height: 100%; stroke-width: 1.6; }
     .btn-primary .stack { flex: 1; min-width: 0; }
-    .btn-primary .stack .title { display: block; font-weight: 600; line-height: 1.3; }
-    .btn-primary .stack .sub {
+    .btn-primary .stack .title {
       display: block;
-      font-size: 11px;
-      font-weight: 400;
-      color: rgba(24,24,27,0.55);
-      margin-top: 2px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.25;
       letter-spacing: 0;
     }
-    .btn-primary:disabled .stack .sub { color: var(--text-faint); }
+    .btn-primary .stack .sub {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 3px;
+      letter-spacing: -0.005em;
+    }
+    .btn-primary:hover:not(:disabled) .stack .sub { color: rgba(8, 8, 10, 0.65); }
     .btn-primary .kbd-inline { flex-shrink: 0; }
 
     /* ─── range pills ─── */
@@ -207,50 +219,59 @@
       flex: 1;
       text-align: center;
       padding: 6px 0;
-      border-radius: 8px;
+      border-radius: var(--r-pill);
       font-size: 11px;
-      color: var(--text-muted);
-      background: var(--surface);
-      border: 1px solid var(--border-faint);
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--hair);
       cursor: pointer;
       transition: background 0.1s, color 0.1s, border-color 0.1s;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
     }
-    .ranges label:hover { background: var(--surface-hover); color: var(--text-secondary); }
+    .ranges label:hover {
+      color: var(--body);
+      border-color: var(--hair-strong);
+    }
     .ranges input { display: none; }
     .ranges label:has(input:checked) {
-      background: var(--surface-press);
-      color: var(--text-primary);
-      border-color: var(--border-strong);
+      color: var(--ink);
+      border-color: var(--ink);
     }
 
-    /* SECONDARY: outline, neutral text */
+    /* SECONDARY — outline pill, smaller, quieter */
     .secondary {
       margin-top: 8px;
-      padding: 11px 16px;
+      padding: 10px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
       background: transparent;
-      border: 1px solid var(--border-faint);
-      border-radius: var(--radius-card);
-      color: var(--text-secondary);
+      border: 1px solid var(--hair);
+      border-radius: var(--r-md);
+      color: var(--muted);
       font-size: 12px;
       cursor: pointer;
       text-align: left;
       transition: background 0.12s, border-color 0.12s, color 0.12s;
     }
-    .secondary:hover { background: var(--surface); color: var(--text-primary); border-color: var(--border); }
-    .secondary .icon { width: 16px; height: 16px; color: var(--text-muted); }
+    .secondary:hover {
+      background: var(--bg-deep);
+      color: var(--ink);
+      border-color: var(--hair-strong);
+    }
+    .secondary .icon { width: 15px; height: 15px; color: var(--faint); }
+    .secondary:hover .icon { color: var(--muted); }
     .secondary .icon svg { width: 100%; height: 100%; stroke-width: 1.6; }
     .secondary .left { display: inline-flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
     .secondary .kbd-inline { flex-shrink: 0; }
 
-    /* ─── status — neutral ink card, no color floods ─── */
+    /* ─── status — neutral card ─── */
     .status {
-      margin: 12px 20px 0;
+      margin: 12px 22px 0;
       padding: 0;
-      border-radius: 10px;
+      border-radius: var(--r-sm);
       font-size: 11.5px;
       text-align: center;
       min-height: 0;
@@ -261,154 +282,163 @@
     }
     .status:not(:empty) {
       opacity: 1;
-      padding: 10px 14px;
+      padding: 11px 14px;
       max-height: 80px;
     }
     .status.success {
-      background: var(--surface);
-      border: 1px solid var(--brand-tint);
-      color: var(--text-primary);
-      font-family: var(--mono);
+      background: var(--bg-deep);
+      border: 1px solid var(--hair-strong);
+      color: var(--ink);
+      font-family: var(--font-mono);
     }
     .status.info {
-      background: var(--surface);
-      border: 1px solid var(--border-faint);
-      color: var(--text-secondary);
+      background: var(--bg-deep);
+      border: 1px solid var(--hair);
+      color: var(--body);
     }
     .status.error {
-      background: rgba(239, 68, 68, 0.07);
-      border: 1px solid rgba(239, 68, 68, 0.20);
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.18);
       color: #f87171;
     }
 
-    /* ─── account row in footer (long names safe) ─── */
+    /* ─── account row — bottom, full-width, long names safe ─── */
     .account-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 14px 20px 12px;
-      margin-top: 16px;
-      border-top: 1px solid var(--border-faint);
-      font-size: 12px;
-      color: var(--text-secondary);
+      gap: 12px;
+      padding: 16px 22px 14px;
+      margin-top: 18px;
+      border-top: 1px solid var(--hair);
+      font-size: 13px;
+      color: var(--body);
       text-decoration: none;
       transition: background 0.1s;
     }
-    .account-row:hover { background: var(--surface); }
+    .account-row:hover { background: var(--bg-deep); }
     .account-row .avatar {
-      width: 22px;
-      height: 22px;
-      border-radius: 11px;
-      background: var(--surface-press);
-      color: var(--text-secondary);
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--hair);
+      color: var(--body);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 600;
       flex-shrink: 0;
       overflow: hidden;
     }
     .account-row .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .account-row .body {
+    .account-row .body-stack {
       flex: 1;
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
     }
     .account-row .label {
+      font-family: var(--font-mono);
       font-size: 9.5px;
-      color: var(--text-faint);
+      color: var(--faint);
       text-transform: uppercase;
-      letter-spacing: 1.2px;
-      font-family: var(--mono);
+      letter-spacing: 0.14em;
     }
     .account-row .name {
-      color: var(--text-primary);
+      color: var(--ink);
+      font-size: 13px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     .account-row .action {
-      color: var(--text-muted);
+      color: var(--muted);
       font-size: 11px;
       flex-shrink: 0;
+      font-family: var(--font-mono);
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
     }
-    .account-row.signin .name { color: var(--text-primary); }
-    .account-row.signin .label { color: var(--text-faint); }
+    .account-row:hover .action { color: var(--ink); }
 
-    /* ─── footer with cross-promo as text links ─── */
+    /* ─── footer ─── */
     .footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 10px 20px 14px;
+      gap: 10px;
+      padding: 11px 22px 16px;
       font-size: 11px;
-      color: var(--text-muted);
-      border-top: 1px solid var(--border-faint);
+      color: var(--muted);
+      border-top: 1px solid var(--hair);
     }
     .footer .also {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
+      gap: 6px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.06em;
     }
-    .footer .also .also-label {
-      font-family: var(--mono);
+    .footer .also-label {
       font-size: 9.5px;
-      letter-spacing: 1.2px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--text-faint);
-      margin-right: 4px;
+      color: var(--faint);
+      margin-right: 2px;
     }
     .footer a {
-      color: var(--text-muted);
+      color: var(--muted);
       text-decoration: none;
       transition: color 0.1s;
     }
-    .footer a:hover { color: var(--text-primary); }
-    .footer .sep {
-      color: var(--text-faint);
-      margin: 0 2px;
+    .footer a:hover { color: var(--ink); }
+    .footer .sep { color: var(--faint); }
+    .footer .right {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.06em;
     }
-    .footer .right { display: inline-flex; align-items: center; gap: 10px; }
 
     /* ─── kbd ─── */
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 24px;
+      min-width: 26px;
       height: 22px;
       padding: 0 7px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--hair-strong);
       border-bottom-width: 1.5px;
       border-radius: 6px;
-      background: rgba(0,0,0,0.45);
-      font-family: var(--mono);
+      background: var(--bg-deep);
+      font-family: var(--font-mono);
       font-size: 10.5px;
-      color: var(--text-secondary);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+      color: var(--muted);
+      letter-spacing: 0;
     }
-    /* kbd on the white primary button shows ink ink not ink-on-ink */
-    .btn-primary:not(:disabled) .kbd {
-      background: rgba(24, 24, 27, 0.85);
-      color: #f4f4f5;
-      border-color: rgba(24, 24, 27, 0.9);
+    .btn-primary:hover:not(:disabled) .kbd {
+      background: rgba(8, 8, 10, 0.80);
+      color: var(--ink);
+      border-color: rgba(8, 8, 10, 0.95);
     }
 
-    /* legacy compatibility */
     .range-options { display: none; }
     .range-options.visible { display: flex; }
   </style>
 </head>
 <body>
   <div class="header">
+    <div class="eyebrow">
+      <span class="num">01</span>
+      <span class="sep">/</span>
+      <span>chrome clipper</span>
+    </div>
     <a class="wordmark" href="https://memory.wiki" target="_blank" rel="noopener">
       <span class="mark"><img src="icons/icon128.png" alt=""></span>
-      <span class="name">memory.wiki <span class="sub">Clipper</span></span>
+      <span><span>memory.wiki</span> <span class="product">Clipper</span></span>
     </a>
   </div>
 
@@ -462,7 +492,7 @@
 
   <a class="account-row" id="account-chip" href="#">
     <span class="avatar" id="account-avatar">?</span>
-    <span class="body">
+    <span class="body-stack">
       <span class="label">account</span>
       <span class="name" id="account-info">checking</span>
     </span>
@@ -484,7 +514,7 @@
     </span>
   </div>
 
-  <!-- legacy stubs popup.js may still write to -->
+  <!-- legacy stubs for popup.js -->
   <span id="search-input" style="display:none"></span>
   <span id="search-results" style="display:none"></span>
   <span id="platform-badge" style="display:none"></span>
