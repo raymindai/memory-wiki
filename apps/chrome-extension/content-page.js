@@ -69,12 +69,6 @@
   function capturePage() {
     let article = null;
     try {
-      // Readability mutates the document it parses, so always clone first.
-      // - charThreshold lowered from 500 → 100 so landing / marketing
-      //   pages (low text density per section) aren't truncated to a
-      //   single chunk.
-      // - nbTopCandidates raised from 5 → 12 so Readability considers
-      //   more content regions before picking the winner.
       const docClone = document.cloneNode(true);
       const reader = new window.Readability(docClone, {
         keepClasses: false,
@@ -85,14 +79,46 @@
     } catch (err) {
       console.warn("[memory.wiki] Readability failed, falling back:", err);
     }
-    // If Readability produced something substantial, use it. If it
-    // returned nothing or only a tiny shard (< 1500 chars of HTML —
-    // typical sign that it locked onto a sidebar / tab-button block
-    // instead of the page body), fall back to a body walk.
-    if (article && article.content && article.content.length > 1500) {
-      return buildMarkdownFromArticle(article);
+
+    // Build BOTH candidates and pick whichever covers more of the
+    // page's actual headings. Readability can lock onto a sidebar
+    // or tab-button block on marketing / landing pages and return
+    // a structurally-fine-looking shard that's missing the hero
+    // H1 + every H2 section. The fallback body walker often has
+    // them all.
+    const pageHeadings = collectPageHeadings();
+    const readabilityOut =
+      article && article.content && article.content.length > 200
+        ? buildMarkdownFromArticle(article)
+        : null;
+    const fallbackOut = fallbackPageMarkdown();
+
+    if (readabilityOut && fallbackOut) {
+      const rCov = headingCoverage(readabilityOut.markdown, pageHeadings);
+      const fCov = headingCoverage(fallbackOut.markdown, pageHeadings);
+      // Prefer Readability when it covers >=80% of what fallback
+      // covers (it's usually cleaner) — otherwise take fallback.
+      if (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400) {
+        return readabilityOut;
+      }
+      return fallbackOut;
     }
-    return fallbackPageMarkdown();
+    return readabilityOut || fallbackOut;
+  }
+
+  function collectPageHeadings() {
+    return Array.from(document.querySelectorAll("h1, h2"))
+      .map((h) => (h.textContent || "").replace(/\s+/g, " ").trim())
+      .filter((t) => t.length >= 4 && t.length <= 200);
+  }
+  function headingCoverage(md, headings) {
+    if (!headings || headings.length === 0) return 1;
+    const lower = md.toLowerCase();
+    let hits = 0;
+    for (const h of headings) {
+      if (lower.includes(h.toLowerCase().slice(0, 60))) hits++;
+    }
+    return hits / headings.length;
   }
 
   function captureSelection() {
