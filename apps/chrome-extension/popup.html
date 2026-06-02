@@ -17,19 +17,30 @@
       --surface:       #131318;
       --surface-hover: #1a1a20;
       --surface-press: #21212a;
-      --border-faint:  #1a1a20;
-      --border:        #27272a;
-      --text-primary:  #e4e4e7;
+      --border-faint:  rgba(255,255,255,0.06);
+      --border:        rgba(255,255,255,0.10);
+      --text-primary:  #f4f4f5;
       --text-secondary:#a1a1aa;
       --text-muted:    #71717a;
       --text-faint:    #52525b;
       --micro-info:    #60a5fa;
       --micro-ok:      #B5FF1A;
+      --radius-window: 14px;
+      --radius-card:   12px;
+      --radius-pill:   999px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
+    /* Round the popup window itself. Chrome 117+ honors radius on html
+       so the corners are clipped at the OS layer. Older Chromes show
+       a small gap (acceptable). */
+    html {
+      border-radius: var(--radius-window);
+      overflow: hidden;
+      background: var(--canvas);
+    }
+    body {
       width: 340px;
       background: var(--canvas);
       color: var(--text-primary);
@@ -38,6 +49,8 @@
       letter-spacing: 0;
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
+      border-radius: var(--radius-window);
+      overflow: hidden;
     }
 
     a, button { font-family: inherit; letter-spacing: 0; }
@@ -47,32 +60,32 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px 12px;
+      padding: 16px 18px 14px;
       gap: 10px;
     }
 
     .wordmark {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       font-family: "Cal Sans", -apple-system, sans-serif;
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 600;
       letter-spacing: 0;
       color: var(--text-primary);
       text-decoration: none;
       line-height: 1;
     }
-    .wordmark .blob { width: 18px; height: 18px; flex-shrink: 0; display: inline-block; }
+    .wordmark .blob { width: 20px; height: 20px; flex-shrink: 0; display: inline-block; }
     .wordmark .blob img { width: 100%; height: 100%; display: block; }
 
     .account {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      padding: 4px 4px 4px 9px;
-      border-radius: 14px;
-      background: transparent;
+      padding: 4px 4px 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
       border: 1px solid var(--border-faint);
       font-size: 11px;
       color: var(--text-secondary);
@@ -80,8 +93,7 @@
       max-width: 200px;
       transition: background 0.12s, border-color 0.12s;
     }
-    .account:hover { background: var(--surface); border-color: var(--border); }
-
+    .account:hover { background: var(--surface-hover); border-color: var(--border); }
     .account .label {
       max-width: 130px;
       overflow: hidden;
@@ -89,9 +101,9 @@
       white-space: nowrap;
     }
     .account .avatar {
-      width: 18px;
-      height: 18px;
-      border-radius: 9px;
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
       background: var(--surface-press);
       color: var(--text-secondary);
       display: inline-flex;
@@ -104,96 +116,81 @@
     }
     .account .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    .account.signin {
-      color: var(--text-primary);
-      border-color: var(--border);
-    }
-    .account.signin .label { color: var(--text-primary); }
-
     /* ─── context line ─── */
     .context {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 0 16px 12px;
+      gap: 7px;
+      padding: 0 18px 16px;
       font-size: 11px;
       color: var(--text-muted);
     }
     .context .dot {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--text-faint);
       flex-shrink: 0;
     }
     .context .dot.live { background: var(--micro-ok); }
-    .context strong {
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
 
-    /* ─── primary action ─── */
-    .actions { padding: 0 16px 14px; }
+    /* ─── actions ─── */
+    .actions { padding: 0 18px 16px; }
 
     .btn-primary {
       display: flex;
       width: 100%;
       align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
+      gap: 12px;
+      padding: 14px 16px;
       background: var(--surface);
       border: 1px solid var(--border-faint);
-      border-radius: 10px;
+      border-radius: var(--radius-card);
       color: var(--text-primary);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       text-align: left;
-      transition: background 0.12s, border-color 0.12s;
+      transition: background 0.12s, border-color 0.12s, transform 0.06s;
     }
     .btn-primary:hover:not(:disabled) {
       background: var(--surface-hover);
       border-color: var(--border);
     }
-    .btn-primary:active:not(:disabled) { background: var(--surface-press); }
+    .btn-primary:active:not(:disabled) { background: var(--surface-press); transform: scale(0.995); }
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-primary svg {
-      width: 16px;
-      height: 16px;
+    .btn-primary .icon {
+      width: 18px;
+      height: 18px;
       flex-shrink: 0;
-      stroke-width: 1.6;
       color: var(--text-secondary);
     }
+    .btn-primary .icon svg { width: 100%; height: 100%; stroke-width: 1.6; }
     .btn-primary .stack { flex: 1; min-width: 0; }
     .btn-primary .stack .title { display: block; font-weight: 600; }
     .btn-primary .stack .sub {
       display: block;
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 400;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
       letter-spacing: 0;
     }
-    .btn-primary .kbd-inline {
-      display: inline-flex;
-      gap: 2px;
-      align-items: center;
-      flex-shrink: 0;
-    }
+    .btn-primary .kbd-inline { flex-shrink: 0; }
 
     /* ─── range pills (only when AI conversation) ─── */
     .ranges {
       display: none;
-      gap: 4px;
+      gap: 5px;
       margin-top: 8px;
     }
     .ranges.visible { display: flex; }
     .ranges label {
       flex: 1;
       text-align: center;
-      padding: 5px 0;
-      border-radius: 6px;
-      font-size: 10.5px;
+      padding: 6px 0;
+      border-radius: 8px;
+      font-size: 11px;
       color: var(--text-muted);
       background: var(--surface);
       border: 1px solid var(--border-faint);
@@ -211,14 +208,14 @@
     /* ─── secondary action ─── */
     .secondary {
       margin-top: 10px;
-      padding: 8px 12px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       background: transparent;
       border: 1px solid var(--border-faint);
-      border-radius: 8px;
+      border-radius: var(--radius-card);
       color: var(--text-secondary);
       font-size: 12px;
       cursor: pointer;
@@ -226,85 +223,34 @@
       transition: background 0.12s, border-color 0.12s, color 0.12s;
     }
     .secondary:hover { background: var(--surface); color: var(--text-primary); border-color: var(--border); }
-    .secondary svg { width: 14px; height: 14px; stroke-width: 1.6; color: var(--text-muted); }
-    .secondary .left { display: inline-flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-    .secondary .kbd-inline { display: inline-flex; gap: 2px; flex-shrink: 0; }
+    .secondary .icon { width: 16px; height: 16px; color: var(--text-muted); }
+    .secondary .icon svg { width: 100%; height: 100%; stroke-width: 1.6; }
+    .secondary .left { display: inline-flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .secondary .kbd-inline { flex-shrink: 0; }
 
-    /* ─── status toast (below actions) ─── */
+    /* ─── status toast ─── */
     .status {
-      margin: 8px 16px 0;
-      padding: 6px 10px;
-      border-radius: 6px;
+      margin: 10px 18px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
       font-size: 11px;
       text-align: center;
       min-height: 0;
       opacity: 0;
       transition: opacity 0.15s, min-height 0.15s;
     }
-    .status.visible { opacity: 1; min-height: 24px; }
+    .status:not(:empty) { opacity: 1; min-height: 30px; padding-top: 9px; padding-bottom: 9px; }
     .status.success { background: rgba(181, 255, 26, 0.08); color: var(--micro-ok); }
     .status.info    { background: var(--surface); color: var(--text-secondary); }
     .status.error   { background: rgba(239, 68, 68, 0.08); color: #f87171; }
-
-    /* ─── search ─── */
-    .search {
-      padding: 12px 16px 4px;
-      border-top: 1px solid var(--border-faint);
-      margin-top: 12px;
-    }
-    .search input {
-      width: 100%;
-      padding: 7px 10px 7px 28px;
-      border: 1px solid var(--border-faint);
-      background: var(--surface);
-      color: var(--text-primary);
-      border-radius: 7px;
-      font-size: 12px;
-      font-family: inherit;
-      outline: none;
-      letter-spacing: 0;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3-3'/></svg>");
-      background-repeat: no-repeat;
-      background-position: 9px center;
-    }
-    .search input:focus { border-color: var(--border); background-color: var(--surface-hover); }
-    .search input::placeholder { color: var(--text-muted); }
-    .search-results {
-      max-height: 160px;
-      overflow-y: auto;
-      margin-top: 6px;
-    }
-    .search-result {
-      padding: 7px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-    .search-result:hover { background: var(--surface); }
-    .search-result .title {
-      font-size: 12px;
-      color: var(--text-primary);
-      font-weight: 500;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .search-result .snippet {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-top: 1px;
-    }
 
     /* ─── footer ─── */
     .footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 16px 12px;
-      margin-top: 8px;
+      padding: 14px 18px 16px;
+      margin-top: 14px;
       border-top: 1px solid var(--border-faint);
       font-size: 11px;
       color: var(--text-muted);
@@ -315,31 +261,28 @@
       transition: color 0.1s;
     }
     .footer a:hover { color: var(--text-primary); }
-    .footer .right { display: inline-flex; gap: 12px; }
+    .footer .right { display: inline-flex; gap: 14px; }
 
     /* ─── kbd hint ─── */
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
       border: 1px solid var(--border-faint);
       border-bottom-width: 1.5px;
-      border-radius: 4px;
-      background: var(--canvas);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.25);
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 10px;
       color: var(--text-muted);
     }
 
-    /* range-options compat with old JS (it sets display via class) */
+    /* legacy compatibility */
     .range-options { display: none; }
     .range-options.visible { display: flex; }
-
-    /* status compat (popup.js sets text + class on #status) */
-    #status:not(:empty) { opacity: 1; min-height: 24px; }
   </style>
 </head>
 <body>
@@ -361,19 +304,19 @@
 
   <div class="actions">
     <button class="btn-primary" id="btn-capture" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <path d="M14 2v6h6"/>
-        <path d="M8 13h8"/>
-        <path d="M8 17h5"/>
-      </svg>
+      <span class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 2v6h6"/>
+          <path d="M8 13h8"/>
+          <path d="M8 17h5"/>
+        </svg>
+      </span>
       <span class="stack">
         <span class="title" id="btn-capture-title">capture this page</span>
         <span class="sub" id="btn-capture-sub">clean markdown, shareable URL</span>
       </span>
-      <span class="kbd-inline">
-        <span class="kbd" id="kbd-page">⇧⌘E</span>
-      </span>
+      <span class="kbd-inline"><span class="kbd" id="kbd-page">⇧⌘E</span></span>
     </button>
 
     <div class="ranges range-options" id="range-selector">
@@ -385,26 +328,21 @@
 
     <button class="secondary" id="btn-selection">
       <span class="left">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
-          <path d="M4 16v2a2 2 0 0 0 2 2h2"/>
-          <path d="M16 4h2a2 2 0 0 1 2 2v2"/>
-          <path d="M16 20h2a2 2 0 0 0 2-2v-2"/>
-          <path d="M8 12h8"/>
-        </svg>
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
+            <path d="M4 16v2a2 2 0 0 0 2 2h2"/>
+            <path d="M16 4h2a2 2 0 0 1 2 2v2"/>
+            <path d="M16 20h2a2 2 0 0 0 2-2v-2"/>
+            <path d="M8 12h8"/>
+          </svg>
+        </span>
         <span>capture selection</span>
       </span>
-      <span class="kbd-inline">
-        <span class="kbd" id="kbd-sel">⇧⌘X</span>
-      </span>
+      <span class="kbd-inline"><span class="kbd" id="kbd-sel">⇧⌘X</span></span>
     </button>
 
     <div class="status" id="status"></div>
-  </div>
-
-  <div class="search">
-    <input type="text" id="search-input" placeholder="search your documents" />
-    <div id="search-results" class="search-results"></div>
   </div>
 
   <div class="footer">
@@ -415,7 +353,9 @@
     </span>
   </div>
 
-  <!-- legacy element IDs popup.js may reach for; keep stubs so it doesn't crash. -->
+  <!-- legacy stub spans referenced by popup.js (now invisible). -->
+  <span id="search-input" style="display:none"></span>
+  <span id="search-results" style="display:none"></span>
   <span id="platform-badge" style="display:none"></span>
   <span id="platform-dot" style="display:none"></span>
   <span id="platform-name" style="display:none"></span>
