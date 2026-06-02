@@ -23,7 +23,7 @@
       --text-secondary: #a1a1aa;
       --text-tertiary: #71717a;
       --text-muted: #52525b;
-      --accent: #B5FF1A;
+      --accent: #e4e4e7;
     }
 
     html, body {
@@ -105,9 +105,9 @@
       font-variant-numeric: tabular-nums;
     }
     .pill.accent {
-      border-color: rgba(181, 255, 26, 0.3);
-      background: rgba(181, 255, 26, 0.06);
-      color: var(--accent);
+      border-color: var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
     }
 
     .kbd {
@@ -178,7 +178,7 @@
       border-radius: 50%;
       transition: transform 0.15s, background 0.15s;
     }
-    .toggle input:checked + .track { background: rgba(181, 255, 26, 0.25); }
+    .toggle input:checked + .track { background: var(--text-primary); }
     .toggle input:checked + .track::after {
       transform: translateX(16px);
       background: var(--accent);

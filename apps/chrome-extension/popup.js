@@ -12,6 +12,32 @@ const btnCapture = document.getElementById("btn-capture");
 const btnSelection = document.getElementById("btn-selection");
 const rangeSelector = document.getElementById("range-selector");
 
+// New popup-redesign helpers — write to the visible IDs the new
+// HTML uses (#context-text, #context-dot, #btn-capture-title,
+// #btn-capture-sub). The legacy #platform-* + .label/.desc writes
+// elsewhere in this file land on invisible stub spans, so this
+// helper is the one that actually paints. Brand voice: lowercase
+// sentence fragments, no Title Case, no middle-dot.
+function paintContext(text, live) {
+  const t = document.getElementById("context-text");
+  const d = document.getElementById("context-dot");
+  if (t) t.textContent = text;
+  if (d) d.classList.toggle("live", !!live);
+}
+function paintCaptureBtn(title, sub, mode) {
+  const titleEl = document.getElementById("btn-capture-title");
+  const subEl = document.getElementById("btn-capture-sub");
+  if (titleEl) titleEl.textContent = title;
+  if (subEl) subEl.textContent = sub;
+  if (mode) btnCapture.dataset.mode = mode;
+}
+function paintRangesVisible(on) {
+  if (!rangeSelector) return;
+  rangeSelector.classList.toggle("visible", !!on);
+  // legacy display:flex too in case some CSS depends on inline style
+  rangeSelector.style.display = on ? "flex" : "none";
+}
+
 // Range: radio buttons instead of select
 function getRangeValue() {
   const checked = document.querySelector('input[name="range"]:checked');
@@ -173,22 +199,18 @@ async function detectPlatform() {
 
     // Check if on a GitHub .md file.
     if (url.includes("github.com") && /\/blob\/.*\.(md|markdown|mdx)$/i.test(url)) {
-      platformDot.classList.remove("inactive");
-      platformDot.classList.add("active");
-      platformNameEl.classList.add("active");
-      platformNameEl.textContent = "github markdown detected";
+      paintContext("github markdown", true);
+      paintCaptureBtn("capture this readme", "use the open-in-memory.wiki button on the page", "github");
       btnCapture.disabled = true;
-      setStatus("use the 'open in memory.wiki' button on the page", "");
+      setStatus("use the open-in-memory.wiki button on the page", "info");
       return null;
     }
 
     if (platform) {
-      platformDot.classList.remove("inactive");
-      platformDot.classList.add("active");
-      platformNameEl.classList.add("active");
-      platformNameEl.textContent = PLATFORM_NAMES[platform] + " detected";
+      paintContext("on " + PLATFORM_NAMES[platform], true);
+      paintCaptureBtn("capture full conversation", "all messages as a markdown document", "ai");
       btnCapture.disabled = false;
-      rangeSelector.style.display = "flex";
+      paintRangesVisible(true);
       return { tab, platform };
     } else {
       showNotOnAiPage();
@@ -201,33 +223,17 @@ async function detectPlatform() {
 }
 
 function showOnMdfy() {
-  if (platformDot) {
-    platformDot.classList.remove("inactive");
-    platformDot.classList.add("active");
-    platformDot.style.background = "#B5FF1A";
-  }
-  if (platformNameEl) {
-    platformNameEl.classList.add("active");
-    platformNameEl.textContent = "memory.wiki";
-  }
+  paintContext("on memory.wiki", false);
+  paintCaptureBtn("you're on memory.wiki", "create and edit documents in the app", "mdfy");
   btnCapture.disabled = true;
-  const labelEl = btnCapture.querySelector(".label");
-  if (labelEl) labelEl.innerHTML = 'you\'re on memory.wiki<span class="desc">create and edit documents directly here</span>';
-  rangeSelector.style.display = "none";
+  paintRangesVisible(false);
 }
 
 function showNotOnAiPage() {
-  platformDot.classList.remove("active");
-  platformDot.classList.add("inactive");
-  platformDot.style.background = "#60a5fa";
-  platformNameEl.classList.add("active");
-  platformNameEl.textContent = "any webpage";
-  document.getElementById("platform-hint").textContent = "capture this page as markdown";
+  paintContext("any webpage", false);
+  paintCaptureBtn("capture this page", "clean markdown, shareable url", "page");
   btnCapture.disabled = false;
-  const labelEl = btnCapture.querySelector(".label");
-  if (labelEl) labelEl.innerHTML = 'capture this page<span class="desc">page content as a clean markdown document</span>';
-  btnCapture.dataset.mode = "page";
-  rangeSelector.style.display = "none";
+  paintRangesVisible(false);
 }
 
 // ─── Actions ───
@@ -350,12 +356,9 @@ btnSelection.addEventListener("click", async () => {
 document.querySelectorAll('input[name="range"]').forEach((radio) => {
   radio.addEventListener("change", () => {
     const val = parseInt(radio.value);
-    const labelEl = btnCapture.querySelector(".label");
-    const descEl = labelEl.querySelector(".desc");
-    // Remove old text, keep .desc span
-    const newText = val === 0 ? "capture full conversation" : "capture last " + val + " exchanges";
-    const newDesc = val === 0 ? "all messages as a markdown document" : "recent " + val + " Q&A pairs as a markdown document";
-    labelEl.innerHTML = newText + '<span class="desc">' + newDesc + '</span>';
+    const title = val === 0 ? "capture full conversation" : "capture last " + val + " exchanges";
+    const sub = val === 0 ? "all messages as a markdown document" : "recent " + val + " Q&A pairs";
+    paintCaptureBtn(title, sub);
   });
 });
 
@@ -395,35 +398,81 @@ function getUserInfo() {
   });
 }
 
-function renderAccountChip({ userId, email }) {
+// Paint profile data (avatar_url + display_name) onto the chip.
+// Falls back to the seeded initial silently if avatar fetch fails.
+function applyProfile(p) {
+  if (!p) return;
   const avatar = document.getElementById("account-avatar");
   const info = document.getElementById("account-info");
-  const action = document.getElementById("account-action");
-  if (!avatar || !info || !action) return;
+  if (info && p.display_name) info.textContent = p.display_name;
+  if (avatar && p.avatar_url) {
+    const img = document.createElement("img");
+    img.src = p.avatar_url;
+    img.alt = "";
+    img.referrerPolicy = "no-referrer";
+    img.onerror = () => {
+      // OAuth pic unreachable — restore initial.
+      avatar.innerHTML = (p.display_name || p.email || "?").trim().charAt(0).toUpperCase() || "?";
+    };
+    avatar.innerHTML = "";
+    avatar.appendChild(img);
+  }
+}
+
+async function fetchProfileAndApply(userId) {
+  try {
+    const res = await proxyFetch(MDFY_URL + "/api/user/profile", {
+      method: "GET",
+      headers: { "x-user-id": userId },
+    });
+    if (!res || !res.ok) return;
+    const body = JSON.parse(res.body || "{}");
+    const profile = body.profile || body;
+    if (profile && (profile.avatar_url || profile.display_name)) {
+      chrome.storage.local.set({ "mw-profile": { userId, avatar_url: profile.avatar_url, display_name: profile.display_name } });
+      applyProfile({ userId, ...profile });
+    }
+  } catch {
+    /* network / unauthorized — silently keep initial */
+  }
+}
+
+function renderAccountChip({ userId, email }) {
+  const chip = document.getElementById("account-chip");
+  const avatar = document.getElementById("account-avatar");
+  const info = document.getElementById("account-info");
+  if (!chip || !avatar || !info) return;
 
   if (userId) {
     const initial = (email || "?").trim().charAt(0).toUpperCase() || "?";
     avatar.textContent = initial;
+    avatar.innerHTML = initial;
     avatar.classList.add("active");
-    if (email) {
-      info.innerHTML = '<span class="email"></span>';
-      info.querySelector(".email").textContent = email;
-    } else {
-      info.innerHTML = '<span class="label">signed in</span>';
-    }
-    action.textContent = "sign out";
-    action.classList.remove("cta");
-    action.onclick = (e) => {
+    info.textContent = email || "signed in";
+    chip.classList.remove("signin");
+    chip.title = "sign out";
+    chip.onclick = (e) => {
       e.preventDefault();
       chrome.tabs.create({ url: MDFY_URL + "/auth/signout" });
     };
+
+    // Async-fetch profile and swap in the OAuth avatar + display
+    // name when they arrive. Cached in chrome.storage.local so the
+    // next popup open paints instantly. Same shape as Desktop's
+    // sidebar (apps/desktop/renderer/editor.js L1054+).
+    chrome.storage.local.get(["mw-profile"], (data) => {
+      const cached = data["mw-profile"];
+      if (cached && cached.userId === userId) applyProfile(cached);
+    });
+    fetchProfileAndApply(userId);
   } else {
     avatar.textContent = "?";
+    avatar.innerHTML = "?";
     avatar.classList.remove("active");
-    info.innerHTML = '<span class="label">sign in for permanent URLs</span>';
-    action.textContent = "sign in";
-    action.classList.add("cta");
-    action.onclick = (e) => {
+    info.textContent = "sign in";
+    chip.classList.add("signin");
+    chip.title = "sign in for permanent URLs";
+    chip.onclick = (e) => {
       e.preventDefault();
       chrome.tabs.create({ url: MDFY_URL });
     };
