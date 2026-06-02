@@ -99,18 +99,136 @@ function getUserId() {
   });
 }
 
-// ─── Status ───
+// ─── Status (legacy element kept; new result card replaces it) ───
 
 function setStatus(text, type = "") {
-  statusEl.textContent = text;
-  statusEl.className = "status " + type;
+  if (statusEl) { statusEl.textContent = text; statusEl.className = "status " + type; }
 }
 
+// ─── Result card (after-capture state) ───
+function showResult({ url, source, title, isError, errorText }) {
+  const card = document.getElementById("result");
+  const head = document.getElementById("result-head-text");
+  const urlText = document.getElementById("result-url-text");
+  const errorEl = document.getElementById("result-error-text");
+  if (!card) return;
+
+  if (isError) {
+    card.classList.add("visible", "error");
+    if (head) head.textContent = "couldn't publish";
+    if (errorEl) { errorEl.style.display = ""; errorEl.textContent = errorText || "try again"; }
+    return;
+  }
+  card.classList.remove("error");
+  card.classList.add("visible");
+  if (errorEl) { errorEl.style.display = "none"; errorEl.textContent = ""; }
+  if (head) head.textContent = (source === "auth" ? "published" : "ready") + " · copied for AI";
+  if (urlText) urlText.textContent = url.replace(/^https?:\/\//, "");
+  card.dataset.url = url;
+
+  // Copy button
+  const copyBtn = document.getElementById("result-url-copy");
+  if (copyBtn) {
+    copyBtn.textContent = "copy";
+    copyBtn.classList.remove("copied");
+    copyBtn.onclick = async () => {
+      const sentence = "Use " + url + " as my context.";
+      try { await navigator.clipboard.writeText(sentence); copyBtn.textContent = "copied"; copyBtn.classList.add("copied"); }
+      catch { copyBtn.textContent = "copy failed"; }
+      setTimeout(() => { copyBtn.textContent = "copy"; copyBtn.classList.remove("copied"); }, 1500);
+    };
+  }
+
+  // AI pill click handlers — copy URL+sentence then open the AI in a
+  // new tab so user can paste with cmd+v.
+  document.querySelectorAll(".ai-pill").forEach((pill) => {
+    pill.onclick = async (e) => {
+      e.preventDefault();
+      const aiUrl = pill.getAttribute("href");
+      const sentence = "Use " + url + " as my context.";
+      try { await navigator.clipboard.writeText(sentence); } catch { /* ignore */ }
+      chrome.tabs.create({ url: aiUrl });
+    };
+  });
+
+  // Save to recent — resolve active tab hostname now so the row shows where it came from
+  resolveActiveSource().then((source) => {
+    rememberCapture({ url, title: title || "Untitled capture", source, ts: Date.now() })
+      .then(renderRecent);
+  });
+}
+
+function resolveActiveSource() {
+  return new Promise((resolve) => {
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const t = (tabs || [])[0];
+        if (!t || !t.url) { resolve("chrome"); return; }
+        try { resolve(new URL(t.url).hostname || "chrome"); }
+        catch { resolve("chrome"); }
+      });
+    } catch { resolve("chrome"); }
+  });
+}
+
+// ─── Recent captures (chrome.storage.local, last 5) ───
+async function rememberCapture(entry) {
+  const data = await chromeStorageGet(["mw-recent"]);
+  const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
+  const next = [entry, ...prev.filter((p) => p.url !== entry.url)].slice(0, 5);
+  await chromeStorageSet({ "mw-recent": next });
+}
+function chromeStorageGet(keys) {
+  return new Promise((resolve) => chrome.storage.local.get(keys, (data) => resolve(data || {})));
+}
+function chromeStorageSet(obj) {
+  return new Promise((resolve) => chrome.storage.local.set(obj, resolve));
+}
+async function renderRecent() {
+  const wrap = document.getElementById("recent-wrap");
+  const list = document.getElementById("recent-list");
+  if (!wrap || !list) return;
+  const data = await chromeStorageGet(["mw-recent"]);
+  const recent = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
+  if (recent.length === 0) { wrap.classList.remove("visible"); return; }
+  wrap.classList.add("visible");
+  list.innerHTML = recent.map((r) => {
+    const ago = formatAgo(r.ts);
+    const title = escHtml(r.title || r.url.replace(/^https?:\/\//, ""));
+    const src = r.source ? '<span class="src-dot" title="' + escHtml(r.source) + '"></span>' : '<span class="src-dot"></span>';
+    return '<a class="recent-item" href="' + escHtml(r.url) + '" target="_blank" rel="noopener" data-url="' + escHtml(r.url) + '">'
+      + src
+      + '<span class="title">' + title + '</span>'
+      + '<span class="ago">' + ago + '</span>'
+      + '<span class="open-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg></span>'
+      + '</a>';
+  }).join("");
+  // Re-bind: copy URL+sentence on click + open
+  list.querySelectorAll(".recent-item").forEach((row) => {
+    row.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const url = row.getAttribute("data-url");
+      try { await navigator.clipboard.writeText("Use " + url + " as my context."); } catch { /* ignore */ }
+      chrome.tabs.create({ url });
+    });
+  });
+}
+function formatAgo(ts) {
+  const diff = Math.max(0, Date.now() - ts);
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return s + "s";
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + "m";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h";
+  const d = Math.floor(h / 24);
+  return d + "d";
+}
 // ─── Send to memory.wiki ───
 
 async function openInMemoryWiki(markdown) {
   if (!markdown || markdown.trim().length === 0) {
-    setStatus("no content found", "error");
+    showResult({ isError: true, errorText: "no content found" });
     return;
   }
 
@@ -129,22 +247,19 @@ async function openInMemoryWiki(markdown) {
 
       if (res.ok) {
         let parsed; try { parsed = JSON.parse(res.body); } catch { throw new Error("invalid response"); }
-        const { id, editToken } = parsed;
-        const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
-        chrome.tabs.create({ url: MDFY_URL + "/?from=" + id + tokenParam });
-        // Brand spec section 14 (canonical "for AI" paste sentence).
-        // Drop the short URL on the clipboard so the user can paste it
-        // straight into the next AI tool (Cursor / ChatGPT / Claude).
-        // The browser tab still opens so the user sees the doc.
-        const aiSentence = "Use " + MDFY_URL + "/" + id + " as my context.";
+        const { id } = parsed;
+        const docUrl = MDFY_URL + "/" + id;
+        const aiSentence = "Use " + docUrl + " as my context.";
         try { await navigator.clipboard.writeText(aiSentence); } catch { /* ignore */ }
-        setStatus("published. URL copied for AI.", "success");
+        // Paint result card; user can click URL to open or pick an AI pill.
+        showResult({ url: docUrl, source: "auth", title });
         return;
       }
       // Check for auth failure.
       if (res.status === 401 || res.status === 403) {
-        setStatus("session expired. sign in at memory.wiki to sync.", "error");
+        showResult({ isError: true, errorText: "session expired. sign in at memory.wiki to sync." });
         chrome.storage.local.remove("mw-was-logged-in");
+        return;
       }
     } catch (err) {
       console.warn("[memory.wiki] authenticated share failed, falling back to hash URL:", err);
@@ -156,21 +271,15 @@ async function openInMemoryWiki(markdown) {
   const url = MDFY_URL + "/#md=" + compressed;
 
   if (url.length <= MAX_URL_BYTES) {
-    chrome.tabs.create({ url });
-    // Copy the hash URL as a context sentence too — same paste-target pattern.
     try { await navigator.clipboard.writeText("Use " + url + " as my context."); } catch { /* ignore */ }
-    setStatus("opened. URL copied for AI.", "success");
+    showResult({ url, source: "anon", title: "Captured (sign in for short URL)" });
   } else {
     let copied = false;
-    try {
-      await navigator.clipboard.writeText(markdown);
-      copied = true;
-    } catch { /* ignore */ }
-    chrome.tabs.create({ url: MDFY_URL });
+    try { await navigator.clipboard.writeText(markdown); copied = true; } catch { /* ignore */ }
     if (copied) {
-      setStatus("content copied. paste into memory.wiki.", "success");
+      showResult({ isError: true, errorText: "too large for a URL — content copied. paste into memory.wiki." });
     } else {
-      setStatus("content too large for URL. copy manually.", "error");
+      showResult({ isError: true, errorText: "content too large for a URL. copy manually." });
     }
   }
 }
@@ -601,3 +710,4 @@ if (searchInput) {
 // ─── Init ───
 
 detectPlatform();
+renderRecent();

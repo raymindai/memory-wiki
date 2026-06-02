@@ -20,10 +20,9 @@
     }
 
     /* ════════════════════════════════════════════════════════════════
-       Pure design tokens — copied verbatim from
-       apps/web/src/components/pure/styles/tokens.css so the popup
-       reads as a slice of memory.wiki's /about page, not a one-off.
-       ══════════════════════════════════════════════════════════════ */
+       Pure design tokens — verbatim mirror of
+       apps/web/src/components/pure/styles/tokens.css
+       ──────────────────────────────────────────────────────────────── */
     :root {
       --bg:          #08080a;
       --bg-deep:     #04040a;
@@ -35,25 +34,32 @@
       --body:   #c2c2c5;
       --muted:  #8a8a92;
       --faint:  #5a5a62;
-      --micro-lime:   #B5FF1A;  /* live / shipped / success — small dot only */
-      --micro-orange: #FF6B1A;  /* beta / pending — unused here */
+
+      /* Micro accents — small visual signals ONLY (dots, badges) */
+      --micro-lime:   #B5FF1A;
+      --micro-orange: #FF6B1A;
+      --micro-ai:     #8B5CF6;
+
       --r-sm:   10px;
       --r-md:   14px;
       --r-lg:   20px;
       --r-pill: 9999px;
+
       --font-display: "Cal Sans", -apple-system, BlinkMacSystemFont, sans-serif;
       --font-sans:    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
       --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      --ease:   cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html {
       background: transparent;
-      width: 384px;
+      width: 396px;
     }
     body {
-      width: 372px;
+      width: 384px;
       margin: 6px;
       background: var(--bg);
       color: var(--body);
@@ -70,16 +76,29 @@
         0 1px 0 rgba(255,255,255,0.04) inset,
         0 24px 64px rgba(0,0,0,0.55),
         0 4px 12px rgba(0,0,0,0.35);
-      animation: pop-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes pop-in {
-      from { opacity: 0; transform: translateY(4px); }
-      to   { opacity: 1; transform: none; }
+
+    /* Page enters with a subtle stagger so the sections feel composed,
+       not dumped. Each section delays 40 ms past the previous. */
+    .stage {
+      opacity: 0;
+      transform: translateY(4px);
+      animation: stage-in 0.32s var(--ease) forwards;
+    }
+    .stage:nth-child(1) { animation-delay: 0ms; }
+    .stage:nth-child(2) { animation-delay: 40ms; }
+    .stage:nth-child(3) { animation-delay: 80ms; }
+    .stage:nth-child(4) { animation-delay: 120ms; }
+    .stage:nth-child(5) { animation-delay: 160ms; }
+    .stage:nth-child(6) { animation-delay: 200ms; }
+    .stage:nth-child(7) { animation-delay: 240ms; }
+    @keyframes stage-in {
+      to { opacity: 1; transform: none; }
     }
 
     a, button { font-family: inherit; letter-spacing: -0.005em; color: inherit; }
 
-    /* ─── header — eyebrow + wordmark, /about hero shape ─── */
+    /* ─── 1. Header — eyebrow + wordmark, /about hero shape ─── */
     .header {
       padding: 22px 22px 4px;
     }
@@ -92,20 +111,16 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
-    .eyebrow .num {
-      color: var(--ink);
-      font-weight: 500;
-    }
-    .eyebrow .sep {
-      color: var(--faint);
-    }
+    .eyebrow .num    { color: var(--ink); font-weight: 500; }
+    .eyebrow .sep    { color: var(--faint); }
+    .eyebrow .v      { margin-left: auto; color: var(--faint); }
 
     .wordmark {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 11px;
       font-family: var(--font-display);
       font-size: 22px;
       font-weight: 600;
@@ -115,28 +130,26 @@
       letter-spacing: 0;
     }
     .wordmark .mark {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       flex-shrink: 0;
-      border-radius: 6px;
+      border-radius: 7px;
       overflow: hidden;
     }
     .wordmark .mark img { width: 100%; height: 100%; display: block; }
     .wordmark .product {
       color: var(--muted);
       font-weight: 500;
-      font-family: var(--font-display);
     }
 
-    /* ─── context line ─── */
+    /* ─── 2. Context line ─── */
     .context {
       display: flex;
       align-items: center;
       gap: 9px;
-      padding: 16px 22px 18px;
+      padding: 16px 22px 0;
       font-size: 13px;
       color: var(--muted);
-      letter-spacing: -0.005em;
     }
     .context .dot {
       width: 6px;
@@ -144,23 +157,34 @@
       border-radius: 50%;
       background: var(--faint);
       flex-shrink: 0;
+      transition: background 200ms var(--ease);
     }
-    .context .dot.live { background: var(--micro-lime); }
+    .context .dot.live {
+      background: var(--micro-lime);
+      animation: dot-pulse 2.4s var(--ease) infinite;
+    }
+    @keyframes dot-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(181,255,26,0.45); }
+      50%      { box-shadow: 0 0 0 5px rgba(181,255,26,0.00); }
+    }
     .context em {
       font-style: normal;
       color: var(--ink);
       font-weight: 500;
     }
 
-    /* ─── primary CTA — Pure /about hover-invert pill ─── */
-    .actions { padding: 0 22px 14px; }
+    /* ─── 3. Actions ─── */
+    .actions {
+      padding: 14px 22px 0;
+    }
 
+    /* Primary CTA — Pure /about hover-invert pill */
     .btn-primary {
       display: flex;
       width: 100%;
       align-items: center;
-      gap: 12px;
-      padding: 16px 20px;
+      gap: 14px;
+      padding: 17px 20px;
       background: transparent;
       color: var(--ink);
       border: 1px solid var(--hair-strong);
@@ -169,7 +193,8 @@
       font-weight: 600;
       cursor: pointer;
       text-align: left;
-      transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 120ms ease;
+      transition: background 180ms var(--ease), border-color 180ms var(--ease),
+                  color 180ms var(--ease), transform 120ms var(--ease);
     }
     .btn-primary:hover:not(:disabled) {
       background: var(--ink);
@@ -177,10 +202,7 @@
       border-color: var(--ink);
     }
     .btn-primary:active:not(:disabled) { transform: scale(0.992); }
-    .btn-primary:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-primary .icon {
       width: 18px;
       height: 18px;
@@ -204,11 +226,12 @@
       color: var(--muted);
       margin-top: 3px;
       letter-spacing: -0.005em;
+      transition: color 180ms var(--ease);
     }
     .btn-primary:hover:not(:disabled) .stack .sub { color: rgba(8, 8, 10, 0.65); }
     .btn-primary .kbd-inline { flex-shrink: 0; }
 
-    /* ─── range pills ─── */
+    /* Range pills */
     .ranges {
       display: none;
       gap: 6px;
@@ -220,29 +243,23 @@
       text-align: center;
       padding: 6px 0;
       border-radius: var(--r-pill);
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--muted);
       background: transparent;
       border: 1px solid var(--hair);
       cursor: pointer;
-      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      transition: color 140ms var(--ease), border-color 140ms var(--ease);
       font-family: var(--font-mono);
       letter-spacing: 0.04em;
     }
-    .ranges label:hover {
-      color: var(--body);
-      border-color: var(--hair-strong);
-    }
+    .ranges label:hover { color: var(--body); border-color: var(--hair-strong); }
     .ranges input { display: none; }
-    .ranges label:has(input:checked) {
-      color: var(--ink);
-      border-color: var(--ink);
-    }
+    .ranges label:has(input:checked) { color: var(--ink); border-color: var(--ink); }
 
-    /* SECONDARY — outline pill, smaller, quieter */
+    /* Secondary */
     .secondary {
       margin-top: 8px;
-      padding: 10px 18px;
+      padding: 11px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -254,7 +271,7 @@
       font-size: 12px;
       cursor: pointer;
       text-align: left;
-      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      transition: background 140ms var(--ease), border-color 140ms var(--ease), color 140ms var(--ease);
     }
     .secondary:hover {
       background: var(--bg-deep);
@@ -262,70 +279,277 @@
       border-color: var(--hair-strong);
     }
     .secondary .icon { width: 15px; height: 15px; color: var(--faint); }
-    .secondary:hover .icon { color: var(--muted); }
+    .secondary:hover .icon { color: var(--body); }
     .secondary .icon svg { width: 100%; height: 100%; stroke-width: 1.6; }
-    .secondary .left { display: inline-flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .secondary .left { display: inline-flex; align-items: center; gap: 11px; flex: 1; min-width: 0; }
     .secondary .kbd-inline { flex-shrink: 0; }
 
-    /* ─── status — neutral card ─── */
-    .status {
-      margin: 12px 22px 0;
+    /* ─── 4. After-capture result card ─── */
+    .result {
+      margin: 14px 22px 0;
       padding: 0;
-      border-radius: var(--r-sm);
-      font-size: 11.5px;
-      text-align: center;
-      min-height: 0;
-      opacity: 0;
+      border-radius: var(--r-md);
+      border: 1px solid transparent;
       max-height: 0;
       overflow: hidden;
-      transition: opacity 0.2s, max-height 0.2s, padding 0.2s;
+      opacity: 0;
+      transition: opacity 200ms var(--ease), max-height 260ms var(--ease),
+                  padding 200ms var(--ease), border-color 200ms var(--ease);
     }
-    .status:not(:empty) {
+    .result.visible {
       opacity: 1;
-      padding: 11px 14px;
-      max-height: 80px;
-    }
-    .status.success {
+      max-height: 300px;
+      padding: 14px 16px 14px;
+      border-color: var(--hair-strong);
       background: var(--bg-deep);
-      border: 1px solid var(--hair-strong);
-      color: var(--ink);
+    }
+    .result.error {
+      border-color: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.05);
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 8px;
     }
-    .status.info {
-      background: var(--bg-deep);
+    .result.error .result-head { color: #f87171; }
+    .result-head .check {
+      width: 12px; height: 12px; flex-shrink: 0;
+      color: var(--micro-lime);
+    }
+    .result.error .result-head .check { color: #f87171; }
+
+    .result-url {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink);
+      padding: 9px 12px;
+      background: var(--bg);
       border: 1px solid var(--hair);
-      color: var(--body);
+      border-radius: var(--r-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow: hidden;
     }
-    .status.error {
-      background: rgba(239, 68, 68, 0.06);
-      border: 1px solid rgba(239, 68, 68, 0.18);
+    .result-url .text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .result-url-copy {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--hair-strong);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: color 140ms var(--ease), border-color 140ms var(--ease), background 140ms var(--ease);
+    }
+    .result-url-copy:hover {
+      color: var(--ink);
+      border-color: var(--ink);
+    }
+    .result-url-copy.copied {
+      color: var(--bg);
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .result-cont {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .result-ai {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .ai-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      background: transparent;
+      border: 1px solid var(--hair);
+      border-radius: var(--r-pill);
+      color: var(--body);
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 140ms var(--ease), border-color 140ms var(--ease), color 140ms var(--ease), transform 100ms var(--ease);
+    }
+    .ai-pill:hover {
+      background: var(--bg);
+      border-color: var(--hair-strong);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+    .ai-pill:active { transform: translateY(0); }
+    .ai-pill .glyph {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: var(--bg);
+    }
+    .ai-pill .arrow {
+      margin-left: auto;
+      color: var(--faint);
+      flex-shrink: 0;
+      transition: transform 140ms var(--ease), color 140ms var(--ease);
+    }
+    .ai-pill:hover .arrow {
+      color: var(--ink);
+      transform: translateX(2px);
+    }
+
+    .result-error-text {
+      font-size: 12px;
       color: #f87171;
     }
 
-    /* ─── account row — bottom, full-width, long names safe ─── */
+    /* ─── 5. Recent captures ─── */
+    .recent-wrap {
+      padding: 18px 22px 0;
+      display: none;
+    }
+    .recent-wrap.visible { display: block; }
+
+    .section-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .section-eyebrow .line {
+      flex: 1;
+      height: 1px;
+      background: var(--hair);
+    }
+
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      margin: 0 -10px;
+      border-radius: var(--r-sm);
+      text-decoration: none;
+      color: var(--body);
+      transition: background 120ms var(--ease), color 120ms var(--ease);
+      cursor: pointer;
+    }
+    .recent-item:hover { background: var(--bg-deep); color: var(--ink); }
+    .recent-item .src-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--faint);
+      flex-shrink: 0;
+    }
+    .recent-item .title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12.5px;
+    }
+    .recent-item .ago {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--faint);
+      flex-shrink: 0;
+      letter-spacing: 0;
+    }
+    .recent-item .open-arrow {
+      width: 12px;
+      height: 12px;
+      color: var(--faint);
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 140ms var(--ease);
+    }
+    .recent-item:hover .open-arrow { opacity: 1; color: var(--muted); }
+    .recent-item .open-arrow svg { width: 100%; height: 100%; stroke-width: 1.6; }
+
+    .recent-library {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 6px 0;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 140ms var(--ease);
+    }
+    .recent-library:hover { color: var(--ink); }
+    .recent-library .arrow { transition: transform 140ms var(--ease); }
+    .recent-library:hover .arrow { transform: translateX(2px); }
+
+    /* ─── 6. Account row ─── */
     .account-row {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 16px 22px 14px;
-      margin-top: 18px;
+      padding: 16px 22px;
+      margin-top: 20px;
       border-top: 1px solid var(--hair);
       font-size: 13px;
       color: var(--body);
       text-decoration: none;
-      transition: background 0.1s;
+      transition: background 120ms var(--ease);
     }
     .account-row:hover { background: var(--bg-deep); }
     .account-row .avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
+      width: 26px;
+      height: 26px;
+      border-radius: 13px;
       background: var(--hair);
       color: var(--body);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       flex-shrink: 0;
       overflow: hidden;
@@ -359,16 +583,17 @@
       font-family: var(--font-mono);
       letter-spacing: 0.06em;
       text-transform: lowercase;
+      transition: color 120ms var(--ease);
     }
     .account-row:hover .action { color: var(--ink); }
 
-    /* ─── footer ─── */
+    /* ─── 7. Footer ─── */
     .footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 11px 22px 16px;
+      padding: 12px 22px 16px;
       font-size: 11px;
       color: var(--muted);
       border-top: 1px solid var(--hair);
@@ -390,14 +615,14 @@
     .footer a {
       color: var(--muted);
       text-decoration: none;
-      transition: color 0.1s;
+      transition: color 120ms var(--ease);
     }
     .footer a:hover { color: var(--ink); }
     .footer .sep { color: var(--faint); }
     .footer .right {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       font-family: var(--font-mono);
       letter-spacing: 0.06em;
     }
@@ -407,7 +632,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 26px;
+      min-width: 28px;
       height: 22px;
       padding: 0 7px;
       border: 1px solid var(--hair-strong);
@@ -420,7 +645,7 @@
       letter-spacing: 0;
     }
     .btn-primary:hover:not(:disabled) .kbd {
-      background: rgba(8, 8, 10, 0.80);
+      background: rgba(8, 8, 10, 0.85);
       color: var(--ink);
       border-color: rgba(8, 8, 10, 0.95);
     }
@@ -430,11 +655,13 @@
   </style>
 </head>
 <body>
-  <div class="header">
+
+  <div class="header stage">
     <div class="eyebrow">
       <span class="num">01</span>
       <span class="sep">/</span>
       <span>chrome clipper</span>
+      <span class="v">v2.4.0</span>
     </div>
     <a class="wordmark" href="https://memory.wiki" target="_blank" rel="noopener">
       <span class="mark"><img src="icons/icon128.png" alt=""></span>
@@ -442,12 +669,12 @@
     </a>
   </div>
 
-  <div class="context" id="context-line">
+  <div class="context stage" id="context-line">
     <span class="dot" id="context-dot"></span>
     <span id="context-text">detecting page</span>
   </div>
 
-  <div class="actions">
+  <div class="actions stage">
     <button class="btn-primary" id="btn-capture" disabled>
       <span class="icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -486,11 +713,70 @@
       </span>
       <span class="kbd-inline"><span class="kbd" id="kbd-sel">⇧⌘X</span></span>
     </button>
-
-    <div class="status" id="status"></div>
   </div>
 
-  <a class="account-row" id="account-chip" href="#">
+  <div class="result" id="result">
+    <div class="result-head" id="result-head">
+      <span class="check">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 8.5l3.5 3.5L13 4.5"/>
+        </svg>
+      </span>
+      <span id="result-head-text">captured</span>
+    </div>
+    <div class="result-url" id="result-url-box">
+      <span class="text" id="result-url-text">memory.wiki/…</span>
+      <button class="result-url-copy" id="result-url-copy" type="button">copy</button>
+    </div>
+    <div class="result-cont">continue this thread on</div>
+    <div class="result-ai">
+      <a class="ai-pill" id="ai-chatgpt" href="https://chatgpt.com" target="_blank" rel="noopener" data-name="chatgpt">
+        <span class="glyph" style="background:#10a37f">G</span>
+        <span>chatgpt</span>
+        <span class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>
+        </span>
+      </a>
+      <a class="ai-pill" id="ai-claude" href="https://claude.ai/new" target="_blank" rel="noopener" data-name="claude">
+        <span class="glyph" style="background:#cc785c">C</span>
+        <span>claude</span>
+        <span class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>
+        </span>
+      </a>
+      <a class="ai-pill" id="ai-gemini" href="https://gemini.google.com/app" target="_blank" rel="noopener" data-name="gemini">
+        <span class="glyph" style="background:#1a73e8">∗</span>
+        <span>gemini</span>
+        <span class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>
+        </span>
+      </a>
+      <a class="ai-pill" id="ai-perplexity" href="https://www.perplexity.ai" target="_blank" rel="noopener" data-name="perplexity">
+        <span class="glyph" style="background:#20808d">P</span>
+        <span>perplexity</span>
+        <span class="arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg>
+        </span>
+      </a>
+    </div>
+    <div class="result-error-text" id="result-error-text" style="display:none"></div>
+  </div>
+
+  <div class="recent-wrap" id="recent-wrap">
+    <div class="section-eyebrow">
+      <span>recent</span>
+      <span class="line"></span>
+    </div>
+    <div class="recent-list" id="recent-list"></div>
+    <a class="recent-library" href="https://memory.wiki" target="_blank" rel="noopener">
+      <span>open library</span>
+      <span class="arrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+  </div>
+
+  <a class="account-row stage" id="account-chip" href="#">
     <span class="avatar" id="account-avatar">?</span>
     <span class="body-stack">
       <span class="label">account</span>
@@ -499,7 +785,7 @@
     <span class="action" id="account-action-label">sign out</span>
   </a>
 
-  <div class="footer">
+  <div class="footer stage">
     <span class="also">
       <span class="also-label">also</span>
       <a href="https://github.com/raymindai/memory-wiki/releases?q=desktop" target="_blank" rel="noopener" title="memory.wiki for Mac">mac</a>
@@ -514,13 +800,14 @@
     </span>
   </div>
 
-  <!-- legacy stubs for popup.js -->
+  <!-- legacy stubs popup.js may still read -->
   <span id="search-input" style="display:none"></span>
   <span id="search-results" style="display:none"></span>
   <span id="platform-badge" style="display:none"></span>
   <span id="platform-dot" style="display:none"></span>
   <span id="platform-name" style="display:none"></span>
   <span id="platform-hint" style="display:none"></span>
+  <span id="status" style="display:none"></span>
 
   <script src="popup.js"></script>
 </body>
