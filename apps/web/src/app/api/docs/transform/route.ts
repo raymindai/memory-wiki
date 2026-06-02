@@ -153,7 +153,10 @@ export async function POST(req: NextRequest) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const tryTitle = attempt === 0 ? title : `${title} (${shortStamp()})`;
     const tryMd = attempt === 0 ? finalMd
-      : finalMd.replace(/^(>\s*\*\*AI prompt:\*\*.*?\n\n)?(.*)/s,
+      // Match "> **AI prompt:** ..." quote block (optional) then everything
+      // else. Use [\s\S] in place of /s flag (which is es2018+ and our
+      // tsconfig target doesn't enable).
+      : finalMd.replace(/^(>[\s\S]*?\*\*AI prompt:\*\*[\s\S]*?\n\n)?([\s\S]*)$/,
           (_, q, rest) => (q || "") + bumpH1(rest, ` (${shortStamp()})`));
     id = nanoid(8);
     const { error } = await supabase.from("documents").insert({
