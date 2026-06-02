@@ -46,10 +46,20 @@
   }
 
   function fallbackPageMarkdown() {
-    // If Readability returned null (single-page apps, paywalls, login walls),
-    // fall back to a best-effort sweep of <main> / <article> / <body>.
-    const main = document.querySelector("main, article, [role='main']") || document.body;
-    const body = window.MwMarkdown.htmlToMarkdown(main) || "";
+    // Marketing pages, SPAs, sparse landing pages — Readability either
+    // returns null or a tiny fragment because text density is low.
+    // Walk the live document, strip the obvious chrome, convert.
+    const root = (
+      document.querySelector("main, article, [role='main']") ||
+      document.body
+    ).cloneNode(true);
+    root.querySelectorAll(
+      "header, footer, nav, aside, " +
+      "script, style, noscript, iframe, template, " +
+      ".header, .footer, .navbar, .nav, .navigation, " +
+      ".cookie, .cookie-banner, .cookies"
+    ).forEach((el) => el.remove());
+    const body = window.MwMarkdown.htmlToMarkdown(root) || "";
     const title = (document.title || "Untitled").trim();
     const md = "# " + title + "\n\n" +
       "Source: " + location.href + "\n\n---\n\n" + body;
@@ -57,16 +67,30 @@
   }
 
   function capturePage() {
+    let article = null;
     try {
       // Readability mutates the document it parses, so always clone first.
+      // - charThreshold lowered from 500 → 100 so landing / marketing
+      //   pages (low text density per section) aren't truncated to a
+      //   single chunk.
+      // - nbTopCandidates raised from 5 → 12 so Readability considers
+      //   more content regions before picking the winner.
       const docClone = document.cloneNode(true);
-      const reader = new window.Readability(docClone, { keepClasses: false });
-      const article = reader.parse();
-      if (article && article.content) {
-        return buildMarkdownFromArticle(article);
-      }
+      const reader = new window.Readability(docClone, {
+        keepClasses: false,
+        charThreshold: 100,
+        nbTopCandidates: 12,
+      });
+      article = reader.parse();
     } catch (err) {
       console.warn("[memory.wiki] Readability failed, falling back:", err);
+    }
+    // If Readability produced something substantial, use it. If it
+    // returned nothing or only a tiny shard (< 1500 chars of HTML —
+    // typical sign that it locked onto a sidebar / tab-button block
+    // instead of the page body), fall back to a body walk.
+    if (article && article.content && article.content.length > 1500) {
+      return buildMarkdownFromArticle(article);
     }
     return fallbackPageMarkdown();
   }
