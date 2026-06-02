@@ -413,9 +413,18 @@ function getUserInfo() {
 // Falls back to the seeded initial silently if avatar fetch fails.
 function applyProfile(p) {
   if (!p) return;
+  const chip = document.getElementById("account-chip");
   const avatar = document.getElementById("account-avatar");
   const info = document.getElementById("account-info");
   if (info && p.display_name) info.textContent = p.display_name;
+  // Refresh tooltip with the real display name + email if available
+  if (chip) {
+    const parts = [];
+    if (p.display_name) parts.push(p.display_name);
+    if (p.email && p.email !== p.display_name) parts.push("<" + p.email + ">");
+    parts.push("click to sign out");
+    chip.title = parts.join("  ·  ");
+  }
   if (avatar && p.avatar_url) {
     const img = document.createElement("img");
     img.src = p.avatar_url;
@@ -448,6 +457,25 @@ async function fetchProfileAndApply(userId) {
   }
 }
 
+// In-extension sign-out: clear the Supabase cookies for memory.wiki
+// directly via chrome.cookies. Avoids a web round-trip (the prior
+// `/auth/signout` URL 404'd) and gives instant feedback.
+async function inExtensionSignOut() {
+  return new Promise((resolve) => {
+    chrome.cookies.getAll({ domain: "memory.wiki" }, (cookies) => {
+      const sb = (cookies || []).filter((c) => c.name.startsWith("sb-"));
+      if (sb.length === 0) { resolve(); return; }
+      let pending = sb.length;
+      sb.forEach((c) => {
+        const url = "https://" + c.domain.replace(/^\./, "") + (c.path || "/");
+        chrome.cookies.remove({ url, name: c.name }, () => {
+          if (--pending === 0) resolve();
+        });
+      });
+    });
+  });
+}
+
 function renderAccountChip({ userId, email }) {
   const chip = document.getElementById("account-chip");
   const avatar = document.getElementById("account-avatar");
@@ -461,10 +489,20 @@ function renderAccountChip({ userId, email }) {
     avatar.classList.add("active");
     info.textContent = email || "signed in";
     chip.classList.remove("signin");
-    chip.title = "sign out";
-    chip.onclick = (e) => {
+    chip.title = (email || "signed in") + " · click to sign out";
+    chip.onclick = async (e) => {
       e.preventDefault();
-      chrome.tabs.create({ url: MDFY_URL + "/auth/signout" });
+      const prevText = info.textContent;
+      info.textContent = "signing out…";
+      chip.style.pointerEvents = "none";
+      await inExtensionSignOut();
+      chrome.storage.local.remove(["mw-was-logged-in", "mw-profile"]);
+      // Re-render as signed-out state
+      renderAccountChip({ userId: null, email: null });
+      chip.style.pointerEvents = "";
+      setStatus("signed out", "info");
+      // Re-detect platform so the capture button picks up the new state
+      try { detectPlatform(); } catch {}
     };
 
     // Async-fetch profile and swap in the OAuth avatar + display
