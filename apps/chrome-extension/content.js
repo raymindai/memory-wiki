@@ -1238,41 +1238,44 @@
 
       const miniBtn = document.createElement("button");
       miniBtn.className = "mw-mini-btn";
-      miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
       miniBtn.title = "send this Q&A to memory.wiki";
 
-      const resetMini = () => {
-        miniBtn.innerHTML = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span><span class="mw-mini-label">this</span>';
+      // Symbol + glyph only — no "this" text. The mark is the
+      // canonical sparkle inside a dark rounded square; the right
+      // glyph swaps (+ → spinner → ✓ → ✕) based on state.
+      const MARK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden><rect x="0" y="0" width="24" height="24" rx="5" fill="#09090b"/><path d="M12 6.5v11M7.7 8.5l8.6 7M7.7 15.5l8.6-7" stroke="#fafafa" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      const PLUS_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      const SPINNER_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.25"/><path d="M12 7a5 5 0 0 0-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+      const CHECK_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><path d="M3 7.5l2.5 2.5L11 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const X_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+      const renderMini = (glyph) => {
+        miniBtn.innerHTML = '<span class="mw-mini-mark">' + MARK_SVG + '</span><span class="mw-mini-glyph">' + glyph + '</span>';
       };
-      const setMiniStatus = (status, state) => {
-        const logo = '<span class="mw-mini-logo"><span class="mw-mini-md">M</span><span class="mw-mini-dot">.</span><span class="mw-mini-fy">W</span></span>';
-        const stateClass = state === "done" ? " mw-mini-status-done" : state === "error" ? " mw-mini-status-error" : "";
-        miniBtn.innerHTML = logo + '<span class="mw-mini-status' + stateClass + '">' + status + '</span>';
-      };
+      const resetMini = () => renderMini(PLUS_SVG);
+      resetMini();
 
       miniBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
         e.preventDefault();
         miniBtn.classList.remove("mw-done", "mw-error");
         miniBtn.classList.add("mw-loading");
-        setMiniStatus("Capturing...");
+        renderMini(SPINNER_SVG);
         try {
           await preProcessArtifactIframes();
-          setMiniStatus("Converting...");
           const { userEl, assistantEl } = findQAPair(msg, role);
           const markdown = formatQAPair(userEl, assistantEl);
-          setMiniStatus("Publishing...");
           await sendToMdfy(markdown);
           miniBtn.classList.remove("mw-loading");
           miniBtn.classList.add("mw-done");
-          setMiniStatus("Published ✓", "done");
-          setTimeout(() => { miniBtn.classList.remove("mw-done"); resetMini(); }, 3000);
+          renderMini(CHECK_SVG);
+          setTimeout(() => { miniBtn.classList.remove("mw-done"); resetMini(); }, 2400);
         } catch (err) {
-          console.error("[Memory.Wiki] capture failed:", err);
+          console.error("[memory.wiki] capture failed:", err);
           miniBtn.classList.remove("mw-loading");
           miniBtn.classList.add("mw-error");
-          setMiniStatus("Failed", "error");
-          setTimeout(() => { miniBtn.classList.remove("mw-error"); resetMini(); }, 3000);
+          renderMini(X_SVG);
+          setTimeout(() => { miniBtn.classList.remove("mw-error"); resetMini(); }, 2400);
         }
       });
 
