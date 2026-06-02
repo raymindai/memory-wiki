@@ -43,14 +43,21 @@
     ).forEach((el) => {
       // Preserve when it contains real content: code/tables/headings.
       if (el.querySelector && el.querySelector("pre, table, h1, h2, h3")) return;
-      // If the wrapper has images, hoist them out before dropping the
-      // wrapper itself. This rescues hero illustrations / product
-      // screenshots from decorative aria-hidden / tabpanel mockups
-      // (which otherwise dump fake UI text — "Properties / category /
-      // author / Add to Obsidian" — into the markdown).
-      const imgs = el.querySelectorAll ? el.querySelectorAll("img") : [];
-      if (imgs.length && el.parentNode) {
-        for (const img of imgs) el.parentNode.insertBefore(img, el);
+      // For aria-hidden / decorative wrappers, drop EVERYTHING — images
+      // included. They're aria-hidden because they're decoration, and
+      // the images inside are usually mockup backgrounds (faux UI demos
+      // on marketing pages), not real content. Real content images
+      // shouldn't be hidden from screen readers in the first place.
+      // For non-decorative chrome (nav/footer), still hoist any image
+      // out before dropping — a logo in the footer might be intentional.
+      const isDecorative =
+        (el.getAttribute && el.getAttribute("aria-hidden") === "true") ||
+        (el.classList && (el.classList.contains("sr-only") || el.classList.contains("screen-reader-only")));
+      if (!isDecorative) {
+        const imgs = el.querySelectorAll ? el.querySelectorAll("img") : [];
+        if (imgs.length && el.parentNode) {
+          for (const img of imgs) el.parentNode.insertBefore(img, el);
+        }
       }
       el.remove();
     });
