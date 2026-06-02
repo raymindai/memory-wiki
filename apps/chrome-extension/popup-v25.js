@@ -32,9 +32,10 @@
     window.__captureIntent = v;
     window.__intentCaptureActive = true;
     document.body.classList.add("intent-active");
+    document.body.classList.add("capturing");
     const btn = document.getElementById("btn-capture");
     if (btn) btn.click();
-    setTimeout(() => document.body.classList.remove("intent-active"), 5000);
+    setTimeout(() => document.body.classList.remove("intent-active"), 60000);
   });
 })();
 
@@ -248,7 +249,12 @@
     if (status && status.textContent) status.textContent = "";
     window.__intentCaptureActive = false;
     document.body.classList.remove("intent-active");
-    setTimeout(() => first.classList.remove("is-fresh"), 1900);
+    document.body.classList.remove("capturing");
+    document.body.classList.add("just-captured");
+    setTimeout(() => {
+      first.classList.remove("is-fresh");
+      document.body.classList.remove("just-captured");
+    }, 1900);
   }
   new MutationObserver(markFresh).observe(list, { childList: true });
 })();
@@ -278,6 +284,38 @@
       titleEl.dataset.locked = "1";
     }
   });
+})();
+
+// Recent — clear-all button
+(function () {
+  const btn = document.getElementById("recent-clear");
+  if (!btn) return;
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Clear recent captures from this list?")) return;
+    chrome.storage.local.remove(["mw-recent"], () => {
+      const list = document.getElementById("recent-list");
+      const wrap = document.getElementById("recent-wrap");
+      if (list) list.innerHTML = "";
+      if (wrap) wrap.classList.remove("visible");
+    });
+  });
+})();
+
+// Mark body as .capturing when the primary CTA is pressed (covers
+// both basic capture and intent capture which triggers the same
+// click). The class disables every interactive surface and renders
+// the animated barber-pole stripes on the CTA.
+(function () {
+  const btn = document.getElementById("btn-capture");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    document.body.classList.add("capturing");
+    // Safety net — if capture hangs we still un-stick after 60s.
+    setTimeout(() => document.body.classList.remove("capturing"), 60000);
+  }, true);
 })();
 
 // "Capture the selection" button stays disabled until the active tab
@@ -312,11 +350,43 @@
   window.addEventListener("focus", syncSelectionState);
 })();
 
-// Intent injection — intercept the FINAL publish step instead of the
-// tab capture step. popup.js publishes via chrome.runtime.sendMessage
-// {action:"proxy-fetch", url:"/api/docs", options:{body:JSON{markdown,...}}}.
-// When __captureIntent is set, prepend the user's prompt to the
-// markdown field of that body before forwarding to the background.
+// Page-type sniffer — capture the pageType field the content script
+// now returns alongside the markdown. We store it on window so the
+// runtime.sendMessage wrapper below can use it to route structured
+// pages (recipe / movie / paper / product) through AI auto-extract
+// even when the user didn't type an instruction.
+(function () {
+  if (!chrome || !chrome.tabs || !chrome.tabs.sendMessage) return;
+  const origTabSend = chrome.tabs.sendMessage;
+  chrome.tabs.sendMessage = function patchedTabSend(tabId, msg, ...rest) {
+    const cb = typeof rest[rest.length - 1] === "function" ? rest.pop() : null;
+    function intercept(response) {
+      try {
+        if (response && response.pageType) {
+          window.__lastPageType = response.pageType;
+          window.__lastMetadata = response.metadata || null;
+        }
+      } catch { /* noop */ }
+      if (cb) cb(response);
+    }
+    if (cb) return origTabSend.call(this, tabId, msg, ...rest, intercept);
+    // Promise form (no callback)
+    const p = origTabSend.call(this, tabId, msg, ...rest);
+    if (p && typeof p.then === "function") {
+      return p.then((response) => { intercept(response); return response; });
+    }
+    return p;
+  };
+})();
+
+// Publish-step interceptor. popup.js publishes via runtime.sendMessage
+// {action:"proxy-fetch", url:"/api/docs", body:JSON{markdown,...}}.
+// We re-route to /api/docs/transform in two cases:
+//   1. User typed an intent in the textarea → AI runs with that intent.
+//   2. No intent but the page is a structured type (recipe / movie /
+//      paper / product) → AI runs with a server-side template prompt.
+// Plain articles / discussions / generic pages stay on /api/docs (no AI).
+const STRUCTURED_TYPES = new Set(["recipe", "movie", "paper", "product"]);
 (function () {
   if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
   const origSend = chrome.runtime.sendMessage;
@@ -324,25 +394,30 @@
     try {
       const msg = args[0];
       const intent = window.__captureIntent;
-      // When intent is queued AND popup.js is about to POST to /api/docs,
-      // re-route to /api/docs/transform with the user's intent. The
-      // server runs the markdown through Claude with the intent as the
-      // instruction and saves the transformed output as the new doc.
+      const pageType = window.__lastPageType;
+      const autoEligible = !intent && pageType && STRUCTURED_TYPES.has(pageType);
       if (
-        intent && msg && msg.action === "proxy-fetch" &&
+        (intent || autoEligible) && msg && msg.action === "proxy-fetch" &&
         typeof msg.url === "string" && /\/api\/docs(?:[?#].*)?$/.test(msg.url) &&
         msg.options && typeof msg.options.body === "string"
       ) {
         const body = JSON.parse(msg.options.body);
         if (body && body.markdown) {
           msg.url = msg.url.replace(/\/api\/docs(?:[?#].*)?$/, "/api/docs/transform");
-          msg.options.body = JSON.stringify({
+          const next = {
             markdown: body.markdown,
-            intent,
             userId: body.userId,
-            source: body.source || "chrome-intent",
-          });
+            source: body.source || (intent ? "chrome-intent" : "chrome-auto"),
+          };
+          if (intent) {
+            next.intent = intent;
+          } else {
+            next.auto = true;
+            next.pageType = pageType;
+          }
+          msg.options.body = JSON.stringify(next);
           window.__captureIntent = null;
+          window.__lastPageType = null; // one-shot
           const ta = document.getElementById("ask-input");
           if (ta) ta.value = "";
         }

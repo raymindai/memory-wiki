@@ -23,32 +23,138 @@
     return location.hostname.replace(/^www\./, "");
   }
 
-  function buildMarkdownFromArticle(article) {
-    const title = (article.title || document.title || "Untitled").trim();
-    const byline = (article.byline || "").trim();
-    const site = (article.siteName || siteName()).trim();
-    const url = location.href;
+  // ─── Metadata extraction ────────────────────────────────────────────
+  // Parses JSON-LD, Open Graph, Twitter Card, and standard meta tags.
+  // Returns a flat object the caller turns into both visible front matter
+  // and page-type detection input.
+  function getMeta(name, attr = "name") {
+    const el = document.querySelector(`meta[${attr}="${name}" i]`);
+    return el ? (el.getAttribute("content") || "").trim() : "";
+  }
+  function parseJsonLd() {
+    const blocks = document.querySelectorAll('script[type="application/ld+json"]');
+    const out = [];
+    for (const b of blocks) {
+      try {
+        const data = JSON.parse(b.textContent || "{}");
+        const items = Array.isArray(data) ? data : (data["@graph"] || [data]);
+        for (const it of items) if (it && typeof it === "object") out.push(it);
+      } catch { /* malformed JSON-LD on the page — skip */ }
+    }
+    return out;
+  }
+  function pickLdAuthor(ld) {
+    const a = ld.author || ld.creator;
+    if (!a) return "";
+    if (typeof a === "string") return a;
+    if (Array.isArray(a)) return a.map((x) => (x && x.name) || x).filter(Boolean).join(", ");
+    return a.name || "";
+  }
+  function extractMetadata() {
+    const ldList = parseJsonLd();
+    // Pick the most "article-y" JSON-LD block
+    const primaryLd = ldList.find((x) => {
+      const t = x["@type"];
+      const types = Array.isArray(t) ? t : [t];
+      return types.some((tt) => /article|recipe|movie|product|book|videoobject|newsarticle|scholarlyarticle|webpage/i.test(String(tt)));
+    }) || ldList[0] || {};
 
+    const ldTypeRaw = primaryLd["@type"];
+    const ldTypes = (Array.isArray(ldTypeRaw) ? ldTypeRaw : [ldTypeRaw]).filter(Boolean).map(String);
+
+    return {
+      title:
+        getMeta("og:title", "property") ||
+        getMeta("twitter:title") ||
+        primaryLd.headline || primaryLd.name ||
+        (document.title || "").trim(),
+      description:
+        getMeta("og:description", "property") ||
+        getMeta("twitter:description") ||
+        getMeta("description") ||
+        primaryLd.description || "",
+      author:
+        pickLdAuthor(primaryLd) ||
+        getMeta("author") ||
+        getMeta("article:author", "property") ||
+        getMeta("twitter:creator") || "",
+      published:
+        getMeta("article:published_time", "property") ||
+        getMeta("article:published", "property") ||
+        primaryLd.datePublished || primaryLd.dateCreated ||
+        getMeta("date") || "",
+      site:
+        getMeta("og:site_name", "property") ||
+        (primaryLd.publisher && primaryLd.publisher.name) ||
+        siteName(),
+      image:
+        getMeta("og:image", "property") ||
+        getMeta("twitter:image") ||
+        (primaryLd.image && (primaryLd.image.url || primaryLd.image[0] || primaryLd.image)) || "",
+      tags:
+        (getMeta("keywords") || getMeta("article:tag", "property") ||
+         (Array.isArray(primaryLd.keywords) ? primaryLd.keywords.join(", ") : primaryLd.keywords) || "")
+          .split(/[,;]+/).map((s) => s.trim()).filter(Boolean).slice(0, 8),
+      ogType: getMeta("og:type", "property"),
+      ldTypes,
+      url: location.href,
+    };
+  }
+
+  function detectPageType(meta) {
+    const t = (meta.ldTypes || []).join(" ").toLowerCase() + " " + (meta.ogType || "").toLowerCase();
+    const host = (location.hostname || "").toLowerCase();
+    const path = (location.pathname || "").toLowerCase();
+    if (/recipe/.test(t)) return "recipe";
+    if (/movie|video\.movie/.test(t)) return "movie";
+    if (/product/.test(t)) return "product";
+    if (/scholarlyarticle/.test(t) || /arxiv\.org|doi\.org|biorxiv|nature\.com|sciencedirect|aclanthology/.test(host)) return "paper";
+    if (/newsarticle/.test(t) || /^article$/.test(meta.ogType || "")) return "article";
+    if (/discussion|forum|qaanswer|socialmedia/.test(t) || /reddit\.com|news\.ycombinator|stackoverflow\.com|stackexchange\.com/.test(host)) return "discussion";
+    if (/github\.com|gitlab\.com|sourcegraph\.com/.test(host) && /\/(blob|tree|releases|issues)\//.test(path) === false) return "code";
+    if (/youtube\.com|vimeo\.com/.test(host)) return "video";
+    return "generic";
+  }
+
+  function buildHeaderBlock(meta) {
+    // Visible attribution block at the top of the captured doc. Reads
+    // as a quoted line in any markdown renderer and is plain enough
+    // that downstream AI calls can use the metadata as instruction
+    // context.
+    const bits = [];
+    if (meta.author)    bits.push("by **" + meta.author + "**");
+    if (meta.published) bits.push(formatDate(meta.published));
+    if (meta.site)      bits.push(meta.site);
+    const line = bits.join(" · ");
+    let header = "";
+    if (line) header += "> " + line + "\n";
+    if (meta.description) header += "> \n> _" + meta.description.replace(/\s+/g, " ").trim() + "_\n";
+    if (header) header += "\n";
+    return header;
+  }
+  function formatDate(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()];
+    return `${m} ${d.getDate()}, ${d.getFullYear()}`;
+  }
+
+  function buildMarkdownFromArticle(article, meta) {
+    const title = (meta.title || article.title || document.title || "Untitled").trim();
+    const url = location.href;
     const html = article.content || "";
     const container = document.createElement("div");
     container.innerHTML = html;
     const body = window.MwMarkdown.htmlToMarkdown(container) || "";
 
-    // Front matter is plain markdown, not YAML — keep it readable as a doc.
     let md = "# " + title + "\n\n";
-    const metaBits = [];
-    if (byline) metaBits.push(byline);
-    if (site) metaBits.push(site);
-    if (metaBits.length) md += "_" + metaBits.join(" / ") + "_\n\n";
+    md += buildHeaderBlock(meta);
     md += "Source: " + url + "\n\n---\n\n";
     md += body;
     return { markdown: md.trim(), title };
   }
 
-  function fallbackPageMarkdown() {
-    // Marketing pages, SPAs, sparse landing pages — Readability either
-    // returns null or a tiny fragment because text density is low.
-    // Walk the live document, strip the obvious chrome, convert.
+  function fallbackPageMarkdown(meta) {
     const root = (
       document.querySelector("main, article, [role='main']") ||
       document.body
@@ -60,13 +166,17 @@
       ".cookie, .cookie-banner, .cookies"
     ).forEach((el) => el.remove());
     const body = window.MwMarkdown.htmlToMarkdown(root) || "";
-    const title = (document.title || "Untitled").trim();
-    const md = "# " + title + "\n\n" +
-      "Source: " + location.href + "\n\n---\n\n" + body;
+    const title = (meta.title || document.title || "Untitled").trim();
+    let md = "# " + title + "\n\n";
+    md += buildHeaderBlock(meta);
+    md += "Source: " + location.href + "\n\n---\n\n" + body;
     return { markdown: md.trim(), title };
   }
 
   function capturePage() {
+    const meta = extractMetadata();
+    const pageType = detectPageType(meta);
+
     let article = null;
     try {
       const docClone = document.cloneNode(true);
@@ -80,30 +190,29 @@
       console.warn("[memory.wiki] Readability failed, falling back:", err);
     }
 
-    // Build BOTH candidates and pick whichever covers more of the
-    // page's actual headings. Readability can lock onto a sidebar
-    // or tab-button block on marketing / landing pages and return
-    // a structurally-fine-looking shard that's missing the hero
-    // H1 + every H2 section. The fallback body walker often has
-    // them all.
     const pageHeadings = collectPageHeadings();
     const readabilityOut =
       article && article.content && article.content.length > 200
-        ? buildMarkdownFromArticle(article)
+        ? buildMarkdownFromArticle(article, meta)
         : null;
-    const fallbackOut = fallbackPageMarkdown();
+    const fallbackOut = fallbackPageMarkdown(meta);
 
+    let chosen;
     if (readabilityOut && fallbackOut) {
       const rCov = headingCoverage(readabilityOut.markdown, pageHeadings);
       const fCov = headingCoverage(fallbackOut.markdown, pageHeadings);
-      // Prefer Readability when it covers >=80% of what fallback
-      // covers (it's usually cleaner) — otherwise take fallback.
-      if (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400) {
-        return readabilityOut;
-      }
-      return fallbackOut;
+      chosen = (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400)
+        ? readabilityOut
+        : fallbackOut;
+    } else {
+      chosen = readabilityOut || fallbackOut;
     }
-    return readabilityOut || fallbackOut;
+    return {
+      markdown: chosen.markdown,
+      title: chosen.title,
+      pageType,                   // popup.js uses this to decide AI auto-apply
+      metadata: meta,             // surfaced for downstream consumers
+    };
   }
 
   function collectPageHeadings() {
