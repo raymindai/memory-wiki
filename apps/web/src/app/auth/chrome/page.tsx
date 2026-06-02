@@ -42,6 +42,13 @@ export default function ChromeAuthPage() {
         return;
       }
       setStatus("success");
+      // Auto-close the tab after a short beat so the user lands back on
+      // the page they were trying to capture. window.close() only works
+      // on tabs opened by script — the chrome extension opens via
+      // chrome.tabs.create which marks the tab as "opened by an
+      // extension" in most builds, so close generally works. Fall back
+      // to instructions in the success copy otherwise.
+      setTimeout(() => { try { window.close(); } catch { /* noop */ } }, 1400);
     })();
   }, [supabase]);
 

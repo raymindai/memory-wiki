@@ -49,7 +49,6 @@
     html { background: transparent; width: 396px; overflow: hidden; }
     body {
       width: 384px;
-      min-height: 520px;
       margin: 6px;
       background: var(--bg);
       color: var(--body);
@@ -70,9 +69,10 @@
         0 4px 12px rgba(0,0,0,0.35);
     }
 
-    /* Footer pins to the bottom of the popup; promo-strip sits BELOW the
-       footer (only visible when signed in). */
-    .foot { margin-top: auto; }
+    /* Body sizes to content; chrome popup auto-sizes to body.
+       Foot has a small margin-top so it sits just below the ask
+       textarea, not glued to it. */
+    .foot { margin-top: 16px; }
     body.signed-out .promo-strip { display: none; }
 
     /* ─── Signed-out: capture controls dimmed, dark hover overlay ─── */
