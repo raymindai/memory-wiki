@@ -614,16 +614,19 @@
     // Claude DOM structure changes frequently. Try multiple selector strategies.
     // Each strategy returns {userEls, assistantEls} or null.
     const strategies = [
-      // Strategy 1: data-testid + font-claude (broad partial match for resilience)
+      // Strategy 1: data-testid + the exact response wrapper. The
+      // wildcard [class*='font-claude'] used to be here but matched
+      // every paragraph inside a response — Last N then sliced
+      // paragraphs instead of messages. Restrict to message wrappers.
       () => {
         const userEls = document.querySelectorAll("[data-testid='user-message'], [data-testid*='user-turn']");
-        const assistantEls = document.querySelectorAll("[class*='font-claude'], [data-testid*='assistant']");
+        const assistantEls = document.querySelectorAll(".font-claude-response, [data-testid*='assistant']");
         return userEls.length || assistantEls.length ? { userEls, assistantEls } : null;
       },
-      // Strategy 2: specific font classes (legacy + current)
+      // Strategy 2: explicit wrapper classes only (no wildcard).
       () => {
-        const userEls = document.querySelectorAll(".font-user-message, [class*='font-user']");
-        const assistantEls = document.querySelectorAll(".font-claude-message, .font-claude-response, [class*='font-claude']");
+        const userEls = document.querySelectorAll(".font-user-message");
+        const assistantEls = document.querySelectorAll(".font-claude-message, .font-claude-response");
         return userEls.length || assistantEls.length ? { userEls, assistantEls } : null;
       },
       // Strategy 3: data-test-render-count or testid-based turns
@@ -1158,7 +1161,11 @@
       case "chatgpt":
         return "[data-message-author-role='assistant']";
       case "claude":
-        return ".font-claude-response, [class*='font-claude'], [data-testid*='assistant']";
+        // Match only the response wrapper, not every styled descendant.
+        // The wildcard [class*='font-claude'] hit individual paragraphs
+        // / list items / pre blocks too, so a mini button appeared on
+        // every line.
+        return ".font-claude-response, [data-test-render-count][data-testid='message']";
       case "gemini":
         return "model-response, .model-response, [data-message-author='model']";
       default:
@@ -1243,7 +1250,8 @@
       // Symbol + glyph only — no "this" text. The mark is the
       // canonical sparkle inside a dark rounded square; the right
       // glyph swaps (+ → spinner → ✓ → ✕) based on state.
-      const MARK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden><rect x="0" y="0" width="24" height="24" rx="5" fill="#09090b"/><path d="M12 6.5v11M7.7 8.5l8.6 7M7.7 15.5l8.6-7" stroke="#fafafa" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      // Official memory.wiki brand blob (icon-inline-dark.svg).
+      const MARK_SVG = '<svg viewBox="-3 -3 45 48" fill="none" aria-hidden><rect x="-3" y="-3" width="45" height="48" rx="5" fill="#09090b"/><g fill="#fafafa"><path d="M36.19,21.04c-1.54,0-2.79,1.25-2.79,2.79s1.25,2.79,2.79,2.79,2.79-1.25,2.79-2.79-1.25-2.79-2.79-2.79Z"/><circle cx="20.11" cy="4.37" r="4.37"/><path d="M6.09,31.53c-1.36.53-1.74,2.06-1.19,3.18.54,1.08,1.79,1.54,2.98,1.09,1.22-.47,1.67-1.69,1.19-3-.39-1.05-1.67-1.78-2.97-1.27Z"/><path d="M31.93,18.82c2.47-2.05,2.41-5.6.47-7.8-1.92-2.16-5.43-2.47-7.7-.32-2.15,2.04-5.57,2.85-8.1.78-1.26-1.03-2.59-1.93-4.38-1.4-1.39.41-2.59,1.52-3.11,3.13-.43,1.31-1.93,1.77-3.24,1.79-2.08.03-3.88,1.36-4.81,2.83-1.2,1.89-1.36,4-.55,5.97,1.08,2.61,3.64,4.2,6.5,3.77,1.85-.28,3.83.15,4.96,1.89.79,1.21,1.1,2.94.65,4.25-.7,2.06-.72,4.22.66,5.94,1.58,1.99,4.03,2.8,6.51,2.11,2.19-.6,3.53-2.47,4.23-4.79.5-1.65,2.55-2.28,4.07-2.36,1.9-.09,3.25-1.65,3.74-3.1.68-1.98-.28-3.55-1.42-4.94-2.11-2.56-.75-5.9,1.51-7.77ZM25.08,26.71c-1.04.64-2.02-.84-3.78-1.5-.57,1.76.47,3.42-.46,4-.46.29-1.19.31-1.56.03-.95-.71.23-2.3-.43-4.05-1.92.7-3.05,2.62-4.08,1.16-.44-.62-.32-1.46.47-1.79.95-.39,1.67-.74,2.71-1.36l-2.86-1.7c-.48-.29-.52-.96-.32-1.38.26-.54.99-.86,1.52-.51l2.61,1.73c.55-1.54-.35-3.26.38-3.92.3-.27,1.04-.31,1.51-.12,1,.41.09,2.34.49,4.02l2.49-1.66c.52-.35,1.23-.14,1.57.33.38.52.34,1.29-.35,1.61-.94.44-1.71.86-2.68,1.55,1.38,1.14,3.27,1.24,3.37,2.34.04.42-.28,1.03-.61,1.23Z"/></g></svg>';
       const PLUS_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       const SPINNER_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.25"/><path d="M12 7a5 5 0 0 0-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
       const CHECK_SVG = '<svg viewBox="0 0 14 14" fill="none" aria-hidden><path d="M3 7.5l2.5 2.5L11 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
