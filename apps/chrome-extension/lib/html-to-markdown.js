@@ -41,10 +41,17 @@
       ".social-share, .share-buttons, .newsletter-signup, " +
       "[role='navigation'][aria-label*='breadcrumb' i]"
     ).forEach((el) => {
-      // Preserve when it contains real content: code, tables, headings,
-      // OR images (mockup screenshots / hero illustrations on landing
-      // pages often live inside aria-hidden / decorative wrappers).
-      if (el.querySelector && el.querySelector("pre, table, h1, h2, h3, img")) return;
+      // Preserve when it contains real content: code/tables/headings.
+      if (el.querySelector && el.querySelector("pre, table, h1, h2, h3")) return;
+      // If the wrapper has images, hoist them out before dropping the
+      // wrapper itself. This rescues hero illustrations / product
+      // screenshots from decorative aria-hidden / tabpanel mockups
+      // (which otherwise dump fake UI text — "Properties / category /
+      // author / Add to Obsidian" — into the markdown).
+      const imgs = el.querySelectorAll ? el.querySelectorAll("img") : [];
+      if (imgs.length && el.parentNode) {
+        for (const img of imgs) el.parentNode.insertBefore(img, el);
+      }
       el.remove();
     });
 
