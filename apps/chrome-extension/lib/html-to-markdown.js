@@ -41,7 +41,10 @@
       ".social-share, .share-buttons, .newsletter-signup, " +
       "[role='navigation'][aria-label*='breadcrumb' i]"
     ).forEach((el) => {
-      if (el.querySelector && el.querySelector("pre, table, h1, h2, h3")) return;
+      // Preserve when it contains real content: code, tables, headings,
+      // OR images (mockup screenshots / hero illustrations on landing
+      // pages often live inside aria-hidden / decorative wrappers).
+      if (el.querySelector && el.querySelector("pre, table, h1, h2, h3, img")) return;
       el.remove();
     });
 
@@ -106,16 +109,17 @@
       // Small square = icon. 80px threshold catches most UI marks but
       // keeps thumbnails / inline diagrams.
       if (w > 0 && h > 0 && w < 80 && h < 80) return true;
-      // Source-side hints (SVG icon sprites, lucide / phosphor / heroicons)
+      // Source-side hints: only flag when "icon" / "logo" / etc. is a
+      // whole path segment, not a substring of a real filename like
+      // "obsidian-web-clipper-icon.png" (that's a real hero image).
       const src = (img.getAttribute("src") || img.getAttribute("data-src") || "").toLowerCase();
-      if (/[/.](logo|icon|favicon|avatar|sprite|emoji)[s]?[/.]/.test(src)) return true;
+      if (/\/(logos?|icons?|favicons?|avatars?|sprites?|emojis?)\//.test(src)) return true;
       if (/lucide|phosphor|heroicon|feather|fontawesome/.test(src)) return true;
-      // Inside an obvious icon-only link (the wrapping <a> has no text content)
-      const parentLink = img.closest("a");
-      if (parentLink) {
-        const linkText = (parentLink.textContent || "").replace(/\s+/g, "").trim();
-        if (!linkText || linkText.length < 2) return true;
-      }
+      // Note: we deliberately do NOT flag "img inside link with no text"
+      // as UI — that pattern is common for hero logos, content image
+      // lightbox wrappers (Wikipedia, blogs), and product shots that
+      // happen to link out. The alt/class/size/src signals above are
+      // enough to catch true UI icons.
       return false;
     }
 
@@ -351,8 +355,10 @@
     text = text
       .replace(/^\s*[*_]{1,3}\s*$/gm, "")           // orphan ** _ *** etc.
       .replace(/\*\*\s*\*\*/g, "")                   // empty inline **  **
-      .replace(/\[\s*\]\([^)]*\)/g, "")              // empty-text links
-      .replace(/!\[\s*\]\(\s*\)/g, "")               // empty images
+      // Empty-text links — but NOT empty-alt images, which legitimately
+      // render `![](src)` for unlabeled photos. Negative lookbehind on `!`.
+      .replace(/(?<!!)\[\s*\]\([^)]*\)/g, "")
+      .replace(/!\[\s*\]\(\s*\)/g, "")               // images with empty src (drop)
       .replace(/^\s*-\s*$/gm, "")                    // empty bullets
       .replace(/^\s*-\s*\[\s*\]\(\s*\)\s*$/gm, "")  // bullets with empty link
       // Collapse `[<newline>text]` (or `[text<newline>]`) into a single
