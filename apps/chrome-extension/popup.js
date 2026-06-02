@@ -18,10 +18,21 @@ const rangeSelector = document.getElementById("range-selector");
 // elsewhere in this file land on invisible stub spans, so this
 // helper is the one that actually paints. Brand voice: lowercase
 // sentence fragments, no Title Case, no middle-dot.
-function paintContext(text, live) {
+function paintContext(text, live, emphasized) {
   const t = document.getElementById("context-text");
   const d = document.getElementById("context-dot");
-  if (t) t.textContent = text;
+  if (t) {
+    if (emphasized) {
+      // Conversational sentence with the detected term highlighted in
+      // ink. Browsers escape attribute-set text already; we only inject
+      // the emphasized fragment, which we control.
+      t.innerHTML = "you're on <em></em>";
+      const em = t.querySelector("em");
+      if (em) em.textContent = emphasized;
+    } else {
+      t.textContent = text;
+    }
+  }
   if (d) d.classList.toggle("live", !!live);
 }
 function paintCaptureBtn(title, sub, mode) {
@@ -199,7 +210,7 @@ async function detectPlatform() {
 
     // Check if on a GitHub .md file.
     if (url.includes("github.com") && /\/blob\/.*\.(md|markdown|mdx)$/i.test(url)) {
-      paintContext("github markdown", true);
+      paintContext(null, true, "a github markdown file");
       paintCaptureBtn("capture this readme", "use the open-in-memory.wiki button on the page", "github");
       btnCapture.disabled = true;
       setStatus("use the open-in-memory.wiki button on the page", "info");
@@ -207,7 +218,7 @@ async function detectPlatform() {
     }
 
     if (platform) {
-      paintContext("on " + PLATFORM_NAMES[platform], true);
+      paintContext(null, true, PLATFORM_NAMES[platform]);
       paintCaptureBtn("capture full conversation", "all messages as a markdown document", "ai");
       btnCapture.disabled = false;
       paintRangesVisible(true);
@@ -223,15 +234,15 @@ async function detectPlatform() {
 }
 
 function showOnMdfy() {
-  paintContext("on memory.wiki", false);
-  paintCaptureBtn("you're on memory.wiki", "create and edit documents in the app", "mdfy");
+  paintContext(null, false, "memory.wiki");
+  paintCaptureBtn("you're already here", "create and edit documents in the app", "mdfy");
   btnCapture.disabled = true;
   paintRangesVisible(false);
 }
 
 function showNotOnAiPage() {
   paintContext("any webpage", false);
-  paintCaptureBtn("capture this page", "clean markdown, shareable url", "page");
+  paintCaptureBtn("capture this page", "clean markdown, shareable URL", "page");
   btnCapture.disabled = false;
   paintRangesVisible(false);
 }
