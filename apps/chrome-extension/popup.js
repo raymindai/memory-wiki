@@ -482,6 +482,10 @@ function renderAccountChip({ userId, email }) {
   const info = document.getElementById("account-info");
   if (!chip || !avatar || !info) return;
 
+  // Update the "sign out / sign in" hint in the footer row, if the
+  // new account-row layout is present.
+  const actionLabel = document.getElementById("account-action-label");
+
   if (userId) {
     const initial = (email || "?").trim().charAt(0).toUpperCase() || "?";
     avatar.textContent = initial;
@@ -489,7 +493,8 @@ function renderAccountChip({ userId, email }) {
     avatar.classList.add("active");
     info.textContent = email || "signed in";
     chip.classList.remove("signin");
-    chip.title = (email || "signed in") + " · click to sign out";
+    chip.title = (email || "signed in") + " — click to sign out";
+    if (actionLabel) actionLabel.textContent = "sign out";
     chip.onclick = async (e) => {
       e.preventDefault();
       const prevText = info.textContent;
@@ -518,9 +523,10 @@ function renderAccountChip({ userId, email }) {
     avatar.textContent = "?";
     avatar.innerHTML = "?";
     avatar.classList.remove("active");
-    info.textContent = "sign in";
+    info.textContent = "sign in for permanent URLs";
     chip.classList.add("signin");
-    chip.title = "sign in for permanent URLs";
+    chip.title = "sign in to memory.wiki";
+    if (actionLabel) actionLabel.textContent = "sign in";
     chip.onclick = (e) => {
       e.preventDefault();
       chrome.tabs.create({ url: MDFY_URL });
