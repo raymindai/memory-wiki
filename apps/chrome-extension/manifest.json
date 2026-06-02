@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "memory.wiki: capture any page or AI chat as a markdown URL",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Clip any web page or AI conversation (ChatGPT, Claude, Gemini) to a clean markdown URL on memory.wiki. Edit, share, paste into the next AI.",
   "permissions": [
     "activeTab",
