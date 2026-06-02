@@ -228,9 +228,30 @@
     });
 
     // 6) Tables (after inline formatting so cells inherit **bold** / `code`).
+    //    Many sites — HN comments, old-school marketing pages, email
+    //    newsletters — use <table> purely for layout. Detect those
+    //    (no <th>, no <thead>, OR cells mostly empty) and unwrap each
+    //    cell as a separate block instead of producing pipe-table noise.
     clone.querySelectorAll("table").forEach((table) => {
-      const rows = table.querySelectorAll("tr");
-      if (rows.length === 0) return;
+      const rows = Array.from(table.querySelectorAll("tr"));
+      if (rows.length === 0) { table.remove(); return; }
+      const hasHeader = !!table.querySelector("thead, th");
+      const allCells = Array.from(table.querySelectorAll("td, th"));
+      const emptyCells = allCells.filter((c) => !(c.textContent || "").trim()).length;
+      const isLayout = !hasHeader || (allCells.length > 0 && emptyCells / allCells.length > 0.3);
+      if (isLayout) {
+        // Layout table → join cell texts as block-separated paragraphs.
+        // Keep only non-empty cells. Nested tables are recursed already.
+        const blocks = allCells
+          .map((c) => (c.textContent || "").replace(/\s+/g, " ").trim())
+          .filter((t) => t.length > 0);
+        // Dedup consecutive identical paragraphs (HN doubles content via
+        // hidden mobile + desktop copies).
+        const dedup = [];
+        for (const t of blocks) if (dedup[dedup.length - 1] !== t) dedup.push(t);
+        table.textContent = "\n" + dedup.join("\n\n") + "\n";
+        return;
+      }
       let md = "\n";
       rows.forEach((row, rowIndex) => {
         const cells = row.querySelectorAll("th, td");
