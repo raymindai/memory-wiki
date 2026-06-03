@@ -260,11 +260,29 @@
   // position:fixed so it doesn't fight a stacking context.
   (function attachImageHoverSave() {
     const MIN_SIDE = 100;
-    const BLOB_SVG = '<svg viewBox="-3 -3 45 48" fill="none" aria-hidden style="width:14px;height:14px;display:block"><g fill="#fafafa"><path d="M36.19,21.04c-1.54,0-2.79,1.25-2.79,2.79s1.25,2.79,2.79,2.79,2.79-1.25,2.79-2.79-1.25-2.79-2.79-2.79Z"/><circle cx="20.11" cy="4.37" r="4.37"/><path d="M6.09,31.53c-1.36.53-1.74,2.06-1.19,3.18.54,1.08,1.79,1.54,2.98,1.09,1.22-.47,1.67-1.69,1.19-3-.39-1.05-1.67-1.78-2.97-1.27Z"/><path d="M31.93,18.82c2.47-2.05,2.41-5.6.47-7.8-1.92-2.16-5.43-2.47-7.7-.32-2.15,2.04-5.57,2.85-8.1.78-1.26-1.03-2.59-1.93-4.38-1.4-1.39.41-2.59,1.52-3.11,3.13-.43,1.31-1.93,1.77-3.24,1.79-2.08.03-3.88,1.36-4.81,2.83-1.2,1.89-1.36,4-.55,5.97,1.08,2.61,3.64,4.2,6.5,3.77,1.85-.28,3.83.15,4.96,1.89.79,1.21,1.1,2.94.65,4.25-.7,2.06-.72,4.22.66,5.94,1.58,1.99,4.03,2.8,6.51,2.11,2.19-.6,3.53-2.47,4.23-4.79.5-1.65,2.55-2.28,4.07-2.36,1.9-.09,3.25-1.65,3.74-3.1.68-1.98-.28-3.55-1.42-4.94-2.11-2.56-.75-5.9,1.51-7.77ZM25.08,26.71c-1.04.64-2.02-.84-3.78-1.5-.57,1.76.47,3.42-.46,4-.46.29-1.19.31-1.56.03-.95-.71.23-2.3-.43-4.05-1.92.7-3.05,2.62-4.08,1.16-.44-.62-.32-1.46.47-1.79.95-.39,1.67-.74,2.71-1.36l-2.86-1.7c-.48-.29-.52-.96-.32-1.38.26-.54.99-.86,1.52-.51l2.61,1.73c.55-1.54-.35-3.26.38-3.92.3-.27,1.04-.31,1.51-.12,1,.41.09,2.34.49,4.02l2.49-1.66c.52-.35,1.23-.14,1.57.33.38.52.34,1.29-.35,1.61-.94.44-1.71.86-2.68,1.55,1.38,1.14,3.27,1.24,3.37,2.34.04.42-.28,1.03-.61,1.23Z"/></g></svg>';
-    const PLUS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="width:14px;height:14px;display:block;color:#fafafa"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
-    const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:block;color:#fafafa"><polyline points="20 6 9 17 4 12"/></svg>';
-    const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="width:14px;height:14px;display:block;color:#fafafa"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
-    const SPIN_SVG = '<span style="display:inline-block;width:14px;height:14px;border:1.6px solid rgba(250,250,250,0.25);border-top-color:#fafafa;border-radius:50%;animation:mw-spin 0.7s linear infinite"></span>';
+    // SVG icons are inlined into <img src="data:..."> so host pages
+    // can't restyle their internals (some sites have global
+    // `svg{fill:currentColor}` or `g[fill]{fill:...}` resets that
+    // were turning the blob mark invisible). xmlns is required for
+    // data: URLs.
+    function svgUrl(svg) {
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+    }
+    function makeIcon(svg, color, size) {
+      const fg = color || "#fafafa";
+      const px = (size || 14) + "px";
+      const recolored = svg.replace(/__FG__/g, fg);
+      const url = svgUrl(recolored);
+      return '<img src="' + url + '" alt="" style="width:' + px + '!important;height:' + px + '!important;display:block!important;border:none!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;margin:0!important;padding:0!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;filter:none!important;opacity:1!important;vertical-align:middle!important">';
+    }
+    // The mark SVG has its own dark rounded-rect background baked
+    // in, so it reads as a self-contained branded dot regardless of
+    // what the host page's CSS does to <svg> children.
+    const BLOB_RAW  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 -3 45 48" fill="none"><rect x="-3" y="-3" width="45" height="48" rx="5" fill="#09090b"/><g fill="__FG__"><path d="M36.19,21.04c-1.54,0-2.79,1.25-2.79,2.79s1.25,2.79,2.79,2.79,2.79-1.25,2.79-2.79-1.25-2.79-2.79-2.79Z"/><circle cx="20.11" cy="4.37" r="4.37"/><path d="M6.09,31.53c-1.36.53-1.74,2.06-1.19,3.18.54,1.08,1.79,1.54,2.98,1.09,1.22-.47,1.67-1.69,1.19-3-.39-1.05-1.67-1.78-2.97-1.27Z"/><path d="M31.93,18.82c2.47-2.05,2.41-5.6.47-7.8-1.92-2.16-5.43-2.47-7.7-.32-2.15,2.04-5.57,2.85-8.1.78-1.26-1.03-2.59-1.93-4.38-1.4-1.39.41-2.59,1.52-3.11,3.13-.43,1.31-1.93,1.77-3.24,1.79-2.08.03-3.88,1.36-4.81,2.83-1.2,1.89-1.36,4-.55,5.97,1.08,2.61,3.64,4.2,6.5,3.77,1.85-.28,3.83.15,4.96,1.89.79,1.21,1.1,2.94.65,4.25-.7,2.06-.72,4.22.66,5.94,1.58,1.99,4.03,2.8,6.51,2.11,2.19-.6,3.53-2.47,4.23-4.79.5-1.65,2.55-2.28,4.07-2.36,1.9-.09,3.25-1.65,3.74-3.1.68-1.98-.28-3.55-1.42-4.94-2.11-2.56-.75-5.9,1.51-7.77ZM25.08,26.71c-1.04.64-2.02-.84-3.78-1.5-.57,1.76.47,3.42-.46,4-.46.29-1.19.31-1.56.03-.95-.71.23-2.3-.43-4.05-1.92.7-3.05,2.62-4.08,1.16-.44-.62-.32-1.46.47-1.79.95-.39,1.67-.74,2.71-1.36l-2.86-1.7c-.48-.29-.52-.96-.32-1.38.26-.54.99-.86,1.52-.51l2.61,1.73c.55-1.54-.35-3.26.38-3.92.3-.27,1.04-.31,1.51-.12,1,.41.09,2.34.49,4.02l2.49-1.66c.52-.35,1.23-.14,1.57.33.38.52.34,1.29-.35,1.61-.94.44-1.71.86-2.68,1.55,1.38,1.14,3.27,1.24,3.37,2.34.04.42-.28,1.03-.61,1.23Z"/></g></svg>';
+    const PLUS_RAW  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="__FG__" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+    const CHECK_RAW = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="__FG__" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    const X_RAW     = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="__FG__" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    const SPIN_HTML = '<span style="display:inline-block!important;width:14px!important;height:14px!important;border:1.6px solid rgba(250,250,250,0.25)!important;border-top-color:#fafafa!important;border-radius:50%!important;animation:mw-spin 0.7s linear infinite!important;background:transparent!important;box-shadow:none!important;box-sizing:border-box!important;padding:0!important;margin:0!important"></span>';
 
     let btn = null;
     let mark = null;
@@ -285,44 +303,63 @@
       injectStyles();
       const el = document.createElement("div");
       el.setAttribute("aria-label", "Save image to memory.wiki library");
+      el.setAttribute("data-mw-save-img", "1");
+      // Geometry mirrors the per-message mw-mini-btn in content.js
+      // (Claude/ChatGPT save button): 14px radius, 4-8-4-4 padding,
+      // 20px mark + 14px glyph + 6px gap.
       el.style.cssText = [
-        "position:fixed",
-        "z-index:2147483647",
+        "position:fixed!important",
+        "z-index:2147483647!important",
         "display:none",
-        "align-items:center",
-        "justify-content:center",
-        "gap:8px",
-        "padding:6px 11px",
-        "border-radius:999px",
-        "background:#09090b",
-        "border:1px solid rgba(255,255,255,0.08)",
-        "box-shadow:0 2px 10px rgba(0,0,0,0.30), 0 0 0 1px rgba(0,0,0,0.30)",
-        "color:#fafafa",
-        "cursor:pointer",
-        "user-select:none",
-        "pointer-events:auto",
-        "font-family:-apple-system,BlinkMacSystemFont,sans-serif",
+        "align-items:center!important",
+        "justify-content:center!important",
+        "gap:6px!important",
+        "padding:4px 8px 4px 4px!important",
+        "border-radius:14px!important",
+        "background:#09090b!important",
+        "border:1px solid rgba(255,255,255,0.10)!important",
+        "box-shadow:0 2px 10px rgba(0,0,0,0.35)!important",
+        "color:#fafafa!important",
+        "cursor:pointer!important",
+        "user-select:none!important",
+        "pointer-events:auto!important",
+        "font-family:-apple-system,BlinkMacSystemFont,sans-serif!important",
+        "line-height:0!important",
         "opacity:0",
-        "transition:opacity 140ms, transform 140ms",
+        "transition:opacity 140ms, transform 140ms, border-color 140ms, background 140ms",
         "transform:translateY(2px)",
+        "box-sizing:border-box!important",
       ].join(";");
 
       mark = document.createElement("span");
-      mark.style.cssText = "display:inline-flex;align-items:center;justify-content:center";
-      mark.innerHTML = BLOB_SVG;
+      mark.setAttribute("data-mw-save-img", "1");
+      mark.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:20px!important;height:20px!important;flex-shrink:0!important;padding:0!important;margin:0!important;background:transparent!important;border:0!important";
+      mark.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 20);
       el.appendChild(mark);
 
       glyph = document.createElement("span");
-      glyph.style.cssText = "display:inline-flex;align-items:center;justify-content:center";
-      glyph.innerHTML = PLUS_SVG;
+      glyph.setAttribute("data-mw-save-img", "1");
+      glyph.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:14px!important;height:14px!important;flex-shrink:0!important;color:#a1a1aa!important;padding:0!important;margin:0!important;background:transparent!important;border:0!important";
+      glyph.innerHTML = makeIcon(PLUS_RAW, "#a1a1aa", 14);
       el.appendChild(glyph);
 
       el.addEventListener("mouseenter", () => {
         clearTimeout(hideTimer);
         el.style.transform = "translateY(0) scale(1.04)";
+        el.style.borderColor = "rgba(255,255,255,0.20)";
+        // Glyph brightens on hover to match mw-mini-btn
+        if (btn && btn.dataset.state === "idle" && glyph) {
+          glyph.style.color = "#fafafa";
+          glyph.innerHTML = makeIcon(PLUS_RAW, "#fafafa", 14);
+        }
       });
       el.addEventListener("mouseleave", () => {
         el.style.transform = "translateY(0) scale(1)";
+        el.style.borderColor = "rgba(255,255,255,0.10)";
+        if (btn && btn.dataset.state === "idle" && glyph) {
+          glyph.style.color = "#a1a1aa";
+          glyph.innerHTML = makeIcon(PLUS_RAW, "#a1a1aa", 14);
+        }
         scheduleHide(220);
       });
       el.addEventListener("mousedown", (e) => e.stopPropagation());
@@ -348,9 +385,13 @@
       if (!btn) return;
       btn.style.background = "#09090b";
       btn.style.color = "#fafafa";
-      btn.style.borderColor = "rgba(255,255,255,0.08)";
+      btn.style.borderColor = "rgba(255,255,255,0.10)";
       btn.title = "Save to memory.wiki library";
-      if (glyph) glyph.innerHTML = PLUS_SVG;
+      if (mark) mark.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 20);
+      if (glyph) {
+        glyph.style.color = "#a1a1aa";
+        glyph.innerHTML = makeIcon(PLUS_RAW, "#a1a1aa", 14);
+      }
     }
 
     function showFor(img) {
@@ -431,21 +472,21 @@
       const src = currentImg.currentSrc || currentImg.src;
       if (btn.dataset.state === "saving") return;
       btn.dataset.state = "saving";
-      if (glyph) glyph.innerHTML = SPIN_SVG;
+      if (glyph) glyph.innerHTML = SPIN_HTML;
       try {
         const resp = await chrome.runtime.sendMessage({ action: "save-image-to-library", src });
         if (resp && resp.ok) {
           btn.dataset.state = "saved";
-          btn.style.background = "#d1ff52";   // lime success
-          if (mark) mark.style.color = "#09090b";
-          if (glyph) glyph.innerHTML = CHECK_SVG.replace(/#fafafa/g, "#09090b");
-          mark.innerHTML = BLOB_SVG.replace(/#fafafa/g, "#09090b");
+          btn.style.borderColor = "rgba(255,255,255,0.50)";
+          btn.style.background = "rgba(255,255,255,0.10)";
+          if (glyph) glyph.innerHTML = makeIcon(CHECK_RAW, "#fb923c", 14);   // orange check, mirrors mw-mini-btn done state
           setTimeout(hideNow, 900);
         } else {
           btn.dataset.state = "error";
-          btn.style.background = "#ef4444";
+          btn.style.borderColor = "rgba(248,113,113,0.45)";
+          btn.style.background = "rgba(248,113,113,0.10)";
           btn.title = (resp && resp.error) || "Failed";
-          if (glyph) glyph.innerHTML = X_SVG;
+          if (glyph) glyph.innerHTML = makeIcon(X_RAW, "#f87171", 14);
           setTimeout(hideNow, 1500);
         }
       } catch (err) {
