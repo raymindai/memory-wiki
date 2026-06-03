@@ -1029,8 +1029,22 @@
           const { id, editToken } = parsed;
           const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
           window.open(MDFY_URL + "/?from=" + id + tokenParam, "memorywiki_" + Date.now());
-          // Brand spec section 14: canonical "for AI" paste sentence.
-          // Copy the short URL so the user can paste it into the next AI tool.
+          // Push to popup Recent so per-message captures show up
+          // in the extension's capture history alongside everything else.
+          try {
+            const docUrl = MDFY_URL + "/" + id;
+            chrome.storage.local.get(["mw-recent"], (data) => {
+              const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
+              const entry = {
+                url: docUrl,
+                title,
+                source: "chrome-" + platformName().toLowerCase(),
+                ts: Date.now(),
+              };
+              const next = [entry, ...prev.filter((p) => p.url !== docUrl)].slice(0, 10);
+              chrome.storage.local.set({ "mw-recent": next });
+            });
+          } catch { /* noop */ }
           try {
             await navigator.clipboard.writeText("Use " + MDFY_URL + "/" + id + " as my context.");
             showToast("published. URL copied for AI.", 3000);
