@@ -13378,50 +13378,97 @@ ${clone.innerHTML}
                         <p className="text-caption mt-1" style={{ color: "var(--text-faint)", opacity: 0.6 }}>Paste or drag images into your document</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {userImages.map((img, idx) => (
-                          <div key={img.name} className="group relative rounded-md overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
-                            {/* Top bar: name */}
-                            <div className="flex items-center px-1.5 py-1" style={{ background: "var(--toggle-bg)" }}>
-                              <span className="text-caption truncate" style={{ color: "var(--text-muted)" }}>{img.name}</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {userImages.map((img) => (
+                          <div
+                            key={img.name}
+                            className="group relative rounded-lg overflow-hidden flex flex-col"
+                            style={{
+                              border: "1px solid var(--border-dim)",
+                              background: "var(--background)",
+                            }}
+                            title={img.name}
+                          >
+                            {/* Fixed-aspect image area so every card has the
+                                same height and the action bar lines up across
+                                the grid. Object-contain preserves the image. */}
+                            <div
+                              className="cursor-pointer relative"
+                              style={{ aspectRatio: "1 / 1", background: "var(--background)" }}
+                              onClick={() => setLightboxImage(img.url)}
+                            >
+                              <img
+                                src={img.url}
+                                alt={img.name}
+                                loading="lazy"
+                                className="absolute inset-0 w-full h-full object-contain"
+                              />
+                              {/* Hover hint: action icons live on the bottom
+                                  bar below, but a click-to-preview affordance
+                                  fades in on hover so users know the image
+                                  itself is interactive. */}
+                              <div
+                                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                                style={{ background: "rgba(0,0,0,0.18)" }}
+                              >
+                                <span
+                                  className="text-caption font-mono"
+                                  style={{ color: "rgba(255,255,255,0.9)", letterSpacing: "0.08em", textTransform: "uppercase" }}
+                                >
+                                  preview
+                                </span>
+                              </div>
                             </div>
-                            {/* Image — click to preview in lightbox */}
-                            <div className="cursor-pointer" onClick={() => setLightboxImage(img.url)}>
-                              <img src={img.url} alt={img.name} loading="lazy" className="w-full object-contain" style={{ background: "var(--background)", maxHeight: 120 }} />
-                            </div>
-                            {/* Bottom bar: Insert + Copy */}
-                            <div className="flex items-center gap-1 px-1.5 py-1" style={{ background: "var(--toggle-bg)" }}>
-                              <button onClick={() => {
-                                const imgMd = `\n![${img.name.replace(/\.\w+$/, "")}](${img.url})\n`;
-                                const current = markdownRef.current;
-                                // Use saved cursor position (persists after focus leaves editor)
-                                const pos = lastCursorPosRef.current || cmGetCursorPos();
-                                const insertAt = pos > 0 && pos <= current.length ? pos : current.length;
-                                const newMd = current.slice(0, insertAt) + imgMd + current.slice(insertAt);
-                                setMarkdown(newMd);
-                                doRender(newMd);
-                                cmSetDocRef.current?.(newMd);
-                                showToast("Image inserted", "success");
-                              }} className="flex-1 py-1 rounded text-caption font-semibold transition-colors hover:opacity-90" style={{ background: "var(--text-primary)", color: "var(--background)" }} title="Insert image into document">
+                            {/* Action bar — fixed position at the bottom of
+                                every card thanks to the square image area. */}
+                            <div
+                              className="flex items-center gap-1 px-1.5 py-1.5 mt-auto"
+                              style={{ borderTop: "1px solid var(--border-dim)" }}
+                            >
+                              <button
+                                onClick={() => {
+                                  const imgMd = `\n![${img.name.replace(/\.\w+$/, "")}](${img.url})\n`;
+                                  const current = markdownRef.current;
+                                  const pos = lastCursorPosRef.current || cmGetCursorPos();
+                                  const insertAt = pos > 0 && pos <= current.length ? pos : current.length;
+                                  const newMd = current.slice(0, insertAt) + imgMd + current.slice(insertAt);
+                                  setMarkdown(newMd);
+                                  doRender(newMd);
+                                  cmSetDocRef.current?.(newMd);
+                                  showToast("Image inserted", "success");
+                                }}
+                                className="flex-1 py-1 rounded-md text-caption font-semibold transition-all hover:opacity-90"
+                                style={{ background: "var(--text-primary)", color: "var(--background)" }}
+                                title="Insert image into document"
+                              >
                                 Insert
                               </button>
-                              <button onClick={() => { navigator.clipboard.writeText(img.url); showToast("URL copied", "success"); }}
-                                className="px-2 py-1 rounded text-caption transition-colors hover:bg-[var(--menu-hover)]" style={{ color: "var(--text-muted)" }} title="Copy URL">
-                                <Copy width={12} height={12} />
+                              <button
+                                onClick={() => { navigator.clipboard.writeText(img.url); showToast("URL copied", "success"); }}
+                                className="flex items-center justify-center w-6 h-6 rounded-md transition-colors hover:bg-[var(--menu-hover)]"
+                                style={{ color: "var(--text-muted)" }}
+                                title="Copy URL"
+                              >
+                                <Copy width={11} height={11} />
                               </button>
-                              <button onClick={async () => {
-                                if (!confirm("Delete this image?")) return;
-                                try {
-                                  const res = await fetch(`/api/upload/delete?name=${encodeURIComponent(img.name)}`, { method: "DELETE", headers: authHeaders });
-                                  if (res.ok) {
-                                    setUserImages(prev => prev.filter(i => i.name !== img.name));
-                                    const data = await res.json();
-                                    if (data.quota) setImageQuota(data.quota);
-                                    showToast("Image deleted", "success");
-                                  } else { showToast("Failed to delete", "error"); }
-                                } catch { showToast("Failed to delete", "error"); }
-                              }} className="px-2 py-1 rounded text-caption transition-colors hover:bg-[rgba(239,68,68,0.1)]" style={{ color: "var(--text-faint)" }} title="Delete">
-                                <Trash2 width={12} height={12} />
+                              <button
+                                onClick={async () => {
+                                  if (!confirm("Delete this image?")) return;
+                                  try {
+                                    const res = await fetch(`/api/upload/delete?name=${encodeURIComponent(img.name)}`, { method: "DELETE", headers: authHeaders });
+                                    if (res.ok) {
+                                      setUserImages(prev => prev.filter(i => i.name !== img.name));
+                                      const data = await res.json();
+                                      if (data.quota) setImageQuota(data.quota);
+                                      showToast("Image deleted", "success");
+                                    } else { showToast("Failed to delete", "error"); }
+                                  } catch { showToast("Failed to delete", "error"); }
+                                }}
+                                className="flex items-center justify-center w-6 h-6 rounded-md transition-colors hover:bg-[rgba(239,68,68,0.1)] hover:text-[#ef4444]"
+                                style={{ color: "var(--text-faint)" }}
+                                title="Delete"
+                              >
+                                <Trash2 width={11} height={11} />
                               </button>
                             </div>
                           </div>

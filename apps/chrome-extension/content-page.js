@@ -248,101 +248,180 @@
 
   // ─── Per-image hover save button ────────────────────────────────────
   //
-  // On any page, hovering an <img> larger than ~100×100 shows a small
-  // floating "save to library" button anchored to the image. Click →
-  // background sends image bytes to memory.wiki/api/upload (Supabase
-  // storage). No doc created — just lands in the user's image library
-  // visible in the web editor's right sidebar.
+  // Hover any reasonably-sized <img> on the page → a branded pill
+  // appears at the image's top-right showing the memory.wiki blob
+  // mark + a "+" icon. Click → image is uploaded to the user's
+  // library (Supabase storage via /api/upload). No doc is created.
+  //
+  // Detection uses throttled mousemove + elementsFromPoint instead
+  // of mouseover/mouseout — this catches images sitting beneath
+  // overlay siblings (Pinterest, Twitter, Instagram, gallery sites)
+  // that would otherwise swallow mouse events. The button uses
+  // position:fixed so it doesn't fight a stacking context.
   (function attachImageHoverSave() {
     const MIN_SIDE = 100;
+    const BLOB_SVG = '<svg viewBox="-3 -3 45 48" fill="none" aria-hidden style="width:14px;height:14px;display:block"><g fill="#fafafa"><path d="M36.19,21.04c-1.54,0-2.79,1.25-2.79,2.79s1.25,2.79,2.79,2.79,2.79-1.25,2.79-2.79-1.25-2.79-2.79-2.79Z"/><circle cx="20.11" cy="4.37" r="4.37"/><path d="M6.09,31.53c-1.36.53-1.74,2.06-1.19,3.18.54,1.08,1.79,1.54,2.98,1.09,1.22-.47,1.67-1.69,1.19-3-.39-1.05-1.67-1.78-2.97-1.27Z"/><path d="M31.93,18.82c2.47-2.05,2.41-5.6.47-7.8-1.92-2.16-5.43-2.47-7.7-.32-2.15,2.04-5.57,2.85-8.1.78-1.26-1.03-2.59-1.93-4.38-1.4-1.39.41-2.59,1.52-3.11,3.13-.43,1.31-1.93,1.77-3.24,1.79-2.08.03-3.88,1.36-4.81,2.83-1.2,1.89-1.36,4-.55,5.97,1.08,2.61,3.64,4.2,6.5,3.77,1.85-.28,3.83.15,4.96,1.89.79,1.21,1.1,2.94.65,4.25-.7,2.06-.72,4.22.66,5.94,1.58,1.99,4.03,2.8,6.51,2.11,2.19-.6,3.53-2.47,4.23-4.79.5-1.65,2.55-2.28,4.07-2.36,1.9-.09,3.25-1.65,3.74-3.1.68-1.98-.28-3.55-1.42-4.94-2.11-2.56-.75-5.9,1.51-7.77ZM25.08,26.71c-1.04.64-2.02-.84-3.78-1.5-.57,1.76.47,3.42-.46,4-.46.29-1.19.31-1.56.03-.95-.71.23-2.3-.43-4.05-1.92.7-3.05,2.62-4.08,1.16-.44-.62-.32-1.46.47-1.79.95-.39,1.67-.74,2.71-1.36l-2.86-1.7c-.48-.29-.52-.96-.32-1.38.26-.54.99-.86,1.52-.51l2.61,1.73c.55-1.54-.35-3.26.38-3.92.3-.27,1.04-.31,1.51-.12,1,.41.09,2.34.49,4.02l2.49-1.66c.52-.35,1.23-.14,1.57.33.38.52.34,1.29-.35,1.61-.94.44-1.71.86-2.68,1.55,1.38,1.14,3.27,1.24,3.37,2.34.04.42-.28,1.03-.61,1.23Z"/></g></svg>';
+    const PLUS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="width:14px;height:14px;display:block;color:#fafafa"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+    const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:block;color:#fafafa"><polyline points="20 6 9 17 4 12"/></svg>';
+    const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="width:14px;height:14px;display:block;color:#fafafa"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    const SPIN_SVG = '<span style="display:inline-block;width:14px;height:14px;border:1.6px solid rgba(250,250,250,0.25);border-top-color:#fafafa;border-radius:50%;animation:mw-spin 0.7s linear infinite"></span>';
+
     let btn = null;
+    let mark = null;
+    let glyph = null;
     let currentImg = null;
     let hideTimer = null;
     let positionRaf = 0;
 
+    function injectStyles() {
+      if (document.getElementById("mw-save-img-style")) return;
+      const s = document.createElement("style");
+      s.id = "mw-save-img-style";
+      s.textContent = "@keyframes mw-spin{to{transform:rotate(360deg)}}";
+      document.head.appendChild(s);
+    }
+
     function makeButton() {
-      const el = document.createElement("button");
-      el.type = "button";
+      injectStyles();
+      const el = document.createElement("div");
       el.setAttribute("aria-label", "Save image to memory.wiki library");
       el.style.cssText = [
-        "position:absolute",
+        "position:fixed",
         "z-index:2147483647",
-        "width:28px",
-        "height:28px",
-        "border-radius:50%",
-        "border:1px solid rgba(0,0,0,0.08)",
-        "background:rgba(255,255,255,0.95)",
-        "backdrop-filter:blur(6px)",
-        "-webkit-backdrop-filter:blur(6px)",
-        "box-shadow:0 2px 10px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.10)",
-        "color:#111",
-        "cursor:pointer",
         "display:none",
         "align-items:center",
         "justify-content:center",
-        "padding:0",
-        "transition:transform 140ms, opacity 140ms",
-        "font-family:inherit",
+        "gap:8px",
+        "padding:6px 11px",
+        "border-radius:999px",
+        "background:#09090b",
+        "border:1px solid rgba(255,255,255,0.08)",
+        "box-shadow:0 2px 10px rgba(0,0,0,0.30), 0 0 0 1px rgba(0,0,0,0.30)",
+        "color:#fafafa",
+        "cursor:pointer",
+        "user-select:none",
+        "pointer-events:auto",
+        "font-family:-apple-system,BlinkMacSystemFont,sans-serif",
         "opacity:0",
+        "transition:opacity 140ms, transform 140ms",
+        "transform:translateY(2px)",
       ].join(";");
-      el.innerHTML =
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-        '<rect x="3" y="3" width="18" height="18" rx="2.5"/>' +
-        '<path d="M8 12h8"/><path d="M12 8v8"/></svg>';
-      el.addEventListener("mouseenter", () => { clearTimeout(hideTimer); el.style.transform = "scale(1.08)"; });
-      el.addEventListener("mouseleave", () => { el.style.transform = "scale(1)"; scheduleHide(200); });
+
+      mark = document.createElement("span");
+      mark.style.cssText = "display:inline-flex;align-items:center;justify-content:center";
+      mark.innerHTML = BLOB_SVG;
+      el.appendChild(mark);
+
+      glyph = document.createElement("span");
+      glyph.style.cssText = "display:inline-flex;align-items:center;justify-content:center";
+      glyph.innerHTML = PLUS_SVG;
+      el.appendChild(glyph);
+
+      el.addEventListener("mouseenter", () => {
+        clearTimeout(hideTimer);
+        el.style.transform = "translateY(0) scale(1.04)";
+      });
+      el.addEventListener("mouseleave", () => {
+        el.style.transform = "translateY(0) scale(1)";
+        scheduleHide(220);
+      });
+      el.addEventListener("mousedown", (e) => e.stopPropagation());
       el.addEventListener("click", onSaveClick);
       document.body.appendChild(el);
       return el;
     }
 
     function positionButton() {
-      if (!btn || !currentImg) return;
+      if (!btn || !currentImg || !currentImg.isConnected) { hideNow(); return; }
       const r = currentImg.getBoundingClientRect();
-      btn.style.top = (window.scrollY + r.top + 8) + "px";
-      btn.style.left = (window.scrollX + r.right - 8 - 28) + "px";
+      if (r.width < 1 || r.height < 1) { hideNow(); return; }
+      // Off-screen → hide
+      if (r.bottom < 0 || r.top > window.innerHeight || r.right < 0 || r.left > window.innerWidth) {
+        hideNow(); return;
+      }
+      // Position at top-right, inset 8px. Use viewport coords (fixed).
+      btn.style.top = (r.top + 8) + "px";
+      btn.style.left = (r.right - 8 - btn.offsetWidth) + "px";
+    }
+
+    function resetButtonChrome() {
+      if (!btn) return;
+      btn.style.background = "#09090b";
+      btn.style.color = "#fafafa";
+      btn.style.borderColor = "rgba(255,255,255,0.08)";
+      btn.title = "Save to memory.wiki library";
+      if (glyph) glyph.innerHTML = PLUS_SVG;
     }
 
     function showFor(img) {
       if (!btn) btn = makeButton();
       currentImg = img;
       btn.dataset.state = "idle";
+      resetButtonChrome();
       btn.style.display = "inline-flex";
       btn.style.opacity = "0";
-      positionButton();
-      requestAnimationFrame(() => { btn.style.opacity = "1"; });
+      btn.style.transform = "translateY(2px) scale(1)";
+      // Wait one frame so offsetWidth is correct, then position + fade in.
+      requestAnimationFrame(() => {
+        positionButton();
+        requestAnimationFrame(() => {
+          if (!btn) return;
+          btn.style.opacity = "1";
+          btn.style.transform = "translateY(0) scale(1)";
+        });
+      });
+    }
+    function hideNow() {
+      clearTimeout(hideTimer);
+      if (!btn) return;
+      btn.style.opacity = "0";
+      btn.style.transform = "translateY(2px) scale(1)";
+      setTimeout(() => { if (btn) btn.style.display = "none"; }, 140);
+      currentImg = null;
     }
     function scheduleHide(ms = 250) {
       clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
-        if (!btn) return;
-        btn.style.opacity = "0";
-        setTimeout(() => { if (btn) btn.style.display = "none"; }, 140);
-        currentImg = null;
-      }, ms);
+      hideTimer = setTimeout(hideNow, ms);
     }
 
     function isEligible(img) {
-      if (!(img instanceof HTMLImageElement)) return false;
-      if (!img.src && !img.currentSrc) return false;
-      const w = img.naturalWidth || img.clientWidth || 0;
-      const h = img.naturalHeight || img.clientHeight || 0;
-      if (w < MIN_SIDE || h < MIN_SIDE) return false;
-      const src = img.currentSrc || img.src;
-      if (!/^https?:|^data:/.test(src)) return false;
+      if (!img || !(img instanceof HTMLImageElement)) return false;
+      const src = img.currentSrc || img.src || "";
+      if (!/^https?:|^data:|^blob:/.test(src)) return false;
+      const r = img.getBoundingClientRect();
+      // Use rendered size, not naturalSize — Pinterest etc. shrink imgs.
+      if (r.width < MIN_SIDE || r.height < MIN_SIDE) return false;
+      // Skip the save button's own icon
+      if (img.closest && img.closest("[data-mw-save-img]")) return false;
       return true;
     }
 
-    function onMouseOver(e) {
-      const img = e.target;
-      if (!isEligible(img)) return;
-      if (img === currentImg) { clearTimeout(hideTimer); return; }
-      showFor(img);
+    // Find an eligible <img> at viewport (x,y), walking through any
+    // overlay siblings that elementFromPoint would normally surface
+    // first. Returns the topmost image whose bounding box contains
+    // the point.
+    function findImageAt(x, y) {
+      const stack = (document.elementsFromPoint && document.elementsFromPoint(x, y)) || [];
+      for (const el of stack) {
+        if (el instanceof HTMLImageElement && isEligible(el)) return el;
+      }
+      // Sometimes the cursor is on the button itself — keep current img.
+      if (btn && stack.includes(btn)) return currentImg;
+      return null;
     }
-    function onMouseOut(e) {
-      // Only hide when we leave the image AND not entering the button.
-      if (e.relatedTarget === btn) return;
-      scheduleHide(220);
+
+    let lastMouseMoveTs = 0;
+    function onMouseMove(e) {
+      const now = performance.now();
+      if (now - lastMouseMoveTs < 30) return;   // throttle to ~33 FPS
+      lastMouseMoveTs = now;
+      const img = findImageAt(e.clientX, e.clientY);
+      if (img) {
+        if (img !== currentImg) showFor(img);
+        else { clearTimeout(hideTimer); positionButton(); }
+      } else {
+        scheduleHide(220);
+      }
     }
 
     async function onSaveClick(e) {
@@ -350,41 +429,43 @@
       e.stopPropagation();
       if (!currentImg || !btn) return;
       const src = currentImg.currentSrc || currentImg.src;
-      const wasState = btn.dataset.state;
-      if (wasState === "saving") return;
+      if (btn.dataset.state === "saving") return;
       btn.dataset.state = "saving";
-      btn.innerHTML =
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9" opacity="0.25"/><path d="M21 12a9 9 0 0 0-9-9" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>';
+      if (glyph) glyph.innerHTML = SPIN_SVG;
       try {
         const resp = await chrome.runtime.sendMessage({ action: "save-image-to-library", src });
         if (resp && resp.ok) {
           btn.dataset.state = "saved";
-          btn.style.background = "rgba(209, 255, 82, 0.95)";   // lime success
-          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-          setTimeout(() => scheduleHide(0), 900);
+          btn.style.background = "#d1ff52";   // lime success
+          if (mark) mark.style.color = "#09090b";
+          if (glyph) glyph.innerHTML = CHECK_SVG.replace(/#fafafa/g, "#09090b");
+          mark.innerHTML = BLOB_SVG.replace(/#fafafa/g, "#09090b");
+          setTimeout(hideNow, 900);
         } else {
           btn.dataset.state = "error";
-          btn.style.background = "rgba(239,68,68,0.95)";
-          btn.style.color = "#fff";
+          btn.style.background = "#ef4444";
           btn.title = (resp && resp.error) || "Failed";
-          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>';
-          setTimeout(() => scheduleHide(0), 1500);
+          if (glyph) glyph.innerHTML = X_SVG;
+          setTimeout(hideNow, 1500);
         }
       } catch (err) {
         console.warn("[memory.wiki] save-image failed:", err);
-        scheduleHide(0);
+        hideNow();
       }
     }
 
-    document.addEventListener("mouseover", onMouseOver, true);
-    document.addEventListener("mouseout", onMouseOut, true);
-    // Reposition while scrolling so the button tracks the image.
+    document.addEventListener("mousemove", onMouseMove, true);
     document.addEventListener("scroll", () => {
       if (!btn || btn.style.display === "none") return;
       cancelAnimationFrame(positionRaf);
       positionRaf = requestAnimationFrame(positionButton);
     }, true);
-    window.addEventListener("resize", positionButton);
+    window.addEventListener("resize", () => {
+      if (!btn || btn.style.display === "none") return;
+      positionButton();
+    });
+    // Hide if the user starts typing — they're done browsing images
+    document.addEventListener("keydown", () => scheduleHide(0), true);
   })();
 
   chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
