@@ -366,6 +366,64 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
+  // Save an arbitrary cross-origin image directly into the user's
+  // memory.wiki image library (Supabase storage via /api/upload).
+  // Used by the per-image hover button injected by content-page.js.
+  if (request.action === "save-image-to-library") {
+    (async () => {
+      const src = request.src;
+      if (!src) { sendResponse({ ok: false, error: "Missing src" }); return; }
+      try {
+        // 1. Fetch the image (background has cross-origin permissions
+        //    via host_permissions:<all_urls>).
+        const imgRes = await fetch(src, { credentials: "omit", mode: "cors" })
+          .catch(() => fetch(src, { credentials: "omit" })); // fallback: no-cors mode
+        if (!imgRes || !imgRes.ok) {
+          sendResponse({ ok: false, error: `Image fetch failed (${imgRes ? imgRes.status : "no response"})` });
+          return;
+        }
+        const blob = await imgRes.blob();
+        if (!blob || blob.size === 0) {
+          sendResponse({ ok: false, error: "Empty image" });
+          return;
+        }
+
+        // 2. Resolve a filename + safe content-type for the upload.
+        let mime = blob.type || "image/jpeg";
+        if (!/^image\//.test(mime)) mime = "image/jpeg";
+        const extFromMime = mime.split("/")[1].split("+")[0] || "jpg";
+        let name = "clipped." + extFromMime;
+        try {
+          const urlPath = new URL(src).pathname;
+          const last = urlPath.split("/").pop() || "";
+          if (last && /\.[a-z0-9]{2,5}$/i.test(last)) name = last;
+        } catch { /* keep default */ }
+
+        // 3. Resolve user id from the shared *.memory.wiki cookie.
+        const userId = await readUserIdFromCookies();
+
+        // 4. Build multipart and POST to memory.wiki/api/upload.
+        const fd = new FormData();
+        fd.append("file", new File([blob], name, { type: mime }));
+
+        const uploadRes = await fetch("https://memory.wiki/api/upload", {
+          method: "POST",
+          headers: userId ? { "x-user-id": userId } : {},
+          body: fd,
+        });
+        const body = await uploadRes.json().catch(() => ({}));
+        if (!uploadRes.ok) {
+          sendResponse({ ok: false, error: body.error || `Upload failed (${uploadRes.status})` });
+          return;
+        }
+        sendResponse({ ok: true, url: body.url, size: body.size, format: body.format });
+      } catch (e) {
+        sendResponse({ ok: false, error: e.message || "save-image failed" });
+      }
+    })();
+    return true;
+  }
+
   if (request.action === "open-memorywiki") {
     const url = request.url || MDFY_URL;
     chrome.tabs.create({ url });

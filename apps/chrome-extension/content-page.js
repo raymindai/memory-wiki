@@ -246,6 +246,147 @@
     return { markdown: md.trim(), title };
   }
 
+  // ─── Per-image hover save button ────────────────────────────────────
+  //
+  // On any page, hovering an <img> larger than ~100×100 shows a small
+  // floating "save to library" button anchored to the image. Click →
+  // background sends image bytes to memory.wiki/api/upload (Supabase
+  // storage). No doc created — just lands in the user's image library
+  // visible in the web editor's right sidebar.
+  (function attachImageHoverSave() {
+    const MIN_SIDE = 100;
+    let btn = null;
+    let currentImg = null;
+    let hideTimer = null;
+    let positionRaf = 0;
+
+    function makeButton() {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.setAttribute("aria-label", "Save image to memory.wiki library");
+      el.style.cssText = [
+        "position:absolute",
+        "z-index:2147483647",
+        "width:28px",
+        "height:28px",
+        "border-radius:50%",
+        "border:1px solid rgba(0,0,0,0.08)",
+        "background:rgba(255,255,255,0.95)",
+        "backdrop-filter:blur(6px)",
+        "-webkit-backdrop-filter:blur(6px)",
+        "box-shadow:0 2px 10px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.10)",
+        "color:#111",
+        "cursor:pointer",
+        "display:none",
+        "align-items:center",
+        "justify-content:center",
+        "padding:0",
+        "transition:transform 140ms, opacity 140ms",
+        "font-family:inherit",
+        "opacity:0",
+      ].join(";");
+      el.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="3" y="3" width="18" height="18" rx="2.5"/>' +
+        '<path d="M8 12h8"/><path d="M12 8v8"/></svg>';
+      el.addEventListener("mouseenter", () => { clearTimeout(hideTimer); el.style.transform = "scale(1.08)"; });
+      el.addEventListener("mouseleave", () => { el.style.transform = "scale(1)"; scheduleHide(200); });
+      el.addEventListener("click", onSaveClick);
+      document.body.appendChild(el);
+      return el;
+    }
+
+    function positionButton() {
+      if (!btn || !currentImg) return;
+      const r = currentImg.getBoundingClientRect();
+      btn.style.top = (window.scrollY + r.top + 8) + "px";
+      btn.style.left = (window.scrollX + r.right - 8 - 28) + "px";
+    }
+
+    function showFor(img) {
+      if (!btn) btn = makeButton();
+      currentImg = img;
+      btn.dataset.state = "idle";
+      btn.style.display = "inline-flex";
+      btn.style.opacity = "0";
+      positionButton();
+      requestAnimationFrame(() => { btn.style.opacity = "1"; });
+    }
+    function scheduleHide(ms = 250) {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        if (!btn) return;
+        btn.style.opacity = "0";
+        setTimeout(() => { if (btn) btn.style.display = "none"; }, 140);
+        currentImg = null;
+      }, ms);
+    }
+
+    function isEligible(img) {
+      if (!(img instanceof HTMLImageElement)) return false;
+      if (!img.src && !img.currentSrc) return false;
+      const w = img.naturalWidth || img.clientWidth || 0;
+      const h = img.naturalHeight || img.clientHeight || 0;
+      if (w < MIN_SIDE || h < MIN_SIDE) return false;
+      const src = img.currentSrc || img.src;
+      if (!/^https?:|^data:/.test(src)) return false;
+      return true;
+    }
+
+    function onMouseOver(e) {
+      const img = e.target;
+      if (!isEligible(img)) return;
+      if (img === currentImg) { clearTimeout(hideTimer); return; }
+      showFor(img);
+    }
+    function onMouseOut(e) {
+      // Only hide when we leave the image AND not entering the button.
+      if (e.relatedTarget === btn) return;
+      scheduleHide(220);
+    }
+
+    async function onSaveClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!currentImg || !btn) return;
+      const src = currentImg.currentSrc || currentImg.src;
+      const wasState = btn.dataset.state;
+      if (wasState === "saving") return;
+      btn.dataset.state = "saving";
+      btn.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9" opacity="0.25"/><path d="M21 12a9 9 0 0 0-9-9" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>';
+      try {
+        const resp = await chrome.runtime.sendMessage({ action: "save-image-to-library", src });
+        if (resp && resp.ok) {
+          btn.dataset.state = "saved";
+          btn.style.background = "rgba(209, 255, 82, 0.95)";   // lime success
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+          setTimeout(() => scheduleHide(0), 900);
+        } else {
+          btn.dataset.state = "error";
+          btn.style.background = "rgba(239,68,68,0.95)";
+          btn.style.color = "#fff";
+          btn.title = (resp && resp.error) || "Failed";
+          btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>';
+          setTimeout(() => scheduleHide(0), 1500);
+        }
+      } catch (err) {
+        console.warn("[memory.wiki] save-image failed:", err);
+        scheduleHide(0);
+      }
+    }
+
+    document.addEventListener("mouseover", onMouseOver, true);
+    document.addEventListener("mouseout", onMouseOut, true);
+    // Reposition while scrolling so the button tracks the image.
+    document.addEventListener("scroll", () => {
+      if (!btn || btn.style.display === "none") return;
+      cancelAnimationFrame(positionRaf);
+      positionRaf = requestAnimationFrame(positionButton);
+    }, true);
+    window.addEventListener("resize", positionButton);
+  })();
+
   chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request && request.action === "capture-page") {
       const out = capturePage();
