@@ -424,33 +424,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  // Fetch the user's recent docs from memory.wiki. Used by popup's
-  // Recent list — replaces chrome.storage.local mw-recent so the list
-  // is identical across browsers / profiles / devices.
-  if (request.action === "fetch-recent-docs") {
-    (async () => {
-      try {
-        const userId = await readUserIdFromCookies();
-        if (!userId) { sendResponse({ ok: false, error: "Not signed in" }); return; }
-        const limit = request.limit || 10;
-        const source = request.source ? `&source=${encodeURIComponent(request.source)}` : "";
-        const res = await fetch(
-          `https://memory.wiki/api/docs/recent?limit=${limit}${source}`,
-          { headers: { "x-user-id": userId } }
-        );
-        const body = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          sendResponse({ ok: false, error: body.error || `HTTP ${res.status}` });
-          return;
-        }
-        sendResponse({ ok: true, items: body.items || [] });
-      } catch (e) {
-        sendResponse({ ok: false, error: e.message || "fetch-recent failed" });
-      }
-    })();
-    return true;
-  }
-
   if (request.action === "open-memorywiki") {
     const url = request.url || MDFY_URL;
     chrome.tabs.create({ url });

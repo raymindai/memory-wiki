@@ -593,49 +593,6 @@
   }
 })();
 
-// Server-backed Recent. When the user is signed in, the Recent list
-// is populated from /api/docs/recent (their actual chrome-sourced
-// captures across all browsers / profiles / devices) instead of the
-// chrome.storage.local fallback. popup.js's renderRecent already
-// renders from a list shape we control, so we replace the source by
-// asking background to fetch + then rebuilding the list DOM.
-(function () {
-  let lastSyncTs = 0;
-  async function syncRecentFromServer() {
-    const now = Date.now();
-    if (now - lastSyncTs < 2000) return; // throttle re-renders
-    lastSyncTs = now;
-    try {
-      const resp = await chrome.runtime.sendMessage({
-        action: "fetch-recent-docs",
-        limit: 10,
-        source: "chrome",
-      });
-      if (!resp || !resp.ok) return;          // signed out / network — keep local fallback
-      const items = resp.items || [];
-      // Mirror into mw-recent so any existing render path / persistence
-      // sees the same data. popup.js's renderRecent reads this key.
-      chrome.storage.local.set({ "mw-recent": items.slice(0, 7) }, () => {
-        try {
-          // popup.js exposes renderRecent on window; if not, fall back
-          // to triggering its existing storage observer by calling it
-          // here if exposed.
-          if (typeof window.renderRecent === "function") window.renderRecent();
-        } catch { /* noop */ }
-      });
-    } catch { /* noop */ }
-  }
-  // Run once on popup open + once shortly after a fresh capture lands.
-  syncRecentFromServer();
-  // Re-sync when a new Recent item is added by the local code path
-  // (so the just-captured doc replaces its local placeholder with the
-  // server-canonical row, with title etc.).
-  const list = document.getElementById("recent-list");
-  if (list) {
-    new MutationObserver(() => { setTimeout(syncRecentFromServer, 1200); }).observe(list, { childList: true });
-  }
-})();
-
 // Recent — clear-all button
 (function () {
   const btn = document.getElementById("recent-clear");

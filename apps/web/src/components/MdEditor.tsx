@@ -1557,6 +1557,31 @@ export default function MdEditor() {
       try { localStorage.setItem("mw-recent-tabs", JSON.stringify(recentTabIds)); } catch { /* quota */ }
     }
   }, [recentTabIds]);
+
+  // Server-fetched recent docs — supplements localStorage recentTabIds
+  // with docs the user created from other surfaces (chrome extension,
+  // VS Code, desktop, etc.) so the Start screen shows EVERYTHING they
+  // recently made, not just what they opened in this browser.
+  type ServerRecentDoc = { id: string; title: string; source: string; ts: number };
+  const [serverRecentDocs, setServerRecentDocs] = useState<ServerRecentDoc[]>([]);
+  const fetchServerRecent = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await fetch("/api/docs/recent?limit=15", { headers: authHeaders });
+      if (!res.ok) return;
+      const data = await res.json();
+      setServerRecentDocs(Array.isArray(data.items) ? data.items : []);
+    } catch { /* noop */ }
+  }, [isAuthenticated, authHeaders]);
+  useEffect(() => { void fetchServerRecent(); }, [fetchServerRecent]);
+  // Refresh on window focus — picks up docs created in other tabs /
+  // chrome ext / desktop without a hard reload.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onFocus = () => { void fetchServerRecent(); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [fetchServerRecent]);
   // Always reflect the active tab at the top of Recent — including on initial
   // mount, history-driven navigation, or any non-click switch. Idempotent: skips
   // when activeTabId is already first. Hub tabs are excluded: the Hub button
@@ -11509,16 +11534,37 @@ ${clone.innerHTML}
                 {(() => {
                   type HomeRecentEntry =
                     | { kind: "tab"; id: string; tab: Tab }
-                    | { kind: "ghost-bundle"; id: string; bundleId: string };
+                    | { kind: "ghost-bundle"; id: string; bundleId: string }
+                    | { kind: "server-doc"; id: string; cloudId: string; title: string; source: string; ts: number };
                   const entries: HomeRecentEntry[] = [];
+                  // Local-first: tabs the user has actually opened in this
+                  // browser bubble to the top of Recent.
                   for (const id of recentTabIds) {
-                    if (entries.length >= 5) break;
+                    if (entries.length >= 7) break;
                     const tab = tabs.find(t => t.id === id && !t.deleted && !t.readonly && t.ownerEmail !== EXAMPLE_OWNER);
                     if (tab) { entries.push({ kind: "tab", id, tab }); continue; }
                     const m = /^bundle-(.+)-\d+$/.exec(id);
                     if (m && bundles.some(b => b.id === m[1])) {
                       entries.push({ kind: "ghost-bundle", id, bundleId: m[1] });
                     }
+                  }
+                  // Server-fetched docs: anything the user created from
+                  // chrome / vscode / desktop / mobile that isn't already
+                  // represented by a local tab. De-dup by cloudId.
+                  const localCloudIds = new Set(
+                    tabs.filter(t => t.cloudId).map(t => t.cloudId as string)
+                  );
+                  for (const doc of serverRecentDocs) {
+                    if (entries.length >= 7) break;
+                    if (localCloudIds.has(doc.id)) continue;
+                    entries.push({
+                      kind: "server-doc",
+                      id: `server-${doc.id}`,
+                      cloudId: doc.id,
+                      title: doc.title,
+                      source: doc.source,
+                      ts: doc.ts,
+                    });
                   }
                   if (entries.length === 0) return null;
                   const openGhost = (bundleId: string) => {
@@ -11565,6 +11611,39 @@ ${clone.innerHTML}
                         }}
                       >
                         {entries.map((entry, i) => {
+                          if (entry.kind === "server-doc") {
+                            // Doc created on another surface (chrome ext /
+                            // vscode / desktop / mobile) — not yet in the
+                            // local tabs list. Click opens it into a new
+                            // tab anchored by cloudId.
+                            const openServer = () => {
+                              setShowOnboarding(false);
+                              try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+                              const existing = tabs.find(t => t.cloudId === entry.cloudId && !t.deleted);
+                              if (existing) { switchTab(existing.id); return; }
+                              const newId = `tab-${tabIdCounter++}`;
+                              const newTab: Tab = { id: newId, title: entry.title || "Untitled", markdown: "", cloudId: entry.cloudId, permission: "mine" };
+                              flushSync(() => { setTabs(prev => [...prev, newTab]); });
+                              switchTab(newId);
+                            };
+                            const tsIso = entry.ts ? new Date(entry.ts).toISOString() : null;
+                            return (
+                              <button key={entry.id} onClick={openServer}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-body text-left cursor-pointer"
+                                style={{ color: "var(--text-secondary)", background: "var(--surface)", transition: "all 0.12s", borderTop: i > 0 ? "1px solid var(--border-dim)" : "none" }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--menu-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--surface)"; e.currentTarget.style.color = "var(--text-secondary)"; }}>
+                                <FileIcon width={14} height={14} style={{ color: "var(--text-faint)", flexShrink: 0 }} />
+                                <span className="flex-1 truncate">{entry.title || "Untitled"}</span>
+                                {entry.source && (
+                                  <span className="shrink-0 text-caption font-mono" style={{ color: "var(--text-faint)", opacity: 0.7 }}>{entry.source.replace(/^chrome-?/, "chrome ")}</span>
+                                )}
+                                {tsIso && (
+                                  <span className="shrink-0 text-caption tabular-nums" style={{ color: "var(--text-faint)" }}>{relativeTime(tsIso)}</span>
+                                )}
+                              </button>
+                            );
+                          }
                           if (entry.kind === "ghost-bundle") {
                             const bundle = bundles.find(b => b.id === entry.bundleId)!;
                             return (
