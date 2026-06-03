@@ -66,10 +66,10 @@
       .mw-social-btn .mw-mark img{width:20px!important;height:20px!important;display:block!important;border:0!important;margin:0!important;padding:0!important;background:transparent!important;max-width:none!important;border-radius:0!important;filter:none!important;opacity:1!important}
       .mw-social-btn .mw-glyph{display:inline-flex!important;width:14px!important;height:14px!important;flex-shrink:0!important;color:#a1a1aa!important;align-items:center!important;justify-content:center!important}
       .mw-social-btn:hover .mw-glyph{color:#fafafa!important}
-      .mw-social-btn.mw-saving .mw-glyph,.mw-social-btn.mw-done .mw-glyph{color:#fb923c!important}
+      .mw-social-btn.mw-saving .mw-glyph,.mw-social-btn.mw-done .mw-glyph{color:#fafafa!important}
       .mw-social-btn.mw-error .mw-glyph{color:#f87171!important}
       .mw-social-btn .mw-glyph svg{width:14px!important;height:14px!important;display:block!important}
-      .mw-social-btn .mw-spin{display:inline-block!important;width:12px!important;height:12px!important;border:1.6px solid rgba(251,146,60,0.25)!important;border-top-color:#fb923c!important;border-radius:50%!important;animation:mw-social-spin .8s linear infinite!important;box-sizing:border-box!important}
+      .mw-social-btn .mw-spin{display:inline-block!important;width:12px!important;height:12px!important;border:1.6px solid rgba(250,250,250,0.25)!important;border-top-color:#fafafa!important;border-radius:50%!important;animation:mw-social-spin .8s linear infinite!important;box-sizing:border-box!important}
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
       html.mw-social-threads .mw-social-btn{right:48px!important}

@@ -745,7 +745,7 @@
           btn.dataset.state = "saved";
           btn.style.borderColor = "rgba(255,255,255,0.50)";
           btn.style.background = "rgba(255,255,255,0.10)";
-          if (glyph) glyph.innerHTML = makeIcon(CHECK_RAW, "#fb923c", 14);
+          if (glyph) glyph.innerHTML = makeIcon(CHECK_RAW, "#fafafa", 14);
           showSavedToast(resp.url || src);
           // Push to popup Recent so saved images show up alongside
           // doc captures. URL points at the uploaded image so a click
