@@ -79,10 +79,12 @@
     body.signed-out .cta-group,
     body.signed-out .cta-secondary-wrap,
     body.signed-out .ask-head,
-    body.signed-out .ask-input-wrap,
-    body.signed-out .recent-wrap {
+    body.signed-out .ask-input-wrap {
       display: none !important;
     }
+    /* Recent stays visible across sign-in/out — it's the user's
+       local capture history (chrome.storage.local), not server data,
+       so hiding it on logout made it look like a reset. */
 
     /* Page context — small eyebrow with live dot showing detected
        platform (ChatGPT, Claude, Gemini, etc.). Populated by

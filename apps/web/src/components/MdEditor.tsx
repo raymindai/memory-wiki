@@ -11424,7 +11424,18 @@ ${clone.innerHTML}
                       )}
                     </div>
                     {startSections.starred && (
-                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+                      <div
+                        className="rounded-xl"
+                        style={{
+                          border: "1px solid var(--border-dim)",
+                          // Cap visible height to ~7 rows. Beyond that
+                          // the section scrolls internally so the page
+                          // doesn't keep growing with a long pin list.
+                          maxHeight: 308,
+                          overflowY: "auto",
+                          overflowX: "hidden",
+                        }}
+                      >
                         {pins.map((p, i) => {
                           let title = "Untitled";
                           let onOpen: (() => void) | null = null;
@@ -11544,7 +11555,15 @@ ${clone.innerHTML}
                         )}
                       </div>
                       {startSections.recent && (
-                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+                      <div
+                        className="rounded-xl"
+                        style={{
+                          border: "1px solid var(--border-dim)",
+                          maxHeight: 308,
+                          overflowY: "auto",
+                          overflowX: "hidden",
+                        }}
+                      >
                         {entries.map((entry, i) => {
                           if (entry.kind === "ghost-bundle") {
                             const bundle = bundles.find(b => b.id === entry.bundleId)!;
