@@ -44,7 +44,11 @@
     const s = document.createElement("style");
     s.id = "mw-social-style";
     s.textContent = `
-      .mw-social-btn{position:absolute!important;top:8px!important;right:8px!important;z-index:9999!important;
+      /* Position: top-right minus 44px so we clear the platform's own
+         '...' (more) menu button, which sits at the post's top-right
+         on both X and Threads. With right:8 the save pill was
+         overlapping their menu and stealing the click. */
+      .mw-social-btn{position:absolute!important;top:6px!important;right:44px!important;z-index:9999!important;
         display:inline-flex!important;align-items:center!important;gap:6px!important;
         padding:4px 8px 4px 4px!important;border-radius:14px!important;
         background:#09090b!important;border:1px solid rgba(255,255,255,0.10)!important;
