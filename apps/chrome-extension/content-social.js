@@ -282,12 +282,15 @@
       },
     },
     linkedin: {
-      // Class-agnostic: ANY element with data-urn containing
-      // 'activity:' — covers every LinkedIn post wrapper variant
-      // (feed-shared-update-v2, update-components-update, sponsored,
-      // article reshares) without depending on class names that
-      // change between LinkedIn versions.
-      selector: '[data-urn*="activity:"]:not([data-mw-social-attached])',
+      // LinkedIn feed posts ship under several variants depending on
+      // surface (main feed, profile, search, sponsored). The wrappers
+      // we've seen in the wild:
+      //   <div class="feed-shared-update-v2 ...">                  legacy + still common
+      //   <div data-id="urn:li:activity:...">                       new shell
+      //   <div data-urn="urn:li:activity:...">                      occasional outer wrapper
+      //   <div data-urn="urn:li:aggregatedShare:...">               aggregated shares
+      // Union them so a post is matched once and exactly once.
+      selector: 'div.feed-shared-update-v2:not([data-mw-social-attached]), div[data-id^="urn:li:activity"]:not([data-mw-social-attached]), div[data-urn^="urn:li:activity"]:not([data-mw-social-attached]), div[data-urn^="urn:li:aggregatedShare"]:not([data-mw-social-attached])',
       extract(el) {
         // Body: LinkedIn renders the post text inside an
         // .update-components-text or .feed-shared-update-v2__commentary
@@ -319,12 +322,17 @@
         // Timestamp: <time> if present, else the visible sub-description text.
         const timeEl = el.querySelector("time");
         const ts = timeEl ? (timeEl.getAttribute("datetime") || timeEl.textContent || "").trim() : "";
-        // Permalink: built from data-urn.
-        const urn = el.getAttribute("data-urn") || el.querySelector("[data-urn]")?.getAttribute("data-urn") || "";
+        // Permalink: prefer the post's own data-id / data-urn, fall
+        // back to any descendant carrying one.
+        const urn = el.getAttribute("data-id")
+          || el.getAttribute("data-urn")
+          || el.querySelector('[data-id^="urn:li:activity"]')?.getAttribute("data-id")
+          || el.querySelector('[data-urn^="urn:li:activity"]')?.getAttribute("data-urn")
+          || "";
         let url = location.href;
-        if (urn) {
-          const activityId = urn.replace(/^urn:li:activity:/, "");
-          if (activityId) url = `https://www.linkedin.com/feed/update/urn:li:activity:${activityId}/`;
+        const activityMatch = urn.match(/urn:li:activity:(\d+)/);
+        if (activityMatch) {
+          url = `https://www.linkedin.com/feed/update/urn:li:activity:${activityMatch[1]}/`;
         }
         // Images: post media + linked previews. Skip avatar + reaction icons.
         const images = Array.from(el.querySelectorAll(
@@ -522,13 +530,18 @@
   // to see what content-social.js is finding. Logs the count of
   // matched posts + attached buttons.
   window.__mwSocialDebug = function () {
-    const all = document.querySelectorAll('[data-urn*="activity:"], div.feed-shared-update-v2, article.feed-shared-update-v2');
+    const counts = {
+      dataUrnActivity: document.querySelectorAll('[data-urn*="activity:"]').length,
+      dataIdActivity: document.querySelectorAll('[data-id^="urn:li:activity"]').length,
+      feedSharedUpdate: document.querySelectorAll('div.feed-shared-update-v2').length,
+      aggregatedShare: document.querySelectorAll('[data-urn^="urn:li:aggregatedShare"]').length,
+    };
     const matched = document.querySelectorAll(adapter.selector);
     const attached = document.querySelectorAll(".mw-social-btn");
     const info = {
       platform,
       host: location.hostname,
-      anyDataUrnOrUpdate: all.length,
+      ...counts,
       matchedByCurrentSelector: matched.length,
       attachedButtons: attached.length,
       sampleHost: matched[0] ? (matched[0].tagName + "." + (matched[0].className || "").toString().slice(0, 80)) : "(none)",
@@ -550,6 +563,18 @@
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
     });
     obs.observe(document.body, { childList: true, subtree: true });
+
+    // Diagnostic re-count so we can see if posts ever match. Feed
+    // renders well after document_idle on LinkedIn, so a 0 on initial
+    // attach is meaningless. These three checks should print non-zero
+    // numbers as the user scrolls.
+    [3000, 8000, 15000].forEach((delay) => {
+      setTimeout(() => {
+        const matched = document.querySelectorAll(adapter.selector).length;
+        const attached = document.querySelectorAll(".mw-social-btn").length;
+        console.log(`[memory.wiki social] +${delay / 1000}s — matched`, matched, "attached", attached);
+      }, delay);
+    });
   }
 
   if (document.readyState === "loading") {
