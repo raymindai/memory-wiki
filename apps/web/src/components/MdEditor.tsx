@@ -7631,40 +7631,41 @@ ${clone.innerHTML}
           })
           )}
           </div>}{/* end view-modes group */}
-          {/* Image library — standalone icon to the right of Source.
-              Visible on every surface (Hub / Start / docs alike) so
-              users can hit the panel without having a doc open. */}
-          {isAuthenticated && (
-            <div className="relative group ml-1.5">
-              <button
-                onClick={() => {
-                  setShowImagePanel(prev => {
-                    if (!prev && !imagesLoading) {
-                      setImagesLoading(true);
-                      fetch("/api/upload/list", { headers: authHeaders })
-                        .then(r => r.ok ? r.json() : null)
-                        .then(data => { if (data) { setUserImages(data.images || []); setImageQuota(data.quota); } })
-                        .catch(() => {})
-                        .finally(() => setImagesLoading(false));
-                    }
-                    return !prev;
-                  });
-                  setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
-                }}
-                className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
-                style={{ background: showImagePanel ? "var(--border)" : "transparent", color: showImagePanel ? "var(--text-primary)" : "var(--text-faint)" }}
-                title="Image library"
-                aria-label="Image library"
-              >
-                <ImageIcon width={13} height={13} />
-              </button>
-              {!showImagePanel && (
-                <div className="absolute top-full right-0 mt-1 px-2 py-1 rounded text-caption whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-                  Image library
-                </div>
-              )}
-            </div>
+          {/* Image library — own pill group, same chrome as Start/Hub
+              + view-mode groups so it reads as a sibling tab. Visible
+              on every surface (Start / Hub / docs / galaxy collapses
+              all so skip there) so the panel is reachable without an
+              open doc. */}
+          {isAuthenticated && !showGalaxy && (
+            <Tooltip text="Image library" position="bottom">
+              <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+                <button
+                  onClick={() => {
+                    setShowImagePanel(prev => {
+                      if (!prev && !imagesLoading) {
+                        setImagesLoading(true);
+                        fetch("/api/upload/list", { headers: authHeaders })
+                          .then(r => r.ok ? r.json() : null)
+                          .then(data => { if (data) { setUserImages(data.images || []); setImageQuota(data.quota); } })
+                          .catch(() => {})
+                          .finally(() => setImagesLoading(false));
+                      }
+                      return !prev;
+                    });
+                    setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
+                  }}
+                  className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
+                  style={{
+                    background: showImagePanel ? "var(--border)" : "var(--toggle-bg)",
+                    color: showImagePanel ? "var(--text-primary)" : "var(--text-muted)",
+                  }}
+                  aria-pressed={showImagePanel}
+                  aria-label="Image library"
+                >
+                  <ImageIcon width={13} height={13} />
+                </button>
+              </div>
+            </Tooltip>
           )}
         </div>{/* end center cluster */}
 
@@ -13489,38 +13490,57 @@ ${clone.innerHTML}
                               className="flex items-center gap-1 px-1.5 py-1.5 mt-auto"
                               style={{ borderTop: "1px solid var(--border-dim)" }}
                             >
-                              <button
-                                onClick={() => {
-                                  const imgMd = `\n![${img.name.replace(/\.\w+$/, "")}](${img.url})\n`;
-                                  const current = markdownRef.current;
-                                  const pos = lastCursorPosRef.current || cmGetCursorPos();
-                                  const insertAt = pos > 0 && pos <= current.length ? pos : current.length;
-                                  const newMd = current.slice(0, insertAt) + imgMd + current.slice(insertAt);
-                                  setMarkdown(newMd);
-                                  doRender(newMd);
-                                  cmSetDocRef.current?.(newMd);
-                                  showToast("Image inserted", "success");
-                                }}
-                                className="flex-1 py-1 rounded-md text-caption font-medium transition-colors"
-                                style={{
-                                  background: "transparent",
-                                  color: "var(--text-secondary)",
-                                  border: "1px solid var(--border-dim)",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background = "var(--menu-hover)";
-                                  e.currentTarget.style.color = "var(--text-primary)";
-                                  e.currentTarget.style.borderColor = "var(--text-primary)";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = "transparent";
-                                  e.currentTarget.style.color = "var(--text-secondary)";
-                                  e.currentTarget.style.borderColor = "var(--border-dim)";
-                                }}
-                                title="Insert image into document"
-                              >
-                                Insert
-                              </button>
+                              {(() => {
+                                // Insert only makes sense when a doc
+                                // is the active surface. On Start /
+                                // Hub / Galaxy there's nothing to
+                                // insert INTO — show the button as
+                                // disabled with an explanatory title.
+                                const hasActiveDoc =
+                                  !showOnboarding && !showHub && !showGalaxy && !showSettings &&
+                                  activeTab?.kind !== "bundle" &&
+                                  !!tabs.find(t => t.id === activeTabId && !t.deleted);
+                                return (
+                                  <button
+                                    disabled={!hasActiveDoc}
+                                    onClick={() => {
+                                      if (!hasActiveDoc) return;
+                                      const imgMd = `\n![${img.name.replace(/\.\w+$/, "")}](${img.url})\n`;
+                                      const current = markdownRef.current;
+                                      const pos = lastCursorPosRef.current || cmGetCursorPos();
+                                      const insertAt = pos > 0 && pos <= current.length ? pos : current.length;
+                                      const newMd = current.slice(0, insertAt) + imgMd + current.slice(insertAt);
+                                      setMarkdown(newMd);
+                                      doRender(newMd);
+                                      cmSetDocRef.current?.(newMd);
+                                      showToast("Image inserted", "success");
+                                    }}
+                                    className="flex-1 py-1 rounded-md text-caption font-medium transition-colors"
+                                    style={{
+                                      background: "transparent",
+                                      color: hasActiveDoc ? "var(--text-secondary)" : "var(--text-faint)",
+                                      border: "1px solid var(--border-dim)",
+                                      opacity: hasActiveDoc ? 1 : 0.5,
+                                      cursor: hasActiveDoc ? "pointer" : "not-allowed",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (!hasActiveDoc) return;
+                                      e.currentTarget.style.background = "var(--menu-hover)";
+                                      e.currentTarget.style.color = "var(--text-primary)";
+                                      e.currentTarget.style.borderColor = "var(--text-primary)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (!hasActiveDoc) return;
+                                      e.currentTarget.style.background = "transparent";
+                                      e.currentTarget.style.color = "var(--text-secondary)";
+                                      e.currentTarget.style.borderColor = "var(--border-dim)";
+                                    }}
+                                    title={hasActiveDoc ? "Insert image into document" : "Open a document to insert"}
+                                  >
+                                    Insert
+                                  </button>
+                                );
+                              })()}
                               <button
                                 onClick={() => { navigator.clipboard.writeText(img.url); showToast("URL copied", "success"); }}
                                 className="flex items-center justify-center w-6 h-6 rounded-md transition-colors hover:bg-[var(--menu-hover)]"
