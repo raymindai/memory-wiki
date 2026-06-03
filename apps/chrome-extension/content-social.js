@@ -282,18 +282,12 @@
       },
     },
     linkedin: {
-      // Feed post container — LinkedIn ships multiple wrapper class
-      // variants across feed / permalink / sponsored views. Cover all
-      // of them so React re-renders or layout swaps don't drop the
-      // pill silently. data-urn anchored on urn:li:activity is the
-      // most stable identity selector.
-      selector: [
-        'div[data-urn^="urn:li:activity:"]:not([data-mw-social-attached])',
-        'div.feed-shared-update-v2:not([data-mw-social-attached])',
-        'article.feed-shared-update-v2:not([data-mw-social-attached])',
-        'div.update-components-update:not([data-mw-social-attached])',
-        'div.update-v2:not([data-mw-social-attached])',
-      ].join(", "),
+      // Class-agnostic: ANY element with data-urn containing
+      // 'activity:' — covers every LinkedIn post wrapper variant
+      // (feed-shared-update-v2, update-components-update, sponsored,
+      // article reshares) without depending on class names that
+      // change between LinkedIn versions.
+      selector: '[data-urn*="activity:"]:not([data-mw-social-attached])',
       extract(el) {
         // Body: LinkedIn renders the post text inside an
         // .update-components-text or .feed-shared-update-v2__commentary
@@ -514,11 +508,34 @@
     });
   }
 
+  // ─── Debug helper ──────────────────────────────────────────────
+  // Run `window.__mwSocialDebug()` in DevTools on x/threads/linkedin
+  // to see what content-social.js is finding. Logs the count of
+  // matched posts + attached buttons.
+  window.__mwSocialDebug = function () {
+    const all = document.querySelectorAll('[data-urn*="activity:"], div.feed-shared-update-v2, article.feed-shared-update-v2');
+    const matched = document.querySelectorAll(adapter.selector);
+    const attached = document.querySelectorAll(".mw-social-btn");
+    const info = {
+      platform,
+      host: location.hostname,
+      anyDataUrnOrUpdate: all.length,
+      matchedByCurrentSelector: matched.length,
+      attachedButtons: attached.length,
+      sampleHost: matched[0] ? (matched[0].tagName + "." + (matched[0].className || "").toString().slice(0, 80)) : "(none)",
+    };
+    console.table(info);
+    alert(JSON.stringify(info, null, 2));
+    return info;
+  };
+  console.log("[memory.wiki social] loaded on", location.hostname, "— platform:", isX ? "x" : isThreads ? "threads" : isLinkedIn ? "linkedin" : "(none)");
+
   function start() {
     injectStyles();
     if (isThreads) document.documentElement.classList.add("mw-social-threads");
     if (isLinkedIn) document.documentElement.classList.add("mw-social-linkedin");
     attachToVisiblePosts();
+    console.log("[memory.wiki social] initial attach: matched", document.querySelectorAll(adapter.selector).length, "buttons placed", document.querySelectorAll(".mw-social-btn").length);
     const obs = new MutationObserver(() => {
       if (start._t) return;
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
