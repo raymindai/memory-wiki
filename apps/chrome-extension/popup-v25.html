@@ -59,8 +59,9 @@
       -webkit-font-smoothing: antialiased;
       position: relative;
       isolation: isolate;
-      display: flex;
-      flex-direction: column;
+      /* Plain block layout — flex column on body was making Chrome
+         pop-up measure the viewport taller than the actual content
+         needed, leaving a big empty band at the bottom. */
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.
