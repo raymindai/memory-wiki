@@ -72,7 +72,7 @@
       .mw-social-btn .mw-spin{display:inline-block!important;width:12px!important;height:12px!important;border:1.6px solid rgba(251,146,60,0.25)!important;border-top-color:#fb923c!important;border-radius:50%!important;animation:mw-social-spin .8s linear infinite!important;box-sizing:border-box!important}
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
-      html.mw-social-threads .mw-social-btn{right:72px!important}
+      html.mw-social-threads .mw-social-btn{right:48px!important}
     `;
     document.head.appendChild(s);
   }
