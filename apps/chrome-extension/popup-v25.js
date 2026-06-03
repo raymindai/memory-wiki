@@ -347,47 +347,89 @@
     return prefs;
   }
 
-  function makeChip({ text, favorite, recent }) {
-    const el = document.createElement("button");
-    el.type = "button";
+  const STAR_SVG = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
+  const X_SVG    = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m4 4 8 8M12 4 4 12"/></svg>';
+
+  function makeChip({ text, favorite, isCurated }) {
+    const el = document.createElement("div");
     el.className = "intent-chip" + (favorite ? " is-favorite" : "");
     el.title = text;
     el.dataset.text = text;
 
-    if (favorite) {
-      const star = document.createElement("span");
-      star.className = "chip-favorite-icon";
-      star.innerHTML = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
-      el.appendChild(star);
-    }
-
+    // Text container (clipped, marquee on hover when overflowing)
+    const labelWrap = document.createElement("span");
+    labelWrap.className = "chip-label-wrap";
     const label = document.createElement("span");
-    label.textContent = text.length > 28 ? text.slice(0, 27) + "…" : text;
-    el.appendChild(label);
+    label.className = "chip-label";
+    label.textContent = text;
+    labelWrap.appendChild(label);
+    el.appendChild(labelWrap);
 
-    const tog = document.createElement("span");
-    tog.className = "chip-favorite-toggle";
-    tog.title = favorite ? "Unpin" : "Pin to favorites";
-    tog.innerHTML = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
-    tog.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    // Right-side actions: favorite + delete
+    const actions = document.createElement("span");
+    actions.className = "chip-actions";
+
+    const fav = document.createElement("span");
+    fav.className = "chip-btn fav";
+    fav.title = favorite ? "Unpin" : "Pin to favorites";
+    fav.innerHTML = STAR_SVG;
+    fav.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation();
       const prefs = await loadPrefs();
       toggleFavorite(prefs, text);
       savePrefs(prefs);
       render();
     });
-    el.appendChild(tog);
+    actions.appendChild(fav);
 
-    el.addEventListener("click", () => {
+    const del = document.createElement("span");
+    del.className = "chip-btn del";
+    del.title = isCurated ? "Hide this preset" : "Remove from history";
+    del.innerHTML = X_SVG;
+    del.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const prefs = await loadPrefs();
+      // Remove from recents/favorites
+      prefs.recents = prefs.recents.filter((r) => r.text !== text);
+      // If curated, also add to the dismissed set so it doesn't come back
+      if (isCurated) {
+        prefs.dismissed = prefs.dismissed || [];
+        if (!prefs.dismissed.includes(text)) prefs.dismissed.push(text);
+      }
+      savePrefs(prefs);
+      el.style.transition = "opacity 140ms, transform 140ms";
+      el.style.opacity = "0";
+      el.style.transform = "scale(0.85)";
+      setTimeout(render, 160);
+    });
+    actions.appendChild(del);
+    el.appendChild(actions);
+
+    // Click chip body → populate textarea
+    el.addEventListener("click", (e) => {
+      if (e.target.closest(".chip-btn")) return;   // ignore clicks on buttons
       const ta = document.getElementById("ask-input");
       if (!ta) return;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
       ta.focus();
-      // Move caret to end
       try { ta.setSelectionRange(text.length, text.length); } catch {}
     });
+
+    // Marquee on hover when text overflows the clipped wrap
+    function startMarquee() {
+      const overflow = label.scrollWidth - labelWrap.clientWidth;
+      if (overflow <= 4) return;
+      el.style.setProperty("--marquee-shift", `-${overflow + 6}px`);
+      el.classList.add("marqueeing");
+    }
+    function stopMarquee() {
+      el.classList.remove("marqueeing");
+      el.style.setProperty("--marquee-shift", `0px`);
+    }
+    el.addEventListener("mouseenter", () => setTimeout(startMarquee, 250));
+    el.addEventListener("mouseleave", stopMarquee);
+
     return el;
   }
 
@@ -407,21 +449,24 @@
     const prefs = await loadPrefs();
     wrap.innerHTML = "";
 
-    // Order: starred favorites first, then top 2 most-used (recents),
-    // then fill with curated defaults until we hit 8 chips total.
-    const favs = prefs.recents.filter((r) => r.favorite)
+    // Order: starred favorites → top 3 most-used recents → curated
+    // defaults to fill. Skip anything the user has dismissed.
+    const dismissed = new Set(prefs.dismissed || []);
+    const favs = prefs.recents
+      .filter((r) => r.favorite && !dismissed.has(r.text))
       .sort((a, b) => b.lastUsed - a.lastUsed);
-    const nonFav = prefs.recents.filter((r) => !r.favorite)
+    const nonFav = prefs.recents
+      .filter((r) => !r.favorite && !dismissed.has(r.text))
       .sort((a, b) => b.count - a.count || b.lastUsed - a.lastUsed);
-    const recentsTop = nonFav.slice(0, 2);
+    const recentsTop = nonFav.slice(0, 3);
     const usedTexts = new Set([...favs, ...recentsTop].map((r) => r.text));
-    const curatedToShow = CURATED.filter((t) => !usedTexts.has(t));
+    const curatedToShow = CURATED.filter((t) => !usedTexts.has(t) && !dismissed.has(t));
 
     const all = [
-      ...favs.map((r) => ({ text: r.text, favorite: true, recent: false })),
-      ...recentsTop.map((r) => ({ text: r.text, favorite: false, recent: true })),
-      ...curatedToShow.map((t) => ({ text: t, favorite: false, recent: false })),
-    ].slice(0, 8);
+      ...favs.map((r) => ({ text: r.text, favorite: true, isCurated: false })),
+      ...recentsTop.map((r) => ({ text: r.text, favorite: false, isCurated: false })),
+      ...curatedToShow.map((t) => ({ text: t, favorite: false, isCurated: true })),
+    ];
 
     for (const item of all) wrap.appendChild(makeChip(item));
     // Sync edge fade indicators after render.
@@ -434,6 +479,17 @@
     if (!wrap) return;
     wrap.addEventListener("scroll", syncScrollEdges, { passive: true });
     window.addEventListener("resize", syncScrollEdges);
+  })();
+
+  // Chevron scroll buttons — one chip-width per click.
+  (function attachChevrons() {
+    const wrap = document.getElementById("intent-chips");
+    const L = document.getElementById("chip-nav-left");
+    const R = document.getElementById("chip-nav-right");
+    if (!wrap || !L || !R) return;
+    const STEP = 170; // ≈ one chip width + gap
+    L.addEventListener("click", () => wrap.scrollBy({ left: -STEP, behavior: "smooth" }));
+    R.addEventListener("click", () => wrap.scrollBy({ left: STEP, behavior: "smooth" }));
   })();
 
   // Cycling placeholder

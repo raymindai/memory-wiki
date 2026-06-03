@@ -593,7 +593,7 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
       scroll-behavior: smooth;
-      padding-bottom: 2px; /* breathing for chip shadow */
+      padding-bottom: 2px;
     }
     .intent-chips::-webkit-scrollbar { display: none; }
     /* Edge fades — clearer visual signal that the row scrolls. */
@@ -602,7 +602,7 @@
       content: "";
       position: absolute;
       top: 8px; bottom: 2px;
-      width: 24px;
+      width: 28px;
       pointer-events: none;
       z-index: 2;
       opacity: 0;
@@ -619,7 +619,39 @@
     .intent-chips-rail.can-scroll-left::before { opacity: 1; }
     .intent-chips-rail.can-scroll-right::after { opacity: 1; }
 
+    /* Chevron scroll buttons — pinned to rail edges, only visible when
+       there's actually more to scroll. Sit on top of the edge fades. */
+    .chip-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px; height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      z-index: 3;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms, color 140ms, border-color 140ms;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+    .chip-nav:hover { color: var(--ink); border-color: var(--ink); }
+    .chip-nav.left { left: 16px; }
+    .chip-nav.right { right: 16px; }
+    .intent-chips-rail.can-scroll-left .chip-nav.left,
+    .intent-chips-rail.can-scroll-right .chip-nav.right {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .chip-nav svg { width: 11px; height: 11px; }
+
     .intent-chip {
+      position: relative;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -633,14 +665,12 @@
       cursor: pointer;
       color: var(--muted);
       background: var(--surface, rgba(255,255,255,0.025));
-      transition: color 140ms, background 140ms, border-color 140ms, transform 80ms, box-shadow 140ms;
+      transition: color 140ms, background 140ms, border-color 140ms, transform 80ms, box-shadow 140ms, width 200ms ease;
       user-select: none;
-      max-width: 240px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      width: 150px;            /* FIXED chip width */
       flex-shrink: 0;
       box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+      overflow: hidden;
     }
     [data-theme="light"] .intent-chip {
       background: rgba(0, 0, 0, 0.015);
@@ -655,30 +685,53 @@
       background: rgba(0, 0, 0, 0.045);
     }
     .intent-chip:active { transform: translateY(1px); box-shadow: none; }
-
-    .intent-chip .chip-favorite-icon {
-      width: 9px; height: 9px;
-      color: var(--micro-amber, #f59e0b);
-      flex-shrink: 0;
-    }
-    .intent-chip .chip-favorite-icon svg { width: 100%; height: 100%; display: block; fill: currentColor; }
     .intent-chip.is-favorite { color: var(--ink); }
 
-    .intent-chip .chip-favorite-toggle {
+    /* Text container — clips overflow, marquees on hover when long. */
+    .intent-chip .chip-label-wrap {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 10px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 10px), transparent 100%);
+    }
+    .intent-chip .chip-label {
+      display: inline-block;
+      white-space: nowrap;
+      transition: transform linear;
+    }
+    /* When JS detects overflow + hover, it sets --marquee-shift on
+       the chip and triggers the animation via .marqueeing class. */
+    .intent-chip.marqueeing .chip-label {
+      transform: translateX(var(--marquee-shift, 0));
+      transition: transform 4s linear;
+    }
+
+    /* Right-side action cluster: star + delete. Hidden until hover,
+       except favorited stars which stay amber. */
+    .intent-chip .chip-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      margin-left: 2px;
+    }
+    .intent-chip .chip-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 11px; height: 11px;
+      width: 12px; height: 12px;
       color: var(--faint);
       cursor: pointer;
-      margin-left: 1px;
       opacity: 0;
-      transition: opacity 100ms, color 120ms;
+      transition: opacity 120ms, color 120ms;
     }
-    .intent-chip:hover .chip-favorite-toggle { opacity: 0.7; }
-    .intent-chip .chip-favorite-toggle:hover { color: var(--micro-amber, #f59e0b); opacity: 1; }
-    .intent-chip.is-favorite .chip-favorite-toggle { opacity: 1; color: var(--micro-amber, #f59e0b); }
-    .intent-chip .chip-favorite-toggle svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+    .intent-chip:hover .chip-btn { opacity: 0.7; }
+    .intent-chip .chip-btn:hover { opacity: 1; }
+    .intent-chip .chip-btn.fav:hover { color: var(--micro-amber, #f59e0b); }
+    .intent-chip .chip-btn.del:hover { color: var(--micro-red, #ef4444); }
+    .intent-chip.is-favorite .chip-btn.fav { opacity: 1; color: var(--micro-amber, #f59e0b); }
+    .intent-chip .chip-btn svg { width: 100%; height: 100%; display: block; fill: currentColor; }
 
     /* ─── Result card: hidden. Capture state shows in the primary CTA
        text ("Capturing..."), and the new doc highlights in Recent. ─── */
@@ -764,17 +817,23 @@
       color: var(--faint);
     }
     .recent-clear {
-      width: 22px; height: 22px;
-      display: inline-flex; align-items: center; justify-content: center;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 8px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
       color: var(--faint);
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 6px;
       opacity: 0;
       transition: opacity 140ms, color 140ms, background 140ms;
+      border: none;
+      background: transparent;
     }
-    .recent-wrap:hover .recent-clear { opacity: 1; }
-    .recent-clear:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
-    .recent-clear svg { width: 13px; height: 13px; }
+    .recent-wrap:hover .recent-clear { opacity: 0.7; }
+    .recent-clear:hover { color: var(--micro-red, #ef4444); opacity: 1; background: rgba(239,68,68,0.06); }
+    .recent-clear svg { width: 11px; height: 11px; flex-shrink: 0; }
     .sec-head .count { color: var(--muted); }
     .sec-head .grow { flex: 1; height: 1px; background: var(--hair); }
 
@@ -1031,9 +1090,15 @@
     </button>
   </div>
   <div class="intent-chips-rail" id="intent-chips-rail">
+    <button class="chip-nav left" id="chip-nav-left" type="button" aria-label="Scroll prompts left">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="10 4 6 8 10 12"/></svg>
+    </button>
     <div class="intent-chips" id="intent-chips" aria-label="Prompt presets">
       <!-- populated by popup-v25.js -->
     </div>
+    <button class="chip-nav right" id="chip-nav-right" type="button" aria-label="Scroll prompts right">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 4 10 8 6 12"/></svg>
+    </button>
   </div>
 
   <div class="result" id="result">
@@ -1072,8 +1137,9 @@
   <div class="recent-wrap" id="recent-wrap">
     <div class="sec-head">
       <span>recent</span>
-      <button class="recent-clear" id="recent-clear" type="button" title="clear all">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      <button class="recent-clear" id="recent-clear" type="button" title="Clear all recent captures">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20 4 4"/><path d="M20 4 4 20"/></svg>
+        <span>clear all</span>
       </button>
     </div>
     <div class="recent-list" id="recent-list"></div>
