@@ -74,9 +74,17 @@
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
       html.mw-social-threads .mw-social-btn{right:48px!important}
-      /* LinkedIn renders a wide overflow-menu cluster (… + Save +
-         dismiss) at the post top-right. Nudge clear of all three. */
-      html.mw-social-linkedin .mw-social-btn{right:96px!important;top:12px!important}
+      /* LinkedIn: wide overflow-menu cluster (… + Save + dismiss) at
+         the post top-right. Nudge clear. ALSO force the pill always
+         visible (not hover-only) — LinkedIn's React stack re-renders
+         posts frequently, and a hover-revealed button often hasn't
+         rebuilt itself before the user moves the cursor. Persistent
+         opacity:1 lets the user see + click reliably. */
+      html.mw-social-linkedin .mw-social-btn{
+        right:96px!important;top:12px!important;
+        opacity:1!important;pointer-events:auto!important;
+        z-index:9999999!important;
+      }
     `;
     document.head.appendChild(s);
   }
@@ -274,10 +282,18 @@
       },
     },
     linkedin: {
-      // Feed post container — works on /feed/ and on standalone
-      // /posts/{slug} permalinks. data-urn is the stable identity;
-      // .feed-shared-update-v2 is the visual wrapper.
-      selector: 'div.feed-shared-update-v2:not([data-mw-social-attached]), div[data-urn^="urn:li:activity:"]:not([data-mw-social-attached])',
+      // Feed post container — LinkedIn ships multiple wrapper class
+      // variants across feed / permalink / sponsored views. Cover all
+      // of them so React re-renders or layout swaps don't drop the
+      // pill silently. data-urn anchored on urn:li:activity is the
+      // most stable identity selector.
+      selector: [
+        'div[data-urn^="urn:li:activity:"]:not([data-mw-social-attached])',
+        'div.feed-shared-update-v2:not([data-mw-social-attached])',
+        'article.feed-shared-update-v2:not([data-mw-social-attached])',
+        'div.update-components-update:not([data-mw-social-attached])',
+        'div.update-v2:not([data-mw-social-attached])',
+      ].join(", "),
       extract(el) {
         // Body: LinkedIn renders the post text inside an
         // .update-components-text or .feed-shared-update-v2__commentary
@@ -487,7 +503,11 @@
   function attachToVisiblePosts() {
     const nodes = document.querySelectorAll(adapter.selector);
     nodes.forEach((el) => {
-      if (el.dataset.mwSocialAttached) return;
+      // Re-check that the button still exists. React on LinkedIn /
+      // Threads often replaces the host's children on re-render and
+      // wipes our button out — without this guard the data flag
+      // sticks, but the button is gone for good.
+      if (el.dataset.mwSocialAttached && el.querySelector(".mw-social-btn")) return;
       el.dataset.mwSocialAttached = "1";
       el.classList.add("mw-social-host");
       el.appendChild(makeButton());
@@ -500,11 +520,14 @@
     if (isLinkedIn) document.documentElement.classList.add("mw-social-linkedin");
     attachToVisiblePosts();
     const obs = new MutationObserver(() => {
-      // Throttled — virtual scrolling fires many mutations per second.
       if (start._t) return;
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
     });
     obs.observe(document.body, { childList: true, subtree: true });
+    // Belt-and-braces: re-check every 1.5s. MutationObserver can miss
+    // mutations on heavy-virtualized pages (LinkedIn lazy-load, X
+    // Bordered Element re-mounts). Cheap idempotent re-attach.
+    setInterval(attachToVisiblePosts, 1500);
   }
 
   if (document.readyState === "loading") {
