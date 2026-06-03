@@ -128,10 +128,14 @@
        controls are hidden, the only visible action is the big CTA
        above which routes to /auth/chrome on click. */
 
-    /* Ambient blurred blob — soft brand presence behind everything */
+    /* Ambient blurred blob — soft brand presence behind everything.
+       position:fixed (not absolute) so the negative insets don't
+       extend documentElement.scrollHeight past actual body content —
+       that was inflating the popup viewport by 130+px and leaving
+       an empty band below the footer. */
     body::before {
       content: "";
-      position: absolute;
+      position: fixed;
       inset: -30% -25% 20% -25%;
       background: url("icons/icon128.png") no-repeat 30% 18% / 70%;
       filter: blur(50px);
@@ -141,7 +145,7 @@
     }
     body::after {
       content: "";
-      position: absolute;
+      position: fixed;
       inset: 40% -25% -30% 25%;
       background: radial-gradient(circle at 50% 50%, rgba(139,92,246,0.20), transparent 60%);
       filter: blur(36px);
