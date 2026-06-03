@@ -442,6 +442,15 @@
       const data = adapter.extract(host);
       if (!data) { setState(btn, "error"); setTimeout(() => setState(btn, "idle"), 1500); return; }
       const { markdown, title } = buildMarkdown(data);
+      // Guard: extension may have been reloaded, leaving stale
+      // content scripts on the page. chrome.runtime?.id is null
+      // once the original ext context is gone; calling sendMessage
+      // then logs ERR_FAILED in a loop on the LinkedIn console.
+      if (!chrome?.runtime?.id) {
+        setState(btn, "error");
+        setTimeout(() => setState(btn, "idle"), 1500);
+        return;
+      }
       const resp = await chrome.runtime.sendMessage({
         action: "proxy-fetch",
         url: "https://memory.wiki/api/docs",
@@ -541,10 +550,6 @@
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
     });
     obs.observe(document.body, { childList: true, subtree: true });
-    // Belt-and-braces: re-check every 1.5s. MutationObserver can miss
-    // mutations on heavy-virtualized pages (LinkedIn lazy-load, X
-    // Bordered Element re-mounts). Cheap idempotent re-attach.
-    setInterval(attachToVisiblePosts, 1500);
   }
 
   if (document.readyState === "loading") {

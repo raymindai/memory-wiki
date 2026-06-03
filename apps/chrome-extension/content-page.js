@@ -740,6 +740,7 @@
       btn.dataset.state = "saving";
       if (glyph) glyph.innerHTML = SPIN_HTML;
       try {
+        if (!chrome?.runtime?.id) { hideNow(); return; }
         const resp = await chrome.runtime.sendMessage({ action: "save-image-to-library", src });
         if (resp && resp.ok) {
           btn.dataset.state = "saved";
