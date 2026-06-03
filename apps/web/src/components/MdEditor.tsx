@@ -13437,8 +13437,22 @@ ${clone.innerHTML}
                                   cmSetDocRef.current?.(newMd);
                                   showToast("Image inserted", "success");
                                 }}
-                                className="flex-1 py-1 rounded-md text-caption font-semibold transition-all hover:opacity-90"
-                                style={{ background: "var(--text-primary)", color: "var(--background)" }}
+                                className="flex-1 py-1 rounded-md text-caption font-medium transition-colors"
+                                style={{
+                                  background: "transparent",
+                                  color: "var(--text-secondary)",
+                                  border: "1px solid var(--border-dim)",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = "var(--menu-hover)";
+                                  e.currentTarget.style.color = "var(--text-primary)";
+                                  e.currentTarget.style.borderColor = "var(--text-primary)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = "transparent";
+                                  e.currentTarget.style.color = "var(--text-secondary)";
+                                  e.currentTarget.style.borderColor = "var(--border-dim)";
+                                }}
                                 title="Insert image into document"
                               >
                                 Insert
