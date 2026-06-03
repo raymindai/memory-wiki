@@ -13410,7 +13410,7 @@ ${clone.innerHTML}
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="flex items-center gap-1.5">
                       <ImageIcon width={12} height={12} style={{ color: "var(--text-primary)" }} />
-                      <span className="text-caption font-semibold" style={{ color: "var(--text-primary)" }}>My Images</span>
+                      <span className="text-caption font-semibold" style={{ color: "var(--text-primary)" }}>Image library</span>
                       {userImages.length > 0 && <span className="text-caption px-1 rounded" style={{ background: "var(--border)", color: "var(--text-primary)" }}>{userImages.length}</span>}
                     </div>
                     <button onClick={() => setShowImagePanel(false)} className="flex items-center justify-center w-5 h-5 rounded transition-colors hover:bg-[var(--menu-hover)]" style={{ color: "var(--text-muted)" }} title="Close image panel">
@@ -13443,7 +13443,17 @@ ${clone.innerHTML}
                         <p className="text-caption mt-1" style={{ color: "var(--text-faint)", opacity: 0.6 }}>Paste or drag images into your document</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div
+                        className="grid gap-2"
+                        style={{
+                          // Auto-fit columns: thumbnails stay 130px wide,
+                          // count per row grows/shrinks as the panel
+                          // resizes. Last row can have trailing empty
+                          // cells when the column count doesn't divide
+                          // userImages.length evenly — intentional.
+                          gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                        }}
+                      >
                         {userImages.map((img) => (
                           <div
                             key={img.name}
