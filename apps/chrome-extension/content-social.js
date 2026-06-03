@@ -393,13 +393,21 @@
         try {
           const parsed = JSON.parse(resp.body || "{}");
           if (parsed.id) {
-            const docUrl = `https://memory.wiki/${parsed.id}`;
-            showSavedPostToast(docUrl);
-            // Push to popup Recent list (chrome.storage.local
-            // mw-recent) so the user sees the new doc in their
-            // capture history without needing the popup to be open.
+            // Editor URL: `?from={id}&token={editToken}` lands the
+            // owner directly inside the editor for that doc. Without
+            // the token + 'from' param they hit the public viewer
+            // even when signed in, which felt like a read-only
+            // landing for a doc they just created.
+            const tokenParam = parsed.editToken ? `&token=${encodeURIComponent(parsed.editToken)}` : "";
+            const editorUrl = `https://memory.wiki/?from=${parsed.id}${tokenParam}`;
+            const viewerUrl = `https://memory.wiki/${parsed.id}`;
+            showSavedPostToast(editorUrl);
             addToRecent({
-              url: docUrl,
+              // Use the viewer URL in Recent so clicking from the popup
+              // list works on any browser (token-less). The toast 'Open
+              // doc' button gets the editor URL because it's a one-shot
+              // 'open right now' affordance the user just earned.
+              url: viewerUrl,
               title: data.body.split("\n")[0].slice(0, 80) || `Post by ${data.handle || "unknown"}`,
               source: `chrome-${platform}`,
               ts: Date.now(),
