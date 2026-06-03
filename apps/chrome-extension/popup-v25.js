@@ -267,18 +267,48 @@
 
     if (clearTimer) clearTimeout(clearTimer);
     if (isError || /success|published|opened|copied/i.test(txt)) {
+      // Wait briefly so the user can see the error/success message,
+      // then wipe ALL transient state. On error this also unlocks the
+      // popup (removes `capturing` which dims controls) and clears the
+      // one-shot intent flag so the next capture isn't accidentally
+      // routed through /transform.
       clearTimer = setTimeout(() => {
         if (savedLabel != null) { titleEl.textContent = savedLabel; savedLabel = null; }
         const s = document.getElementById("ask-submit");
         if (savedSubLabel != null && s) { s.textContent = savedSubLabel; savedSubLabel = null; }
         statusEl.textContent = "";
         window.__intentCaptureActive = false;
+        if (isError) {
+          // Success path already runs markFresh() which wipes these,
+          // but error paths need their own cleanup or the popup stays
+          // dimmed until the 60s safety timeout.
+          document.body.classList.remove("capturing");
+          document.body.classList.remove("intent-active");
+          window.__captureIntent = null;
+          window.__lastPageType = null;
+        }
       }, 2200);
     }
   }
   new MutationObserver(applyStatus).observe(statusEl, {
     childList: true, characterData: true, subtree: true,
   });
+
+  // popup.js's showResult() paints the result card but doesn't touch
+  // #status — so on auth failure / "too large" / generic publish-error
+  // paths, the status mirror's cleanup never fires and `body.capturing`
+  // sticks for the full 60s safety timeout. Mirror result-card
+  // transitions into #status so the existing cleanup runs.
+  const resultEl = document.getElementById("result");
+  if (resultEl) {
+    new MutationObserver(() => {
+      if (!resultEl.classList.contains("visible")) return;
+      const isErr = resultEl.classList.contains("error");
+      const cur = (statusEl.textContent || "").trim();
+      const next = isErr ? "publish failed" : "published";
+      if (cur !== next) statusEl.textContent = next;
+    }).observe(resultEl, { attributes: true, attributeFilter: ["class"] });
+  }
 })();
 
 // When popup.js's renderRecent updates #recent-list, mark the FIRST

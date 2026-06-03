@@ -1314,12 +1314,28 @@
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "capture-conversation") {
       const lastN = request.lastN || 0;
-      preProcessArtifactIframes().then(() => {
-        let messages = extractConversation();
-        if (lastN > 0) messages = messages.slice(-(lastN * 2));
-        const markdown = formatConversation(messages);
-        sendResponse({ markdown, platform });
-      });
+      // `preProcessArtifactIframes().then(...)` without a `.catch()` is
+      // the same hang pattern that broke content-page.js: if the chain
+      // throws (e.g. iframe.replaceWith on a node React just detached,
+      // a stray extractConversation TypeError), sendResponse never
+      // fires and the popup sits on "Capturing…" forever. Always send
+      // a response, even an error stub.
+      preProcessArtifactIframes()
+        .then(() => {
+          try {
+            let messages = extractConversation();
+            if (lastN > 0) messages = messages.slice(-(lastN * 2));
+            const markdown = formatConversation(messages);
+            sendResponse({ markdown, platform });
+          } catch (err) {
+            console.warn("[memory.wiki] extractConversation threw:", err);
+            sendResponse({ markdown: "", platform, error: String(err && err.message || err) });
+          }
+        })
+        .catch((err) => {
+          console.warn("[memory.wiki] artifact pre-process failed:", err);
+          sendResponse({ markdown: "", platform, error: String(err && err.message || err) });
+        });
       return true;
     }
 
@@ -1329,39 +1345,58 @@
     }
 
     if (request.action === "capture-selection") {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const container = document.createElement("div");
-        container.appendChild(range.cloneContents());
-        const markdown = htmlToMarkdown(container);
-        sendResponse({ markdown });
-      } else {
-        sendResponse({ markdown: null });
+      try {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const container = document.createElement("div");
+          container.appendChild(range.cloneContents());
+          const markdown = htmlToMarkdown(container);
+          sendResponse({ markdown });
+        } else {
+          sendResponse({ markdown: null });
+        }
+      } catch (err) {
+        console.warn("[memory.wiki] captureSelection threw:", err);
+        sendResponse({ markdown: null, error: String(err && err.message || err) });
       }
       return true;
     }
 
     if (request.action === "toggle-float-button") {
-      const existing = document.getElementById("mw-float-container");
-      if (request.show && !existing) {
-        createFloatingButton();
-      } else if (!request.show && existing) {
-        existing.remove();
+      try {
+        const existing = document.getElementById("mw-float-container");
+        if (request.show && !existing) {
+          createFloatingButton();
+        } else if (!request.show && existing) {
+          existing.remove();
+        }
+        sendResponse({ ok: true });
+      } catch (err) {
+        sendResponse({ ok: false, error: String(err && err.message || err) });
       }
-      sendResponse({ ok: true });
       return true;
     }
 
     if (request.action === "capture-page") {
-      // On AI pages: extract conversation (with artifact pre-processing)
-      // On other pages: return null (background.js will handle it)
+      // On AI pages: extract conversation (with artifact pre-processing).
+      // On other pages: return null so the caller falls through.
       if (platform) {
-        preProcessArtifactIframes().then(() => {
-          const messages = extractConversation();
-          const markdown = formatConversation(messages);
-          sendResponse({ markdown });
-        });
+        preProcessArtifactIframes()
+          .then(() => {
+            try {
+              const messages = extractConversation();
+              const markdown = formatConversation(messages);
+              sendResponse({ markdown });
+            } catch (err) {
+              console.warn("[memory.wiki] extractConversation threw:", err);
+              sendResponse({ markdown: "", error: String(err && err.message || err) });
+            }
+          })
+          .catch((err) => {
+            console.warn("[memory.wiki] artifact pre-process failed:", err);
+            sendResponse({ markdown: "", error: String(err && err.message || err) });
+          });
       } else {
         sendResponse({ markdown: null });
       }
