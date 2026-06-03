@@ -46,7 +46,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; letter-spacing: 0 !important; }
-    html { background: var(--bg); width: 384px; overflow: hidden; }
+    html { background: var(--bg); width: 384px; }
     body {
       width: 100%;
       margin: 0;
@@ -57,7 +57,6 @@
       line-height: 1.55;
       letter-spacing: -0.005em;
       -webkit-font-smoothing: antialiased;
-      overflow: hidden;
       position: relative;
       isolation: isolate;
       display: flex;
@@ -871,20 +870,7 @@
     .recent-wrap { display: none; }
     .recent-wrap.visible { display: block; }
     /* List aligned to the same 24px rail as every other section */
-    .recent-list {
-      margin: 0 24px;
-      display: flex;
-      flex-direction: column;
-      /* Cap to ~3 rows. Beyond that the list scrolls internally so
-         the footer (account + promo strip) stays anchored at the
-         bottom of the popup instead of getting pushed off-screen. */
-      max-height: 132px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: thin;
-    }
-    .recent-list::-webkit-scrollbar { width: 4px; }
-    .recent-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+    .recent-list { margin: 0 24px; display: flex; flex-direction: column; }
     /* popup.js renders rows as .recent-item (not .recent). Style both. */
     .recent, .recent-item {
       position: relative;
