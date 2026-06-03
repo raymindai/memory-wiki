@@ -1,48 +1,37 @@
 // popup-v25.html companion: headline rotation + free-form AI submit wiring.
 // Inline scripts are blocked by Manifest V3 CSP, so this lives in its own file.
 
-// ─── Popup auto-fit ─────────────────────────────────────────────────
-//
-// Chrome auto-sizes the popup window to documentElement.scrollHeight
-// at FIRST paint. After that, if body shrinks (rare) or grows (chips
-// rendered, Recent items hydrated from storage, page-context line
-// detected, etc.) the popup may NOT re-resize until something forces
-// a layout invalidation. The result is the user sees either:
-//   (a) scrollbar because content grew past initial measure, or
-//   (b) empty band at the bottom because content shrank.
-//
-// Fix: explicitly write body.scrollHeight back to documentElement at
-// every paint cycle for the first 2 seconds (catches all async
-// hydration), then on every meaningful mutation. This forces Chrome
-// to recompute its popup viewport.
+// ─── Debug: popup auto-fit diagnostic (Cmd+Shift+D inside popup) ──
+// Press Cmd+Shift+D (Mac) or Ctrl+Shift+D (Win) to log current
+// document / body / window dimensions. Helps identify what's making
+// chrome allocate a popup viewport larger than visible content.
 (function () {
-  function fit() {
-    const h = document.body.scrollHeight;
-    if (h < 1) return;
-    // Touching documentElement.style.height invalidates Chrome's
-    // cached popup viewport measurement.
-    document.documentElement.style.height = h + "px";
-  }
-  // Initial: re-fit on every animation frame for 2 seconds so all
-  // async work (chrome.storage Recent, font load, image decode,
-  // chip layout) gets caught.
-  const start = performance.now();
-  function loop() {
-    fit();
-    if (performance.now() - start < 2000) requestAnimationFrame(loop);
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => requestAnimationFrame(loop), { once: true });
-  } else {
-    requestAnimationFrame(loop);
-  }
-  // Steady-state: re-fit whenever significant DOM changes happen
-  // (Recent list mutated, chips added, intent textarea grew, etc.).
-  new MutationObserver(() => {
-    requestAnimationFrame(fit);
-  }).observe(document.body, { childList: true, subtree: true, characterData: true });
-  // Also refit on textarea input (the AI intent box auto-grows).
-  document.addEventListener("input", () => requestAnimationFrame(fit), true);
+  document.addEventListener("keydown", (e) => {
+    const cmdOrCtrl = e.metaKey || e.ctrlKey;
+    if (!cmdOrCtrl || !e.shiftKey || e.key.toLowerCase() !== "d") return;
+    e.preventDefault();
+    const b = document.body;
+    const h = document.documentElement;
+    const data = {
+      "body.scrollHeight":    b.scrollHeight,
+      "body.offsetHeight":    b.offsetHeight,
+      "body.clientHeight":    b.clientHeight,
+      "html.scrollHeight":    h.scrollHeight,
+      "html.offsetHeight":    h.offsetHeight,
+      "window.innerHeight":   window.innerHeight,
+      "window.outerHeight":   window.outerHeight,
+      tallestChild: (() => {
+        let maxH = 0, maxEl = null;
+        for (const el of b.querySelectorAll("*")) {
+          const r = el.getBoundingClientRect();
+          if (r.bottom > maxH) { maxH = r.bottom; maxEl = el; }
+        }
+        return maxEl ? `${maxEl.tagName}.${(maxEl.className||"").toString().slice(0,40)} bottom=${maxH}` : "none";
+      })(),
+    };
+    console.table(data);
+    alert(JSON.stringify(data, null, 2));
+  });
 })();
 
 (function () {

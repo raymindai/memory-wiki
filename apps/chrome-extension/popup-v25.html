@@ -46,18 +46,14 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; letter-spacing: 0 !important; }
-    html {
-      background: var(--bg);
-      width: 384px;
-      /* Clip any rogue absolutely-positioned children that extend
-         past body height; without this they push documentElement
-         scrollHeight beyond actual content, which Chrome then
-         allocates as popup viewport — the empty band the user saw
-         below the footer. */
-      overflow: hidden;
-    }
+    /* Critical: Chrome popup auto-sizes from documentElement +
+       body offsetHeight at first paint. Any flex / overflow /
+       isolation / position-relative on these elements interferes
+       with that measurement. Keep them as plain blocks with no
+       layout context of their own. */
+    html { width: 384px; background: var(--bg); }
     body {
-      width: 100%;
+      width: 384px;
       margin: 0;
       background: var(--bg);
       color: var(--body);
@@ -66,11 +62,6 @@
       line-height: 1.55;
       letter-spacing: -0.005em;
       -webkit-font-smoothing: antialiased;
-      position: relative;
-      isolation: isolate;
-      /* Plain block layout — flex column on body was making Chrome
-         pop-up measure the viewport taller than the actual content
-         needed, leaving a big empty band at the bottom. */
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.
@@ -1232,7 +1223,7 @@
   <span class="hidden-stub" id="platform-dot"></span>
   <span class="hidden-stub" id="platform-name"></span>
   <span class="hidden-stub" id="platform-hint"></span>
-  <span style="display:none !important;position:absolute;left:-9999px" id="status"></span>
+  <span class="hidden-stub" id="status"></span>
 
   <script src="popup.js"></script>
   <script src="popup-v25.js"></script>
