@@ -1442,6 +1442,14 @@ export default function MdEditor() {
         const w = Math.max(240, Math.min(720, rect.right - e.clientX));
         const el = wrapper.querySelector('[data-pane="image-panel"]') as HTMLElement | null;
         if (el) el.style.width = `${w}px`;
+        // The absolute-positioned overlay surfaces (hub/galaxy/settings/
+        // bundle canvas embed) use `right:` to reserve room for the
+        // panel. Without this live update they don't reflow until
+        // mouseup — so growing the panel makes them overlap or get
+        // hidden underneath. Sync them in real time.
+        wrapper.querySelectorAll('[data-reserves-right-panel]').forEach((node) => {
+          (node as HTMLElement).style.right = `${w}px`;
+        });
         imagePanelPendingWidthRef.current = w;
       }
     };
@@ -5959,13 +5967,16 @@ export default function MdEditor() {
       setIsDragging(false);
       const files = Array.from(e.dataTransfer.files);
 
-      // Handle image file drops — upload and insert via Tiptap
+      // Handle image file drops — upload, insert into doc + add to library.
       const imageFiles = files.filter(f => f.type.startsWith("image/"));
       if (imageFiles.length > 0) {
-        if (imageFiles.length > 1) showToast(`Uploading ${imageFiles.length} images...`, "info");
+        const total = imageFiles.length;
+        let done = 0;
         let failed = 0;
+        showToast(total > 1 ? `Uploading 0 / ${total}…` : `Uploading ${imageFiles[0].name}…`, "info");
         for (const img of imageFiles) {
           const url = await uploadImage(img);
+          done++;
           if (url) {
             const ed = tiptapRef.current?.getEditor();
             if (ed) {
@@ -5978,9 +5989,25 @@ export default function MdEditor() {
               cmSetDocRef.current?.(newMd);
               doRender(newMd);
             }
-          } else { failed++; }
+            // Per-image progress toast (overrides previous one).
+            if (total > 1) {
+              showToast(`Uploaded ${done} / ${total}${failed ? ` (${failed} failed)` : ""}`, "info");
+            }
+          } else {
+            failed++;
+            if (total > 1) {
+              showToast(`Uploading ${done} / ${total} (${failed} failed)…`, "info");
+            }
+          }
         }
-        if (failed > 0) showToast(`${failed} image${failed > 1 ? "s" : ""} failed to upload`, "error");
+        const ok = done - failed;
+        if (failed === 0) {
+          showToast(ok === 1 ? "Added to library" : `${ok} images added to library`, "success");
+        } else if (ok === 0) {
+          showToast("All uploads failed", "error");
+        } else {
+          showToast(`${ok} uploaded, ${failed} failed`, "error");
+        }
         return;
       }
 
@@ -7636,36 +7663,36 @@ ${clone.innerHTML}
               on every surface (Start / Hub / docs / galaxy collapses
               all so skip there) so the panel is reachable without an
               open doc. */}
-          {isAuthenticated && !showGalaxy && (
-            <Tooltip text="Image library" position="bottom">
-              <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
-                <button
-                  onClick={() => {
-                    setShowImagePanel(prev => {
-                      if (!prev && !imagesLoading) {
-                        setImagesLoading(true);
-                        fetch("/api/upload/list", { headers: authHeaders })
-                          .then(r => r.ok ? r.json() : null)
-                          .then(data => { if (data) { setUserImages(data.images || []); setImageQuota(data.quota); } })
-                          .catch(() => {})
-                          .finally(() => setImagesLoading(false));
-                      }
-                      return !prev;
-                    });
-                    setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
-                  }}
-                  className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
-                  style={{
-                    background: showImagePanel ? "var(--border)" : "var(--toggle-bg)",
-                    color: showImagePanel ? "var(--text-primary)" : "var(--text-muted)",
-                  }}
-                  aria-pressed={showImagePanel}
-                  aria-label="Image library"
-                >
-                  <ImageIcon width={13} height={13} />
-                </button>
-              </div>
-            </Tooltip>
+          {!showGalaxy && (
+            <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+              <button
+                onClick={() => {
+                  if (!isAuthenticated) { setShowAuthMenu(true); return; }
+                  setShowImagePanel(prev => {
+                    if (!prev && !imagesLoading) {
+                      setImagesLoading(true);
+                      fetch("/api/upload/list", { headers: authHeaders })
+                        .then(r => r.ok ? r.json() : null)
+                        .then(data => { if (data) { setUserImages(data.images || []); setImageQuota(data.quota); } })
+                        .catch(() => {})
+                        .finally(() => setImagesLoading(false));
+                    }
+                    return !prev;
+                  });
+                  setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
+                }}
+                className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
+                style={{
+                  background: showImagePanel ? "var(--border)" : "var(--toggle-bg)",
+                  color: showImagePanel ? "var(--text-primary)" : "var(--text-muted)",
+                }}
+                aria-pressed={showImagePanel}
+                aria-label="Image library"
+                title="Image library"
+              >
+                <ImageIcon width={13} height={13} />
+              </button>
+            </div>
           )}
         </div>{/* end center cluster */}
 
@@ -12222,7 +12249,7 @@ ${clone.innerHTML}
                 where you were. */}
             {showSettings && (
               <div
-                className="absolute top-0 bottom-0 left-0 z-10 flex"
+                className="absolute top-0 bottom-0 left-0 z-10 flex" data-reserves-right-panel
                 style={{
                   right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
@@ -12243,7 +12270,7 @@ ${clone.innerHTML}
                 respects the right-side panels. */}
             {showHub && hubSlug && !showOnboarding && !showSettings && !showGalaxy && (
               <div
-                className="absolute top-0 bottom-0 left-0 z-10 flex"
+                className="absolute top-0 bottom-0 left-0 z-10 flex" data-reserves-right-panel
                 style={{
                   right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
@@ -12484,7 +12511,7 @@ ${clone.innerHTML}
                 via the active checks above. */}
             {showGalaxy && !showOnboarding && !showHub && !showSettings && (
               <div
-                className="absolute top-0 bottom-0 left-0 z-10 flex"
+                className="absolute top-0 bottom-0 left-0 z-10 flex" data-reserves-right-panel
                 style={{
                   right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
@@ -12535,7 +12562,7 @@ ${clone.innerHTML}
             )}
             {activeTab?.kind === "bundle" && activeTab.bundleId && !showOnboarding && !showHub && !showGalaxy && !showSettings && (
               <div
-                className="absolute top-0 bottom-0 left-0 z-10 flex"
+                className="absolute top-0 bottom-0 left-0 z-10 flex" data-reserves-right-panel
                 style={{
                   // Leave room for the right-side Assistant or Image panel when open.
                   // Bundle view has no markdown to outline, so we never render the
@@ -13484,14 +13511,13 @@ ${clone.innerHTML}
                                   itself is interactive. */}
                               <div
                                 className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                                style={{ background: "rgba(0,0,0,0.18)" }}
+                                style={{ background: "rgba(0,0,0,0.20)" }}
                               >
-                                <span
-                                  className="text-caption font-mono"
-                                  style={{ color: "rgba(255,255,255,0.9)", letterSpacing: "0.08em", textTransform: "uppercase" }}
-                                >
-                                  preview
-                                </span>
+                                <Eye
+                                  width={20}
+                                  height={20}
+                                  style={{ color: "rgba(255,255,255,0.95)", strokeWidth: 1.8 }}
+                                />
                               </div>
                             </div>
                             {/* Action bar — fixed position at the bottom of
