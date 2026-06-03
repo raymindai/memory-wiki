@@ -545,11 +545,32 @@
       const src = img.currentSrc || img.src || "";
       if (!/^https?:|^data:|^blob:/.test(src)) return false;
       const r = img.getBoundingClientRect();
-      // Use rendered size, not naturalSize — Pinterest etc. shrink imgs.
       if (r.width < MIN_SIDE || r.height < MIN_SIDE) return false;
-      // Skip the save button's own icon
       if (img.closest && img.closest("[data-mw-save-img]")) return false;
+      // Map tiles — every tile would otherwise sprout a save button.
+      // Detect by URL pattern (most map providers expose /tiles/, /vt/,
+      // /maptile/ or known CDNs) and by canonical tile dimensions
+      // (256/512 px exact). Also skip anything sitting inside a known
+      // map container.
+      if (isMapTile(img, src, r)) return false;
       return true;
+    }
+    function isMapTile(img, src, rect) {
+      const lower = src.toLowerCase();
+      if (/\/(tile|tiles|vt|maptile|map-tile)\//.test(lower)) return true;
+      if (/maps\.googleapis\.com|maps\.gstatic\.com|tile\.openstreetmap|tiles?\.mapbox|api\.mapbox\.com\/styles\/v1/.test(lower)) return true;
+      if (/\.tiles?\.|tile\.|tilecache|wmts|wms/.test(lower)) return true;
+      // Square 256 / 512 tiles in dense grids — map providers' default.
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      if ((w === 256 && h === 256) || (w === 512 && h === 512)) return true;
+      // Inside a known map container.
+      if (img.closest && img.closest(
+        '[role="application"][aria-label*="map" i], ' +
+        '.gm-style, .leaflet-tile-pane, .mapboxgl-canvas-container, .maplibregl-canvas-container, ' +
+        '.ol-viewport, [class*="mapbox-gl"], [class*="leaflet-"], [class*="map-canvas"]'
+      )) return true;
+      return false;
     }
 
     // Find an eligible <img> at viewport (x,y), walking through any

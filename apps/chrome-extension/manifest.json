@@ -72,6 +72,20 @@
     },
     {
       "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*",
+        "https://www.threads.net/*",
+        "https://threads.net/*",
+        "https://www.threads.com/*",
+        "https://threads.com/*"
+      ],
+      "js": [
+        "content-social.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
         "<all_urls>"
       ],
       "exclude_matches": [
