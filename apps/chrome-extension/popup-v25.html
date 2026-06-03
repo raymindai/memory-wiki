@@ -875,9 +875,10 @@
       margin: 0 24px;
       display: flex;
       flex-direction: column;
-      /* Cap to ~4 rows; scroll internally beyond that so the whole
-         popup doesn't start scrolling and pushing the footer down. */
-      max-height: 192px;
+      /* Cap to ~3 rows. Beyond that the list scrolls internally so
+         the footer (account + promo strip) stays anchored at the
+         bottom of the popup instead of getting pushed off-screen. */
+      max-height: 132px;
       overflow-y: auto;
       overflow-x: hidden;
       scrollbar-width: thin;
