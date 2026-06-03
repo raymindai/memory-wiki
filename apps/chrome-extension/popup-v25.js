@@ -298,14 +298,14 @@
 // has content.
 (function () {
   const CURATED = [
-    "한국어로 5줄 요약",
-    "action items만 체크리스트로",
-    "Cursor 붙여넣을 reference로",
-    "Q&A 플래시카드로",
-    "핵심 숫자/사실만 표로",
-    "TL;DR 2 문장",
-    "코드 블록만 추출",
-    "반대 입장 steelman",
+    "Extract code blocks only",
+    "Action items as checklist",
+    "TL;DR in 2 sentences",
+    "Key facts as a table",
+    "Q&A flashcards",
+    "Cursor-ready reference",
+    "Steelman the opposing view",
+    "Plain English, 8th grade",
   ];
 
   const STORAGE_KEY = "mw-intent-prefs";   // { recents: [{text, count, lastUsed, favorite}] }
@@ -354,11 +354,6 @@
     el.title = text;
     el.dataset.text = text;
 
-    if (recent && !favorite) {
-      const dot = document.createElement("span");
-      dot.className = "chip-dot";
-      el.appendChild(dot);
-    }
     if (favorite) {
       const star = document.createElement("span");
       star.className = "chip-favorite-icon";
@@ -396,6 +391,16 @@
     return el;
   }
 
+  function syncScrollEdges() {
+    const rail = document.getElementById("intent-chips-rail");
+    const wrap = document.getElementById("intent-chips");
+    if (!rail || !wrap) return;
+    const max = wrap.scrollWidth - wrap.clientWidth;
+    const x = wrap.scrollLeft;
+    rail.classList.toggle("can-scroll-left", x > 2);
+    rail.classList.toggle("can-scroll-right", x < max - 2);
+  }
+
   async function render() {
     const wrap = document.getElementById("intent-chips");
     if (!wrap) return;
@@ -419,7 +424,17 @@
     ].slice(0, 8);
 
     for (const item of all) wrap.appendChild(makeChip(item));
+    // Sync edge fade indicators after render.
+    requestAnimationFrame(syncScrollEdges);
   }
+
+  // Re-evaluate scroll edges on user scroll + on window resize.
+  (function attachScrollSync() {
+    const wrap = document.getElementById("intent-chips");
+    if (!wrap) return;
+    wrap.addEventListener("scroll", syncScrollEdges, { passive: true });
+    window.addEventListener("resize", syncScrollEdges);
+  })();
 
   // Cycling placeholder
   function startPlaceholderCycle() {
