@@ -1202,6 +1202,12 @@ export default function MdEditor() {
   });
   const [showImagePanel, setShowImagePanel] = useState(() => {
     if (typeof window === "undefined") return false;
+    // Deep-link: ?panel=images opens the My Images sidebar on load,
+    // used by the chrome extension's 'saved → Open library' toast.
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("panel") === "images") return true;
+    } catch { /* noop */ }
     return localStorage.getItem("mw-panel-image") === "true";
   });
   // Persist right panel state

@@ -295,8 +295,123 @@
       if (document.getElementById("mw-save-img-style")) return;
       const s = document.createElement("style");
       s.id = "mw-save-img-style";
-      s.textContent = "@keyframes mw-spin{to{transform:rotate(360deg)}}";
+      s.textContent =
+        "@keyframes mw-spin{to{transform:rotate(360deg)}}" +
+        "@keyframes mw-toast-in{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}" +
+        "@keyframes mw-toast-out{to{transform:translateY(-8px);opacity:0}}";
       document.head.appendChild(s);
+    }
+
+    // Top-right toast that tells the user *where* the image went and
+    // gives them a one-click way to go check. Without it the only
+    // feedback was a green check on the button, which doesn't answer
+    // "ok... and now what / where?". First-save toast carries a
+    // longer explainer; repeat saves use a compact form.
+    let toastEl = null;
+    let toastTimer = null;
+    async function showSavedToast(imageUrl) {
+      try {
+        const wasSeenKey = "mw-saved-image-toast-seen";
+        const seenObj = await new Promise((r) => chrome.storage.local.get([wasSeenKey], r));
+        const firstTime = !seenObj[wasSeenKey];
+        if (firstTime) chrome.storage.local.set({ [wasSeenKey]: Date.now() });
+
+        if (toastEl) { clearTimeout(toastTimer); toastEl.remove(); toastEl = null; }
+        toastEl = document.createElement("div");
+        toastEl.setAttribute("data-mw-save-img", "1");
+        toastEl.style.cssText = [
+          "position:fixed!important",
+          "top:18px!important",
+          "right:18px!important",
+          "z-index:2147483647!important",
+          "display:flex!important",
+          "align-items:center!important",
+          "gap:10px!important",
+          "padding:" + (firstTime ? "12px 14px" : "10px 12px") + "!important",
+          "max-width:" + (firstTime ? "320px" : "260px") + "!important",
+          "background:#09090b!important",
+          "color:#fafafa!important",
+          "border:1px solid rgba(255,255,255,0.10)!important",
+          "border-radius:12px!important",
+          "box-shadow:0 8px 24px rgba(0,0,0,0.40), 0 0 0 1px rgba(0,0,0,0.30)!important",
+          "font-family:-apple-system,BlinkMacSystemFont,sans-serif!important",
+          "font-size:13px!important",
+          "line-height:1.4!important",
+          "animation:mw-toast-in 220ms ease-out!important",
+          "box-sizing:border-box!important",
+        ].join(";");
+
+        const markWrap = document.createElement("span");
+        markWrap.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:24px!important;height:24px!important;flex-shrink:0!important";
+        markWrap.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 24);
+        toastEl.appendChild(markWrap);
+
+        const body = document.createElement("div");
+        body.style.cssText = "display:flex!important;flex-direction:column!important;gap:" + (firstTime ? "4px" : "2px") + "!important;min-width:0!important;flex:1 1 auto!important";
+
+        const title = document.createElement("div");
+        title.style.cssText = "font-weight:600!important;color:#fafafa!important;font-size:" + (firstTime ? "13px" : "12px") + "!important";
+        title.textContent = firstTime ? "Saved to your image library" : "Saved";
+        body.appendChild(title);
+
+        if (firstTime) {
+          const sub = document.createElement("div");
+          sub.style.cssText = "color:#a1a1aa!important;font-size:12px!important;line-height:1.45!important";
+          sub.textContent = "Find it in memory.wiki → editor right sidebar → My Images. Reusable in any doc.";
+          body.appendChild(sub);
+        }
+        toastEl.appendChild(body);
+
+        const openBtn = document.createElement("a");
+        openBtn.href = "https://memory.wiki/?panel=images";
+        openBtn.target = "_blank";
+        openBtn.rel = "noopener";
+        openBtn.textContent = firstTime ? "Open library" : "Open";
+        openBtn.style.cssText = [
+          "display:inline-flex!important",
+          "align-items:center!important",
+          "justify-content:center!important",
+          "padding:6px 10px!important",
+          "border-radius:8px!important",
+          "background:rgba(255,255,255,0.08)!important",
+          "color:#fafafa!important",
+          "border:1px solid rgba(255,255,255,0.14)!important",
+          "text-decoration:none!important",
+          "font-size:11.5px!important",
+          "font-weight:500!important",
+          "font-family:inherit!important",
+          "flex-shrink:0!important",
+          "cursor:pointer!important",
+          "transition:background 140ms, border-color 140ms",
+        ].join(";");
+        openBtn.addEventListener("mouseenter", () => {
+          openBtn.style.background = "rgba(255,255,255,0.14)";
+          openBtn.style.borderColor = "rgba(255,255,255,0.24)";
+        });
+        openBtn.addEventListener("mouseleave", () => {
+          openBtn.style.background = "rgba(255,255,255,0.08)";
+          openBtn.style.borderColor = "rgba(255,255,255,0.14)";
+        });
+        toastEl.appendChild(openBtn);
+
+        const closeBtn = document.createElement("button");
+        closeBtn.setAttribute("aria-label", "Dismiss");
+        closeBtn.style.cssText = "background:transparent!important;border:0!important;padding:4px!important;margin:-4px -4px -4px 0!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important";
+        closeBtn.innerHTML = makeIcon(X_RAW, "#71717a", 12);
+        closeBtn.addEventListener("click", () => dismissToast());
+        toastEl.appendChild(closeBtn);
+
+        document.body.appendChild(toastEl);
+        toastTimer = setTimeout(dismissToast, firstTime ? 8000 : 3500);
+      } catch (e) { /* noop */ }
+    }
+    function dismissToast() {
+      if (!toastEl) return;
+      const el = toastEl;
+      toastEl = null;
+      clearTimeout(toastTimer);
+      el.style.animation = "mw-toast-out 180ms ease-in forwards";
+      setTimeout(() => { try { el.remove(); } catch {} }, 200);
     }
 
     function makeButton() {
@@ -479,7 +594,8 @@
           btn.dataset.state = "saved";
           btn.style.borderColor = "rgba(255,255,255,0.50)";
           btn.style.background = "rgba(255,255,255,0.10)";
-          if (glyph) glyph.innerHTML = makeIcon(CHECK_RAW, "#fb923c", 14);   // orange check, mirrors mw-mini-btn done state
+          if (glyph) glyph.innerHTML = makeIcon(CHECK_RAW, "#fb923c", 14);
+          showSavedToast(resp.url || src);
           setTimeout(hideNow, 900);
         } else {
           btn.dataset.state = "error";
