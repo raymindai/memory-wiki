@@ -163,7 +163,7 @@ export default function HelpPage() {
             }}
           >
             Every way to get content into memory.wiki — from the Chrome extension, from
-            the editor, from AI chats. One reference, scroll to the surface you're on.
+            the editor, from AI chats. One reference, scroll to the surface you&apos;re on.
           </p>
         </div>
 
