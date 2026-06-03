@@ -357,13 +357,13 @@
         if (firstTime) {
           const sub = document.createElement("div");
           sub.style.cssText = "color:#a1a1aa!important;font-size:12px!important;line-height:1.45!important";
-          sub.textContent = "Find it in memory.wiki → editor right sidebar → My Images. Reusable in any doc.";
+          sub.textContent = "Open memory.wiki/library anytime to browse, copy, or insert it into any doc.";
           body.appendChild(sub);
         }
         toastEl.appendChild(body);
 
         const openBtn = document.createElement("a");
-        openBtn.href = "https://memory.wiki/?panel=images";
+        openBtn.href = "https://memory.wiki/library";
         openBtn.target = "_blank";
         openBtn.rel = "noopener";
         openBtn.textContent = firstTime ? "Open library" : "Open";
