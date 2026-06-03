@@ -11456,7 +11456,11 @@ ${clone.innerHTML}
                           // Cap visible height to ~7 rows. Beyond that
                           // the section scrolls internally so the page
                           // doesn't keep growing with a long pin list.
-                          maxHeight: 308,
+                          // ~7 rows. Bumped from 308 because rows can
+                          // grow when titles wrap to a second line or
+                          // a source/timestamp pill renders inline —
+                          // 308 was clipping the 5th row in practice.
+                          maxHeight: 460,
                           overflowY: "auto",
                           overflowX: "hidden",
                         }}
@@ -11605,7 +11609,11 @@ ${clone.innerHTML}
                         className="rounded-xl"
                         style={{
                           border: "1px solid var(--border-dim)",
-                          maxHeight: 308,
+                          // ~7 rows. Bumped from 308 because rows can
+                          // grow when titles wrap to a second line or
+                          // a source/timestamp pill renders inline —
+                          // 308 was clipping the 5th row in practice.
+                          maxHeight: 460,
                           overflowY: "auto",
                           overflowX: "hidden",
                         }}
