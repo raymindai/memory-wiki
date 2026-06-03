@@ -1218,6 +1218,17 @@ export default function MdEditor() {
     const saved = parseInt(localStorage.getItem("mw-ai-panel-width") || "");
     return Number.isFinite(saved) && saved >= 280 && saved <= 720 ? saved : 360;
   });
+  // Resizable image panel width. Drag handle on the panel's left edge.
+  const [imagePanelWidth, setImagePanelWidth] = useState<number>(() => {
+    if (typeof window === "undefined") return 320;
+    const saved = parseInt(localStorage.getItem("mw-image-panel-width") || "");
+    return Number.isFinite(saved) && saved >= 240 && saved <= 720 ? saved : 320;
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("mw-image-panel-width", String(imagePanelWidth));
+  }, [imagePanelWidth]);
+  const isDraggingImagePanel = useRef(false);
+  const imagePanelPendingWidthRef = useRef<number | null>(null);
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mw-ai-panel-width", String(aiPanelWidth));
   }, [aiPanelWidth]);
@@ -1427,6 +1438,11 @@ export default function MdEditor() {
         const el = wrapper.querySelector('[data-pane="ai-panel"]') as HTMLElement | null;
         if (el) el.style.width = `${w}px`;
         aiPanelPendingWidthRef.current = w;
+      } else if (isDraggingImagePanel.current) {
+        const w = Math.max(240, Math.min(720, rect.right - e.clientX));
+        const el = wrapper.querySelector('[data-pane="image-panel"]') as HTMLElement | null;
+        if (el) el.style.width = `${w}px`;
+        imagePanelPendingWidthRef.current = w;
       }
     };
     const onUp = () => {
@@ -1444,6 +1460,15 @@ export default function MdEditor() {
         if (aiPanelPendingWidthRef.current != null) {
           setAiPanelWidth(aiPanelPendingWidthRef.current);
           aiPanelPendingWidthRef.current = null;
+        }
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      }
+      if (isDraggingImagePanel.current) {
+        isDraggingImagePanel.current = false;
+        if (imagePanelPendingWidthRef.current != null) {
+          setImagePanelWidth(imagePanelPendingWidthRef.current);
+          imagePanelPendingWidthRef.current = null;
         }
         document.body.style.cursor = "";
         document.body.style.userSelect = "";
@@ -7606,6 +7631,41 @@ ${clone.innerHTML}
           })
           )}
           </div>}{/* end view-modes group */}
+          {/* Image library — standalone icon to the right of Source.
+              Visible on every surface (Hub / Start / docs alike) so
+              users can hit the panel without having a doc open. */}
+          {isAuthenticated && (
+            <div className="relative group ml-1.5">
+              <button
+                onClick={() => {
+                  setShowImagePanel(prev => {
+                    if (!prev && !imagesLoading) {
+                      setImagesLoading(true);
+                      fetch("/api/upload/list", { headers: authHeaders })
+                        .then(r => r.ok ? r.json() : null)
+                        .then(data => { if (data) { setUserImages(data.images || []); setImageQuota(data.quota); } })
+                        .catch(() => {})
+                        .finally(() => setImagesLoading(false));
+                    }
+                    return !prev;
+                  });
+                  setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
+                }}
+                className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
+                style={{ background: showImagePanel ? "var(--border)" : "transparent", color: showImagePanel ? "var(--text-primary)" : "var(--text-faint)" }}
+                title="Image library"
+                aria-label="Image library"
+              >
+                <ImageIcon width={13} height={13} />
+              </button>
+              {!showImagePanel && (
+                <div className="absolute top-full right-0 mt-1 px-2 py-1 rounded text-caption whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                  Image library
+                </div>
+              )}
+            </div>
+          )}
         </div>{/* end center cluster */}
 
         <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0 justify-end" style={{ position: "relative", zIndex: 2 }}>
@@ -12034,36 +12094,7 @@ ${clone.innerHTML}
                     </div>
                   )}
                 </div>}
-                {/* Images panel toggle */}
-                {isAuthenticated && <div className="relative group">
-                  <button
-                    onClick={() => {
-                      setShowImagePanel(prev => {
-                        if (!prev && !imagesLoading) {
-                          setImagesLoading(true);
-                          fetch("/api/upload/list", { headers: authHeaders })
-                            .then(r => r.ok ? r.json() : null)
-                            .then(data => { if (data) { setUserImages(data.images || []); setImageQuota(data.quota); } })
-                            .catch(() => {})
-                            .finally(() => setImagesLoading(false));
-                        }
-                        return !prev;
-                      });
-                      setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
-                    }}
-                    className="flex items-center justify-center h-6 w-6 rounded-md transition-colors"
-                    style={{ background: showImagePanel ? "var(--border)" : "transparent", color: showImagePanel ? "var(--text-primary)" : "var(--text-faint)" }}
-                    title="My images"
-                  >
-                    <ImageIcon width={11} height={11} />
-                  </button>
-                  {!showImagePanel && (
-                    <div className="absolute top-full right-0 mt-1 px-2 py-1 rounded text-caption whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[9998]"
-                      style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-                      My Images
-                    </div>
-                  )}
-                </div>}
+                {/* Image library moved to the top global nav (right of Source). */}
                 <div className="w-px h-3.5 mx-0.5" style={{ background: "var(--border-dim)" }} />
                 {/* Export dropdown */}
                 <div className="relative group" ref={exportMenuRef}>
@@ -12192,7 +12223,7 @@ ${clone.innerHTML}
               <div
                 className="absolute top-0 bottom-0 left-0 z-10 flex"
                 style={{
-                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
+                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
                 }}
               >
@@ -12213,7 +12244,7 @@ ${clone.innerHTML}
               <div
                 className="absolute top-0 bottom-0 left-0 z-10 flex"
                 style={{
-                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
+                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
                 }}
               >
@@ -12454,7 +12485,7 @@ ${clone.innerHTML}
               <div
                 className="absolute top-0 bottom-0 left-0 z-10 flex"
                 style={{
-                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
+                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
                 }}
               >
@@ -12508,7 +12539,7 @@ ${clone.innerHTML}
                   // Leave room for the right-side Assistant or Image panel when open.
                   // Bundle view has no markdown to outline, so we never render the
                   // outline panel here — don't reserve space for it either.
-                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? 320 : 0),
+                  right: showAIPanel ? aiPanelWidth : (showImagePanel ? imagePanelWidth : 0),
                   background: "var(--background)",
                   outline: dragTabId ? "2px dashed var(--text-primary)" : undefined,
                   outlineOffset: dragTabId ? "-8px" : undefined,
@@ -13344,9 +13375,36 @@ ${clone.innerHTML}
                   </div>
                 </div>
               )}
-              {/* ─── Images Panel (side-by-side) ─── */}
+              {/* ─── Images Panel (side-by-side, resizable) ─── */}
               {showImagePanel && isAuthenticated && (
-                <div className="flex flex-col shrink-0" style={{ width: "min(300px, 50%)", background: "var(--surface)", borderLeft: "1px solid var(--border-dim)" }}>
+                <div
+                  className="flex flex-col shrink-0 relative"
+                  data-pane="image-panel"
+                  style={{ width: imagePanelWidth, background: "var(--surface)", borderLeft: "1px solid var(--border-dim)" }}
+                >
+                  {/* Drag handle — 6px wide, sits flush against the
+                      left border. Active cursor + transparent so it
+                      doesn't obstruct the content visually. */}
+                  <div
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      isDraggingImagePanel.current = true;
+                      document.body.style.cursor = "col-resize";
+                      document.body.style.userSelect = "none";
+                    }}
+                    className="absolute top-0 bottom-0 z-10 cursor-col-resize"
+                    style={{ left: -3, width: 6 }}
+                    title="Drag to resize"
+                    aria-label="Resize image panel"
+                  />
+                  {/* On hover the handle paints a thin accent line so
+                      its location is discoverable. */}
+                  <style>{`
+                    [data-pane="image-panel"] > div[aria-label="Resize image panel"]:hover::after {
+                      content: ""; position: absolute; left: 2px; top: 0; bottom: 0; width: 2px;
+                      background: var(--text-primary); opacity: 0.4;
+                    }
+                  `}</style>
                   {/* Header */}
                   <div className="flex items-center justify-between px-3 py-2 shrink-0" style={{ borderBottom: "1px solid var(--border-dim)" }}>
                     <div className="flex items-center gap-1.5">
