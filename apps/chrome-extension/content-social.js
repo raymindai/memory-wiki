@@ -74,17 +74,17 @@
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
       html.mw-social-threads .mw-social-btn{right:48px!important}
-      /* LinkedIn: wide overflow-menu cluster (… + Save + dismiss) at
-         the post top-right. Nudge clear. ALSO force the pill always
-         visible (not hover-only) — LinkedIn's React stack re-renders
-         posts frequently, and a hover-revealed button often hasn't
-         rebuilt itself before the user moves the cursor. Persistent
-         opacity:1 lets the user see + click reliably. */
-      html.mw-social-linkedin .mw-social-btn{
-        right:96px!important;top:12px!important;
-        opacity:1!important;pointer-events:auto!important;
-        z-index:9999999!important;
+      /* LinkedIn floating-pill mode: pill lives on document.body, not
+         inside the post wrapper, so React's repeated subtree replacement
+         can't destroy it. position:fixed; we set top/left on mousemove
+         to anchor it to whatever post is under the cursor. */
+      .mw-social-float{
+        position:fixed!important;
+        z-index:2147483646!important;
+        opacity:0!important;pointer-events:none!important;
+        transition:opacity 140ms,top 80ms linear,left 80ms linear!important;
       }
+      .mw-social-float.mw-show{opacity:1!important;pointer-events:auto!important}
     `;
     document.head.appendChild(s);
   }
@@ -443,7 +443,9 @@
     e.preventDefault();
     e.stopPropagation();
     const btn = e.currentTarget;
-    const host = btn.closest("[data-mw-social-attached]");
+    // Floating mode stashes the current host on the button itself
+    // because the pill lives on document.body, outside the post tree.
+    const host = btn._mwHost || btn.closest("[data-mw-social-attached]");
     if (!host) return;
     setState(btn, "saving");
     try {
@@ -552,10 +554,89 @@
   };
   console.log("[memory.wiki social] loaded on", location.hostname, "— platform:", isX ? "x" : isThreads ? "threads" : isLinkedIn ? "linkedin" : "(none)");
 
+  // ─── Floating pill mode (LinkedIn) ──────────────────────────────
+  // LinkedIn's React renders posts inside a heavily virtualized
+  // container that gets destroyed/recreated frequently. Per-element
+  // attach was losing buttons faster than the MutationObserver could
+  // re-attach them. Instead: one pill on document.body, position:fixed,
+  // re-anchored on mousemove via elementsFromPoint + closest(matcher).
+  // The pill never lives inside React's tree.
+  function startFloatingPill(matcherSelector) {
+    const pill = makeButton();
+    pill.classList.add("mw-social-float");
+    document.body.appendChild(pill);
+
+    let hideTimer = null;
+    let currentHost = null;
+
+    function findHost(x, y) {
+      const stack = document.elementsFromPoint(x, y);
+      for (const el of stack) {
+        if (el === pill || pill.contains(el)) continue;
+        const host = el.closest(matcherSelector);
+        if (host) return host;
+      }
+      return null;
+    }
+
+    function anchorTo(host) {
+      const rect = host.getBoundingClientRect();
+      const pillRect = pill.getBoundingClientRect();
+      const pw = pillRect.width || 64;
+      const top = Math.max(8, rect.top + 12);
+      const left = Math.max(8, rect.right - pw - 96);
+      // !important on inline style is required to beat .mw-social-btn's
+      // class-level `top:6px!important; right:44px!important`.
+      pill.style.setProperty("top", top + "px", "important");
+      pill.style.setProperty("left", left + "px", "important");
+      pill.style.setProperty("right", "auto", "important");
+    }
+
+    function showOnHost(host) {
+      if (!host) return;
+      currentHost = host;
+      pill._mwHost = host;
+      anchorTo(host);
+      pill.classList.add("mw-show");
+    }
+
+    function hide() {
+      pill.classList.remove("mw-show");
+      currentHost = null;
+      pill._mwHost = null;
+    }
+
+    function onMove(e) {
+      if (pill.classList.contains("mw-saving") || pill.classList.contains("mw-done") || pill.classList.contains("mw-error")) return;
+      const host = findHost(e.clientX, e.clientY);
+      if (host) {
+        clearTimeout(hideTimer);
+        if (host !== currentHost) showOnHost(host);
+        else anchorTo(host);
+      } else {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(hide, 400);
+      }
+    }
+
+    document.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("scroll", () => { if (currentHost) anchorTo(currentHost); }, { passive: true, capture: true });
+  }
+
   function start() {
     injectStyles();
     if (isThreads) document.documentElement.classList.add("mw-social-threads");
-    if (isLinkedIn) document.documentElement.classList.add("mw-social-linkedin");
+    if (isLinkedIn) {
+      document.documentElement.classList.add("mw-social-linkedin");
+      // LinkedIn uses the floating pill, NOT per-element attach.
+      // matcherSelector is the same union of post wrappers minus the
+      // :not([data-mw-social-attached]) clause — that flag is irrelevant
+      // when we're not stamping anything onto the host.
+      const matcher = 'div.feed-shared-update-v2, div[data-id^="urn:li:activity"], div[data-urn^="urn:li:activity"], div[data-urn^="urn:li:aggregatedShare"]';
+      startFloatingPill(matcher);
+      console.log("[memory.wiki social] LinkedIn floating-pill mode active");
+      return;
+    }
     attachToVisiblePosts();
     console.log("[memory.wiki social] initial attach: matched", document.querySelectorAll(adapter.selector).length, "buttons placed", document.querySelectorAll(".mw-social-btn").length);
     const obs = new MutationObserver(() => {
@@ -563,18 +644,6 @@
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
     });
     obs.observe(document.body, { childList: true, subtree: true });
-
-    // Diagnostic re-count so we can see if posts ever match. Feed
-    // renders well after document_idle on LinkedIn, so a 0 on initial
-    // attach is meaningless. These three checks should print non-zero
-    // numbers as the user scrolls.
-    [3000, 8000, 15000].forEach((delay) => {
-      setTimeout(() => {
-        const matched = document.querySelectorAll(adapter.selector).length;
-        const attached = document.querySelectorAll(".mw-social-btn").length;
-        console.log(`[memory.wiki social] +${delay / 1000}s — matched`, matched, "attached", attached);
-      }, delay);
-    });
   }
 
   if (document.readyState === "loading") {
