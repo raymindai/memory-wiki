@@ -46,7 +46,16 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; letter-spacing: 0 !important; }
-    html { background: var(--bg); width: 384px; }
+    html {
+      background: var(--bg);
+      width: 384px;
+      /* Clip any rogue absolutely-positioned children that extend
+         past body height; without this they push documentElement
+         scrollHeight beyond actual content, which Chrome then
+         allocates as popup viewport — the empty band the user saw
+         below the footer. */
+      overflow: hidden;
+    }
     body {
       width: 100%;
       margin: 0;
