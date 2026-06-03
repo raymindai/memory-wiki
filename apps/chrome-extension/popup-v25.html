@@ -700,13 +700,18 @@
     .intent-chip:active { transform: translateY(1px); box-shadow: none; }
     .intent-chip.is-favorite { color: var(--ink); }
 
-    /* Text container — clips overflow, marquees on hover when long. */
+    /* Text container — clips overflow, marquees on hover when long.
+       No right-edge mask in idle state so text reaches the chip edge;
+       mask only applies while the chip is actively marqueeing so the
+       text fades cleanly into the scroll instead of stopping abruptly. */
     .intent-chip .chip-label-wrap {
       flex: 1 1 auto;
       min-width: 0;
       overflow: hidden;
-      mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 10px), transparent 100%);
-      -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 10px), transparent 100%);
+    }
+    .intent-chip.marqueeing .chip-label-wrap {
+      mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 8px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 8px), transparent 100%);
     }
     .intent-chip .chip-label {
       display: inline-block;
@@ -725,13 +730,14 @@
     .intent-chip .chip-actions {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 0;
       flex-shrink: 0;
       margin-left: 0;
-      transition: margin-left 160ms ease;
+      transition: gap 160ms ease, margin-left 160ms ease;
     }
     .intent-chip:hover .chip-actions,
     .intent-chip.is-favorite .chip-actions {
+      gap: 4px;
       margin-left: 4px;
     }
     .intent-chip .chip-btn {
