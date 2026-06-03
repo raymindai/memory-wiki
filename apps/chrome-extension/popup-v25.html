@@ -871,7 +871,19 @@
     .recent-wrap { display: none; }
     .recent-wrap.visible { display: block; }
     /* List aligned to the same 24px rail as every other section */
-    .recent-list { margin: 0 24px; display: flex; flex-direction: column; }
+    .recent-list {
+      margin: 0 24px;
+      display: flex;
+      flex-direction: column;
+      /* Cap to ~4 rows; scroll internally beyond that so the whole
+         popup doesn't start scrolling and pushing the footer down. */
+      max-height: 192px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+    }
+    .recent-list::-webkit-scrollbar { width: 4px; }
+    .recent-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
     /* popup.js renders rows as .recent-item (not .recent). Style both. */
     .recent, .recent-item {
       position: relative;
