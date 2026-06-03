@@ -255,7 +255,11 @@
 
     if (targetEl && targetEl.id === "ask-submit") {
       if (savedSubLabel == null) savedSubLabel = targetEl.textContent;
-      targetEl.textContent = isError ? "failed" : (/capturing|publishing/i.test(txt) ? "capturing" : "ok");
+      // Show full stage text on the intent submit button so the user
+      // can see AI cascade progress ("thinking with AI…", etc.).
+      // Strip trailing ellipsis to fit the narrow pill cleanly.
+      const subPretty = isError ? "failed" : pretty.replace(/[…\.]+$/, "");
+      targetEl.textContent = subPretty || "working";
     } else {
       if (savedLabel == null) savedLabel = titleEl.textContent;
       titleEl.textContent = pretty;
@@ -305,7 +309,73 @@
       document.body.classList.remove("just-captured");
     }, 1900);
   }
-  new MutationObserver(markFresh).observe(list, { childList: true });
+
+  // For any Recent row whose underlying mw-recent entry carries an
+  // `intent`, inject a small "reuse" pill that re-populates the intent
+  // textarea on click. The row's primary click still opens the doc;
+  // the reuse button intercepts via stopPropagation so the two
+  // affordances don't fight.
+  async function attachIntentReuse() {
+    let entries = [];
+    try {
+      entries = await new Promise((r) =>
+        chrome.storage.local.get(["mw-recent"], (d) => r(Array.isArray(d["mw-recent"]) ? d["mw-recent"] : []))
+      );
+    } catch { return; }
+    const byUrl = new Map(entries.map((e) => [e.url, e]));
+    list.querySelectorAll(".recent-item").forEach((row) => {
+      if (row.dataset.mwReuseAttached) return;
+      const url = row.getAttribute("data-url") || row.getAttribute("href");
+      const entry = url && byUrl.get(url);
+      if (!entry || !entry.intent) return;
+      row.dataset.mwReuseAttached = "1";
+
+      const reuse = document.createElement("button");
+      reuse.type = "button";
+      reuse.className = "recent-reuse";
+      reuse.title = `Reuse prompt: ${entry.intent}`;
+      reuse.setAttribute("aria-label", "Reuse this prompt");
+      reuse.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 21v-5h5"/></svg>';
+      reuse.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const ta = document.getElementById("ask-input");
+        if (!ta) return;
+        ta.value = entry.intent;
+        ta.dispatchEvent(new Event("input", { bubbles: true }));
+        ta.focus();
+        try { ta.setSelectionRange(entry.intent.length, entry.intent.length); } catch {}
+        ta.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      // Place before the open-arrow.
+      const arrow = row.querySelector(".open-arrow");
+      if (arrow) row.insertBefore(reuse, arrow);
+      else row.appendChild(reuse);
+    });
+  }
+
+  // Inject the styles once (placed near body so any re-render keeps them).
+  (function injectReuseStyle() {
+    if (document.getElementById("mw-reuse-style")) return;
+    const s = document.createElement("style");
+    s.id = "mw-reuse-style";
+    s.textContent = `
+      .recent-item .recent-reuse{
+        display:inline-flex;align-items:center;justify-content:center;
+        width:18px;height:18px;padding:0;margin:0 6px 0 0;
+        border:0;background:transparent;color:var(--faint,#a1a1aa);
+        cursor:pointer;border-radius:5px;flex-shrink:0;
+        transition:color 120ms, background 120ms;
+      }
+      .recent-item .recent-reuse:hover{color:var(--ink,#fafafa);background:rgba(255,255,255,0.06)}
+      .recent-item .recent-reuse svg{display:block}
+    `;
+    document.head.appendChild(s);
+  })();
+
+  new MutationObserver(() => { markFresh(); attachIntentReuse(); }).observe(list, { childList: true });
+  // Run once on initial render too.
+  attachIntentReuse();
 })();
 
 // Block capture on protected URLs (chrome://, chrome-extension://, etc.)
@@ -743,6 +813,44 @@
 //      paper / product) → AI runs with a server-side template prompt.
 // Plain articles / discussions / generic pages stay on /api/docs (no AI).
 const STRUCTURED_TYPES = new Set(["recipe", "movie", "paper", "product"]);
+
+// Drive #status through a sequence so the CTA reads
+// "thinking with AI" → "rewriting your page" → "almost there"
+// while /api/docs/transform's LLM cascade runs (5-15s).
+// Stops when popup.js (or the markFresh observer) clears #status,
+// because that means the response landed.
+function startTransformProgress(mode) {
+  const status = document.getElementById("status");
+  if (!status) return;
+  const stages = mode === "intent"
+    ? ["thinking with AI…", "rewriting your page…", "almost there…"]
+    : ["reading your page…", "extracting structure…", "almost there…"];
+  let i = 0;
+  const apply = () => {
+    if (!document.body.classList.contains("capturing")) { stop(); return; }
+    status.textContent = stages[i];
+    i = Math.min(i + 1, stages.length - 1);
+  };
+  apply();
+  const t = setInterval(apply, 2800);
+  let stopped = false;
+  function stop() {
+    if (stopped) return;
+    stopped = true;
+    clearInterval(t);
+    obs.disconnect();
+  }
+  // If popup.js / markFresh clears or replaces #status text (response
+  // landed, success or failure), stop driving stages.
+  const obs = new MutationObserver(() => {
+    const txt = (status.textContent || "").trim().toLowerCase();
+    if (!txt || /success|published|fail|error|copied|opened/.test(txt)) stop();
+  });
+  obs.observe(status, { childList: true, characterData: true, subtree: true });
+  // Hard cap so we never leak the interval if something weird happens.
+  setTimeout(stop, 45000);
+}
+
 (function () {
   if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
   const origSend = chrome.runtime.sendMessage;
@@ -776,6 +884,12 @@ const STRUCTURED_TYPES = new Set(["recipe", "movie", "paper", "product"]);
           window.__lastPageType = null; // one-shot
           const ta = document.getElementById("ask-input");
           if (ta) ta.value = "";
+
+          // Transform takes 5-15s (gpt-5-nano → gemini → claude
+          // cascade) and popup.js's status freezes at "publishing".
+          // Show meaningful stages so the user knows we're still
+          // working and doesn't close the popup mid-request.
+          startTransformProgress(intent ? "intent" : "auto");
         }
       }
     } catch (e) { /* never block the send */ }

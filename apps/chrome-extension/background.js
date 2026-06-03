@@ -251,6 +251,61 @@ async function dispatchCapture(tab, kind) {
   }
 }
 
+// ─── Recent mirror ───
+// Append a successfully-published doc to chrome.storage.local 'mw-recent'.
+// Called from the proxy-fetch handler so the entry lands even when the
+// popup that initiated the request has already been dismissed (common
+// for /api/docs/transform requests, which can take 5-15 seconds).
+async function mirrorRecent(url, options, responseText, sender) {
+  let parsed;
+  try { parsed = JSON.parse(responseText); } catch { return; }
+  if (!parsed || !parsed.id) return;
+  const docUrl = MDFY_URL + "/" + parsed.id;
+
+  // Title: server returns it for /transform; for plain /api/docs pull it
+  // from the request body (# heading match).
+  let title = parsed.title || "";
+  let intent = "";
+  let source = "chrome";
+  try {
+    const body = options && typeof options.body === "string" ? JSON.parse(options.body) : null;
+    if (body) {
+      if (!title && body.markdown) {
+        const m = body.markdown.match(/^#\s+(.+)/m);
+        if (m) title = m[1].trim().slice(0, 100);
+      }
+      if (typeof body.intent === "string") intent = body.intent;
+      if (typeof body.source === "string") source = body.source;
+    }
+  } catch { /* ignore parse errors */ }
+  if (!title) title = "Untitled capture";
+
+  // Hostname for the source-dot tooltip — prefer the sender tab if
+  // popup didn't pass it (popup.js sets source explicitly).
+  try {
+    if (sender && sender.tab && sender.tab.url) {
+      const h = new URL(sender.tab.url).hostname;
+      if (h) source = h;
+    } else {
+      const tabs = await new Promise((r) => chrome.tabs.query({ active: true, lastFocusedWindow: true }, r));
+      const t = tabs && tabs[0];
+      if (t && t.url) {
+        const h = new URL(t.url).hostname;
+        if (h) source = h;
+      }
+    }
+  } catch { /* keep source */ }
+
+  const entry = { url: docUrl, title, source, ts: Date.now() };
+  if (intent) entry.intent = intent;
+
+  const prev = await new Promise((r) =>
+    chrome.storage.local.get(["mw-recent"], (d) => r(Array.isArray(d["mw-recent"]) ? d["mw-recent"] : []))
+  );
+  const next = [entry, ...prev.filter((p) => p.url !== entry.url)].slice(0, 5);
+  await new Promise((r) => chrome.storage.local.set({ "mw-recent": next }, r));
+}
+
 // ─── Context menus ───
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -359,6 +414,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .then(async (res) => {
         const text = await res.text();
         sendResponse({ ok: res.ok, status: res.status, body: text });
+        // Side-effect: when a publish succeeds, mirror the new doc into
+        // chrome.storage.local 'mw-recent' so it appears in the popup
+        // Recent list even if the popup closed mid-request. popup.js
+        // does this on its own success path, but a 5-15s AI cascade
+        // (/api/docs/transform) often outlives the popup window —
+        // without this, the doc ends up on memory.wiki with no Recent
+        // entry at all.
+        if (res.ok && /\/api\/docs(?:\/transform)?(?:[?#].*)?$/.test(url)) {
+          try { await mirrorRecent(url, options, text, sender); } catch { /* never break the response */ }
+        }
       })
       .catch((err) => {
         sendResponse({ ok: false, error: err.message });
