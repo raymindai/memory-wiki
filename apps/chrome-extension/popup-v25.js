@@ -28,6 +28,22 @@
         }
         return maxEl ? `${maxEl.tagName}.${(maxEl.className||"").toString().slice(0,40)} bottom=${maxH}` : "none";
       })(),
+      // EVERY element whose bottom edge sits past body.scrollHeight
+      // — the one(s) inflating html.scrollHeight past body.
+      overflowingElements: (() => {
+        const bsh = b.scrollHeight;
+        const out = [];
+        for (const el of document.documentElement.querySelectorAll("*")) {
+          const r = el.getBoundingClientRect();
+          if (r.bottom > bsh + 1) {
+            const cs = window.getComputedStyle(el);
+            out.push(`${el.tagName}.${(el.className||"").toString().slice(0,30)} ` +
+              `bottom=${Math.round(r.bottom)} pos=${cs.position} ` +
+              `display=${cs.display} parent=${el.parentElement?.tagName || "?"}`);
+          }
+        }
+        return out.length ? out : ["(none)"];
+      })(),
     };
     console.table(data);
     alert(JSON.stringify(data, null, 2));

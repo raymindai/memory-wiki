@@ -50,8 +50,13 @@
        body offsetHeight at first paint. Any flex / overflow /
        isolation / position-relative on these elements interferes
        with that measurement. Keep them as plain blocks with no
-       layout context of their own. */
-    html { width: 384px; background: var(--bg); }
+       layout context of their own.
+       overflow:hidden on html clips any positioned descendant whose
+       bounding box extends past body bottom — without it Chrome
+       uses documentElement.scrollHeight, which can be 100+px taller
+       than body content and shows as an empty band below the
+       footer. Diagnosed: body=648, html=780, diff=132. */
+    html { width: 384px; background: var(--bg); overflow: hidden; }
     body {
       width: 384px;
       margin: 0;
