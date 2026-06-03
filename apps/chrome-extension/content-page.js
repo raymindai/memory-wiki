@@ -352,19 +352,41 @@
         const headRow = document.createElement("div");
         headRow.style.cssText = "display:flex!important;align-items:center!important;gap:10px!important;width:100%!important";
 
-        const markWrap = document.createElement("span");
-        markWrap.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;flex-shrink:0!important";
-        markWrap.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 22);
-        headRow.appendChild(markWrap);
+        const LIBRARY_URL = "https://memory.wiki/?panel=images";
+
+        // Row 1 — small thumbnail of the actual image (most visceral
+        // proof "yes the right thing was saved"), title, dismiss.
+        const thumb = document.createElement("img");
+        thumb.src = imageUrl;
+        thumb.alt = "";
+        thumb.style.cssText = "width:36px!important;height:36px!important;flex-shrink:0!important;border-radius:6px!important;object-fit:cover!important;background:rgba(255,255,255,0.05)!important;border:1px solid rgba(255,255,255,0.08)!important;display:block!important;margin:0!important;padding:0!important";
+        headRow.appendChild(thumb);
+
+        const titleWrap = document.createElement("div");
+        titleWrap.style.cssText = "flex:1 1 auto!important;min-width:0!important;display:flex!important;flex-direction:column!important;gap:1px!important";
 
         const title = document.createElement("div");
-        title.style.cssText = "flex:1 1 auto!important;min-width:0!important;font-weight:600!important;color:#fafafa!important;font-size:13px!important;line-height:1.3!important";
-        title.textContent = firstTime ? "Saved to your image library" : "Saved";
-        headRow.appendChild(title);
+        title.style.cssText = "font-weight:600!important;color:#fafafa!important;font-size:13px!important;line-height:1.25!important;display:flex!important;align-items:center!important;gap:6px!important";
+        const markInline = document.createElement("span");
+        markInline.style.cssText = "display:inline-flex!important;width:14px!important;height:14px!important;flex-shrink:0!important";
+        markInline.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 14);
+        title.appendChild(markInline);
+        title.appendChild(document.createTextNode(firstTime ? "Saved to your image library" : "Image saved"));
+        titleWrap.appendChild(title);
+
+        // Tiny dimensions / source line for context.
+        const sub = document.createElement("div");
+        sub.style.cssText = "color:#a1a1aa!important;font-size:11.5px!important;line-height:1.4!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important";
+        sub.textContent = firstTime
+          ? "Reusable from any doc — top nav → Image library."
+          : "Available in your image library.";
+        titleWrap.appendChild(sub);
+
+        headRow.appendChild(titleWrap);
 
         const closeBtn = document.createElement("button");
         closeBtn.setAttribute("aria-label", "Dismiss");
-        closeBtn.style.cssText = "background:transparent!important;border:0!important;padding:2px!important;margin:0!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important;flex-shrink:0!important;width:18px!important;height:18px!important";
+        closeBtn.style.cssText = "background:transparent!important;border:0!important;padding:2px!important;margin:0!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important;flex-shrink:0!important;width:18px!important;height:18px!important;align-self:flex-start!important";
         closeBtn.innerHTML = makeIcon(X_RAW, "#71717a", 12);
         closeBtn.addEventListener("click", () => dismissToast());
         closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#fafafa"; });
@@ -373,77 +395,81 @@
 
         toastEl.appendChild(headRow);
 
-        if (firstTime) {
-          // ── Row 2: subcopy ─────────────────────────────────────────
-          const sub = document.createElement("div");
-          sub.style.cssText = "color:#a1a1aa!important;font-size:12px!important;line-height:1.5!important;padding-left:32px!important";
-          sub.textContent = "Open memory.wiki/library anytime to browse, copy, or insert it into any doc.";
-          toastEl.appendChild(sub);
+        // Row 2 — one action: Open library. Same row aligns under the
+        // title column (left of thumb gets ~46px indent).
+        const actionRow = document.createElement("div");
+        actionRow.style.cssText = "display:flex!important;gap:8px!important;padding-left:46px!important";
+        const openBtn = document.createElement("a");
+        openBtn.href = LIBRARY_URL;
+        openBtn.target = "_blank";
+        openBtn.rel = "noopener";
+        openBtn.textContent = "Open library";
+        openBtn.style.cssText = [
+          "display:inline-flex!important",
+          "align-items:center!important",
+          "padding:5px 11px!important",
+          "border-radius:7px!important",
+          "background:rgba(255,255,255,0.08)!important",
+          "color:#fafafa!important",
+          "border:1px solid rgba(255,255,255,0.14)!important",
+          "text-decoration:none!important",
+          "font-size:12px!important",
+          "font-weight:500!important",
+          "font-family:inherit!important",
+          "cursor:pointer!important",
+          "transition:background 140ms, border-color 140ms!important",
+        ].join(";");
+        openBtn.addEventListener("mouseenter", () => {
+          openBtn.style.background = "rgba(255,255,255,0.14)";
+          openBtn.style.borderColor = "rgba(255,255,255,0.24)";
+        });
+        openBtn.addEventListener("mouseleave", () => {
+          openBtn.style.background = "rgba(255,255,255,0.08)";
+          openBtn.style.borderColor = "rgba(255,255,255,0.14)";
+        });
+        actionRow.appendChild(openBtn);
 
-          // ── Row 3: action button ───────────────────────────────────
-          const actionRow = document.createElement("div");
-          actionRow.style.cssText = "display:flex!important;padding-left:32px!important";
-          const openBtn = document.createElement("a");
-          openBtn.href = "https://memory.wiki/library";
-          openBtn.target = "_blank";
-          openBtn.rel = "noopener";
-          openBtn.textContent = "Open library";
-          openBtn.style.cssText = [
-            "display:inline-flex!important",
-            "align-items:center!important",
-            "justify-content:center!important",
-            "padding:6px 12px!important",
-            "border-radius:8px!important",
-            "background:rgba(255,255,255,0.08)!important",
-            "color:#fafafa!important",
-            "border:1px solid rgba(255,255,255,0.14)!important",
-            "text-decoration:none!important",
-            "font-size:12px!important",
-            "font-weight:500!important",
-            "font-family:inherit!important",
-            "cursor:pointer!important",
-            "transition:background 140ms, border-color 140ms!important",
-          ].join(";");
-          openBtn.addEventListener("mouseenter", () => {
-            openBtn.style.background = "rgba(255,255,255,0.14)";
-            openBtn.style.borderColor = "rgba(255,255,255,0.24)";
-          });
-          openBtn.addEventListener("mouseleave", () => {
-            openBtn.style.background = "rgba(255,255,255,0.08)";
-            openBtn.style.borderColor = "rgba(255,255,255,0.14)";
-          });
-          actionRow.appendChild(openBtn);
-          toastEl.appendChild(actionRow);
-        } else {
-          // Compact (non-first) toast: small inline 'Open' link
-          // beside the title row. No separate action row.
-          const openBtn = document.createElement("a");
-          openBtn.href = "https://memory.wiki/library";
-          openBtn.target = "_blank";
-          openBtn.rel = "noopener";
-          openBtn.textContent = "Open";
-          openBtn.style.cssText = [
-            "display:inline-flex!important",
-            "align-items:center!important",
-            "padding:3px 9px!important",
-            "border-radius:6px!important",
-            "background:rgba(255,255,255,0.08)!important",
-            "color:#fafafa!important",
-            "border:1px solid rgba(255,255,255,0.14)!important",
-            "text-decoration:none!important",
-            "font-size:11px!important",
-            "font-weight:500!important",
-            "font-family:inherit!important",
-            "cursor:pointer!important",
-            "flex-shrink:0!important",
-            "margin-right:6px!important",
-          ].join(";");
-          // Insert before the close button so layout is title - Open - ×
-          headRow.insertBefore(openBtn, closeBtn);
-        }
+        // Copy URL — handy for inline paste into any markdown editor.
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.textContent = "Copy URL";
+        copyBtn.style.cssText = [
+          "display:inline-flex!important",
+          "align-items:center!important",
+          "padding:5px 11px!important",
+          "border-radius:7px!important",
+          "background:transparent!important",
+          "color:#a1a1aa!important",
+          "border:1px solid rgba(255,255,255,0.08)!important",
+          "font-size:12px!important",
+          "font-weight:500!important",
+          "font-family:inherit!important",
+          "cursor:pointer!important",
+          "transition:background 140ms, color 140ms, border-color 140ms!important",
+        ].join(";");
+        copyBtn.addEventListener("mouseenter", () => {
+          copyBtn.style.background = "rgba(255,255,255,0.06)";
+          copyBtn.style.color = "#fafafa";
+          copyBtn.style.borderColor = "rgba(255,255,255,0.16)";
+        });
+        copyBtn.addEventListener("mouseleave", () => {
+          copyBtn.style.background = "transparent";
+          copyBtn.style.color = "#a1a1aa";
+          copyBtn.style.borderColor = "rgba(255,255,255,0.08)";
+        });
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(imageUrl);
+            copyBtn.textContent = "Copied";
+            setTimeout(() => { copyBtn.textContent = "Copy URL"; }, 1100);
+          } catch { /* noop */ }
+        });
+        actionRow.appendChild(copyBtn);
+
+        toastEl.appendChild(actionRow);
 
         document.body.appendChild(toastEl);
-        toastTimer = setTimeout(dismissToast, firstTime ? 8000 : 3500);
+        toastTimer = setTimeout(dismissToast, firstTime ? 7000 : 4500);
       } catch (e) { /* noop */ }
     }
     function dismissToast() {
