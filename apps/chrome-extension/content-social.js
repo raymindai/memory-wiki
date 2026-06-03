@@ -22,7 +22,8 @@
   const HOST = (location.hostname || "").toLowerCase();
   const isX = /(^|\.)x\.com$|(^|\.)twitter\.com$/.test(HOST);
   const isThreads = /(^|\.)threads\.(net|com)$/.test(HOST);
-  if (!isX && !isThreads) return;
+  const isLinkedIn = /(^|\.)linkedin\.com$/.test(HOST);
+  if (!isX && !isThreads && !isLinkedIn) return;
 
   // ─── Brand assets (data URLs so host CSS can't reach in) ─────────
   // Full blob mark: outer 4 elements PLUS the inner square detail
@@ -73,6 +74,9 @@
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
       html.mw-social-threads .mw-social-btn{right:48px!important}
+      /* LinkedIn renders a wide overflow-menu cluster (… + Save +
+         dismiss) at the post top-right. Nudge clear of all three. */
+      html.mw-social-linkedin .mw-social-btn{right:96px!important;top:12px!important}
     `;
     document.head.appendChild(s);
   }
@@ -269,9 +273,64 @@
         return { body, author: handle, handle, ts, url, images };
       },
     },
+    linkedin: {
+      // Feed post container — works on /feed/ and on standalone
+      // /posts/{slug} permalinks. data-urn is the stable identity;
+      // .feed-shared-update-v2 is the visual wrapper.
+      selector: 'div.feed-shared-update-v2:not([data-mw-social-attached]), div[data-urn^="urn:li:activity:"]:not([data-mw-social-attached])',
+      extract(el) {
+        // Body: LinkedIn renders the post text inside an
+        // .update-components-text or .feed-shared-update-v2__commentary
+        // span. Sponsored posts use slightly different classes but
+        // share the same outer wrapper, so we fall through to the
+        // longest dir="ltr" span.
+        const textEl = el.querySelector(".update-components-text, .feed-shared-update-v2__commentary, .feed-shared-text");
+        let body = textEl ? collectText(textEl) : "";
+        if (!body) {
+          // Fallback: pick the longest text node block inside.
+          const candidates = el.querySelectorAll('[dir="ltr"], span[lang]');
+          for (const c of candidates) {
+            const t = collectText(c);
+            if (t.length > body.length) body = t;
+          }
+        }
+        if (!body) return null;
+        // Author: actor title (display name) + headline (sub-description).
+        const nameEl = el.querySelector(".update-components-actor__title, .feed-shared-actor__name");
+        let author = "";
+        if (nameEl) author = collectText(nameEl).split("\n")[0].trim();
+        // Handle: linkedin doesn't really have @-handles, use slug from author link.
+        const profileLink = el.querySelector('a[href*="/in/"], a[href*="/company/"]');
+        let handle = "";
+        if (profileLink) {
+          const m = (profileLink.getAttribute("href") || "").match(/\/(in|company)\/([^/?#]+)/);
+          if (m) handle = "@" + m[2];
+        }
+        // Timestamp: <time> if present, else the visible sub-description text.
+        const timeEl = el.querySelector("time");
+        const ts = timeEl ? (timeEl.getAttribute("datetime") || timeEl.textContent || "").trim() : "";
+        // Permalink: built from data-urn.
+        const urn = el.getAttribute("data-urn") || el.querySelector("[data-urn]")?.getAttribute("data-urn") || "";
+        let url = location.href;
+        if (urn) {
+          const activityId = urn.replace(/^urn:li:activity:/, "");
+          if (activityId) url = `https://www.linkedin.com/feed/update/urn:li:activity:${activityId}/`;
+        }
+        // Images: post media + linked previews. Skip avatar + reaction icons.
+        const images = Array.from(el.querySelectorAll(
+          ".update-components-image img, " +
+          ".feed-shared-image img, " +
+          ".update-components-article__image img, " +
+          ".feed-shared-linkedin-video img"
+        ))
+          .map(img => img.currentSrc || img.src)
+          .filter(s => s && /^https?:/.test(s));
+        return { body, author, handle, ts, url, images };
+      },
+    },
   };
 
-  const platform = isX ? "x" : "threads";
+  const platform = isX ? "x" : (isThreads ? "threads" : "linkedin");
   const adapter = ADAPTERS[platform];
 
   function collectText(el) {
@@ -438,6 +497,7 @@
   function start() {
     injectStyles();
     if (isThreads) document.documentElement.classList.add("mw-social-threads");
+    if (isLinkedIn) document.documentElement.classList.add("mw-social-linkedin");
     attachToVisiblePosts();
     const obs = new MutationObserver(() => {
       // Throttled — virtual scrolling fires many mutations per second.
