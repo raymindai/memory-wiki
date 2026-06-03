@@ -84,7 +84,7 @@ captures on web, VS Code, desktop, iOS, Android, MCP, CLI.
 
 ## Category
 
-Productivity (primary) · Developer Tools (secondary)
+Productivity (primary), Developer Tools (secondary)
 
 ## Languages
 
@@ -116,5 +116,5 @@ https://memory.wiki/privacy
 ## Marquee tile copy (1400×560, optional)
 
 - Headline: **Save the web. One URL every AI reads.**
-- Sub: Pages · AI chats · Social posts · Images
+- Sub: Pages / AI chats / Social posts / Images
 - Right side: 384px popup mockup
