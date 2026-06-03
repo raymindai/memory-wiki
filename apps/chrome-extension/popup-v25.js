@@ -629,19 +629,27 @@
       moved = 0;
       startX = e.pageX;
       scrollStart = wrap.scrollLeft;
-      wrap.classList.add("dragging");
+      // Don't add .dragging yet — CSS sets `.dragging .intent-chip {
+      // pointer-events:none }`, which kills the chip click for the
+      // pure (no-movement) case. Only flip into drag mode once the
+      // pointer has actually moved past the threshold.
     }
     function onMove(e) {
       if (!isDown) return;
       const dx = e.pageX - startX;
       moved = Math.max(moved, Math.abs(dx));
-      wrap.scrollLeft = scrollStart - dx;
+      if (moved > 4 && !wrap.classList.contains("dragging")) {
+        wrap.classList.add("dragging");
+      }
+      if (wrap.classList.contains("dragging")) wrap.scrollLeft = scrollStart - dx;
     }
     function onUp() {
       if (!isDown) return;
       isDown = false;
       // Defer removing .dragging so any synthesized click after mouseup
-      // is still suppressed by the pointer-events:none rule.
+      // is still suppressed by the pointer-events:none rule (only matters
+      // when we actually dragged, since we no longer add .dragging on
+      // pure clicks).
       setTimeout(() => wrap.classList.remove("dragging"), 0);
     }
     wrap.addEventListener("mousedown", onDown);

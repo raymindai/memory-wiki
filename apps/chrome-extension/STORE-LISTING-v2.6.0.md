@@ -7,7 +7,7 @@ Paste these fields into the Chrome Web Store dev dashboard when uploading
 
 ## Short description (132 chars max)
 
-> Save anything on the web — pages, AI chats, social posts, images — to a memory.wiki URL Claude, ChatGPT & Cursor can read.
+> Save anything on the web — pages, AI chats, X / Threads posts, images — to a memory.wiki URL Claude, ChatGPT & Cursor read.
 
 (131 chars — under cap.)
 
@@ -30,7 +30,7 @@ AI fetches the same markdown, every time.
   or gemini.google.com to save just that Q+A pair, or hit the popup
   to save the whole thread.
 - **Social posts (NEW in 2.6)** — per-post save buttons on X /
-  Twitter / Threads. Captures author, timestamp, body, attached
+  Twitter and Threads. Captures author, timestamp, body, attached
   images, and a link back to the original.
 - **Images (NEW in 2.6)** — hover any image on the web → save to
   your reusable image library at memory.wiki. Insert into any future
@@ -67,7 +67,7 @@ captures on web, VS Code, desktop, iOS, Android, MCP, CLI.
 
 ### v2.6.0 changelog
 
-- NEW: per-post capture for X, Twitter, Threads
+- NEW: per-post capture for X / Twitter and Threads
 - NEW: hover-image save → memory.wiki image library
 - NEW: AI-transform on the fly — type "summarize" / "extract X" /
   "translate to Y" in the popup intent box
@@ -104,7 +104,7 @@ https://memory.wiki/privacy
 
 1. **Hero / popup main** — "Save the conversation. Get a URL Claude, ChatGPT, Cursor all read."
 2. **AI per-message capture** — "One click on any AI message. Q+A pair, clean markdown."
-3. **Social post capture** — "X, Threads — per-post capture with author, time, images."
+3. **Social post capture** — "X and Threads, per-post capture with author, time, images."
 4. **AI intent** — "'Translate to Korean', '5 bullets' — type the intent, AI does it."
 5. **Image library** — "Hover any image on the web → your reusable image library."
 

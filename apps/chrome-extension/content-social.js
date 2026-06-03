@@ -6,8 +6,9 @@
  * extracts {author, timestamp, body text, media URLs} → posts to
  * memory.wiki/api/docs as a markdown doc.
  *
- * Phase 1: X + Threads only (DOM stable, AI workflow priority).
- * LinkedIn / Instagram / Facebook ship in subsequent passes.
+ * X + Threads only. LinkedIn was tried (per-element + floating pill)
+ * but React virtualization made it unreliable; pulled from the
+ * release. Instagram / Facebook deferred.
  *
  * Pattern mirrors content.js's per-message mw-mini-btn — same brand
  * pill, same loading/done/error states.
@@ -22,8 +23,7 @@
   const HOST = (location.hostname || "").toLowerCase();
   const isX = /(^|\.)x\.com$|(^|\.)twitter\.com$/.test(HOST);
   const isThreads = /(^|\.)threads\.(net|com)$/.test(HOST);
-  const isLinkedIn = /(^|\.)linkedin\.com$/.test(HOST);
-  if (!isX && !isThreads && !isLinkedIn) return;
+  if (!isX && !isThreads) return;
 
   // ─── Brand assets (data URLs so host CSS can't reach in) ─────────
   // Full blob mark: outer 4 elements PLUS the inner square detail
@@ -74,17 +74,6 @@
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
       html.mw-social-threads .mw-social-btn{right:48px!important}
-      /* LinkedIn floating-pill mode: pill lives on document.body, not
-         inside the post wrapper, so React's repeated subtree replacement
-         can't destroy it. position:fixed; we set top/left on mousemove
-         to anchor it to whatever post is under the cursor. */
-      .mw-social-float{
-        position:fixed!important;
-        z-index:2147483646!important;
-        opacity:0!important;pointer-events:none!important;
-        transition:opacity 140ms,top 80ms linear,left 80ms linear!important;
-      }
-      .mw-social-float.mw-show{opacity:1!important;pointer-events:auto!important}
     `;
     document.head.appendChild(s);
   }
@@ -281,74 +270,9 @@
         return { body, author: handle, handle, ts, url, images };
       },
     },
-    linkedin: {
-      // LinkedIn feed posts ship under several variants depending on
-      // surface (main feed, profile, search, sponsored). The wrappers
-      // we've seen in the wild:
-      //   <div class="feed-shared-update-v2 ...">                  legacy + still common
-      //   <div data-id="urn:li:activity:...">                       new shell
-      //   <div data-urn="urn:li:activity:...">                      occasional outer wrapper
-      //   <div data-urn="urn:li:aggregatedShare:...">               aggregated shares
-      // Union them so a post is matched once and exactly once.
-      selector: 'div.feed-shared-update-v2:not([data-mw-social-attached]), div[data-id^="urn:li:activity"]:not([data-mw-social-attached]), div[data-urn^="urn:li:activity"]:not([data-mw-social-attached]), div[data-urn^="urn:li:aggregatedShare"]:not([data-mw-social-attached])',
-      extract(el) {
-        // Body: LinkedIn renders the post text inside an
-        // .update-components-text or .feed-shared-update-v2__commentary
-        // span. Sponsored posts use slightly different classes but
-        // share the same outer wrapper, so we fall through to the
-        // longest dir="ltr" span.
-        const textEl = el.querySelector(".update-components-text, .feed-shared-update-v2__commentary, .feed-shared-text");
-        let body = textEl ? collectText(textEl) : "";
-        if (!body) {
-          // Fallback: pick the longest text node block inside.
-          const candidates = el.querySelectorAll('[dir="ltr"], span[lang]');
-          for (const c of candidates) {
-            const t = collectText(c);
-            if (t.length > body.length) body = t;
-          }
-        }
-        if (!body) return null;
-        // Author: actor title (display name) + headline (sub-description).
-        const nameEl = el.querySelector(".update-components-actor__title, .feed-shared-actor__name");
-        let author = "";
-        if (nameEl) author = collectText(nameEl).split("\n")[0].trim();
-        // Handle: linkedin doesn't really have @-handles, use slug from author link.
-        const profileLink = el.querySelector('a[href*="/in/"], a[href*="/company/"]');
-        let handle = "";
-        if (profileLink) {
-          const m = (profileLink.getAttribute("href") || "").match(/\/(in|company)\/([^/?#]+)/);
-          if (m) handle = "@" + m[2];
-        }
-        // Timestamp: <time> if present, else the visible sub-description text.
-        const timeEl = el.querySelector("time");
-        const ts = timeEl ? (timeEl.getAttribute("datetime") || timeEl.textContent || "").trim() : "";
-        // Permalink: prefer the post's own data-id / data-urn, fall
-        // back to any descendant carrying one.
-        const urn = el.getAttribute("data-id")
-          || el.getAttribute("data-urn")
-          || el.querySelector('[data-id^="urn:li:activity"]')?.getAttribute("data-id")
-          || el.querySelector('[data-urn^="urn:li:activity"]')?.getAttribute("data-urn")
-          || "";
-        let url = location.href;
-        const activityMatch = urn.match(/urn:li:activity:(\d+)/);
-        if (activityMatch) {
-          url = `https://www.linkedin.com/feed/update/urn:li:activity:${activityMatch[1]}/`;
-        }
-        // Images: post media + linked previews. Skip avatar + reaction icons.
-        const images = Array.from(el.querySelectorAll(
-          ".update-components-image img, " +
-          ".feed-shared-image img, " +
-          ".update-components-article__image img, " +
-          ".feed-shared-linkedin-video img"
-        ))
-          .map(img => img.currentSrc || img.src)
-          .filter(s => s && /^https?:/.test(s));
-        return { body, author, handle, ts, url, images };
-      },
-    },
   };
 
-  const platform = isX ? "x" : (isThreads ? "threads" : "linkedin");
+  const platform = isX ? "x" : "threads";
   const adapter = ADAPTERS[platform];
 
   function collectText(el) {
@@ -455,7 +379,7 @@
       // Guard: extension may have been reloaded, leaving stale
       // content scripts on the page. chrome.runtime?.id is null
       // once the original ext context is gone; calling sendMessage
-      // then logs ERR_FAILED in a loop on the LinkedIn console.
+      // then logs ERR_FAILED in a loop on the host page console.
       if (!chrome?.runtime?.id) {
         setState(btn, "error");
         setTimeout(() => setState(btn, "idle"), 1500);
@@ -516,10 +440,9 @@
   function attachToVisiblePosts() {
     const nodes = document.querySelectorAll(adapter.selector);
     nodes.forEach((el) => {
-      // Re-check that the button still exists. React on LinkedIn /
-      // Threads often replaces the host's children on re-render and
-      // wipes our button out — without this guard the data flag
-      // sticks, but the button is gone for good.
+      // Threads sometimes replaces the host's children on re-render
+      // and wipes our button out — re-attach when the flag is set but
+      // the button is gone.
       if (el.dataset.mwSocialAttached && el.querySelector(".mw-social-btn")) return;
       el.dataset.mwSocialAttached = "1";
       el.classList.add("mw-social-host");
@@ -527,118 +450,10 @@
     });
   }
 
-  // ─── Debug helper ──────────────────────────────────────────────
-  // Run `window.__mwSocialDebug()` in DevTools on x/threads/linkedin
-  // to see what content-social.js is finding. Logs the count of
-  // matched posts + attached buttons.
-  window.__mwSocialDebug = function () {
-    const counts = {
-      dataUrnActivity: document.querySelectorAll('[data-urn*="activity:"]').length,
-      dataIdActivity: document.querySelectorAll('[data-id^="urn:li:activity"]').length,
-      feedSharedUpdate: document.querySelectorAll('div.feed-shared-update-v2').length,
-      aggregatedShare: document.querySelectorAll('[data-urn^="urn:li:aggregatedShare"]').length,
-    };
-    const matched = document.querySelectorAll(adapter.selector);
-    const attached = document.querySelectorAll(".mw-social-btn");
-    const info = {
-      platform,
-      host: location.hostname,
-      ...counts,
-      matchedByCurrentSelector: matched.length,
-      attachedButtons: attached.length,
-      sampleHost: matched[0] ? (matched[0].tagName + "." + (matched[0].className || "").toString().slice(0, 80)) : "(none)",
-    };
-    console.table(info);
-    alert(JSON.stringify(info, null, 2));
-    return info;
-  };
-  console.log("[memory.wiki social] loaded on", location.hostname, "— platform:", isX ? "x" : isThreads ? "threads" : isLinkedIn ? "linkedin" : "(none)");
-
-  // ─── Floating pill mode (LinkedIn) ──────────────────────────────
-  // LinkedIn's React renders posts inside a heavily virtualized
-  // container that gets destroyed/recreated frequently. Per-element
-  // attach was losing buttons faster than the MutationObserver could
-  // re-attach them. Instead: one pill on document.body, position:fixed,
-  // re-anchored on mousemove via elementsFromPoint + closest(matcher).
-  // The pill never lives inside React's tree.
-  function startFloatingPill(matcherSelector) {
-    const pill = makeButton();
-    pill.classList.add("mw-social-float");
-    document.body.appendChild(pill);
-
-    let hideTimer = null;
-    let currentHost = null;
-
-    function findHost(x, y) {
-      const stack = document.elementsFromPoint(x, y);
-      for (const el of stack) {
-        if (el === pill || pill.contains(el)) continue;
-        const host = el.closest(matcherSelector);
-        if (host) return host;
-      }
-      return null;
-    }
-
-    function anchorTo(host) {
-      const rect = host.getBoundingClientRect();
-      const pillRect = pill.getBoundingClientRect();
-      const pw = pillRect.width || 64;
-      const top = Math.max(8, rect.top + 12);
-      const left = Math.max(8, rect.right - pw - 96);
-      // !important on inline style is required to beat .mw-social-btn's
-      // class-level `top:6px!important; right:44px!important`.
-      pill.style.setProperty("top", top + "px", "important");
-      pill.style.setProperty("left", left + "px", "important");
-      pill.style.setProperty("right", "auto", "important");
-    }
-
-    function showOnHost(host) {
-      if (!host) return;
-      currentHost = host;
-      pill._mwHost = host;
-      anchorTo(host);
-      pill.classList.add("mw-show");
-    }
-
-    function hide() {
-      pill.classList.remove("mw-show");
-      currentHost = null;
-      pill._mwHost = null;
-    }
-
-    function onMove(e) {
-      if (pill.classList.contains("mw-saving") || pill.classList.contains("mw-done") || pill.classList.contains("mw-error")) return;
-      const host = findHost(e.clientX, e.clientY);
-      if (host) {
-        clearTimeout(hideTimer);
-        if (host !== currentHost) showOnHost(host);
-        else anchorTo(host);
-      } else {
-        clearTimeout(hideTimer);
-        hideTimer = setTimeout(hide, 400);
-      }
-    }
-
-    document.addEventListener("mousemove", onMove, { passive: true });
-    window.addEventListener("scroll", () => { if (currentHost) anchorTo(currentHost); }, { passive: true, capture: true });
-  }
-
   function start() {
     injectStyles();
     if (isThreads) document.documentElement.classList.add("mw-social-threads");
-    if (isLinkedIn) {
-      document.documentElement.classList.add("mw-social-linkedin");
-      // LinkedIn uses the floating pill, NOT per-element attach.
-      // matcherSelector is the same union of post wrappers minus the
-      // :not([data-mw-social-attached]) clause — that flag is irrelevant
-      // when we're not stamping anything onto the host.
-      const matcher = 'div.feed-shared-update-v2, div[data-id^="urn:li:activity"], div[data-urn^="urn:li:activity"], div[data-urn^="urn:li:aggregatedShare"]';
-      startFloatingPill(matcher);
-      console.log("[memory.wiki social] LinkedIn floating-pill mode active");
-      return;
-    }
     attachToVisiblePosts();
-    console.log("[memory.wiki social] initial attach: matched", document.querySelectorAll(adapter.selector).length, "buttons placed", document.querySelectorAll(".mw-social-btn").length);
     const obs = new MutationObserver(() => {
       if (start._t) return;
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
