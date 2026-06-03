@@ -319,16 +319,23 @@
         if (toastEl) { clearTimeout(toastTimer); toastEl.remove(); toastEl = null; }
         toastEl = document.createElement("div");
         toastEl.setAttribute("data-mw-save-img", "1");
+        // Toast container — vertical card layout. Header row pairs
+        // the brand mark + title + dismiss; body row is the sub
+        // copy; footer row is the action button. Each row owns its
+        // own line so the title doesn't fight for horizontal space
+        // with the CTA and the description doesn't wrap at 10
+        // characters anymore.
         toastEl.style.cssText = [
           "position:fixed!important",
           "top:18px!important",
           "right:18px!important",
           "z-index:2147483647!important",
           "display:flex!important",
-          "align-items:center!important",
-          "gap:10px!important",
+          "flex-direction:column!important",
+          "gap:" + (firstTime ? "10px" : "6px") + "!important",
           "padding:" + (firstTime ? "12px 14px" : "10px 12px") + "!important",
-          "max-width:" + (firstTime ? "320px" : "260px") + "!important",
+          "width:" + (firstTime ? "340px" : "260px") + "!important",
+          "max-width:calc(100vw - 36px)!important",
           "background:#09090b!important",
           "color:#fafafa!important",
           "border:1px solid rgba(255,255,255,0.10)!important",
@@ -341,65 +348,99 @@
           "box-sizing:border-box!important",
         ].join(";");
 
-        const markWrap = document.createElement("span");
-        markWrap.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:24px!important;height:24px!important;flex-shrink:0!important";
-        markWrap.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 24);
-        toastEl.appendChild(markWrap);
+        // ── Row 1: blob + title + × ─────────────────────────────────
+        const headRow = document.createElement("div");
+        headRow.style.cssText = "display:flex!important;align-items:center!important;gap:10px!important;width:100%!important";
 
-        const body = document.createElement("div");
-        body.style.cssText = "display:flex!important;flex-direction:column!important;gap:" + (firstTime ? "4px" : "2px") + "!important;min-width:0!important;flex:1 1 auto!important";
+        const markWrap = document.createElement("span");
+        markWrap.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;flex-shrink:0!important";
+        markWrap.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 22);
+        headRow.appendChild(markWrap);
 
         const title = document.createElement("div");
-        title.style.cssText = "font-weight:600!important;color:#fafafa!important;font-size:" + (firstTime ? "13px" : "12px") + "!important";
+        title.style.cssText = "flex:1 1 auto!important;min-width:0!important;font-weight:600!important;color:#fafafa!important;font-size:13px!important;line-height:1.3!important";
         title.textContent = firstTime ? "Saved to your image library" : "Saved";
-        body.appendChild(title);
-
-        if (firstTime) {
-          const sub = document.createElement("div");
-          sub.style.cssText = "color:#a1a1aa!important;font-size:12px!important;line-height:1.45!important";
-          sub.textContent = "Open memory.wiki/library anytime to browse, copy, or insert it into any doc.";
-          body.appendChild(sub);
-        }
-        toastEl.appendChild(body);
-
-        const openBtn = document.createElement("a");
-        openBtn.href = "https://memory.wiki/library";
-        openBtn.target = "_blank";
-        openBtn.rel = "noopener";
-        openBtn.textContent = firstTime ? "Open library" : "Open";
-        openBtn.style.cssText = [
-          "display:inline-flex!important",
-          "align-items:center!important",
-          "justify-content:center!important",
-          "padding:6px 10px!important",
-          "border-radius:8px!important",
-          "background:rgba(255,255,255,0.08)!important",
-          "color:#fafafa!important",
-          "border:1px solid rgba(255,255,255,0.14)!important",
-          "text-decoration:none!important",
-          "font-size:11.5px!important",
-          "font-weight:500!important",
-          "font-family:inherit!important",
-          "flex-shrink:0!important",
-          "cursor:pointer!important",
-          "transition:background 140ms, border-color 140ms",
-        ].join(";");
-        openBtn.addEventListener("mouseenter", () => {
-          openBtn.style.background = "rgba(255,255,255,0.14)";
-          openBtn.style.borderColor = "rgba(255,255,255,0.24)";
-        });
-        openBtn.addEventListener("mouseleave", () => {
-          openBtn.style.background = "rgba(255,255,255,0.08)";
-          openBtn.style.borderColor = "rgba(255,255,255,0.14)";
-        });
-        toastEl.appendChild(openBtn);
+        headRow.appendChild(title);
 
         const closeBtn = document.createElement("button");
         closeBtn.setAttribute("aria-label", "Dismiss");
-        closeBtn.style.cssText = "background:transparent!important;border:0!important;padding:4px!important;margin:-4px -4px -4px 0!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important";
+        closeBtn.style.cssText = "background:transparent!important;border:0!important;padding:2px!important;margin:0!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important;flex-shrink:0!important;width:18px!important;height:18px!important";
         closeBtn.innerHTML = makeIcon(X_RAW, "#71717a", 12);
         closeBtn.addEventListener("click", () => dismissToast());
-        toastEl.appendChild(closeBtn);
+        closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#fafafa"; });
+        closeBtn.addEventListener("mouseleave", () => { closeBtn.style.color = "#71717a"; });
+        headRow.appendChild(closeBtn);
+
+        toastEl.appendChild(headRow);
+
+        if (firstTime) {
+          // ── Row 2: subcopy ─────────────────────────────────────────
+          const sub = document.createElement("div");
+          sub.style.cssText = "color:#a1a1aa!important;font-size:12px!important;line-height:1.5!important;padding-left:32px!important";
+          sub.textContent = "Open memory.wiki/library anytime to browse, copy, or insert it into any doc.";
+          toastEl.appendChild(sub);
+
+          // ── Row 3: action button ───────────────────────────────────
+          const actionRow = document.createElement("div");
+          actionRow.style.cssText = "display:flex!important;padding-left:32px!important";
+          const openBtn = document.createElement("a");
+          openBtn.href = "https://memory.wiki/library";
+          openBtn.target = "_blank";
+          openBtn.rel = "noopener";
+          openBtn.textContent = "Open library";
+          openBtn.style.cssText = [
+            "display:inline-flex!important",
+            "align-items:center!important",
+            "justify-content:center!important",
+            "padding:6px 12px!important",
+            "border-radius:8px!important",
+            "background:rgba(255,255,255,0.08)!important",
+            "color:#fafafa!important",
+            "border:1px solid rgba(255,255,255,0.14)!important",
+            "text-decoration:none!important",
+            "font-size:12px!important",
+            "font-weight:500!important",
+            "font-family:inherit!important",
+            "cursor:pointer!important",
+            "transition:background 140ms, border-color 140ms!important",
+          ].join(";");
+          openBtn.addEventListener("mouseenter", () => {
+            openBtn.style.background = "rgba(255,255,255,0.14)";
+            openBtn.style.borderColor = "rgba(255,255,255,0.24)";
+          });
+          openBtn.addEventListener("mouseleave", () => {
+            openBtn.style.background = "rgba(255,255,255,0.08)";
+            openBtn.style.borderColor = "rgba(255,255,255,0.14)";
+          });
+          actionRow.appendChild(openBtn);
+          toastEl.appendChild(actionRow);
+        } else {
+          // Compact (non-first) toast: small inline 'Open' link
+          // beside the title row. No separate action row.
+          const openBtn = document.createElement("a");
+          openBtn.href = "https://memory.wiki/library";
+          openBtn.target = "_blank";
+          openBtn.rel = "noopener";
+          openBtn.textContent = "Open";
+          openBtn.style.cssText = [
+            "display:inline-flex!important",
+            "align-items:center!important",
+            "padding:3px 9px!important",
+            "border-radius:6px!important",
+            "background:rgba(255,255,255,0.08)!important",
+            "color:#fafafa!important",
+            "border:1px solid rgba(255,255,255,0.14)!important",
+            "text-decoration:none!important",
+            "font-size:11px!important",
+            "font-weight:500!important",
+            "font-family:inherit!important",
+            "cursor:pointer!important",
+            "flex-shrink:0!important",
+            "margin-right:6px!important",
+          ].join(";");
+          // Insert before the close button so layout is title - Open - ×
+          headRow.insertBefore(openBtn, closeBtn);
+        }
 
         document.body.appendChild(toastEl);
         toastTimer = setTimeout(dismissToast, firstTime ? 8000 : 3500);
