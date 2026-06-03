@@ -137,10 +137,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "AI returned empty output" }, { status: 502 });
   }
 
-  // Prepend AI prompt as a quoted note above the H1 so future
-  // readers see what the user asked for. The H1 the LLM produced
-  // stays as the doc title.
-  const finalMd = `> **AI prompt:** ${intent}\n\n${transformed.trim()}\n`;
+  // Prepend a single-line attribution above the H1 so future readers
+  // see what produced the doc. User intent shows the prompt verbatim;
+  // auto mode shows the detected page-type template name.
+  const header = intent
+    ? `> **AI prompt:** ${intent}`
+    : `> _Auto-extracted as **${pageType}**_`;
+  const finalMd = `${header}\n\n${transformed.trim()}\n`;
   let title = extractTitleFromMd(finalMd) || "AI transform";
 
   // Retry on (a) PK collision (nanoid clash) and (b) dedup-lock
