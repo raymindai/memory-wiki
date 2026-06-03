@@ -358,6 +358,23 @@ function showNotOnAiPage() {
 
 // ─── Actions ───
 
+// chrome.tabs.sendMessage can hang indefinitely when the receiving
+// content script crashes mid-handler (the channel is held open by
+// `return true` but sendResponse never fires). Wrap with a hard
+// timeout so the popup recovers instead of sitting on "Capturing"
+// forever. Returns the response, OR an error stub if either limit
+// hits.
+function sendMessageWithTimeout(tabId, msg, ms) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (value) => { if (!done) { done = true; resolve(value); } };
+    const t = setTimeout(() => finish({ error: "timed out waiting for capture" }), ms);
+    Promise.resolve(chrome.tabs.sendMessage(tabId, msg))
+      .then((r) => { clearTimeout(t); finish(r); })
+      .catch((err) => { clearTimeout(t); finish({ error: String(err && err.message || err) }); });
+  });
+}
+
 async function ensureContentScript(tabId, kind /* "page" | "ai" */) {
   // Try a no-op ping; if no response, inject the appropriate files.
   try {
@@ -391,20 +408,24 @@ btnCapture.addEventListener("click", async () => {
       // General web page — route through the content-page.js script
       // (manifest already injects it; we still ensure for first-load safety).
       await ensureContentScript(tab.id, "page");
-      const response = await chrome.tabs.sendMessage(tab.id, { action: "capture-page" });
+      const response = await sendMessageWithTimeout(tab.id, { action: "capture-page" }, 25000);
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
+      } else if (response && response.error) {
+        setStatus("capture failed: " + response.error, "error");
       } else {
         setStatus("no content found", "error");
       }
     } else {
       // AI conversation — existing path.
-      const response = await chrome.tabs.sendMessage(tab.id, {
+      const response = await sendMessageWithTimeout(tab.id, {
         action: "capture-conversation",
         lastN,
-      });
+      }, 25000);
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
+      } else if (response && response.error) {
+        setStatus("capture failed: " + response.error, "error");
       } else {
         setStatus("no conversation found", "error");
       }
@@ -421,9 +442,11 @@ btnCapture.addEventListener("click", async () => {
       }
       const action = kind === "page" ? "capture-page" : "capture-conversation";
       const payload = kind === "page" ? { action } : { action, lastN };
-      const response = await chrome.tabs.sendMessage(tab.id, payload);
+      const response = await sendMessageWithTimeout(tab.id, payload, 25000);
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
+      } else if (response && response.error) {
+        setStatus("capture failed: " + response.error, "error");
       } else {
         setStatus(kind === "page" ? "no content found" : "no conversation found", "error");
       }

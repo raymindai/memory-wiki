@@ -220,9 +220,32 @@
       // Tweet container — works on x.com timeline + permalink pages.
       selector: 'article[data-testid="tweet"]:not([data-mw-social-attached])',
       extract(el) {
-        const textEl = el.querySelector('[data-testid="tweetText"]');
-        const body = textEl ? collectText(textEl) : "";
-        if (!body && !el.querySelector('[data-testid="tweetPhoto"]')) return null;
+        // Body — X rolled the tweet body through several variants:
+        //   1. [data-testid="tweetText"] (most common)
+        //   2. <div lang="..."> with the longest inner text (sometimes
+        //      tweetText is split across multiple spans + reposted-quote
+        //      sub-tweets steal the testid)
+        //   3. Longest visible span as a last resort
+        // Pick the longest non-empty among all candidates so we don't
+        // mistakenly pick the quote-tweet author's display name.
+        let body = "";
+        const tried = [
+          ...el.querySelectorAll('[data-testid="tweetText"]'),
+          ...el.querySelectorAll('div[lang]'),
+        ];
+        for (const c of tried) {
+          const t = collectText(c);
+          if (t.length > body.length) body = t;
+        }
+        if (!body) {
+          // Last-ditch: longest single span.
+          const spans = el.querySelectorAll('span');
+          for (const s of spans) {
+            const t = (s.textContent || "").trim();
+            if (t.length > body.length && t.length > 12 && !t.startsWith("@")) body = t;
+          }
+        }
+        if (!body && !el.querySelector('[data-testid="tweetPhoto"], img[alt][src*="pbs.twimg.com"]')) return null;
         const userEl = el.querySelector('[data-testid="User-Name"]');
         let author = "", handle = "";
         if (userEl) {
@@ -238,9 +261,14 @@
         // Permalink: any anchor with /status/ in href
         const permalinkEl = el.querySelector('a[href*="/status/"]');
         const url = permalinkEl ? new URL(permalinkEl.getAttribute("href") || "", location.origin).href : location.href;
-        const images = Array.from(el.querySelectorAll('[data-testid="tweetPhoto"] img'))
-          .map(img => img.currentSrc || img.src)
-          .filter(Boolean);
+        // Images: official tweetPhoto wrapper + raw twimg pbs urls
+        // (sometimes X strips the testid for video poster frames).
+        const seen = new Set();
+        const images = [];
+        el.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]').forEach((img) => {
+          const src = img.currentSrc || img.src;
+          if (src && !seen.has(src)) { seen.add(src); images.push(src); }
+        });
         return { body, author, handle, ts, url, images };
       },
     },

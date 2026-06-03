@@ -795,13 +795,29 @@
 
   chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request && request.action === "capture-page") {
-      const out = capturePage();
-      sendResponse(out);
+      // capturePage runs Readability + DOM walks against the live
+      // document. On SPA-heavy hosts (x.com, big React apps) the clone
+      // can throw or hit edge cases — if anything escapes the
+      // try/catch, sendResponse never fires and the popup hangs on
+      // "Capturing…" forever. Always respond, even with a stub, so
+      // the caller can fall through to its error path.
+      try {
+        const out = capturePage();
+        sendResponse(out);
+      } catch (err) {
+        console.warn("[memory.wiki] capturePage threw:", err);
+        sendResponse({ markdown: "", title: document.title || "", pageType: "generic", error: String(err && err.message || err) });
+      }
       return true;
     }
     if (request && (request.action === "capture-page-selection" || request.action === "capture-selection")) {
-      const out = captureSelection();
-      sendResponse(out);
+      try {
+        const out = captureSelection();
+        sendResponse(out);
+      } catch (err) {
+        console.warn("[memory.wiki] captureSelection threw:", err);
+        sendResponse({ markdown: "", title: document.title || "", error: String(err && err.message || err) });
+      }
       return true;
     }
     if (request && request.action === "ping-page") {
