@@ -759,7 +759,7 @@
                 title: filename,
                 source: "chrome-image",
                 ts: Date.now(),
-              }, ...prev.filter((p) => p.url !== (resp.url || src))].slice(0, 10);
+              }, ...prev.filter((p) => p.url !== (resp.url || src))].slice(0, 5);
               chrome.storage.local.set({ "mw-recent": next });
             });
           } catch { /* noop */ }

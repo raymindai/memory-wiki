@@ -1041,7 +1041,7 @@
                 source: "chrome-" + platformName().toLowerCase(),
                 ts: Date.now(),
               };
-              const next = [entry, ...prev.filter((p) => p.url !== docUrl)].slice(0, 10);
+              const next = [entry, ...prev.filter((p) => p.url !== docUrl)].slice(0, 5);
               chrome.storage.local.set({ "mw-recent": next });
             });
           } catch { /* noop */ }

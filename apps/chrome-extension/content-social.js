@@ -333,7 +333,7 @@
     try {
       chrome.storage.local.get(["mw-recent"], (data) => {
         const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
-        const next = [entry, ...prev.filter((p) => p.url !== entry.url)].slice(0, 10);
+        const next = [entry, ...prev.filter((p) => p.url !== entry.url)].slice(0, 5);
         chrome.storage.local.set({ "mw-recent": next });
       });
     } catch { /* noop */ }
