@@ -45,9 +45,8 @@
     s.id = "mw-social-style";
     s.textContent = `
       /* Position: top-right minus 44px so we clear the platform's own
-         '...' (more) menu button, which sits at the post's top-right
-         on both X and Threads. With right:8 the save pill was
-         overlapping their menu and stealing the click. */
+         '...' (more) menu button. Threads renders a wider menu cluster
+         (icon + spacing) so it gets an extra 24px nudge. */
       .mw-social-btn{position:absolute!important;top:6px!important;right:44px!important;z-index:9999!important;
         display:inline-flex!important;align-items:center!important;gap:6px!important;
         padding:4px 8px 4px 4px!important;border-radius:14px!important;
@@ -73,6 +72,7 @@
       .mw-social-btn .mw-spin{display:inline-block!important;width:12px!important;height:12px!important;border:1.6px solid rgba(251,146,60,0.25)!important;border-top-color:#fb923c!important;border-radius:50%!important;animation:mw-social-spin .8s linear infinite!important;box-sizing:border-box!important}
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
+      html.mw-social-threads .mw-social-btn{right:72px!important}
     `;
     document.head.appendChild(s);
   }
@@ -80,6 +80,137 @@
   const PLUS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
   const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+  // ─── Saved-toast (mirrors content-page.js showSavedToast) ────────
+  let toastEl = null;
+  let toastTimer = null;
+  function injectToastStyles() {
+    if (document.getElementById("mw-social-toast-style")) return;
+    const s = document.createElement("style");
+    s.id = "mw-social-toast-style";
+    s.textContent =
+      "@keyframes mw-social-toast-in{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}" +
+      "@keyframes mw-social-toast-out{to{transform:translateY(-8px);opacity:0}}";
+    document.head.appendChild(s);
+  }
+  function dismissToast() {
+    if (!toastEl) return;
+    const el = toastEl;
+    toastEl = null;
+    clearTimeout(toastTimer);
+    el.style.animation = "mw-social-toast-out 180ms ease-in forwards";
+    setTimeout(() => { try { el.remove(); } catch {} }, 200);
+  }
+  async function showSavedPostToast(docUrl) {
+    injectToastStyles();
+    const seenKey = "mw-saved-post-toast-seen";
+    const seenObj = await new Promise((r) => chrome.storage.local.get([seenKey], r));
+    const firstTime = !seenObj[seenKey];
+    if (firstTime) chrome.storage.local.set({ [seenKey]: Date.now() });
+
+    if (toastEl) { clearTimeout(toastTimer); toastEl.remove(); toastEl = null; }
+    toastEl = document.createElement("div");
+    toastEl.setAttribute("data-mw-social-toast", "1");
+    toastEl.style.cssText = [
+      "position:fixed!important",
+      "top:18px!important",
+      "right:18px!important",
+      "z-index:2147483647!important",
+      "display:flex!important",
+      "flex-direction:column!important",
+      "gap:" + (firstTime ? "10px" : "6px") + "!important",
+      "padding:" + (firstTime ? "12px 14px" : "10px 12px") + "!important",
+      "width:" + (firstTime ? "340px" : "260px") + "!important",
+      "max-width:calc(100vw - 36px)!important",
+      "background:#09090b!important",
+      "color:#fafafa!important",
+      "border:1px solid rgba(255,255,255,0.10)!important",
+      "border-radius:12px!important",
+      "box-shadow:0 8px 24px rgba(0,0,0,0.40), 0 0 0 1px rgba(0,0,0,0.30)!important",
+      "font-family:-apple-system,BlinkMacSystemFont,sans-serif!important",
+      "font-size:13px!important",
+      "line-height:1.4!important",
+      "animation:mw-social-toast-in 220ms ease-out!important",
+      "box-sizing:border-box!important",
+    ].join(";");
+
+    const headRow = document.createElement("div");
+    headRow.style.cssText = "display:flex!important;align-items:center!important;gap:10px!important;width:100%!important";
+
+    const markWrap = document.createElement("span");
+    markWrap.style.cssText = "display:inline-flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;flex-shrink:0!important";
+    markWrap.innerHTML = '<img src="' + BLOB_DATA + '" alt="" style="width:22px!important;height:22px!important;display:block!important;border:0!important;margin:0!important;padding:0!important;background:transparent!important">';
+    headRow.appendChild(markWrap);
+
+    const title = document.createElement("div");
+    title.style.cssText = "flex:1 1 auto!important;min-width:0!important;font-weight:600!important;color:#fafafa!important;font-size:13px!important;line-height:1.3!important";
+    title.textContent = firstTime ? `Post saved to memory.wiki` : "Post saved";
+    headRow.appendChild(title);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.setAttribute("aria-label", "Dismiss");
+    closeBtn.style.cssText = "background:transparent!important;border:0!important;padding:2px!important;margin:0!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important;flex-shrink:0!important;width:18px!important;height:18px!important";
+    closeBtn.innerHTML = '<span style="display:inline-flex;width:12px;height:12px;color:currentColor">' + X_SVG + '</span>';
+    closeBtn.addEventListener("click", dismissToast);
+    closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#fafafa"; });
+    closeBtn.addEventListener("mouseleave", () => { closeBtn.style.color = "#71717a"; });
+
+    function makeOpenBtn(label, opts) {
+      const a = document.createElement("a");
+      a.href = docUrl;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = label;
+      a.style.cssText = [
+        "display:inline-flex!important",
+        "align-items:center!important",
+        "padding:" + (opts.large ? "6px 12px" : "3px 9px") + "!important",
+        "border-radius:" + (opts.large ? "8px" : "6px") + "!important",
+        "background:rgba(255,255,255,0.08)!important",
+        "color:#fafafa!important",
+        "border:1px solid rgba(255,255,255,0.14)!important",
+        "text-decoration:none!important",
+        "font-size:" + (opts.large ? "12px" : "11px") + "!important",
+        "font-weight:500!important",
+        "font-family:inherit!important",
+        "cursor:pointer!important",
+        "flex-shrink:0!important",
+        "transition:background 140ms, border-color 140ms!important",
+      ].join(";");
+      a.addEventListener("mouseenter", () => {
+        a.style.background = "rgba(255,255,255,0.14)";
+        a.style.borderColor = "rgba(255,255,255,0.24)";
+      });
+      a.addEventListener("mouseleave", () => {
+        a.style.background = "rgba(255,255,255,0.08)";
+        a.style.borderColor = "rgba(255,255,255,0.14)";
+      });
+      return a;
+    }
+
+    if (firstTime) {
+      toastEl.appendChild(headRow);
+      const sub = document.createElement("div");
+      sub.style.cssText = "color:#a1a1aa!important;font-size:12px!important;line-height:1.5!important;padding-left:32px!important";
+      sub.textContent = "The post (text, attached images, author + date) is now a markdown doc you can edit, share, or paste into any AI.";
+      toastEl.appendChild(sub);
+
+      const actionRow = document.createElement("div");
+      actionRow.style.cssText = "display:flex!important;padding-left:32px!important";
+      actionRow.appendChild(makeOpenBtn("Open doc", { large: true }));
+      toastEl.appendChild(actionRow);
+      headRow.appendChild(closeBtn);
+    } else {
+      headRow.appendChild(makeOpenBtn("Open", { large: false }));
+      headRow.appendChild(closeBtn);
+      // headRow already inserts Open before close — adjust order
+      headRow.insertBefore(headRow.lastChild.previousSibling, closeBtn);
+      toastEl.appendChild(headRow);
+    }
+
+    document.body.appendChild(toastEl);
+    toastTimer = setTimeout(dismissToast, firstTime ? 8000 : 3500);
+  }
 
   // ─── Per-platform adapters ───────────────────────────────────────
   // Each returns: { selector, extract(el): {body, author, handle, ts, url, images} | null }
@@ -197,6 +328,17 @@
     return { markdown: lines.join("\n").trim(), title: titleSeed };
   }
 
+  // Shared Recent-list writer (matches popup.js's mw-recent schema)
+  function addToRecent(entry) {
+    try {
+      chrome.storage.local.get(["mw-recent"], (data) => {
+        const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
+        const next = [entry, ...prev.filter((p) => p.url !== entry.url)].slice(0, 10);
+        chrome.storage.local.set({ "mw-recent": next });
+      });
+    } catch { /* noop */ }
+  }
+
   function makeButton() {
     const el = document.createElement("div");
     el.className = "mw-social-btn";
@@ -248,8 +390,22 @@
       });
       if (resp && resp.ok) {
         setState(btn, "done");
-        // After 1.5s, revert to idle so the user can re-save if they
-        // want a fresh copy (different revision, etc.).
+        try {
+          const parsed = JSON.parse(resp.body || "{}");
+          if (parsed.id) {
+            const docUrl = `https://memory.wiki/${parsed.id}`;
+            showSavedPostToast(docUrl);
+            // Push to popup Recent list (chrome.storage.local
+            // mw-recent) so the user sees the new doc in their
+            // capture history without needing the popup to be open.
+            addToRecent({
+              url: docUrl,
+              title: data.body.split("\n")[0].slice(0, 80) || `Post by ${data.handle || "unknown"}`,
+              source: `chrome-${platform}`,
+              ts: Date.now(),
+            });
+          }
+        } catch { /* still show done state */ }
         setTimeout(() => setState(btn, "idle"), 1500);
       } else {
         setState(btn, "error");
@@ -273,6 +429,7 @@
 
   function start() {
     injectStyles();
+    if (isThreads) document.documentElement.classList.add("mw-social-threads");
     attachToVisiblePosts();
     const obs = new MutationObserver(() => {
       // Throttled — virtual scrolling fires many mutations per second.

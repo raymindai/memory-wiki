@@ -455,6 +455,69 @@
       setTimeout(() => { try { el.remove(); } catch {} }, 200);
     }
 
+    // Generic capture toast used by both image saves AND any other
+    // capture path that wants the same UX (page capture, selection
+    // capture, anything from the popup). Expose to outer scope so
+    // the runtime.onMessage listener can call it.
+    window.__mwCaptureSavedToast = function ({ url, label }) {
+      injectStyles();
+      if (toastEl) { clearTimeout(toastTimer); toastEl.remove(); toastEl = null; }
+      toastEl = document.createElement("div");
+      toastEl.setAttribute("data-mw-save-img", "1");
+      toastEl.style.cssText = [
+        "position:fixed!important",
+        "top:18px!important",
+        "right:18px!important",
+        "z-index:2147483647!important",
+        "display:flex!important",
+        "align-items:center!important",
+        "gap:10px!important",
+        "padding:10px 12px!important",
+        "max-width:340px!important",
+        "background:#09090b!important",
+        "color:#fafafa!important",
+        "border:1px solid rgba(255,255,255,0.10)!important",
+        "border-radius:12px!important",
+        "box-shadow:0 8px 24px rgba(0,0,0,0.40), 0 0 0 1px rgba(0,0,0,0.30)!important",
+        "font-family:-apple-system,BlinkMacSystemFont,sans-serif!important",
+        "font-size:13px!important",
+        "animation:mw-toast-in 220ms ease-out!important",
+        "box-sizing:border-box!important",
+      ].join(";");
+
+      const m = document.createElement("span");
+      m.style.cssText = "display:inline-flex!important;width:22px!important;height:22px!important;flex-shrink:0!important";
+      m.innerHTML = makeIcon(BLOB_RAW, "#fafafa", 22);
+      toastEl.appendChild(m);
+
+      const t = document.createElement("div");
+      t.style.cssText = "flex:1 1 auto!important;font-weight:600!important;color:#fafafa!important;font-size:13px!important;min-width:0!important;line-height:1.3!important";
+      t.textContent = label || "Saved to memory.wiki";
+      toastEl.appendChild(t);
+
+      if (url) {
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = "Open";
+        a.style.cssText = "display:inline-flex!important;align-items:center!important;padding:3px 9px!important;border-radius:6px!important;background:rgba(255,255,255,0.08)!important;color:#fafafa!important;border:1px solid rgba(255,255,255,0.14)!important;text-decoration:none!important;font-size:11px!important;font-weight:500!important;font-family:inherit!important;cursor:pointer!important;flex-shrink:0!important;transition:background 140ms,border-color 140ms!important";
+        a.addEventListener("mouseenter", () => { a.style.background = "rgba(255,255,255,0.14)"; a.style.borderColor = "rgba(255,255,255,0.24)"; });
+        a.addEventListener("mouseleave", () => { a.style.background = "rgba(255,255,255,0.08)"; a.style.borderColor = "rgba(255,255,255,0.14)"; });
+        toastEl.appendChild(a);
+      }
+
+      const x = document.createElement("button");
+      x.setAttribute("aria-label", "Dismiss");
+      x.style.cssText = "background:transparent!important;border:0!important;padding:2px!important;color:#71717a!important;cursor:pointer!important;display:inline-flex!important;width:18px!important;height:18px!important;border-radius:4px!important;flex-shrink:0!important";
+      x.innerHTML = makeIcon(X_RAW, "#71717a", 12);
+      x.addEventListener("click", dismissToast);
+      toastEl.appendChild(x);
+
+      document.body.appendChild(toastEl);
+      toastTimer = setTimeout(dismissToast, 4000);
+    };
+
     function makeButton() {
       injectStyles();
       const el = document.createElement("div");
@@ -658,6 +721,22 @@
           btn.style.background = "rgba(255,255,255,0.10)";
           if (glyph) glyph.innerHTML = makeIcon(CHECK_RAW, "#fb923c", 14);
           showSavedToast(resp.url || src);
+          // Push to popup Recent so saved images show up alongside
+          // doc captures. URL points at the uploaded image so a click
+          // opens the asset directly.
+          try {
+            chrome.storage.local.get(["mw-recent"], (data) => {
+              const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
+              const filename = (src.split("/").pop() || "image").split("?")[0].slice(0, 80) || "image";
+              const next = [{
+                url: resp.url || src,
+                title: filename,
+                source: "chrome-image",
+                ts: Date.now(),
+              }, ...prev.filter((p) => p.url !== (resp.url || src))].slice(0, 10);
+              chrome.storage.local.set({ "mw-recent": next });
+            });
+          } catch { /* noop */ }
           setTimeout(hideNow, 900);
         } else {
           btn.dataset.state = "error";
@@ -700,6 +779,20 @@
     }
     if (request && request.action === "ping-page") {
       sendResponse({ ok: true, kind: "general" });
+      return true;
+    }
+    if (request && request.action === "show-saved-toast") {
+      // Triggered by background after popup-driven captures (page,
+      // selection) succeed. Pass through to the same toast helper
+      // image saves use so all capture surfaces feel consistent.
+      try {
+        const url = request.url || "";
+        const label = request.label || "Page saved";
+        if (typeof window.__mwCaptureSavedToast === "function") {
+          window.__mwCaptureSavedToast({ url, label });
+        }
+      } catch { /* noop */ }
+      sendResponse({ ok: true });
       return true;
     }
   });
