@@ -623,8 +623,13 @@
        there's actually more to scroll. Sit on top of the edge fades. */
     .chip-nav {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
+      /* Center vertically inside the rail content box (rail has 8px
+         top padding + 2px bottom padding from .intent-chips). Using
+         auto margins with bounded top/bottom centers the button on
+         the chip row instead of the whole rail. */
+      top: 8px;
+      bottom: 2px;
+      margin: auto 0;
       width: 22px; height: 22px;
       display: inline-flex;
       align-items: center;
@@ -643,6 +648,14 @@
     .chip-nav:hover { color: var(--ink); border-color: var(--ink); }
     .chip-nav.left { left: 16px; }
     .chip-nav.right { right: 16px; }
+
+    /* Drag-to-scroll cursor states */
+    .intent-chips { cursor: grab; }
+    .intent-chips.dragging {
+      cursor: grabbing;
+      scroll-behavior: auto; /* no smooth interpolation while dragging */
+    }
+    .intent-chips.dragging .intent-chip { pointer-events: none; }
     .intent-chips-rail.can-scroll-left .chip-nav.left,
     .intent-chips-rail.can-scroll-right .chip-nav.right {
       opacity: 1;
@@ -714,24 +727,34 @@
       align-items: center;
       gap: 4px;
       flex-shrink: 0;
-      margin-left: 2px;
+      margin-left: 0;
+      transition: margin-left 160ms ease;
+    }
+    .intent-chip:hover .chip-actions,
+    .intent-chip.is-favorite .chip-actions {
+      margin-left: 4px;
     }
     .intent-chip .chip-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 12px; height: 12px;
+      width: 0; height: 12px;
+      overflow: hidden;
       color: var(--faint);
       cursor: pointer;
       opacity: 0;
-      transition: opacity 120ms, color 120ms;
+      transition: width 160ms ease, opacity 160ms ease, color 120ms;
     }
-    .intent-chip:hover .chip-btn { opacity: 0.7; }
+    .intent-chip:hover .chip-btn { width: 12px; opacity: 0.7; }
     .intent-chip .chip-btn:hover { opacity: 1; }
     .intent-chip .chip-btn.fav:hover { color: var(--micro-amber, #f59e0b); }
     .intent-chip .chip-btn.del:hover { color: var(--micro-red, #ef4444); }
-    .intent-chip.is-favorite .chip-btn.fav { opacity: 1; color: var(--micro-amber, #f59e0b); }
-    .intent-chip .chip-btn svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+    .intent-chip.is-favorite .chip-btn.fav {
+      width: 12px;
+      opacity: 1;
+      color: var(--micro-amber, #f59e0b);
+    }
+    .intent-chip .chip-btn svg { width: 12px; height: 12px; display: block; fill: currentColor; flex-shrink: 0; }
 
     /* ─── Result card: hidden. Capture state shows in the primary CTA
        text ("Capturing..."), and the new doc highlights in Recent. ─── */

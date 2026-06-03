@@ -492,6 +492,54 @@
     R.addEventListener("click", () => wrap.scrollBy({ left: STEP, behavior: "smooth" }));
   })();
 
+  // Drag-to-scroll on the chip rail. Click events on chips are
+  // suppressed if the pointer actually moved (so dragging across a
+  // chip doesn't accidentally pick it).
+  (function attachDragScroll() {
+    const wrap = document.getElementById("intent-chips");
+    if (!wrap) return;
+    let isDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+    let moved = 0;
+
+    function onDown(e) {
+      // Don't start drag on the action buttons inside chips.
+      if (e.target.closest(".chip-btn")) return;
+      isDown = true;
+      moved = 0;
+      startX = e.pageX;
+      scrollStart = wrap.scrollLeft;
+      wrap.classList.add("dragging");
+    }
+    function onMove(e) {
+      if (!isDown) return;
+      const dx = e.pageX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      wrap.scrollLeft = scrollStart - dx;
+    }
+    function onUp() {
+      if (!isDown) return;
+      isDown = false;
+      // Defer removing .dragging so any synthesized click after mouseup
+      // is still suppressed by the pointer-events:none rule.
+      setTimeout(() => wrap.classList.remove("dragging"), 0);
+    }
+    wrap.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+
+    // Capture-phase click suppressor — if we dragged >5px, swallow
+    // the click so the chip doesn't fire its populate-textarea logic.
+    wrap.addEventListener("click", (e) => {
+      if (moved > 5) {
+        e.preventDefault();
+        e.stopPropagation();
+        moved = 0;
+      }
+    }, true);
+  })();
+
   // Cycling placeholder
   function startPlaceholderCycle() {
     const span = document.getElementById("placeholder-cycle");
