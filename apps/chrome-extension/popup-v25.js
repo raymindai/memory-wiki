@@ -286,6 +286,194 @@
   });
 })();
 
+// ─── Intent prompt chips + cycling placeholder + favorites/recent ─────
+//
+// Renders 6-8 selectable prompt presets below the AI textarea. Click
+// a chip → populates textarea + focuses. Curated defaults sit at the
+// bottom; the user's most-clicked + starred prompts get hoisted to
+// the top. Star icon on hover lets the user pin / unpin.
+//
+// Cycling placeholder: a span overlays the textarea (CSS), fading
+// through example prompts every 3.5s. Stops on focus + when textarea
+// has content.
+(function () {
+  const CURATED = [
+    "한국어로 5줄 요약",
+    "action items만 체크리스트로",
+    "Cursor 붙여넣을 reference로",
+    "Q&A 플래시카드로",
+    "핵심 숫자/사실만 표로",
+    "TL;DR 2 문장",
+    "코드 블록만 추출",
+    "반대 입장 steelman",
+  ];
+
+  const STORAGE_KEY = "mw-intent-prefs";   // { recents: [{text, count, lastUsed, favorite}] }
+
+  function loadPrefs() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get([STORAGE_KEY], (data) => {
+        const v = data[STORAGE_KEY] || { recents: [] };
+        if (!Array.isArray(v.recents)) v.recents = [];
+        resolve(v);
+      });
+    });
+  }
+  function savePrefs(prefs) {
+    chrome.storage.local.set({ [STORAGE_KEY]: prefs });
+  }
+  function bumpIntent(prefs, text) {
+    text = (text || "").trim();
+    if (!text) return prefs;
+    const existing = prefs.recents.find((r) => r.text === text);
+    if (existing) { existing.count++; existing.lastUsed = Date.now(); }
+    else { prefs.recents.push({ text, count: 1, lastUsed: Date.now(), favorite: false }); }
+    // Cap to 30 most recent (favorites always kept regardless)
+    const favs = prefs.recents.filter((r) => r.favorite);
+    const others = prefs.recents.filter((r) => !r.favorite)
+      .sort((a, b) => b.lastUsed - a.lastUsed)
+      .slice(0, 30);
+    prefs.recents = [...favs, ...others];
+    return prefs;
+  }
+  function toggleFavorite(prefs, text) {
+    let r = prefs.recents.find((x) => x.text === text);
+    if (!r) {
+      r = { text, count: 0, lastUsed: Date.now(), favorite: true };
+      prefs.recents.push(r);
+    } else {
+      r.favorite = !r.favorite;
+    }
+    return prefs;
+  }
+
+  function makeChip({ text, favorite, recent }) {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "intent-chip" + (favorite ? " is-favorite" : "");
+    el.title = text;
+    el.dataset.text = text;
+
+    if (recent && !favorite) {
+      const dot = document.createElement("span");
+      dot.className = "chip-dot";
+      el.appendChild(dot);
+    }
+    if (favorite) {
+      const star = document.createElement("span");
+      star.className = "chip-favorite-icon";
+      star.innerHTML = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
+      el.appendChild(star);
+    }
+
+    const label = document.createElement("span");
+    label.textContent = text.length > 28 ? text.slice(0, 27) + "…" : text;
+    el.appendChild(label);
+
+    const tog = document.createElement("span");
+    tog.className = "chip-favorite-toggle";
+    tog.title = favorite ? "Unpin" : "Pin to favorites";
+    tog.innerHTML = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
+    tog.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const prefs = await loadPrefs();
+      toggleFavorite(prefs, text);
+      savePrefs(prefs);
+      render();
+    });
+    el.appendChild(tog);
+
+    el.addEventListener("click", () => {
+      const ta = document.getElementById("ask-input");
+      if (!ta) return;
+      ta.value = text;
+      ta.dispatchEvent(new Event("input", { bubbles: true }));
+      ta.focus();
+      // Move caret to end
+      try { ta.setSelectionRange(text.length, text.length); } catch {}
+    });
+    return el;
+  }
+
+  async function render() {
+    const wrap = document.getElementById("intent-chips");
+    if (!wrap) return;
+    const prefs = await loadPrefs();
+    wrap.innerHTML = "";
+
+    // Order: starred favorites first, then top 2 most-used (recents),
+    // then fill with curated defaults until we hit 8 chips total.
+    const favs = prefs.recents.filter((r) => r.favorite)
+      .sort((a, b) => b.lastUsed - a.lastUsed);
+    const nonFav = prefs.recents.filter((r) => !r.favorite)
+      .sort((a, b) => b.count - a.count || b.lastUsed - a.lastUsed);
+    const recentsTop = nonFav.slice(0, 2);
+    const usedTexts = new Set([...favs, ...recentsTop].map((r) => r.text));
+    const curatedToShow = CURATED.filter((t) => !usedTexts.has(t));
+
+    const all = [
+      ...favs.map((r) => ({ text: r.text, favorite: true, recent: false })),
+      ...recentsTop.map((r) => ({ text: r.text, favorite: false, recent: true })),
+      ...curatedToShow.map((t) => ({ text: t, favorite: false, recent: false })),
+    ].slice(0, 8);
+
+    for (const item of all) wrap.appendChild(makeChip(item));
+  }
+
+  // Cycling placeholder
+  function startPlaceholderCycle() {
+    const span = document.getElementById("placeholder-cycle");
+    const ta = document.getElementById("ask-input");
+    const wrap = document.getElementById("ask-input-wrap");
+    if (!span || !ta || !wrap) return;
+    let i = 0;
+    span.textContent = CURATED[0];
+    function step() {
+      if (ta.value.trim() || document.activeElement === ta) return;
+      span.classList.add("fading");
+      setTimeout(() => {
+        i = (i + 1) % CURATED.length;
+        span.textContent = CURATED[i];
+        span.classList.remove("fading");
+      }, 320);
+    }
+    setInterval(step, 3500);
+    // Toggle visibility classes
+    function sync() {
+      if (ta.value.trim()) wrap.classList.add("has-content"); else wrap.classList.remove("has-content");
+    }
+    ta.addEventListener("input", sync);
+    ta.addEventListener("focus", () => wrap.classList.add("is-focused"));
+    ta.addEventListener("blur", () => wrap.classList.remove("is-focused"));
+    sync();
+  }
+
+  // Track intent usage on submit
+  (function attachSubmitTracker() {
+    const sub = document.getElementById("ask-submit");
+    if (!sub) return;
+    sub.addEventListener("click", async () => {
+      const ta = document.getElementById("ask-input");
+      const v = (ta && ta.value || "").trim();
+      if (!v) return;
+      const prefs = await loadPrefs();
+      bumpIntent(prefs, v);
+      savePrefs(prefs);
+      // Re-render after a beat so the popup shows the freshly-used chip
+      setTimeout(render, 500);
+    });
+  })();
+
+  // Init
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => { render(); startPlaceholderCycle(); });
+  } else {
+    render();
+    startPlaceholderCycle();
+  }
+})();
+
 // Recent — clear-all button
 (function () {
   const btn = document.getElementById("recent-clear");

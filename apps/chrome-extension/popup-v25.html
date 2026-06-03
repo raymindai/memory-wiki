@@ -187,10 +187,10 @@
     }
 
     /* ─── Hero (compact) ─── */
-    .hero { padding: 10px 24px 0; }
+    .hero { padding: 8px 24px 0; }
     .hero .line {
       font-family: var(--font-display);
-      font-size: 28px; font-weight: 600;
+      font-size: 26px; font-weight: 600;
       line-height: 1.0; letter-spacing: -0.025em;
       color: var(--ink);
     }
@@ -446,11 +446,56 @@
     }
     .ask-submit .ai-spark {
       width: 13px; height: 13px;
-      color: var(--micro-ai);
+      color: currentColor;     /* match the label color */
       display: inline-flex;
       flex-shrink: 0;
+      transition: opacity 200ms var(--ease), width 200ms var(--ease);
     }
     .ask-submit .ai-spark svg { width: 100%; height: 100%; display: block; }
+    /* During and after capture the sparkle hides — the button is no
+       longer "ask AI", it's "captured". */
+    body.capturing .ask-submit .ai-spark,
+    body.just-captured .ask-submit .ai-spark {
+      opacity: 0;
+      width: 0;
+    }
+
+    /* ─── Capturing overlay: blur backdrop + animated blob + label ─── */
+    .capturing-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: rgba(8, 8, 10, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 99999;
+      pointer-events: none;
+    }
+    body.capturing .capturing-overlay {
+      display: flex;
+      pointer-events: auto;
+    }
+    .capturing-overlay .blob {
+      width: 80px;
+      height: 80px;
+      animation: cap-pulse 1.8s ease-in-out infinite;
+    }
+    .capturing-overlay .blob img { width: 100%; height: 100%; display: block; }
+    @keyframes cap-pulse {
+      0%, 100% { transform: scale(1);    opacity: 0.85; }
+      50%      { transform: scale(1.10); opacity: 1; }
+    }
+    .capturing-overlay .label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
     .ask-input-wrap {
       margin: 0 24px;
@@ -509,6 +554,108 @@
     }
     .ask-submit:hover { filter: brightness(0.93); }
     .ask-submit:disabled { background: var(--hair); color: var(--faint); cursor: not-allowed; }
+
+    /* ─── Cycling placeholder: a single span fades through example
+       prompts every few seconds when the textarea is empty + blurred.
+       Implemented as an absolute-positioned overlay so the native
+       <textarea placeholder=""> stays empty. ─── */
+    .ask-input-wrap .placeholder-cycle {
+      position: absolute;
+      top: 14px; left: 16px; right: 16px;
+      pointer-events: none;
+      z-index: 1;
+      color: var(--faint);
+      opacity: 0.75;
+      font-size: 13px;
+      line-height: 1.45;
+      transition: opacity 320ms ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: var(--font-sans);
+    }
+    .ask-input-wrap .placeholder-cycle.fading { opacity: 0; }
+    .ask-input-wrap.has-content .placeholder-cycle,
+    .ask-input-wrap.is-focused .placeholder-cycle { display: none; }
+
+    /* ─── Intent prompt chips ─── */
+    .intent-chips {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      padding: 8px 24px 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+    }
+    .intent-chips::-webkit-scrollbar { display: none; }
+    body.signed-out .intent-chips { display: none; }
+    .intent-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0;
+      padding: 4px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      background: transparent;
+      transition: color 140ms, background 140ms, border-color 140ms, transform 80ms;
+      user-select: none;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .intent-chip:hover {
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--ink-line, var(--line));
+    }
+    [data-theme="light"] .intent-chip:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    .intent-chip:active { transform: translateY(1px); }
+    .intent-chip .chip-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--micro-lime, #d1ff52);
+      flex-shrink: 0;
+    }
+    .intent-chip .chip-favorite-icon {
+      width: 8px; height: 8px;
+      color: var(--micro-amber, #f59e0b);
+      flex-shrink: 0;
+    }
+    .intent-chip .chip-favorite-icon svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+    .intent-chip.is-favorite { color: var(--ink); }
+    .intent-chip.expand {
+      font-size: 10px;
+      color: var(--faint);
+      border-style: dashed;
+    }
+    .intent-chip .chip-favorite-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 10px; height: 10px;
+      color: var(--faint);
+      cursor: pointer;
+      margin-left: 2px;
+      opacity: 0;
+      transition: opacity 100ms, color 120ms;
+    }
+    .intent-chip:hover .chip-favorite-toggle { opacity: 1; }
+    .intent-chip .chip-favorite-toggle:hover { color: var(--micro-amber, #f59e0b); }
+    .intent-chip.is-favorite .chip-favorite-toggle { opacity: 1; color: var(--micro-amber, #f59e0b); }
+    .intent-chip .chip-favorite-toggle svg { width: 100%; height: 100%; display: block; fill: currentColor; }
 
     /* ─── Result card: hidden. Capture state shows in the primary CTA
        text ("Capturing..."), and the new doc highlights in Recent. ─── */
@@ -588,11 +735,23 @@
     /* ─── Recent ─── */
     .sec-head {
       margin: 14px 24px 4px;
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
       font-family: var(--font-mono);
       font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
       color: var(--faint);
     }
+    .recent-clear {
+      width: 22px; height: 22px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--faint);
+      cursor: pointer;
+      border-radius: 5px;
+      opacity: 0;
+      transition: opacity 140ms, color 140ms, background 140ms;
+    }
+    .recent-wrap:hover .recent-clear { opacity: 1; }
+    .recent-clear:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+    .recent-clear svg { width: 13px; height: 13px; }
     .sec-head .count { color: var(--muted); }
     .sec-head .grow { flex: 1; height: 1px; background: var(--hair); }
 
@@ -838,14 +997,18 @@
   <div class="ask-head">
     <span>or capture with intent</span>
   </div>
-  <div class="ask-input-wrap">
-    <textarea id="ask-input" placeholder="extract only the parts about pricing and battery life…"></textarea>
+  <div class="ask-input-wrap" id="ask-input-wrap">
+    <span class="placeholder-cycle" id="placeholder-cycle" aria-hidden="true"></span>
+    <textarea id="ask-input" placeholder=""></textarea>
     <button class="ask-submit" id="ask-submit" disabled>
       <span class="ai-spark" aria-hidden>
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.7 4.7 4.7 1.7-4.7 1.7L12 14.8l-1.7-4.7-4.7-1.7 4.7-1.7L12 2z"/><path d="M19 14l.8 2.3 2.2.7-2.2.7-.8 2.3-.8-2.3-2.2-.7 2.2-.7z"/></svg>
       </span>
       <span>capture</span>
     </button>
+  </div>
+  <div class="intent-chips" id="intent-chips" aria-label="Prompt presets">
+    <!-- populated by popup-v25.js -->
   </div>
 
   <div class="result" id="result">
@@ -882,7 +1045,12 @@
   </div>
 
   <div class="recent-wrap" id="recent-wrap">
-    <div class="sec-head"><span>recent</span></div>
+    <div class="sec-head">
+      <span>recent</span>
+      <button class="recent-clear" id="recent-clear" type="button" title="clear all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+    </div>
     <div class="recent-list" id="recent-list"></div>
   </div>
 
@@ -905,6 +1073,12 @@
       <a href="https://www.npmjs.com/package/memory-wiki-cli" target="_blank" rel="noopener">CLI</a>
       <a href="https://www.npmjs.com/package/memory-wiki-mcp" target="_blank" rel="noopener">MCP</a>
     </div>
+  </div>
+
+  <!-- Capturing overlay (covers the whole popup during capture) -->
+  <div class="capturing-overlay" aria-hidden="true">
+    <div class="blob"><img src="icons/mwblob_morph.svg" alt=""></div>
+    <div class="label">Capturing...</div>
   </div>
 
   <!-- popup.js compatibility stubs -->
