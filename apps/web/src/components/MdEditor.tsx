@@ -2874,7 +2874,20 @@ export default function MdEditor() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [tabs, switchTab]);
 
-  // Multi-select: compute visible doc order for shift-range
+  // Multi-select: shift-range needs the SAME order the sidebar actually
+  // paints, so the previous version (which used the unrelated `sortMode`
+  // and put root tabs BEFORE folder contents) selected what looked like
+  // random rows whenever the visible order didn't match A-Z.
+  //
+  // Visible order is dictated by:
+  //   - SidebarFolderTree (apps/web/src/components/SidebarFolder.tsx)
+  //     renders root folders sorted by `sortFolders(mdsSortMode)` FIRST,
+  //     then root tabs sorted by `sortTabs(mdsSortMode)`. Each folder
+  //     descends depth-first: subfolders (sortFolders) → tabs (sortTabs).
+  //   - The Shared section is hand-rolled in this file and uses tab
+  //     insertion order, so we mirror that — no sorting.
+  // Collapsed folders contribute zero ids (their children aren't visible
+  // so they can't be in a visible range).
   const visibleMyDocIds = useMemo(() => {
     const allMyTabs = tabs.filter(t => !t.deleted && !t.readonly && t.permission !== "readonly" && t.permission !== "editable" && t.kind !== "bundle" && t.kind !== "hub");
     const myTabs = docFilter === "all" ? allMyTabs
@@ -2882,31 +2895,67 @@ export default function MdEditor() {
       : docFilter === "shared" ? allMyTabs.filter(t => t.isSharedByMe || t.isRestricted)
       : docFilter === "synced" ? allMyTabs.filter(t => t.source && SYNCED_SOURCES.includes(t.source))
       : allMyTabs;
-    const sortFn = (a: Tab, b: Tab) => {
-      if (sortMode === "custom") return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
-      if (sortMode === "za") return (b.title || "").localeCompare(a.title || "");
-      return (a.title || "").localeCompare(b.title || "");
+
+    // Mirror SidebarFolder.sortTabs — same enum, same tie-break behavior.
+    const tabSort = (a: Tab, b: Tab) => {
+      if (mdsSortMode === "custom") return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      if (mdsSortMode === "za") return (b.title || "").localeCompare(a.title || "");
+      if (mdsSortMode === "newest") return (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0);
+      if (mdsSortMode === "oldest") return (a.lastOpenedAt ?? 0) - (b.lastOpenedAt ?? 0);
+      return (a.title || "").localeCompare(b.title || ""); // az default
     };
-    // Lowercase the search ONCE per render. Title-match short-circuits — body
-    // scan only runs if title misses, and body is capped at 3KB so a 100KB doc
-    // doesn't tank typing latency.
+    // Mirror SidebarFolder.sortFolders — folders fall back to alphabetical
+    // when sort mode is newest/oldest (folders carry no timestamp).
+    const folderSort = (a: FolderType, b: FolderType) => {
+      if (mdsSortMode === "custom") return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      if (mdsSortMode === "za") return b.name.localeCompare(a.name);
+      return a.name.localeCompare(b.name);
+    };
+
     const q = sidebarSearchDebounced.toLowerCase();
     const matches = (t: Tab) => {
       if (!q) return true;
       if ((t.title || "").toLowerCase().includes(q)) return true;
       return (t.markdown || "").slice(0, 3000).toLowerCase().includes(q);
     };
-    const rootIds = myTabs.filter(t => !t.folderId && matches(t)).sort(sortFn).map(t => t.id);
-    const myFolderIds = folders.filter(f => !f.section || f.section === "my").filter(f => !f.collapsed).flatMap(f =>
-      tabs.filter(t => !t.deleted && t.folderId === f.id && matches(t)).sort(sortFn).map(t => t.id)
-    );
-    // Shared tabs (for shift-select across sections)
-    const sharedRootIds = tabs.filter(t => !t.deleted && !t.folderId && (t.permission === "readonly" || t.permission === "editable") && !hiddenExampleIds.has(t.id)).map(t => t.id);
-    const sharedFolderIds = folders.filter(f => f.section === "shared").filter(f => !f.collapsed).flatMap(f =>
-      tabs.filter(t => !t.deleted && t.folderId === f.id && !hiddenExampleIds.has(t.id)).map(t => t.id)
-    );
-    return [...rootIds, ...myFolderIds, ...sharedRootIds, ...sharedFolderIds];
-  }, [tabs, docFilter, sortMode, sidebarSearchDebounced, folders, hiddenExampleIds]);
+
+    // Recurse depth-first through a folder: subfolders first, then tabs,
+    // each sorted to match the sidebar. Returns empty list if the folder
+    // is collapsed (its contents aren't visible, so they can't be in a
+    // visible range).
+    const walkFolder = (f: FolderType): string[] => {
+      if (f.collapsed) return [];
+      const out: string[] = [];
+      const subfolders = folders
+        .filter(sub => sub.parentId === f.id && (!sub.section || sub.section === "my"))
+        .sort(folderSort);
+      for (const sub of subfolders) out.push(...walkFolder(sub));
+      const folderTabs = myTabs
+        .filter(t => t.folderId === f.id && matches(t))
+        .sort(tabSort);
+      for (const t of folderTabs) out.push(t.id);
+      return out;
+    };
+
+    // MDs section: root folders (sorted) → root tabs (sorted).
+    const rootFolders = folders
+      .filter(f => !f.parentId && (!f.section || f.section === "my"))
+      .sort(folderSort);
+    const mdsIds: string[] = [];
+    for (const rf of rootFolders) mdsIds.push(...walkFolder(rf));
+    const rootTabs = myTabs.filter(t => !t.folderId && matches(t)).sort(tabSort);
+    for (const t of rootTabs) mdsIds.push(t.id);
+
+    // Shared section (hand-rolled below; insertion order only).
+    const sharedRootIds = tabs
+      .filter(t => !t.deleted && !t.folderId && (t.permission === "readonly" || t.permission === "editable") && !hiddenExampleIds.has(t.id))
+      .map(t => t.id);
+    const sharedFolderIds = folders
+      .filter(f => f.section === "shared" && !f.collapsed)
+      .flatMap(f => tabs.filter(t => !t.deleted && t.folderId === f.id && !hiddenExampleIds.has(t.id)).map(t => t.id));
+
+    return [...mdsIds, ...sharedRootIds, ...sharedFolderIds];
+  }, [tabs, docFilter, mdsSortMode, sidebarSearchDebounced, folders, hiddenExampleIds]);
 
   // FLIP-style reorder animation for the Recent list. When a click
   // promotes an item to the top of the list, we capture each row's
@@ -3035,7 +3084,7 @@ export default function MdEditor() {
   }, [visibleMyDocIds, activeTabId, switchTab, captureRecentRects, recentTabIds]);
 
   // Clear selection on filter/search change
-  useEffect(() => { setSelectedTabIds(new Set()); }, [docFilter, sidebarSearch, sortMode]);
+  useEffect(() => { setSelectedTabIds(new Set()); }, [docFilter, sidebarSearch, mdsSortMode]);
 
   // Debounced cloud search when sidebarSearch has 3+ chars
   useEffect(() => {
