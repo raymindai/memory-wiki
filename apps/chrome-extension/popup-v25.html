@@ -711,6 +711,25 @@
     .intent-chip:active { transform: translateY(1px); box-shadow: none; }
     .intent-chip.is-favorite { color: var(--ink); }
 
+    /* Site-specific suggestion: small ink dot before the label so the
+       user can tell at a glance which chips are contextual to the
+       current tab (vs. user favorites or generic curated). 6px = the
+       smallest allowed dot in the design system; ink-tinted so it
+       reads as a secondary marker, not an attention pull. */
+    .intent-chip.is-site .chip-label-wrap::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ink, currentColor);
+      opacity: 0.55;
+      margin-right: 6px;
+      vertical-align: middle;
+      transform: translateY(-1px);
+    }
+    .intent-chip.is-site { color: var(--ink); }
+
     /* Text container — clips overflow, marquees on hover when long.
        No right-edge mask in idle state so text reaches the chip edge;
        mask only applies while the chip is actively marqueeing so the

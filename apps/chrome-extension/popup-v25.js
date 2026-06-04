@@ -457,6 +457,178 @@
     "Plain English, 8th grade",
   ];
 
+  // Per-site intent suggestions. Match on hostname (longest match wins
+  // so subdomains like `mobile.twitter.com` fall back to the bare
+  // `twitter.com` entry). The values are intents the user is most
+  // likely to want on THAT kind of page — picked to match how people
+  // actually use those sites (skim YouTube transcripts, pull arXiv
+  // abstracts, distill HN threads, etc.). When the user lands on a
+  // matching site these surface at the FRONT of the chip rail so
+  // they're the first thing the user sees, before the generic
+  // CURATED defaults.
+  //
+  // Adding a new site: drop in a hostname → string[] entry. Keep each
+  // intent short enough to read in a chip (≤ ~32 chars feels right).
+  const SITE_SUGGESTIONS = {
+    "youtube.com": [
+      "Summarize from transcript",
+      "Key moments + timestamps",
+      "Action items only",
+    ],
+    "arxiv.org": [
+      "Abstract + contributions",
+      "Methodology in plain English",
+      "What makes this novel",
+    ],
+    "github.com": [
+      "README in 5 bullets",
+      "Setup steps only",
+      "API usage examples",
+    ],
+    "stackoverflow.com": [
+      "Accepted answer + code",
+      "Why this approach works",
+    ],
+    "reddit.com": [
+      "Top comments distilled",
+      "Consensus + dissent",
+      "Best advice from thread",
+    ],
+    "news.ycombinator.com": [
+      "Top arguments distilled",
+      "Strongest counterpoints",
+      "What experts in the thread say",
+    ],
+    "medium.com": [
+      "Main argument + evidence",
+      "Pull quotes worth keeping",
+      "TL;DR in 3 sentences",
+    ],
+    "substack.com": [
+      "Main thesis + supporting points",
+      "Quotable lines",
+      "Action items only",
+    ],
+    "x.com": [
+      "This thread distilled",
+      "Strongest argument only",
+      "Action items only",
+    ],
+    "twitter.com": [
+      "This thread distilled",
+      "Strongest argument only",
+      "Action items only",
+    ],
+    "threads.com": [
+      "Post + replies summary",
+      "Key arguments only",
+    ],
+    "threads.net": [
+      "Post + replies summary",
+      "Key arguments only",
+    ],
+    "linkedin.com": [
+      "Profile highlights",
+      "Career trajectory",
+      "Key skills + impact",
+    ],
+    "nytimes.com": [
+      "Article in 3 bullets",
+      "Quotes from sources",
+      "What's actually new here",
+    ],
+    "bbc.com": [
+      "Article in 3 bullets",
+      "Quotes from sources",
+    ],
+    "theverge.com": [
+      "Article in 3 bullets",
+      "What's actually new here",
+    ],
+    "wired.com": [
+      "Article in 3 bullets",
+      "What's actually new here",
+    ],
+    "wikipedia.org": [
+      "Overview + key dates",
+      "Most-cited sources",
+      "Plain English, 8th grade",
+    ],
+    "notion.so": [
+      "Action items as checklist",
+      "Key decisions + owners",
+    ],
+    "docs.google.com": [
+      "Action items as checklist",
+      "Key decisions + owners",
+    ],
+    "openai.com": [
+      "Strip UI, keep my conversation",
+      "Just the model's final answer",
+    ],
+    "chatgpt.com": [
+      "Strip UI, keep my conversation",
+      "Just the model's final answer",
+    ],
+    "claude.ai": [
+      "Strip UI, keep my conversation",
+      "Just the model's final answer",
+    ],
+    "gemini.google.com": [
+      "Strip UI, keep my conversation",
+      "Just the model's final answer",
+    ],
+    "perplexity.ai": [
+      "Answer + cited sources only",
+    ],
+    "amazon.com": [
+      "Product specs + key reviews",
+      "Pros and cons",
+    ],
+    "yelp.com": [
+      "Top dishes + must-knows",
+    ],
+    "imdb.com": [
+      "Plot in 2 sentences (no spoilers)",
+      "Top reviews distilled",
+    ],
+  };
+
+  // Resolve the current tab's hostname to a SITE_SUGGESTIONS key.
+  // Strips leading `www.`/`m.`/`mobile.` and falls back through
+  // subdomain layers (so `mobile.twitter.com` → `twitter.com`).
+  function pickSiteKey(hostname) {
+    if (!hostname) return null;
+    const h = hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, "");
+    if (SITE_SUGGESTIONS[h]) return h;
+    // Try progressively shorter parent domains: a.b.c.com → b.c.com → c.com
+    const parts = h.split(".");
+    for (let i = 1; i < parts.length - 1; i++) {
+      const parent = parts.slice(i).join(".");
+      if (SITE_SUGGESTIONS[parent]) return parent;
+    }
+    return null;
+  }
+
+  // Returns Promise<{ key: string | null, intents: string[] }>.
+  // Resolves to empty intents when there's no current tab access
+  // (popup opened in a context where chrome.tabs is unavailable) or
+  // no match — render() then falls back to favorites + curated.
+  function getSiteSuggestions() {
+    return new Promise((resolve) => {
+      try {
+        if (!chrome?.tabs?.query) return resolve({ key: null, intents: [] });
+        chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+          const url = tab?.url || "";
+          let host = "";
+          try { host = new URL(url).hostname; } catch { /* not a real URL — chrome://, about:, etc. */ }
+          const key = pickSiteKey(host);
+          resolve({ key, intents: key ? SITE_SUGGESTIONS[key].slice() : [] });
+        });
+      } catch { resolve({ key: null, intents: [] }); }
+    });
+  }
+
   const STORAGE_KEY = "mw-intent-prefs";   // { recents: [{text, count, lastUsed, favorite}] }
 
   function loadPrefs() {
@@ -499,11 +671,17 @@
   const STAR_SVG = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
   const X_SVG    = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m4 4 8 8M12 4 4 12"/></svg>';
 
-  function makeChip({ text, favorite, isCurated }) {
+  function makeChip({ text, favorite, isCurated, siteKey }) {
     const el = document.createElement("div");
-    el.className = "intent-chip" + (favorite ? " is-favorite" : "");
-    el.title = text;
+    el.className = "intent-chip"
+      + (favorite ? " is-favorite" : "")
+      + (siteKey ? " is-site" : "");
+    // Tooltip hints WHY this chip showed up — for site suggestions
+    // we surface the host so it's clear it's contextual to the
+    // current tab, not a generic preset.
+    el.title = siteKey ? `${text}  ·  suggested for ${siteKey}` : text;
     el.dataset.text = text;
+    if (siteKey) el.dataset.site = siteKey;
 
     // Text container (clipped, marquee on hover when overflowing)
     const labelWrap = document.createElement("span");
@@ -595,26 +773,41 @@
   async function render() {
     const wrap = document.getElementById("intent-chips");
     if (!wrap) return;
-    const prefs = await loadPrefs();
+    const [prefs, site] = await Promise.all([loadPrefs(), getSiteSuggestions()]);
     wrap.innerHTML = "";
 
-    // Order: starred favorites → top 3 most-used recents → curated
-    // defaults to fill. Skip anything the user has dismissed.
+    // Order:
+    //   1. starred favorites         (user-pinned, highest signal)
+    //   2. per-site suggestions      (contextual: "on this page you
+    //                                 probably want…") — surfaces
+    //                                 BEFORE recents/curated so the
+    //                                 site-specific intent is the
+    //                                 first thing the user sees.
+    //   3. top 3 most-used recents
+    //   4. curated defaults to fill
+    // Skip anything the user has dismissed.
     const dismissed = new Set(prefs.dismissed || []);
     const favs = prefs.recents
       .filter((r) => r.favorite && !dismissed.has(r.text))
       .sort((a, b) => b.lastUsed - a.lastUsed);
+    const favTexts = new Set(favs.map((f) => f.text));
+    // Site suggestions: filter out anything the user has already
+    // starred (no duplicate chips) or dismissed.
+    const siteChips = (site.intents || [])
+      .filter((t) => !favTexts.has(t) && !dismissed.has(t));
+    const siteSet = new Set(siteChips);
     const nonFav = prefs.recents
-      .filter((r) => !r.favorite && !dismissed.has(r.text))
+      .filter((r) => !r.favorite && !dismissed.has(r.text) && !siteSet.has(r.text))
       .sort((a, b) => b.count - a.count || b.lastUsed - a.lastUsed);
     const recentsTop = nonFav.slice(0, 3);
-    const usedTexts = new Set([...favs, ...recentsTop].map((r) => r.text));
+    const usedTexts = new Set([...favs.map((f) => f.text), ...siteChips, ...recentsTop.map((r) => r.text)]);
     const curatedToShow = CURATED.filter((t) => !usedTexts.has(t) && !dismissed.has(t));
 
     const all = [
-      ...favs.map((r) => ({ text: r.text, favorite: true, isCurated: false })),
-      ...recentsTop.map((r) => ({ text: r.text, favorite: false, isCurated: false })),
-      ...curatedToShow.map((t) => ({ text: t, favorite: false, isCurated: true })),
+      ...favs.map((r) => ({ text: r.text, favorite: true, isCurated: false, siteKey: null })),
+      ...siteChips.map((t) => ({ text: t, favorite: false, isCurated: false, siteKey: site.key })),
+      ...recentsTop.map((r) => ({ text: r.text, favorite: false, isCurated: false, siteKey: null })),
+      ...curatedToShow.map((t) => ({ text: t, favorite: false, isCurated: true, siteKey: null })),
     ];
 
     for (const item of all) wrap.appendChild(makeChip(item));
