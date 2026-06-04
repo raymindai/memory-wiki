@@ -878,15 +878,38 @@
     window.addEventListener("resize", syncScrollEdges);
   })();
 
-  // Chevron scroll buttons — one chip-width per click.
+  // Chevron scroll buttons — one chip-width per click, with wrap-
+  // around at the ends: clicking right when already at the rightmost
+  // position snaps the rail back to the start (and the inverse on
+  // left). Without this the chevron was a dead click once you hit
+  // either edge, which surprised users who'd kept clicking expecting
+  // the carousel to loop.
   (function attachChevrons() {
     const wrap = document.getElementById("intent-chips");
     const L = document.getElementById("chip-nav-left");
     const R = document.getElementById("chip-nav-right");
     if (!wrap || !L || !R) return;
     const STEP = 170; // ≈ one chip width + gap
-    L.addEventListener("click", () => wrap.scrollBy({ left: -STEP, behavior: "smooth" }));
-    R.addEventListener("click", () => wrap.scrollBy({ left: STEP, behavior: "smooth" }));
+    const EDGE = 2;   // tolerance for fractional scroll positions
+    L.addEventListener("click", () => {
+      const atStart = wrap.scrollLeft <= EDGE;
+      if (atStart) {
+        // Already at the left edge → jump to the far right.
+        wrap.scrollTo({ left: wrap.scrollWidth - wrap.clientWidth, behavior: "smooth" });
+      } else {
+        wrap.scrollBy({ left: -STEP, behavior: "smooth" });
+      }
+    });
+    R.addEventListener("click", () => {
+      const max = wrap.scrollWidth - wrap.clientWidth;
+      const atEnd = wrap.scrollLeft >= max - EDGE;
+      if (atEnd) {
+        // Already at the right edge → snap back to the start.
+        wrap.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        wrap.scrollBy({ left: STEP, behavior: "smooth" });
+      }
+    });
   })();
 
   // Drag-to-scroll on the chip rail. Click events on chips are
