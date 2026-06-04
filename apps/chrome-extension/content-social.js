@@ -702,18 +702,33 @@
     try {
       const hostRect = host.getBoundingClientRect();
       if (hostRect.width === 0 || hostRect.height === 0) return;
-      const candidates = host.querySelectorAll('[role="button"], button, [aria-label]');
+      // Detect SVG-shaped icons in the top-right of the post. The
+      // previous version queried [role="button"], button, [aria-label]
+      // — but Threads' pencil edit icon doesn't always carry those
+      // hooks (it's sometimes a div/a wrapping a raw SVG), so the
+      // pencil was missed and the Add button settled flush against the
+      // more (…) menu, covering the pencil.
+      //
+      // Every visible action in the cluster has an <svg> at its core,
+      // so we scan SVGs and use the nearest clickable ancestor's
+      // bounding rect (which is the actual hit target — bigger than
+      // the svg alone). Filter to icons that are (a) icon-sized,
+      // (b) within the top ~64px of the host, (c) flush against the
+      // host's right edge. Take the LEFTMOST and place Add to its
+      // left with an 8px gap.
+      const svgs = host.querySelectorAll("svg");
       let leftmost = Infinity;
-      for (const c of candidates) {
-        if (c === btn || btn.contains(c) || c.contains(btn)) continue;
-        const r = c.getBoundingClientRect();
-        // Icon-sized only (skip wide things like the body button hit area).
-        if (r.width === 0 || r.width > 56 || r.height > 56) continue;
-        // Top-right cluster: top must be within 64px of host top.
+      for (const svg of svgs) {
+        if (btn.contains(svg)) continue;
+        const target = svg.closest('[role="button"], button, a, [tabindex]') || svg;
+        if (target === btn || btn.contains(target)) continue;
+        const r = target.getBoundingClientRect();
+        if (r.width === 0 || r.width > 64 || r.height > 64) continue;
+        // Top-right cluster only — top within 64px of host top, near
+        // the right edge.
         if (r.top - hostRect.top > 64) continue;
         if (r.top < hostRect.top - 4) continue;
-        // Must be near the right edge of the host (within 120px).
-        if (hostRect.right - r.right > 120) continue;
+        if (hostRect.right - r.right > 140) continue;
         if (r.right > hostRect.right + 4) continue;
         if (r.left < leftmost) leftmost = r.left;
       }
