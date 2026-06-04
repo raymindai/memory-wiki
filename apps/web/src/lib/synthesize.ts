@@ -10,6 +10,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { readHubSchema, DEFAULT_HUB_SCHEMA_MD } from "@/lib/hub-schema";
+import { callAI } from "@/lib/ai-providers";
 
 export type SynthesisKind = "memo" | "faq" | "brief" | "wiki";
 
@@ -217,62 +218,16 @@ export async function synthesizeBundle(
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  let markdown: string | null = null;
-  if (process.env.ANTHROPIC_API_KEY) markdown = await runAnthropic(fullPrompt, process.env.ANTHROPIC_API_KEY);
-  else if (process.env.OPENAI_API_KEY) markdown = await runOpenAI(fullPrompt, process.env.OPENAI_API_KEY);
-  else if (process.env.GEMINI_API_KEY) markdown = await runGemini(fullPrompt, process.env.GEMINI_API_KEY);
-  if (!markdown) return null;
-
+  const result = await callAI({
+    prompt: fullPrompt,
+    useLiteModel: false,
+    temperature: 0.3,
+    maxOutputTokens: 2048,
+  });
+  if (!result.ok) return null;
   return {
-    markdown,
+    markdown: result.text,
     sourceDocIds: docOrder.map(d => d.id),
     intent: intent || null,
   };
-}
-
-async function runAnthropic(prompt: string, apiKey: string): Promise<string | null> {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2048,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.content?.[0]?.text || null;
-}
-
-async function runOpenAI(prompt: string, apiKey: string): Promise<string | null> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 2048,
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || null;
-}
-
-async function runGemini(prompt: string, apiKey: string): Promise<string | null> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 2048 },
-      }),
-    }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
 }

@@ -1,17 +1,14 @@
 // LLM reranker for hub retrieval.
 //
 // First-pass retrieval (pgvector + hybrid RRF) gives us a top-K
-// candidate set ordered by lexical / vector similarity. That's a
-// strong recall signal but a weak precision signal — "X mentions
-// the word in the query" doesn't mean "X is the best answer to the
-// query." A cross-encoder rerank step closes the gap.
+// candidate set ordered by lexical / vector similarity. A
+// cross-encoder rerank step closes the precision gap.
 //
-// We don't need a dedicated rerank API for v1: a single Anthropic
-// Haiku call rates every candidate against the query and returns
-// JSON scores. ~1s latency, ~$0.001 per call. The provider can be
-// swapped later (Voyage / Cohere / BGE) by replacing this module's
-// internals — callers see the same `rerank(query, candidates)`
-// interface.
+// Routes through the shared callAI cascade (lite tier — short JSON
+// scoring task). Provider + model selection comes from the admin's
+// site_config, same as every other AI surface.
+
+import { callAI } from "@/lib/ai-providers";
 
 interface CandidateInput {
   /** Stable id the caller cares about. We hand it back unchanged. */
@@ -55,8 +52,6 @@ export async function rerank<T extends CandidateInput>(
   candidates: T[],
 ): Promise<RerankedCandidate<T>[]> {
   if (candidates.length === 0) return [];
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return candidates.map((c) => ({ candidate: c, score: 0 }));
 
   // Cap the candidate set sent to the LLM. Above ~30 the prompt gets
   // big enough to hurt latency with diminishing precision gains;
@@ -68,37 +63,17 @@ export async function rerank<T extends CandidateInput>(
     .map((c) => `--- id: ${c.id} ---\n${(c.text || "").slice(0, MAX_TEXT_PER_CANDIDATE)}`)
     .join("\n\n");
 
-  let body;
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5",
-        max_tokens: 2048,
-        system: "You return ONLY valid JSON matching the requested array shape. No prose, no fences.",
-        messages: [{
-          role: "user",
-          content: `${PROMPT}\n\nQuery: ${query}\n\nPassages:\n${corpus}\n\nScores (JSON array):`,
-        }],
-      }),
-    });
-    if (!res.ok) {
-      console.warn("rerank: Anthropic API error", res.status);
-      return candidates.map((c) => ({ candidate: c, score: 0 }));
-    }
-    body = await res.json();
-  } catch (err) {
-    console.warn("rerank: fetch failed", err instanceof Error ? err.message : err);
+  const result = await callAI({
+    prompt: `You return ONLY valid JSON matching the requested array shape. No prose, no fences.\n\n${PROMPT}\n\nQuery: ${query}\n\nPassages:\n${corpus}\n\nScores (JSON array):`,
+    useLiteModel: true,
+    temperature: 0.1,
+    maxOutputTokens: 2048,
+  });
+  if (!result.ok) {
+    console.warn("rerank: callAI failed", result.status, result.error);
     return candidates.map((c) => ({ candidate: c, score: 0 }));
   }
-
-  const text: string = body?.content?.[0]?.text || "";
-  const scores = parseScores(text);
+  const scores = parseScores(result.text);
   if (!scores) return candidates.map((c) => ({ candidate: c, score: 0 }));
 
   const scoreById = new Map<string, number>();

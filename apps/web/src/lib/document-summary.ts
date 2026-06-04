@@ -15,9 +15,13 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { callAI } from "@/lib/ai-providers";
 
-const SUMMARY_MODEL = process.env.MW_SUMMARY_MODEL || "claude-haiku-4-5";
-const ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages";
+// Kept for the `summary_model` row column. Provider that actually
+// served the response is reflected in result.provider but the column
+// expects a model string for backwards compat — we record the lite
+// tier name as a sensible label.
+const SUMMARY_MODEL_LABEL = "lite-cascade";
 
 const PROMPT = `Summarize the following markdown document in 1-2 short sentences
 that capture the load-bearing claim or fact. Skip metadata (capture date,
@@ -31,8 +35,6 @@ DOCUMENT:
 
 export async function generateSummary(markdown: string): Promise<string | null> {
   if (!markdown || markdown.trim().length < 80) return null;
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
 
   // Cap input — most docs are short, but we never want to send 100k
   // tokens to the cheap summarizer. 12k chars (~3k tokens) is plenty
@@ -40,29 +42,17 @@ export async function generateSummary(markdown: string): Promise<string | null> 
   const trimmed = markdown.length > 12000 ? markdown.slice(0, 12000) : markdown;
 
   try {
-    const r = await fetch(ANTHROPIC_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: SUMMARY_MODEL,
-        max_tokens: 200,
-        messages: [{ role: "user", content: PROMPT + trimmed }],
-      }),
+    const result = await callAI({
+      prompt: PROMPT + trimmed,
+      useLiteModel: true,
+      temperature: 0.3,
+      maxOutputTokens: 200,
     });
-    if (!r.ok) {
-      console.warn("[summary] HTTP", r.status, (await r.text()).slice(0, 200));
+    if (!result.ok) {
+      console.warn("[summary] callAI failed", result.status, result.error);
       return null;
     }
-    const data = await r.json();
-    const text = (data.content || [])
-      .filter((b: { type: string }) => b.type === "text")
-      .map((b: { text: string }) => b.text)
-      .join("")
-      .trim();
+    const text = result.text.trim();
     if (!text) return null;
     // One-line: strip line breaks, collapse whitespace.
     return text.replace(/\s+/g, " ").slice(0, 600);
@@ -88,7 +78,7 @@ export async function syncDocumentSummary(
       .from("documents")
       .update({
         summary,
-        summary_model: SUMMARY_MODEL,
+        summary_model: SUMMARY_MODEL_LABEL,
         summary_generated_at: new Date().toISOString(),
       })
       .eq("id", id);

@@ -16,6 +16,7 @@
 import { NextRequest } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { embedText, vectorToSql } from "@/lib/embeddings";
+import { streamText } from "@/lib/ai-providers";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
@@ -171,68 +172,40 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     history.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n\n")
   }\n\nUser: ${message}\n\nAssistant:`;
 
-  // ─── Streaming response (Anthropic preferred for grounding quality) ─
-  if (process.env.ANTHROPIC_API_KEY) {
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": process.env.ANTHROPIC_API_KEY!,
-              "anthropic-version": "2023-06-01",
-            },
-            body: JSON.stringify({
-              // Claude Haiku 4.5 — fast + cheap for chat-grounded
-              // hub Q&A. The system prompt + retrieved doc context
-              // does the heavy lifting; the model just synthesises
-              // concisely.
-              model: "claude-haiku-4-5-20251001",
-              // Haiku 4.5 max output is 64k tokens; let the model
-              // run long when the question warrants it. Earlier
-              // 4096 cap was clipping rich answers.
-              max_tokens: 64000,
-              stream: true,
-              messages: [{ role: "user", content: fullPrompt }],
-            }),
-          });
-          if (!res.ok || !res.body) {
-            controller.enqueue(encoder.encode(`Error: AI request failed (${res.status})`));
-            controller.close();
-            return;
-          }
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-            for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              const data = line.slice(6);
-              try {
-                const evt = JSON.parse(data);
-                if (evt.type === "content_block_delta" && evt.delta?.text) {
-                  controller.enqueue(encoder.encode(evt.delta.text));
-                }
-              } catch { /* ignore parse error */ }
-            }
-          }
-          controller.close();
-        } catch (err) {
-          controller.enqueue(encoder.encode(`Error: ${err instanceof Error ? err.message : "stream failed"}`));
-          controller.close();
-        }
-      },
-    });
-    return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  // Routes through the shared streamText helper. Provider order +
+  // model selection come from admin's site_config — hub chat now
+  // shares the same cascade as doc chat / bundle chat / the rest of
+  // the AI surfaces. Long-form RAG synthesis, so useLiteModel is
+  // false (admin can flip primary to a stronger model if quality
+  // matters). iOS expects text/plain framing.
+  const result = await streamText({
+    prompt: fullPrompt,
+    useLiteModel: false,
+    maxOutputTokens: 64000,
+    temperature: 0.5,
+  });
+  if (!result.ok || !result.stream) {
+    return new Response(
+      JSON.stringify({ error: result.error || "AI request failed" }),
+      { status: result.status || 502, headers: { "Content-Type": "application/json" } },
+    );
   }
-
-  // Fallback: return a single non-streamed response (Gemini / OpenAI)
-  return new Response(JSON.stringify({ error: "Streaming requires ANTHROPIC_API_KEY" }), { status: 503 });
+  const encoder = new TextEncoder();
+  const byteStream = new ReadableStream({
+    async start(controller) {
+      const reader = result.stream!.getReader();
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          controller.enqueue(encoder.encode(value));
+        }
+      } catch (err) {
+        controller.enqueue(encoder.encode(`\n[Error: ${err instanceof Error ? err.message : "stream failed"}]`));
+      } finally {
+        controller.close();
+      }
+    },
+  });
+  return new Response(byteStream, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }

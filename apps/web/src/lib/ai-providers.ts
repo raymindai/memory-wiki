@@ -286,6 +286,223 @@ async function callOpenAI(apiKey: string, model: string, ctx: CallContext): Prom
   return { ok: true, text, provider: "openai", finishReason };
 }
 
+/**
+ * Streaming variant of callAI. Same cascade + config resolution; the
+ * returned ReadableStream emits plain text chunks (no SSE framing).
+ *
+ * Used by the editor chat, hub chat, and bundle chat routes — they
+ * pipe the resulting stream straight back to the browser with
+ * text/plain or text/event-stream framing of their choice. callers
+ * that don't need streaming should use callAI.
+ *
+ * Provider behavior matrix:
+ *   Anthropic — `stream: true` returns SSE; we read content_block_delta
+ *   OpenAI    — `stream: true` returns SSE; we read choices[0].delta.content
+ *   Gemini    — streamGenerateContent returns a JSON array streamed in
+ *               chunks; we parse each candidates[0].content.parts[0].text
+ *
+ * Failover rule: a stream "succeeds" once the first chunk is emitted.
+ * If a provider errors AFTER chunks start flowing we surface that
+ * error inline rather than retry — a partial response is better than
+ * a fresh start that wastes the user's reading time.
+ */
+export interface StreamTextResult {
+  ok: boolean;
+  /** Provider that actually served the stream (only when ok). */
+  provider?: ProviderName;
+  /** ReadableStream of plain text chunks. Closed when generation
+   *  ends, errors mid-stream, or the upstream provider closes. */
+  stream?: ReadableStream<string>;
+  /** Failure reason — only when ok === false (every provider tried
+   *  failed BEFORE any chunk could be emitted). */
+  error?: string;
+  status?: number;
+}
+
+export async function streamText(opts: AICallOptions): Promise<StreamTextResult> {
+  const config = await getAIConfig();
+  const order = opts.providerOrder ?? config.order;
+  const temperature = opts.temperature ?? 0.3;
+  const maxOutputTokens = opts.maxOutputTokens ?? 8192;
+  const lite = !!opts.useLiteModel;
+
+  let lastError: { status: number; message: string } | null = null;
+
+  for (const provider of order) {
+    const key = providerKey(provider);
+    if (!key) continue;
+    const model = lite ? config.models[provider].lite : config.models[provider].primary;
+    try {
+      const stream = await openProviderStream(provider, key, model, {
+        prompt: opts.prompt,
+        temperature,
+        maxOutputTokens,
+      });
+      if (stream) return { ok: true, provider, stream };
+    } catch (err) {
+      lastError = {
+        status: 502,
+        message: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+  return {
+    ok: false,
+    error: lastError?.message || "No AI provider available for streaming",
+    status: lastError?.status ?? 503,
+  };
+}
+
+async function openProviderStream(
+  provider: ProviderName,
+  apiKey: string,
+  model: string,
+  ctx: CallContext,
+): Promise<ReadableStream<string> | null> {
+  if (provider === "anthropic") return openAnthropicStream(apiKey, model, ctx);
+  if (provider === "openai")    return openOpenAIStream(apiKey, model, ctx);
+  return openGeminiStream(apiKey, model, ctx);
+}
+
+async function openAnthropicStream(apiKey: string, model: string, ctx: CallContext): Promise<ReadableStream<string> | null> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: Math.min(ctx.maxOutputTokens, 64000),
+      temperature: ctx.temperature,
+      stream: true,
+      messages: [{ role: "user", content: ctx.prompt }],
+    }),
+  });
+  if (!res.ok || !res.body) {
+    throw new Error(`Anthropic ${res.status}`);
+  }
+  return sseTextChunks(res.body, (data) => {
+    // event: content_block_delta { delta: { type: "text_delta", text: "..." } }
+    const d = data as { delta?: { type?: string; text?: string } };
+    if (d?.delta?.type === "text_delta" && typeof d.delta.text === "string") {
+      return d.delta.text;
+    }
+    return "";
+  });
+}
+
+async function openOpenAIStream(apiKey: string, model: string, ctx: CallContext): Promise<ReadableStream<string> | null> {
+  const body: Record<string, unknown> = {
+    model,
+    stream: true,
+    messages: [{ role: "user", content: ctx.prompt }],
+  };
+  if (/^gpt-5-/.test(model)) {
+    body.max_completion_tokens = Math.min(ctx.maxOutputTokens, 16384);
+  } else {
+    body.temperature = ctx.temperature;
+    body.max_tokens = Math.min(ctx.maxOutputTokens, 16384);
+  }
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) {
+    throw new Error(`OpenAI ${res.status}`);
+  }
+  return sseTextChunks(res.body, (data) => {
+    // { choices: [{ delta: { content: "..." } }] }
+    const d = data as { choices?: Array<{ delta?: { content?: string } }> };
+    const c = d?.choices?.[0]?.delta?.content;
+    return typeof c === "string" ? c : "";
+  });
+}
+
+async function openGeminiStream(apiKey: string, model: string, ctx: CallContext): Promise<ReadableStream<string> | null> {
+  // Gemini streamGenerateContent returns a streamed JSON array. With
+  // alt=sse it ships SSE-formatted lines that each carry one
+  // GenerateContentResponse — same shape as the non-stream endpoint
+  // but one candidate at a time.
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: ctx.prompt }] }],
+      generationConfig: {
+        temperature: ctx.temperature,
+        maxOutputTokens: ctx.maxOutputTokens,
+      },
+    }),
+  });
+  if (!res.ok || !res.body) {
+    throw new Error(`Gemini ${res.status}`);
+  }
+  return sseTextChunks(res.body, (data) => {
+    const d = data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    const parts = d?.candidates?.[0]?.content?.parts;
+    if (!Array.isArray(parts)) return "";
+    return parts.map((p) => p?.text || "").join("");
+  });
+}
+
+/**
+ * Parse an SSE byte stream into plain text chunks. extractText pulls
+ * the per-event text from the parsed JSON. Skips comments / empty
+ * lines / `data: [DONE]` markers. Stops on stream close.
+ */
+function sseTextChunks(
+  body: ReadableStream<Uint8Array>,
+  extractText: (data: unknown) => string,
+): ReadableStream<string> {
+  const decoder = new TextDecoder();
+  let buffer = "";
+  return new ReadableStream<string>({
+    async start(controller) {
+      const reader = body.getReader();
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          // SSE events are separated by blank lines (\n\n). Each event
+          // can have multiple `data:` fields that concatenate.
+          let sepIdx: number;
+          while ((sepIdx = buffer.indexOf("\n\n")) >= 0) {
+            const eventBlock = buffer.slice(0, sepIdx);
+            buffer = buffer.slice(sepIdx + 2);
+            const dataLines: string[] = [];
+            for (const line of eventBlock.split("\n")) {
+              if (line.startsWith("data:")) {
+                dataLines.push(line.slice(5).trim());
+              }
+            }
+            if (dataLines.length === 0) continue;
+            const payload = dataLines.join("\n");
+            if (payload === "[DONE]") continue;
+            try {
+              const parsed = JSON.parse(payload);
+              const text = extractText(parsed);
+              if (text) controller.enqueue(text);
+            } catch { /* malformed event, skip */ }
+          }
+        }
+      } catch (err) {
+        controller.error(err);
+        return;
+      } finally {
+        controller.close();
+      }
+    },
+  });
+}
+
 async function callGemini(apiKey: string, model: string, ctx: CallContext): Promise<AICallResult> {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,

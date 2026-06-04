@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { callAI } from "@/lib/ai-providers";
 
 /**
  * Suggested queries panel (W8).
@@ -112,19 +113,14 @@ export function formatSuggestedQueriesMarkdown(report: SuggestedQueriesReport): 
 }
 
 async function runProviderChain(prompt: string): Promise<SuggestedQuery[]> {
-  if (process.env.ANTHROPIC_API_KEY) {
-    const out = await runAnthropic(prompt, process.env.ANTHROPIC_API_KEY);
-    if (out.length > 0) return out;
-  }
-  if (process.env.OPENAI_API_KEY) {
-    const out = await runOpenAI(prompt, process.env.OPENAI_API_KEY);
-    if (out.length > 0) return out;
-  }
-  if (process.env.GEMINI_API_KEY) {
-    const out = await runGemini(prompt, process.env.GEMINI_API_KEY);
-    if (out.length > 0) return out;
-  }
-  return [];
+  const result = await callAI({
+    prompt,
+    useLiteModel: true,
+    temperature: 0.3,
+    maxOutputTokens: 800,
+  });
+  if (!result.ok) return [];
+  return parseQueries(result.text);
 }
 
 function parseQueries(text: string): SuggestedQuery[] {
@@ -151,56 +147,4 @@ function parseQueries(text: string): SuggestedQuery[] {
   return [];
 }
 
-async function runAnthropic(prompt: string, apiKey: string): Promise<SuggestedQuery[]> {
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 800,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return parseQueries(data.content?.[0]?.text || "");
-  } catch { return []; }
-}
-
-async function runOpenAI(prompt: string, apiKey: string): Promise<SuggestedQuery[]> {
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 800,
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return parseQueries(data.choices?.[0]?.message?.content || "");
-  } catch { return []; }
-}
-
-async function runGemini(prompt: string, apiKey: string): Promise<SuggestedQuery[]> {
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 800, responseMimeType: "application/json" },
-        }),
-      },
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return parseQueries(data.candidates?.[0]?.content?.parts?.[0]?.text || "");
-  } catch { return []; }
-}
+// Provider-specific runners removed — all routes through callAI.

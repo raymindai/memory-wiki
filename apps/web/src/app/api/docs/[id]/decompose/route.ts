@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { callAI } from "@/lib/ai-providers";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -177,9 +178,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Document is empty" }, { status: 400 });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "AI not configured" }, { status: 503 });
-
   // Cap input — long docs get the first 12k chars (most use cases fit easily).
   const excerpt = doc.markdown.slice(0, 12000);
   // When the bundle (or caller) provides an intent, the AI weights chunks by
@@ -191,14 +189,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   const prompt = `${DECOMPOSE_PROMPT}${intentLine}\n\nDocument title: "${doc.title || "Untitled"}"\n\nDocument content:\n${excerpt}`;
 
   try {
-    let result: SemanticChunksResult | null = null;
-    if (process.env.ANTHROPIC_API_KEY) {
-      result = await callAnthropic(prompt, process.env.ANTHROPIC_API_KEY);
-    } else if (process.env.OPENAI_API_KEY) {
-      result = await callOpenAI(prompt, process.env.OPENAI_API_KEY);
-    } else if (process.env.GEMINI_API_KEY) {
-      result = await callGemini(prompt, process.env.GEMINI_API_KEY);
+    const ai = await callAI({
+      prompt,
+      useLiteModel: true,
+      temperature: 0.3,
+      maxOutputTokens: 4096,
+    });
+    if (!ai.ok) {
+      return NextResponse.json({ error: ai.error || "AI extraction failed" }, { status: ai.rateLimited ? 429 : 502 });
     }
+    const result = parseChunksJson(ai.text);
     if (!result) return NextResponse.json({ error: "AI extraction failed" }, { status: 500 });
 
     // Verify chunk content can still be located in the source. AI commonly
@@ -249,60 +249,7 @@ interface SemanticChunksResult {
   version?: number;
 }
 
-async function callAnthropic(prompt: string, apiKey: string): Promise<SemanticChunksResult | null> {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  const text = data.content?.[0]?.text || "";
-  return parseChunksJson(text);
-}
-
-async function callOpenAI(prompt: string, apiKey: string): Promise<SemanticChunksResult | null> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 4096,
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content || "";
-  return parseChunksJson(text);
-}
-
-async function callGemini(prompt: string, apiKey: string): Promise<SemanticChunksResult | null> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 4096, responseMimeType: "application/json" },
-      }),
-    }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  return parseChunksJson(text);
-}
+// Provider-specific implementations removed — routes through callAI.
 
 function parseChunksJson(text: string): SemanticChunksResult | null {
   const m = text.match(/```(?:json)?\s*([\s\S]*?)```/);

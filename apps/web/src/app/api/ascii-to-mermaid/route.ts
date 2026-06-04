@@ -1,3 +1,14 @@
+// NOTE: This route is intentionally Gemini-direct. ascii-to-mermaid
+// optionally accepts an uploaded image (vision input), which the
+// shared callAI cascade does NOT support — callAI is text-only by
+// design. Vision pass-through is Gemini-specific via inlineData parts.
+// Migrating would require either adding image support to callAI (and
+// then dropping image fallback to Anthropic/OpenAI cleanly, which is
+// non-trivial across providers) OR splitting this into a text path
+// (through callAI) + image path (direct Gemini). Punted for now —
+// admin's model picker doesn't touch this; ascii-to-mermaid stays on
+// gemini-3-flash-preview with vision support.
+
 import { NextRequest, NextResponse } from "next/server";
 import https from "https";
 

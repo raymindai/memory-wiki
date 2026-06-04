@@ -2,13 +2,12 @@
  * LLM-driven markdown structuring for ingested raw text.
  *
  * Used by PDF / DOCX / scanned-paste pipelines that produce flat text
- * with no formatting. Routes the call through the same provider chain
- * the rest of Memory.Wiki uses: Anthropic > OpenAI > Gemini.
- *
- * Returns null when no provider is configured or when every provider in
- * the chain fails. Callers should fall back to the raw text in that case
- * so the user's import still lands somewhere.
+ * with no formatting. Routes through the shared cost-first cascade
+ * (callAI). Returns null when the whole cascade fails so callers fall
+ * back to the raw text.
  */
+
+import { callAI } from "@/lib/ai-providers";
 
 interface CleanOptions {
   /** Optional filename for context (helps with title detection). */
@@ -41,90 +40,13 @@ export async function cleanMarkdownStructure(
   const filenameLine = opts.filenameHint ? ` named "${opts.filenameHint}"` : "";
   const userPrompt = `Restructure the following text extracted from a ${sourceLabel}${filenameLine}. The extraction lost all formatting; recover the structure as clean Markdown.\n\nRaw text:\n---\n${trimmed}\n---\n\nStructured Markdown:`;
 
-  if (process.env.ANTHROPIC_API_KEY) {
-    const out = await runAnthropic(userPrompt, process.env.ANTHROPIC_API_KEY);
-    if (out) return out;
-  }
-  if (process.env.OPENAI_API_KEY) {
-    const out = await runOpenAI(userPrompt, process.env.OPENAI_API_KEY);
-    if (out) return out;
-  }
-  if (process.env.GEMINI_API_KEY) {
-    const out = await runGemini(userPrompt, process.env.GEMINI_API_KEY);
-    if (out) return out;
-  }
-  return null;
-}
-
-async function runAnthropic(prompt: string, apiKey: string): Promise<string | null> {
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 8192,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = data.content?.[0]?.text;
-    return typeof text === "string" && text.trim() ? text : null;
-  } catch {
-    return null;
-  }
-}
-
-async function runOpenAI(prompt: string, apiKey: string): Promise<string | null> {
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: prompt },
-        ],
-        max_tokens: 8192,
-      }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = data.choices?.[0]?.message?.content;
-    return typeof text === "string" && text.trim() ? text : null;
-  } catch {
-    return null;
-  }
-}
-
-async function runGemini(prompt: string, apiKey: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: SYSTEM_PROMPT + "\n\n" + prompt }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 32768 },
-        }),
-      },
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    return typeof text === "string" && text.trim() ? text : null;
-  } catch {
-    return null;
-  }
+  const result = await callAI({
+    prompt: `${SYSTEM_PROMPT}\n\n${userPrompt}`,
+    useLiteModel: false,
+    temperature: 0.1,
+    maxOutputTokens: 8192,
+  });
+  if (!result.ok) return null;
+  const text = result.text.trim();
+  return text || null;
 }

@@ -14,6 +14,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeConceptLabel } from "@/lib/build-concept-index";
+import { callAI } from "@/lib/ai-providers";
 
 interface ExtractedConcept {
   label: string;
@@ -228,73 +229,23 @@ export async function extractDocOntology(
   return { conceptsWritten, relationsWritten, inferredIntent: extracted.intent };
 }
 
-async function callExtractor(title: string, markdown: string, overrideKey?: string): Promise<ExtractedDoc | null> {
-  const anthropicKey = overrideKey || process.env.ANTHROPIC_API_KEY;
-  const openaiKey = !anthropicKey ? process.env.OPENAI_API_KEY : null;
-  const geminiKey = !anthropicKey && !openaiKey ? process.env.GEMINI_API_KEY : null;
-  if (!anthropicKey && !openaiKey && !geminiKey) return null;
-
+async function callExtractor(title: string, markdown: string, _overrideKey?: string): Promise<ExtractedDoc | null> {
+  // _overrideKey was used by the old Anthropic-direct path. Now the
+  // shared cascade handles provider selection + keys via env / site_config.
   // Truncate to 8000 chars — covers 95% of personal notes; preserves
-  // beginning + ending which is where signal usually lives. Middle
-  // omitted so the model still sees both ends of the document.
+  // beginning + ending where signal usually lives.
   const truncated = clipMiddle(markdown, 8000);
   const userBlock = `Title: ${title || "Untitled"}\n\n${truncated}`;
 
   try {
-    if (anthropicKey) {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5",
-          max_tokens: 2048,
-          system: "You return ONLY valid JSON matching the schema requested. No prose, no fences.",
-          messages: [{ role: "user", content: `${PER_DOC_PROMPT}\n\nDocument:\n${userBlock}` }],
-        }),
-      });
-      if (!res.ok) return null;
-      const data = await res.json();
-      const text = data.content?.[0]?.text || "";
-      return parsePerDocJson(text);
-    }
-    if (openaiKey) {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: PER_DOC_PROMPT },
-            { role: "user", content: `Document:\n${userBlock}` },
-          ],
-          max_tokens: 2048,
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return parsePerDocJson(data.choices?.[0]?.message?.content || "");
-    }
-    if (geminiKey) {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `${PER_DOC_PROMPT}\n\nDocument:\n${userBlock}` }] }],
-            generationConfig: { maxOutputTokens: 2048, responseMimeType: "application/json" },
-          }),
-        },
-      );
-      if (!res.ok) return null;
-      const data = await res.json();
-      return parsePerDocJson(data.candidates?.[0]?.content?.parts?.[0]?.text || "");
-    }
+    const result = await callAI({
+      prompt: `You return ONLY valid JSON matching the schema requested. No prose, no fences.\n\n${PER_DOC_PROMPT}\n\nDocument:\n${userBlock}`,
+      useLiteModel: true,
+      temperature: 0.3,
+      maxOutputTokens: 2048,
+    });
+    if (!result.ok) return null;
+    return parsePerDocJson(result.text);
   } catch (err) {
     console.warn("extractDocOntology API error:", err instanceof Error ? err.message : err);
   }

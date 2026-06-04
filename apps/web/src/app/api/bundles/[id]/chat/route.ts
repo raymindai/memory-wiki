@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
+import { streamText } from "@/lib/ai-providers";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -86,136 +87,42 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     history.map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n\n")
   }\n\nUser: ${message}\n\nAssistant:`;
 
-  // Anthropic Haiku — same provider + model the hub chat uses so
-  // the two surfaces have identical voice + latency + citation
-  // format. Streams raw text chunks (no SSE framing) for parity
-  // with /api/hub/<slug>/chat — the iOS ChatSheet expects that.
-  if (process.env.ANTHROPIC_API_KEY) {
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": process.env.ANTHROPIC_API_KEY!,
-              "anthropic-version": "2023-06-01",
-            },
-            body: JSON.stringify({
-              model: "claude-haiku-4-5-20251001",
-              max_tokens: 64000,
-              stream: true,
-              messages: [{ role: "user", content: fullPrompt }],
-            }),
-          });
-          if (!res.ok || !res.body) {
-            controller.enqueue(encoder.encode(`Error: AI request failed (${res.status})`));
-            controller.close();
-            return;
-          }
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let buf = "";
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            buf += decoder.decode(value, { stream: true });
-            const lines = buf.split("\n");
-            buf = lines.pop() || "";
-            for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              const payload = line.slice(6).trim();
-              if (!payload || payload === "[DONE]") continue;
-              try {
-                const obj = JSON.parse(payload);
-                if (obj.type === "content_block_delta" && obj.delta?.text) {
-                  controller.enqueue(encoder.encode(obj.delta.text));
-                }
-              } catch { /* skip malformed */ }
-            }
-          }
-          controller.close();
-        } catch (err) {
-          console.error("Bundle chat stream error:", err);
-          controller.enqueue(encoder.encode(`\n[Error: ${(err as Error).message}]`));
-          controller.close();
-        }
-      },
-    });
-    return new Response(stream, {
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" },
-    });
+  // Streams plain text chunks via the shared streamText helper.
+  // Provider order + model selection come from admin's site_config —
+  // bundle chat picks the same cascade as doc chat / hub chat / the
+  // rest of the AI surfaces. iOS ChatSheet + web reader expect
+  // text/plain framing (not SSE), so we re-encode the unified text
+  // stream to bytes here.
+  const result = await streamText({
+    prompt: fullPrompt,
+    useLiteModel: false,
+    maxOutputTokens: 64000,
+    temperature: 0.7,
+  });
+  if (!result.ok || !result.stream) {
+    return new Response(
+      JSON.stringify({ error: result.error || "AI request failed" }),
+      { status: result.status || 502, headers: { "Content-Type": "application/json" } },
+    );
   }
-
-  // Fallback: Gemini (kept for parity but not preferred; the
-  // response framing is SSE here, not raw text).
-  if (process.env.GEMINI_API_KEY) {
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse&key=${process.env.GEMINI_API_KEY}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: fullPrompt }] }],
-              generationConfig: { maxOutputTokens: 2048, temperature: 0.6 },
-            }),
-          });
-
-          if (!res.ok) {
-            const errText = await res.text();
-            console.error("Gemini chat error:", res.status, errText);
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "AI error" })}\n\n`));
-            controller.close();
-            return;
-          }
-
-          const reader = res.body?.getReader();
-          if (!reader) { controller.close(); return; }
-          const decoder = new TextDecoder();
-          let buffer = "";
-
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              try {
-                const data = JSON.parse(line.slice(6));
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (text) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
-                }
-              } catch { /* skip malformed line */ }
-            }
-          }
-
-          // Send doc IDs map for citation resolution
-          const docMap = orderedDocs.reduce((acc, d, i) => { acc[i + 1] = { id: d.id, title: d.title || "Untitled" }; return acc; }, {} as Record<number, { id: string; title: string }>);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, docMap })}\n\n`));
-          controller.close();
-        } catch (err) {
-          console.error("Chat stream error:", err);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "Stream failed" })}\n\n`));
-          controller.close();
+  const encoder = new TextEncoder();
+  const byteStream = new ReadableStream({
+    async start(controller) {
+      const reader = result.stream!.getReader();
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          controller.enqueue(encoder.encode(value));
         }
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-      },
-    });
-  }
-
-  return new Response(JSON.stringify({ error: "Gemini key required for streaming" }), { status: 503 });
+      } catch (err) {
+        controller.enqueue(encoder.encode(`\n[Error: ${(err as Error).message}]`));
+      } finally {
+        controller.close();
+      }
+    },
+  });
+  return new Response(byteStream, {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" },
+  });
 }

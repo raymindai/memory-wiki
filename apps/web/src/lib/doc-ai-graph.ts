@@ -3,14 +3,14 @@
 // documents.ai_graph. Mirrors what bundles.graph_data carries for a
 // curated bundle, scoped to a single document.
 //
-// Cheap by default — uses claude-haiku-4-5 (~$0.001 per doc). Called
-// fire-and-forget from doc POST/PATCH so doc save stays fast; backfill
-// of historic docs runs through eval/backfill-doc-graph.mjs.
+// Routes through the shared cost-first cascade (callAI). Fire-and-
+// forget from doc POST/PATCH so doc save stays fast; backfill of
+// historic docs runs through eval/backfill-doc-graph.mjs.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { callAI } from "@/lib/ai-providers";
 
-const MODEL = process.env.MW_DOC_GRAPH_MODEL || "claude-haiku-4-5";
-const ENDPOINT = "https://api.anthropic.com/v1/messages";
+const GRAPH_MODEL_LABEL = "lite-cascade";
 
 export interface DocAIGraph {
   themes?: string[];
@@ -37,34 +37,18 @@ Rules:
 
 export async function generateDocAIGraph(
   markdown: string,
-  apiKey: string,
 ): Promise<DocAIGraph | null> {
   if (!markdown || markdown.trim().length < 200) return null;
   const trimmed = markdown.length > 16000 ? markdown.slice(0, 16000) : markdown;
 
-  const r = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1200,
-      messages: [{ role: "user", content: PROMPT.replace("{{BODY}}", trimmed) }],
-    }),
+  const result = await callAI({
+    prompt: PROMPT.replace("{{BODY}}", trimmed),
+    useLiteModel: true,
+    temperature: 0.3,
+    maxOutputTokens: 1200,
   });
-
-  if (!r.ok) {
-    throw new Error(`AI graph HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
-  }
-  const data = await r.json();
-  const text = (data.content || [])
-    .filter((b: { type: string }) => b.type === "text")
-    .map((b: { text: string }) => b.text)
-    .join("");
-  const m = text.match(/\{[\s\S]*\}/);
+  if (!result.ok) return null;
+  const m = result.text.match(/\{[\s\S]*\}/);
   if (!m) return null;
   try {
     const parsed = JSON.parse(m[0]) as DocAIGraph;
@@ -92,16 +76,14 @@ export async function syncDocAIGraph(
   docId: string,
   markdown: string,
 ): Promise<void> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return;
   try {
-    const graph = await generateDocAIGraph(markdown, apiKey);
+    const graph = await generateDocAIGraph(markdown);
     if (!graph) return;
     await supabase
       .from("documents")
       .update({
         ai_graph: graph,
-        ai_graph_model: MODEL,
+        ai_graph_model: GRAPH_MODEL_LABEL,
         ai_graph_generated_at: new Date().toISOString(),
       })
       .eq("id", docId);

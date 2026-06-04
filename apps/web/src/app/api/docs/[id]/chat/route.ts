@@ -8,9 +8,10 @@
 // Body: { message: string, history?: [{role,content}] }
 // Response: text/plain stream (raw token chunks)
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { streamText } from "@/lib/ai-providers";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -66,58 +67,40 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     history.map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n\n")
   }\n\nUser: ${message}\n\nAssistant:`;
 
+  // Routed through the shared streamText helper. Provider order +
+  // model selection come from admin's site_config — chat picks the
+  // same cascade as the rest of the AI surfaces. Long-form reply, so
+  // useLiteModel is false (admin can flip primary to a stronger model
+  // if quality matters).
+  const result = await streamText({
+    prompt: fullPrompt,
+    useLiteModel: false,
+    maxOutputTokens: 64000,
+    temperature: 0.7,
+  });
+  if (!result.ok || !result.stream) {
+    return NextResponse.json({ error: result.error || "AI request failed" }, { status: result.status || 502 });
+  }
+  // Re-encode the text chunks back to bytes for the HTTP response.
+  // The client reads this as text/plain and renders incrementally.
   const encoder = new TextEncoder();
-  const stream = new ReadableStream({
+  const byteStream = new ReadableStream({
     async start(controller) {
+      const reader = result.stream!.getReader();
       try {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.ANTHROPIC_API_KEY!,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 64000,
-            stream: true,
-            messages: [{ role: "user", content: fullPrompt }],
-          }),
-        });
-        if (!res.ok || !res.body) {
-          controller.enqueue(encoder.encode(`Error: AI request failed (${res.status})`));
-          controller.close();
-          return;
-        }
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buf = "";
-        while (true) {
-          const { value, done } = await reader.read();
+        for (;;) {
+          const { done, value } = await reader.read();
           if (done) break;
-          buf += decoder.decode(value, { stream: true });
-          const lines = buf.split("\n");
-          buf = lines.pop() || "";
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const payload = line.slice(6).trim();
-            if (!payload || payload === "[DONE]") continue;
-            try {
-              const obj = JSON.parse(payload);
-              if (obj.type === "content_block_delta" && obj.delta?.text) {
-                controller.enqueue(encoder.encode(obj.delta.text));
-              }
-            } catch { /* skip malformed */ }
-          }
+          controller.enqueue(encoder.encode(value));
         }
-        controller.close();
       } catch (err) {
         controller.enqueue(encoder.encode(`\n[Error: ${(err as Error).message}]`));
+      } finally {
         controller.close();
       }
-    }
+    },
   });
-  return new Response(stream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" }
+  return new Response(byteStream, {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" },
   });
 }
