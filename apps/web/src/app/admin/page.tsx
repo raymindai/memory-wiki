@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -76,6 +76,10 @@ export default function AdminPage() {
   const [aiAnthropicLite, setAiAnthropicLite]     = useState("claude-haiku-4-5");
   const [savingModels, setSavingModels] = useState(false);
   const [modelSaveMsg, setModelSaveMsg] = useState("");
+  // Hydrate the AI Settings inputs from server exactly once on first
+  // load. The 30s background refresh must NOT overwrite them — that
+  // would clobber whatever the admin is mid-typing.
+  const aiHydratedRef = useRef(false);
 
   // Usage tab state — lazy-loaded on first tab visit so the admin
   // page's initial paint stays fast. ai_usage scans aren't huge but
@@ -108,8 +112,13 @@ export default function AdminPage() {
     });
   }, []);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
+    // Only flip `loading` for the initial fetch — the 30s auto-refresh
+    // calls this in silent mode so the page doesn't swap to the
+    // "Loading..." placeholder twice a minute (the cause of the
+    // periodic flicker that ate every render including AI settings
+    // inputs mid-edit).
+    if (!opts?.silent) setLoading(true);
     try {
       const sb = getSupabaseBrowserClient();
       const { data: sessionData } = await sb!.auth.getSession();
@@ -130,7 +139,7 @@ export default function AdminPage() {
       setDailyStats(data.dailyStats || []);
       setSourceBreakdown(data.sourceBreakdown || {});
       setEmailTemplates(data.emailTemplates || []);
-      if (data.aiProviders) {
+      if (data.aiProviders && !aiHydratedRef.current) {
         if (Array.isArray(data.aiProviders.order)) setAiProviderOrder(data.aiProviders.order);
         const m = data.aiProviders.models;
         if (m?.openai?.primary)     setAiOpenaiPrimary(m.openai.primary);
@@ -139,6 +148,7 @@ export default function AdminPage() {
         if (m?.gemini?.lite)        setAiGeminiLite(m.gemini.lite);
         if (m?.anthropic?.primary)  setAiAnthropicPrimary(m.anthropic.primary);
         if (m?.anthropic?.lite)     setAiAnthropicLite(m.anthropic.lite);
+        aiHydratedRef.current = true;
       }
     } catch {
       setAuthed(false);
@@ -147,16 +157,21 @@ export default function AdminPage() {
     setLastUpdated(Date.now());
   }, [email]);
 
+  // Stable silent-refresh ref so the 30s interval doesn't tear down /
+  // recreate every time fetchData's identity changes.
+  const silentRefresh = useCallback(() => { fetchData({ silent: true }); }, [fetchData]);
+
   useEffect(() => {
     if (authed && email) fetchData();
   }, [authed, email, fetchData]);
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 30 seconds — silent so the page doesn't
+  // flicker through the "Loading..." placeholder on every tick.
   useEffect(() => {
     if (!authed || !email) return;
-    const interval = setInterval(() => { fetchData(); }, 30000);
+    const interval = setInterval(silentRefresh, 30000);
     return () => clearInterval(interval);
-  }, [authed, email, fetchData]);
+  }, [authed, email, silentRefresh]);
 
   // "Last updated X seconds ago" ticker
   useEffect(() => {
@@ -217,7 +232,7 @@ export default function AdminPage() {
           <p style={{ fontSize: 12, color: "#52525b", marginTop: 4 }}>{email}</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={fetchData} style={btnStyle}>Refresh</button>
+          <button onClick={() => fetchData()} style={btnStyle}>Refresh</button>
           {lastUpdated !== null && (
             <span style={{ fontSize: 11, color: "#52525b", alignSelf: "center" }}>
               Updated {secondsAgo < 5 ? "just now" : `${secondsAgo}s ago`}
