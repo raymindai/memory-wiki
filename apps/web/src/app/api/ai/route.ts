@@ -314,25 +314,34 @@ ${markdown.slice(0, 3 * 1024 * 1024)}
 
 ${trailingLabel}`;
 
-  // Per-action knobs: summary/tldr/selection-ops + visitor_chat can
-  // use the lite model (cheaper, faster, answers are short); the
-  // rest get the primary tier. visitor_chat also caps output at
-  // 2048 tokens because there's no path where a visitor needs a
-  // multi-thousand-token reply — anything longer is usually the
-  // model misclassifying and trying to echo the doc body.
-  const useLite = action === "summary" || action === "tldr" || action === "visitor_chat" || action.startsWith("selection_");
+  // Per-action knobs: summary/tldr/selection-ops + visitor_chat + format
+  // can use the lite model. `format` was on the primary tier before
+  // and routinely sat for minutes because it's a pure structural pass
+  // (raw text → headings/lists/tables) — exactly what Flash-class
+  // models nail without the Pro overhead.
+  const useLite = action === "summary" || action === "tldr" || action === "visitor_chat" || action === "format" || action.startsWith("selection_");
   const temperature =
     action === "polish" || action === "translate" || action === "compact"
       || action === "format"
       || action === "selection_polish" || action === "selection_translate"
       ? 0.1
       : 0.3;
+  // Cap output at the input length × 1.4 for actions whose output
+  // never exceeds the input (format restructures, compact shortens,
+  // polish/translate replace 1:1). Gemini's stop-token detection is
+  // tighter when the budget isn't oversized — the previous 65k cap
+  // routinely made the model run on far past the natural end of the
+  // doc, adding tens of seconds. Estimate tokens as chars / 3.5
+  // (conservative for mixed CJK/Latin).
+  const inputTokensEstimate = Math.ceil((markdown || "").length / 3.5);
   const maxOutputTokens =
     action === "summary" || action === "tldr" || action === "visitor_chat"
       ? 2048
       : action.startsWith("selection_")
         ? 8192
-        : 65536;
+        : action === "format" || action === "polish" || action === "translate" || action === "compact"
+          ? Math.min(65536, Math.max(4096, Math.ceil(inputTokensEstimate * 1.4)))
+          : 65536;
 
   // Gemini fallback respects site_config overrides; Anthropic /
   // OpenAI use hardcoded sane defaults inside the helper.
