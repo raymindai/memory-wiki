@@ -556,8 +556,7 @@ export default function HubEmbed({
           container so the blob stays anchored to the viewport while
           the user scrolls. */}
       <div className="mw-start-backdrop" aria-hidden>
-        <img className="mw-start-backdrop-morph mw-logo-darktheme" src="/brand/mwblob_morph.svg" alt="" draggable={false} />
-        <img className="mw-start-backdrop-morph mw-logo-lighttheme" src="/brand/mwblob_morph_dark.svg" alt="" draggable={false} />
+        <div className="mw-start-backdrop-morph" />
       </div>
       <div className="h-full overflow-auto relative mw-start-backdrop-content">
       <div className="max-w-3xl mx-auto px-6 py-10">
