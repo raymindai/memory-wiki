@@ -73,14 +73,13 @@
       .mw-social-btn .mw-spin{display:inline-block!important;width:12px!important;height:12px!important;border:1.6px solid rgba(250,250,250,0.25)!important;border-top-color:#fafafa!important;border-radius:50%!important;animation:mw-social-spin .8s linear infinite!important;box-sizing:border-box!important}
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
-      /* Threads action cluster on a post's top-right:
-       *   …(more)  at ~right:16px (always present)
-       *   ✎ pencil at ~right:50px (ONLY on the user's own posts)
-       * The button was at right:48px which sat right on top of the
-       * pencil. Bump to 88px to clear both icons with a small gap
-       * regardless of own/other-post — non-own posts just see Add
-       * sit a bit further left of the more menu, which is fine. */
-      html.mw-social-threads .mw-social-btn{right:88px!important}
+      /* Threads — initial offset before JS measures the actual action
+       * cluster. positionThreadsButton() (see attachToVisiblePosts)
+       * overrides this with a measured value so the Add button always
+       * sits just left of the existing icons, whether the cluster has
+       * 1 (… more) or 2 (✎ pencil + … more) buttons. The CSS value is
+       * only used for the brief moment before the first measurement. */
+      html.mw-social-threads .mw-social-btn{right:48px!important}
     `;
     document.head.appendChild(s);
   }
@@ -686,16 +685,69 @@
     }
   }
 
+  /**
+   * Measure the post's existing top-right action cluster and position
+   * the Add button just to the left of it. Handles the Threads case
+   * where own-posts show [✎ pencil][… more] (2 icons) while other
+   * posts show only [… more] (1 icon) — and X cases with variable
+   * icon counts. Falls back silently to the CSS default if no cluster
+   * is detected.
+   *
+   * Strategy: scan host descendants for clickable / aria-labeled
+   * icons that sit in the top ~64px of the host AND are flush to the
+   * right edge (within 120px). Take the leftmost icon's x and set
+   * the button's `right` to (host.right - leftmost + 8px gap).
+   */
+  function positionButton(host, btn) {
+    try {
+      const hostRect = host.getBoundingClientRect();
+      if (hostRect.width === 0 || hostRect.height === 0) return;
+      const candidates = host.querySelectorAll('[role="button"], button, [aria-label]');
+      let leftmost = Infinity;
+      for (const c of candidates) {
+        if (c === btn || btn.contains(c) || c.contains(btn)) continue;
+        const r = c.getBoundingClientRect();
+        // Icon-sized only (skip wide things like the body button hit area).
+        if (r.width === 0 || r.width > 56 || r.height > 56) continue;
+        // Top-right cluster: top must be within 64px of host top.
+        if (r.top - hostRect.top > 64) continue;
+        if (r.top < hostRect.top - 4) continue;
+        // Must be near the right edge of the host (within 120px).
+        if (hostRect.right - r.right > 120) continue;
+        if (r.right > hostRect.right + 4) continue;
+        if (r.left < leftmost) leftmost = r.left;
+      }
+      if (!Number.isFinite(leftmost)) return;
+      const offset = Math.max(16, Math.round(hostRect.right - leftmost + 8));
+      btn.style.right = `${offset}px`;
+    } catch { /* ignore — keep CSS default */ }
+  }
+
   function attachToVisiblePosts() {
     const nodes = document.querySelectorAll(adapter.selector);
     nodes.forEach((el) => {
       // Threads sometimes replaces the host's children on re-render
       // and wipes our button out — re-attach when the flag is set but
       // the button is gone.
-      if (el.dataset.mwSocialAttached && el.querySelector(".mw-social-btn")) return;
+      if (el.dataset.mwSocialAttached && el.querySelector(".mw-social-btn")) {
+        // Even when already attached, re-measure: Threads can swap the
+        // top-right cluster (pencil appears/disappears, more menu
+        // shifts) without re-rendering the whole post. Cheap enough to
+        // run every observer tick.
+        const btn = el.querySelector(".mw-social-btn");
+        if (btn) positionButton(el, btn);
+        return;
+      }
       el.dataset.mwSocialAttached = "1";
       el.classList.add("mw-social-host");
-      el.appendChild(makeButton());
+      const btn = makeButton();
+      el.appendChild(btn);
+      // Initial position immediately, then retry once after a frame —
+      // Threads sometimes mounts the action icons a tick after the
+      // post body so the first measurement misses them.
+      positionButton(el, btn);
+      requestAnimationFrame(() => positionButton(el, btn));
+      setTimeout(() => positionButton(el, btn), 250);
     });
   }
 
