@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld("mwDesktop", {
   openInBrowser: (url) => ipcRenderer.invoke("open-in-browser", url),
   openQuickLookSettings: () => ipcRenderer.invoke("open-quicklook-settings"),
   isQuickLookInstalled: () => ipcRenderer.invoke("is-quicklook-installed"),
+  repairQuickLook: () => ipcRenderer.invoke("repair-quicklook"),
   revealInFinder: (path) => ipcRenderer.invoke("reveal-in-finder", path),
   readClipboard: () => ipcRenderer.invoke("read-clipboard"),
   writeClipboard: (text) => ipcRenderer.invoke("write-clipboard", text),

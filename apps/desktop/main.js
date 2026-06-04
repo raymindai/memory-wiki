@@ -2039,23 +2039,74 @@ ipcMain.handle("open-quicklook-settings", () => {
   fs.writeFileSync(marker, new Date().toISOString());
 });
 
+// Source-of-truth bundle id for the QL extension. Used by both the
+// status check and the repair handler. Mirrors the value Xcode
+// stamps into the .appex Info.plist at build time.
+const QL_EXT_BUNDLE_ID = "wiki.memory.quicklook.qlextension";
+
+// Real registration check — asks macOS, not the filesystem. The old
+// version returned true whenever the .appex / host bundle EXISTED on
+// disk, which is independent of whether LaunchServices ever indexed
+// or pluginkit registered the extension. Users routinely saw a
+// false-positive "Active" badge while Space-in-Finder did nothing.
+//
+// pluginkit's output for a registered extension looks like:
+//   "+    wiki.memory.quicklook.qlextension(1.0)"  ← enabled
+//   "-    wiki.memory.quicklook.qlextension(1.0)"  ← disabled by user
+//   "?    wiki.memory.quicklook.qlextension(1.0)"  ← awaiting decision
+// Any of those lines means the system knows about the extension.
+// Empty output = not registered, which is the failure we want to
+// surface so the renderer can show a "Repair" CTA instead of lying.
+function isQuickLookExtRegistered() {
+  try {
+    const { execSync } = require("child_process");
+    const out = execSync(`pluginkit -m -i ${QL_EXT_BUNDLE_ID}`, { encoding: "utf8", timeout: 3000 }).trim();
+    return out.length > 0;
+  } catch {
+    // pluginkit missing or errored — fall back to existence check so
+    // we don't permanently misreport on weird systems.
+    const embeddedAppex = path.join(path.dirname(app.getAppPath()), "..", "PlugIns", "MemoryWikiQLExtension.appex");
+    const userAppsBundle = path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app");
+    return fs.existsSync(embeddedAppex) || fs.existsSync(userAppsBundle);
+  }
+}
+
 ipcMain.handle("is-quicklook-installed", () => {
-  // v2.5.0+: the .appex lives at Contents/PlugIns/ inside the host
-  // bundle (App Store-required layout). That's the source-of-truth
-  // check; if present, LaunchServices has the extension. Fall back
-  // to legacy markers + the ~/Applications copy for DMG installs
-  // that predate the embed.
-  const embeddedAppex = path.join(
-    path.dirname(app.getAppPath()),
-    "..",
-    "PlugIns",
-    "MemoryWikiQLExtension.appex"
-  );
-  if (fs.existsSync(embeddedAppex)) return true;
-  const legacy = path.join(USER_DATA_DIR, ".quicklook-installed");
-  const versioned = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
-  const userAppsBundle = path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app");
-  return fs.existsSync(legacy) || fs.existsSync(versioned) || fs.existsSync(userAppsBundle);
+  return isQuickLookExtRegistered();
+});
+
+// Force LaunchServices to re-scan the QL host bundle so pluginkit
+// re-registers the .appex inside it. This is the fix for "bundle
+// is on disk but macOS doesn't know about the extension" — the
+// exact symptom that made every fresh DMG install ship with a
+// non-functional QuickLook. Runs lsregister against whichever bundle
+// path actually exists (embedded host first, then the ~/Applications
+// sidecar from legacy DMG installs).
+function refreshQuickLookRegistration() {
+  const { execSync } = require("child_process");
+  const lsregister = "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister";
+  const candidates = [
+    // Sidecar host app for DMG / standalone installs.
+    path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app"),
+    // Embedded host app inside the desktop bundle (MAS/embed builds
+    // do this for us automatically, but kicking lsregister doesn't
+    // hurt — it just refreshes the existing registration).
+    path.join(path.dirname(app.getAppPath()), ".."),
+  ];
+  for (const target of candidates) {
+    if (!fs.existsSync(target)) continue;
+    try {
+      execSync(`"${lsregister}" -f "${target}"`, { timeout: 5000 });
+    } catch (err) {
+      console.log("[quicklook] lsregister failed for", target, "—", err.message);
+    }
+  }
+}
+
+ipcMain.handle("repair-quicklook", () => {
+  refreshQuickLookRegistration();
+  // Give pluginkit a moment to re-index before reading status back.
+  return new Promise((resolve) => setTimeout(() => resolve(isQuickLookExtRegistered()), 600));
 });
 
 ipcMain.handle("read-clipboard", () => {
@@ -2243,7 +2294,9 @@ function buildMenu() {
 
 function installQuickLook() {
   // If the .appex is already inside our own bundle at the standard
-  // PlugIns location, LaunchServices has already registered it. Skip.
+  // PlugIns location, LaunchServices auto-registers it on first
+  // launch. We still poke lsregister at the end though — users have
+  // reported the embed not getting indexed reliably across upgrades.
   const embeddedAppex = path.join(
     path.dirname(app.getAppPath()),
     "..",
@@ -2251,29 +2304,44 @@ function installQuickLook() {
     "MemoryWikiQLExtension.appex"
   );
   if (fs.existsSync(embeddedAppex)) {
+    refreshQuickLookRegistration();
     return;
   }
 
   const marker = path.join(USER_DATA_DIR, `.quicklook-installed-${app.getVersion()}`);
-  if (fs.existsSync(marker)) return;
-
   const qlSource = path.join(process.resourcesPath, "memory.wiki QuickLook.app");
-  if (!fs.existsSync(qlSource)) return;
+  if (!fs.existsSync(qlSource)) {
+    // No bundle to install. Still try a registration refresh against
+    // whatever sidecar might already exist — covers the case where
+    // an older build copied the bundle but the current build skipped
+    // packaging it.
+    refreshQuickLookRegistration();
+    return;
+  }
 
   const userApps = path.join(app.getPath("home"), "Applications");
   const qlDest = path.join(userApps, "memory.wiki QuickLook.app");
+  const needsCopy = !fs.existsSync(marker) || !fs.existsSync(qlDest);
 
   try {
-    if (!fs.existsSync(userApps)) fs.mkdirSync(userApps, { recursive: true });
-    if (fs.existsSync(qlDest)) {
+    if (needsCopy) {
+      if (!fs.existsSync(userApps)) fs.mkdirSync(userApps, { recursive: true });
+      if (fs.existsSync(qlDest)) {
+        const { execSync } = require("child_process");
+        execSync(`rm -rf "${qlDest}"`);
+      }
       const { execSync } = require("child_process");
-      execSync(`rm -rf "${qlDest}"`);
+      execSync(`cp -R "${qlSource}" "${qlDest}"`);
+      fs.writeFileSync(marker, new Date().toISOString());
+      console.log("[quicklook] Legacy install/refresh to ~/Applications/");
     }
-    const { execSync } = require("child_process");
-    execSync(`cp -R "${qlSource}" "${qlDest}"`);
-    execSync(`open "${qlDest}"`);
-    fs.writeFileSync(marker, new Date().toISOString());
-    console.log("[quicklook] Legacy install/refresh to ~/Applications/");
+    // CRITICAL: copying the bundle is NOT enough — without lsregister
+    // macOS often doesn't index the .appex, so pluginkit shows
+    // nothing and Space-in-Finder is silent. Run it on every launch
+    // (idempotent, ~50-200ms) to guarantee the extension is known to
+    // the system. This was the root cause of the "ACTIVE badge says
+    // on but QL doesn't work" bug.
+    refreshQuickLookRegistration();
   } catch (err) {
     console.log("[quicklook] Install failed (non-critical):", err.message);
   }

@@ -265,36 +265,61 @@
     }
 
     // Home QuickLook banner — adaptive. Renders "Enable" CTA when
-    // the extension isn't registered yet, "On" status when it is.
-    // installQuickLook() already runs on every launch in main.js,
-    // but the user may need to flip the toggle in System Settings
-    // → Extensions if macOS auto-disabled the .appex.
+    // the extension isn't registered yet, "Active" badge when it is,
+    // and (NEW) re-runs lsregister + re-checks on click so the user
+    // can self-repair a broken-but-installed state without leaving
+    // the app. The old status came from a filesystem check that
+    // returned true whenever the bundle existed even if macOS had
+    // never registered the extension — users saw "Active" while
+    // Space-in-Finder did nothing. Now isQuickLookInstalled reflects
+    // actual pluginkit registration.
     var qlBanner = document.getElementById("home-quicklook-banner");
     var qlTitle = document.getElementById("home-quicklook-title");
     var qlDesc = document.getElementById("home-quicklook-desc");
     var qlAction = document.getElementById("home-quicklook-action");
+    function refreshQlBannerUI(installed) {
+      if (!qlBanner) return;
+      qlBanner.style.display = "flex";
+      if (installed) {
+        qlBanner.classList.add("active");
+        if (qlTitle) qlTitle.textContent = "QuickLook Preview is on";
+        if (qlDesc) qlDesc.textContent = "Press Space on any .md file in Finder to preview it instantly.";
+        if (qlAction) qlAction.textContent = "Active";
+      } else {
+        qlBanner.classList.remove("active");
+        if (qlTitle) qlTitle.textContent = "QuickLook Preview needs repair";
+        if (qlDesc) qlDesc.textContent = "Click to re-register with macOS, then try Space on a .md file in Finder.";
+        if (qlAction) qlAction.textContent = "Repair";
+      }
+    }
     if (qlBanner && window.mwDesktop.isQuickLookInstalled) {
-      window.mwDesktop.isQuickLookInstalled().then(function(installed) {
-        qlBanner.style.display = "flex";
-        if (installed) {
-          qlBanner.classList.add("active");
-          if (qlTitle) qlTitle.textContent = "QuickLook Preview is on";
-          if (qlDesc) qlDesc.textContent = "Press Space on any .md file in Finder to preview it instantly.";
-          if (qlAction) qlAction.textContent = "Active";
-        } else {
-          qlBanner.classList.remove("active");
-          if (qlTitle) qlTitle.textContent = "Enable QuickLook Preview";
-          if (qlDesc) qlDesc.textContent = "Press Space on .md files in Finder to preview them without opening.";
-          if (qlAction) qlAction.textContent = "Enable";
-        }
-      });
+      window.mwDesktop.isQuickLookInstalled().then(refreshQlBannerUI);
       qlBanner.addEventListener("click", function() {
-        window.mwDesktop.openQuickLookSettings();
+        var installed = qlBanner.classList.contains("active");
+        if (installed) {
+          // Already registered — clicking opens System Settings so
+          // the user can toggle the per-extension switch if macOS
+          // disabled it after a system update.
+          window.mwDesktop.openQuickLookSettings();
+          return;
+        }
+        // NOT registered — run the repair flow (lsregister + recheck)
+        // before falling back to System Settings. This handles the
+        // common "bundle on disk but not indexed" case automatically.
+        if (qlAction) qlAction.textContent = "Repairing…";
+        window.mwDesktop.repairQuickLook().then(function(nowInstalled) {
+          refreshQlBannerUI(nowInstalled);
+          if (!nowInstalled) {
+            // Couldn't auto-register — open System Settings so the
+            // user can enable the extension manually.
+            window.mwDesktop.openQuickLookSettings();
+          }
+        });
       });
       qlBanner.addEventListener("keydown", function(e) {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          window.mwDesktop.openQuickLookSettings();
+          qlBanner.click();
         }
       });
     }
