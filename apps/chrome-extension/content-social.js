@@ -240,18 +240,51 @@
           } catch { /* ignore — fall through to current DOM */ }
         }
 
-        // Body — X rolled the tweet body through several variants. Pick
-        // the LONGEST non-empty among all candidates so we don't pick a
-        // quote-tweet author's name when the focal tweet's text is right
-        // there next to it.
+        // Body — X rolled the tweet body through several variants. The
+        // tricky case: quote-tweets render the QUOTED post INSIDE the
+        // outer article inside a `div[role="link"][tabindex]` wrapper
+        // (clickable to navigate to the quoted post). A naive "longest
+        // tweetText" pick would capture the quoted post's body when
+        // the user's own commentary is shorter than the quote — the
+        // user clicks Add on their own tweet but gets the referenced
+        // tweet's content instead.
+        //
+        // Fix: walk every tweetText, skip any with an ancestor
+        // `[role="link"][tabindex]` (the quote wrapper) inside `el`.
+        // Among the remaining outer-tweet candidates, pick the longest.
+        const isInsideQuoteWrap = (node) => {
+          let p = node.parentElement;
+          while (p && p !== el) {
+            if (p.getAttribute && p.getAttribute("role") === "link" && p.hasAttribute("tabindex")) {
+              return true;
+            }
+            p = p.parentElement;
+          }
+          return false;
+        };
         let body = "";
-        const tried = [
-          ...el.querySelectorAll('[data-testid="tweetText"]'),
-          ...el.querySelectorAll('div[lang]'),
-        ];
-        for (const c of tried) {
+        const outerCandidates = [];
+        const quotedCandidates = [];
+        for (const c of el.querySelectorAll('[data-testid="tweetText"]')) {
+          (isInsideQuoteWrap(c) ? quotedCandidates : outerCandidates).push(c);
+        }
+        for (const c of el.querySelectorAll('div[lang]')) {
+          if (!c.matches('[data-testid="tweetText"]') && !c.querySelector('[data-testid="tweetText"]')) {
+            (isInsideQuoteWrap(c) ? quotedCandidates : outerCandidates).push(c);
+          }
+        }
+        for (const c of outerCandidates) {
           const t = collectText(c);
           if (t.length > body.length) body = t;
+        }
+        // Fallback only — if the outer tweet truly has no text (image-
+        // only quote-tweet), accept the quoted body as a last resort
+        // rather than returning empty.
+        if (!body) {
+          for (const c of quotedCandidates) {
+            const t = collectText(c);
+            if (t.length > body.length) body = t;
+          }
         }
         if (!body) {
           const spans = el.querySelectorAll('span');
@@ -295,9 +328,12 @@
 
         // Images — official tweetPhoto wrapper + raw twimg pbs urls
         // (X strips the testid for video poster frames sometimes).
+        // Same quote-wrapper exclusion as the body extractor: a quoted
+        // tweet's images belong to the quoted tweet, not the focal one.
         const seen = new Set();
         const images = [];
         el.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]').forEach((img) => {
+          if (isInsideQuoteWrap(img)) return;
           const src = img.currentSrc || img.src;
           if (src && !seen.has(src)) { seen.add(src); images.push(src); }
         });
@@ -354,25 +390,87 @@
       // Each post is a pressable container. Filter to those with text content.
       selector: 'div[data-pressable-container="true"]:not([data-mw-social-attached])',
       extract(el) {
-        // Threads body: the first long span with dir="auto" inside the post,
-        // skipping author chips.
-        const candidates = el.querySelectorAll('span[dir="auto"], div[dir="auto"]');
-        let body = "";
-        for (const c of candidates) {
-          const t = collectText(c);
-          if (t.length > body.length) body = t;
-        }
-        if (!body) return null;
-        // Author: first <a> with href starting with /@
+        // Threads' rebrand + iterative redesigns keep moving the body
+        // text container around. The original `span[dir="auto"]` /
+        // `div[dir="auto"]` selectors broke when Threads dropped the
+        // dir attribute on the body span — captures came back with
+        // only the image, no text. Fix is layered fallbacks:
+        //   1. Try the canonical body containers (multiple known patterns).
+        //   2. If empty, walk the entire pressable container and strip
+        //      out UI chrome (author chips, time, engagement counts,
+        //      action button labels) → whatever's left IS the body.
+        const timeEl = el.querySelector("time");
         const userLink = el.querySelector('a[href^="/@"]');
         const handle = userLink ? "@" + (userLink.getAttribute("href") || "").replace(/^\/@/, "").split("/")[0] : "";
-        const timeEl = el.querySelector("time");
         const ts = timeEl ? timeEl.getAttribute("datetime") || "" : "";
         const permalinkEl = el.querySelector('a[href*="/post/"]');
         const url = permalinkEl ? new URL(permalinkEl.getAttribute("href") || "", location.origin).href : location.href;
+
+        // Click "Show more" / "더 보기" if the post is collapsed — without
+        // this long posts get truncated mid-sentence (matches the X
+        // adapter's expand-then-read pattern).
+        const showMore = Array.from(el.querySelectorAll('div[role="button"], button, a, span'))
+          .find((b) => /^(show more|more|더 보기|もっと見る|看更多)$/i.test((b.textContent || "").trim()));
+        if (showMore) {
+          try { showMore.click(); } catch { /* ignore */ }
+        }
+
+        // Layer 1: known body container patterns.
+        let body = "";
+        const bodyCandidates = [
+          ...el.querySelectorAll('[data-testid="thread-text"]'),
+          ...el.querySelectorAll('span[dir="auto"]'),
+          ...el.querySelectorAll('div[dir="auto"]'),
+          ...el.querySelectorAll('span[style*="white-space: pre-wrap"]'),
+        ];
+        for (const c of bodyCandidates) {
+          // Exclude candidates that ARE or contain UI chrome (author
+          // chip, time row, engagement counts). Authors are typically
+          // wrapped by /@ anchors; counts live next to action buttons.
+          if (c.closest('a[href^="/@"]')) continue;
+          if (c.closest('time')) continue;
+          const txt = collectText(c);
+          if (!txt) continue;
+          // Skip handles / dates / engagement counts that slip through.
+          if (/^@?[\w._-]+$/.test(txt)) continue;        // just a handle
+          if (/^\d+[dhms]$|^\d+(\.\d+)?[KMB]?$/.test(txt)) continue; // "4d" / "2.6K"
+          if (txt.length > body.length) body = txt;
+        }
+
+        // Layer 2: fallback — walk every text node in `el`, strip
+        // chrome regions, join what's left. This survives almost any
+        // future Threads DOM change because it only relies on
+        // identifying the chrome (which has stable hooks: anchors,
+        // <time>, action buttons).
+        if (!body || body.length < 20) {
+          const chromeNodes = new Set();
+          el.querySelectorAll('a[href^="/@"], time, [role="button"], [aria-label]').forEach((n) => chromeNodes.add(n));
+          const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+          const lines = [];
+          let n;
+          while ((n = walker.nextNode())) {
+            // Skip text inside chrome regions.
+            let p = n.parentElement;
+            let isChrome = false;
+            while (p && p !== el) {
+              if (chromeNodes.has(p)) { isChrome = true; break; }
+              p = p.parentElement;
+            }
+            if (isChrome) continue;
+            const t = (n.nodeValue || "").trim();
+            if (!t) continue;
+            if (/^\d+[dhms]$|^\d+(\.\d+)?[KMB]?$/.test(t)) continue;
+            if (/^@?[\w._-]+$/.test(t) && t.length < 30) continue;
+            lines.push(t);
+          }
+          const fallback = lines.join("\n").trim();
+          if (fallback.length > body.length) body = fallback;
+        }
+
         const images = Array.from(el.querySelectorAll("picture img, img[alt]"))
           .map(img => img.currentSrc || img.src)
           .filter(s => s && /^https?:/.test(s) && !/profile_images|emoji|avatar/i.test(s));
+        if (!body && images.length === 0) return null;
         return { body, author: handle, handle, ts, url, images };
       },
     },
