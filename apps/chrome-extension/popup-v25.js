@@ -740,15 +740,24 @@
 
     const del = document.createElement("span");
     del.className = "chip-btn del";
-    del.title = isCurated ? "Hide this preset" : "Remove from history";
+    del.title = siteKey
+      ? "Don't suggest this on this site"
+      : isCurated ? "Hide this preset" : "Remove from history";
     del.innerHTML = X_SVG;
     del.addEventListener("click", async (e) => {
       e.preventDefault(); e.stopPropagation();
       const prefs = await loadPrefs();
       // Remove from recents/favorites
       prefs.recents = prefs.recents.filter((r) => r.text !== text);
-      // If curated, also add to the dismissed set so it doesn't come back
-      if (isCurated) {
+      // Curated default OR site suggestion: add to dismissed so it
+      // doesn't bubble back on the next render. Without this, clicking
+      // the X on a site chip did NOTHING — site chips aren't stored in
+      // recents (they come from the static SITE_SUGGESTIONS table), so
+      // the recents filter above was a no-op and render() kept
+      // re-adding the chip. dismissed is global (not per-site) by
+      // design: if the user disliked the prompt text once, surfacing it
+      // again on a different site would feel just as wrong.
+      if (isCurated || siteKey) {
         prefs.dismissed = prefs.dismissed || [];
         if (!prefs.dismissed.includes(text)) prefs.dismissed.push(text);
       }

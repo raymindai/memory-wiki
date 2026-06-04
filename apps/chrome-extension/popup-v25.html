@@ -721,18 +721,29 @@
       width: 180px;
     }
     .intent-chip .chip-site-icon {
-      display: inline-flex;
       flex-shrink: 0;
       width: 12px;
       height: 12px;
       margin-right: 6px;
       color: var(--ink, currentColor);
       opacity: 0.8;
+      /* The icon was previously inline-flex inside an inline chip-label-wrap,
+         so it landed on the text baseline (bottom of glyph) and visually
+         sat well ABOVE the text x-height. Switch the parent wrap to flex
+         + align-items:center so icon and label center to each other on the
+         cross-axis instead of sharing a typographic baseline. */
+      display: block;
     }
     .intent-chip .chip-site-icon svg {
       width: 12px;
       height: 12px;
       display: block;
+    }
+    /* Only sites need the flex layout — non-site chips keep the original
+       inline wrap (their label is the only child, no alignment concern). */
+    .intent-chip.is-site .chip-label-wrap {
+      display: flex;
+      align-items: center;
     }
 
     /* Text container — clips overflow, marquees on hover when long.
