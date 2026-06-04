@@ -2929,9 +2929,9 @@ textarea::selection {
    "look here" rather than "this changed in the background". The
    matching tree code also scroll-into-views the row. */
 @keyframes mwSidebarRowDropFlash {
-  0%   { background: color-mix(in srgb, var(--accent) 38%, transparent); box-shadow: inset 2px 0 0 0 var(--accent); }
-  50%  { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 2px 0 0 0 var(--accent); }
-  100% { background: transparent; box-shadow: inset 2px 0 0 0 transparent; }
+  0%   { background: color-mix(in srgb, var(--accent) 38%, transparent); }
+  50%  { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  100% { background: transparent; }
 }
 [data-sidebar-tab-id][data-just-dropped="1"],
 [data-sidebar-folder-id][data-just-dropped="1"] {
