@@ -467,6 +467,35 @@
           if (fallback.length > body.length) body = fallback;
         }
 
+        // Layer 3 (authoritative on permalinks) — Threads ships the
+        // full post body in `og:description` and `meta[name=description]`
+        // for SEO previews. On a post's own permalink page these are
+        // authoritative for THIS post (not a sibling on the page), so
+        // whenever the DOM walk came up shorter than what OG carries,
+        // prefer OG. This is bulletproof against the obfuscated React
+        // class names Threads keeps churning. We don't apply this on
+        // timeline / profile pages because there OG describes the
+        // overall page, not the individual post the user clicked.
+        const onThisPermalink = (() => {
+          try {
+            const u = new URL(url);
+            return u.pathname === location.pathname;
+          } catch { return false; }
+        })();
+        if (onThisPermalink) {
+          const og = document.querySelector('meta[property="og:description"]')?.getAttribute("content")
+            || document.querySelector('meta[name="description"]')?.getAttribute("content")
+            || "";
+          const ogClean = og.trim();
+          // Use OG if (a) DOM extraction yielded nothing, or (b) OG is
+          // substantially longer than the DOM result — i.e. the DOM
+          // walk only caught a fragment because Threads chunks the
+          // body across many spans on collapse/expand boundaries.
+          if (ogClean.length > 0 && (body.length === 0 || ogClean.length > body.length * 1.5)) {
+            body = ogClean;
+          }
+        }
+
         const images = Array.from(el.querySelectorAll("picture img, img[alt]"))
           .map(img => img.currentSrc || img.src)
           .filter(s => s && /^https?:/.test(s) && !/profile_images|emoji|avatar/i.test(s));
