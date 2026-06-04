@@ -1125,17 +1125,23 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
               // vivid (existing 10) from muted (new 6, v8 direction).
               const prev = idx > 0 ? ACCENT_COLORS[idx - 1] : null;
               const isFirstMuted = c.group === "muted" && prev?.group !== "muted";
-              // Lime is the implicit scheme-default — selecting it
-              // removes the data-accent override so the root value
-              // applies. The row's swatches mirror the current
-              // scheme's natural accent so the UI stops claiming
-              // "lime" when the rendered colour is teal under Nord.
+              // The "lime" row is the implicit scheme-default — selecting
+              // it removes the data-accent override so the scheme's root
+              // value applies. The row's swatches + label mirror what
+              // actually paints, so the UI stops claiming "Lime" when
+              // (a) Nord paints teal or (b) the default scheme paints
+              // monochrome ink (#fafafa dark / #18181b light).
               const isDefaultRow = c.name === "lime";
+              const isDefaultDefault = isDefaultRow && skinScheme === "default";
               const naturalName = isDefaultRow ? SCHEME_ACCENT_MAP[skinScheme] : c.name;
-              const display = ACCENT_COLORS.find((x) => x.name === naturalName) || c;
-              const showLabel = isDefaultRow
-                ? (skinScheme === "default" ? "Default (Lime)" : `Default (${display.label})`)
-                : c.label;
+              // For the default-default case there is no entry in
+              // ACCENT_COLORS (ink isn't a real accent token, just the
+              // text-primary value), so synthesize a display object
+              // from the ink token values.
+              const display: { label: string; dark: string; light: string } = isDefaultDefault
+                ? { label: "Ink", dark: "#fafafa", light: "#18181b" }
+                : (ACCENT_COLORS.find((x) => x.name === naturalName) || c);
+              const showLabel = isDefaultRow ? `Default (${display.label})` : c.label;
               return (
                 <div key={c.name}>
                   {isFirstMuted && (

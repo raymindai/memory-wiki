@@ -45,11 +45,13 @@ export interface ColorSchemeOption {
 }
 
 export const COLOR_SCHEMES: ColorSchemeOption[] = [
-  // Default scheme — paired with lime (the app's root --accent). The
-  // preview dot + desc previously claimed orange, which leaked into
-  // the Key Color "Default (Lime)" row via SCHEME_ACCENT_MAP and
-  // rendered orange swatches under a lime label.
-  { name: "default",   label: "Default",   preview: "#B5FF1A", darkBg: "#18181b", lightBg: "#fafaf9", desc: "Warm zinc + lime" },
+  // Default scheme's natural accent is the ink token (dark: #fafafa,
+  // light: #18181b — see _tokens.{dark,light}.generated.css). The lime
+  // preview + "Warm zinc + lime" desc were a leftover from an earlier
+  // build when the root --accent really was lime; they made the
+  // Settings Key Color row claim "Default (Lime)" while the rendered
+  // accent was actually monochrome. Zinc-500 reads on both bgs.
+  { name: "default",   label: "Default",   preview: "#71717a", darkBg: "#18181b", lightBg: "#fafaf9", desc: "Warm zinc + ink" },
   { name: "nord",      label: "Nord",      preview: "#88c0d0", darkBg: "#2e3440", lightBg: "#eceff4", desc: "Arctic frost" },
   { name: "dracula",   label: "Dracula",   preview: "#bd93f9", darkBg: "#282a36", lightBg: "#f8f8f2", desc: "Dark purple" },
   { name: "solarized", label: "Solarized", preview: "#2aa198", darkBg: "#002b36", lightBg: "#fdf6e3", desc: "Warm teal" },
