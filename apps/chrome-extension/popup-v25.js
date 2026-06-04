@@ -636,6 +636,20 @@
       chrome.storage.local.get([STORAGE_KEY], (data) => {
         const v = data[STORAGE_KEY] || { recents: [] };
         if (!Array.isArray(v.recents)) v.recents = [];
+        // Dedupe defensively on load: bumpIntent / toggleFavorite use
+        // .find(by text) so they can't produce dupes on the happy
+        // path, but corrupted state (interrupted writes, manual edits
+        // to chrome.storage, future refactors) could. Keep the FIRST
+        // entry per text — that's the favorited-or-most-recent one
+        // once you pair this with the dedupe done in render().
+        const seen = new Set();
+        v.recents = v.recents.filter((r) => {
+          if (!r || typeof r.text !== "string") return false;
+          const t = r.text.trim();
+          if (!t || seen.has(t)) return false;
+          seen.add(t);
+          return true;
+        });
         resolve(v);
       });
     });
@@ -825,7 +839,24 @@
       ...curatedToShow.map((t) => ({ text: t, favorite: false, isCurated: true, siteKey: null })),
     ];
 
-    for (const item of all) wrap.appendChild(makeChip(item));
+    // Final-stage dedupe — the earlier filters use exact text match,
+    // but visually-identical chips (different casing, extra/trailing
+    // whitespace, smart quotes vs straight quotes) would still slip
+    // through and produce a duplicate-looking rail. Normalize each
+    // text (trim + lowercase + collapse whitespace + unify quote
+    // characters) and keep the FIRST occurrence — which preserves the
+    // priority order: favorites → site → recents → curated.
+    const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " ").replace(/[‘’]/g, "'").replace(/[“”]/g, '"');
+    const seenNorm = new Set();
+    const deduped = [];
+    for (const item of all) {
+      const key = norm(item.text);
+      if (!key || seenNorm.has(key)) continue;
+      seenNorm.add(key);
+      deduped.push(item);
+    }
+
+    for (const item of deduped) wrap.appendChild(makeChip(item));
     // Sync edge fade indicators after render.
     requestAnimationFrame(syncScrollEdges);
   }
