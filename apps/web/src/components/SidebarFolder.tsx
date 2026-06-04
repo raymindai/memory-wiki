@@ -868,6 +868,16 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
   const treeRef = useRef<HTMLDivElement>(null);
   const lastOrderRef = useRef<string>("");
   const lastRectsRef = useRef<Map<string, DOMRect>>(new Map());
+  // Track whether a drag was in flight on the previous render. When a
+  // drop lands, dragTabId/dragFolderId clear AND the folder_id update
+  // hits state in the same commit, so the next render sees a brand-
+  // new row order. Animating the long traversal (e.g. a row jumping
+  // from a deep folder to the root) bounces every row in between —
+  // founder feedback called this out as the worst part of the
+  // drag-out UX. Skipping FLIP for the post-drop frame lets the rows
+  // snap into place instantly, while sort-flip / rename / A→Z slot
+  // moves still animate normally.
+  const wasDraggingRef = useRef(false);
   useLayoutEffect(() => {
     const root = treeRef.current;
     if (!root) return;
@@ -875,6 +885,9 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
     const orderKey = rows.map(r => r.dataset.sidebarTabId).join("|");
     const isFirstPaint = lastOrderRef.current === "";
     const changed = !isFirstPaint && orderKey !== lastOrderRef.current;
+    const isDragNow = !!(props.dragTabId || props.dragFolderId);
+    const justDropped = wasDraggingRef.current && !isDragNow;
+    wasDraggingRef.current = isDragNow;
     // Fast path — when nothing about the row set / order changed, the
     // expensive getBoundingClientRect() loop below is pure waste (it
     // forces a layout pass on every commit, which on the editor's
@@ -893,7 +906,10 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
     const nextIds = new Set(rows.map((r) => r.dataset.sidebarTabId || ""));
     let setEqual = prevIds.size === nextIds.size;
     if (setEqual) for (const id of nextIds) if (!prevIds.has(id)) { setEqual = false; break; }
-    const shouldFlip = changed && setEqual;
+    // Same skip when this commit is the immediate aftermath of a drop
+    // — let the dropped item (and the rows it displaced) settle into
+    // place instantly instead of sliding.
+    const shouldFlip = changed && setEqual && !justDropped;
 
     if (shouldFlip) {
       const prev = lastRectsRef.current;
