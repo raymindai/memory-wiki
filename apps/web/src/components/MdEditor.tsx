@@ -8404,17 +8404,118 @@ ${clone.innerHTML}
                         return res.json();
                       })
                       .then(data => {
-                        if (data?.documents) {
-                          setServerDocs(data.documents); ingestDocAiMeta(data.documents);
-                          const sm = new Map(data.documents.map((d: { id: string; source?: string }) => [d.id, d.source]));
-                          setTabs(prev => {
-                            const ids = new Set(prev.filter(t => t.cloudId).map(t => t.cloudId!));
-                            const nw = data.documents.filter((d: { id: string }) => !ids.has(d.id)).map((d: { id: string; title?: string; source?: string; is_draft?: boolean }) => ({
-                              id: `cloud-${d.id}`, title: d.title || "Untitled", markdown: "", cloudId: d.id, isDraft: d.is_draft !== false, source: d.source || undefined, permission: "mine" as const,
-                            }));
-                            return [...prev.map(t => t.cloudId ? { ...t, source: (sm.get(t.cloudId) as string) || undefined } : t), ...nw];
+                        if (!data?.documents) return;
+                        setServerDocs(data.documents);
+                        ingestDocAiMeta(data.documents);
+                        // Full resync of cloud tabs — title, draft state, shared
+                        // state, restricted state, source, edit mode, folder,
+                        // soft-delete. The previous version only patched
+                        // `source` on existing tabs, so a doc renamed on
+                        // another device kept its old title in the sidebar
+                        // even after Refresh. This mirrors the realtime
+                        // postgres_changes sync further up the file so both
+                        // paths produce identical state.
+                        type ServerDoc = {
+                          id: string; title?: string; source?: string | null;
+                          is_draft?: boolean; folder_id?: string | null;
+                          allowed_emails?: string[]; edit_mode?: string;
+                          updated_at?: string; created_at?: string;
+                          deleted_at?: string | null;
+                        };
+                        const docs = data.documents as ServerDoc[];
+                        const docsById = new Map(docs.map(d => [d.id, d]));
+                        const publishedIds = new Set(docs.filter(d => d.is_draft === false).map(d => d.id));
+                        const ownerEmailLower = user?.email?.toLowerCase();
+                        const restrictedIds = new Set(
+                          docs.filter(d => {
+                            const ae = d.allowed_emails || [];
+                            if (ae.length === 0) return false;
+                            return ae.some(e => e.toLowerCase() !== ownerEmailLower);
+                          }).map(d => d.id)
+                        );
+                        const sourceMap = new Map(docs.map(d => [d.id, d.source ?? null]));
+                        const editModeMap = new Map(docs.map(d => [d.id, d.edit_mode || "token"]));
+                        const sharedCountMap = new Map(docs.map(d => {
+                          const others = (d.allowed_emails || []).filter(e => e.toLowerCase() !== (ownerEmailLower || ""));
+                          return [d.id, others.length];
+                        }));
+                        setTabs(prev => {
+                          const existingCloudIds = new Set(prev.filter(t => t.cloudId).map(t => t.cloudId!));
+                          // 1. Update fields on existing cloud tabs.
+                          const updated = prev.map(t => {
+                            if (!t.cloudId) return t;
+                            const sd = docsById.get(t.cloudId);
+                            if (!sd) return t; // deletion handled below
+                            const newTitle = sd.title || "Untitled";
+                            const newDraft = !publishedIds.has(t.cloudId);
+                            const newShared = publishedIds.has(t.cloudId);
+                            const newRestricted = restrictedIds.has(t.cloudId);
+                            const newSource = sourceMap.get(t.cloudId) || undefined;
+                            const newEditMode = editModeMap.get(t.cloudId) || "token";
+                            const newSharedCount = sharedCountMap.get(t.cloudId) || 0;
+                            const newFolderId = sd.folder_id || undefined;
+                            if (
+                              t.title === newTitle &&
+                              t.isDraft === newDraft &&
+                              t.isSharedByMe === newShared &&
+                              t.isRestricted === newRestricted &&
+                              t.source === newSource &&
+                              t.editMode === newEditMode &&
+                              t.sharedWithCount === newSharedCount &&
+                              t.folderId === newFolderId
+                            ) return t;
+                            return {
+                              ...t,
+                              title: newTitle,
+                              isDraft: newDraft,
+                              isSharedByMe: newShared,
+                              isRestricted: newRestricted,
+                              source: newSource,
+                              editMode: newEditMode,
+                              sharedWithCount: newSharedCount,
+                              folderId: newFolderId,
+                            };
                           });
-                        }
+                          // 2. Reflect deletion state. Hard-deleted = absent
+                          //    from server response → drop the tab (unless
+                          //    it's currently active so the editor can show
+                          //    a placeholder). Soft-deleted (deleted_at set)
+                          //    → keep the tab but mark deleted. Server
+                          //    un-deleted → flip the local flag back.
+                          const filtered = updated.flatMap(t => {
+                            if (!t.cloudId) return [t];
+                            const sd = docsById.get(t.cloudId);
+                            if (!sd) {
+                              if (t.id === activeTabIdRef.current) return [t];
+                              return [];
+                            }
+                            const isSoft = !!sd.deleted_at;
+                            if (isSoft && !t.deleted) {
+                              return [{ ...t, deleted: true, deletedAt: new Date(sd.deleted_at!).getTime() }];
+                            }
+                            if (!isSoft && t.deleted) {
+                              return [{ ...t, deleted: false, deletedAt: undefined }];
+                            }
+                            return [t];
+                          });
+                          // 3. Add new server docs that aren't local yet.
+                          const newTabs = docs
+                            .filter(d => !existingCloudIds.has(d.id))
+                            .map(d => ({
+                              id: `cloud-${d.id}`,
+                              title: d.title || "Untitled",
+                              markdown: "",
+                              cloudId: d.id,
+                              isDraft: d.is_draft !== false,
+                              source: d.source || undefined,
+                              folderId: d.folder_id || undefined,
+                              permission: "mine" as const,
+                              lastOpenedAt: d.updated_at
+                                ? new Date(d.updated_at).getTime()
+                                : d.created_at ? new Date(d.created_at).getTime() : Date.now(),
+                            }));
+                          return [...filtered, ...newTabs];
+                        });
                       })
                       .catch(err => console.warn("[sidebar refresh] docs threw", err));
                     const bundlesP = fetch("/api/bundles", opts)
