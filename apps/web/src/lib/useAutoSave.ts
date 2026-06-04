@@ -40,6 +40,14 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
   const pendingRef = useRef<Parameters<typeof scheduleSave>[0] | null>(null);
   const retryCountRef = useRef(0);
   const MAX_RETRIES = 3;
+  // Synchronous timestamp of the most recent save attempt (scheduled
+  // OR completed). The realtime channel uses this to filter out
+  // postgres_changes payloads that came from our own save — the older
+  // useEffect-based mirror of `state.lastSaved` was async (had to wait
+  // for React to commit), so a WebSocket frame landing before the
+  // commit could fail the guard and trigger a false "updated
+  // elsewhere" toast while the user was typing.
+  const lastSaveAttemptAtRef = useRef<number>(0);
 
   // Embedding refresh runs on a separate, longer debounce (10s after the
   // last successful save). It calls POST /api/embed/{cloudId} which is
@@ -178,6 +186,11 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
           return;
         }
         inflightRef.current = true;
+        // Synchronous mark — the realtime channel reads this BEFORE
+        // React commits state, so the guard works even when the
+        // WebSocket frame for our own save lands ahead of the HTTP
+        // response.
+        lastSaveAttemptAtRef.current = Date.now();
         setState((s) => ({ ...s, isSaving: true }));
         // Reset the refresh guard at the START of every save attempt.
         // The guard exists to prevent infinite refresh loops within a
@@ -278,6 +291,10 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
             if (data.updated_at) {
               lastServerUpdatedAtRef.current = data.updated_at;
             }
+            // Refresh the sync timestamp on save completion too so the
+            // realtime guard stays warm for the full save round-trip,
+            // not just the moment we kicked off.
+            lastSaveAttemptAtRef.current = Date.now();
             retryCountRef.current = 0; // Reset on success
             setState({ isSaving: false, lastSaved: new Date(), error: null, conflict: null });
             // Kick off the debounced embedding refresh. Server is the
@@ -417,6 +434,18 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
   const getLastSavedMarkdown = useCallback(() => lastSavedMdRef.current, []);
 
   /**
+   * Synchronous "did we save recently?" check. The realtime channel
+   * uses this to ignore postgres_changes UPDATE payloads triggered by
+   * our own PATCH — see the comment on lastSaveAttemptAtRef for why
+   * the older async useEffect mirror of state.lastSaved produced false
+   * "updated elsewhere" toasts under WebSocket-before-HTTP-response
+   * races.
+   */
+  const isRecentSave = useCallback((windowMs: number = 5000) => {
+    return Date.now() - lastSaveAttemptAtRef.current < windowMs;
+  }, []);
+
+  /**
    * Clear the sticky `error` (and any conflict). Used when switching
    * tabs / loading a new doc, since a stale error from a previous
    * tab's failed save shouldn't keep showing in the header on a doc
@@ -435,6 +464,7 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
     setLastServerUpdatedAt,
     getLastServerUpdatedAt,
     getLastSavedMarkdown,
+    isRecentSave,
     clearError,
     cancel,
   };

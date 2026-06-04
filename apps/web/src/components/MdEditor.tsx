@@ -4597,6 +4597,35 @@ export default function MdEditor() {
   isCollaboratingRef.current = isCollaborating;
 
   // ─── Supabase Realtime: Editor document changes ───
+  // Cloud IDs that received an external update (from MCP / CLI / iOS /
+  // another browser / Bundle/Hub auto-organize) within the last few
+  // seconds. The sidebar reads this set to render a brief pulse + dot
+  // on the matching row so the user can SEE that a doc changed even
+  // when they're not looking at it. Entries auto-expire after 4.5s.
+  const [recentlyUpdatedCloudIds, setRecentlyUpdatedCloudIds] = useState<Set<string>>(new Set());
+  const recentlyUpdatedTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const markTabFresh = useCallback((cloudId: string) => {
+    if (!cloudId) return;
+    setRecentlyUpdatedCloudIds((prev) => {
+      if (prev.has(cloudId)) return prev;
+      const next = new Set(prev);
+      next.add(cloudId);
+      return next;
+    });
+    const existing = recentlyUpdatedTimersRef.current.get(cloudId);
+    if (existing) clearTimeout(existing);
+    const t = setTimeout(() => {
+      setRecentlyUpdatedCloudIds((prev) => {
+        if (!prev.has(cloudId)) return prev;
+        const next = new Set(prev);
+        next.delete(cloudId);
+        return next;
+      });
+      recentlyUpdatedTimersRef.current.delete(cloudId);
+    }, 4500);
+    recentlyUpdatedTimersRef.current.set(cloudId, t);
+  }, []);
+
   // Subscribe to document updates when a cloud document is active in the editor.
   // If local is clean → auto-pull; if dirty → show toast with Pull/Ignore.
   const realtimeLastSaveRef = useRef<number>(0); // timestamp of our own last save
@@ -4628,9 +4657,13 @@ export default function MdEditor() {
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'documents', filter: `id=eq.${cloudId}` },
         async (payload: { new: Record<string, unknown> }) => {
-          // Skip if this update was triggered by our own save (within 3s window)
-          const now = Date.now();
-          if (now - realtimeLastSaveRef.current < 3000) return;
+          // Skip if this update was triggered by our own save. The
+          // synchronous getter is critical here — the older
+          // useEffect-mirrored ref was set AFTER React commit, so a
+          // WebSocket frame landing ahead of the HTTP response left
+          // the ref stale and the guard would fail, surfacing a false
+          // "updated elsewhere" toast while the user was typing.
+          if (autoSave.isRecentSave(5000)) return;
           // Don't blow away tabs DOM mid-drag — Chrome cancels HTML5 drag
           // the moment the dragged element is unmounted/reordered.
           if (isDraggingSidebarRef.current) return;
@@ -4696,11 +4729,11 @@ export default function MdEditor() {
             const localIsDirty = autoSave.isSaving || localMd !== baseline;
 
             if (!localIsDirty) {
-              // Server changed, local clean → auto-pull silently.
-              // Also push into Tiptap so the Live tab stays in sync
-              // with the parent's markdown state (previously this
-              // path only updated parent state, leaving Tiptap on
-              // the old content until the user switched tabs).
+              // Server changed, local clean → auto-pull. Previously
+              // silent except for highlightDiff's 1.5s background tint
+              // on the preview pane, which the user only saw on the
+              // Preview tab (and easily missed). Surface a short toast
+              // so the change is acknowledged regardless of view mode.
               const oldMd = localMd;
               setMarkdownRaw(serverMd);
               if (serverTitle) setTitle(serverTitle);
@@ -4709,7 +4742,9 @@ export default function MdEditor() {
               tiptapRef.current?.setMarkdown(serverMd);
               if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
               setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: serverTitle || t.title } : t));
+              markTabFresh(cloudId);
               highlightDiff(oldMd, serverMd);
+              showToast("Synced — this document was updated from another surface", "info");
             } else {
               // True conflict — server moved forward AND local has
               // uncommitted edits. Notify but don't overwrite.
@@ -4738,9 +4773,10 @@ export default function MdEditor() {
     if (!cloudId) return;
 
     const refetchIfStale = async () => {
-      // Skip if we're the ones that just saved (within 3s) — same
-      // guard the realtime channel uses to avoid clobbering local edits.
-      if (Date.now() - realtimeLastSaveRef.current < 3000) return;
+      // Same sync-getter guard as the realtime channel — the older
+      // ref-based check was async and produced false "updated
+      // elsewhere" surfacing under typing-during-save races.
+      if (autoSave.isRecentSave(5000)) return;
       if (autoSave.isSaving) return;
       try {
         // cache: no-store — browser HTTP cache was returning a stale
@@ -4787,7 +4823,9 @@ export default function MdEditor() {
         tiptapRef.current?.setMarkdown(serverMd);
         if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
         setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: (doc.title as string) || t.title } : t));
+        markTabFresh(cloudId);
         highlightDiff(oldMd, serverMd);
+        showToast("Synced — this document was updated from another surface", "info");
       } catch { /* ignore */ }
     };
 
@@ -4864,8 +4902,10 @@ export default function MdEditor() {
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'documents', filter: `user_id=eq.${user.id}` },
         () => {
-          // Skip if this is likely our own save (within 3s of auto-save)
-          if (autoSave.lastSaved && Date.now() - autoSave.lastSaved.getTime() < 3000) return;
+          // Skip if this is likely our own save. Sync getter avoids the
+          // ref-stale race that surfaced false "updated elsewhere" notes
+          // on the active doc; same race applies to the sidebar list.
+          if (autoSave.isRecentSave(5000)) return;
           // Debounce: coalesce rapid updates into a single fetch
           if (debounceTimer) clearTimeout(debounceTimer);
           debounceTimer = setTimeout(async () => {
@@ -4915,6 +4955,15 @@ export default function MdEditor() {
               data.documents.map((d: { id: string; allowed_emails?: string[] }) => [d.id, computeSharedCount2(d.allowed_emails, ownerEmailLower2)])
             );
 
+            // Build server-doc map up front so we can compare each tab's
+            // current state against the server snapshot AND collect
+            // freshness signals (title change, new draft state, new
+            // doc landed) in one pass. The sidebar reads
+            // recentlyUpdatedCloudIds to animate the affected row.
+            const serverDocByIdForFresh = new Map<string, { title?: string }>(
+              data.documents.map((d: { id: string; title?: string }) => [d.id, d])
+            );
+            const freshCloudIds: string[] = [];
             setTabs(prev => {
               const existingCloudIds = new Set(prev.filter(t => t.cloudId).map(t => t.cloudId!));
               // Update existing tabs
@@ -4926,24 +4975,34 @@ export default function MdEditor() {
                 const newSource = sourceMap.get(t.cloudId) || undefined;
                 const newEditMode = editModeMap2.get(t.cloudId) || "token";
                 const newSharedCount = sharedCountMap2.get(t.cloudId) || 0;
-                // Only create new object if something actually changed
-                if (t.isDraft === newDraft && t.isSharedByMe === newShared && t.isRestricted === newRestricted && t.source === newSource && t.editMode === newEditMode && t.sharedWithCount === newSharedCount) return t;
-                return { ...t, isDraft: newDraft, isSharedByMe: newShared, isRestricted: newRestricted, source: newSource, editMode: newEditMode, sharedWithCount: newSharedCount };
+                const sd = serverDocByIdForFresh.get(t.cloudId);
+                const newTitle = sd?.title || t.title;
+                // Title sync — same fix as the Refresh button. Without
+                // it a doc renamed from another surface kept the stale
+                // title in the sidebar.
+                const titleChanged = newTitle !== t.title;
+                const stateChanged = t.isDraft !== newDraft || t.isSharedByMe !== newShared || t.isRestricted !== newRestricted || t.source !== newSource || t.editMode !== newEditMode || t.sharedWithCount !== newSharedCount;
+                if (!titleChanged && !stateChanged) return t;
+                if (titleChanged || stateChanged) freshCloudIds.push(t.cloudId);
+                return { ...t, title: newTitle, isDraft: newDraft, isSharedByMe: newShared, isRestricted: newRestricted, source: newSource, editMode: newEditMode, sharedWithCount: newSharedCount };
               });
               // Add new server docs that don't have local tabs
               const newTabs = data.documents
                 .filter((d: { id: string }) => !existingCloudIds.has(d.id))
-                .map((d: { id: string; title?: string; source?: string; is_draft?: boolean; folder_id?: string; updated_at?: string; created_at?: string }) => ({
-                  id: `cloud-${d.id}`,
-                  title: d.title || "Untitled",
-                  markdown: "",
-                  cloudId: d.id,
-                  isDraft: d.is_draft !== false,
-                  source: d.source || undefined,
-                  folderId: d.folder_id || undefined,
-                  permission: "mine" as const,
-                  lastOpenedAt: d.updated_at ? new Date(d.updated_at).getTime() : d.created_at ? new Date(d.created_at).getTime() : Date.now(),
-                }));
+                .map((d: { id: string; title?: string; source?: string; is_draft?: boolean; folder_id?: string; updated_at?: string; created_at?: string }) => {
+                  freshCloudIds.push(d.id);
+                  return {
+                    id: `cloud-${d.id}`,
+                    title: d.title || "Untitled",
+                    markdown: "",
+                    cloudId: d.id,
+                    isDraft: d.is_draft !== false,
+                    source: d.source || undefined,
+                    folderId: d.folder_id || undefined,
+                    permission: "mine" as const,
+                    lastOpenedAt: d.updated_at ? new Date(d.updated_at).getTime() : d.created_at ? new Date(d.created_at).getTime() : Date.now(),
+                  };
+                });
               // Reflect server delete state on local tabs:
               //  - cloudId not in server response → hard-deleted, remove (keep
               //    active tab so editor can show "deleted" placeholder)
@@ -4980,6 +5039,11 @@ export default function MdEditor() {
               });
               return [...filtered, ...newTabs];
             });
+            // Flash the sidebar rows that just changed (renamed, share
+            // toggled, draft state, NEW doc landed) so the user can SEE
+            // that something moved without watching the list. The set
+            // is read by SidebarFolder via `recentlyUpdatedCloudIds`.
+            for (const cid of freshCloudIds) markTabFresh(cid);
           } catch { /* offline */ }
           }, 1500);
         }
@@ -4987,6 +5051,7 @@ export default function MdEditor() {
       .subscribe();
 
     return () => { if (debounceTimer) clearTimeout(debounceTimer); supabase.removeChannel(channel); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // ─── Supabase Realtime: Bundles + folders ───
@@ -9611,6 +9676,7 @@ ${clone.innerHTML}
                         activeTabId={activeTabId}
                         selectedTabIds={selectedTabIds}
                         activeBundleDocIds={activeBundleDocIds}
+                        freshCloudIds={recentlyUpdatedCloudIds}
                         sidebarSearch={sidebarSearchDebounced}
                         sortMode={mdsSortMode}
                         sidebarMode={sidebarMode}

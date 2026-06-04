@@ -90,6 +90,12 @@ export interface SidebarFolderTreeProps {
   activeTabId?: string;
   selectedTabIds: Set<string>;
   activeBundleDocIds: Set<string>;
+  /** Cloud IDs that received an external update within the last few
+   *  seconds (e.g. MCP / CLI / iOS / another browser / AI organize
+   *  pass). Their rows pulse briefly so the user sees that the doc
+   *  changed even when they weren't looking at it. Parent owns the
+   *  auto-clear timer. */
+  freshCloudIds?: Set<string>;
   sidebarSearch: string;
   sortMode: "az" | "za" | "custom" | "newest" | "oldest";
   sidebarMode: string;
@@ -249,6 +255,7 @@ interface TabRowProps {
   isSelected: boolean;
   isMultiSelected: boolean;
   isActive: boolean;
+  isFresh?: boolean;
   selectedTabIds: Set<string>;
   paddingLeft: number;
   paddingRight: number;
@@ -334,6 +341,7 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
   return (
     <div
       data-sidebar-tab-id={p.tab.id}
+      data-fresh={p.isFresh ? "1" : undefined}
       draggable
       onDragStart={(e) => {
         _dragTabIdRef = p.tab.id;
@@ -527,6 +535,7 @@ interface FolderNodeProps {
   renderTabIcon: (tab: SidebarTabItem, isActive: boolean) => ReactNode;
   renderTabMeta?: (tab: SidebarTabItem) => ReactNode;
   renderTabBadge?: (tab: SidebarTabItem) => ReactNode;
+  freshCloudIds?: Set<string>;
   /** Controlled inline-rename state, threaded from the tree root. */
   renamingItem?: { kind: "folder" | "tab"; id: string } | null;
   setRenamingItem?: (next: { kind: "folder" | "tab"; id: string } | null) => void;
@@ -790,6 +799,7 @@ function FolderNode(props: FolderNodeProps) {
             const isSelected = selectedTabIds.has(tab.id) || tab.id === activeTabId || inActiveBundle;
             const tabIndent = (depth + 1) * 12;
             const tabRenaming = props.renamingItem?.kind === "tab" && props.renamingItem.id === tab.id;
+            const isFresh = !!(tab.cloudId && props.freshCloudIds?.has(tab.cloudId));
             return (
               <TabRow
                 key={tab.id}
@@ -797,6 +807,7 @@ function FolderNode(props: FolderNodeProps) {
                 isSelected={isSelected}
                 isMultiSelected={selectedTabIds.has(tab.id)}
                 isActive={tab.id === activeTabId}
+                isFresh={isFresh}
                 selectedTabIds={selectedTabIds}
                 paddingLeft={tabIndent + 4}
                 paddingRight={6}
@@ -955,6 +966,7 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
             renderTabIcon={props.renderTabIcon}
             renderTabMeta={props.renderTabMeta}
             renderTabBadge={props.renderTabBadge}
+            freshCloudIds={props.freshCloudIds}
             renamingItem={props.renamingItem}
             setRenamingItem={props.setRenamingItem}
             isRenaming={isRen}
@@ -982,6 +994,7 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
               isSelected={isSelected}
               isMultiSelected={props.selectedTabIds.has(tab.id)}
               isActive={tab.id === props.activeTabId}
+              isFresh={!!(tab.cloudId && props.freshCloudIds?.has(tab.cloudId))}
               selectedTabIds={props.selectedTabIds}
               paddingLeft={6}
               paddingRight={6}

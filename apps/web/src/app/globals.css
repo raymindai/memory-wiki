@@ -2885,6 +2885,38 @@ textarea::selection {
   animation: mwLoaderEnter 480ms ease-out both;
 }
 
+/* Sidebar row pulse — fires on TabRow elements that got an external
+   update (MCP / CLI / another browser / AI organize). The dot at the
+   top-right + brief background tint give an explicit "this changed"
+   signal without dragging attention away from the active doc. The
+   ::after pseudo doubles as the dot so we don't have to thread an
+   element into TabRow's render path. */
+@keyframes mwSidebarRowFreshPulse {
+  0%   { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+  60%  { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  100% { background: transparent; }
+}
+@keyframes mwSidebarRowFreshDot {
+  0%, 70% { opacity: 1; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(0.6); }
+}
+[data-sidebar-tab-id][data-fresh="1"] {
+  animation: mwSidebarRowFreshPulse 4s ease-out both;
+  position: relative;
+}
+[data-sidebar-tab-id][data-fresh="1"]::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: mwSidebarRowFreshDot 4s ease-out both;
+  pointer-events: none;
+}
+
 /* Sidebar multi-select toolbar — labels collapse to icon-only when
    the container gets narrow. The wrapper sets container-type:
    inline-size so children can query its width. */
