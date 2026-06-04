@@ -219,15 +219,31 @@
     x: {
       // Tweet container — works on x.com timeline + permalink pages.
       selector: 'article[data-testid="tweet"]:not([data-mw-social-attached])',
-      extract(el) {
-        // Body — X rolled the tweet body through several variants:
-        //   1. [data-testid="tweetText"] (most common)
-        //   2. <div lang="..."> with the longest inner text (sometimes
-        //      tweetText is split across multiple spans + reposted-quote
-        //      sub-tweets steal the testid)
-        //   3. Longest visible span as a last resort
-        // Pick the longest non-empty among all candidates so we don't
-        // mistakenly pick the quote-tweet author's display name.
+      async extract(el) {
+        // Long tweets (Premium / X long-form, plus anything over the
+        // collapse threshold) keep the trailing text out of the DOM
+        // until the user clicks "Show more". Click it programmatically
+        // and wait one paint for React to re-render before reading the
+        // body. Without this the captured doc ends mid-syllable.
+        const showMore =
+          el.querySelector('[data-testid="tweet-text-show-more-link"]') ||
+          Array.from(el.querySelectorAll('button, [role="button"], a'))
+            .find((b) => /^(show more|더 보기|もっと見る|看更多)$/i.test((b.textContent || "").trim()));
+        if (showMore) {
+          try {
+            showMore.click();
+            // Two animation frames is enough for React to re-render the
+            // expanded text. (Polling for the show-more button to
+            // disappear was unreliable on slow tabs.)
+            await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+            await new Promise((r) => setTimeout(r, 60));
+          } catch { /* ignore — fall through to current DOM */ }
+        }
+
+        // Body — X rolled the tweet body through several variants. Pick
+        // the LONGEST non-empty among all candidates so we don't pick a
+        // quote-tweet author's name when the focal tweet's text is right
+        // there next to it.
         let body = "";
         const tried = [
           ...el.querySelectorAll('[data-testid="tweetText"]'),
@@ -238,7 +254,6 @@
           if (t.length > body.length) body = t;
         }
         if (!body) {
-          // Last-ditch: longest single span.
           const spans = el.querySelectorAll('span');
           for (const s of spans) {
             const t = (s.textContent || "").trim();
@@ -246,29 +261,47 @@
           }
         }
         if (!body && !el.querySelector('[data-testid="tweetPhoto"], img[alt][src*="pbs.twimg.com"]')) return null;
+
         const userEl = el.querySelector('[data-testid="User-Name"]');
         let author = "", handle = "";
         if (userEl) {
           const names = userEl.querySelectorAll("span");
-          // Twitter shows display name + @handle in spans
           const arr = Array.from(names).map(s => (s.textContent || "").trim()).filter(Boolean);
           author = arr[0] || "";
           const h = arr.find(s => s.startsWith("@"));
           handle = h || "";
         }
+
         const timeEl = el.querySelector("time");
         const ts = timeEl ? timeEl.getAttribute("datetime") || "" : "";
-        // Permalink: any anchor with /status/ in href
-        const permalinkEl = el.querySelector('a[href*="/status/"]');
-        const url = permalinkEl ? new URL(permalinkEl.getAttribute("href") || "", location.origin).href : location.href;
-        // Images: official tweetPhoto wrapper + raw twimg pbs urls
-        // (sometimes X strips the testid for video poster frames).
+
+        // Permalink — was `a[href*="/status/"]` which also matches
+        // "View analytics" (/status/<id>/analytics), the engagement
+        // count link (/status/<id>/likes etc.), and quote-tweet
+        // wrappers (/<other-user>/status/<other-id>). The canonical
+        // permalink is the anchor wrapping the timestamp <time>.
+        let url = location.href;
+        const timeLinkEl = timeEl?.closest('a[href*="/status/"]');
+        const cleanLink = timeLinkEl
+          || Array.from(el.querySelectorAll('a[href*="/status/"]'))
+              .find((a) => {
+                const href = a.getAttribute("href") || "";
+                return /^[^?#]+\/status\/\d+$/.test(href);
+              });
+        if (cleanLink) {
+          try { url = new URL(cleanLink.getAttribute("href") || "", location.origin).href; }
+          catch { /* keep location.href */ }
+        }
+
+        // Images — official tweetPhoto wrapper + raw twimg pbs urls
+        // (X strips the testid for video poster frames sometimes).
         const seen = new Set();
         const images = [];
         el.querySelectorAll('[data-testid="tweetPhoto"] img, img[src*="pbs.twimg.com/media"]').forEach((img) => {
           const src = img.currentSrc || img.src;
           if (src && !seen.has(src)) { seen.add(src); images.push(src); }
         });
+
         return { body, author, handle, ts, url, images };
       },
     },
@@ -401,7 +434,9 @@
     if (!host) return;
     setState(btn, "saving");
     try {
-      const data = adapter.extract(host);
+      // extract may return a Promise — X clicks "Show more" + waits a
+      // tick for the full body to render before extracting.
+      const data = await adapter.extract(host);
       if (!data) { setState(btn, "error"); setTimeout(() => setState(btn, "idle"), 1500); return; }
       const { markdown, title } = buildMarkdown(data);
       // Guard: extension may have been reloaded, leaving stale
