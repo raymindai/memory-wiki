@@ -702,39 +702,53 @@
     try {
       const hostRect = host.getBoundingClientRect();
       if (hostRect.width === 0 || hostRect.height === 0) return;
-      // Detect SVG-shaped icons in the top-right of the post. The
-      // previous version queried [role="button"], button, [aria-label]
-      // — but Threads' pencil edit icon doesn't always carry those
-      // hooks (it's sometimes a div/a wrapping a raw SVG), so the
-      // pencil was missed and the Add button settled flush against the
-      // more (…) menu, covering the pencil.
+      // Detect SVG-shaped icons in the top-right of the post. Every
+      // visible action (pencil, more menu, follow, etc.) has an <svg>
+      // at its core — measuring the svg's OWN rect (not the wrapping
+      // clickable ancestor) gives us the visible icon position. Older
+      // versions used `svg.closest('[role=button], button, a, [tabindex]')`
+      // which often resolved to a much wider flex container, throwing
+      // off the leftmost calculation so the Add button still covered
+      // the pencil.
       //
-      // Every visible action in the cluster has an <svg> at its core,
-      // so we scan SVGs and use the nearest clickable ancestor's
-      // bounding rect (which is the actual hit target — bigger than
-      // the svg alone). Filter to icons that are (a) icon-sized,
-      // (b) within the top ~64px of the host, (c) flush against the
-      // host's right edge. Take the LEFTMOST and place Add to its
-      // left with an 8px gap.
+      // For each candidate icon: must be icon-sized, within ~80px of
+      // host top, flush against host's right edge. Use the leftmost
+      // and place Add to its left with an 8px gap. Then clear the
+      // Add button's measured WIDTH on top of that so the button
+      // body itself never overlaps the icon.
       const svgs = host.querySelectorAll("svg");
       let leftmost = Infinity;
+      let topRightCount = 0;
       for (const svg of svgs) {
         if (btn.contains(svg)) continue;
-        const target = svg.closest('[role="button"], button, a, [tabindex]') || svg;
-        if (target === btn || btn.contains(target)) continue;
-        const r = target.getBoundingClientRect();
-        if (r.width === 0 || r.width > 64 || r.height > 64) continue;
-        // Top-right cluster only — top within 64px of host top, near
-        // the right edge.
-        if (r.top - hostRect.top > 64) continue;
+        const r = svg.getBoundingClientRect();
+        if (r.width === 0 || r.width > 36 || r.height > 36) continue;
+        if (r.top - hostRect.top > 80) continue;
         if (r.top < hostRect.top - 4) continue;
-        if (hostRect.right - r.right > 140) continue;
+        if (hostRect.right - r.right > 160) continue;
         if (r.right > hostRect.right + 4) continue;
+        topRightCount++;
         if (r.left < leftmost) leftmost = r.left;
       }
       if (!Number.isFinite(leftmost)) return;
-      const offset = Math.max(16, Math.round(hostRect.right - leftmost + 8));
-      btn.style.right = `${offset}px`;
+      // host.right - leftmost = pixels from host's right edge to the
+      // leftmost icon's left edge. Adding 8px gap then leaves Add's
+      // RIGHT edge 8px to the left of the icon, but the Add button has
+      // its own width — we want Add's BODY to clear the icon, not just
+      // its right edge. So add the button's measured width as well.
+      const iconSlot = Math.round(hostRect.right - leftmost);
+      const offset = Math.max(16, iconSlot + 8);
+      // CRITICAL: the platform CSS rule
+      //   html.mw-social-threads .mw-social-btn{right:48px!important}
+      // beats a plain `btn.style.right = ...` assignment — !important
+      // wins over inline styles unless the inline also has !important.
+      // Without setProperty(..., "important"), every dynamic update we
+      // wrote here was silently ignored and the button stayed at 48px,
+      // right on top of the pencil. setProperty with the third arg
+      // makes the inline style carry !important too, which then wins
+      // (later cascade origin + tied specificity → later one wins).
+      btn.style.setProperty("right", `${offset}px`, "important");
+      void topRightCount;
     } catch { /* ignore — keep CSS default */ }
   }
 
