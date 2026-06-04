@@ -466,11 +466,16 @@ function sseTextChunks(
   return new ReadableStream<string>({
     async start(controller) {
       const reader = body.getReader();
+      let errored = false;
       try {
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
-          buffer += decoder.decode(value, { stream: true });
+          // Normalize CRLF / CR to LF up-front. SSE spec allows any
+          // line terminator (RFC 5234) and some providers / proxies
+          // ship \r\n. The event-separator search below assumes \n\n
+          // — without this, those streams would buffer forever.
+          buffer += decoder.decode(value, { stream: true }).replace(/\r\n?/g, "\n");
           // SSE events are separated by blank lines (\n\n). Each event
           // can have multiple `data:` fields that concatenate.
           let sepIdx: number;
@@ -494,11 +499,12 @@ function sseTextChunks(
           }
         }
       } catch (err) {
+        errored = true;
         controller.error(err);
-        return;
-      } finally {
-        controller.close();
       }
+      // close() is a no-op (and emits a warning in some runtimes)
+      // once the controller is already errored. Skip in that case.
+      if (!errored) controller.close();
     },
   });
 }

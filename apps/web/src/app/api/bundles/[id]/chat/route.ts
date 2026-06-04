@@ -122,7 +122,22 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
     },
   });
+  // Citation map for [1] / [2] references in the assistant's reply
+  // — the SYSTEM_PROMPT instructs the model to use 1-indexed doc
+  // numbers, the client resolves them back to (id, title) via this
+  // header. Previously interleaved into an SSE `data: {docMap:...}`
+  // final event; now sent up-front as a header so the stream body
+  // can stay pure text/plain (matches doc-chat / hub-chat framing).
+  const docMap: Record<number, { id: string; title: string }> = {};
+  orderedDocs.forEach((d, i) => { docMap[i + 1] = { id: d.id, title: d.title || "Untitled" }; });
+  // Base64 so the header is HTTP-safe regardless of titles (CJK,
+  // emoji, quotes). Client decodes back to JSON.
+  const docMapB64 = Buffer.from(JSON.stringify(docMap), "utf8").toString("base64");
   return new Response(byteStream, {
-    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-cache" },
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache",
+      "X-Bundle-Doc-Map": docMapB64,
+    },
   });
 }

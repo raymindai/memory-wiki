@@ -116,42 +116,38 @@ export default function BundleChat({ bundleId, bundleTitle, documentCount, accen
         return;
       }
 
+      // docMap (number → {id,title}) is now delivered up-front as an
+      // HTTP header — see the X-Bundle-Doc-Map block in
+      // /api/bundles/[id]/chat/route.ts. The stream body is plain
+      // text. Previously the server interleaved an SSE
+      // `data:{docMap}` final event, but the rest of the chat
+      // surfaces (hub-chat, doc-chat) use raw text streams, so
+      // bundle-chat now matches that single shape.
+      let docMap: Record<number, { id: string; title: string }> | undefined;
+      const docMapHeader = res.headers.get("X-Bundle-Doc-Map");
+      if (docMapHeader) {
+        try {
+          const json = typeof atob === "function"
+            ? atob(docMapHeader)
+            : Buffer.from(docMapHeader, "base64").toString("utf8");
+          docMap = JSON.parse(json);
+        } catch { /* best-effort — citations just won't resolve */ }
+      }
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = "";
       let assistantContent = "";
-      let docMap: Record<number, { id: string; title: string }> | undefined;
-
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.error) { setError(data.error); break; }
-            if (data.text) {
-              assistantContent += data.text;
-              setMessages(prev => {
-                const next = [...prev];
-                next[next.length - 1] = { role: "assistant", content: assistantContent, docMap };
-                return next;
-              });
-            }
-            if (data.done && data.docMap) {
-              docMap = data.docMap;
-              setMessages(prev => {
-                const next = [...prev];
-                next[next.length - 1] = { role: "assistant", content: assistantContent, docMap };
-                return next;
-              });
-            }
-          } catch { /* skip malformed */ }
-        }
+        const chunk = decoder.decode(value, { stream: true });
+        if (!chunk) continue;
+        assistantContent += chunk;
+        setMessages(prev => {
+          const next = [...prev];
+          next[next.length - 1] = { role: "assistant", content: assistantContent, docMap };
+          return next;
+        });
       }
     } catch {
       setError("Connection failed");
