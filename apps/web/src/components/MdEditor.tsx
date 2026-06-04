@@ -14481,14 +14481,27 @@ ${clone.innerHTML}
           // subtree any time folders change.
           key={`docmenu-${folders.map(f => `${f.id}:${f.name}`).join("|")}`}
           className="fixed rounded-lg shadow-xl py-1"
+          // Initial position uses the raw click coordinates. The ref
+          // callback below measures the actual rendered bounds and
+          // flips the menu up/left when it overflows the viewport —
+          // right-clicking the bottom-most row no longer clips the
+          // bottom of the menu.
           style={{
-            left: Math.min(docContextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 9999) - 180),
-            top: Math.min(docContextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 9999) - 200),
+            left: docContextMenu.x,
+            top: docContextMenu.y,
             zIndex: 9999,
             background: "var(--menu-bg)",
             border: "1px solid var(--border)",
             width: 160,
             boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          }}
+          ref={(el) => {
+            if (!el) return;
+            const r = el.getBoundingClientRect();
+            const vw = typeof window !== "undefined" ? window.innerWidth : 9999;
+            const vh = typeof window !== "undefined" ? window.innerHeight : 9999;
+            if (r.right > vw) el.style.left = `${Math.max(4, vw - r.width - 4)}px`;
+            if (r.bottom > vh) el.style.top = `${Math.max(4, vh - r.height - 4)}px`;
           }}
         >
           {(() => {
@@ -15104,14 +15117,24 @@ ${clone.innerHTML}
           <div className="fixed inset-0 z-[9998]" onClick={() => setFolderContextMenu(null)} />
           <div
             className="fixed rounded-lg shadow-xl py-1"
+            // Initial position at the click; ref-measured clamp flips
+            // up/left when the menu would overflow the viewport.
             style={{
-              left: Math.min(folderContextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 9999) - 200),
-              top: Math.min(folderContextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 9999) - 300),
+              left: folderContextMenu.x,
+              top: folderContextMenu.y,
               zIndex: 9999,
               background: "var(--menu-bg)",
               border: "1px solid var(--border)",
               width: 160,
               boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+            }}
+            ref={(el) => {
+              if (!el) return;
+              const r = el.getBoundingClientRect();
+              const vw = typeof window !== "undefined" ? window.innerWidth : 9999;
+              const vh = typeof window !== "undefined" ? window.innerHeight : 9999;
+              if (r.right > vw) el.style.left = `${Math.max(4, vw - r.width - 4)}px`;
+              if (r.bottom > vh) el.style.top = `${Math.max(4, vh - r.height - 4)}px`;
             }}
           >
             {[
@@ -15249,14 +15272,26 @@ ${clone.innerHTML}
             <div className="fixed inset-0 z-[9998]" onClick={closeMenu} />
             <div
               className="fixed rounded-lg shadow-xl py-1"
+              // Initial position at the click; ref-measured clamp
+              // flips up/left when the menu would overflow the
+              // viewport — right-clicking the bottom-most bundle row
+              // no longer clips the menu.
               style={{
-                left: Math.min(bundleContextMenu.x, (typeof window !== "undefined" ? window.innerWidth : 9999) - 200),
-                top: Math.min(bundleContextMenu.y, (typeof window !== "undefined" ? window.innerHeight : 9999) - 300),
+                left: bundleContextMenu.x,
+                top: bundleContextMenu.y,
                 zIndex: 9999,
                 background: "var(--menu-bg)",
                 border: "1px solid var(--border)",
                 width: 180,
                 boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+              }}
+              ref={(el) => {
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                const vw = typeof window !== "undefined" ? window.innerWidth : 9999;
+                const vh = typeof window !== "undefined" ? window.innerHeight : 9999;
+                if (r.right > vw) el.style.left = `${Math.max(4, vw - r.width - 4)}px`;
+                if (r.bottom > vh) el.style.top = `${Math.max(4, vh - r.height - 4)}px`;
               }}
             >
               {items.map((item) => (

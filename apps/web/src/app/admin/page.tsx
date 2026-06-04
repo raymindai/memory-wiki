@@ -552,6 +552,34 @@ export default function AdminPage() {
                     </div>
                   </div>
 
+                  {/* Action catalog — static reference of every action
+                      label the cascade can write. Helps the admin
+                      decode the per-feature breakdown rows above.
+                      Update this when a NEW callAI/streamText site is
+                      added (see [[ai_usage_tracking_2026_06]]). */}
+                  <div style={{ marginBottom: 40 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fafafa", margin: "0 0 4px" }}>Action catalog</h3>
+                    <p style={{ fontSize: 11, color: "#52525b", margin: "0 0 12px" }}>What every action label above means. Grouped by surface.</p>
+                    {ACTION_CATALOG.map((group) => (
+                      <div key={group.surface} style={{ marginBottom: 18 }}>
+                        <div style={{ fontSize: 11, color: "#a1a1aa", fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>{group.surface}</div>
+                        <div style={{ background: "#0e0e10", border: "1px solid #27272a", borderRadius: 8, overflow: "hidden" }}>
+                          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                            <tbody>
+                              {group.actions.map((a) => (
+                                <tr key={a.action} style={{ borderTop: "1px solid #27272a" }}>
+                                  <td style={{ ...tdStyle, fontFamily: "var(--font-mono)", color: "#fafafa", whiteSpace: "nowrap", width: 180 }}>{a.action}</td>
+                                  <td style={{ ...tdStyle, color: "#a1a1aa" }}>{a.description}</td>
+                                  <td style={{ ...tdStyle, color: "#52525b", whiteSpace: "nowrap", fontSize: 10, textAlign: "right" }}>{a.tier}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   {/* Per-provider breakdown */}
                   <div>
                     <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fafafa", margin: "0 0 12px" }}>By provider</h3>
@@ -875,6 +903,94 @@ function BarChart({ data }: { data: ChartPoint[] }) {
     </div>
   );
 }
+
+// ─── Action catalog ───
+// Every action label that lib/ai-providers.ts can write to ai_usage,
+// what feature triggers it, and which model tier it normally lands
+// on. Keep in sync with the call-site wiring — when adding a new AI
+// surface, add a row here too. Used by the Usage tab to decode the
+// per-feature breakdown.
+
+interface ActionDef { action: string; description: string; tier: "lite" | "primary" | "varies"; }
+interface ActionGroup { surface: string; actions: ActionDef[]; }
+
+const ACTION_CATALOG: ActionGroup[] = [
+  {
+    surface: "Editor — AI buttons (whole document)",
+    actions: [
+      { action: "polish",       description: "Polish the entire document (the editor's main AI button).", tier: "primary" },
+      { action: "summary",      description: "Generate a short summary of the document.",                 tier: "lite" },
+      { action: "tldr",         description: "TL;DR — the briefest one-paragraph distill.",                tier: "lite" },
+      { action: "translate",    description: "Translate the document to the requested language.",         tier: "primary" },
+      { action: "beautify",     description: "Beautify formatting (headings, spacing, lists, tables).",   tier: "primary" },
+      { action: "compact",      description: "Compact / tighten the document (remove fluff).",            tier: "primary" },
+      { action: "format",       description: "Format raw text into clean Markdown structure.",            tier: "lite" },
+      { action: "chat",         description: "Editor chat (signed-in user asking the AI to edit).",        tier: "primary" },
+      { action: "visitor_chat", description: "Visitor chat on a public doc (Q&A, no edits).",              tier: "lite" },
+    ],
+  },
+  {
+    surface: "Editor — selection toolbar",
+    actions: [
+      { action: "selection_polish",    description: "Polish the highlighted selection only.",                tier: "lite" },
+      { action: "selection_shorten",   description: "Shorten the highlighted selection.",                    tier: "lite" },
+      { action: "selection_expand",    description: "Expand the highlighted selection.",                     tier: "lite" },
+      { action: "selection_rewrite",   description: "Rewrite the selection per the user's instruction.",     tier: "lite" },
+      { action: "selection_translate", description: "Translate the selection to the requested language.",    tier: "lite" },
+    ],
+  },
+  {
+    surface: "Chat surfaces (streaming, RAG)",
+    actions: [
+      { action: "chat-doc",    description: "Long-form chat grounded in a single document.",                tier: "primary" },
+      { action: "chat-bundle", description: "Chat grounded in a bundle (multi-doc, with [doc:N] citations).", tier: "primary" },
+      { action: "chat-hub",    description: "Chat grounded in a user's entire hub (concept-bridged RAG).",   tier: "primary" },
+    ],
+  },
+  {
+    surface: "Bundles (the thinking surface)",
+    actions: [
+      { action: "bundle-graph",         description: "Generate the bundle's knowledge graph (nodes + edges).", tier: "primary" },
+      { action: "bundle-tension",       description: "Resolve a contradiction / tension identified in a bundle.", tier: "primary" },
+      { action: "bundle-generate",      description: "Auto-build a bundle for a query — pulls relevant docs.",   tier: "primary" },
+      { action: "bundle-suggest-title", description: "Suggest a title for an unnamed bundle.",                   tier: "lite" },
+      { action: "bundle-suggestions",   description: "Suggest related bundles the user might want to open.",     tier: "lite" },
+      { action: "synthesize",           description: "Synthesize a bundle's docs into a single narrative.",      tier: "primary" },
+    ],
+  },
+  {
+    surface: "Doc auto-processing (runs on save)",
+    actions: [
+      { action: "doc-summary",   description: "Auto-generate the per-document summary (sidebar previews, OG).", tier: "lite" },
+      { action: "doc-graph",     description: "Auto-extract the document's local AI graph (concepts + edges).", tier: "lite" },
+      { action: "doc-ontology",  description: "Extract the doc's ontology into concept_index + relations.",     tier: "primary" },
+      { action: "doc-decompose", description: "Decompose a doc into its parts (sections / claims / refs).",     tier: "primary" },
+      { action: "organize-doc",  description: "Background organize job — clean structure, fix headings.",        tier: "lite" },
+    ],
+  },
+  {
+    surface: "Hub / Concept",
+    actions: [
+      { action: "hub-suggestions",        description: "Generate bundle suggestions for the user's hub.",        tier: "primary" },
+      { action: "hub-suggested-queries",  description: "Suggest chat queries to seed hub conversations.",         tier: "lite" },
+      { action: "concept-define",         description: "Generate the definition for a concept_index entry.",      tier: "lite" },
+    ],
+  },
+  {
+    surface: "Search / retrieval",
+    actions: [
+      { action: "rerank", description: "LLM reranker for vector recall hits before they hit the prompt.", tier: "lite" },
+    ],
+  },
+  {
+    surface: "Imports / external intake",
+    actions: [
+      { action: "import-mdfy", description: "Convert raw text (paste, file drop) → clean Markdown.",       tier: "lite" },
+      { action: "llm-clean",   description: "Clean the markdown coming out of PDF extraction.",            tier: "lite" },
+      { action: "transform",   description: "Chrome-extension intent transform (clip → tidy markdown).",   tier: "lite" },
+    ],
+  },
+];
 
 // ─── Styles ───
 

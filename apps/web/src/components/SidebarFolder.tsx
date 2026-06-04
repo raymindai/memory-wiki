@@ -650,6 +650,9 @@ function FolderNode(props: FolderNodeProps) {
         onDragLeave={() => setDropZone(null)}
         onDrop={(e) => {
           e.preventDefault();
+          // Stop the tree-level "drop to root" handler from also firing
+          // — a folder drop is a folder drop, not a root move.
+          e.stopPropagation();
           const tabIds = _dragTabIdsRef.length > 0 ? _dragTabIdsRef : (_dragTabIdRef ? [_dragTabIdRef] : (dragTabId ? [dragTabId] : []));
           const folderId = _dragFolderIdRef ?? dragFolderId;
           if (tabIds.length > 0) {
@@ -938,8 +941,59 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
   const itemAlreadyAtRoot = (draggedTab && !draggedTab.folderId) || (draggedFolder && !draggedFolder.parentId);
   const showRootSlot = (draggingTab || draggingFolder) && !itemAlreadyAtRoot;
 
+  // Tree-level drop-to-root: any drop that lands on the tree
+  // background (not a folder row, not a tab reorder zone) moves the
+  // dragged item to the root. Folder onDrop calls stopPropagation, so
+  // this only fires when the drop missed every inner target.
+  // Visual: when dragging, the tree shows a faint tint to indicate the
+  // whole area is droppable.
+  const [treeRootHover, setTreeRootHover] = useState(false);
   return (
-    <div ref={treeRef}>
+    <div
+      ref={treeRef}
+      onDragOver={(e) => {
+        if (!draggingTab && !draggingFolder) return;
+        if (itemAlreadyAtRoot) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (!treeRootHover) setTreeRootHover(true);
+      }}
+      onDragLeave={(e) => {
+        // Only clear the hover when the pointer actually leaves the
+        // tree (not when it transitions between child rows).
+        if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        setTreeRootHover(false);
+      }}
+      onDrop={(e) => {
+        if (!draggingTab && !draggingFolder) return;
+        e.preventDefault();
+        const tabIds = _dragTabIdsRef.length > 0 ? _dragTabIdsRef : (_dragTabIdRef ? [_dragTabIdRef] : (props.dragTabId ? [props.dragTabId] : []));
+        const folderId = _dragFolderIdRef ?? props.dragFolderId;
+        for (const tid of tabIds) props.handlers.onDropTabIntoFolder(tid, null);
+        if (folderId) props.handlers.onDropFolderIntoFolder(folderId, null);
+        _dragTabIdRef = null;
+        _dragTabIdsRef = [];
+        _dragFolderIdRef = null;
+        props.setDragTabId(null);
+        props.setDragFolderId(null);
+        setTreeRootHover(false);
+        setRootHover(false);
+      }}
+      style={{
+        // Min-height + bottom padding gives a real catchment area under
+        // the last row so users can drop into the empty space without
+        // hunting for the explicit "Drop here…" tile.
+        minHeight: 120,
+        paddingBottom: 16,
+        // Subtle background tint while a non-root item is being dragged
+        // — communicates "drop anywhere here = move out of folder".
+        background: treeRootHover && (draggingTab || draggingFolder) && !itemAlreadyAtRoot
+          ? "color-mix(in srgb, var(--border) 40%, transparent)"
+          : undefined,
+        borderRadius: 6,
+        transition: "background 0.12s",
+      }}
+    >
       {/* Folders first — matches Finder / VS Code / Notion / Obsidian
           convention. Containers scan first; loose items below. */}
       {sortedRoots.map(folder => {
