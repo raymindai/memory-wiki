@@ -670,6 +670,11 @@
 
   const STAR_SVG = '<svg viewBox="0 0 16 16"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.9 4.9L8 12.3 3.5 14.6l.9-4.9L.8 6.2l5-.7L8 1z"/></svg>';
   const X_SVG    = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m4 4 8 8M12 4 4 12"/></svg>';
+  // Lucide-style sparkles glyph — universally read as "AI / smart" by
+  // users who have spent any time around Notion, Linear, Slack, etc.
+  // Single main spark + two corner accents. Stroked, not filled, so
+  // it inherits chip text color cleanly via currentColor.
+  const SPARKLE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>';
 
   function makeChip({ text, favorite, isCurated, siteKey }) {
     const el = document.createElement("div");
@@ -683,9 +688,19 @@
     el.dataset.text = text;
     if (siteKey) el.dataset.site = siteKey;
 
-    // Text container (clipped, marquee on hover when overflowing)
+    // Text container (clipped, marquee on hover when overflowing).
+    // Site-suggestion chips get an AI sparkle prefix INSIDE the wrap
+    // so the icon scrolls with marquee text rather than sitting in a
+    // separate fixed slot.
     const labelWrap = document.createElement("span");
     labelWrap.className = "chip-label-wrap";
+    if (siteKey) {
+      const icon = document.createElement("span");
+      icon.className = "chip-site-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = SPARKLE_SVG;
+      labelWrap.appendChild(icon);
+    }
     const label = document.createElement("span");
     label.className = "chip-label";
     label.textContent = text;
