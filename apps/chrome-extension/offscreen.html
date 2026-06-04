@@ -6,6 +6,12 @@
   <title>memory.wiki offscreen</title>
 </head>
 <body>
+  <!-- Readability + html-to-markdown loaded so the offscreen doc can
+       turn a fetched HTML string into clean markdown for "URL-only"
+       tweet card extraction. Service workers lack DOMParser; offscreen
+       fills the gap. -->
+  <script src="lib/readability.js"></script>
+  <script src="lib/html-to-markdown.js"></script>
   <script src="offscreen.js"></script>
 </body>
 </html>

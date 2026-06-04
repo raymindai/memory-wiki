@@ -159,8 +159,8 @@ async function copyToClipboardViaOffscreen(text) {
     if (existingContexts.length === 0) {
       await chrome.offscreen.createDocument({
         url: chrome.runtime.getURL("offscreen.html"),
-        reasons: ["CLIPBOARD"],
-        justification: "Copy memory.wiki link to clipboard after capture.",
+        reasons: ["CLIPBOARD", "DOM_PARSER"],
+        justification: "Copy capture link to clipboard and parse fetched HTML for tweet-card link expansion.",
       });
     }
     await chrome.runtime.sendMessage({ target: "offscreen", action: "copy", text });
@@ -391,6 +391,54 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       } catch (err) {
         sendResponse({ error: err.message });
+      }
+    })();
+    return true;
+  }
+
+  // Fetch a third-party URL, run Readability in offscreen, return
+  // markdown. Used by the X per-tweet pill: when a tweet body is just
+  // a URL with a link card, X only shows a 2-line truncated card
+  // snippet; this pulls the actual article content from the
+  // destination so the captured doc is useful.
+  if (request.action === "capture-linked-url") {
+    (async () => {
+      const url = request.url;
+      if (!url || !/^https?:\/\//.test(url)) { sendResponse({ ok: false, error: "invalid url" }); return; }
+      try {
+        const res = await fetch(url, { credentials: "omit", redirect: "follow" });
+        if (!res.ok) { sendResponse({ ok: false, error: `fetch ${res.status}` }); return; }
+        const html = await res.text();
+        const finalUrl = res.url || url;
+        // Spin up (or reuse) the offscreen doc, hand it the html.
+        if (chrome.offscreen) {
+          try {
+            const existing = await chrome.runtime.getContexts({ contextTypes: ["OFFSCREEN_DOCUMENT"] });
+            if (!existing || existing.length === 0) {
+              await chrome.offscreen.createDocument({
+                url: chrome.runtime.getURL("offscreen.html"),
+                reasons: ["CLIPBOARD", "DOM_PARSER"],
+                justification: "Copy capture link to clipboard and parse fetched HTML for tweet-card link expansion.",
+              });
+            }
+          } catch (err) {
+            sendResponse({ ok: false, error: "offscreen unavailable: " + (err && err.message || err) });
+            return;
+          }
+        }
+        const parsed = await chrome.runtime.sendMessage({
+          target: "offscreen",
+          action: "parse-and-extract",
+          html,
+          url: finalUrl,
+        });
+        if (parsed && parsed.ok) {
+          sendResponse({ ok: true, title: parsed.title, description: parsed.description, markdown: parsed.markdown, url: finalUrl });
+        } else {
+          sendResponse({ ok: false, error: parsed?.error || "extract failed" });
+        }
+      } catch (err) {
+        sendResponse({ ok: false, error: String(err && err.message || err) });
       }
     })();
     return true;

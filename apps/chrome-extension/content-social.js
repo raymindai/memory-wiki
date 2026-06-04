@@ -302,6 +302,51 @@
           if (src && !seen.has(src)) { seen.add(src); images.push(src); }
         });
 
+        // URL-only tweet with a link card → fetch the destination
+        // article in the background, run Readability, and use its
+        // content as the body. Without this the captured doc gets
+        // only X's 2-line truncated card snippet (the original bug
+        // that motivated this whole path).
+        const bodyLooksJustUrl = /^https?:\/\/\S+$/i.test(body.trim());
+        const bodyVeryShort = body.length < 50;
+        if (bodyLooksJustUrl || bodyVeryShort) {
+          const cardWrap = el.querySelector('[data-testid="card.wrapper"]');
+          let cardHref = "";
+          if (cardWrap) {
+            cardHref = cardWrap.getAttribute("href")
+              || cardWrap.querySelector("a[href]")?.getAttribute("href")
+              || "";
+          }
+          if (!cardHref) {
+            // Fallback: first absolute link inside the tweet text that
+            // isn't an x.com mention or a t.co shortener-only link.
+            const linkInText = el.querySelector('[data-testid="tweetText"] a[href^="https://t.co/"], a[href^="https://t.co/"]');
+            if (linkInText) cardHref = linkInText.getAttribute("href") || "";
+          }
+          if (cardHref && chrome?.runtime?.id) {
+            try {
+              const linked = await chrome.runtime.sendMessage({
+                action: "capture-linked-url",
+                url: cardHref,
+              });
+              if (linked && linked.ok && linked.markdown) {
+                // Replace the URL-only / truncated-card body with the
+                // fetched article. linkedTitle / linkedUrl are
+                // surfaced separately so buildMarkdown doesn't end up
+                // emitting two H1s (one from data.body's first line,
+                // one from the article title).
+                const articleUrl = linked.url || cardHref;
+                return {
+                  body: `[Source article](${articleUrl})\n\n---\n\n${linked.markdown}`,
+                  author, handle, ts, url, images,
+                  linkedTitle: (linked.title || "").trim() || null,
+                  linkedUrl: articleUrl,
+                };
+              }
+            } catch { /* keep the original short body */ }
+          }
+        }
+
         return { body, author, handle, ts, url, images };
       },
     },
@@ -364,7 +409,14 @@
 
   function buildMarkdown(data) {
     const lines = [];
-    const titleSeed = (data.body.split("\n")[0] || "").slice(0, 80).trim() || `Post by ${data.handle || data.author || "unknown"}`;
+    // Prefer the linked article's title when the tweet was URL-only
+    // and the X extractor pulled the destination via offscreen
+    // Readability — otherwise the title would be the "Source article"
+    // attribution line that leads the body. Cap title at 80 chars.
+    const fromLinked = data.linkedTitle ? data.linkedTitle.slice(0, 80) : "";
+    const titleSeed = fromLinked
+      || (data.body.split("\n")[0] || "").slice(0, 80).trim()
+      || `Post by ${data.handle || data.author || "unknown"}`;
     lines.push("# " + titleSeed);
     lines.push("");
     const meta = [];
