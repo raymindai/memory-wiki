@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { embedText, prepareEmbeddingInput, vectorToSql } from "@/lib/embeddings";
+import { callAI } from "@/lib/ai-providers";
 
 /**
  * v6 — AI Bundle Generation.
@@ -180,104 +181,21 @@ export async function POST(req: NextRequest) {
 }
 
 async function callBundleCurator(system: string, user: string): Promise<string> {
-  if (process.env.ANTHROPIC_API_KEY) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 2000,
-        system,
-        messages: [{ role: "user", content: user }],
-      }),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Anthropic ${res.status}: ${text || "unknown"}`);
-    }
-    const data = await res.json();
-    type Block = { type: string; text?: string };
-    const blocks: Block[] = data.content || [];
-    return blocks.filter(b => b.type === "text").map(b => b.text || "").join("");
+  // Bundle curation is the heaviest "quality matters" use-case in
+  // the stack — structured JSON, doc-id validation downstream. Route
+  // through the primary tier of the shared cascade. parseSuggestion
+  // is already tolerant of fenced ```json``` wrapping so the lack of
+  // Gemini's responseSchema enforcement is fine.
+  const result = await callAI({
+    prompt: `${system}\n\n${user}`,
+    useLiteModel: false,
+    temperature: 0.4,
+    maxOutputTokens: 2000,
+  });
+  if (!result.ok) {
+    throw new Error(result.error || "AI call failed");
   }
-
-  if (process.env.OPENAI_API_KEY) {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        temperature: 0.4,
-      }),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`OpenAI ${res.status}: ${text || "unknown"}`);
-    }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "";
-  }
-
-  if (process.env.GEMINI_API_KEY) {
-    // Gemini fallback. responseMimeType + responseSchema enforces
-    // structured JSON without relying on the model to obey "no fences"
-    // in the system prompt. Schema mirrors the {title,description,
-    // documents:[{id,annotation}]} shape parseSuggestion expects.
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 2000,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              title: { type: "string" },
-              description: { type: "string" },
-              documents: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    id: { type: "string" },
-                    annotation: { type: "string" },
-                  },
-                  required: ["id"],
-                },
-              },
-            },
-            required: ["title", "description", "documents"],
-          },
-        },
-      }),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Gemini ${res.status}: ${text || "unknown"}`);
-    }
-    const data = await res.json();
-    type Part = { text?: string };
-    const parts: Part[] = data.candidates?.[0]?.content?.parts || [];
-    return parts.map(p => p.text || "").join("");
-  }
-
-  throw new Error("No AI provider configured (ANTHROPIC_API_KEY, OPENAI_API_KEY, or GEMINI_API_KEY)");
+  return result.text;
 }
 
 function parseSuggestion(text: string, candidates: CandidateRow[]): AISuggestion {

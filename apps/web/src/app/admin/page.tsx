@@ -64,9 +64,16 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
-  // AI model settings
-  const [aiModelPrimary, setAiModelPrimary] = useState("gemini-3-flash-preview");
-  const [aiModelLite, setAiModelLite] = useState("gemini-3.1-flash-lite");
+  // AI settings — unified per-provider model table + provider order.
+  // Defaults mirror lib/ai-providers.ts so the form renders sensibly
+  // before /api/admin GET hydrates the real values.
+  const [aiProviderOrder, setAiProviderOrder] = useState<string[]>(["openai", "gemini", "anthropic"]);
+  const [aiOpenaiPrimary, setAiOpenaiPrimary]     = useState("gpt-4o-mini");
+  const [aiOpenaiLite, setAiOpenaiLite]           = useState("gpt-5-nano");
+  const [aiGeminiPrimary, setAiGeminiPrimary]     = useState("gemini-3-flash-preview");
+  const [aiGeminiLite, setAiGeminiLite]           = useState("gemini-3.1-flash-lite");
+  const [aiAnthropicPrimary, setAiAnthropicPrimary] = useState("claude-haiku-4-5");
+  const [aiAnthropicLite, setAiAnthropicLite]     = useState("claude-haiku-4-5");
   const [savingModels, setSavingModels] = useState(false);
   const [modelSaveMsg, setModelSaveMsg] = useState("");
 
@@ -108,9 +115,15 @@ export default function AdminPage() {
       setDailyStats(data.dailyStats || []);
       setSourceBreakdown(data.sourceBreakdown || {});
       setEmailTemplates(data.emailTemplates || []);
-      if (data.aiModels) {
-        setAiModelPrimary(data.aiModels.primary || "gemini-3-flash-preview");
-        setAiModelLite(data.aiModels.lite || "gemini-3.1-flash-lite");
+      if (data.aiProviders) {
+        if (Array.isArray(data.aiProviders.order)) setAiProviderOrder(data.aiProviders.order);
+        const m = data.aiProviders.models;
+        if (m?.openai?.primary)     setAiOpenaiPrimary(m.openai.primary);
+        if (m?.openai?.lite)        setAiOpenaiLite(m.openai.lite);
+        if (m?.gemini?.primary)     setAiGeminiPrimary(m.gemini.primary);
+        if (m?.gemini?.lite)        setAiGeminiLite(m.gemini.lite);
+        if (m?.anthropic?.primary)  setAiAnthropicPrimary(m.anthropic.primary);
+        if (m?.anthropic?.lite)     setAiAnthropicLite(m.anthropic.lite);
       }
     } catch {
       setAuthed(false);
@@ -363,45 +376,68 @@ export default function AdminPage() {
           {/* Settings */}
           {tab === "settings" && (
             <div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#fafafa", margin: "0 0 8px" }}>AI Model Configuration</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#fafafa", margin: "0 0 8px" }}>AI Configuration</h3>
               <p style={{ fontSize: 12, color: "#52525b", marginBottom: 24 }}>
-                Configure which Gemini models are used for AI features. Changes take effect within 5 minutes.
+                Provider order (cheapest first by default) + per-provider primary / lite models.
+                Every AI surface (editor chat, polish, translate, format, Chrome-ext intent transform,
+                bundle graph, hub concepts) routes through the same cascade.
+                <br/><br/>
+                Save invalidates the in-memory config cache, so changes are live immediately.
               </p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 480 }}>
-                {/* Primary model */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 28, maxWidth: 640 }}>
+                {/* Provider order */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 600, color: "#a1a1aa", display: "block", marginBottom: 6 }}>
-                    Primary Model
-                    <span style={{ fontWeight: 400, color: "#52525b", marginLeft: 8 }}>chat, polish, translate</span>
+                    Provider order
+                    <span style={{ fontWeight: 400, color: "#52525b", marginLeft: 8 }}>tried in sequence until one returns text</span>
                   </label>
-                  <select
-                    value={aiModelPrimary}
-                    onChange={e => setAiModelPrimary(e.target.value)}
-                    style={selectStyle}
-                  >
-                    <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
-                    <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
-                    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                  </select>
+                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    {aiProviderOrder.map((p, i) => (
+                      <div key={p} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ padding: "6px 10px", borderRadius: 6, background: "#27272a", color: "#fafafa", fontSize: 12, fontFamily: "var(--font-mono)" }}>{i + 1}. {p}</span>
+                        {i > 0 && (
+                          <button
+                            onClick={() => {
+                              const next = [...aiProviderOrder];
+                              [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                              setAiProviderOrder(next);
+                            }}
+                            style={{ fontSize: 11, padding: "2px 6px", background: "#18181b", color: "#a1a1aa", border: "1px solid #3f3f46", borderRadius: 4, cursor: "pointer" }}
+                            title="Move up"
+                          >↑</button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 11, color: "#52525b", marginTop: 6 }}>
+                    Default: openai → gemini → anthropic (cost-first cascade). Click ↑ to bubble a provider up.
+                  </p>
                 </div>
 
-                {/* Lite model */}
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: "#a1a1aa", display: "block", marginBottom: 6 }}>
-                    Lite Model
-                    <span style={{ fontWeight: 400, color: "#52525b", marginLeft: 8 }}>summary, tldr</span>
-                  </label>
-                  <select
-                    value={aiModelLite}
-                    onChange={e => setAiModelLite(e.target.value)}
-                    style={selectStyle}
-                  >
-                    <option value="gemini-3-flash-preview">gemini-3-flash-preview</option>
-                    <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
-                    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                  </select>
-                </div>
+                {/* Per-provider models */}
+                {([
+                  { name: "openai",    label: "OpenAI",    primary: aiOpenaiPrimary,    setPrimary: setAiOpenaiPrimary,    lite: aiOpenaiLite,    setLite: setAiOpenaiLite,    hint: "e.g. gpt-4o-mini / gpt-5-nano" },
+                  { name: "gemini",    label: "Gemini",    primary: aiGeminiPrimary,    setPrimary: setAiGeminiPrimary,    lite: aiGeminiLite,    setLite: setAiGeminiLite,    hint: "e.g. gemini-3-flash-preview / gemini-3.1-flash-lite" },
+                  { name: "anthropic", label: "Anthropic", primary: aiAnthropicPrimary, setPrimary: setAiAnthropicPrimary, lite: aiAnthropicLite, setLite: setAiAnthropicLite, hint: "e.g. claude-sonnet-4 / claude-haiku-4-5" },
+                ] as const).map((p) => (
+                  <div key={p.name} style={{ display: "flex", flexDirection: "column", gap: 8, padding: 16, border: "1px solid #27272a", borderRadius: 8, background: "#0e0e10" }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#fafafa" }}>{p.label}</div>
+                    <p style={{ fontSize: 11, color: "#52525b", margin: 0 }}>{p.hint}</p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div>
+                        <label style={{ fontSize: 11, color: "#a1a1aa", display: "block", marginBottom: 4 }}>Primary <span style={{ color: "#52525b" }}>polish, translate, chat</span></label>
+                        <input value={p.primary} onChange={(e) => p.setPrimary(e.target.value)}
+                          style={{ width: "100%", padding: "6px 10px", background: "#18181b", color: "#fafafa", border: "1px solid #3f3f46", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 11, color: "#a1a1aa", display: "block", marginBottom: 4 }}>Lite <span style={{ color: "#52525b" }}>summary, tldr, format, intent</span></label>
+                        <input value={p.lite} onChange={(e) => p.setLite(e.target.value)}
+                          style={{ width: "100%", padding: "6px 10px", background: "#18181b", color: "#fafafa", border: "1px solid #3f3f46", borderRadius: 6, fontSize: 12, fontFamily: "var(--font-mono)" }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
 
                 {/* Save */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -420,7 +456,14 @@ export default function AdminPage() {
                             ...(token ? { "Authorization": `Bearer ${token}` } : {}),
                             "x-user-email": email,
                           },
-                          body: JSON.stringify({ aiModelPrimary, aiModelLite }),
+                          body: JSON.stringify({
+                            providerOrder: aiProviderOrder,
+                            models: {
+                              openai:    { primary: aiOpenaiPrimary,    lite: aiOpenaiLite },
+                              gemini:    { primary: aiGeminiPrimary,    lite: aiGeminiLite },
+                              anthropic: { primary: aiAnthropicPrimary, lite: aiAnthropicLite },
+                            },
+                          }),
                         });
                         if (!res.ok) {
                           const err = await res.json();
@@ -442,7 +485,7 @@ export default function AdminPage() {
                       cursor: savingModels ? "not-allowed" : "pointer",
                     }}
                   >
-                    {savingModels ? "Saving..." : "Save Models"}
+                    {savingModels ? "Saving..." : "Save AI Config"}
                   </button>
                   {modelSaveMsg && (
                     <span style={{ fontSize: 12, color: modelSaveMsg.includes("success") ? "#4ade80" : "#ef4444" }}>

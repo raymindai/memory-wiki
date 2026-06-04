@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { callAI } from "@/lib/ai-providers";
 
 // POST /api/bundles/suggest-title
 //
@@ -85,78 +86,16 @@ export async function POST(req: NextRequest) {
 }
 
 async function callTitleSuggester(system: string, user: string): Promise<string> {
-  // Haiku — short output, fast turnaround, cheap. Falls back to
-  // OpenAI / Gemini if Anthropic isn't configured.
-  if (process.env.ANTHROPIC_API_KEY) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5",
-        max_tokens: 60,
-        system,
-        messages: [{ role: "user", content: user }],
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      throw new Error(`Anthropic ${res.status}: ${t || "unknown"}`);
-    }
-    const data = await res.json();
-    type Block = { type: string; text?: string };
-    const blocks: Block[] = data.content || [];
-    return blocks.filter((b) => b.type === "text").map((b) => b.text || "").join("").trim().replace(/^["']|["']$/g, "").replace(/[.,;:!?]+$/, "");
+  // Routed through the shared cost-first cascade — title suggestion
+  // is a short text reply that the lite tier handles perfectly.
+  const result = await callAI({
+    prompt: `${system}\n\n${user}`,
+    useLiteModel: true,
+    temperature: 0.5,
+    maxOutputTokens: 60,
+  });
+  if (!result.ok) {
+    throw new Error(result.error || "AI call failed");
   }
-
-  if (process.env.OPENAI_API_KEY) {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        temperature: 0.5,
-        max_tokens: 60,
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      throw new Error(`OpenAI ${res.status}: ${t || "unknown"}`);
-    }
-    const data = await res.json();
-    const text: string = data.choices?.[0]?.message?.content || "";
-    return text.trim().replace(/^["']|["']$/g, "").replace(/[.,;:!?]+$/, "");
-  }
-
-  if (process.env.GEMINI_API_KEY) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: { temperature: 0.5, maxOutputTokens: 60 },
-      }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      throw new Error(`Gemini ${res.status}: ${t || "unknown"}`);
-    }
-    const data = await res.json();
-    type Part = { text?: string };
-    const parts: Part[] = data.candidates?.[0]?.content?.parts || [];
-    return parts.map((p) => p.text || "").join("").trim().replace(/^["']|["']$/g, "").replace(/[.,;:!?]+$/, "");
-  }
-
-  throw new Error("No AI provider configured (ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY)");
+  return result.text.trim().replace(/^["']|["']$/g, "").replace(/[.,;:!?]+$/, "");
 }

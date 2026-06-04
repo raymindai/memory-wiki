@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseClient } from "@/lib/supabase";
 import { callAI } from "@/lib/ai-providers";
 
 export const runtime = "nodejs";
@@ -20,42 +19,6 @@ type AIAction =
   | "selection_expand"
   | "selection_rewrite"
   | "selection_translate";
-
-// ─── AI Model Config (cached from site_config table) ───
-const DEFAULT_PRIMARY_MODEL = "gemini-3-flash-preview";
-const DEFAULT_LITE_MODEL = "gemini-3.1-flash-lite";
-
-let cachedModels: { primary: string; lite: string } | null = null;
-let cachedModelsAt = 0;
-const MODEL_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-async function getAIModels(): Promise<{ primary: string; lite: string }> {
-  if (cachedModels && Date.now() - cachedModelsAt < MODEL_CACHE_TTL) {
-    return cachedModels;
-  }
-  try {
-    const supabase = getSupabaseClient();
-    if (supabase) {
-      const { data } = await supabase
-        .from("site_config")
-        .select("key, value")
-        .in("key", ["ai_model_primary", "ai_model_lite"]);
-      const map: Record<string, string> = {};
-      for (const row of data || []) map[row.key] = row.value;
-      cachedModels = {
-        primary: map["ai_model_primary"] || DEFAULT_PRIMARY_MODEL,
-        lite: map["ai_model_lite"] || DEFAULT_LITE_MODEL,
-      };
-      cachedModelsAt = Date.now();
-      return cachedModels;
-    }
-  } catch {
-    // Fall through to defaults
-  }
-  cachedModels = { primary: DEFAULT_PRIMARY_MODEL, lite: DEFAULT_LITE_MODEL };
-  cachedModelsAt = Date.now();
-  return cachedModels;
-}
 
 const PROMPTS: Record<Exclude<AIAction, "chat" | "visitor_chat" | "translate" | "selection_rewrite" | "selection_translate">, string> = {
   polish: `You are an expert editor. Polish the following Markdown document:
@@ -343,18 +306,12 @@ ${trailingLabel}`;
           ? Math.min(65536, Math.max(4096, Math.ceil(inputTokensEstimate * 1.4)))
           : 65536;
 
-  // Gemini fallback respects site_config overrides; Anthropic /
-  // OpenAI use hardcoded sane defaults inside the helper.
-  const models = await getAIModels();
-
   try {
     const result = await callAI({
       prompt: fullPrompt,
       temperature,
       maxOutputTokens,
       useLiteModel: useLite,
-      geminiModel: models.primary,
-      geminiLiteModel: models.lite,
     });
 
     if (!result.ok) {

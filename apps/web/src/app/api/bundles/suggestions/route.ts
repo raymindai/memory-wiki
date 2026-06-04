@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { callAI } from "@/lib/ai-providers";
 
 /**
  * v6 — Auto-suggest bundle prompts based on the caller's hub content.
@@ -83,73 +84,19 @@ export async function GET(req: NextRequest) {
 }
 
 async function callSuggester(system: string, user: string): Promise<string> {
-  if (process.env.ANTHROPIC_API_KEY) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 400,
-        system,
-        messages: [{ role: "user", content: user }],
-      }),
-    });
-    if (!res.ok) throw new Error(`anthropic ${res.status}`);
-    const data = await res.json();
-    type Block = { type: string; text?: string };
-    const blocks: Block[] = data.content || [];
-    return blocks.filter(b => b.type === "text").map(b => b.text || "").join("");
-  }
-  if (process.env.OPENAI_API_KEY) {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        temperature: 0.6,
-      }),
-    });
-    if (!res.ok) throw new Error(`openai ${res.status}`);
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "";
-  }
-  if (process.env.GEMINI_API_KEY) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 400,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              prompts: { type: "array", items: { type: "string" } },
-            },
-            required: ["prompts"],
-          },
-        },
-      }),
-    });
-    if (!res.ok) throw new Error(`gemini ${res.status}`);
-    const data = await res.json();
-    type Part = { text?: string };
-    const parts: Part[] = data.candidates?.[0]?.content?.parts || [];
-    return parts.map(p => p.text || "").join("");
-  }
-  throw new Error("no provider");
+  // Routed through the unified cost-first cascade. Prompt instructs
+  // JSON output; parseSuggestions handles both raw JSON and fenced
+  // ```json``` blocks so the absence of Gemini's responseSchema
+  // enforcement here is fine — the downstream parser is already
+  // tolerant.
+  const result = await callAI({
+    prompt: `${system}\n\n${user}`,
+    useLiteModel: true,
+    temperature: 0.6,
+    maxOutputTokens: 400,
+  });
+  if (!result.ok) throw new Error(result.error || "AI call failed");
+  return result.text;
 }
 
 function parseSuggestions(text: string): ProviderResponse {

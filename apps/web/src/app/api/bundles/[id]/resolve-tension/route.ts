@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { callAI } from "@/lib/ai-providers";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -100,65 +101,20 @@ ${body.source.chunkContent}
 **Content:**
 ${body.target.chunkContent}`;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "AI not configured" }, { status: 503 });
-
   try {
-    let resolution: string | null = null;
-    if (process.env.ANTHROPIC_API_KEY) resolution = await runAnthropic(prompt, process.env.ANTHROPIC_API_KEY);
-    else if (process.env.OPENAI_API_KEY) resolution = await runOpenAI(prompt, process.env.OPENAI_API_KEY);
-    else if (process.env.GEMINI_API_KEY) resolution = await runGemini(prompt, process.env.GEMINI_API_KEY);
-    if (!resolution) return NextResponse.json({ error: "AI resolution failed" }, { status: 500 });
-    return NextResponse.json({ resolution });
+    const result = await callAI({
+      prompt,
+      useLiteModel: true,        // short tension-resolution reply
+      temperature: 0.3,
+      maxOutputTokens: 768,
+    });
+    if (!result.ok) {
+      console.error("Resolve tension AI error:", result.error);
+      return NextResponse.json({ error: result.error || "AI resolution failed" }, { status: result.rateLimited ? 429 : 502 });
+    }
+    return NextResponse.json({ resolution: result.text });
   } catch (err) {
     console.error("Resolve tension AI error:", err);
     return NextResponse.json({ error: "AI resolution failed" }, { status: 500 });
   }
-}
-
-async function runAnthropic(prompt: string, apiKey: string): Promise<string | null> {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 768,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.content?.[0]?.text || null;
-}
-
-async function runOpenAI(prompt: string, apiKey: string): Promise<string | null> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 768,
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || null;
-}
-
-async function runGemini(prompt: string, apiKey: string): Promise<string | null> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 768 },
-      }),
-    }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
 }

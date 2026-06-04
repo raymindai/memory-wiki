@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
+import { callAI } from "@/lib/ai-providers";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -132,25 +133,24 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     : "";
   const fullPrompt = EXTRACTION_PROMPT + intentPrefix;
 
-  // Try AI extraction
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "AI not configured" }, { status: 503 });
-  }
-
+  // Bundle graph extraction routed through the unified cascade.
+  // Quality task (structured JSON, doc-id grounded), so primary tier.
+  // The system prompt forces JSON-only output; parseGraphJson is
+  // tolerant of fences regardless.
   try {
-    let graphData;
-
-    if (process.env.ANTHROPIC_API_KEY) {
-      graphData = await extractWithAnthropic(excerpts, docs, process.env.ANTHROPIC_API_KEY, fullPrompt);
-    } else if (process.env.OPENAI_API_KEY) {
-      graphData = await extractWithOpenAI(excerpts, docs, process.env.OPENAI_API_KEY, fullPrompt);
-    } else if (process.env.GEMINI_API_KEY) {
-      graphData = await extractWithGemini(excerpts, docs, process.env.GEMINI_API_KEY, fullPrompt);
+    const aiResult = await callAI({
+      prompt: `${fullPrompt}\n\nDocuments:\n${excerpts}`,
+      useLiteModel: false,
+      temperature: 0.3,
+      maxOutputTokens: 16384,
+    });
+    if (!aiResult.ok) {
+      return NextResponse.json({ error: aiResult.error || "AI extraction failed" }, { status: aiResult.rateLimited ? 429 : 502 });
     }
+    const graphData = parseGraphJson(aiResult.text);
 
     if (!graphData) {
-      console.error("AI extraction returned null — parse failed or API error");
+      console.error("AI extraction returned null — parse failed");
       return NextResponse.json({ error: "AI extraction failed" }, { status: 500 });
     }
     console.log("AI graph extracted:", graphData.nodes.length, "nodes,", graphData.edges.length, "edges");
@@ -218,85 +218,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 }
 
 // ─── Provider implementations ───
-
-interface DocInfo { id: string; title: string | null }
-
-async function extractWithAnthropic(excerpts: string, docs: DocInfo[], apiKey: string, prompt: string = EXTRACTION_PROMPT) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      // Anthropic requires max_tokens; the value is just a ceiling.
-      // Billing is on actual output tokens, not the cap, so a larger
-      // value costs nothing extra when the response is short. 4096 was
-      // truncating ~10-doc bundles mid-array; 16K future-proofs even
-      // for hubs that pile 20+ docs into a bundle.
-      max_tokens: 16384,
-      system: "You return ONLY valid JSON matching the schema requested. No prose before or after. No markdown code fences. No explanation. Just the JSON object.",
-      messages: [{
-        role: "user",
-        content: `${prompt}\n\nDocuments:\n${excerpts}`,
-      }],
-    }),
-  });
-  if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    console.error("Anthropic API error:", res.status, errText.slice(0, 400));
-    return null;
-  }
-  const data = await res.json();
-  const text = data.content?.[0]?.text || "";
-  console.log("Anthropic response length:", text.length, "stop_reason:", data.stop_reason);
-  return parseGraphJson(text);
-}
-
-async function extractWithOpenAI(excerpts: string, docs: DocInfo[], apiKey: string, prompt: string = EXTRACTION_PROMPT) {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: `Documents:\n${excerpts}` },
-      ],
-      max_tokens: 16384,
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content || "";
-  return parseGraphJson(text);
-}
-
-async function extractWithGemini(excerpts: string, docs: DocInfo[], apiKey: string, prompt: string = EXTRACTION_PROMPT) {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: `${prompt}\n\nDocuments:\n${excerpts}` }] }],
-      generationConfig: { maxOutputTokens: 16384, responseMimeType: "application/json" },
-    }),
-  });
-  if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    console.error("Gemini API error:", res.status, errText);
-    return null;
-  }
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-  console.log("Gemini response length:", text.length);
-  return parseGraphJson(text);
-}
+// Previous per-provider extractWith{Anthropic,OpenAI,Gemini} blocks
+// were removed when this route migrated to the shared callAI cascade.
+// Only the JSON parser stays — call site at the top of POST passes
+// the prompt directly to callAI and feeds the response text in here.
 
 function parseGraphJson(text: string) {
   // Three-layer extraction so the route survives small model misbehaviors:

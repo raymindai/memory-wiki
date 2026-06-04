@@ -148,15 +148,15 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Fetch AI model config from site_config
-    const aiModels: { primary: string; lite: string } = { primary: "gemini-3-flash-preview", lite: "gemini-3.1-flash-lite" };
-    try {
-      const { data: configRows } = await supabase.from("site_config").select("key, value").in("key", ["ai_model_primary", "ai_model_lite"]);
-      const configMap: Record<string, string> = {};
-      for (const row of configRows || []) configMap[row.key] = row.value;
-      if (configMap["ai_model_primary"]) aiModels.primary = configMap["ai_model_primary"];
-      if (configMap["ai_model_lite"]) aiModels.lite = configMap["ai_model_lite"];
-    } catch { /* table may not exist yet */ }
+    // Fetch unified AI config (provider order + per-provider models)
+    // from the shared lib so admin always shows the resolved values
+    // — exactly what callAI will use on the next request.
+    const { getAIConfig } = await import("@/lib/ai-providers");
+    const aiConfig = await getAIConfig();
+    // Backwards-compat: keep `aiModels` on the response for any old
+    // admin client still on the road. New clients should read
+    // `aiProviders` instead.
+    const aiModels = { primary: aiConfig.models.gemini.primary, lite: aiConfig.models.gemini.lite };
 
     return NextResponse.json({
       stats: {
@@ -175,6 +175,10 @@ export async function GET(req: NextRequest) {
       sourceBreakdown: sourceCount,
       emailTemplates: getTemplatePreviews(),
       aiModels,
+      aiProviders: {
+        order: aiConfig.order,
+        models: aiConfig.models,
+      },
     });
   } catch (err) {
     console.error("Admin API error:", err);
@@ -182,7 +186,22 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ─── PATCH: Update AI model settings ───
+// ─── PATCH: Update AI provider order + per-provider model settings ───
+// Body shape (all fields optional — only sent keys get upserted):
+//   {
+//     providerOrder?: ProviderName[],          // e.g. ["openai","gemini","anthropic"]
+//     models?: {
+//       openai?:    { primary?: string, lite?: string },
+//       gemini?:    { primary?: string, lite?: string },
+//       anthropic?: { primary?: string, lite?: string },
+//     },
+//     // Legacy fields kept for the older admin client (Gemini only):
+//     aiModelPrimary?: string,
+//     aiModelLite?: string,
+//   }
+//
+// On success the lib's getAIConfig cache is invalidated so the change
+// is visible on the very next AI call (no 5-minute wait).
 export async function PATCH(req: NextRequest) {
   const { supabase: _sb, error } = await verifyAdmin(req);
   if (error || !_sb) return error!;
@@ -190,32 +209,62 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { aiModelPrimary, aiModelLite } = body as { aiModelPrimary?: string; aiModelLite?: string };
-
-    const allowedModels = [
-      "gemini-3-flash-preview",
-      "gemini-3.1-flash-lite",
-      "gemini-2.0-flash",
-    ];
+    const {
+      providerOrder,
+      models,
+      aiModelPrimary, // legacy
+      aiModelLite,    // legacy
+    } = body as {
+      providerOrder?: string[];
+      models?: {
+        openai?:    { primary?: string; lite?: string };
+        gemini?:    { primary?: string; lite?: string };
+        anthropic?: { primary?: string; lite?: string };
+      };
+      aiModelPrimary?: string;
+      aiModelLite?: string;
+    };
 
     const updates: { key: string; value: string; updated_at: string }[] = [];
     const now = new Date().toISOString();
 
-    if (aiModelPrimary) {
-      if (!allowedModels.includes(aiModelPrimary)) {
-        return NextResponse.json({ error: `Invalid primary model: ${aiModelPrimary}` }, { status: 400 });
+    if (Array.isArray(providerOrder)) {
+      const cleaned = providerOrder
+        .map((s) => String(s).trim().toLowerCase())
+        .filter((s) => s === "openai" || s === "gemini" || s === "anthropic");
+      if (cleaned.length === 0) {
+        return NextResponse.json({ error: "providerOrder must contain at least one of openai/gemini/anthropic" }, { status: 400 });
       }
-      updates.push({ key: "ai_model_primary", value: aiModelPrimary, updated_at: now });
+      updates.push({ key: "ai_provider_order", value: cleaned.join(","), updated_at: now });
     }
-    if (aiModelLite) {
-      if (!allowedModels.includes(aiModelLite)) {
-        return NextResponse.json({ error: `Invalid lite model: ${aiModelLite}` }, { status: 400 });
+
+    const pushModel = (key: string, value?: string) => {
+      if (typeof value !== "string") return;
+      const v = value.trim();
+      if (!v) return;
+      // Model names are free-form (Anthropic/OpenAI/Gemini release new
+      // names monthly). Cap at 80 chars and disallow whitespace so a
+      // typo can't bork the whole stack. Validation is intentionally
+      // soft — the admin knows what they're typing.
+      if (v.length > 80 || /\s/.test(v)) {
+        throw new Error(`Invalid model name: "${v}"`);
       }
-      updates.push({ key: "ai_model_lite", value: aiModelLite, updated_at: now });
+      updates.push({ key, value: v, updated_at: now });
+    };
+
+    try {
+      if (models?.openai)    { pushModel("ai_openai_primary",    models.openai.primary);    pushModel("ai_openai_lite",    models.openai.lite); }
+      if (models?.gemini)    { pushModel("ai_gemini_primary",    models.gemini.primary);    pushModel("ai_gemini_lite",    models.gemini.lite); }
+      if (models?.anthropic) { pushModel("ai_anthropic_primary", models.anthropic.primary); pushModel("ai_anthropic_lite", models.anthropic.lite); }
+      // Legacy compat — older admin client only knew Gemini.
+      pushModel("ai_model_primary", aiModelPrimary);
+      pushModel("ai_model_lite",    aiModelLite);
+    } catch (err) {
+      return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 400 });
     }
 
     if (updates.length === 0) {
-      return NextResponse.json({ error: "No model values provided" }, { status: 400 });
+      return NextResponse.json({ error: "No settings provided" }, { status: 400 });
     }
 
     for (const u of updates) {
@@ -225,6 +274,14 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: "Failed to save" }, { status: 500 });
       }
     }
+
+    // Invalidate the lib cache so the next /api/ai or transform call
+    // re-reads from site_config immediately instead of waiting out the
+    // 5-minute TTL.
+    try {
+      const { invalidateAIConfigCache } = await import("@/lib/ai-providers");
+      invalidateAIConfigCache();
+    } catch { /* lib not loaded yet — fine */ }
 
     return NextResponse.json({ ok: true, updated: updates.map(u => u.key) });
   } catch (err) {
