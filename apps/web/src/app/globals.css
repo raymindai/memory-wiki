@@ -2923,6 +2923,27 @@ textarea::selection {
   }
 }
 
+/* Post-drop flash — shows up on the row that was JUST dropped (tab
+   or folder) so the user can see where it landed after a folder move.
+   Stronger + shorter than the realtime fresh pulse so it reads as
+   "look here" rather than "this changed in the background". The
+   matching tree code also scroll-into-views the row. */
+@keyframes mwSidebarRowDropFlash {
+  0%   { background: color-mix(in srgb, var(--accent) 38%, transparent); box-shadow: inset 2px 0 0 0 var(--accent); }
+  50%  { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 2px 0 0 0 var(--accent); }
+  100% { background: transparent; box-shadow: inset 2px 0 0 0 transparent; }
+}
+[data-sidebar-tab-id][data-just-dropped="1"],
+[data-sidebar-folder-id][data-just-dropped="1"] {
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-sidebar-tab-id][data-just-dropped="1"],
+  [data-sidebar-folder-id][data-just-dropped="1"] {
+    animation: mwSidebarRowDropFlash 1.6s ease-out both;
+  }
+}
+
 /* Sidebar multi-select toolbar — labels collapse to icon-only when
    the container gets narrow. The wrapper sets container-type:
    inline-size so children can query its width. */

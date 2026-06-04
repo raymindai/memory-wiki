@@ -868,16 +868,19 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
   const treeRef = useRef<HTMLDivElement>(null);
   const lastOrderRef = useRef<string>("");
   const lastRectsRef = useRef<Map<string, DOMRect>>(new Map());
-  // Track whether a drag was in flight on the previous render. When a
-  // drop lands, dragTabId/dragFolderId clear AND the folder_id update
-  // hits state in the same commit, so the next render sees a brand-
-  // new row order. Animating the long traversal (e.g. a row jumping
-  // from a deep folder to the root) bounces every row in between —
-  // founder feedback called this out as the worst part of the
-  // drag-out UX. Skipping FLIP for the post-drop frame lets the rows
-  // snap into place instantly, while sort-flip / rename / A→Z slot
-  // moves still animate normally.
+  // Track whether a drag was in flight on the previous render AND
+  // which item was being dragged. When a drop lands, dragTabId/
+  // dragFolderId clear AND the folder_id update hits state in the
+  // same commit, so the next render sees a brand-new row order.
+  // Animating the long traversal (e.g. a row jumping from a deep
+  // folder to the root) bounces every row in between — founder
+  // feedback called this out as the worst part of the drag-out UX.
+  // We skip FLIP for the post-drop frame so rows snap into place,
+  // then immediately scroll the dropped item into view and pulse it
+  // so the user can see WHERE it landed.
   const wasDraggingRef = useRef(false);
+  const lastDraggedTabIdRef = useRef<string | null>(null);
+  const lastDraggedFolderIdRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     const root = treeRef.current;
     if (!root) return;
@@ -887,7 +890,32 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
     const changed = !isFirstPaint && orderKey !== lastOrderRef.current;
     const isDragNow = !!(props.dragTabId || props.dragFolderId);
     const justDropped = wasDraggingRef.current && !isDragNow;
+    // Capture the dragged id BEFORE it clears so we can locate the
+    // dropped row on the post-drop frame.
+    if (props.dragTabId)    lastDraggedTabIdRef.current    = props.dragTabId;
+    if (props.dragFolderId) lastDraggedFolderIdRef.current = props.dragFolderId;
     wasDraggingRef.current = isDragNow;
+
+    // On the post-drop frame, find the dropped row in its new
+    // position, scroll it into view (smooth, nearest edge so we don't
+    // jolt the sidebar), and stamp `data-just-dropped` so the CSS
+    // pulse fires. The attribute clears after 1.6s.
+    if (justDropped && changed) {
+      const droppedTabId = lastDraggedTabIdRef.current;
+      const droppedFolderId = lastDraggedFolderIdRef.current;
+      const target = droppedTabId
+        ? root.querySelector<HTMLElement>(`[data-sidebar-tab-id="${CSS.escape(droppedTabId)}"]`)
+        : droppedFolderId
+        ? root.querySelector<HTMLElement>(`[data-sidebar-folder-id="${CSS.escape(droppedFolderId)}"]`)
+        : null;
+      if (target) {
+        try { target.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch { /* ignore */ }
+        target.setAttribute("data-just-dropped", "1");
+        setTimeout(() => target.removeAttribute("data-just-dropped"), 1600);
+      }
+      lastDraggedTabIdRef.current = null;
+      lastDraggedFolderIdRef.current = null;
+    }
     // Fast path — when nothing about the row set / order changed, the
     // expensive getBoundingClientRect() loop below is pure waste (it
     // forces a layout pass on every commit, which on the editor's
