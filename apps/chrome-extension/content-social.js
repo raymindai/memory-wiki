@@ -73,7 +73,14 @@
       .mw-social-btn .mw-spin{display:inline-block!important;width:12px!important;height:12px!important;border:1.6px solid rgba(250,250,250,0.25)!important;border-top-color:#fafafa!important;border-radius:50%!important;animation:mw-social-spin .8s linear infinite!important;box-sizing:border-box!important}
       @keyframes mw-social-spin{to{transform:rotate(360deg)}}
       .mw-social-host{position:relative!important}
-      html.mw-social-threads .mw-social-btn{right:48px!important}
+      /* Threads action cluster on a post's top-right:
+       *   …(more)  at ~right:16px (always present)
+       *   ✎ pencil at ~right:50px (ONLY on the user's own posts)
+       * The button was at right:48px which sat right on top of the
+       * pencil. Bump to 88px to clear both icons with a small gap
+       * regardless of own/other-post — non-own posts just see Add
+       * sit a bit further left of the more menu, which is fine. */
+      html.mw-social-threads .mw-social-btn{right:88px!important}
     `;
     document.head.appendChild(s);
   }
