@@ -56,9 +56,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return new Response(JSON.stringify({ error: "Not authorised" }), { status: 403 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return new Response(JSON.stringify({ error: "AI not configured" }), { status: 503 });
-  }
+  // No per-provider guard here — streamText below tries each
+  // configured provider in cost-first order and returns
+  // { ok:false, status:503 } if none is reachable. The old hard-
+  // coded ANTHROPIC_API_KEY check broke the cascade for setups
+  // running on only OpenAI or Gemini.
 
   const docContent = doc.markdown.length > 80000
     ? doc.markdown.slice(0, 80000) + "\n\n[document truncated]"

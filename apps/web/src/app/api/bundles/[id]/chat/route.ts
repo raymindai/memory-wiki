@@ -77,10 +77,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     return `--- Document ${i + 1}: "${doc.title || "Untitled"}" (id: doc:${doc.id}) ---\n${content}`;
   }).join("\n\n");
 
-  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: "AI not configured" }), { status: 503 });
-  }
+  // No per-provider guard — streamText cascades through every
+  // configured provider in admin-defined order. The old check
+  // hard-coded its own ordering (anthropic > gemini > openai) which
+  // diverged from the cost-first cascade.
 
   // Build conversation
   const fullPrompt = `${SYSTEM_PROMPT}\n\nBundle: "${bundle.title}"\nDocuments:\n${documentsContext}\n\n${

@@ -165,9 +165,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }).join("\n\n")
     : "";
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY;
-  if (!apiKey) return new Response(JSON.stringify({ error: "AI not configured" }), { status: 503 });
-
+  // No per-provider guard — streamText cascades through every
+  // configured provider in admin-defined order. The old check
+  // hard-coded gemini-first ordering, diverging from the cost-first
+  // cascade defined in lib/ai-providers.
   const fullPrompt = `${SYSTEM_PROMPT}\n\nHub: ${profile.display_name || slug}\n\n${ontologyBlock || "(No matching concepts indexed yet.)"}\n\n${chunksBlock || "(No matching chunks.)"}\n\n${
     history.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n\n")
   }\n\nUser: ${message}\n\nAssistant:`;
