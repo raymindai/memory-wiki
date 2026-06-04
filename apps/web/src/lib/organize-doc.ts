@@ -217,7 +217,13 @@ export async function runOrganizeDocJob(
     const bodySnippet = markdown.slice(0, 12_000);
     const prompt = `${ORGANIZE_PROMPT}\n\nTitle: ${title}\n\nBody:\n${bodySnippet}`;
 
-    const ai = await callAI({ prompt, temperature: 0.2, maxOutputTokens: 1024 });
+    const ai = await callAI({
+      prompt,
+      temperature: 0.2,
+      maxOutputTokens: 1024,
+      userId,
+      action: "organize-doc",
+    });
     if (!ai.ok) {
       await failJob(supabase, job, new Error(`callAI failed: ${ai.error || "unknown"}`));
       return;

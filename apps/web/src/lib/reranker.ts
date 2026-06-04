@@ -50,6 +50,7 @@ const MAX_CANDIDATES_PER_CALL = 30;
 export async function rerank<T extends CandidateInput>(
   query: string,
   candidates: T[],
+  userId?: string,
 ): Promise<RerankedCandidate<T>[]> {
   if (candidates.length === 0) return [];
 
@@ -68,6 +69,8 @@ export async function rerank<T extends CandidateInput>(
     useLiteModel: true,
     temperature: 0.1,
     maxOutputTokens: 2048,
+    userId,
+    action: "rerank",
   });
   if (!result.ok) {
     console.warn("rerank: callAI failed", result.status, result.error);

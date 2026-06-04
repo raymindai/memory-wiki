@@ -17,6 +17,7 @@ import { NextRequest } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { embedText, vectorToSql } from "@/lib/embeddings";
 import { streamText } from "@/lib/ai-providers";
+import { verifyAuthToken } from "@/lib/verify-auth";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
@@ -179,11 +180,23 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   // the AI surfaces. Long-form RAG synthesis, so useLiteModel is
   // false (admin can flip primary to a stronger model if quality
   // matters). iOS expects text/plain framing.
+  // Opportunistic identity resolution for billing. Hub chat is a
+  // public surface, but signed-in callers must be billed for their
+  // tokens (otherwise visitors-querying-their-own-hub would drop the
+  // attribution). Anon callers fall through and the row is dropped
+  // by logUsage on the way to ai_usage.
+  const verified = await verifyAuthToken(req.headers.get("authorization"));
+  const userId = verified?.userId || req.headers.get("x-user-id") || undefined;
+  const anonymousId = req.headers.get("x-anonymous-id") || undefined;
+
   const result = await streamText({
     prompt: fullPrompt,
     useLiteModel: false,
     maxOutputTokens: 64000,
     temperature: 0.5,
+    userId,
+    anonymousId,
+    action: "chat-hub",
   });
   if (!result.ok || !result.stream) {
     return new Response(

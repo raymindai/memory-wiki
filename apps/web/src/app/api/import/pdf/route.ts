@@ -112,31 +112,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "PDF has no extractable text. Scanned PDFs need OCR (not supported yet)." }, { status: 422 });
     }
 
-    // Hand the extracted text to the LLM cleaner so headings, lists, code
-    // blocks, etc. survive the round-trip. The cleaner is a no-op when no
-    // AI provider is configured — we still save the raw text so the user's
-    // PDF lands somewhere.
-    let markdown = rawText;
-    let cleanedByAi = false;
-    try {
-      const cleaned = await cleanMarkdownStructure(rawText, {
-        filenameHint: filename,
-        sourceLabel: "PDF",
-      });
-      if (cleaned) {
-        markdown = cleaned;
-        cleanedByAi = true;
-      }
-    } catch (err) {
-      console.warn("PDF AI cleanup failed; saving raw text:", err);
-    }
-
     const supabase = getSupabaseClient();
     if (!supabase) {
       return NextResponse.json({ error: "Storage not configured" }, { status: 503 });
     }
 
-    // Auth resolution mirrors /api/docs.
+    // Auth resolution mirrors /api/docs. Done BEFORE the LLM cleanup so
+    // the cleanMarkdownStructure call can be attributed to the caller
+    // for usage billing.
     const verified = await verifyAuthToken(req.headers.get("authorization"));
     let userId: string | undefined = verified?.userId;
     if (!userId) userId = req.headers.get("x-user-id") || undefined;
@@ -158,6 +141,27 @@ export async function POST(req: NextRequest) {
         req.headers.get("x-anonymous-id") ||
         readAnonymousCookie(req) ||
         crypto.randomUUID();
+    }
+
+    // Hand the extracted text to the LLM cleaner so headings, lists, code
+    // blocks, etc. survive the round-trip. The cleaner is a no-op when no
+    // AI provider is configured — we still save the raw text so the user's
+    // PDF lands somewhere.
+    let markdown = rawText;
+    let cleanedByAi = false;
+    try {
+      const cleaned = await cleanMarkdownStructure(rawText, {
+        filenameHint: filename,
+        sourceLabel: "PDF",
+        userId,
+        anonymousId,
+      });
+      if (cleaned) {
+        markdown = cleaned;
+        cleanedByAi = true;
+      }
+    } catch (err) {
+      console.warn("PDF AI cleanup failed; saving raw text:", err);
     }
 
     const editToken = nanoid(32);

@@ -178,7 +178,7 @@ export async function runSuggestionPass(
   for (const c of clusters) {
     const cdocs = c.docIds.map((id) => docsById.get(id)).filter(Boolean) as DocSeed[];
     if (cdocs.length < MIN_CLUSTER_SIZE) continue;
-    const { title, reason } = await summarizeCluster(cdocs);
+    const { title, reason } = await summarizeCluster(cdocs, userId);
     if (!title || !reason) continue;
     const id = nanoid(10);
     const now = new Date().toISOString();
@@ -198,7 +198,7 @@ export async function runSuggestionPass(
   return inserted;
 }
 
-async function summarizeCluster(docs: DocSeed[]): Promise<{ title: string | null; reason: string | null }> {
+async function summarizeCluster(docs: DocSeed[], userId?: string): Promise<{ title: string | null; reason: string | null }> {
   const summaryInput = docs
     .map((d, i) => {
       const t = d.title || "Untitled";
@@ -220,6 +220,8 @@ Output strict JSON only, no fences:
     useLiteModel: true,
     temperature: 0.2,
     maxOutputTokens: 256,
+    userId,
+    action: "hub-suggestions",
   });
   if (!result.ok) return { title: null, reason: null };
   return parseJsonResponse(result.text);

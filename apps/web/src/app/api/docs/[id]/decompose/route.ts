@@ -194,6 +194,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       useLiteModel: true,
       temperature: 0.3,
       maxOutputTokens: 4096,
+      userId,
+      anonymousId,
+      action: "doc-decompose",
     });
     if (!ai.ok) {
       return NextResponse.json({ error: ai.error || "AI extraction failed" }, { status: ai.rateLimited ? 429 : 502 });

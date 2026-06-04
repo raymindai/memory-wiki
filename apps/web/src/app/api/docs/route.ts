@@ -279,12 +279,12 @@ export async function POST(req: NextRequest) {
   // Per-doc summary for the compact hub digest (Phase A.2). Cheap
   // Haiku call, fire-and-forget — the compact route falls back to the
   // first-paragraph extractor when summary is still null.
-  void syncDocumentSummary(supabase, id, markdown);
+  void syncDocumentSummary(supabase, id, markdown, userId);
 
   // Per-doc AI graph (themes / insights / keyTakeaways / openQuestions).
   // Same shape as bundle.graph_data, scoped to a single doc — surfaced
   // in /raw/<id> above the body. Cheap Haiku call, fire-and-forget.
-  void syncDocAIGraph(supabase, id, markdown);
+  void syncDocAIGraph(supabase, id, markdown, userId);
 
   // Best-effort hub log entry. Anonymous docs aren't logged because
   // there's no user to attribute them to until claim time.

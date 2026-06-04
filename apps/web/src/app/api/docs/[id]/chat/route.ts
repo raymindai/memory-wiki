@@ -79,6 +79,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     useLiteModel: false,
     maxOutputTokens: 64000,
     temperature: 0.7,
+    userId: requesterId || undefined,
+    action: "chat-doc",
   });
   if (!result.ok || !result.stream) {
     return NextResponse.json({ error: result.error || "AI request failed" }, { status: result.status || 502 });

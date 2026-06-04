@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { streamText } from "@/lib/ai-providers";
+import { verifyAuthToken } from "@/lib/verify-auth";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -93,11 +94,23 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   // rest of the AI surfaces. iOS ChatSheet + web reader expect
   // text/plain framing (not SSE), so we re-encode the unified text
   // stream to bytes here.
+  // Opportunistic identity resolution for billing attribution. The
+  // bundle chat surface is public (anyone with the URL can hit it),
+  // but signed-in callers should still be billed for their tokens —
+  // otherwise per-user usage totals would drop every chat over a
+  // public bundle. Identity is best-effort: anon callers get no row.
+  const verified = await verifyAuthToken(req.headers.get("authorization"));
+  const userId = verified?.userId || req.headers.get("x-user-id") || undefined;
+  const anonymousId = req.headers.get("x-anonymous-id") || undefined;
+
   const result = await streamText({
     prompt: fullPrompt,
     useLiteModel: false,
     maxOutputTokens: 64000,
     temperature: 0.7,
+    userId,
+    anonymousId,
+    action: "chat-bundle",
   });
   if (!result.ok || !result.stream) {
     return new Response(

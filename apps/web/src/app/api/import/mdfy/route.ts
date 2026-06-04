@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callAI } from "@/lib/ai-providers";
+import { verifyAuthToken } from "@/lib/verify-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,12 +57,23 @@ ${trimmed}
 
 Structured Markdown:`;
 
+  // Opportunistic identity resolution. This endpoint runs from the
+  // web import dialog (signed-in) and from chrome-ext drop targets;
+  // either provides an Authorization header, so we attribute when
+  // present and let anon (rare) drop through.
+  const verified = await verifyAuthToken(req.headers.get("authorization"));
+  const userId = verified?.userId || req.headers.get("x-user-id") || undefined;
+  const anonymousId = req.headers.get("x-anonymous-id") || undefined;
+
   try {
     const result = await callAI({
       prompt,
       temperature: 0.1,
       maxOutputTokens: 65536,
       useLiteModel: true,
+      userId,
+      anonymousId,
+      action: "import-mdfy",
     });
 
     if (!result.ok) {

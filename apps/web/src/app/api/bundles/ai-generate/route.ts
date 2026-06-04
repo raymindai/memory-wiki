@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
   // same HTTP shape so the response handling is uniform.
   let aiText = "";
   try {
-    aiText = await callBundleCurator(SYSTEM_PROMPT, userMessage);
+    aiText = await callBundleCurator(SYSTEM_PROMPT, userMessage, userId, anonymousId);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "AI call failed";
     return NextResponse.json({ error: `AI: ${msg}` }, { status: 502 });
@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-async function callBundleCurator(system: string, user: string): Promise<string> {
+async function callBundleCurator(system: string, user: string, userId?: string, anonymousId?: string): Promise<string> {
   // Bundle curation is the heaviest "quality matters" use-case in
   // the stack — structured JSON, doc-id validation downstream. Route
   // through the primary tier of the shared cascade. parseSuggestion
@@ -191,6 +191,9 @@ async function callBundleCurator(system: string, user: string): Promise<string> 
     useLiteModel: false,
     temperature: 0.4,
     maxOutputTokens: 2000,
+    userId,
+    anonymousId,
+    action: "bundle-generate",
   });
   if (!result.ok) {
     throw new Error(result.error || "AI call failed");

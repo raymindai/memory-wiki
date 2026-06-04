@@ -14,6 +14,9 @@ interface CleanOptions {
   filenameHint?: string;
   /** Human-readable source type ("PDF", "DOCX") for the prompt. */
   sourceLabel?: string;
+  /** Identity for usage attribution. */
+  userId?: string;
+  anonymousId?: string;
 }
 
 const MAX_INPUT_BYTES = 3 * 1024 * 1024; // 3 MB cap; ~750k tokens worst case
@@ -45,6 +48,9 @@ export async function cleanMarkdownStructure(
     useLiteModel: false,
     temperature: 0.1,
     maxOutputTokens: 8192,
+    userId: opts.userId,
+    anonymousId: opts.anonymousId,
+    action: "llm-clean",
   });
   if (!result.ok) return null;
   const text = result.text.trim();

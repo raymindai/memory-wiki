@@ -76,6 +76,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       useLiteModel: true,
       temperature: 0.3,
       maxOutputTokens: 512,
+      userId: userId || undefined,
+      anonymousId: anonymousId || undefined,
+      action: "concept-define",
     });
     if (!result.ok) {
       return NextResponse.json({ error: result.error || "AI define failed" }, { status: result.rateLimited ? 429 : 502 });

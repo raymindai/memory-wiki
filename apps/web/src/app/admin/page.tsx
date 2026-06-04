@@ -60,7 +60,7 @@ export default function AdminPage() {
   const [sourceBreakdown, setSourceBreakdown] = useState<Record<string, number>>({});
   const [emailTemplates, setEmailTemplates] = useState<{ name: string; subject: string; html: string }[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<number>(0);
-  const [tab, setTab] = useState<"overview" | "charts" | "users" | "documents" | "emails" | "activity" | "settings">("overview");
+  const [tab, setTab] = useState<"overview" | "charts" | "users" | "documents" | "emails" | "activity" | "usage" | "settings">("overview");
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
@@ -76,6 +76,21 @@ export default function AdminPage() {
   const [aiAnthropicLite, setAiAnthropicLite]     = useState("claude-haiku-4-5");
   const [savingModels, setSavingModels] = useState(false);
   const [modelSaveMsg, setModelSaveMsg] = useState("");
+
+  // Usage tab state — lazy-loaded on first tab visit so the admin
+  // page's initial paint stays fast. ai_usage scans aren't huge but
+  // we don't need them until the user clicks Usage.
+  interface UsageData {
+    windowDays: number;
+    totals: { calls: number; inputTokens: number; outputTokens: number; costUsd: number; errors: number };
+    topUsers: Array<{ id: string; email: string | null; isAnon: boolean; calls: number; inputTokens: number; outputTokens: number; costUsd: number }>;
+    actionRows: Array<{ action: string; calls: number; inputTokens: number; outputTokens: number; costUsd: number }>;
+    providerRows: Array<{ provider: string; calls: number; inputTokens: number; outputTokens: number; costUsd: number }>;
+    dailySeries: Array<{ date: string; calls: number; costUsd: number }>;
+  }
+  const [usage, setUsage] = useState<UsageData | null>(null);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [usageError, setUsageError] = useState("");
 
   // Auth check
   useEffect(() => {
@@ -153,6 +168,36 @@ export default function AdminPage() {
     return () => clearInterval(tick);
   }, [lastUpdated]);
 
+  // Lazy-load usage data on first Usage tab visit (then refresh
+  // whenever the tab is re-visited so the admin can see fresh data).
+  useEffect(() => {
+    if (tab !== "usage" || !authed) return;
+    let cancelled = false;
+    (async () => {
+      setUsageLoading(true);
+      setUsageError("");
+      try {
+        const sb = getSupabaseBrowserClient();
+        const { data: sessionData } = await sb!.auth.getSession();
+        const token = sessionData.session?.access_token;
+        const res = await fetch("/api/admin/usage", {
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        if (!cancelled) setUsage(data);
+      } catch (e) {
+        if (!cancelled) setUsageError(e instanceof Error ? e.message : "Load failed");
+      } finally {
+        if (!cancelled) setUsageLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [tab, authed]);
+
   if (authed === null) return <div style={page}><p style={{ color: "#71717a" }}>Checking access...</p></div>;
   if (authed === false) return (
     <div style={page}>
@@ -184,7 +229,7 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 2, marginBottom: 24, borderBottom: "1px solid #27272a" }}>
-        {(["overview", "charts", "users", "documents", "activity", "settings"] as const).map(t => (
+        {(["overview", "charts", "users", "documents", "activity", "usage", "settings"] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -370,6 +415,161 @@ export default function AdminPage() {
                 </div>
               ))}
               {recent.length === 0 && <p style={{ color: "#52525b" }}>No recent activity</p>}
+            </div>
+          )}
+
+          {/* Usage */}
+          {tab === "usage" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#fafafa", margin: 0 }}>
+                  AI Usage <span style={{ fontWeight: 400, color: "#52525b", fontSize: 12 }}>last {usage?.windowDays ?? 30} days</span>
+                </h3>
+                {usageLoading && <span style={{ fontSize: 12, color: "#52525b" }}>Loading...</span>}
+              </div>
+
+              {usageError && (
+                <div style={{ padding: 12, background: "#1c1c24", border: "1px solid #7f1d1d", borderRadius: 8, color: "#fca5a5", fontSize: 12, marginBottom: 16 }}>
+                  Error: {usageError}
+                </div>
+              )}
+
+              {usage && (
+                <>
+                  {/* Totals */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12, marginBottom: 32 }}>
+                    <div style={cardStyle}>
+                      <p style={{ fontSize: 11, color: "#71717a", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>Total Cost</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: "#fafafa", margin: 0 }}>${usage.totals.costUsd.toFixed(4)}</p>
+                    </div>
+                    <div style={cardStyle}>
+                      <p style={{ fontSize: 11, color: "#71717a", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>Calls</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: "#fafafa", margin: 0 }}>{usage.totals.calls.toLocaleString()}</p>
+                    </div>
+                    <div style={cardStyle}>
+                      <p style={{ fontSize: 11, color: "#71717a", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>Input Tokens</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: "#fafafa", margin: 0 }}>{usage.totals.inputTokens.toLocaleString()}</p>
+                    </div>
+                    <div style={cardStyle}>
+                      <p style={{ fontSize: 11, color: "#71717a", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>Output Tokens</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: "#fafafa", margin: 0 }}>{usage.totals.outputTokens.toLocaleString()}</p>
+                    </div>
+                    <div style={cardStyle}>
+                      <p style={{ fontSize: 11, color: "#71717a", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: 1 }}>Errors</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: usage.totals.errors > 0 ? "#fb923c" : "#fafafa", margin: 0 }}>{usage.totals.errors.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {/* Daily cost chart */}
+                  <div style={{ marginBottom: 40 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fafafa", margin: "0 0 16px" }}>Cost per day (USD)</h3>
+                    <LineChart data={usage.dailySeries.map(d => ({ label: d.date, value: Number((d.costUsd * 10000).toFixed(0)) / 10000 }))} color="#fb923c" />
+                    <p style={{ fontSize: 10, color: "#52525b", marginTop: 4 }}>Y-axis is USD. Hover shows the daily total.</p>
+                  </div>
+
+                  {/* Top users */}
+                  <div style={{ marginBottom: 40 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fafafa", margin: "0 0 12px" }}>Top users by spend</h3>
+                    <div style={{ background: "#0e0e10", border: "1px solid #27272a", borderRadius: 8, overflow: "hidden" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                        <thead>
+                          <tr style={{ background: "#18181b", color: "#a1a1aa" }}>
+                            <th style={thStyle}>User</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Calls</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Input</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Output</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Cost (USD)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {usage.topUsers.map((u) => (
+                            <tr key={u.id} style={{ borderTop: "1px solid #27272a" }}>
+                              <td style={tdStyle}>
+                                {u.isAnon ? (
+                                  <span style={{ color: "#52525b" }}>anon: {u.id.slice(0, 12)}...</span>
+                                ) : (
+                                  <span style={{ color: "#fafafa" }}>{u.email || u.id.slice(0, 8)}</span>
+                                )}
+                              </td>
+                              <td style={{ ...tdStyle, textAlign: "right" }}>{u.calls.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#71717a" }}>{u.inputTokens.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#71717a" }}>{u.outputTokens.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#fb923c", fontWeight: 600 }}>${u.costUsd.toFixed(4)}</td>
+                            </tr>
+                          ))}
+                          {usage.topUsers.length === 0 && (
+                            <tr><td colSpan={5} style={{ ...tdStyle, color: "#52525b", textAlign: "center" }}>No usage yet</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Per-action breakdown */}
+                  <div style={{ marginBottom: 40 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fafafa", margin: "0 0 12px" }}>By feature (action)</h3>
+                    <div style={{ background: "#0e0e10", border: "1px solid #27272a", borderRadius: 8, overflow: "hidden" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                        <thead>
+                          <tr style={{ background: "#18181b", color: "#a1a1aa" }}>
+                            <th style={thStyle}>Action</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Calls</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Input</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Output</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Cost (USD)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {usage.actionRows.map((a) => (
+                            <tr key={a.action} style={{ borderTop: "1px solid #27272a" }}>
+                              <td style={{ ...tdStyle, fontFamily: "var(--font-mono)", color: "#fafafa" }}>{a.action}</td>
+                              <td style={{ ...tdStyle, textAlign: "right" }}>{a.calls.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#71717a" }}>{a.inputTokens.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#71717a" }}>{a.outputTokens.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#fb923c", fontWeight: 600 }}>${a.costUsd.toFixed(4)}</td>
+                            </tr>
+                          ))}
+                          {usage.actionRows.length === 0 && (
+                            <tr><td colSpan={5} style={{ ...tdStyle, color: "#52525b", textAlign: "center" }}>No usage yet</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Per-provider breakdown */}
+                  <div>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fafafa", margin: "0 0 12px" }}>By provider</h3>
+                    <div style={{ background: "#0e0e10", border: "1px solid #27272a", borderRadius: 8, overflow: "hidden" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                        <thead>
+                          <tr style={{ background: "#18181b", color: "#a1a1aa" }}>
+                            <th style={thStyle}>Provider</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Calls</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Input</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Output</th>
+                            <th style={{ ...thStyle, textAlign: "right" }}>Cost (USD)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {usage.providerRows.map((p) => (
+                            <tr key={p.provider} style={{ borderTop: "1px solid #27272a" }}>
+                              <td style={{ ...tdStyle, fontFamily: "var(--font-mono)", color: "#fafafa" }}>{p.provider}</td>
+                              <td style={{ ...tdStyle, textAlign: "right" }}>{p.calls.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#71717a" }}>{p.inputTokens.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#71717a" }}>{p.outputTokens.toLocaleString()}</td>
+                              <td style={{ ...tdStyle, textAlign: "right", color: "#fb923c", fontWeight: 600 }}>${p.costUsd.toFixed(4)}</td>
+                            </tr>
+                          ))}
+                          {usage.providerRows.length === 0 && (
+                            <tr><td colSpan={5} style={{ ...tdStyle, color: "#52525b", textAlign: "center" }}>No usage yet</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

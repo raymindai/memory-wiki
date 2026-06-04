@@ -68,10 +68,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     .single();
   if (!bundle) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Resolve caller identity up-front so it's available for usage
+  // attribution on the callAI below, regardless of the draft branch.
+  const verified = await verifyAuthToken(req.headers.get("authorization"));
+  const userId = body.userId || verified?.userId || req.headers.get("x-user-id") || undefined;
+  const anonymousId = body.anonymousId || req.headers.get("x-anonymous-id") || undefined;
+
   if (bundle.is_draft) {
-    const verified = await verifyAuthToken(req.headers.get("authorization"));
-    const userId = body.userId || verified?.userId || req.headers.get("x-user-id") || undefined;
-    const anonymousId = body.anonymousId || req.headers.get("x-anonymous-id") || undefined;
     const isOwner =
       !!(userId && bundle.user_id && userId === bundle.user_id) ||
       !!(anonymousId && bundle.anonymous_id && anonymousId === bundle.anonymous_id);
@@ -107,6 +110,9 @@ ${body.target.chunkContent}`;
       useLiteModel: true,        // short tension-resolution reply
       temperature: 0.3,
       maxOutputTokens: 768,
+      userId: userId || (bundle.user_id as string | null) || undefined,
+      anonymousId,
+      action: "bundle-tension",
     });
     if (!result.ok) {
       console.error("Resolve tension AI error:", result.error);

@@ -37,6 +37,7 @@ Rules:
 
 export async function generateDocAIGraph(
   markdown: string,
+  userId?: string,
 ): Promise<DocAIGraph | null> {
   if (!markdown || markdown.trim().length < 200) return null;
   const trimmed = markdown.length > 16000 ? markdown.slice(0, 16000) : markdown;
@@ -46,6 +47,8 @@ export async function generateDocAIGraph(
     useLiteModel: true,
     temperature: 0.3,
     maxOutputTokens: 1200,
+    userId,
+    action: "doc-graph",
   });
   if (!result.ok) return null;
   const m = result.text.match(/\{[\s\S]*\}/);
@@ -75,9 +78,10 @@ export async function syncDocAIGraph(
   supabase: SupabaseClient,
   docId: string,
   markdown: string,
+  userId?: string,
 ): Promise<void> {
   try {
-    const graph = await generateDocAIGraph(markdown);
+    const graph = await generateDocAIGraph(markdown, userId);
     if (!graph) return;
     await supabase
       .from("documents")

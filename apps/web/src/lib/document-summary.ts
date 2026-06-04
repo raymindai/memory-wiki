@@ -33,7 +33,7 @@ Do NOT use em-dashes (—), en-dashes (–), middle-dots (·), arrows (→), che
 DOCUMENT:
 `;
 
-export async function generateSummary(markdown: string): Promise<string | null> {
+export async function generateSummary(markdown: string, userId?: string): Promise<string | null> {
   if (!markdown || markdown.trim().length < 80) return null;
 
   // Cap input — most docs are short, but we never want to send 100k
@@ -47,6 +47,8 @@ export async function generateSummary(markdown: string): Promise<string | null> 
       useLiteModel: true,
       temperature: 0.3,
       maxOutputTokens: 200,
+      userId,
+      action: "doc-summary",
     });
     if (!result.ok) {
       console.warn("[summary] callAI failed", result.status, result.error);
@@ -70,9 +72,10 @@ export async function syncDocumentSummary(
   supabase: SupabaseClient,
   id: string,
   markdown: string,
+  userId?: string,
 ): Promise<void> {
   try {
-    const summary = await generateSummary(markdown);
+    const summary = await generateSummary(markdown, userId);
     if (!summary) return;
     await supabase
       .from("documents")

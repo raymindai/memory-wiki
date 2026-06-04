@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
 
   let raw = "";
   try {
-    raw = await callSuggester(SYSTEM_PROMPT, userMessage);
+    raw = await callSuggester(SYSTEM_PROMPT, userMessage, userId, anonymousId);
   } catch {
     // AI unavailable — return empty list rather than error so the UI
     // can quietly hide the suggestions row.
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(parsed);
 }
 
-async function callSuggester(system: string, user: string): Promise<string> {
+async function callSuggester(system: string, user: string, userId?: string, anonymousId?: string): Promise<string> {
   // Routed through the unified cost-first cascade. Prompt instructs
   // JSON output; parseSuggestions handles both raw JSON and fenced
   // ```json``` blocks so the absence of Gemini's responseSchema
@@ -94,6 +94,9 @@ async function callSuggester(system: string, user: string): Promise<string> {
     useLiteModel: true,
     temperature: 0.6,
     maxOutputTokens: 400,
+    userId,
+    anonymousId,
+    action: "bundle-suggestions",
   });
   if (!result.ok) throw new Error(result.error || "AI call failed");
   return result.text;

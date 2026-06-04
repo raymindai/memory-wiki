@@ -88,7 +88,7 @@ Rules:
 - Each rationale explains why this question is productive given the hub's current state.
 - Keep questions under 18 words and rationales under 25 words.`;
 
-  const result = await runProviderChain(prompt);
+  const result = await runProviderChain(prompt, userId);
   return {
     computedAt: new Date().toISOString(),
     totalDocs: docs.length,
@@ -112,12 +112,14 @@ export function formatSuggestedQueriesMarkdown(report: SuggestedQueriesReport): 
   return lines.join("\n");
 }
 
-async function runProviderChain(prompt: string): Promise<SuggestedQuery[]> {
+async function runProviderChain(prompt: string, userId?: string): Promise<SuggestedQuery[]> {
   const result = await callAI({
     prompt,
     useLiteModel: true,
     temperature: 0.3,
     maxOutputTokens: 800,
+    userId,
+    action: "hub-suggested-queries",
   });
   if (!result.ok) return [];
   return parseQueries(result.text);

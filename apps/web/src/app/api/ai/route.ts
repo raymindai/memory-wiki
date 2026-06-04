@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callAI } from "@/lib/ai-providers";
+import { verifyAuthToken } from "@/lib/verify-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -306,12 +307,23 @@ ${trailingLabel}`;
           ? Math.min(65536, Math.max(4096, Math.ceil(inputTokensEstimate * 1.4)))
           : 65536;
 
+  // Resolve caller identity for usage attribution. The AI button is
+  // user-facing; in practice the signed-in JWT lands via the auth
+  // header, but we also honor the x-user-id / x-anonymous-id headers
+  // used by the chrome-ext and CLI surfaces.
+  const verified = await verifyAuthToken(req.headers.get("authorization"));
+  const userId = verified?.userId || req.headers.get("x-user-id") || undefined;
+  const anonymousId = req.headers.get("x-anonymous-id") || undefined;
+
   try {
     const result = await callAI({
       prompt: fullPrompt,
       temperature,
       maxOutputTokens,
       useLiteModel: useLite,
+      userId,
+      anonymousId,
+      action: action || "ai-action",
     });
 
     if (!result.ok) {

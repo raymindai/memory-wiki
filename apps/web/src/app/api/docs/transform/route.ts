@@ -126,10 +126,14 @@ export async function POST(req: NextRequest) {
   // Pick effective instruction: user's text, or auto-prompt by page type.
   const { system, effectiveIntent } = pickSystem(intent, pageType, auto);
 
+  // Also pick up anonymousId for chrome-ext anon flows so the
+  // attribution row gets the right identifier when userId is empty.
+  const anonymousId = req.headers.get("x-anonymous-id") || undefined;
+
   // Run the transform.
   let transformed: string;
   try {
-    transformed = await callTransformer(effectiveIntent, markdown, system);
+    transformed = await callTransformer(effectiveIntent, markdown, system, userId, anonymousId);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "AI call failed";
     return NextResponse.json({ error: `AI: ${msg}` }, { status: 502 });
@@ -207,7 +211,7 @@ function extractTitleFromMd(md: string): string {
 // the admin page. Caller still keeps its own SYSTEM_BASE prompt and
 // concatenates with user instruction + source — callAI takes a
 // single prompt string by design.
-async function callTransformer(intent: string, sourceMd: string, system: string = SYSTEM_BASE): Promise<string> {
+async function callTransformer(intent: string, sourceMd: string, system: string = SYSTEM_BASE, userId?: string, anonymousId?: string): Promise<string> {
   const prompt =
     `${system}\n\nInstruction:\n${intent}\n\n---\n\nSource markdown (clipped from a webpage or AI chat):\n\n${sourceMd}`;
   const result = await callAI({
@@ -215,6 +219,9 @@ async function callTransformer(intent: string, sourceMd: string, system: string 
     useLiteModel: true,        // chrome-ext intent is always a short transform
     temperature: 0.3,
     maxOutputTokens: 8192,
+    userId,
+    anonymousId,
+    action: "transform",
   });
   if (!result.ok) {
     throw new Error(result.error || "All providers failed");

@@ -223,6 +223,8 @@ export async function synthesizeBundle(
     useLiteModel: false,
     temperature: 0.3,
     maxOutputTokens: 2048,
+    userId: (bundle.user_id as string | null) || undefined,
+    action: "synthesize",
   });
   if (!result.ok) return null;
   return {

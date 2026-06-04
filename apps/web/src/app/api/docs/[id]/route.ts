@@ -638,8 +638,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     // always set when we got here.
     if (typeof updates.markdown === "string") {
       void syncBacklinks(supabase, "document", id, updates.markdown);
-      void syncDocumentSummary(supabase, id, updates.markdown);
-      void syncDocAIGraph(supabase, id, updates.markdown);
+      void syncDocumentSummary(supabase, id, updates.markdown, resolvedUserId || undefined);
+      void syncDocAIGraph(supabase, id, updates.markdown, resolvedUserId || undefined);
     }
 
     // If the title changed, every bundle that has this doc as a member

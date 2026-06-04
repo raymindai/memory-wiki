@@ -120,7 +120,7 @@ export async function extractDocOntology(
     return { conceptsWritten: 0, relationsWritten: 0, inferredIntent: null, skipped: "empty" };
   }
 
-  const extracted = await callExtractor(title, trimmed, args.apiKey);
+  const extracted = await callExtractor(title, trimmed, args.apiKey, userId);
   if (!extracted) {
     return { conceptsWritten: 0, relationsWritten: 0, inferredIntent: null, skipped: "extract_failed" };
   }
@@ -229,7 +229,7 @@ export async function extractDocOntology(
   return { conceptsWritten, relationsWritten, inferredIntent: extracted.intent };
 }
 
-async function callExtractor(title: string, markdown: string, _overrideKey?: string): Promise<ExtractedDoc | null> {
+async function callExtractor(title: string, markdown: string, _overrideKey?: string, userId?: string): Promise<ExtractedDoc | null> {
   // _overrideKey was used by the old Anthropic-direct path. Now the
   // shared cascade handles provider selection + keys via env / site_config.
   // Truncate to 8000 chars — covers 95% of personal notes; preserves
@@ -243,6 +243,8 @@ async function callExtractor(title: string, markdown: string, _overrideKey?: str
       useLiteModel: true,
       temperature: 0.3,
       maxOutputTokens: 2048,
+      userId,
+      action: "doc-ontology",
     });
     if (!result.ok) return null;
     return parsePerDocJson(result.text);

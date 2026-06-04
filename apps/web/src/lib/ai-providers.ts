@@ -24,6 +24,7 @@
  */
 
 import { getSupabaseClient } from "@/lib/supabase";
+import { estimateCostUsd } from "@/lib/ai-pricing";
 
 export type ProviderName = "anthropic" | "openai" | "gemini";
 
@@ -41,6 +42,18 @@ export interface AICallOptions {
   useLiteModel?: boolean;
   /** Override provider order for this call. Otherwise reads site_config. */
   providerOrder?: ProviderName[];
+  /** Identity for usage tracking. Pass userId when the caller has a
+   *  signed-in user; anonymousId when the caller is on the
+   *  unsigned-in path (anon chrome-ext captures + their transforms).
+   *  Either is enough — both null means the row is dropped (no
+   *  identity, no billable). */
+  userId?: string;
+  anonymousId?: string;
+  /** Action label for usage attribution. Free-form but stable —
+   *  the admin Usage tab groups by this. Examples: "polish",
+   *  "translate", "chat-doc", "chat-hub", "chat-bundle",
+   *  "transform", "bundle-graph", "doc-ontology". */
+  action?: string;
 }
 
 export interface AICallSuccess {
@@ -162,6 +175,7 @@ export async function callAI(opts: AICallOptions): Promise<AICallResult> {
   const temperature = opts.temperature ?? 0.3;
   const maxOutputTokens = opts.maxOutputTokens ?? 8192;
   const lite = !!opts.useLiteModel;
+  const action = opts.action || "unknown";
 
   let lastError: { status: number; message: string } | null = null;
   let sawRateLimit = false;
@@ -170,15 +184,34 @@ export async function callAI(opts: AICallOptions): Promise<AICallResult> {
     const key = providerKey(provider);
     if (!key) continue;
     const model = lite ? config.models[provider].lite : config.models[provider].primary;
+    const startedAt = Date.now();
     try {
-      const result = await callProvider(provider, key, model, {
+      const { result, usage } = await callProvider(provider, key, model, {
         prompt: opts.prompt,
         temperature,
         maxOutputTokens,
       });
-      if (result.ok) return result;
+      const durationMs = Date.now() - startedAt;
+      if (result.ok) {
+        logUsage({
+          userId: opts.userId,
+          anonymousId: opts.anonymousId,
+          action,
+          provider,
+          model,
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          status: "ok",
+          tier: lite ? "lite" : "primary",
+          durationMs,
+        });
+        return result;
+      }
       if (result.status === 429) sawRateLimit = true;
       lastError = { status: result.status, message: result.error };
+      // Per-failed-attempt log entries are noise (every cascade rung
+      // would write a row when nothing is wrong with the user). Only
+      // log the final outcome below.
     } catch (err) {
       lastError = {
         status: 502,
@@ -186,6 +219,21 @@ export async function callAI(opts: AICallOptions): Promise<AICallResult> {
       };
     }
   }
+
+  // Final-failure log so the admin Usage tab can still surface
+  // outages / quota exhaustion (cost: zero, status: error /
+  // rate_limited).
+  logUsage({
+    userId: opts.userId,
+    anonymousId: opts.anonymousId,
+    action,
+    provider: order[0] || "openai",
+    model: "(none)",
+    inputTokens: 0,
+    outputTokens: 0,
+    status: sawRateLimit ? "rate_limited" : (lastError ? "error" : "no_provider"),
+    tier: lite ? "lite" : "primary",
+  });
 
   if (!lastError) {
     return { ok: false, error: "No AI provider configured", status: 503 };
@@ -215,18 +263,28 @@ interface CallContext {
   maxOutputTokens: number;
 }
 
+interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
+interface ProviderCallResult {
+  result: AICallResult;
+  usage: TokenUsage;
+}
+
 async function callProvider(
   provider: ProviderName,
   apiKey: string,
   model: string,
   ctx: CallContext,
-): Promise<AICallResult> {
+): Promise<ProviderCallResult> {
   if (provider === "anthropic") return callAnthropic(apiKey, model, ctx);
   if (provider === "openai") return callOpenAI(apiKey, model, ctx);
   return callGemini(apiKey, model, ctx);
 }
 
-async function callAnthropic(apiKey: string, model: string, ctx: CallContext): Promise<AICallResult> {
+async function callAnthropic(apiKey: string, model: string, ctx: CallContext): Promise<ProviderCallResult> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -242,18 +300,22 @@ async function callAnthropic(apiKey: string, model: string, ctx: CallContext): P
     }),
   });
   if (!res.ok) {
-    return { ok: false, error: `Anthropic ${res.status}`, status: res.status };
+    return { result: { ok: false, error: `Anthropic ${res.status}`, status: res.status }, usage: { inputTokens: 0, outputTokens: 0 } };
   }
   const data = await res.json();
   const text = data.content?.[0]?.text || "";
   const stopReason = data.stop_reason;
+  const usage: TokenUsage = {
+    inputTokens: data.usage?.input_tokens || 0,
+    outputTokens: data.usage?.output_tokens || 0,
+  };
   if (!text.trim()) {
-    return { ok: false, error: "Empty Anthropic response", status: 500 };
+    return { result: { ok: false, error: "Empty Anthropic response", status: 500 }, usage };
   }
-  return { ok: true, text, provider: "anthropic", finishReason: stopReason };
+  return { result: { ok: true, text, provider: "anthropic", finishReason: stopReason }, usage };
 }
 
-async function callOpenAI(apiKey: string, model: string, ctx: CallContext): Promise<AICallResult> {
+async function callOpenAI(apiKey: string, model: string, ctx: CallContext): Promise<ProviderCallResult> {
   // gpt-5-nano routes through the same chat-completions endpoint but
   // doesn't accept `temperature` tuning — strip it for that model.
   const body: Record<string, unknown> = {
@@ -275,15 +337,19 @@ async function callOpenAI(apiKey: string, model: string, ctx: CallContext): Prom
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    return { ok: false, error: `OpenAI ${res.status}`, status: res.status };
+    return { result: { ok: false, error: `OpenAI ${res.status}`, status: res.status }, usage: { inputTokens: 0, outputTokens: 0 } };
   }
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content || "";
   const finishReason = data.choices?.[0]?.finish_reason;
+  const usage: TokenUsage = {
+    inputTokens: data.usage?.prompt_tokens || 0,
+    outputTokens: data.usage?.completion_tokens || 0,
+  };
   if (!text.trim()) {
-    return { ok: false, error: "Empty OpenAI response", status: 500 };
+    return { result: { ok: false, error: "Empty OpenAI response", status: 500 }, usage };
   }
-  return { ok: true, text, provider: "openai", finishReason };
+  return { result: { ok: true, text, provider: "openai", finishReason }, usage };
 }
 
 /**
@@ -325,6 +391,7 @@ export async function streamText(opts: AICallOptions): Promise<StreamTextResult>
   const temperature = opts.temperature ?? 0.3;
   const maxOutputTokens = opts.maxOutputTokens ?? 8192;
   const lite = !!opts.useLiteModel;
+  const action = opts.action || "unknown";
 
   let lastError: { status: number; message: string } | null = null;
 
@@ -332,13 +399,82 @@ export async function streamText(opts: AICallOptions): Promise<StreamTextResult>
     const key = providerKey(provider);
     if (!key) continue;
     const model = lite ? config.models[provider].lite : config.models[provider].primary;
+    const startedAt = Date.now();
+    // Each provider streams its own SSE event shape; the extractor
+    // pair below pulls (text chunks, usage tokens) per event. Usage
+    // accumulator lives here so we can log a single row when the
+    // stream finishes, with the final reported counts.
+    const usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
     try {
-      const stream = await openProviderStream(provider, key, model, {
+      const rawStream = await openProviderStream(provider, key, model, {
         prompt: opts.prompt,
         temperature,
         maxOutputTokens,
-      });
-      if (stream) return { ok: true, provider, stream };
+      }, usage);
+      if (rawStream) {
+        // Tee a thin wrapper so we can log usage when the consumer
+        // finishes reading (or errors / cancels). The wrapper is
+        // transparent — just forwards every chunk.
+        const finalizedStream = new ReadableStream<string>({
+          async start(controller) {
+            const reader = rawStream.getReader();
+            try {
+              for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                controller.enqueue(value);
+              }
+              controller.close();
+              logUsage({
+                userId: opts.userId,
+                anonymousId: opts.anonymousId,
+                action,
+                provider,
+                model,
+                inputTokens: usage.inputTokens,
+                outputTokens: usage.outputTokens,
+                status: "ok",
+                tier: lite ? "lite" : "primary",
+                durationMs: Date.now() - startedAt,
+              });
+            } catch (err) {
+              controller.error(err);
+              // Stream errored mid-flight after some chunks landed.
+              // Log what we got so the user is still billed for the
+              // tokens the provider actually generated (partial).
+              logUsage({
+                userId: opts.userId,
+                anonymousId: opts.anonymousId,
+                action,
+                provider,
+                model,
+                inputTokens: usage.inputTokens,
+                outputTokens: usage.outputTokens,
+                status: "error",
+                tier: lite ? "lite" : "primary",
+                durationMs: Date.now() - startedAt,
+              });
+            }
+          },
+          cancel() {
+            // Consumer aborted (browser closed tab, etc.). Log the
+            // partial usage so billing reflects work the provider did.
+            logUsage({
+              userId: opts.userId,
+              anonymousId: opts.anonymousId,
+              action,
+              provider,
+              model,
+              inputTokens: usage.inputTokens,
+              outputTokens: usage.outputTokens,
+              status: "ok",
+              tier: lite ? "lite" : "primary",
+              durationMs: Date.now() - startedAt,
+            });
+          },
+        });
+        return { ok: true, provider, stream: finalizedStream };
+      }
     } catch (err) {
       lastError = {
         status: 502,
@@ -346,6 +482,19 @@ export async function streamText(opts: AICallOptions): Promise<StreamTextResult>
       };
     }
   }
+  // Pre-stream failure (no provider responded) — log a zero-token
+  // row so the admin can see the failure surface.
+  logUsage({
+    userId: opts.userId,
+    anonymousId: opts.anonymousId,
+    action,
+    provider: order[0] || "openai",
+    model: "(none)",
+    inputTokens: 0,
+    outputTokens: 0,
+    status: lastError ? "error" : "no_provider",
+    tier: lite ? "lite" : "primary",
+  });
   return {
     ok: false,
     error: lastError?.message || "No AI provider available for streaming",
@@ -358,13 +507,14 @@ async function openProviderStream(
   apiKey: string,
   model: string,
   ctx: CallContext,
+  usage: TokenUsage,
 ): Promise<ReadableStream<string> | null> {
-  if (provider === "anthropic") return openAnthropicStream(apiKey, model, ctx);
-  if (provider === "openai")    return openOpenAIStream(apiKey, model, ctx);
-  return openGeminiStream(apiKey, model, ctx);
+  if (provider === "anthropic") return openAnthropicStream(apiKey, model, ctx, usage);
+  if (provider === "openai")    return openOpenAIStream(apiKey, model, ctx, usage);
+  return openGeminiStream(apiKey, model, ctx, usage);
 }
 
-async function openAnthropicStream(apiKey: string, model: string, ctx: CallContext): Promise<ReadableStream<string> | null> {
+async function openAnthropicStream(apiKey: string, model: string, ctx: CallContext, usage: TokenUsage): Promise<ReadableStream<string> | null> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -384,8 +534,23 @@ async function openAnthropicStream(apiKey: string, model: string, ctx: CallConte
     throw new Error(`Anthropic ${res.status}`);
   }
   return sseTextChunks(res.body, (data) => {
-    // event: content_block_delta { delta: { type: "text_delta", text: "..." } }
-    const d = data as { delta?: { type?: string; text?: string } };
+    // Anthropic SSE events we care about:
+    //   message_start  → carries usage.input_tokens (one-time)
+    //   content_block_delta { delta: { type:"text_delta", text } } → chunk
+    //   message_delta  → cumulative usage.output_tokens; we overwrite
+    const d = data as {
+      type?: string;
+      delta?: { type?: string; text?: string };
+      message?: { usage?: { input_tokens?: number; output_tokens?: number } };
+      usage?: { input_tokens?: number; output_tokens?: number };
+    };
+    if (d?.type === "message_start" && d.message?.usage) {
+      if (typeof d.message.usage.input_tokens === "number")  usage.inputTokens  = d.message.usage.input_tokens;
+      if (typeof d.message.usage.output_tokens === "number") usage.outputTokens = d.message.usage.output_tokens;
+    }
+    if (d?.type === "message_delta" && d.usage) {
+      if (typeof d.usage.output_tokens === "number") usage.outputTokens = d.usage.output_tokens;
+    }
     if (d?.delta?.type === "text_delta" && typeof d.delta.text === "string") {
       return d.delta.text;
     }
@@ -393,10 +558,14 @@ async function openAnthropicStream(apiKey: string, model: string, ctx: CallConte
   });
 }
 
-async function openOpenAIStream(apiKey: string, model: string, ctx: CallContext): Promise<ReadableStream<string> | null> {
+async function openOpenAIStream(apiKey: string, model: string, ctx: CallContext, usage: TokenUsage): Promise<ReadableStream<string> | null> {
   const body: Record<string, unknown> = {
     model,
     stream: true,
+    // Per OpenAI docs: opt-in to receive a final chunk with usage
+    // tokens after [DONE]. Without this the cascade has no idea what
+    // the call cost.
+    stream_options: { include_usage: true },
     messages: [{ role: "user", content: ctx.prompt }],
   };
   if (/^gpt-5-/.test(model)) {
@@ -417,18 +586,27 @@ async function openOpenAIStream(apiKey: string, model: string, ctx: CallContext)
     throw new Error(`OpenAI ${res.status}`);
   }
   return sseTextChunks(res.body, (data) => {
-    // { choices: [{ delta: { content: "..." } }] }
-    const d = data as { choices?: Array<{ delta?: { content?: string } }> };
+    const d = data as {
+      choices?: Array<{ delta?: { content?: string } }>;
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+    };
+    // include_usage=true emits a final chunk with empty choices[] +
+    // populated usage. Capture before returning empty-text.
+    if (d?.usage) {
+      if (typeof d.usage.prompt_tokens === "number")     usage.inputTokens  = d.usage.prompt_tokens;
+      if (typeof d.usage.completion_tokens === "number") usage.outputTokens = d.usage.completion_tokens;
+    }
     const c = d?.choices?.[0]?.delta?.content;
     return typeof c === "string" ? c : "";
   });
 }
 
-async function openGeminiStream(apiKey: string, model: string, ctx: CallContext): Promise<ReadableStream<string> | null> {
+async function openGeminiStream(apiKey: string, model: string, ctx: CallContext, usage: TokenUsage): Promise<ReadableStream<string> | null> {
   // Gemini streamGenerateContent returns a streamed JSON array. With
   // alt=sse it ships SSE-formatted lines that each carry one
   // GenerateContentResponse — same shape as the non-stream endpoint
-  // but one candidate at a time.
+  // but one candidate at a time. The FINAL event in the stream
+  // carries usageMetadata.
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
   const res = await fetch(url, {
     method: "POST",
@@ -445,7 +623,14 @@ async function openGeminiStream(apiKey: string, model: string, ctx: CallContext)
     throw new Error(`Gemini ${res.status}`);
   }
   return sseTextChunks(res.body, (data) => {
-    const d = data as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    const d = data as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
+    };
+    if (d?.usageMetadata) {
+      if (typeof d.usageMetadata.promptTokenCount === "number")     usage.inputTokens  = d.usageMetadata.promptTokenCount;
+      if (typeof d.usageMetadata.candidatesTokenCount === "number") usage.outputTokens = d.usageMetadata.candidatesTokenCount;
+    }
     const parts = d?.candidates?.[0]?.content?.parts;
     if (!Array.isArray(parts)) return "";
     return parts.map((p) => p?.text || "").join("");
@@ -509,7 +694,7 @@ function sseTextChunks(
   });
 }
 
-async function callGemini(apiKey: string, model: string, ctx: CallContext): Promise<AICallResult> {
+async function callGemini(apiKey: string, model: string, ctx: CallContext): Promise<ProviderCallResult> {
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
@@ -525,17 +710,96 @@ async function callGemini(apiKey: string, model: string, ctx: CallContext): Prom
     }
   );
   if (!res.ok) {
-    return { ok: false, error: `Gemini ${res.status}`, status: res.status };
+    return { result: { ok: false, error: `Gemini ${res.status}`, status: res.status }, usage: { inputTokens: 0, outputTokens: 0 } };
   }
   const data = await res.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
   const finishReason = data.candidates?.[0]?.finishReason;
+  const usage: TokenUsage = {
+    inputTokens: data.usageMetadata?.promptTokenCount || 0,
+    outputTokens: data.usageMetadata?.candidatesTokenCount || 0,
+  };
   if (!text.trim()) {
     return {
-      ok: false,
-      error: finishReason === "SAFETY" ? "Safety filter blocked output" : "Empty Gemini response",
-      status: finishReason === "SAFETY" ? 451 : 500,
+      result: {
+        ok: false,
+        error: finishReason === "SAFETY" ? "Safety filter blocked output" : "Empty Gemini response",
+        status: finishReason === "SAFETY" ? 451 : 500,
+      },
+      usage,
     };
   }
-  return { ok: true, text, provider: "gemini", finishReason };
+  return { result: { ok: true, text, provider: "gemini", finishReason }, usage };
+}
+
+// ─── Usage logging ────────────────────────────────────────────────
+//
+// Every successful (or failed-but-attributable) AI call lands a row
+// in ai_usage. Per-user totals + per-action breakdown power both the
+// admin Usage tab today and the per-user invoice / quota system the
+// product will need when Pro launches.
+//
+// Design notes:
+//   - Fire-and-forget. A logging failure must NEVER surface to the
+//     user — we already shipped the AI response (or an unrelated
+//     failure) before this runs. So every error path swallows and
+//     console.warns.
+//   - Identity-gated. No userId AND no anonymousId means we cannot
+//     bill anyone, so we drop the row rather than store an orphan.
+//     (Public viewer-only AI calls, if any, fall here.)
+//   - Cost is computed AT WRITE TIME via the pricing table — we want
+//     the cost the user actually accrued, not the cost recomputed
+//     from a future pricing change.
+//   - Service-role client (lib/supabase.getSupabaseClient) bypasses
+//     RLS for the insert, which is intentional: only the cost-first
+//     cascade writes here, browsers can only read their own rows
+//     via the user-scoped policy.
+
+interface LogUsageArgs {
+  userId?: string;
+  anonymousId?: string;
+  action: string;
+  provider: ProviderName;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  status: "ok" | "error" | "rate_limited" | "no_provider";
+  tier: "lite" | "primary";
+  durationMs?: number;
+}
+
+function logUsage(args: LogUsageArgs): void {
+  // No identity → no row. We can't bill an anonymous-anonymous call
+  // (typical for unauthenticated public viewer GETs that don't pass
+  // through any caller-side anonymousId).
+  if (!args.userId && !args.anonymousId) return;
+
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+
+  const costUsd = estimateCostUsd(args.model, args.inputTokens, args.outputTokens);
+
+  // Fire-and-forget — never await, never throw. The .then().catch()
+  // chain is what lets us swallow errors without an unhandled-rejection
+  // warning at runtime.
+  supabase
+    .from("ai_usage")
+    .insert({
+      user_id: args.userId ?? null,
+      anonymous_id: args.anonymousId ?? null,
+      action: args.action,
+      provider: args.provider,
+      model: args.model,
+      input_tokens: args.inputTokens,
+      output_tokens: args.outputTokens,
+      cost_usd: costUsd,
+      status: args.status,
+      tier: args.tier,
+      duration_ms: args.durationMs ?? null,
+    })
+    .then(({ error }) => {
+      if (error) {
+        console.warn("[ai-usage] insert failed:", error.message);
+      }
+    });
 }

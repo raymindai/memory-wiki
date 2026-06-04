@@ -143,6 +143,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       useLiteModel: false,
       temperature: 0.3,
       maxOutputTokens: 16384,
+      userId: (bundle.user_id as string | null) || undefined,
+      action: "bundle-graph",
     });
     if (!aiResult.ok) {
       return NextResponse.json({ error: aiResult.error || "AI extraction failed" }, { status: aiResult.rateLimited ? 429 : 502 });

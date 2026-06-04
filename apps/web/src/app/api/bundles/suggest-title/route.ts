@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
   }).join("\n\n");
 
   try {
-    const title = await callTitleSuggester(SYSTEM, `Documents to bundle:\n\n${ctx}`);
+    const title = await callTitleSuggester(SYSTEM, `Documents to bundle:\n\n${ctx}`, userId, anonymousId);
     return NextResponse.json({ title });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "AI call failed";
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function callTitleSuggester(system: string, user: string): Promise<string> {
+async function callTitleSuggester(system: string, user: string, userId?: string, anonymousId?: string): Promise<string> {
   // Routed through the shared cost-first cascade — title suggestion
   // is a short text reply that the lite tier handles perfectly.
   const result = await callAI({
@@ -93,6 +93,9 @@ async function callTitleSuggester(system: string, user: string): Promise<string>
     useLiteModel: true,
     temperature: 0.5,
     maxOutputTokens: 60,
+    userId,
+    anonymousId,
+    action: "bundle-suggest-title",
   });
   if (!result.ok) {
     throw new Error(result.error || "AI call failed");
