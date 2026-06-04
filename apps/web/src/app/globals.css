@@ -797,13 +797,6 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 0;
   overflow: hidden;
 }
-/* Backdrop blob — was two hardcoded-fill <img> SVGs (one per theme)
-   that ignored the user's chosen accent and color scheme entirely.
-   Re-implement as a single tinted silhouette: mask the morph SVG
-   and fill the underlying element with var(--accent), so the blob
-   picks up Lime / Nord teal / Dracula pink / Ink-default exactly
-   like the rest of the UI. Call sites render ONE <div> per surface
-   (no -dark / -light variants needed). */
 .mw-start-backdrop-morph {
   position: absolute;
   display: block;
@@ -816,19 +809,10 @@ h1, h2, h3, h4, h5, h6 {
   transform: translate3d(-50%, -50%, 0);
   pointer-events: none;
   filter: blur(20px);
-  opacity: 0.12;
-  background-color: var(--accent);
-  -webkit-mask-image: url('/brand/mwblob_morph.svg');
-          mask-image: url('/brand/mwblob_morph.svg');
-  -webkit-mask-size: contain;
-          mask-size: contain;
-  -webkit-mask-position: center;
-          mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
+  opacity: 0.05;
 }
 [data-theme="light"] .mw-start-backdrop-morph {
-  opacity: 0.18;
+  opacity: 0.12;
 }
 .mw-start-backdrop-content {
   position: relative;

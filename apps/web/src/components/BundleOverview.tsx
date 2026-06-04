@@ -204,7 +204,8 @@ export default function BundleOverview({
           the scrollable coordinate system and dragged the blob with
           the content.) */}
       <div className="mw-start-backdrop" aria-hidden>
-        <div className="mw-start-backdrop-morph" />
+        <img className="mw-start-backdrop-morph mw-logo-darktheme" src="/brand/mwblob_morph.svg" alt="" draggable={false} />
+        <img className="mw-start-backdrop-morph mw-logo-lighttheme" src="/brand/mwblob_morph_dark.svg" alt="" draggable={false} />
       </div>
       <div className="h-full overflow-y-auto relative mw-start-backdrop-content">
       <div className="max-w-3xl mx-auto px-6 py-10">

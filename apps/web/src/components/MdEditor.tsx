@@ -11342,7 +11342,8 @@ ${clone.innerHTML}
                   app pane). Theme-swapped via the mw-logo-blob-*
                   CSS rules. */}
               <div className="mw-start-backdrop" aria-hidden>
-                <div className="mw-start-backdrop-morph" />
+                <img className="mw-start-backdrop-morph mw-logo-darktheme" src="/brand/mwblob_morph.svg" alt="" draggable={false} />
+                <img className="mw-start-backdrop-morph mw-logo-lighttheme" src="/brand/mwblob_morph_dark.svg" alt="" draggable={false} />
               </div>
               {/* Centered vertically + horizontally — the start
                   content is short, so anchoring it to the visual
