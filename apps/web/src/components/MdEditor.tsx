@@ -1593,8 +1593,15 @@ export default function MdEditor() {
     if (!activeTabId) return;
     if (isDraggingSidebarRef.current) return;
     if (activeTabId.startsWith("hub-")) return;
-    setRecentTabIds(prev => prev[0] === activeTabId ? prev : [activeTabId, ...prev.filter(id => id !== activeTabId)].slice(0, 7));
+    setRecentTabIds(prev => prev[0] === activeTabId ? prev : [activeTabId, ...prev.filter(id => id !== activeTabId)].slice(0, 25));
   }, [activeTabId]);
+  // Start surface Recent + Starred — show 5 by default, See more
+  // expands to the full 25-item ceiling. Per-session state (resets
+  // on reload) so opening a fresh page always leads with the tight
+  // 5-row view.
+  const [recentExpandedStart, setRecentExpandedStart] = useState(false);
+  const [starredExpandedStart, setStarredExpandedStart] = useState(false);
+  const START_PREVIEW_COUNT = 5;
   const [showRecent, setShowRecent] = useState(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("mw-show-recent") !== "false";
@@ -3069,7 +3076,7 @@ export default function MdEditor() {
         // first so the FLIP useLayoutEffect animates the slide-to-top.
         if (!isDraggingSidebarRef.current) {
           if (recentTabIds.includes(tabId) && recentTabIds[0] !== tabId) captureRecentRects();
-          setRecentTabIds(prev => [tabId, ...prev.filter(id => id !== tabId)].slice(0, 7));
+          setRecentTabIds(prev => [tabId, ...prev.filter(id => id !== tabId)].slice(0, 25));
         }
       } else if (recentTabIds.includes(tabId) && recentTabIds[0] !== tabId) {
         // Already active and already in Recent but not at the top —
@@ -3077,7 +3084,7 @@ export default function MdEditor() {
         // can animate the move-to-top.
         captureRecentRects();
         if (!isDraggingSidebarRef.current) {
-          setRecentTabIds(prev => [tabId, ...prev.filter(id => id !== tabId)].slice(0, 7));
+          setRecentTabIds(prev => [tabId, ...prev.filter(id => id !== tabId)].slice(0, 25));
         }
       }
     }
@@ -9068,7 +9075,7 @@ ${clone.innerHTML}
                                   // animates a slide-to-top via FLIP.
                                   if (recentTabIds[0] !== entry.id) {
                                     captureRecentRects();
-                                    setRecentTabIds(prev => [entry.id, ...prev.filter(id => id !== entry.id)].slice(0, 7));
+                                    setRecentTabIds(prev => [entry.id, ...prev.filter(id => id !== entry.id)].slice(0, 25));
                                   }
                                   const activeTab = tabs.find(t => t.id === activeTabId);
                                   const alreadyOpen = activeTab?.kind === "bundle" && activeTab.bundleId === entry.bundleId;
@@ -9465,7 +9472,7 @@ ${clone.innerHTML}
                           // Also persist immediately so a refresh on /b/X doesn't lose it.
                           if (!isDraggingSidebarRef.current) {
                             setRecentTabIds(prev => {
-                              const next = [openedTabId, ...prev.filter(id => id !== openedTabId)].slice(0, 7);
+                              const next = [openedTabId, ...prev.filter(id => id !== openedTabId)].slice(0, 25);
                               try { localStorage.setItem("mw-recent-tabs", JSON.stringify(next)); } catch { /* ignore */ }
                               return next;
                             });
@@ -11679,24 +11686,23 @@ ${clone.innerHTML}
                         </button>
                       )}
                     </div>
-                    {startSections.starred && (
+                    {startSections.starred && (() => {
+                      // Show 5 by default + a "See more" footer.
+                      // Removes the maxHeight + internal scroll the
+                      // older layout used so the expand control is the
+                      // single source of truth for how tall this gets.
+                      const visiblePins = starredExpandedStart
+                        ? pins
+                        : pins.slice(0, START_PREVIEW_COUNT);
+                      const overflowCount = pins.length - visiblePins.length;
+                      return (
                       <div
-                        className="rounded-xl"
+                        className="rounded-xl overflow-hidden"
                         style={{
                           border: "1px solid var(--border-dim)",
-                          // Cap visible height to ~7 rows. Beyond that
-                          // the section scrolls internally so the page
-                          // doesn't keep growing with a long pin list.
-                          // ~7 rows. Bumped from 308 because rows can
-                          // grow when titles wrap to a second line or
-                          // a source/timestamp pill renders inline —
-                          // 308 was clipping the 5th row in practice.
-                          maxHeight: 460,
-                          overflowY: "auto",
-                          overflowX: "hidden",
                         }}
                       >
-                        {pins.map((p, i) => {
+                        {visiblePins.map((p, i) => {
                           let title = "Untitled";
                           let onOpen: (() => void) | null = null;
                           let tsIso: string | null = null;
@@ -11756,8 +11762,28 @@ ${clone.innerHTML}
                             </button>
                           );
                         })}
+                        {(overflowCount > 0 || starredExpandedStart) && (
+                          <button
+                            type="button"
+                            onClick={() => setStarredExpandedStart((v) => !v)}
+                            className="w-full text-caption font-mono tracking-wide cursor-pointer transition-colors"
+                            style={{
+                              color: "var(--text-faint)",
+                              background: "var(--surface)",
+                              border: "none",
+                              borderTop: "1px solid var(--border-dim)",
+                              padding: "8px 12px",
+                              textAlign: "center",
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.background = "var(--menu-hover)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.background = "var(--surface)"; }}
+                          >
+                            {starredExpandedStart ? "See less" : `See ${overflowCount} more`}
+                          </button>
+                        )}
                       </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -11773,9 +11799,11 @@ ${clone.innerHTML}
                     | { kind: "server-doc"; id: string; cloudId: string; title: string; source: string; ts: number };
                   const entries: HomeRecentEntry[] = [];
                   // Local-first: tabs the user has actually opened in this
-                  // browser bubble to the top of Recent.
+                  // browser bubble to the top of Recent. 25 is the
+                  // "all" ceiling for the See more toggle below; the
+                  // default-visible slice is 5.
                   for (const id of recentTabIds) {
-                    if (entries.length >= 7) break;
+                    if (entries.length >= 25) break;
                     const tab = tabs.find(t => t.id === id && !t.deleted && !t.readonly && t.ownerEmail !== EXAMPLE_OWNER);
                     if (tab) { entries.push({ kind: "tab", id, tab }); continue; }
                     const m = /^bundle-(.+)-\d+$/.exec(id);
@@ -11790,7 +11818,7 @@ ${clone.innerHTML}
                     tabs.filter(t => t.cloudId).map(t => t.cloudId as string)
                   );
                   for (const doc of serverRecentDocs) {
-                    if (entries.length >= 7) break;
+                    if (entries.length >= 25) break;
                     if (localCloudIds.has(doc.id)) continue;
                     entries.push({
                       kind: "server-doc",
@@ -11835,21 +11863,19 @@ ${clone.innerHTML}
                           </button>
                         )}
                       </div>
-                      {startSections.recent && (
+                      {startSections.recent && (() => {
+                        const visibleEntries = recentExpandedStart
+                          ? entries
+                          : entries.slice(0, START_PREVIEW_COUNT);
+                        const overflowCount = entries.length - visibleEntries.length;
+                        return (
                       <div
-                        className="rounded-xl"
+                        className="rounded-xl overflow-hidden"
                         style={{
                           border: "1px solid var(--border-dim)",
-                          // ~7 rows. Bumped from 308 because rows can
-                          // grow when titles wrap to a second line or
-                          // a source/timestamp pill renders inline —
-                          // 308 was clipping the 5th row in practice.
-                          maxHeight: 460,
-                          overflowY: "auto",
-                          overflowX: "hidden",
                         }}
                       >
-                        {entries.map((entry, i) => {
+                        {visibleEntries.map((entry, i) => {
                           if (entry.kind === "server-doc") {
                             // Doc created on another surface (chrome ext /
                             // vscode / desktop / mobile) — not yet in the
@@ -11926,8 +11952,28 @@ ${clone.innerHTML}
                             </button>
                           );
                         })}
+                        {(overflowCount > 0 || recentExpandedStart) && (
+                          <button
+                            type="button"
+                            onClick={() => setRecentExpandedStart((v) => !v)}
+                            className="w-full text-caption font-mono tracking-wide cursor-pointer transition-colors"
+                            style={{
+                              color: "var(--text-faint)",
+                              background: "var(--surface)",
+                              border: "none",
+                              borderTop: "1px solid var(--border-dim)",
+                              padding: "8px 12px",
+                              textAlign: "center",
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-primary)"; e.currentTarget.style.background = "var(--menu-hover)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-faint)"; e.currentTarget.style.background = "var(--surface)"; }}
+                          >
+                            {recentExpandedStart ? "See less" : `See ${overflowCount} more`}
+                          </button>
+                        )}
                       </div>
-                      )}
+                      );
+                    })()}
                     </div>
                   );
                 })()}
