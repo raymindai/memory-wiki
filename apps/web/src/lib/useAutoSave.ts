@@ -139,6 +139,10 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
           const data = await res.json();
           lastSavedMdRef.current = args.markdown;
           if (data.updated_at) lastServerUpdatedAtRef.current = data.updated_at;
+          // Mark createDocument too so the realtime guard sees the
+          // initial INSERT-as-UPDATE bump and doesn't surface the
+          // user's own create as an "external update".
+          lastSaveAttemptAtRef.current = Date.now();
           setState({ isSaving: false, lastSaved: new Date(), error: null, conflict: null });
           return {
             id: data.id as string,

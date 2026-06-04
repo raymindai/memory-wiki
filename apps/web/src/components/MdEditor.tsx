@@ -4625,6 +4625,16 @@ export default function MdEditor() {
     }, 4500);
     recentlyUpdatedTimersRef.current.set(cloudId, t);
   }, []);
+  // Clear all pending fresh-flash timers on unmount so they don't
+  // fire setRecentlyUpdatedCloudIds on a torn-down tree (React
+  // warning + wasted work).
+  useEffect(() => {
+    const timers = recentlyUpdatedTimersRef.current;
+    return () => {
+      for (const t of timers.values()) clearTimeout(t);
+      timers.clear();
+    };
+  }, []);
 
   // Subscribe to document updates when a cloud document is active in the editor.
   // If local is clean → auto-pull; if dirty → show toast with Pull/Ignore.
@@ -4902,10 +4912,15 @@ export default function MdEditor() {
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'documents', filter: `user_id=eq.${user.id}` },
         () => {
-          // Skip if this is likely our own save. Sync getter avoids the
-          // ref-stale race that surfaced false "updated elsewhere" notes
-          // on the active doc; same race applies to the sidebar list.
-          if (autoSave.isRecentSave(5000)) return;
+          // Tiny coalesce window — just long enough to merge a single
+          // save's worth of bursts (auto-save fires PATCH, server
+          // emits one UPDATE row, sometimes a follow-up summary write
+          // emits another). 5s was wrong here: it suppressed
+          // MCP / iOS / other-browser writes to a DIFFERENT doc that
+          // landed in the same window as our local save, so the
+          // sidebar never saw them. The 1.5s debounce below already
+          // coalesces real bursts.
+          if (autoSave.isRecentSave(1000)) return;
           // Debounce: coalesce rapid updates into a single fetch
           if (debounceTimer) clearTimeout(debounceTimer);
           debounceTimer = setTimeout(async () => {
