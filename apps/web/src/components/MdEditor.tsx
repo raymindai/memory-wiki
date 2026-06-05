@@ -750,14 +750,34 @@ export default function MdEditor() {
           if (saved) {
             const parsed = JSON.parse(saved);
             if (Array.isArray(parsed)) {
-              const existingIds = new Set(parsed.map((t: Tab) => t.id));
-              const missing = EXAMPLE_TABS.filter(e => !existingIds.has(e.id));
-              if (missing.length > 0) {
-                const merged = [...parsed, ...missing];
-                localStorage.setItem("mw-tabs", JSON.stringify(merged));
-                return merged;
-              }
-              return parsed;
+              // Always re-seed example tabs from canonical EXAMPLE_TABS.
+              // They're readonly so the user can never have edited them,
+              // and prior bugs (or any path that wrote `markdown: ""`
+              // back into mw-tabs) could leave the example body empty —
+              // which then renders as a Read-only example banner with
+              // nothing below. Resetting on every load keeps them
+              // bulletproof.
+              const exampleById = new Map(EXAMPLE_TABS.map((e) => [e.id, e]));
+              const reseeded = parsed.map((t: Tab) => {
+                const canon = exampleById.get(t.id);
+                if (!canon) return t;
+                // Preserve UI-only state (deleted, folderId), force
+                // markdown / title / readonly / permission back to
+                // canonical so a stale empty body can't persist.
+                return {
+                  ...t,
+                  markdown: canon.markdown,
+                  title: canon.title,
+                  readonly: canon.readonly,
+                  permission: canon.permission,
+                  ownerEmail: canon.ownerEmail,
+                };
+              });
+              const existingIds = new Set(reseeded.map((t: Tab) => t.id));
+              const missing = EXAMPLE_TABS.filter((e) => !existingIds.has(e.id));
+              const merged = missing.length > 0 ? [...reseeded, ...missing] : reseeded;
+              localStorage.setItem("mw-tabs", JSON.stringify(merged));
+              return merged;
             }
           }
         } catch { /* fall through to INITIAL_TABS */ }
@@ -6809,6 +6829,33 @@ ${html}
     setConfirmRotateToken(false);
   }, [docId, user, confirmRotateToken]);
 
+  // After a delete (single or bulk), pick the best fallback tab to
+  // switch to. Hard rule: NEVER land on a readonly example tab — the
+  // user just deleted something they own; surfacing them on a "Read-
+  // only example" with a Duplicate-to-edit banner makes the editor
+  // feel broken (founder report: "말이 안되는 화면"). Priority:
+  //   1. their own non-readonly doc (any kind, cloud or local)
+  //   2. any non-readonly tab (shared with edit permission)
+  //   3. null → caller switches to the Start surface instead
+  const pickFallbackTabAfterDelete = useCallback((deletedIds: Set<string>): string | null => {
+    const candidates = tabs.filter((t) => !t.deleted && !deletedIds.has(t.id));
+    const userOwned = candidates.find((t) => !t.readonly && t.ownerEmail !== EXAMPLE_OWNER);
+    if (userOwned) return userOwned.id;
+    const editable = candidates.find((t) => !t.readonly);
+    if (editable) return editable.id;
+    return null;
+  }, [tabs]);
+
+  // Convenience: navigate to Start surface (the personal landing).
+  // Used when delete fallbacks find no usable tab. Matches what the
+  // Start button in the header does.
+  const switchToStartSurface = useCallback(() => {
+    setShowOnboarding(true);
+    setShowHub(false);
+    setShowGalaxy(false);
+    setShowSettings(false);
+  }, []);
+
   // Delete document
   const [confirmDeleteDoc, setConfirmDeleteDoc] = useState(false);
   // Soft delete document on server. Returns a promise so callers can revert
@@ -10934,7 +10981,7 @@ ${clone.innerHTML}
                   // Soft delete from server for cloud documents
                   tabs.filter(t => ids.has(t.id) && t.cloudId).forEach(t => softDeleteOnServer(t));
                   setTabs(prev => prev.map(t => ids.has(t.id) ? { ...t, deleted: true, deletedAt: Date.now() } : t));
-                  if (ids.has(activeTabId)) { const rem = tabs.filter(t => !t.deleted && !ids.has(t.id)); if (rem.length) switchTab(rem[0].id); }
+                  if (ids.has(activeTabId)) { const fb = pickFallbackTabAfterDelete(ids); if (fb) switchTab(fb); else switchToStartSurface(); }
                   setSelectedTabIds(new Set());
                 }} className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-md text-caption font-medium transition-colors shrink-0 ${confirmTrash ? "bg-[#ef4444]" : ""}`}
                   style={{ color: confirmTrash ? "#fff" : "#ef4444", border: confirmTrash ? "1px solid #ef4444" : "1px solid rgba(239,68,68,0.3)" }}
@@ -14536,8 +14583,8 @@ ${clone.innerHTML}
               { label: "Hide example", action: () => {
                 setHiddenExampleIds(prev => new Set([...prev, docContextMenu.tabId]));
                 if (docContextMenu.tabId === activeTabId) {
-                  const remaining = tabs.filter(t => !t.deleted && t.id !== docContextMenu.tabId && !hiddenExampleIds.has(t.id));
-                  if (remaining.length) switchTab(remaining[0].id);
+                  const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
+                  if (fb) switchTab(fb); else switchToStartSurface();
                 }
               }},
             ] : isSharedWithMe ? [
@@ -14588,8 +14635,8 @@ ${clone.innerHTML}
               { label: "Remove from list", action: () => {
                 setTabs(prev => prev.filter(t => t.id !== docContextMenu.tabId));
                 if (docContextMenu.tabId === activeTabId) {
-                  const remaining = tabs.filter(t => !t.deleted && t.id !== docContextMenu.tabId);
-                  if (remaining.length) switchTab(remaining[0].id);
+                  const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
+                  if (fb) switchTab(fb); else switchToStartSurface();
                 }
               }, danger: true },
             ] : [
@@ -14776,8 +14823,8 @@ ${clone.innerHTML}
                   if (trashTab) softDeleteOnServer(trashTab);
                   setTabs(prev => prev.map(t => t.id === docContextMenu.tabId ? { ...t, deleted: true, deletedAt: Date.now() } : t));
                   if (docContextMenu.tabId === activeTabId) {
-                    const remaining = tabs.filter(t => !t.deleted && t.id !== docContextMenu.tabId);
-                    if (remaining.length) switchTab(remaining[0].id);
+                    const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
+                    if (fb) switchTab(fb); else switchToStartSurface();
                   }
                 }, danger: true },
               ] : []),
@@ -15319,8 +15366,8 @@ ${clone.innerHTML}
                         setTabs(prev => prev.filter(t => !(t.kind === "bundle" && t.bundleId === b.id)));
                         const openTab = tabs.find(t => t.kind === "bundle" && t.bundleId === b.id);
                         if (openTab && activeTabIdRef.current === openTab.id) {
-                          const remaining = tabs.filter(t => !t.deleted && t.id !== openTab.id);
-                          if (remaining.length) switchTab(remaining[0].id);
+                          const fb = pickFallbackTabAfterDelete(new Set([openTab.id]));
+                          if (fb) switchTab(fb); else switchToStartSurface();
                         }
                         fetch(`/api/bundles/${b.id}`, {
                           method: "DELETE",
