@@ -2076,23 +2076,55 @@ ipcMain.handle("is-quicklook-installed", () => {
 });
 
 // Force LaunchServices to re-scan the QL host bundle so pluginkit
-// re-registers the .appex inside it. This is the fix for "bundle
-// is on disk but macOS doesn't know about the extension" — the
-// exact symptom that made every fresh DMG install ship with a
-// non-functional QuickLook. Runs lsregister against whichever bundle
-// path actually exists (embedded host first, then the ~/Applications
-// sidecar from legacy DMG installs).
+// re-registers the .appex inside it. Three things this needs to
+// handle for the install to actually work, learned the hard way:
+//   1. Strip quarantine xattr — files cp'd out of a freshly-mounted
+//      DMG inherit the quarantine flag, which causes lsregister to
+//      reject with -10811 / -10814 ("failed to scan ... from
+//      spotlight"). xattr -cr is idempotent.
+//   2. Unregister any STALE path that LaunchServices still has for
+//      our bundle id (Xcode derived-data builds during development,
+//      or older app versions that lived elsewhere). Without this,
+//      pluginkit may "win" with the stale path even when our
+//      current bundle is also registered.
+//   3. lsregister -f against the host bundle (LaunchServices then
+//      indexes the nested .appex automatically).
 function refreshQuickLookRegistration() {
   const { execSync } = require("child_process");
   const lsregister = "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister";
   const candidates = [
-    // Sidecar host app for DMG / standalone installs.
     path.join(app.getPath("home"), "Applications", "memory.wiki QuickLook.app"),
-    // Embedded host app inside the desktop bundle (MAS/embed builds
-    // do this for us automatically, but kicking lsregister doesn't
-    // hurt — it just refreshes the existing registration).
     path.join(path.dirname(app.getAppPath()), ".."),
   ];
+
+  // Step 1: strip quarantine.
+  for (const target of candidates) {
+    if (!fs.existsSync(target)) continue;
+    try {
+      execSync(`/usr/bin/xattr -cr "${target}"`, { timeout: 3000 });
+    } catch { /* xattr might fail on read-only locations — non-fatal */ }
+  }
+
+  // Step 2: unregister any path pointing somewhere our bundles
+  // aren't. Iterates pluginkit's view of our bundle id and prunes
+  // anything that doesn't match an installed bundle below.
+  const validPaths = candidates.filter(fs.existsSync).map((p) => path.resolve(p));
+  try {
+    const list = execSync(`/usr/sbin/pluginkit -mvvv -i wiki.memory.quicklook.qlextension 2>&1 || true`, { timeout: 3000 }).toString();
+    const matches = list.match(/Path = ([^\n]+)/g) || [];
+    for (const m of matches) {
+      const p = m.replace(/^Path = /, "").trim();
+      // The registered path is the .appex inside the host bundle.
+      // Resolve to the host bundle for comparison.
+      const hostFromAppex = p.replace(/\/Contents\/PlugIns\/[^/]+\.appex$/, "");
+      const stale = !validPaths.some((vp) => path.resolve(hostFromAppex) === vp);
+      if (stale) {
+        try { execSync(`"${lsregister}" -u "${p}"`, { timeout: 3000 }); } catch { /* best-effort */ }
+      }
+    }
+  } catch { /* pluginkit not available — skip prune step */ }
+
+  // Step 3: register current bundles.
   for (const target of candidates) {
     if (!fs.existsSync(target)) continue;
     try {
