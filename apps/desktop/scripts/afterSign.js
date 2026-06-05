@@ -66,6 +66,10 @@ module.exports = async function afterSign(context) {
   }
 
   try {
+    // Step 1: re-sign the .appex with the QL entitlements (which
+    // includes app-sandbox). This INVALIDATES the host app's
+    // signature because the host's signature embeds a hash of every
+    // nested code object — including this .appex.
     execSync(
       `codesign --force --sign "${IDENTITY}" ` +
       `--entitlements "${QL_ENTITLEMENTS}" ` +
@@ -75,16 +79,63 @@ module.exports = async function afterSign(context) {
     );
     console.log(`[afterSign] re-signed QL .appex with app-sandbox entitlement: ${appex}`);
 
-    // Verify the new entitlements stuck — fail loud if not.
+    // Step 2: also re-sign the QL HOST bundle (memory.wiki QuickLook.app)
+    // because it ALSO embeds the .appex hash. Use the QL host's own
+    // entitlements (host doesn't need sandbox itself).
+    const qlHost = path.join(hostApp, "Contents", "Resources", "memory.wiki QuickLook.app");
+    const qlHostEnt = path.resolve(__dirname, "..", "..", "quicklook", "MemoryWikiQuickLook", "HostApp", "MemoryWikiQuickLook.entitlements");
+    if (fs.existsSync(qlHostEnt)) {
+      execSync(
+        `codesign --force --sign "${IDENTITY}" ` +
+        `--entitlements "${qlHostEnt}" ` +
+        `--timestamp --options runtime ` +
+        `"${qlHost}"`,
+        { stdio: "inherit" }
+      );
+      console.log(`[afterSign] re-signed QL host bundle: ${qlHost}`);
+    } else {
+      // Fallback: sign without entitlements file — still re-establishes
+      // the bundle signature against the new .appex hash.
+      execSync(
+        `codesign --force --sign "${IDENTITY}" --timestamp --options runtime "${qlHost}"`,
+        { stdio: "inherit" }
+      );
+      console.log(`[afterSign] re-signed QL host bundle (no entitlements file): ${qlHost}`);
+    }
+
+    // Step 3: re-sign the OUTER memory.wiki.app host with electron-
+    // builder's mac entitlements (hardened runtime + JIT + dyld env).
+    // SHALLOW sign (no --deep) — we just want to refresh the outer
+    // bundle's hash chain to include our updated nested signatures.
+    // --deep would recursively overwrite our QL re-signs and undo the
+    // whole point of this hook.
+    const hostEnt = path.resolve(__dirname, "..", "build", "entitlements.mac.plist");
+    if (fs.existsSync(hostEnt)) {
+      execSync(
+        `codesign --force --sign "${IDENTITY}" ` +
+        `--entitlements "${hostEnt}" ` +
+        `--timestamp --options runtime ` +
+        `"${hostApp}"`,
+        { stdio: "inherit" }
+      );
+      console.log(`[afterSign] re-signed outer host app: ${hostApp}`);
+    } else {
+      throw new Error(`Host entitlements file missing: ${hostEnt}`);
+    }
+
+    // Step 4: verify. The .appex must STILL have app-sandbox AND the
+    // outer host must verify cleanly with --deep --strict (which
+    // walks every nested signature).
     const ents = execSync(`codesign -d --entitlements - "${appex}" 2>&1`).toString();
     if (!ents.includes("com.apple.security.app-sandbox")) {
       throw new Error("Re-sign succeeded but app-sandbox entitlement still missing from .appex");
     }
-    console.log(`[afterSign] verified app-sandbox entitlement is present`);
+    execSync(`codesign --verify --deep --strict "${hostApp}"`, { stdio: "inherit" });
+    console.log(`[afterSign] verified: .appex has app-sandbox; outer host passes --deep --strict`);
   } catch (err) {
-    console.error(`[afterSign] FATAL: QL re-sign failed`);
+    console.error(`[afterSign] FATAL: QL re-sign chain failed`);
     console.error(`  ${err.message}`);
-    console.error(`  Without app-sandbox the QuickLook extension will be silently rejected by pkd on every install.`);
+    console.error(`  Without this fix the DMG either ships a broken QL extension (no sandbox = pkd rejects it) or fails notarization (sign chain invalidated).`);
     throw err;
   }
 };
