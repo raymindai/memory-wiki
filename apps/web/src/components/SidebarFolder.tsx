@@ -1024,23 +1024,25 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
         setRootHover(false);
       }}
       style={{
-        // Min-height + bottom padding gives a real catchment area under
-        // the last row so users can drop into the empty space without
-        // hunting for the explicit "Drop here…" tile. ONLY applies
-        // when there's at least one item to drag — when the tree is
-        // empty, the catchment is wasted space (and the parent
-        // section's "No documents yet" message looks orphaned below
-        // 120px of nothing, while sibling sections without trees stay
-        // tight). Founder caught this on a fresh signed-out account.
-        minHeight: (props.tabs.length + props.folders.length) > 0 ? 120 : undefined,
-        paddingBottom: (props.tabs.length + props.folders.length) > 0 ? 16 : undefined,
+        // Drag catchment area: gives users a real empty-space drop
+        // target below the last row so they don't have to hunt for
+        // the explicit "Drop here…" tile.
+        //
+        // Only inflate WHILE a drag is in flight. In idle state the
+        // 120px reservation made empty sections (e.g. MDs with 0
+        // docs) look weirdly tall vs. neighbouring sections that
+        // don't use this tree component (Recent / Shared with me /
+        // Trash). Founder noted: "why does only this section have
+        // empty space?".
+        minHeight: (draggingTab || draggingFolder) ? 120 : 0,
+        paddingBottom: (draggingTab || draggingFolder) ? 16 : 0,
         // Subtle background tint while a non-root item is being dragged
         // — communicates "drop anywhere here = move out of folder".
         background: treeRootHover && (draggingTab || draggingFolder) && !itemAlreadyAtRoot
           ? "color-mix(in srgb, var(--border) 40%, transparent)"
           : undefined,
         borderRadius: 6,
-        transition: "background 0.12s",
+        transition: "background 0.12s, min-height 0.12s, padding-bottom 0.12s",
       }}
     >
       {/* Folders first — matches Finder / VS Code / Notion / Obsidian
