@@ -193,7 +193,7 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   : "After downloading, open chrome://extensions → enable Developer mode → Load unpacked."}
                 download={{
                   label: isKo ? "다운로드 v2.2.2 · 50 KB" : "Download v2.2.2 · 50 KB",
-                  href: "/downloads/mw-chrome-extension-v2.2.2.zip",
+                  href: "/downloads/memory-wiki-chrome.zip",
                 }}
                 guide={{
                   label: isKo ? "Chrome 가이드" : "Chrome guide",

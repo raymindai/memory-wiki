@@ -134,7 +134,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginDownload
                 primary={{
                   label: "Download v2.2.2 · 50 KB",
-                  href: "/downloads/mw-chrome-extension-v2.2.2.zip",
+                  href: "/downloads/memory-wiki-chrome.zip",
                 }}
                 secondary={{ label: t.chrome.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />

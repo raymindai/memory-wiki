@@ -57,6 +57,34 @@ const nextConfig: NextConfig = {
       { source: "/mdfy-roadmap-2026", destination: "/d/mdfy-roadmap-2026" },
     ];
   },
+  // Desktop DMG download — redirect a stable internal path to the
+  // current GitHub Release. Keeps the link in PluginsPure.tsx stable
+  // (`/downloads/memory-wiki-desktop.dmg`) and lets us point at a new
+  // release just by editing this one line per ship. 308 lets the user
+  // resume downloads against GitHub's CDN instead of streaming a
+  // ~110MB asset through Vercel.
+  async redirects() {
+    return [
+      {
+        source: "/downloads/memory-wiki-desktop.dmg",
+        destination: "https://github.com/raymindai/memory-wiki/releases/download/desktop-v2.7.2/memory.wiki-2.7.2-arm64.dmg",
+        permanent: false,
+      },
+      // Bare alias — short URL we can share in tweets / docs.
+      {
+        source: "/download/mac",
+        destination: "https://github.com/raymindai/memory-wiki/releases/download/desktop-v2.7.2/memory.wiki-2.7.2-arm64.dmg",
+        permanent: false,
+      },
+      // Chrome extension zip — same pattern; Web Store link is the
+      // primary install path but power users want the raw zip too.
+      {
+        source: "/downloads/memory-wiki-chrome.zip",
+        destination: "https://github.com/raymindai/memory-wiki/releases/download/chrome-ext-v2.7.0/memory-wiki-clipper-2.7.0.zip",
+        permanent: false,
+      },
+    ];
+  },
   webpack(config) {
     // Mermaid: exclude from webpack bundle — loaded via CDN script tag.
     // Avoids dynamic-import chunk resolution issues with mermaid v11.
