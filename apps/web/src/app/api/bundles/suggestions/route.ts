@@ -18,7 +18,7 @@ import { callAI } from "@/lib/ai-providers";
  * Provider: Claude > GPT-4o > Gemini fallback (same chain as
  * ai-generate). Uses titles only, never bodies — token-cheap.
  */
-const SYSTEM_PROMPT = `You are Memory.Wiki's bundle suggester. You will receive a list of document titles from a user's personal knowledge hub. Your job is to propose 3 to 5 short prompts the user could click to ask the bundle curator to assemble themed collections from their hub.
+const SYSTEM_PROMPT = `You are memory.wiki's bundle suggester. You will receive a list of document titles from a user's personal knowledge hub. Your job is to propose 3 to 5 short prompts the user could click to ask the bundle curator to assemble themed collections from their hub.
 
 Each prompt should:
 - Be 4-12 words. No quotes, no trailing punctuation.

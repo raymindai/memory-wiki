@@ -62,9 +62,9 @@ export const manifestoEn: ManifestoContent = {
   navCtaHref: "/",
   hero: {
     readingTime: "12 min read",
-    title: "Why I'm building Memory.Wiki",
+    title: "Why I'm building memory.wiki",
     intro: [
-      "I started Memory.Wiki as a side project in early 2026. I went full-time on it in April. Six months in, it's a memory layer that any AI can read — not just a publishing tool.",
+      "I started memory.wiki as a side project in early 2026. I went full-time on it in April. Six months in, it's a memory layer that any AI can read — not just a publishing tool.",
       "This is why.",
     ],
   },
@@ -92,16 +92,16 @@ export const manifestoEn: ManifestoContent = {
         "When you let an AI extract your memory, you let an AI define what mattered. You let an algorithm decide which thread of yesterday's thinking is worth carrying forward, which insight to compress into a fact, which piece of yourself to keep.",
         "That's a strange thing to outsource.",
         "Some people will outsource it gladly. The convenience is real. But for those of us who think carefully about what we want our future selves to know — for those of us who treat our knowledge as a craft, not a byproduct — there should be another option.",
-        "That option is Memory.Wiki.",
+        "That option is memory.wiki.",
       ],
     },
     {
-      heading: "What Memory.Wiki is today",
+      heading: "What memory.wiki is today",
       paragraphs: [
-        "If you visited Memory.Wiki right now, you'd see what looks like a markdown publishing tool — and it is.",
+        "If you visited memory.wiki right now, you'd see what looks like a markdown publishing tool — and it is.",
         "You can capture markdown from anywhere: ChatGPT, Claude, Gemini (via Chrome extension), GitHub repos, Notion pages, Obsidian vaults, any web URL, your terminal (<code>cat README.md | mw publish</code>), VS Code, your Mac clipboard. You can edit it in a beautiful WYSIWYG editor — no syntax friction, no install required. You can share it with a permanent URL that anyone can read in the browser, that any AI can fetch as context.",
         "It's a publishing tool. It works. People can use it today.",
-        "And it's grown past the publishing layer. Every saved doc folds into a personal hub that auto-publishes a wiki manifest (index.md, SCHEMA.md, log.md), maintains a concept index across your library, and exposes a recall API any AI can query. The role-split is the load-bearing idea: you set the direction, Memory.Wiki structures the URL, any AI reads it.",
+        "And it's grown past the publishing layer. Every saved doc folds into a personal hub that auto-publishes a wiki manifest (index.md, SCHEMA.md, log.md), maintains a concept index across your library, and exposes a recall API any AI can query. The role-split is the load-bearing idea: you set the direction, memory.wiki structures the URL, any AI reads it.",
         "Shipped so far:",
       ],
       list: [
@@ -134,10 +134,10 @@ export const manifestoEn: ManifestoContent = {
     {
       heading: "What's coming next",
       paragraphs: [
-        "The memory layer is now live. Hub URLs, recall API, concept index, and the wiki manifests all shipped. What's left is the part that turns Memory.Wiki from a tool people learn into one they reach for without thinking.",
+        "The memory layer is now live. Hub URLs, recall API, concept index, and the wiki manifests all shipped. What's left is the part that turns memory.wiki from a tool people learn into one they reach for without thinking.",
       ],
       highlight:
-        "You should be able to take what you've authored and deploy it as context to any AI, anywhere — without remembering how Memory.Wiki works.",
+        "You should be able to take what you've authored and deploy it as context to any AI, anywhere — without remembering how memory.wiki works.",
       afterHighlight: [
         "Deeper ingest: Bear, Apple Notes, Roam, Drive. Native ingestion from every place people already keep notes, with the same dedup contract that makes re-importing safe.",
         "Sharper recall: latency budgets on the cross-encoder rerank, a hybrid scoring that the user can dial without reading docs, and citations that visibly improve the answer instead of just appearing under it.",
@@ -166,7 +166,7 @@ export const manifestoEn: ManifestoContent = {
       "Through 2024 and 2025 the industry shipped closed AI memory — OpenAI Memory inside ChatGPT, Google's Memory Bank inside Gemini, Anthropic's context window inside Claude. Each one is trying to own your memory inside its own walls.",
       "Cross-AI memory is structurally impossible for any of them to build. OpenAI won't ship a memory layer that serves Claude. Anthropic won't ship one that serves ChatGPT. It has to come from outside.",
       "By 2027 either the closed systems will have entrenched, or an open standard will have taken hold. I'm betting on the second outcome. I'm betting that markdown URLs become to AI memory what HTTP became to documents.",
-      "Memory.Wiki exists to make that outcome more likely.",
+      "memory.wiki exists to make that outcome more likely.",
     ],
   },
   roadmap: {
@@ -180,7 +180,7 @@ export const manifestoEn: ManifestoContent = {
   },
   closing: {
     paragraphs: [
-      "Memory.Wiki is built by Hyunsang at <a href=\"https://raymind.ai\" target=\"_blank\" rel=\"noopener noreferrer\">Raymind.AI</a>.",
+      "memory.wiki is built by Hyunsang at <a href=\"https://raymind.ai\" target=\"_blank\" rel=\"noopener noreferrer\">Raymind.AI</a>.",
       "The codebase is <a href=\"https://github.com/raymindai/memory-wiki\" target=\"_blank\" rel=\"noopener noreferrer\">open source on GitHub</a>.",
       "The Bundle spec will be published before Phase 2 ships.",
       "Reach me at <a href=\"mailto:hi@raymind.ai\">hi@raymind.ai</a>.",
@@ -220,7 +220,7 @@ export const manifestoEn: ManifestoContent = {
       ]},
     ],
     bottomLeft: "A product of Raymind.AI",
-    bottomRight: "© 2026 Memory.Wiki. All rights reserved.",
+    bottomRight: "© 2026 memory.wiki. All rights reserved.",
     tagline: "Personal knowledge hub for the AI era.",
     parent: { label: "A product of Raymind.AI", href: "https://raymind.ai" },
   },
@@ -241,9 +241,9 @@ export const manifestoKo: ManifestoContent = {
   navCtaHref: "/",
   hero: {
     readingTime: "12분",
-    title: "내가 Memory.Wiki를 만드는 이유",
+    title: "내가 memory.wiki를 만드는 이유",
     intro: [
-      "2026년 초 사이드프로젝트로 Memory.Wiki를 시작했습니다. 4월에 풀타임으로 전환했고, 6개월 차 — 이제 단순 퍼블리싱 도구가 아니라 어떤 AI든 읽을 수 있는 memory layer가 됐습니다.",
+      "2026년 초 사이드프로젝트로 memory.wiki를 시작했습니다. 4월에 풀타임으로 전환했고, 6개월 차 — 이제 단순 퍼블리싱 도구가 아니라 어떤 AI든 읽을 수 있는 memory layer가 됐습니다.",
       "이게 그 이유입니다.",
     ],
   },
@@ -261,13 +261,13 @@ export const manifestoKo: ManifestoContent = {
       paragraphs: [
         "AI는 텍스트를 생성합니다. 하지만 그 텍스트를 \"문서\"로 만드는 건 사람입니다. 구조를 잡고, 맥락을 더하고, 필요 없는 부분을 잘라내고, 자기 목소리를 입힙니다.",
         "이 과정이 authorship입니다. AI 출력물의 단순 추출이 아니라, 사람의 판단과 편집이 들어간 \"저작\"입니다.",
-        "Memory.Wiki는 이 authorship을 지원하는 도구입니다. AI가 만든 원재료를 당신의 문서로 바꾸는 곳. 그리고 그 문서에 영구적인 URL을 부여하는 곳.",
+        "memory.wiki는 이 authorship을 지원하는 도구입니다. AI가 만든 원재료를 당신의 문서로 바꾸는 곳. 그리고 그 문서에 영구적인 URL을 부여하는 곳.",
       ],
     },
     {
-      heading: "Memory.Wiki가 지금 무엇인가",
+      heading: "memory.wiki가 지금 무엇인가",
       paragraphs: [
-        "Memory.Wiki는 마크다운 허브입니다. 어디서든 캡처하고, AI 도구로 편집하고, 영구 URL로 퍼블리시합니다.",
+        "memory.wiki는 마크다운 허브입니다. 어디서든 캡처하고, AI 도구로 편집하고, 영구 URL로 퍼블리시합니다.",
       ],
       list: [
         "<strong>캡처</strong> — Chrome Extension, VS Code, Mac App, CLI, 붙여넣기. 어떤 AI에서든, 어떤 에디터에서든, 원클릭으로.",
@@ -281,7 +281,7 @@ export const manifestoKo: ManifestoContent = {
     {
       heading: "더 큰 베팅",
       paragraphs: [
-        "Memory.Wiki는 마크다운 도구로 시작하지만, 궁극적으로는 AI 시대의 memory layer를 만들려고 합니다.",
+        "memory.wiki는 마크다운 도구로 시작하지만, 궁극적으로는 AI 시대의 memory layer를 만들려고 합니다.",
         "모든 AI 대화, 모든 메모, 모든 문서가 하나의 주소를 갖고, 하나의 장소에서 관리되고, 어떤 AI에든 컨텍스트로 전달될 수 있는 세계. 마크다운 URL이 AI 시대 지식의 substrate가 되는 세계.",
         "이건 단순한 에디터 만들기가 아닙니다. AI와 사람 사이의 인터페이스를 재정의하는 일입니다.",
       ],
@@ -291,7 +291,7 @@ export const manifestoKo: ManifestoContent = {
       paragraphs: [],
       list: [
         "<strong>Bundle as context</strong> — 여러 문서를 하나의 번들로 묶어 AI에게 전달. \"이 프로젝트의 모든 문서를 읽어\"가 가능해집니다.",
-        "<strong>MCP Server & REST API</strong> — 어떤 AI 에이전트든 Memory.Wiki 문서를 읽고, 쓰고, 업데이트할 수 있습니다.",
+        "<strong>MCP Server & REST API</strong> — 어떤 AI 에이전트든 memory.wiki 문서를 읽고, 쓰고, 업데이트할 수 있습니다.",
         "<strong>Hub 기반 knowledge memory</strong> — 컨셉 인덱스, Related-in-your-hub, Needs-review lint으로 개인 위키가 자라납니다.",
       ],
     },
@@ -307,7 +307,7 @@ export const manifestoKo: ManifestoContent = {
       { title: "AI는 도구가 아니라 collaborator다.",            body: "AI에게 주제 관련 docs를 묶어 달라고 요청하세요. 결과 검토. annotation 편집. 저장. Human + AI가 함께 지식을 만듭니다 — AI 혼자 블랙박스에서 만드는 게 아닙니다." },
       { title: "지식은 스코프가 있다 — Document, Bundle, Hub.", body: "같은 URL primitive, 세 가지 스케일. 한 답변은 Document URL. 주제별 컬렉션은 Bundle URL. 전체 지식은 Hub URL." },
       { title: "메모리는 deployable해야 한다.",                 body: "저장이 목적이 아닙니다. AI에 컨텍스트로 다시 paste 못하는 메모리는 메모리 역할을 못합니다. 모든 URL이 깨끗한 markdown 컨텍스트로 fetch됩니다." },
-      { title: "Open by default.",                              body: "Memory.Wiki는 오픈소스. Bundle Spec은 공개 표준. Open format이 durable한 인프라를 만드는 방식입니다." },
+      { title: "Open by default.",                              body: "memory.wiki는 오픈소스. Bundle Spec은 공개 표준. Open format이 durable한 인프라를 만드는 방식입니다." },
     ],
   },
   whyNow: {
@@ -316,7 +316,7 @@ export const manifestoKo: ManifestoContent = {
       "2024~2025년, 업계는 닫힌 AI 메모리를 출시했습니다 — ChatGPT 안의 OpenAI Memory, Gemini 안의 Google Memory Bank, Claude의 컨텍스트 윈도우. 각자 자기 벽 안에서 당신의 메모리를 차지하려 합니다.",
       "Cross-AI 메모리는 어느 한 회사가 구조적으로 만들 수 없습니다. OpenAI는 Claude를 위한 memory layer를 출시하지 않습니다. Anthropic은 ChatGPT를 위한 걸 출시하지 않습니다. 외부에서 와야 합니다.",
       "2027년이면 닫힌 시스템이 굳거나, 열린 표준이 자리를 잡거나 둘 중 하나입니다. 저는 후자에 베팅합니다. HTTP가 문서의 열린 표준이 된 것처럼, 마크다운 URL이 AI 메모리의 열린 표준이 된다는 베팅.",
-      "Memory.Wiki는 그 결과를 더 가능하게 만들기 위해 존재합니다.",
+      "memory.wiki는 그 결과를 더 가능하게 만들기 위해 존재합니다.",
     ],
   },
   roadmap: {
@@ -330,7 +330,7 @@ export const manifestoKo: ManifestoContent = {
   },
   closing: {
     paragraphs: [
-      "Memory.Wiki는 <a href=\"https://raymind.ai\" target=\"_blank\" rel=\"noopener noreferrer\">Raymind.AI</a>의 Hyunsang이 만듭니다.",
+      "memory.wiki는 <a href=\"https://raymind.ai\" target=\"_blank\" rel=\"noopener noreferrer\">Raymind.AI</a>의 Hyunsang이 만듭니다.",
       "코드베이스는 <a href=\"https://github.com/raymindai/memory-wiki\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub에 오픈소스</a>로 공개되어 있습니다.",
       "Bundle spec은 Phase 2 출시 전에 공개됩니다.",
       "<a href=\"mailto:hi@raymind.ai\">hi@raymind.ai</a>로 연락 주세요.",
@@ -370,7 +370,7 @@ export const manifestoKo: ManifestoContent = {
       ]},
     ],
     bottomLeft: "Raymind.AI 가 만든 제품",
-    bottomRight: "© 2026 Memory.Wiki. All rights reserved.",
+    bottomRight: "© 2026 memory.wiki. All rights reserved.",
     tagline: "AI 시대의 개인 지식 허브.",
     parent: { label: "Raymind.AI 가 만든 제품", href: "https://raymind.ai" },
   },

@@ -1,9 +1,9 @@
 /**
  * Email templates and sending functions via Resend API.
- * All emails use Memory.Wiki dark branding: #09090b bg, #18181b card, #27272a border, #fb923c accent.
+ * All emails use memory.wiki dark branding: #09090b bg, #18181b card, #27272a border, #fb923c accent.
  */
 
-const FROM_ADDRESS = "Memory.Wiki <notifications@memory.wiki>";
+const FROM_ADDRESS = "memory.wiki <notifications@memory.wiki>";
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 // ─── Shared template parts ───
@@ -16,7 +16,7 @@ function footerHtml(to: string): string {
   return `
   <div style="margin-top:32px;padding-top:16px;border-top:1px solid #27272a">
     <p style="margin:0;font-size:11px;color:#52525b;line-height:1.6">
-      This email was sent by <a href="https://memory.wiki" style="color:#fb923c;text-decoration:none">Memory.Wiki</a> to ${to}.<br/>
+      This email was sent by <a href="https://memory.wiki" style="color:#fb923c;text-decoration:none">memory.wiki</a> to ${to}.<br/>
       If you no longer wish to receive these emails, you can update your notification preferences in your account settings.
     </p>
   </div>`;
@@ -63,7 +63,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
 // ─── Welcome Email ───
 
 export async function sendWelcomeEmail(to: string): Promise<void> {
-  const subject = "Welcome to Memory.Wiki";
+  const subject = "Welcome to memory.wiki";
 
   const features = [
     { title: "Publish instantly", desc: "Paste or write Markdown and get a shareable URL in seconds. No account needed to start." },
@@ -82,12 +82,12 @@ export async function sendWelcomeEmail(to: string): Promise<void> {
     .join("");
 
   const body = card(`
-    <p style="margin:0 0 20px;font-size:18px;font-weight:700;color:#fafafa">Welcome to Memory.Wiki</p>
+    <p style="margin:0 0 20px;font-size:18px;font-weight:700;color:#fafafa">Welcome to memory.wiki</p>
     <p style="margin:0 0 24px;font-size:14px;color:#a1a1aa;line-height:1.6">
       The fastest way from thought to shared document. Here is what you can do:
     </p>
     ${featuresHtml}
-    <div style="margin-top:24px">${ctaButton("Open Memory.Wiki", "https://memory.wiki")}</div>
+    <div style="margin-top:24px">${ctaButton("Open memory.wiki", "https://memory.wiki")}</div>
   `);
 
   const html = wrapEmail(body, to);
@@ -102,7 +102,7 @@ export async function sendShareEmail(
   docTitle: string,
   docId: string
 ): Promise<void> {
-  const subject = `${fromName} shared a document with you on Memory.Wiki`;
+  const subject = `${fromName} shared a document with you on memory.wiki`;
   const docUrl = `https://memory.wiki/${docId}`;
 
   const body = card(`
@@ -125,7 +125,7 @@ export async function sendEditRequestEmail(
   docTitle: string,
   docId: string
 ): Promise<void> {
-  const subject = `${fromName} requested edit access on Memory.Wiki`;
+  const subject = `${fromName} requested edit access on memory.wiki`;
   const docUrl = `https://memory.wiki/${docId}`;
 
   const body = card(`
@@ -148,7 +148,7 @@ export async function sendWeeklyDigestEmail(
   totalViews: number,
   newShares: number
 ): Promise<void> {
-  const subject = "Your Memory.Wiki weekly summary";
+  const subject = "Your memory.wiki weekly summary";
 
   const statRow = (label: string, value: string) =>
     `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #27272a">
@@ -157,11 +157,11 @@ export async function sendWeeklyDigestEmail(
     </div>`;
 
   const body = card(`
-    <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#fafafa">Your week on Memory.Wiki</p>
+    <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#fafafa">Your week on memory.wiki</p>
     ${statRow("Documents created", String(docsCreated))}
     ${statRow("Total views", totalViews.toLocaleString())}
     ${statRow("New shares", String(newShares))}
-    <div style="margin-top:24px">${ctaButton("Open Memory.Wiki", "https://memory.wiki")}</div>
+    <div style="margin-top:24px">${ctaButton("Open memory.wiki", "https://memory.wiki")}</div>
   `);
 
   const html = wrapEmail(body, to);
@@ -175,9 +175,9 @@ export function getTemplatePreviews(): { name: string; subject: string; html: st
   return [
     {
       name: "Welcome",
-      subject: "Welcome to Memory.Wiki",
+      subject: "Welcome to memory.wiki",
       html: wrapEmail(card(`
-        <p style="margin:0 0 20px;font-size:18px;font-weight:700;color:#fafafa">Welcome to Memory.Wiki</p>
+        <p style="margin:0 0 20px;font-size:18px;font-weight:700;color:#fafafa">Welcome to memory.wiki</p>
         <p style="margin:0 0 24px;font-size:14px;color:#a1a1aa;line-height:1.6">
           The fastest way from thought to shared document. Here is what you can do:
         </p>
@@ -193,12 +193,12 @@ export function getTemplatePreviews(): { name: string; subject: string; html: st
           <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#fafafa">AI-powered tools</p>
           <p style="margin:0;font-size:13px;color:#a1a1aa;line-height:1.5">Polish, summarize, translate, and chat with your documents.</p>
         </div>
-        <div style="margin-top:24px">${ctaButton("Open Memory.Wiki", "https://memory.wiki")}</div>
+        <div style="margin-top:24px">${ctaButton("Open memory.wiki", "https://memory.wiki")}</div>
       `), to),
     },
     {
       name: "Document Shared",
-      subject: "Alex shared a document with you on Memory.Wiki",
+      subject: "Alex shared a document with you on memory.wiki",
       html: wrapEmail(card(`
         <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#fafafa">Alex shared a document with you</p>
         <p style="margin:0 0 20px;font-size:14px;color:#a1a1aa;line-height:1.5">
@@ -209,7 +209,7 @@ export function getTemplatePreviews(): { name: string; subject: string; html: st
     },
     {
       name: "Edit Request",
-      subject: "Alex requested edit access on Memory.Wiki",
+      subject: "Alex requested edit access on memory.wiki",
       html: wrapEmail(card(`
         <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#fafafa">Alex requested edit access</p>
         <p style="margin:0 0 20px;font-size:14px;color:#a1a1aa;line-height:1.5">
@@ -220,9 +220,9 @@ export function getTemplatePreviews(): { name: string; subject: string; html: st
     },
     {
       name: "Weekly Digest",
-      subject: "Your Memory.Wiki weekly summary",
+      subject: "Your memory.wiki weekly summary",
       html: wrapEmail(card(`
-        <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#fafafa">Your week on Memory.Wiki</p>
+        <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#fafafa">Your week on memory.wiki</p>
         <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #27272a">
           <span style="font-size:13px;color:#a1a1aa">Documents created</span>
           <span style="font-size:14px;font-weight:700;color:#fafafa">5</span>
@@ -235,7 +235,7 @@ export function getTemplatePreviews(): { name: string; subject: string; html: st
           <span style="font-size:13px;color:#a1a1aa">New shares</span>
           <span style="font-size:14px;font-weight:700;color:#fafafa">3</span>
         </div>
-        <div style="margin-top:24px">${ctaButton("Open Memory.Wiki", "https://memory.wiki")}</div>
+        <div style="margin-top:24px">${ctaButton("Open memory.wiki", "https://memory.wiki")}</div>
       `), to),
     },
   ];

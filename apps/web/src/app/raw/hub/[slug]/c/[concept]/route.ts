@@ -107,7 +107,7 @@ export async function GET(
     `url: https://memory.wiki/hub/${slug}/c/${concept}`,
     `document_count: ${docs.length}`,
     `weight: ${Math.round(conceptRow.weight || 0)}`,
-    'source: "Memory.Wiki"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].join("\n");

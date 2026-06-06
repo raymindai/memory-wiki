@@ -133,7 +133,7 @@ export default function HubViewerV8({
             <p className="vhub-bio">{profile.hub_description}</p>
           ) : (
             <p className="vhub-bio vhub-bio-empty">
-              Memory.Wiki hub at memory.wiki/@{slug}
+              memory.wiki hub at memory.wiki/@{slug}
             </p>
           )}
 

@@ -86,7 +86,7 @@ export default function IntegrateDocsPure({ locale = "en" }: { locale?: Locale }
         {isKo ? (
           <>
             <p className="pure-integrate-docs-intro">
-              Claude Code, Cursor, Codex, 그 외 모든 에이전트가 이미 <code>CLAUDE.md</code> / <code>AGENTS.md</code> / <code>.cursor/rules</code> 의 내용으로 부팅합니다. Memory.Wiki bundle 또는 hub 를 가리키는 한 줄만 추가하면, 다음 세션은 이전 결정, 노트, 분석이 <em>이미 로드된 상태로</em> 시작됩니다.
+              Claude Code, Cursor, Codex, 그 외 모든 에이전트가 이미 <code>CLAUDE.md</code> / <code>AGENTS.md</code> / <code>.cursor/rules</code> 의 내용으로 부팅합니다. memory.wiki bundle 또는 hub 를 가리키는 한 줄만 추가하면, 다음 세션은 이전 결정, 노트, 분석이 <em>이미 로드된 상태로</em> 시작됩니다.
             </p>
             <p className="pure-integrate-docs-intro">
               URL 응답은 번들의 pre-computed 그래프 (themes, insights, concept relations) 를 같은 페이로드에 담아 보냅니다 &mdash; 받는 AI 는 이전 AI 의 작업을 <em>무료로</em> 이어받습니다. API 키 없음, vendor lock-in 없음, 도구별 플러그인 없음.
@@ -95,7 +95,7 @@ export default function IntegrateDocsPure({ locale = "en" }: { locale?: Locale }
         ) : (
           <>
             <p className="pure-integrate-docs-intro">
-              Claude Code, Cursor, Codex, and every other agent boot with whatever you wrote in <code>CLAUDE.md</code> / <code>AGENTS.md</code> / <code>.cursor/rules</code>. Add a single line that points at your Memory.Wiki bundle or hub, and the next session opens with your prior decisions, notes, and analysis already loaded.
+              Claude Code, Cursor, Codex, and every other agent boot with whatever you wrote in <code>CLAUDE.md</code> / <code>AGENTS.md</code> / <code>.cursor/rules</code>. Add a single line that points at your memory.wiki bundle or hub, and the next session opens with your prior decisions, notes, and analysis already loaded.
             </p>
             <p className="pure-integrate-docs-intro">
               The URL response carries the bundle&apos;s pre-computed graph (themes, insights, concept relations) in the same payload &mdash; the receiving AI inherits the prior AI&apos;s work for free. No vendor lock-in, no API keys, no per-tool plug-in.
@@ -173,8 +173,8 @@ The bundle carries its own graph (themes, insights, concept relations).`}
         </h2>
         <p className="pure-integrate-docs-body">
           {isKo
-            ? "Memory.Wiki 는 세 가지 URL 모양을 제공합니다. 프로젝트 스코프 도구 설정에는 거의 항상 bundle URL 이 맞습니다 — 캔버스 분석을 같이 가져가니까요."
-            : "Memory.Wiki exposes three URL shapes. For project-scoped tool config, the bundle URL is almost always the right choice — it carries the canvas analysis with it."}
+            ? "memory.wiki 는 세 가지 URL 모양을 제공합니다. 프로젝트 스코프 도구 설정에는 거의 항상 bundle URL 이 맞습니다 — 캔버스 분석을 같이 가져가니까요."
+            : "memory.wiki exposes three URL shapes. For project-scoped tool config, the bundle URL is almost always the right choice — it carries the canvas analysis with it."}
         </p>
         <div className="pure-integrate-docs-table">
           <div className="pure-integrate-docs-row">
@@ -359,11 +359,11 @@ index call needed.`}
         <p className="pure-integrate-docs-body-faint">
           {isKo ? (
             <>
-              패턴: 도구별 override 는 각 도구의 파일 (<code>.cursor/rules/</code>, <code>GEMINI.md</code>, <code>.windsurfrules</code>) 에 두고, Memory.Wiki URL 만 <code>AGENTS.md</code> 에. URL 이 portable 한 부분, 도구별 nuance 는 도구별 위치.
+              패턴: 도구별 override 는 각 도구의 파일 (<code>.cursor/rules/</code>, <code>GEMINI.md</code>, <code>.windsurfrules</code>) 에 두고, memory.wiki URL 만 <code>AGENTS.md</code> 에. URL 이 portable 한 부분, 도구별 nuance 는 도구별 위치.
             </>
           ) : (
             <>
-              Pattern: keep tool-specific overrides in their respective files (<code>.cursor/rules/</code>, <code>GEMINI.md</code>, <code>.windsurfrules</code>) but put the Memory.Wiki URL in <code>AGENTS.md</code>. The URL is the portable bit; per-tool nuance stays per-tool.
+              Pattern: keep tool-specific overrides in their respective files (<code>.cursor/rules/</code>, <code>GEMINI.md</code>, <code>.windsurfrules</code>) but put the memory.wiki URL in <code>AGENTS.md</code>. The URL is the portable bit; per-tool nuance stays per-tool.
             </>
           )}
         </p>
@@ -380,14 +380,14 @@ index call needed.`}
             ? "Claude Code 는 프로젝트 루트와 부모 디렉터리 모두에서 CLAUDE.md 를 auto-load 합니다 (AGENTS.md 도 함께). 둘 다 동작; CLAUDE.md 는 Claude 전용 override 의 적절한 위치."
             : "Claude Code auto-loads CLAUDE.md from the project root and every parent directory, plus AGENTS.md when present. Either file works; CLAUDE.md is the right home for Claude-specific overrides."}
           snippet={isKo
-            ? `## Project context (from Memory.Wiki)
+            ? `## Project context (from memory.wiki)
 
 Bundle: https://memory.wiki/b/<bundle-id>
 
 이 번들이 프로젝트의 스펙, ADR, 결정 + pre-computed 그래프
 (themes, insights, concept relations) 를 담음.
 cross-doc 컨텍스트가 필요할 때마다 다시 읽음.`
-            : `## Project context (from Memory.Wiki)
+            : `## Project context (from memory.wiki)
 
 Bundle: https://memory.wiki/b/<bundle-id>
 
@@ -414,11 +414,11 @@ Re-read it whenever you need cross-doc context.`}
           name="Cursor"
           filePath=".cursor/rules/memorywiki.mdc"
           tagline={isKo
-            ? "Cursor 의 신규 multi-rule 포맷. frontmatter 가 룰 적용 범위 스코프, body 가 Memory.Wiki URL 보관. 번들마다 한 파일로 깨끗하게 분리."
-            : "Cursor's newer multi-rule format. Frontmatter scopes when the rule applies; body holds the Memory.Wiki URL. Use one file per bundle for clean separation."}
+            ? "Cursor 의 신규 multi-rule 포맷. frontmatter 가 룰 적용 범위 스코프, body 가 memory.wiki URL 보관. 번들마다 한 파일로 깨끗하게 분리."
+            : "Cursor's newer multi-rule format. Frontmatter scopes when the rule applies; body holds the memory.wiki URL. Use one file per bundle for clean separation."}
           snippet={isKo
             ? `---
-description: Project context from Memory.Wiki
+description: Project context from memory.wiki
 alwaysApply: true
 ---
 
@@ -428,7 +428,7 @@ alwaysApply: true
 응답은 번들의 그래프 분석 (themes, insights, gaps, connections) 이
 기본으로 포함된 깨끗한 마크다운.`
             : `---
-description: Project context from Memory.Wiki
+description: Project context from memory.wiki
 alwaysApply: true
 ---
 
@@ -552,17 +552,17 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
       {!isKo && (
         <section id="github-action" className="pure-integrate-docs-section">
           <h2 className="pure-integrate-docs-section-title">
-            GitHub Action sync — keep one Memory.Wiki doc in step with your repo
+            GitHub Action sync — keep one memory.wiki doc in step with your repo
           </h2>
           <p className="pure-integrate-docs-body">
-            Treat one Memory.Wiki doc as your repo&apos;s &ldquo;working knowledge URL&rdquo;. Every push to <code>main</code> that touches <code>CLAUDE.md</code>, <code>AGENTS.md</code>, or <code>docs/**.md</code> PATCHes the combined markdown to your Memory.Wiki doc. Paste the doc URL into Claude, Cursor, or Codex and they always see the latest state of your repo&apos;s docs.
+            Treat one memory.wiki doc as your repo&apos;s &ldquo;working knowledge URL&rdquo;. Every push to <code>main</code> that touches <code>CLAUDE.md</code>, <code>AGENTS.md</code>, or <code>docs/**.md</code> PATCHes the combined markdown to your memory.wiki doc. Paste the doc URL into Claude, Cursor, or Codex and they always see the latest state of your repo&apos;s docs.
           </p>
           <p className="pure-integrate-docs-body">
             One-time setup (under 5 minutes):
           </p>
           <ol className="pure-integrate-docs-ol">
             <li>
-              Create the target doc on Memory.Wiki. The URL chip in the editor shows the id (the <code>&lt;id&gt;</code> in <code>memory.wiki/d/&lt;id&gt;</code>) — that&apos;s your <code>MDFY_DOC_ID</code>.
+              Create the target doc on memory.wiki. The URL chip in the editor shows the id (the <code>&lt;id&gt;</code> in <code>memory.wiki/d/&lt;id&gt;</code>) — that&apos;s your <code>MDFY_DOC_ID</code>.
             </li>
             <li>
               On the same doc, open the <strong>Share</strong> modal (top-right of the editor). Scroll to the <em>Developer access</em> footer and click <strong>Copy edit token</strong>. That&apos;s your <code>MDFY_EDIT_TOKEN</code>. Treat it like a password — anyone with it can write to the doc.
@@ -571,7 +571,7 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
               On GitHub: <em>Settings → Secrets and variables → Actions → New repository secret</em>. Add both <code>MDFY_DOC_ID</code> and <code>MDFY_EDIT_TOKEN</code>.
             </li>
             <li>
-              Drop the workflow file below at <code>.github/workflows/sync-memorywiki.yml</code> and push. Run it once via <em>Actions → Sync repo docs → Memory.Wiki → Run workflow</em> to verify.
+              Drop the workflow file below at <code>.github/workflows/sync-memorywiki.yml</code> and push. Run it once via <em>Actions → Sync repo docs → memory.wiki → Run workflow</em> to verify.
             </li>
           </ol>
           <p className="pure-integrate-docs-file-caption mono">
@@ -579,7 +579,7 @@ Fetch that URL when you need spec, decisions, or cross-doc reasoning.`}
           </p>
           <PureCodeBlock
             lang="yaml"
-            code={`name: Sync repo docs → Memory.Wiki
+            code={`name: Sync repo docs → memory.wiki
 
 on:
   push:

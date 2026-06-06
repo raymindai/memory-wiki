@@ -86,7 +86,7 @@ function findSection(markdown: string, heading: string): Section | null {
 // ─── MCP Server ───
 
 function createMcpServer(userId?: string) {
-  const server = new McpServer({ name: "Memory.Wiki", version: "1.4.0" });
+  const server = new McpServer({ name: "memory.wiki", version: "1.4.0" });
   const supabase = getSupabaseClient();
   const requireDb = () => supabase ?? null;
 
@@ -94,7 +94,7 @@ function createMcpServer(userId?: string) {
 
   server.tool(
     "mw_create",
-    "Create a new Markdown document on Memory.Wiki and get a shareable URL",
+    "Create a new Markdown document on memory.wiki and get a shareable URL",
     {
       markdown: z.string().describe("Markdown content"),
       title: z.string().optional().describe("Document title"),
@@ -445,7 +445,7 @@ function createMcpServer(userId?: string) {
 
   server.tool(
     "mw_import_url",
-    "Fetch a webpage and import it as a new Memory.Wiki document",
+    "Fetch a webpage and import it as a new memory.wiki document",
     {
       url: z.string().describe("URL to fetch"),
       title: z.string().optional(),
@@ -752,7 +752,7 @@ function createMcpServer(userId?: string) {
     "Get the public render URL for previewing markdown without saving",
     { markdown: z.string().describe("Markdown to preview") },
     async ({ markdown }) => {
-      // For now just return the hash-share URL (Memory.Wiki supports it via /#md=...)
+      // For now just return the hash-share URL (memory.wiki supports it via /#md=...)
       // True render would need WASM access; this gives users a quick preview link.
       void markdown;
       return textResult(`To preview: paste markdown into ${BASE_URL} (it renders live in browser).\nFor a permanent preview, use mw_create with draft=true.`);

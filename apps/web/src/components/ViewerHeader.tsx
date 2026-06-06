@@ -7,7 +7,7 @@ import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 // Shared header for the public viewers (/d/<id>, /b/<id>, /hub/<slug>).
 // Single source of truth for the chrome each viewer wears at the top:
 // - sticky + backdrop blur (so the page scrolls under it)
-// - Memory.Wiki logo on the left (always links to /)
+// - memory.wiki logo on the left (always links to /)
 // - title + optional subtitle, both truncated so long titles don't shove
 //   the action buttons off the viewport
 // - actions slot on the right — each viewer passes its viewer-specific
@@ -53,7 +53,7 @@ export default function ViewerHeader({ title, subtitle, breadcrumb, actions, bor
         borderBottom: bordered ? "1px solid var(--border-dim)" : undefined,
       }}
     >
-      <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="Memory.Wiki home">
+      <Link href="/" className="shrink-0 flex items-center transition-opacity hover:opacity-80" aria-label="memory.wiki home">
         <MemoryWikiLogo size={18} withBlob />
       </Link>
 

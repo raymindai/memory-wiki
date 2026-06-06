@@ -44,9 +44,9 @@ export interface CaseData {
   sub: string;
   /** Legacy field — kept in the type for backwards compat; not rendered. */
   accent?: string;
-  /** What's broken without Memory.Wiki. */
+  /** What's broken without memory.wiki. */
   pain: string[];
-  /** What the user does in Memory.Wiki. */
+  /** What the user does in memory.wiki. */
   action: { step: string; detail: string }[];
   /** What they get back. */
   result: string[];
@@ -154,7 +154,7 @@ export default function CasePure({ data, locale = "en" }: { data: CaseData; loca
               <p className="pure-case-cta-sub">
                 {isKo ? "회원가입 없음. 첫 문서 넣으면 URL은 당신 것." : "No signup. Drop in your first doc and the URL is yours."}
               </p>
-              <PureButton href="/">{isKo ? "Memory.Wiki 열기" : "Open Memory.Wiki"}</PureButton>
+              <PureButton href="/">{isKo ? "memory.wiki 열기" : "Open memory.wiki"}</PureButton>
             </section>
 
             {/* Related */}

@@ -20,7 +20,7 @@ export function MiroVariant() {
             <span className="brand-square brand-square-blob">
               <img src="/brand/mwblob_morph_dark.svg" alt="" aria-hidden />
             </span>
-            <span className="brand-word">Memory.Wiki</span>
+            <span className="brand-word">memory.wiki</span>
           </a>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Product</a>
@@ -38,7 +38,7 @@ export function MiroVariant() {
       {/* Hero */}
       <section className="hero-band">
         <h1 className="display-hero">
-          See how teams remember context with Memory.Wiki.
+          See how teams remember context with memory.wiki.
         </h1>
         <p className="hero-sub">
           Capture from anywhere. AI organizes. Every AI you use can read your
@@ -169,7 +169,7 @@ export function MiroVariant() {
       {/* CTA banner dark */}
       <section className="section">
         <div className="cta-banner-dark">
-          <h2 className="display-2 on-dark">Try Memory.Wiki today.</h2>
+          <h2 className="display-2 on-dark">Try memory.wiki today.</h2>
           <p className="hero-sub on-dark">No credit card. Beta is free.</p>
           <button className="btn-on-dark">Get started free</button>
         </div>
@@ -182,7 +182,7 @@ export function MiroVariant() {
             <span className="brand-square brand-square-blob brand-square-dark">
               <img src="/brand/mwblob_morph.svg" alt="" aria-hidden />
             </span>
-            <span className="brand-word brand-word-dark">Memory.Wiki</span>
+            <span className="brand-word brand-word-dark">memory.wiki</span>
           </div>
           <div className="footer-cols">
             <div className="footer-col">

@@ -11,7 +11,7 @@ export function WiseVariant() {
       {/* Top nav */}
       <header className="topnav">
         <div className="topnav-inner">
-          <a href="#" className="brand">Memory.Wiki</a>
+          <a href="#" className="brand">memory.wiki</a>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Capture</a>
             <a href="#" className="topnav-link">Organize</a>
@@ -39,7 +39,7 @@ export function WiseVariant() {
               your context from one URL.
             </p>
             <div className="cta-row">
-              <button className="btn-primary">Start your Memory.Wiki</button>
+              <button className="btn-primary">Start your memory.wiki</button>
               <button className="btn-tertiary">See an example</button>
             </div>
           </div>
@@ -133,7 +133,7 @@ export function WiseVariant() {
               Every AI.
             </h2>
             <p className="hero-sub-dark">
-              Memory.Wiki is the context layer giants can&apos;t build.
+              memory.wiki is the context layer giants can&apos;t build.
               Cross-AI is structural — and that&apos;s the wedge.
             </p>
             <div className="cta-row">
@@ -209,7 +209,7 @@ export function WiseVariant() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-top">
-            <div className="brand brand-dark">Memory.Wiki</div>
+            <div className="brand brand-dark">memory.wiki</div>
             <div className="caption">v8 Variant G · Wise-inspired</div>
           </div>
           <div className="footer-cols">

@@ -138,7 +138,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!hub) return { robots: { index: false, follow: false } };
 
   const author = hub.profile.display_name || slug;
-  const title = `${author}'s knowledge hub — Memory.Wiki`;
+  const title = `${author}'s knowledge hub — memory.wiki`;
   const description = hub.profile.hub_description ||
     `${hub.docs.length} documents, ${hub.bundles.length} bundles. Karpathy's wiki, deployable to any AI.`;
 
@@ -173,7 +173,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       // outbound link (OG share preview, sitemap, share copy) uses
       // the @-form so it propagates as the user-facing identity.
       url: `https://memory.wiki/@${slug}`,
-      siteName: "Memory.Wiki",
+      siteName: "memory.wiki",
       type: "profile",
       images: [{ url: ogImage, width: 1200, height: 630 }],
     },

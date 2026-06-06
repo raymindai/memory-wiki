@@ -30,7 +30,7 @@ export function PureFooter({
     <footer className="pure-footer">
       <div className="pure-footer-inner">
         <div className="pure-footer-top">
-          <Link href="/" className="pure-footer-brand" aria-label="Memory.Wiki">
+          <Link href="/" className="pure-footer-brand" aria-label="memory.wiki">
             <img
               className="pure-footer-symbol"
               src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"}

@@ -15,11 +15,11 @@ const data: CaseData = {
   action: [
     {
       step: "결정을 짧은 문서로 작성",
-      detail: "Context (알았던 것), Options (고려한 것), Decision (고른 것), Consequences (예상하는 것). 200-400단어. Memory.Wiki가 다음 concept refresh 후 intent를 \"decision\"으로 자동 태그.",
+      detail: "Context (알았던 것), Options (고려한 것), Decision (고른 것), Consequences (예상하는 것). 200-400단어. memory.wiki가 다음 concept refresh 후 intent를 \"decision\"으로 자동 태그.",
     },
     {
       step: "Input 인용",
-      detail: "고객 인터뷰, 스파이크 브랜치, 비용 모델 스프레드시트, 생각하는 데 도움 준 AI 대화를 링크. 각 링크는 Memory.Wiki URL이 영구적이라 살아남음.",
+      detail: "고객 인터뷰, 스파이크 브랜치, 비용 모델 스프레드시트, 생각하는 데 도움 준 AI 대화를 링크. 각 링크는 memory.wiki URL이 영구적이라 살아남음.",
     },
     {
       step: "영역별로 번들",

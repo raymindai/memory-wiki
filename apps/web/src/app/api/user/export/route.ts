@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
       bundleDocuments: bundleDocsRows,
       folders: foldersRes.data || [],
       concepts: conceptsRes.data || [],
-      notice: "This file contains a complete snapshot of your data on Memory.Wiki. Re-import support is planned; for now this is a portable backup you fully own. Password hashes for protected docs/bundles are intentionally stripped (only a has_password flag is included).",
+      notice: "This file contains a complete snapshot of your data on memory.wiki. Re-import support is planned; for now this is a portable backup you fully own. Password hashes for protected docs/bundles are intentionally stripped (only a has_password flag is included).",
     };
 
     const json = JSON.stringify(exportPayload, null, 2);

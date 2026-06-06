@@ -5,7 +5,7 @@ import { verifyAuthToken } from "@/lib/verify-auth";
 import { compactMarkdown, estimateTokens, isCompactRequested, tokenEconomyHeaders } from "@/lib/markdown-compact";
 import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
 
-// Public, AI-deployable representation of a single Memory.Wiki document.
+// Public, AI-deployable representation of a single memory.wiki document.
 // Hit by:
 //   - explicit /raw/{id} requests
 //   - middleware-rewritten /{id} requests where the caller signaled "I want
@@ -15,9 +15,9 @@ import { extractRequestSignals, logRawFetch } from "@/lib/raw-telemetry";
 // Output is plain markdown with a YAML frontmatter block carrying the bits
 // an AI reader needs to attribute and reuse the doc:
 //   - title  — human title
-//   - url    — canonical Memory.Wiki URL (so the LLM can cite it back)
+//   - url    — canonical memory.wiki URL (so the LLM can cite it back)
 //   - updated — ISO timestamp
-//   - source  — always "Memory.Wiki" so the LLM knows the origin
+//   - source  — always "memory.wiki" so the LLM knows the origin
 //
 // Restricted documents (draft / soft-deleted / password-protected /
 // expired / email-restricted) intentionally 404 here so the AI never
@@ -66,7 +66,7 @@ export async function GET(
 
   const title = (data.title || "Untitled").replace(/"/g, '\\"');
   const updated = data.updated_at ? new Date(data.updated_at).toISOString() : "";
-  const source = data.source ? String(data.source).replace(/"/g, '\\"') : "Memory.Wiki";
+  const source = data.source ? String(data.source).replace(/"/g, '\\"') : "memory.wiki";
 
   // ── Knowledge-graph context for this doc ──────────────────────
   // The hub-level digest carries the full concept graph; for an AI

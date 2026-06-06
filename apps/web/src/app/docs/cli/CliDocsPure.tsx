@@ -48,26 +48,26 @@ const TOC_KO = [
 
 // ─── Command tables (key + description per locale) ─────────────────────
 const COMMANDS_EN = [
-  { cmd: "mw publish <file>",       desc: "Publish a Markdown file or stdin to Memory.Wiki." },
+  { cmd: "mw publish <file>",       desc: "Publish a Markdown file or stdin to memory.wiki." },
   { cmd: "mw update <id> <file>",   desc: "Update an existing document with new content." },
   { cmd: "mw pull <id>",            desc: "Download a document's Markdown content." },
   { cmd: "mw delete <id>",          desc: "Soft-delete a document." },
   { cmd: "mw list",                 desc: "List all your documents." },
   { cmd: "mw open <id>",            desc: "Open a document in the browser." },
   { cmd: "mw capture",              desc: "Capture the current tmux pane and publish." },
-  { cmd: "mw login",                desc: "Authenticate with Memory.Wiki." },
+  { cmd: "mw login",                desc: "Authenticate with memory.wiki." },
   { cmd: "mw logout",               desc: "Clear stored credentials." },
   { cmd: "mw whoami",               desc: "Show current authenticated user." },
 ];
 const COMMANDS_KO = [
-  { cmd: "mw publish <file>",       desc: "Markdown 파일 또는 stdin을 Memory.Wiki에 게시합니다." },
+  { cmd: "mw publish <file>",       desc: "Markdown 파일 또는 stdin을 memory.wiki에 게시합니다." },
   { cmd: "mw update <id> <file>",   desc: "기존 문서를 새 내용으로 업데이트합니다." },
   { cmd: "mw pull <id>",            desc: "문서의 Markdown 내용을 다운로드합니다." },
   { cmd: "mw delete <id>",          desc: "문서를 소프트 삭제합니다." },
   { cmd: "mw list",                 desc: "내 모든 문서를 조회합니다." },
   { cmd: "mw open <id>",            desc: "브라우저에서 문서를 엽니다." },
   { cmd: "mw capture",              desc: "현재 tmux 패널을 캡처하여 게시합니다." },
-  { cmd: "mw login",                desc: "Memory.Wiki에 인증합니다." },
+  { cmd: "mw login",                desc: "memory.wiki에 인증합니다." },
   { cmd: "mw logout",               desc: "저장된 인증 정보를 삭제합니다." },
   { cmd: "mw whoami",               desc: "현재 인증된 사용자를 표시합니다." },
 ];
@@ -211,7 +211,7 @@ mw logout
 mw whoami
 # user@example.com (authenticated via OAuth)`;
 
-const PIPES_CODE_EN = `# Clipboard to Memory.Wiki
+const PIPES_CODE_EN = `# Clipboard to memory.wiki
 pbpaste | mw publish
 
 # Command output
@@ -232,7 +232,7 @@ docker logs my-app 2>&1 | mw publish
 # Pipe through multiple commands
 curl -s https://api.example.com/data | jq . | mw publish`;
 
-const PIPES_CODE_KO = `# 클립보드를 Memory.Wiki로
+const PIPES_CODE_KO = `# 클립보드를 memory.wiki로
 pbpaste | mw publish
 
 # 명령어 출력

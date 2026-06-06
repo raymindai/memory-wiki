@@ -37,11 +37,11 @@ import {
 import { getAboutContent, type Locale } from "./content";
 
 const GALLERY_SLIDES = [
-  { src: "/images/hero-editor.webp",        alt: "Memory.Wiki WYSIWYG editor",                  title: "Web editor",          desc: "Paste, drop, capture. URL in three seconds.",         href: "/",                linkText: "Open" },
+  { src: "/images/hero-editor.webp",        alt: "memory.wiki WYSIWYG editor",                  title: "Web editor",          desc: "Paste, drop, capture. URL in three seconds.",         href: "/",                linkText: "Open" },
   { src: "/images/hero-chromeext.webp",     alt: "Chrome extension capturing from Claude",      title: "Chrome extension",    desc: "One click on ChatGPT, Claude, Gemini.",               href: "/plugins#chrome",  linkText: "Open" },
   { src: "/images/hero-mcp.webp",           alt: "MCP server in Claude Code",                   title: "MCP server",          desc: "29 tools for Claude, Cursor, Windsurf, Codex.",       href: "/plugins#mcp",     linkText: "Open" },
   { src: "/images/plugin-vscode.webp",      alt: "VS Code extension with sidebar and preview",  title: "VS Code extension",   desc: "Sidebar to your cloud, one-click publish, WYSIWYG.",   href: "/plugins#vscode",  linkText: "Open" },
-  { src: "/images/plugin-desktop.webp",     alt: "Memory.Wiki for Mac with sidebar",            title: "Memory.Wiki for Mac", desc: "Native sidebar, folders, offline.",                    href: "/plugins#desktop", linkText: "Open" },
+  { src: "/images/plugin-desktop.webp",     alt: "memory.wiki for Mac with sidebar",            title: "memory.wiki for Mac", desc: "Native sidebar, folders, offline.",                    href: "/plugins#desktop", linkText: "Open" },
   { src: "/images/feature-showcase-1.webp", alt: "Rendered document",                           title: "Beautiful rendering", desc: "Tables, lists, headings rendered with precision.",     href: "/",                linkText: "Open" },
   { src: "/images/feature-showcase-2.webp", alt: "Math and diagrams",                           title: "Math, diagrams, code", desc: "KaTeX, Mermaid, 190+ language highlighting.",         href: "/docs",            linkText: "Open" },
 ];

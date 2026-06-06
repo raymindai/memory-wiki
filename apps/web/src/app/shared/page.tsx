@@ -4,9 +4,9 @@ import { getSupabaseClient } from "@/lib/supabase";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 
 export const metadata: Metadata = {
-  title: "Shared bundles — Memory.Wiki",
+  title: "Shared bundles — memory.wiki",
   description:
-    "Bundles other people on Memory.Wiki chose to share publicly. Each one is a curated set of documents you can paste into any AI as context.",
+    "Bundles other people on memory.wiki chose to share publicly. Each one is a curated set of documents you can paste into any AI as context.",
   alternates: { canonical: "https://memory.wiki/shared" },
 };
 
@@ -111,7 +111,7 @@ export default async function SharedBundlesPage() {
             Bundles
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            Shared by people on Memory.Wiki
+            Shared by people on memory.wiki
           </h1>
           <p
             className="text-body"
@@ -184,7 +184,7 @@ export default async function SharedBundlesPage() {
           style={{ borderTop: "1px solid var(--border-dim)", color: "var(--text-faint)" }}
         >
           <span>
-            Hosted on <Link href="/" style={{ color: "var(--accent)" }}>Memory.Wiki</Link>
+            Hosted on <Link href="/" style={{ color: "var(--accent)" }}>memory.wiki</Link>
           </span>
           <span>Owners control whether their bundle appears here.</span>
         </footer>

@@ -2,7 +2,7 @@
  * Shared types for share-link importers.
  *
  * Each provider extractor turns a public AI conversation share URL
- * (ChatGPT, Claude, Gemini) into clean markdown that Memory.Wiki can save
+ * (ChatGPT, Claude, Gemini) into clean markdown that memory.wiki can save
  * as a Document.
  */
 

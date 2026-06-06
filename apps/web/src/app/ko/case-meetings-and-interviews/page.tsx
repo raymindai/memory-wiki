@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "전사록 캡처",
-      detail: "Otter / Fireflies / Granola에서 paste, 또는 그것을 담고 있는 Notion 페이지에서 import. Memory.Wiki가 화자를 정규화하고 영구 URL에 저장.",
+      detail: "Otter / Fireflies / Granola에서 paste, 또는 그것을 담고 있는 Notion 페이지에서 import. memory.wiki가 화자를 정규화하고 영구 URL에 저장.",
     },
     {
       step: "Intent 태깅",

@@ -47,9 +47,9 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "Memory.Wiki — Stop re-explaining your context to every AI",
+  title: "memory.wiki — Stop re-explaining your context to every AI",
   description:
-    "One URL, every AI. Capture from ChatGPT, Claude, Notion, GitHub, Obsidian — your knowledge becomes a citable URL that Claude, ChatGPT, Cursor, and Codex all fetch the same way. You set the direction; Memory.Wiki structures the URL.",
+    "One URL, every AI. Capture from ChatGPT, Claude, Notion, GitHub, Obsidian — your knowledge becomes a citable URL that Claude, ChatGPT, Cursor, and Codex all fetch the same way. You set the direction; memory.wiki structures the URL.",
   keywords: [
     "personal knowledge hub",
     "AI memory",
@@ -65,20 +65,20 @@ export const metadata: Metadata = {
     "Codex",
     "knowledge management",
   ],
-  authors: [{ name: "Memory.Wiki", url: "https://memory.wiki" }],
+  authors: [{ name: "memory.wiki", url: "https://memory.wiki" }],
   metadataBase: new URL("https://memory.wiki"),
   openGraph: {
-    title: "Memory.Wiki — Stop re-explaining your context to every AI",
+    title: "memory.wiki — Stop re-explaining your context to every AI",
     description:
       "One URL, every AI. Capture, bundle, deploy. The personal knowledge hub for the AI era.",
     url: "https://memory.wiki",
-    siteName: "Memory.Wiki",
+    siteName: "memory.wiki",
     type: "website",
     images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Memory.Wiki — Stop re-explaining your context to every AI",
+    title: "memory.wiki — Stop re-explaining your context to every AI",
     description:
       "One URL, every AI. Your memory, deployable to Claude, ChatGPT, Cursor, Codex — same way.",
     images: ["/api/og"],
@@ -138,7 +138,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
-          "name": "Memory.Wiki",
+          "name": "memory.wiki",
           "url": "https://memory.wiki",
           "description": "Stop re-explaining your context to every AI. Put your knowledge in one URL Claude, ChatGPT, Cursor and Codex all read the same way. WYSIWYG editor, AI capture from chat surfaces, cross-platform sync, developer API. No login required.",
           "publisher": {
@@ -155,7 +155,7 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "Memory.Wiki",
+          "name": "memory.wiki",
           "applicationCategory": "Productivity",
           "operatingSystem": "Web, macOS, VS Code, Chrome",
           "url": "https://memory.wiki",

@@ -1,7 +1,7 @@
 /* ════════════════════════════════════════════════════════════════════
    v8 Frontier — AI-native, dark-first, glass + aurora.
 
-   The current era's product DNA, applied to Memory.Wiki:
+   The current era's product DNA, applied to memory.wiki:
    - Pure-dark canvas with ambient aurora + grain
    - Oversized Instrument Serif italic for emotional moments,
      Inter for trustable body
@@ -2396,7 +2396,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   APP-SHELL HUB VIEW — match real Memory.Wiki hub
+   APP-SHELL HUB VIEW — match real memory.wiki hub
    ══════════════════════════════════════════════════════════════════ */
 .v8-frontier .hub-public {
   display: inline-flex;
@@ -2560,7 +2560,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   REAL HUB MOCK — match production Memory.Wiki hub
+   REAL HUB MOCK — match production memory.wiki hub
    ══════════════════════════════════════════════════════════════════ */
 
 .v8-frontier .app-main {

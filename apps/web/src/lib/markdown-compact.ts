@@ -1,6 +1,6 @@
 // Token-economical markdown post-processing for /raw/* endpoints.
 //
-// Thesis: an Memory.Wiki URL should fetch as the densest possible representation
+// Thesis: an memory.wiki URL should fetch as the densest possible representation
 // of the underlying content so an LLM spends fewer tokens for the same
 // information. Compact mode strips bytes that carry no meaning to a
 // reader (blank-line padding, HTML comments, trailing whitespace) while

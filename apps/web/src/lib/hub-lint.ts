@@ -228,7 +228,7 @@ export async function computeLintReport(
     for (const candidateId of liveDocIds) {
       if (candidateId === d.id) continue;
       if (referenced.has(candidateId)) continue;
-      // Memory.Wiki URL shapes:
+      // memory.wiki URL shapes:
       //   memory.wiki/<id>           (canonical, AI-fetcher path)
       //   memory.wiki/d/<id>         (browser route)
       //   /<id>                   (relative link if user wrote one)

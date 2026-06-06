@@ -8,7 +8,7 @@ export function LovableVariant() {
   const [streamedText, setStreamedText] = useState("");
   const fullText =
     "Your weekly digest: 12 captures this week, clustered into 3 themes. " +
-    "Memory.Wiki noticed a strong connection between your TypeScript notes " +
+    "memory.wiki noticed a strong connection between your TypeScript notes " +
     "and the new design system you started capturing on Thursday.";
 
   const startStream = () => {
@@ -30,7 +30,7 @@ export function LovableVariant() {
         <div className="topnav-inner">
           <a href="#" className="topnav-brand">
             <span className="brand-mark">✦</span>
-            <span className="brand-word">Memory.Wiki</span>
+            <span className="brand-word">memory.wiki</span>
           </a>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Product</a>
@@ -59,7 +59,7 @@ export function LovableVariant() {
             Capture from anywhere, paste anywhere.
           </p>
           <div className="cta-row">
-            <button className="btn-dark">Start your Memory.Wiki</button>
+            <button className="btn-dark">Start your memory.wiki</button>
             <button className="btn-outline">See an example</button>
           </div>
 
@@ -67,7 +67,7 @@ export function LovableVariant() {
           <div className="prompt-input">
             <textarea
               className="prompt-textarea"
-              placeholder="Paste anything — article, AI chat, idea — and Memory.Wiki organizes it."
+              placeholder="Paste anything — article, AI chat, idea — and memory.wiki organizes it."
               rows={3}
               readOnly
               defaultValue=""
@@ -111,7 +111,7 @@ export function LovableVariant() {
         <div className="section-head">
           <h2 className="display-section">Three primitives. One URL.</h2>
           <p className="section-lede">
-            Every Memory.Wiki page is composed of three layers: capture,
+            Every memory.wiki page is composed of three layers: capture,
             organize, and use. AI lives in the middle.
           </p>
         </div>
@@ -169,7 +169,7 @@ export function LovableVariant() {
             </div>
             <h3 className="card-title">v8 thinking — capture vs memory</h3>
             <p className="card-body">
-              Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+              memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
               그래서 capture everything 이 자연스러운 입구.
             </p>
             <div className="tags">
@@ -203,7 +203,7 @@ export function LovableVariant() {
             </div>
             <h3 className="card-title">My current focus</h3>
             <p className="card-body">
-              Shipping Memory.Wiki v8 over 20 weeks. Capture → Organize → Use.
+              Shipping memory.wiki v8 over 20 weeks. Capture → Organize → Use.
               Cross-AI delivery is the wedge giants cannot build.
             </p>
             <div className="tags">
@@ -224,7 +224,7 @@ export function LovableVariant() {
         </div>
         <div className="dual-card dual-card-ai" style={{ maxWidth: 720 }}>
           <div className="dual-meta">
-            <span className="ai-pill">✦ Memory.Wiki AI</span>
+            <span className="ai-pill">✦ memory.wiki AI</span>
             <button className="btn-outline-small" onClick={startStream}>
               Generate again
             </button>
@@ -264,7 +264,7 @@ export function LovableVariant() {
           <div className="footer-top">
             <a href="#" className="topnav-brand">
               <span className="brand-mark">✦</span>
-              <span className="brand-word">Memory.Wiki</span>
+              <span className="brand-word">memory.wiki</span>
             </a>
             <div className="footer-meta">
               <span className="footer-link">v8 · Variant F</span>

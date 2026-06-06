@@ -535,7 +535,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
           </button>
         ) : (
           <Link href="/" className="text-sm font-medium px-4 py-2 rounded-lg" style={{ background: "var(--text-primary)", color: "var(--background)", textDecoration: "none" }}>
-            Go to Memory.Wiki
+            Go to memory.wiki
           </Link>
         )}
       </div>
@@ -570,7 +570,7 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
             Settings
           </h1>
           <p className="mt-2" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.55 }}>
-            Tune your account, hub, and how Memory.Wiki auto-manages your knowledge.
+            Tune your account, hub, and how memory.wiki auto-manages your knowledge.
           </p>
         </header>
 

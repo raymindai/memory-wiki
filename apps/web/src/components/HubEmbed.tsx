@@ -281,7 +281,7 @@ export default function HubEmbed({
   onOpenGalaxy,
 }: HubEmbedProps) {
   // Needs Review + Suggestions default to COLLAPSED when auto-
-  // management is on — the assumption is Memory.Wiki is handling them
+  // management is on — the assumption is memory.wiki is handling them
   // for you, so the user shouldn't have to scroll past detailed
   // lists every Hub visit. When auto-management is off, both
   // sections default OPEN so manual triage is still front-and-
@@ -848,7 +848,7 @@ export default function HubEmbed({
             Deploy + Setup split. One panel: pick the tool, see
             exactly what to do, copy, done. URL tools (chat AIs +
             Generic) show a URL row with the Compact/Full chip
-            toggle; snippet tools (editor + Memory.Wiki native) show their
+            toggle; snippet tools (editor + memory.wiki native) show their
             specific snippet. No "via memory.wiki:" group label — every
             tool sits at the same level. */}
         <section
@@ -859,7 +859,7 @@ export default function HubEmbed({
                 Row 1 — "where you do AI" (Claude / ChatGPT / Gemini /
                 Claude Code / Cursor / Generic), ordered by likely-
                 use frequency (chat surfaces first, IDE next).
-                Row 2 — "Memory.Wiki native" runtime (MCP / Skill / CLI)
+                Row 2 — "memory.wiki native" runtime (MCP / Skill / CLI)
                 under a small "via memory.wiki:" label so users see them
                 as add-on capabilities, not yet-another-vendor.
               The active tab's snippet card carries a one-line hint,
@@ -885,29 +885,29 @@ export default function HubEmbed({
             const compactAvailable = compactTokens > 0;
             const projCtx = `# Project context
 
-Memory.Wiki hub: ${url}
+memory.wiki hub: ${url}
 
 Fetch this URL on every session. The response carries clean
 markdown of the user's knowledge graph (concept index, bundle
 analyses, doc list) — paste-and-go context.`;
             const cursorRule = `---
-description: Memory.Wiki hub context
+description: memory.wiki hub context
 alwaysApply: true
 ---
-Memory.Wiki hub: ${url}
+memory.wiki hub: ${url}
 
 Fetch this URL on every session for the user's knowledge graph
 (concept index, bundle analyses, doc list).`;
             const mcpConfig = `{
   "mcpServers": {
-    "Memory.Wiki": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["-y", "memory-wiki-mcp"]
     }
   }
 }`;
             const skillUse = `# Install once
-claude skill install Memory.Wiki
+claude skill install memory.wiki
 
 # Inside any Claude Code session
 /memory.wiki capture "your idea"
@@ -915,9 +915,9 @@ claude skill install Memory.Wiki
 /memory.wiki hub`;
             const cliUse = `npm install -g memory-wiki-cli
 
-Memory.Wiki capture "your idea"
-Memory.Wiki search "topic"
-Memory.Wiki hub`;
+memory.wiki capture "your idea"
+memory.wiki search "topic"
+memory.wiki hub`;
 
             type Tool = {
               id: string;
@@ -1018,7 +1018,7 @@ Memory.Wiki hub`;
                 hint: "Use /memory.wiki slash commands inside Claude Code",
                 snippet: skillUse,
                 explanation:
-                  "Install once with `claude skill install Memory.Wiki`. Then in any Claude Code session, run slash commands like /memory.wiki capture, /memory.wiki search, /memory.wiki hub. The skill is namespaced so it doesn't collide with Claude's built-ins.",
+                  "Install once with `claude skill install memory.wiki`. Then in any Claude Code session, run slash commands like /memory.wiki capture, /memory.wiki search, /memory.wiki hub. The skill is namespaced so it doesn't collide with Claude's built-ins.",
                 docHref: "/docs/integrate",
               },
               {
@@ -1029,7 +1029,7 @@ Memory.Wiki hub`;
                 hint: "Capture and search from your terminal",
                 snippet: cliUse,
                 explanation:
-                  "Globally-installed npm package. Run Memory.Wiki capture, Memory.Wiki search, Memory.Wiki hub from any directory. Handy for scripting, terminal-first workflows, or piping shell output into your hub.",
+                  "Globally-installed npm package. Run memory.wiki capture, memory.wiki search, memory.wiki hub from any directory. Handy for scripting, terminal-first workflows, or piping shell output into your hub.",
                 docHref: "/docs/cli",
               },
             ];

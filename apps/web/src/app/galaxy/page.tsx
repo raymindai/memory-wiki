@@ -10,7 +10,7 @@ import GalaxyPageClient from "./GalaxyPageClient";
 // page did. See claude memory `start_growing_hub_concept_2026_05`.
 
 export const metadata: Metadata = {
-  title: "Galaxy — Memory.Wiki",
+  title: "Galaxy — memory.wiki",
   description: "Your hub as a constellation. Concepts and docs, connected.",
   robots: { index: false, follow: false }, // owner-only surface
 };

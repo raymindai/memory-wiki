@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "프로젝트 허브 한 번만 구축",
-      detail: "스펙, 최근 결정, 고객 피드백, 디자인 제약을 Memory.Wiki 문서로 캡처. 프로젝트 이름의 번들로 묶음. 그 번들은 영구 URL 보유.",
+      detail: "스펙, 최근 결정, 고객 피드백, 디자인 제약을 memory.wiki 문서로 캡처. 프로젝트 이름의 번들로 묶음. 그 번들은 영구 URL 보유.",
     },
     {
       step: "Priming할 때 번들 URL paste",
@@ -27,7 +27,7 @@ const data: CaseData = {
     },
     {
       step: "허브를 현재 상태로 유지",
-      detail: "새 결정이 나오면 Memory.Wiki에 저장 (Hub Chat의 Save-as-doc, 또는 에디터). 다음에 URL을 paste하면 두 AI 모두 업데이트된 상태를 봄. Re-priming 없음.",
+      detail: "새 결정이 나오면 memory.wiki에 저장 (Hub Chat의 Save-as-doc, 또는 에디터). 다음에 URL을 paste하면 두 AI 모두 업데이트된 상태를 봄. Re-priming 없음.",
     },
   ],
   result: [

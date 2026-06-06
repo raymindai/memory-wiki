@@ -5,7 +5,7 @@ const data: CaseData = {
   slug: "agent-memory",
   kicker: "Agent persistent memory",
   title: "Long-running agents that remember what they did yesterday.",
-  sub: "For people building or operating autonomous AI agents. Every run starts fresh by default — Memory.Wiki turns the hub URL into the agent's cross-run memory, readable and writable through the MCP server.",
+  sub: "For people building or operating autonomous AI agents. Every run starts fresh by default — memory.wiki turns the hub URL into the agent's cross-run memory, readable and writable through the MCP server.",
   accent: "#a78bfa",
   pain: [
     "Your agent (Claude Code, Cursor agent, Aider, a custom one) runs for an hour, makes 12 decisions, finishes the task. Next run, it starts from zero.",
@@ -15,7 +15,7 @@ const data: CaseData = {
   ],
   action: [
     {
-      step: "Give the agent an Memory.Wiki hub",
+      step: "Give the agent an memory.wiki hub",
       detail: "Create a hub (memory.wiki/hub/<slug>). The hub URL is the agent's memory address. Bundle URLs inside it scope memory by project or task type.",
     },
     {
@@ -24,11 +24,11 @@ const data: CaseData = {
     },
     {
       step: "Pre-run: pull the hub URL as context",
-      detail: "First step of every agent run is `Memory.Wiki pull <hub_url>` or `Memory.Wiki search <task topic>`. The hub fetches as plain markdown — no vector setup, no vendor SDK.",
+      detail: "First step of every agent run is `memory.wiki pull <hub_url>` or `memory.wiki search <task topic>`. The hub fetches as plain markdown — no vector setup, no vendor SDK.",
     },
     {
       step: "Post-run: write decisions back",
-      detail: "When the agent finishes, it calls `Memory.Wiki capture` (or `mw_create` MCP tool) with a structured summary: decision, rationale, files touched, follow-ups. Next run reads these alongside everything older.",
+      detail: "When the agent finishes, it calls `memory.wiki capture` (or `mw_create` MCP tool) with a structured summary: decision, rationale, files touched, follow-ups. Next run reads these alongside everything older.",
     },
   ],
   result: [

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "memory.wiki — Open Spec",
     description: "AI 시대 wiki를 위한 URL 계약 + retrieval API + llms.txt. 오픈, MIT 라이선스 엔진.",
     url: "https://memory.wiki/ko/spec",
-    images: [{ url: "/api/og?title=Memory.Wiki%20Spec", width: 1200, height: 630 }],
+    images: [{ url: "/api/og?title=memory.wiki%20Spec", width: 1200, height: 630 }],
   },
 };
 

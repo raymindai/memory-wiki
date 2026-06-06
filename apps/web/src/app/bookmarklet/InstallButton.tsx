@@ -28,10 +28,10 @@ export default function InstallButton({ href }: Props) {
       draggable
       // The dragged-to-bookmarks title is taken from the anchor's
       // accessible name. Setting a `title` attribute makes it
-      // explicit so the saved bookmark reads "Memory.Wiki — Save
+      // explicit so the saved bookmark reads "memory.wiki — Save
       // this chat" even on browsers that don't carry the page
       // favicon to `javascript:` URLs (Firefox in particular).
-      title="Memory.Wiki — Save this chat"
+      title="memory.wiki — Save this chat"
       onClick={(e) => {
         e.preventDefault();
         // eslint-disable-next-line no-alert
@@ -41,10 +41,10 @@ export default function InstallButton({ href }: Props) {
     >
       <img
         src="/brand/mwblob_morph.svg"
-        alt="Memory.Wiki"
+        alt="memory.wiki"
         className="pure-bookmarklet-button-mark"
       />
-      <span>Save to Memory.Wiki</span>
+      <span>Save to memory.wiki</span>
     </a>
   );
 }

@@ -154,7 +154,7 @@ export function FrontierVariant() {
             your context to AI.
           </h1>
           <p className="lede">
-            Memory.Wiki captures every thought, document, and conversation,
+            memory.wiki captures every thought, document, and conversation,
             organizes them with AI, and ships the result as one URL any model
             can read. Cross-AI by design, permanent by default.
           </p>
@@ -321,7 +321,7 @@ export function FrontierVariant() {
                 </span>
               </div>
               <div className="payload-body">
-                <div><span className="md-h"># raymind / Memory.Wiki hub</span></div>
+                <div><span className="md-h"># raymind / memory.wiki hub</span></div>
                 <div><span className="md-meta">memory.wiki/@raymind / 247 docs / 17 bundles / updated 2h ago</span></div>
                 <div>&nbsp;</div>
                 <div><span className="md-h">## What this hub is</span></div>
@@ -329,7 +329,7 @@ export function FrontierVariant() {
                 <div>Product specs, vision docs, CV, and the wiki that ties it together.</div>
                 <div>&nbsp;</div>
                 <div><span className="md-h">## Concept map (compact)</span></div>
-                <div><span className="md-bullet">-</span>Memory.Wiki vision <span className="md-link">[v8 thinking]</span></div>
+                <div><span className="md-bullet">-</span>memory.wiki vision <span className="md-link">[v8 thinking]</span></div>
                 <div><span className="md-bullet">-</span>Cross-AI strategy <span className="md-link">[strategy / wedge]</span></div>
                 <div><span className="md-bullet">-</span>Capture surfaces <span className="md-link">[9 surfaces shipping]</span></div>
                 <div><span className="md-bullet">-</span>Auto-organize layer <span className="md-link">[clusters / bundles]</span></div>
@@ -488,7 +488,7 @@ export function FrontierVariant() {
             <div className="bnum-card-num">∞</div>
             <div className="bnum-card-headline">URL lifetime</div>
             <div className="bnum-card-detail mono">
-              Memory.Wiki URLs are permanent by policy. No expiry, ever.
+              memory.wiki URLs are permanent by policy. No expiry, ever.
             </div>
           </div>
         </div>
@@ -584,8 +584,8 @@ export function FrontierVariant() {
                   <span className="lib-cat-count">3</span>
                 </div>
                 <div className="lib-rows">
-                  <button className="lib-row active"><GlobeRowIcon /> Memory.Wiki v8 / UI &amp; Brand Direction</button>
-                  <button className="lib-row"><GlobeRowIcon /> Memory.Wiki v8 Plan</button>
+                  <button className="lib-row active"><GlobeRowIcon /> memory.wiki v8 / UI &amp; Brand Direction</button>
+                  <button className="lib-row"><GlobeRowIcon /> memory.wiki v8 Plan</button>
                   <button className="lib-row"><GlobeRowIcon /> memory.wiki 사업계획 v7-revised</button>
                 </div>
               </div>
@@ -597,7 +597,7 @@ export function FrontierVariant() {
                   <span className="lib-cat-end mono">18</span>
                 </div>
                 <div className="lib-rows">
-                  <button className="lib-row"><BundleRowIcon /> Memory Wiki v7 <span className="lib-row-count">5</span></button>
+                  <button className="lib-row"><BundleRowIcon /> memory.wiki v7 <span className="lib-row-count">5</span></button>
                   <button className="lib-row"><BundleRowIcon /> Hyunsang Cho CV <span className="lib-row-count">1</span></button>
                   <button className="lib-row"><BundleRowIcon /> mdfy Foundations <span className="lib-row-count">9</span></button>
                   <button className="lib-row"><BundleRowIcon /> AI Memory <span className="lib-row-count">3</span></button>
@@ -611,7 +611,7 @@ export function FrontierVariant() {
                   <span className="lib-cat-end mono">127</span>
                 </div>
                 <div className="lib-rows">
-                  <button className="lib-row"><GlobeRowIcon /> Memory.Wiki v8 Plan</button>
+                  <button className="lib-row"><GlobeRowIcon /> memory.wiki v8 Plan</button>
                   <button className="lib-row"><GlobeRowIcon /> v8 Idea</button>
                   <button className="lib-row"><LockRowIcon /> v7 rebrand / Remaining tasks</button>
                 </div>
@@ -797,7 +797,7 @@ export function FrontierVariant() {
               <div className="app-ai-head">
                 <span className="badge-ai">
                   <span className="pulse-dot sm" style={{ width: 6, height: 6, minWidth: 6, minHeight: 6, maxWidth: 6, maxHeight: 6, display: "inline-block", borderRadius: "50%", padding: 0, margin: 0, lineHeight: 0, verticalAlign: "middle" }} />
-                  Memory.Wiki AI
+                  memory.wiki AI
                 </span>
                 <button className="btn-pill">Close</button>
               </div>
@@ -810,7 +810,7 @@ export function FrontierVariant() {
                 <div className="ai-cite mono">source / memory.wiki/nvF3Li2x</div>
               </div>
               <div className="ai-input">
-                <input placeholder="Ask Memory.Wiki" />
+                <input placeholder="Ask memory.wiki" />
                 <button className="ai-send" aria-label="Send">→</button>
               </div>
             </aside>
@@ -853,7 +853,7 @@ export function FrontierVariant() {
               <div className="avatar lg">R</div>
               <div className="pdoc-byline-text">
                 <div className="pdoc-byline-name">raymind</div>
-                <div className="pdoc-byline-role mono">Solo founder / Memory.Wiki</div>
+                <div className="pdoc-byline-role mono">Solo founder / memory.wiki</div>
               </div>
               <button className="pdoc-follow">
                 <Plus size={12} strokeWidth={2} /> Follow
@@ -870,7 +870,7 @@ export function FrontierVariant() {
 
             <div className="pdoc-body">
               <p className="pdoc-lede">
-                Memory.Wiki이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+                memory.wiki이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
                 그래서 capture everything이 자연스러운 입구.
               </p>
               <blockquote className="pdoc-quote">
@@ -951,13 +951,13 @@ export function FrontierVariant() {
                 <div className="vhub-card-text">
                   <h1 className="vhub-name">raymind</h1>
                   <p className="vhub-bio">
-                    Solo founder of Memory.Wiki. Building a cross-AI context
+                    Solo founder of memory.wiki. Building a cross-AI context
                     layer. Ships fast, prefers TypeScript, lives in markdown.
                   </p>
                 </div>
                 <div className="vhub-card-actions">
                   <button className="btn-primary">
-                    Paste my Memory.Wiki
+                    Paste my memory.wiki
                     <ArrowRight size={14} strokeWidth={2} />
                   </button>
                   <button className="btn-secondary">
@@ -1190,7 +1190,7 @@ export function FrontierVariant() {
         </div>
         <div className="footer-rule" />
         <div className="footer-bottom">
-          <span className="mono">© 2026 Memory.Wiki</span>
+          <span className="mono">© 2026 memory.wiki</span>
           <span className="ops-status">
             <span className="status-dot" />
             All systems operational

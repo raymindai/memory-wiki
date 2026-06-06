@@ -61,16 +61,16 @@ export default function TermsPure({ locale = "en" }: { locale?: "en" | "ko" }) {
             </h1>
             <p className="pure-manifesto-intro">
               {isKo
-                ? "Memory.Wiki, Memory.Wiki Chrome 확장, VS Code 확장, Memory.Wiki for Mac, Memory.Wiki MCP 서버 (이하 \"서비스\") 를 사용함으로써 본 약관에 동의하게 됩니다. 서비스는 Raymind AI가 운영합니다."
-                : "By using Memory.Wiki, the Memory.Wiki Chrome Extension, VS Code Extension, Memory.Wiki for Mac, or the Memory.Wiki MCP server (collectively, “the Service”), you agree to these terms. The Service is operated by Raymind AI."}
+                ? "memory.wiki, memory.wiki Chrome 확장, VS Code 확장, memory.wiki for Mac, memory.wiki MCP 서버 (이하 \"서비스\") 를 사용함으로써 본 약관에 동의하게 됩니다. 서비스는 Raymind AI가 운영합니다."
+                : "By using memory.wiki, the memory.wiki Chrome Extension, VS Code Extension, memory.wiki for Mac, or the memory.wiki MCP server (collectively, “the Service”), you agree to these terms. The Service is operated by Raymind AI."}
             </p>
 
             <PureProse>
               <h2>{isKo ? "1. 서비스" : "1. The Service"}</h2>
               <p>
                 {isKo
-                  ? "Memory.Wiki는 마크다운 문서 발행 플랫폼입니다. 공유 가능한 URL로 문서를 생성, 편집, 공유할 수 있습니다. 서비스는 웹 에디터, 브라우저 확장, VS Code 확장, 데스크톱 앱, AI 도구 연동용 MCP 서버를 포함합니다."
-                  : "Memory.Wiki is a Markdown document publishing platform. You can create, edit, and share documents via shareable URLs. The Service includes a web editor, browser extension, VS Code extension, desktop app, and MCP server for AI tool integration."}
+                  ? "memory.wiki는 마크다운 문서 발행 플랫폼입니다. 공유 가능한 URL로 문서를 생성, 편집, 공유할 수 있습니다. 서비스는 웹 에디터, 브라우저 확장, VS Code 확장, 데스크톱 앱, AI 도구 연동용 MCP 서버를 포함합니다."
+                  : "memory.wiki is a Markdown document publishing platform. You can create, edit, and share documents via shareable URLs. The Service includes a web editor, browser extension, VS Code extension, desktop app, and MCP server for AI tool integration."}
               </p>
 
               <h2>{isKo ? "2. 사용자 콘텐츠" : "2. Your content"}</h2>

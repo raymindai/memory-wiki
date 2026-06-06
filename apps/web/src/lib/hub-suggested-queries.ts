@@ -5,7 +5,7 @@ import { callAI } from "@/lib/ai-providers";
  * Suggested queries panel (W8).
  *
  * Graphify's GRAPH_REPORT.md ends with "Suggested queries" so the user
- * has a starting point for what to ask. Memory.Wiki does the same, but
+ * has a starting point for what to ask. memory.wiki does the same, but
  * personalized to each owner's hub. The AI looks at recent docs + a
  * shape of what the hub covers, and proposes five questions the owner
  * could ask their AI tools, paired with the hub URL as context.

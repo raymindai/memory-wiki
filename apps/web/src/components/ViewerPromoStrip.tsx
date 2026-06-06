@@ -35,7 +35,7 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
           className="inline-flex items-center gap-1 transition-colors hover:underline"
           style={{ color: "var(--text-primary)" }}
         >
-          Go to Memory.Wiki
+          Go to memory.wiki
         </Link>
       </section>
     );
@@ -195,7 +195,7 @@ export default function ViewerPromoStrip({ isOwner = false }: ViewerPromoStripPr
             letterSpacing: "0.04em",
           }}
         >
-          How Memory.Wiki works
+          How memory.wiki works
           <ArrowUpRight size={11} strokeWidth={1.75} />
         </Link>
       </div>

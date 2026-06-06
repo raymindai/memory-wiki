@@ -13,7 +13,7 @@ import { extractTitleFromMd } from "@/lib/editor-types";
 
 // ─── Sample documents for default tabs ───
 
-export const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
+export const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
 > **The Markdown Hub.** Collect from anywhere. Edit with AI. Publish with a permanent URL.
 
@@ -52,7 +52,7 @@ export const SAMPLE_WELCOME = `# Welcome to Memory.Wiki
 
 | Channel | How |
 |---------|-----|
-| Web | You are here — [Memory.Wiki](https://memory.wiki) |
+| Web | You are here — [memory.wiki](https://memory.wiki) |
 | VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) — Cmd+Shift+M to preview |
 | Mac App | Native desktop with sidebar and sync |
 | CLI | \`npm install -g memory-wiki-cli\` — pipe anything to a URL |
@@ -260,7 +260,7 @@ erDiagram
 mindmap
   root((mdcore))
     Product
-      Memory.Wiki
+      memory.wiki
       Chrome Extension
     Engine
       Rust
@@ -277,7 +277,7 @@ mindmap
 timeline
     title mdcore Milestones
     2026 Q1 : Engine v0.1
-             : Memory.Wiki launch
+             : memory.wiki launch
     2026 Q2 : npm package
              : CLI tool
     2026 Q3 : API platform
@@ -349,7 +349,7 @@ export const SAMPLE_ASCII = `# ASCII Art Examples
 
 \`\`\`
 ┌──────────────────────────────────────────┐
-│              Memory.Wiki                      │
+│              memory.wiki                      │
 │                                          │
 │  ┌─ Input ─────────────────────────────┐ │
 │  │ Chrome Extension: AI → capture      │ │
@@ -367,7 +367,7 @@ export const SAMPLE_ASCII = `# ASCII Art Examples
 │                    ▼                      │
 │  ┌─ Output ────────────────────────────┐ │
 │  │ memory.wiki/{id} — shareable URL        │ │
-│  │ + "Published with Memory.Wiki" badge    │ │
+│  │ + "Published with memory.wiki" badge    │ │
 │  └─────────────────────────────────────┘ │
 └──────────────────────────────────────────┘
 \`\`\`
@@ -383,7 +383,7 @@ export const SAMPLE_ASCII = `# ASCII Art Examples
 │  Clarity  ██████░░░░ 63%     │
 │                              │
 │  — Analyzed by mdcore        │
-│  Memory.Wiki                     │
+│  memory.wiki                     │
 └─────────────────────────────┘
 \`\`\`
 
@@ -429,7 +429,7 @@ export const SAMPLE_IMPORT_EXPORT = `# Import & Export Guide
 
 ## Import — 13+ Formats
 
-Drop any file onto Memory.Wiki, use the **IMPORT** button in the sidebar, or paste content directly.
+Drop any file onto memory.wiki, use the **IMPORT** button in the sidebar, or paste content directly.
 
 | Format | How it works |
 |--------|-------------|
@@ -463,7 +463,7 @@ pbpaste | mw publish
 
 ### Import from GitHub
 
-Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. Memory.Wiki fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
+Paste a GitHub URL — repo home, a folder, a single file, or a \`raw.githubusercontent.com/...\` link. memory.wiki fetches every \`.md\` it finds (capped at 80 files / 200 KB each) and creates one doc per file, dropping them into a single bundle so you can open the whole repo as a thinking surface.
 
 Works on:
 - \`github.com/owner/repo\` — repo root, recursive
@@ -473,13 +473,13 @@ Works on:
 
 ### Import an Obsidian vault
 
-Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. Memory.Wiki walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
+Pick **Import Obsidian vault (.zip)** in the sidebar's + menu and upload your vault as a ZIP. memory.wiki walks every \`.md\` file (capped at 80 files / 200 KB each), skips Obsidian's config folders (\`.obsidian/\`, \`.git/\`, macOS resource forks), and imports each note as a draft doc. Re-uploading the same vault deduplicates instead of creating copies — safe to re-run.
 
 > v1 doesn't follow \`[[wikilinks]]\` or rewrite attachments — they come through as plain text. The concept index will still connect notes that share concepts once the ontology refresh catches up.
 
 ### Import via Chrome Extension
 
-Click the Memory.Wiki button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
+Click the memory.wiki button on ChatGPT, Claude, or Gemini to capture AI conversations directly.
 
 ## Export — Every Destination
 
@@ -515,7 +515,7 @@ Click anywhere in the **MD** view to start editing. Format with the toolbar or k
 
 ## Flavor Detection & Conversion
 
-Memory.Wiki auto-detects your Markdown flavor:
+memory.wiki auto-detects your Markdown flavor:
 
 - **GFM** — GitHub Flavored Markdown (tables, task lists, strikethrough)
 - **CommonMark** — Standard, maximum compatibility
@@ -565,7 +565,7 @@ Click the **Outline** button to see your document structure. All headings (H1-H6
 
 ## Related in your hub
 
-Under every doc you own, Memory.Wiki lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
+Under every doc you own, memory.wiki lists **other docs in your hub that share concepts** with the one you're reading — ranked by overlap, with the shared concept labels shown as chips. Built from the auto-extracted concept index, owner-only, and refreshed in the background. No manual wiki maintenance.
 
 ## Hub recall + reranker
 
@@ -596,11 +596,11 @@ Toggle **Narrow View** in the panel header to constrain content width for comfor
 
 ## Cross-Platform Sync
 
-Your documents sync across all 7 Memory.Wiki channels:
+Your documents sync across all 7 memory.wiki channels:
 
 | Channel | Install | What it does |
 |---------|---------|-------------|
-| Web | [Memory.Wiki](https://memory.wiki) | Full editor with AI tools |
+| Web | [memory.wiki](https://memory.wiki) | Full editor with AI tools |
 | VS Code | \`ext install raymindai.memory-wiki-vscode\` | WYSIWYG preview + sync |
 | Mac App | [Download DMG](https://memory.wiki/plugins) | Native sidebar + offline |
 | CLI | \`npm install -g memory-wiki-cli\` | Pipe anything to a URL |
@@ -850,13 +850,13 @@ export const SAMPLE_CHROME_EXT = `# Chrome Extension
 ### Capture from ChatGPT / Claude / Gemini
 
 1. Open any AI conversation
-2. Click the **Memory.Wiki** floating button (bottom-right corner)
+2. Click the **memory.wiki** floating button (bottom-right corner)
 3. Conversation is auto-formatted with User/Assistant roles
 4. URL is copied to clipboard
 
 ### Capture from Any Page
 
-1. Click the Memory.Wiki icon in the toolbar
+1. Click the memory.wiki icon in the toolbar
 2. Select "Capture Page"
 3. Page content is converted to Markdown and published
 
@@ -887,7 +887,7 @@ export const SAMPLE_VSCODE_EXT = `# VS Code Extension
 ext install raymindai.memory-wiki-vscode
 \`\`\`
 
-Or search "Memory.Wiki" in VS Code Extensions.
+Or search "memory.wiki" in VS Code Extensions.
 
 ## Quick Start
 
@@ -911,7 +911,7 @@ Or search "Memory.Wiki" in VS Code Extensions.
 | Shortcut | Command |
 |----------|---------|
 | \`Cmd+Shift+M\` | Open WYSIWYG preview |
-| \`Cmd+Alt+P\` | Publish to Memory.Wiki |
+| \`Cmd+Alt+P\` | Publish to memory.wiki |
 | \`Cmd+Alt+E\` | Export document |
 
 ## Settings
@@ -924,24 +924,24 @@ Or search "Memory.Wiki" in VS Code Extensions.
 | \`memorywiki.syncInterval\` | \`30\` | Polling interval (seconds) |
 `;
 
-export const SAMPLE_DESKTOP = `# Memory.Wiki for Mac
+export const SAMPLE_DESKTOP = `# memory.wiki for Mac
 
 > Native desktop app with sidebar, sync, and local rendering.
 
 ## Install
 
 1. Download the DMG from [memory.wiki/plugins](https://memory.wiki/plugins)
-2. Drag **Memory.Wiki** to Applications
-3. Launch Memory.Wiki
+2. Drag **memory.wiki** to Applications
+3. Launch memory.wiki
 
 ## Sidebar
 
 | Tab | Contents |
 |-----|----------|
 | ALL | Everything — local + synced + cloud |
-| SYNCED | Local files linked to Memory.Wiki |
+| SYNCED | Local files linked to memory.wiki |
 | LOCAL | Unpublished local files |
-| CLOUD | Documents on Memory.Wiki with folders |
+| CLOUD | Documents on memory.wiki with folders |
 
 ## Editing Modes
 
@@ -955,7 +955,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 
 ## Features
 
-- Full rendering engine (same as Memory.Wiki web)
+- Full rendering engine (same as memory.wiki web)
 - KaTeX math, Mermaid diagrams, 190+ language highlighting
 - Document outline panel
 - Import: PDF, DOCX, PPTX, XLSX, HTML, CSV
@@ -965,7 +965,7 @@ Click the orange **Publish** button → URL copied to clipboard.
 - Offline support
 `;
 
-export const SAMPLE_CLI = `# Memory.Wiki CLI
+export const SAMPLE_CLI = `# memory.wiki CLI
 
 > Publish Markdown from the terminal. Pipe anything to a URL.
 
@@ -1001,18 +1001,18 @@ curl -s https://api.example.com/status | mw publish
 ## Read in Terminal
 
 \`\`\`bash
-Memory.Wiki read abc123
+memory.wiki read abc123
 # → Color-coded headings, bold, code blocks, lists
 \`\`\`
 
 ## Manage Documents
 
 \`\`\`bash
-Memory.Wiki list                       # List your documents
-Memory.Wiki update abc123 updated.md   # Update
-Memory.Wiki pull abc123 -o doc.md      # Download
-Memory.Wiki delete abc123              # Delete
-Memory.Wiki open abc123                # Open in browser
+memory.wiki list                       # List your documents
+memory.wiki update abc123 updated.md   # Update
+memory.wiki pull abc123 -o doc.md      # Download
+memory.wiki delete abc123              # Delete
+memory.wiki open abc123                # Open in browser
 \`\`\`
 
 ## tmux Integration
@@ -1027,19 +1027,19 @@ bind-key M run-shell "tmux capture-pane -p -S -1000 | mw publish"
 
 | Short | Full |
 |-------|------|
-| \`Memory.Wiki p\` | \`Memory.Wiki publish\` |
-| \`Memory.Wiki ls\` | \`Memory.Wiki list\` |
-| \`Memory.Wiki rm\` | \`Memory.Wiki delete\` |
-| \`Memory.Wiki cat\` | \`Memory.Wiki read\` |
+| \`memory.wiki p\` | \`memory.wiki publish\` |
+| \`memory.wiki ls\` | \`memory.wiki list\` |
+| \`memory.wiki rm\` | \`memory.wiki delete\` |
+| \`memory.wiki cat\` | \`memory.wiki read\` |
 `;
 
 export const SAMPLE_MCP = `# MCP Server
 
-> Let AI tools create, read, and manage documents on Memory.Wiki.
+> Let AI tools create, read, and manage documents on memory.wiki.
 
 ## What is MCP?
 
-MCP (Model Context Protocol) lets AI tools call external APIs. The Memory.Wiki MCP server gives Claude the ability to publish and manage documents.
+MCP (Model Context Protocol) lets AI tools call external APIs. The memory.wiki MCP server gives Claude the ability to publish and manage documents.
 
 ## Setup
 
@@ -1064,7 +1064,7 @@ Add to \`.mcp.json\`:
 \`\`\`json
 {
   "mcpServers": {
-    "Memory.Wiki": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["memory-wiki-mcp"]
     }
@@ -1075,7 +1075,7 @@ Add to \`.mcp.json\`:
 ## Usage Examples
 
 \`\`\`
-You: "Publish my meeting notes to Memory.Wiki"
+You: "Publish my meeting notes to memory.wiki"
 Claude: → mw_create → https://memory.wiki/abc123
 
 You: "Show me my documents"
@@ -1102,9 +1102,9 @@ Claude: → mw_update → Document updated, same URL
 The hosted HTTP MCP exposes 25 tools including append, sections, versions, folders, and more.
 `;
 
-export const SAMPLE_FRESHNESS = `# How Memory.Wiki keeps your docs, bundles, and hub fresh
+export const SAMPLE_FRESHNESS = `# How memory.wiki keeps your docs, bundles, and hub fresh
 
-> Every Memory.Wiki URL is what the AI reads when you paste it. Freshness is part of the deal.
+> Every memory.wiki URL is what the AI reads when you paste it. Freshness is part of the deal.
 
 ## TL;DR
 
@@ -1141,7 +1141,7 @@ Normal flow: concept changes show up in the hub URL within seconds. Two guardrai
 
 ## The "Re-analyze (N)" banner
 
-When the Hub opens, Memory.Wiki compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
+When the Hub opens, memory.wiki compares \`concepts_built_at\` (last successful job) against \`docs_touched_at\` (latest doc content change). If stale you see:
 
 > 🟡 Concepts out of date · N docs have changed
 > [Re-analyze (N)]
@@ -1170,7 +1170,7 @@ Right-click any doc in the sidebar → **Re-analyze concepts**. Same machinery, 
 - You haven't touched anything (just reading) — nothing to refresh
 - You're not signed in — no concept index applies
 
-## Why Memory.Wiki doesn't auto-rebuild more aggressively
+## Why memory.wiki doesn't auto-rebuild more aggressively
 
 **Cost discipline.** Concept extraction is a Haiku call per doc. Auto-rebuilding on every save would burn tokens during noisy editing.
 
@@ -1185,7 +1185,7 @@ export const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 ## Install
 
-1. Install Memory.Wiki for Mac — QuickLook is bundled automatically
+1. Install memory.wiki for Mac — QuickLook is bundled automatically
 2. Or download MdfyQuickLook separately from [memory.wiki/plugins](https://memory.wiki/plugins)
 3. Enable in **System Settings → Extensions → Quick Look**
 
@@ -1203,7 +1203,7 @@ export const SAMPLE_QUICKLOOK = `# QuickLook Preview
 - Tables with alignment
 - KaTeX math equations
 - Dark / light theme (follows system preference)
-- "Open on Memory.Wiki" button
+- "Open on memory.wiki" button
 
 ## Supported Files
 
@@ -1218,13 +1218,13 @@ export const SAMPLE_QUICKLOOK = `# QuickLook Preview
 
 - Works in Finder, Desktop, and Open/Save dialogs
 - Preview updates when you press Space again after editing
-- Click "Open on Memory.Wiki" to publish directly from the preview
+- Click "Open on memory.wiki" to publish directly from the preview
 - No background processes — lightweight QuickLook extension
 `;
 
 export const SAMPLE_BUNDLES = `# Bundles, Discoveries, Compile & Concepts
 
-Beyond single docs, Memory.Wiki lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
+Beyond single docs, memory.wiki lets you cluster related documents into a **Bundle** and treat them as a single thinking surface. The bundle isn't a folder — it actively analyzes its contents, surfaces what they collectively say, and lets you compile new artifacts out of them.
 
 ## Bundles: from folder to thinking surface
 
@@ -1289,7 +1289,7 @@ Click any concept → drawer with all citations across your library:
 
 \`\`\`
 AI Memory Ownership — 4 docs, 7 mentions
-  ┌─ "Memory.Wiki V2"           [concept] excerpt…
+  ┌─ "memory.wiki V2"           [concept] excerpt…
   ├─ "Bundle Strategy Brief"    [definition] excerpt…
   └─ "Launch Plan"              [concept] excerpt…
 \`\`\`
@@ -1314,7 +1314,7 @@ The home screen shows compounding stats:
 The bundle is no longer a folder. It's a thinking partner that reads what you've gathered and tells you what it sees.
 `;
 
-// Server-seeded "Sample Bundle: Tour of Memory.Wiki". The bundle row and its
+// Server-seeded "Sample Bundle: Tour of memory.wiki". The bundle row and its
 // 3 member docs are inserted by supabase/migrations/033_example_bundle.sql
 // with fixed ids (mw-ex-bundle / mw-ex-fmt / mw-ex-diag / mw-ex-feat),
 // so this id can be hardcoded on the client. Listed in EXAMPLE_TABS as a
@@ -1325,13 +1325,13 @@ export const EXAMPLE_BUNDLE_ID = "mw-ex-bundle";
 
 export const SAMPLE_AI_CAPTURE = `# Capture AI conversations
 
-Memory.Wiki is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
+memory.wiki is built around the idea that the answers you got out of an AI today are worth keeping — and worth deploying back into another AI tomorrow.
 
 ## Three ways in
 
 ### 1. Paste a share URL
 
-Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. Memory.Wiki fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
+Paste a ChatGPT, Claude, or Gemini share URL directly into the editor. memory.wiki fetches the conversation and converts it into clean markdown — code blocks, headings, and quotes preserved.
 
 \`\`\`
 https://chat.openai.com/share/abc-...
@@ -1340,7 +1340,7 @@ https://claude.ai/share/xyz-...
 
 ### 2. Drop a transcript
 
-Copied a chat thread to clipboard? Paste it. Memory.Wiki auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
+Copied a chat thread to clipboard? Paste it. memory.wiki auto-detects ChatGPT / Claude / Gemini formats and structures the turns for you (User: / Assistant:) so the result reads like a real document, not a wall of text.
 
 ### 3. Capture from where you work
 
@@ -1368,7 +1368,7 @@ export const EXAMPLE_TABS: Tab[] = [
   // Markdown is "" because BundleEmbed fetches member docs by bundleId,
   // not from this tab's local body. readonly:true so the tab persists
   // across sessions like other Guides & Examples entries.
-  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of Memory.Wiki", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
+  { id: "tab-ex-bundle", kind: "bundle", bundleId: EXAMPLE_BUNDLE_ID, title: "Sample Bundle: Tour of memory.wiki", markdown: "", readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-import", title: extractTitleFromMd(SAMPLE_IMPORT_EXPORT), markdown: SAMPLE_IMPORT_EXPORT, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-features", title: extractTitleFromMd(SAMPLE_FEATURES), markdown: SAMPLE_FEATURES, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },
   { id: "tab-syntax", title: extractTitleFromMd(SAMPLE_FORMATTING), markdown: SAMPLE_FORMATTING, readonly: true, permission: "readonly", ownerEmail: EXAMPLE_OWNER },

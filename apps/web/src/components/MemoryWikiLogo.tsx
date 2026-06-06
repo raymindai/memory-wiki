@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Canonical Memory.Wiki logo.
+ * Canonical memory.wiki logo.
  *
  * Renders the brand v2 monochrome mark + wordmark on a SINGLE
  * horizontal line. The full v2 SVG lockup (logo-full-*.svg) is
@@ -97,14 +97,14 @@ export default function MemoryWikiLogo({
 
   if (resolved === "icon-only") {
     return (
-      <span className="mw-logo" style={{ display: "inline-block", lineHeight: 0 }} aria-label="Memory.Wiki">
+      <span className="mw-logo" style={{ display: "inline-block", lineHeight: 0 }} aria-label="memory.wiki">
         {Icon}
       </span>
     );
   }
   if (resolved === "text-only") {
     return (
-      <span className="mw-logo" aria-label="Memory.Wiki">
+      <span className="mw-logo" aria-label="memory.wiki">
         {Wordmark}
       </span>
     );
@@ -121,7 +121,7 @@ export default function MemoryWikiLogo({
         gap: Math.max(6, Math.round(size * 0.35)),
         lineHeight: 1,
       }}
-      aria-label="Memory.Wiki"
+      aria-label="memory.wiki"
     >
       {Icon}
       {Wordmark}

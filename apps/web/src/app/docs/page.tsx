@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import DocsHomePure from "./DocsHomePure";
 
 export const metadata: Metadata = {
-  title: "Documentation — Memory.Wiki",
+  title: "Documentation — memory.wiki",
   description:
-    "Complete developer documentation for Memory.Wiki. REST API, CLI, JavaScript SDK, MCP server, and npm packages for Markdown publishing.",
+    "Complete developer documentation for memory.wiki. REST API, CLI, JavaScript SDK, MCP server, and npm packages for Markdown publishing.",
   alternates: {
     canonical: "https://memory.wiki/docs",
     languages: { ko: "https://memory.wiki/ko/docs" },
   },
   openGraph: {
-    title: "Documentation — Memory.Wiki",
+    title: "Documentation — memory.wiki",
     description: "Complete developer documentation. REST API, CLI, SDK, MCP server.",
     url: "https://memory.wiki/docs",
     images: [{ url: "/api/og?title=Documentation", width: 1200, height: 630 }],

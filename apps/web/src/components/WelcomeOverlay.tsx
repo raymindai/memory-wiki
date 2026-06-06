@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 // Bumped to v7 so anyone who saw the old "mdfy.app" welcome card
-// gets the new "Memory.Wiki" version of the tour after rebrand.
+// gets the new "memory.wiki" version of the tour after rebrand.
 const STORAGE_KEY = "mw-welcome-seen-v7";
 
 // v6 welcome flow. Five slides, each with one role and one CTA:
@@ -14,7 +14,7 @@ const STORAGE_KEY = "mw-welcome-seen-v7";
 //
 // One CTA per slide (the Next button). No inline links — those competed
 // with Next and broke the "one screen, one action" rule. The dashboard
-// surfaces (Install /memory.wiki, Memory.Wiki Foundations bundle, etc.) are the
+// surfaces (Install /memory.wiki, memory.wiki Foundations bundle, etc.) are the
 // click targets once the user dismisses the overlay.
 
 type Surface = { name: string; desc: string; color: string };

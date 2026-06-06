@@ -75,7 +75,7 @@ export function MonoVariant() {
             </div>
             <h3 className="card-title">v8 thinking — capture vs memory</h3>
             <p className="card-body">
-              Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+              memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
               그래서 capture everything 이 자연스러운 입구.
             </p>
             <div className="card-tags">

@@ -15,11 +15,11 @@ const data: CaseData = {
   action: [
     {
       step: "중요한 문서 import",
-      detail: ".md 파일이 있는 GitHub repo (URL 하나, Memory.Wiki가 모든 .md를 walk). Notion 페이지 (URL + 통합 토큰 paste). Obsidian 볼트 (.zip 드롭). URL 페이지 (어떤 공개 docs 페이지든). 컴퓨터에서 파일 드래그앤드롭.",
+      detail: ".md 파일이 있는 GitHub repo (URL 하나, memory.wiki가 모든 .md를 walk). Notion 페이지 (URL + 통합 토큰 paste). Obsidian 볼트 (.zip 드롭). URL 페이지 (어떤 공개 docs 페이지든). 컴퓨터에서 파일 드래그앤드롭.",
     },
     {
       step: "허브 public으로",
-      detail: "설정 → Hub public 토글. Memory.Wiki가 index.md / SCHEMA.md / log.md / llms.txt를 허브 루트에 자동 발행 — 모든 AI 에이전트가 선호하는 프로토콜.",
+      detail: "설정 → Hub public 토글. memory.wiki가 index.md / SCHEMA.md / log.md / llms.txt를 허브 루트에 자동 발행 — 모든 AI 에이전트가 선호하는 프로토콜.",
     },
     {
       step: "하나의 URL 공유",

@@ -183,12 +183,12 @@ export const aboutEn: AboutContent = {
     num: "03",
     eyebrow: "Nine surfaces",
     title: "Wherever you already work.",
-    lede: "Memory.Wiki ships as native apps across every surface that matters. One account, one hub, every entry point.",
+    lede: "memory.wiki ships as native apps across every surface that matters. One account, one hub, every entry point.",
     items: [
       { title: "Web editor",        brand: "browser", href: "/",                  body: "WYSIWYG markdown at memory.wiki. Paste, drop a file, capture. URL in three seconds." },
       { title: "Chrome extension",  brand: "chrome",  href: "/plugins#chrome",    body: "One-click capture from ChatGPT, Claude, Gemini chat pages." },
       { title: "VS Code extension", brand: "vscode",  href: "/plugins#vscode",    body: "WYSIWYG preview, cloud sync, AI tools, Copy-as-context, sidebar." },
-      { title: "Memory.Wiki for Mac", brand: "mac",   href: "/plugins#desktop",   body: "Native sidebar, folders, offline, signed and notarized DMG." },
+      { title: "memory.wiki for Mac", brand: "mac",   href: "/plugins#desktop",   body: "Native sidebar, folders, offline, signed and notarized DMG." },
       { title: "iOS native",        brand: "ios",     href: "/plugins#ios",       body: "Share Extension, camera capture with OCR, Spotlight, Widgets, background sync." },
       { title: "Android native",    brand: "android", href: "/plugins#android",   body: "Share intent, camera, Widgets, background sync, push." },
       { title: "CLI",               brand: "cli",     href: "/plugins#cli",       body: "memory-wiki-cli on npm. mw publish, mw capture, mw login, pipe-friendly." },
@@ -268,8 +268,8 @@ export const aboutEn: AboutContent = {
     num: "07",
     eyebrow: "Why this is different",
     title: "Not vendor memory. Not agent memory.",
-    lede: "Memory.Wiki is the URL delivery layer. You author the content. Any AI fetches it. The two adjacent categories solve different problems.",
-    columns: ["", "Vendor memory", "Agent memory store", "Memory.Wiki"],
+    lede: "memory.wiki is the URL delivery layer. You author the content. Any AI fetches it. The two adjacent categories solve different problems.",
+    columns: ["", "Vendor memory", "Agent memory store", "memory.wiki"],
     rows: [
       { feature: "First user",   vals: ["AI auto-extract",  "AI agent",          "Human"]                    },
       { feature: "Interface",    vals: ["Inside one tool",  "SDK or MCP server", "Public URL"]               },
@@ -278,12 +278,12 @@ export const aboutEn: AboutContent = {
       { feature: "Sharing",      vals: ["no",               "personal or team",  "Public URL, anyone reads"] },
       { feature: "Ownership",    vals: ["Vendor",           "Backend service",   "You"]                      },
     ],
-    footnote: "Vendor memory (ChatGPT memory, Claude projects) lives inside one tool. Agent memory (mem0, Letta, OpenAI Memory) is a backend store an agent recalls from. Memory.Wiki is the URL delivery layer that sits one level up, deployable to every AI.",
+    footnote: "Vendor memory (ChatGPT memory, Claude projects) lives inside one tool. Agent memory (mem0, Letta, OpenAI Memory) is a backend store an agent recalls from. memory.wiki is the URL delivery layer that sits one level up, deployable to every AI.",
   },
   roadmap: {
     num: "08",
     eyebrow: "Roadmap",
-    title: "Where Memory.Wiki is going.",
+    title: "Where memory.wiki is going.",
     lede: "The full surface is in private beta today. Public launch wave runs in late summer 2026 across nine surfaces simultaneously.",
     items: [
       { tag: "Shipped", title: "Today",  body: "Live across every capture and retrieval surface. The product runs end to end.", bullets: ["Doc, Bundle, Hub URL primitives", "Seven capture surfaces (Web, Chrome, VS Code, Mac, CLI, MCP, QuickLook)", "Hybrid BM25 plus vector recall", "Open cross-AI evaluation, reproducible"], badge: "Live now" },
@@ -352,7 +352,7 @@ export const aboutEn: AboutContent = {
     items: [
       {
         q: "How is this different from Notion, Obsidian, or Roam?",
-        a: "Knowledge tools optimize for human reading and editing. Memory.Wiki optimizes for AI delivery: every URL fetches as clean markdown, with no auth and no rate limits, so any AI can ingest it. You can keep using Notion or Obsidian for authoring — Memory.Wiki is where the URL lives that you actually paste into ChatGPT, Claude, or Cursor.",
+        a: "Knowledge tools optimize for human reading and editing. memory.wiki optimizes for AI delivery: every URL fetches as clean markdown, with no auth and no rate limits, so any AI can ingest it. You can keep using Notion or Obsidian for authoring — memory.wiki is where the URL lives that you actually paste into ChatGPT, Claude, or Cursor.",
       },
       {
         q: "Will my content be used to train AI?",
@@ -376,14 +376,14 @@ export const aboutEn: AboutContent = {
       },
       {
         q: "Who owns the data?",
-        a: "You do. Memory.Wiki is a delivery layer, not an owner. You hold the markdown, the URLs, and the right to take them elsewhere. We do not relicense or resell your content.",
+        a: "You do. memory.wiki is a delivery layer, not an owner. You hold the markdown, the URLs, and the right to take them elsewhere. We do not relicense or resell your content.",
       },
     ],
   },
   emailSignup: {
     eyebrow: "Launch list",
     title: "Get one email when public launch ships.",
-    lede: "Memory.Wiki opens to everyone in August 2026. One message, no spam, unsubscribe with one click.",
+    lede: "memory.wiki opens to everyone in August 2026. One message, no spam, unsubscribe with one click.",
     placeholder: "your@email.com",
     button: "Notify me",
     buttonSending: "Sending…",
@@ -393,7 +393,7 @@ export const aboutEn: AboutContent = {
   },
   manifesto: {
     eyebrow: "The bigger picture",
-    lede: "The thesis behind Memory.Wiki, the strategy chain that led to v8, and what comes after launch.",
+    lede: "The thesis behind memory.wiki, the strategy chain that led to v8, and what comes after launch.",
     cta: "Read the manifesto",
   },
   cta: {
@@ -434,7 +434,7 @@ export const aboutEn: AboutContent = {
       ]},
     ],
     bottomLeft: "A product of Raymind.AI",
-    bottomRight: "© 2026 Memory.Wiki. All rights reserved.",
+    bottomRight: "© 2026 memory.wiki. All rights reserved.",
     tagline: "Personal knowledge hub for the AI era.",
     parent: { label: "A product of Raymind.AI", href: "https://raymind.ai" },
   },
@@ -517,12 +517,12 @@ export const aboutKo: AboutContent = {
     num: "03",
     eyebrow: "9개 표면",
     title: "당신이 이미 작업하는 곳에서.",
-    lede: "Memory.Wiki는 의미 있는 모든 표면에 네이티브 앱으로 출시됩니다. 한 계정, 한 허브, 모든 진입점.",
+    lede: "memory.wiki는 의미 있는 모든 표면에 네이티브 앱으로 출시됩니다. 한 계정, 한 허브, 모든 진입점.",
     items: [
       { title: "웹 에디터",         brand: "browser", href: "/",                  hrefLabel: "열기", body: "memory.wiki의 WYSIWYG 마크다운. 붙여넣기, 파일 드롭, 캡처. URL 3초." },
       { title: "Chrome 확장",       brand: "chrome",  href: "/ko/plugins#chrome",    hrefLabel: "열기", body: "ChatGPT, Claude, Gemini 채팅 페이지에서 원클릭 캡처." },
       { title: "VS Code 확장",      brand: "vscode",  href: "/ko/plugins#vscode",    hrefLabel: "열기", body: "WYSIWYG 프리뷰, 클라우드 동기화, AI 도구, Copy-as-context, 사이드바." },
-      { title: "Memory.Wiki for Mac", brand: "mac",   href: "/ko/plugins#desktop",   hrefLabel: "열기", body: "네이티브 사이드바, 폴더, 오프라인. Apple 서명 + notarize DMG." },
+      { title: "memory.wiki for Mac", brand: "mac",   href: "/ko/plugins#desktop",   hrefLabel: "열기", body: "네이티브 사이드바, 폴더, 오프라인. Apple 서명 + notarize DMG." },
       { title: "iOS 네이티브",      brand: "ios",     href: "/ko/plugins#ios",       hrefLabel: "열기", body: "Share Extension, OCR 카메라, Spotlight, 위젯, 백그라운드 동기화." },
       { title: "Android 네이티브",  brand: "android", href: "/ko/plugins#android",   hrefLabel: "열기", body: "Share intent, 카메라, 위젯, 백그라운드 동기화, 푸시." },
       { title: "CLI",               brand: "cli",     href: "/ko/plugins#cli",       hrefLabel: "열기", body: "memory-wiki-cli (npm). mw publish, mw capture, mw login. 파이프 친화적." },
@@ -602,8 +602,8 @@ export const aboutKo: AboutContent = {
     num: "07",
     eyebrow: "왜 다른가",
     title: "벤더 메모리도, 에이전트 메모리도 아닙니다.",
-    lede: "Memory.Wiki는 URL 전달 계층. 당신이 콘텐츠를 author하고, 어떤 AI든 그걸 가져갑니다. 인접한 두 카테고리는 다른 문제를 풉니다.",
-    columns: ["", "벤더 메모리", "에이전트 메모리 저장소", "Memory.Wiki"],
+    lede: "memory.wiki는 URL 전달 계층. 당신이 콘텐츠를 author하고, 어떤 AI든 그걸 가져갑니다. 인접한 두 카테고리는 다른 문제를 풉니다.",
+    columns: ["", "벤더 메모리", "에이전트 메모리 저장소", "memory.wiki"],
     rows: [
       { feature: "첫 사용자",      vals: ["AI 자동 추출",    "AI 에이전트",      "사람"]                    },
       { feature: "인터페이스",     vals: ["한 도구 안",      "SDK 또는 MCP",     "공개 URL"]                },
@@ -612,12 +612,12 @@ export const aboutKo: AboutContent = {
       { feature: "공유",           vals: ["no",              "개인 또는 팀",     "공개 URL, 누구나 읽음"]   },
       { feature: "소유권",         vals: ["벤더",            "백엔드 서비스",    "당신"]                    },
     ],
-    footnote: "벤더 메모리(ChatGPT memory, Claude projects)는 한 도구 안에 갇혀 있고, 에이전트 메모리(mem0, Letta, OpenAI Memory)는 에이전트가 기억을 가져오는 백엔드 저장소입니다. Memory.Wiki는 그 위 한 단계 위에 있는 URL 전달 계층이며, 모든 AI에 deploy 가능합니다.",
+    footnote: "벤더 메모리(ChatGPT memory, Claude projects)는 한 도구 안에 갇혀 있고, 에이전트 메모리(mem0, Letta, OpenAI Memory)는 에이전트가 기억을 가져오는 백엔드 저장소입니다. memory.wiki는 그 위 한 단계 위에 있는 URL 전달 계층이며, 모든 AI에 deploy 가능합니다.",
   },
   roadmap: {
     num: "08",
     eyebrow: "로드맵",
-    title: "Memory.Wiki가 향하는 곳.",
+    title: "memory.wiki가 향하는 곳.",
     lede: "현재 모든 표면이 private 베타. 9개 표면 동시 출시 wave는 2026년 늦여름.",
     items: [
       { tag: "Shipped", title: "오늘",  body: "모든 캡처/조회 표면에 라이브. 제품이 end-to-end 동작.",  bullets: ["Doc, Bundle, Hub URL 기본 단위", "7개 캡처 표면 (Web, Chrome, VS Code, Mac, CLI, MCP, QuickLook)", "BM25 + 벡터 하이브리드 recall", "Cross-AI 공개 평가, 재현 가능"], badge: "지금 라이브" },
@@ -686,7 +686,7 @@ export const aboutKo: AboutContent = {
     items: [
       {
         q: "Notion, Obsidian, Roam과는 어떻게 다른가요?",
-        a: "지식 도구들은 사람의 읽기와 편집을 최적화합니다. Memory.Wiki는 AI 전달을 최적화합니다. 모든 URL이 clean markdown으로, 인증과 속도 제한 없이 fetch되어 어떤 AI든 바로 ingest할 수 있습니다. 저작은 Notion이나 Obsidian에서 계속하시고, Memory.Wiki는 ChatGPT, Claude, Cursor에 실제로 붙여 넣는 URL이 사는 곳입니다.",
+        a: "지식 도구들은 사람의 읽기와 편집을 최적화합니다. memory.wiki는 AI 전달을 최적화합니다. 모든 URL이 clean markdown으로, 인증과 속도 제한 없이 fetch되어 어떤 AI든 바로 ingest할 수 있습니다. 저작은 Notion이나 Obsidian에서 계속하시고, memory.wiki는 ChatGPT, Claude, Cursor에 실제로 붙여 넣는 URL이 사는 곳입니다.",
       },
       {
         q: "제 콘텐츠가 AI 학습에 사용되나요?",
@@ -710,14 +710,14 @@ export const aboutKo: AboutContent = {
       },
       {
         q: "데이터 소유권은 누구에게 있나요?",
-        a: "당신입니다. Memory.Wiki는 전달 계층이지 소유자가 아닙니다. markdown, URL, 다른 곳으로 옮길 권리 모두 당신이 가집니다. 콘텐츠를 재라이선싱하거나 재판매하지 않습니다.",
+        a: "당신입니다. memory.wiki는 전달 계층이지 소유자가 아닙니다. markdown, URL, 다른 곳으로 옮길 권리 모두 당신이 가집니다. 콘텐츠를 재라이선싱하거나 재판매하지 않습니다.",
       },
     ],
   },
   emailSignup: {
     eyebrow: "출시 알림",
     title: "공개 출시 때 이메일 한 통.",
-    lede: "Memory.Wiki는 2026년 8월에 모든 사용자에게 공개됩니다. 메일 한 통, 스팸 없음, 한 번 클릭으로 해지.",
+    lede: "memory.wiki는 2026년 8월에 모든 사용자에게 공개됩니다. 메일 한 통, 스팸 없음, 한 번 클릭으로 해지.",
     placeholder: "your@email.com",
     button: "알림 받기",
     buttonSending: "보내는 중…",
@@ -727,7 +727,7 @@ export const aboutKo: AboutContent = {
   },
   manifesto: {
     eyebrow: "더 큰 그림",
-    lede: "Memory.Wiki 뒤의 thesis, v8로 이어진 전략 체인, 출시 후의 방향.",
+    lede: "memory.wiki 뒤의 thesis, v8로 이어진 전략 체인, 출시 후의 방향.",
     cta: "선언문 읽기",
   },
   cta: {
@@ -768,7 +768,7 @@ export const aboutKo: AboutContent = {
       ]},
     ],
     bottomLeft: "Raymind.AI 가 만든 제품",
-    bottomRight: "© 2026 Memory.Wiki. All rights reserved.",
+    bottomRight: "© 2026 memory.wiki. All rights reserved.",
     tagline: "AI 시대의 개인 지식 허브.",
     parent: { label: "Raymind.AI 가 만든 제품", href: "https://raymind.ai" },
   },

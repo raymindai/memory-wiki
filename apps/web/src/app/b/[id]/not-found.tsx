@@ -44,7 +44,7 @@ export default function BundleNotFound() {
             className="mt-2 mb-6 leading-relaxed"
             style={{ color: "var(--text-faint)", fontSize: 12, lineHeight: 1.55 }}
           >
-            Bundles are collections of documents, they share one URL but contain many docs. Make your own from any pair of docs in Memory.Wiki.
+            Bundles are collections of documents, they share one URL but contain many docs. Make your own from any pair of docs in memory.wiki.
           </p>
           <div className="flex flex-col items-center gap-3">
             <Link

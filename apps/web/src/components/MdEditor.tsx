@@ -790,7 +790,7 @@ export default function MdEditor() {
     // Root URL contract: visiting memory.wiki/ (no doc path, no
     // ?from=/?doc=/?bundle=, no hash share) means "I'm starting
     // fresh — show me Home." Restoring a stale activeTab from
-    // localStorage here was confusing: the user types Memory.Wiki,
+    // localStorage here was confusing: the user types memory.wiki,
     // expects a landing page, instead lands inside the editor on
     // whatever doc they last looked at (often with an empty body
     // because the doc's cloud markdown wasn't fetched yet).
@@ -831,7 +831,7 @@ export default function MdEditor() {
   // the user is *intentionally* viewing it (they just clicked it in
   // the Guides sidebar / Start grid). Honour that click — previously
   // we filtered it out and silently fell back to an owned doc, which
-  // is why clicking "Sample Bundle: Tour of Memory.Wiki" in the sidebar
+  // is why clicking "Sample Bundle: Tour of memory.wiki" in the sidebar
   // showed someone else's doc (or blank) instead of the bundle.
   const activeTab = (() => {
     const isOwn = (t: typeof tabs[number]) => !t.deleted && t.ownerEmail !== EXAMPLE_OWNER;
@@ -896,7 +896,7 @@ export default function MdEditor() {
   // when localStorage has examples only), don't fall back to
   // SAMPLE_WELCOME either. The Start screen handles the empty-
   // state case; the editor staying blank prevents the
-  // "# Welcome to Memory.Wiki" blurb from auto-rendering on refresh.
+  // "# Welcome to memory.wiki" blurb from auto-rendering on refresh.
   const initialMd = activeTab?.markdown
     || (activeTab ? "" : "");
   const [markdown, setMarkdownRaw] = useState(initialMd);
@@ -1056,7 +1056,7 @@ export default function MdEditor() {
       // is either the editor's seed (used to be SAMPLE_WELCOME!) or
       // a Tiptap-normalized version of it. Saving would clobber the
       // real doc body with the seed — which is the failure mode that
-      // produced the "Welcome to [Memory.Wiki]..." corruption.
+      // produced the "Welcome to [memory.wiki]..." corruption.
       if (!currentTab.markdown) return;
       // Hold off saving while a tab switch is mid-flight. handleTiptapChange
       // already gates on this flag for direct edits, but other call sites
@@ -3300,7 +3300,7 @@ export default function MdEditor() {
       });
     };
 
-    waitForMermaid().catch(() => { console.warn("[Memory.Wiki] Mermaid failed to load"); return null; }).then(async (mermaid) => {
+    waitForMermaid().catch(() => { console.warn("[memory.wiki] Mermaid failed to load"); return null; }).then(async (mermaid) => {
       if (!mermaid) return;
       mermaid.initialize({
         startOnLoad: false,
@@ -3865,7 +3865,7 @@ export default function MdEditor() {
           return;
         }
       }
-      // ?fork=<id> — visitor clicked "Save in Memory.Wiki" on the public
+      // ?fork=<id> — visitor clicked "Save in memory.wiki" on the public
       // viewer's Ask AI panel. Fetch the source doc, drop it into a
       // fresh local tab as a draft (no cloudId — autoSave creates a
       // new row under the signed-in user's account, or anon cookie
@@ -7503,7 +7503,7 @@ ${clone.innerHTML}
           <h1
             className="font-bold tracking-tight cursor-pointer shrink-0 flex items-baseline"
             onClick={() => window.open("/about", "_blank")}
-            title="Memory.Wiki — About"
+            title="memory.wiki — About"
           >
             <MemoryWikiLogo size={isMobile ? 14 : 18} variant="full" />
           </h1>
@@ -11614,7 +11614,7 @@ ${clone.innerHTML}
                     toolbar was redundant. The greeting falls through
                     profile.display_name → email prefix → bare time
                     string so it never renders an empty name slot.
-                    Signed-out users see "Welcome to Memory.Wiki" + the
+                    Signed-out users see "Welcome to memory.wiki" + the
                     deploy-to-any-AI subtitle. */}
                 {(() => {
                   const hour = new Date().getHours();
@@ -11637,7 +11637,7 @@ ${clone.innerHTML}
                       <h1 style={{ color: "var(--text-primary)", lineHeight: 1.15, fontSize: 30 }}>
                         {isSignedIn
                           ? (displayName ? `${timeGreeting}, ${displayName}` : timeGreeting)
-                          : "Welcome to Memory.Wiki"}
+                          : "Welcome to memory.wiki"}
                       </h1>
                       <p className="text-body mt-1.5" style={{ color: "var(--text-secondary)" }}>
                         {isSignedIn
@@ -12128,7 +12128,7 @@ ${clone.innerHTML}
                           : { label: "Sign in to get your hub", desc: "Every signed-in user gets a personal hub URL", url: "/", color: "#fb923c", icon: <Globe width={14} height={14} />, tag: null },
                         { label: "Install /memory.wiki", desc: "From any AI tool", url: "/install", color: "#fbbf24", icon: <Sparkles width={14} height={14} />, tag: "Recommended" },
                         { label: "Shared bundles", desc: "Curated public context", url: "/shared", color: "#4ade80", icon: <Users width={14} height={14} />, tag: null },
-                        { label: "How Memory.Wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-memorywiki-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
+                        { label: "How memory.wiki stays fresh", desc: "Doc / bundle / hub freshness model", url: "/how-memorywiki-stays-fresh", color: "#60a5fa", icon: <Sparkles width={14} height={14} />, tag: null, docSlug: "RUMdz2fQ" },
                       ];
                       return cards.map((item) => {
                         const sharedProps = {
@@ -12187,7 +12187,7 @@ ${clone.innerHTML}
                   </>)}
                 </div>
 
-                {/* How people use Memory.Wiki — short Pain → Action → Result case
+                {/* How people use memory.wiki — short Pain → Action → Result case
                     studies. Each card opens a published doc in the founder
                     hub. Sits between the v6 hero (Deploy to AI) and the
                     tutorial-shaped Guides & Examples — answers "why would
@@ -12204,7 +12204,7 @@ ${clone.innerHTML}
                       style={{ color: "var(--text-primary)", background: "none", border: "none", padding: 0 }}
                     >
                       <ChevronDown width={11} height={11} style={{ transform: startSections.cases ? "" : "rotate(-90deg)", transition: "transform 0.15s" }} />
-                      What people put in Memory.Wiki
+                      What people put in memory.wiki
                     </button>
                     {startSections.cases && (
                       <button
@@ -12289,10 +12289,10 @@ ${clone.innerHTML}
                       { label: "Documentation", desc: "API and SDK reference", url: "/docs", color: "#60a5fa", icon: <FileText width={14} height={14} /> },
                       { label: "Plugins", desc: "Chrome, VS Code, Mac, CLI", url: "/plugins", color: "#4ade80", icon: <Download width={14} height={14} /> },
                       { label: "How it works", desc: "Architecture, end to end", url: "/about#how-it-works", color: "#c4b5fd", icon: <HelpCircle width={14} height={14} /> },
-                      { label: "Memory.Wiki Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
+                      { label: "memory.wiki Memory", desc: "How memory works under the hood", url: "/about#memory", color: "#a78bfa", icon: <Sparkles width={14} height={14} /> },
                     ]).map((item) => (
                       // Same-window navigation (Link, no target=_blank)
-                      // for internal Memory.Wiki pages — keeps the user in one
+                      // for internal memory.wiki pages — keeps the user in one
                       // browser tab; editor state restores on back.
                       <NextLink key={item.label} href={item.url}
                         className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-left cursor-pointer"
@@ -13302,7 +13302,7 @@ ${clone.innerHTML}
               {/* ─── AI Panel (side-by-side) ─── */}
               {showAIPanel && (canEdit || activeTab?.kind === "bundle" || showHub || (aiPanelMode === "hub" && hubSlug)) && (() => {
                 // Three assistants — Document, Bundle, Hub. All share the
-                // Memory.Wiki orange palette; the radio tabs above the panel are
+                // memory.wiki orange palette; the radio tabs above the panel are
                 // the single source of mode identity. The header below
                 // just shows "what the active assistant is working with"
                 // (title + word count, doc count + bundle name, concept
@@ -14367,7 +14367,7 @@ ${clone.innerHTML}
       >
         {/* Left: Alpha badge + Help + navigation */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <Tooltip text="Memory.Wiki is in alpha — features can change and bugs are expected. Send feedback to hi@raymind.ai." position="top">
+          <Tooltip text="memory.wiki is in alpha — features can change and bugs are expected. Send feedback to hi@raymind.ai." position="top">
             <span
               className="inline-flex items-center font-semibold uppercase shrink-0"
               style={{
@@ -14451,7 +14451,7 @@ ${clone.innerHTML}
           <button onClick={() => { setShowCommandPalette(true); setCmdSearch(""); }} className="transition-colors hidden sm:inline-flex items-center gap-1" style={{ color: "var(--text-faint)", background: "none", border: "1px solid var(--border-dim)", borderRadius: 4, padding: "1px 6px", fontSize: 10, cursor: "pointer" }} title="Command palette">
             <span style={{ fontSize: 10 }}>{navigator.platform?.includes("Mac") ? "\u2318" : "Ctrl+"}K</span>
           </button>
-          <a href="/about" className="transition-colors inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="About Memory.Wiki">About</a>
+          <a href="/about" className="transition-colors inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="About memory.wiki">About</a>
           <a href="/plugins" className="transition-colors hidden sm:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Browser and editor plugins">Plugins</a>
           <a href="/discover" className="transition-colors hidden md:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="Trending public documents">Trending</a>
           <a href="/docs" className="transition-colors hidden md:inline" style={{ color: "var(--text-muted)" }} target="_blank" rel="noopener noreferrer" title="API documentation">API</a>
@@ -14880,10 +14880,10 @@ ${clone.innerHTML}
         </div>
       )}
 
-      {/* Memory.Wiki AI structuring prompt */}
+      {/* memory.wiki AI structuring prompt */}
       {/* Sign In / Sign Up modal — Pure redesign:
           - MW brand symbol (morph blob) anchors the top so the
-            dialog reads as Memory.Wiki and not generic OAuth glue
+            dialog reads as memory.wiki and not generic OAuth glue
           - Title in Cal Sans 500 (no more 700 bold)
           - OAuth buttons: pure outlined pills with brand glyph in
             its own color, NOT a bright vendor-blue fill
@@ -14904,7 +14904,7 @@ ${clone.innerHTML}
           >
             <div className="px-6 pt-6 pb-5 text-center">
               {/* Brand lockup carries the "this is memory.wiki" signal.
-                  The old "Sign in to Memory.Wiki" h2 underneath was
+                  The old "Sign in to memory.wiki" h2 underneath was
                   pure repetition (and brand-case-wrong). The OAuth
                   buttons below say "Continue with…" which is the
                   actual action CTA — no extra heading needed. */}
@@ -15040,7 +15040,7 @@ ${clone.innerHTML}
         <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }} onClick={() => !mwLoading && setMdfyPrompt(null)}>
           <div className="rounded-xl p-5 w-80" style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} onClick={e => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--text-primary)" }}>Memory.Wiki</span> this document?</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}><span style={{ color: "var(--text-primary)" }}>memory.wiki</span> this document?</span>
               <span className="text-caption font-mono" style={{ color: "var(--text-muted)" }}>
                 {(mwPrompt.text.length / 1024).toFixed(0)} KB
               </span>
@@ -15049,7 +15049,7 @@ ${clone.innerHTML}
               This file was imported as raw text — all formatting (headings, lists, tables, emphasis) was lost during extraction.
             </p>
             <p className="text-caption mb-4" style={{ color: "var(--text-muted)" }}>
-              <strong style={{ color: "var(--text-primary)" }}>Memory.Wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
+              <strong style={{ color: "var(--text-primary)" }}>memory.wiki</strong> uses AI to detect the original structure and rebuild it as clean Markdown — headings, bullet points, tables, code blocks, and more.
               {mwPrompt.text.length > 200_000 && (
                 <span style={{ color: "var(--text-faint)" }}> Large documents may take 30–60 seconds.</span>
               )}
@@ -15089,7 +15089,7 @@ ${clone.innerHTML}
                       showToast("Document structured successfully", "success");
                     }
                   } catch (err) {
-                    console.error("Memory.Wiki failed:", err);
+                    console.error("memory.wiki failed:", err);
                     const message = err instanceof Error ? err.message : "AI processing failed";
                     showToast(message, "error");
                   }

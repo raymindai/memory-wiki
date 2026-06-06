@@ -123,7 +123,7 @@ export default function HowPure({ locale = "en" }: { locale?: "en" | "ko" }) {
           <div className="pure-manifesto-page">
             <div className="pure-manifesto-readtime mono">{isKo ? "8분 분량" : "8 min read"}</div>
             <h1 className="pure-manifesto-title">
-              {isKo ? "Memory.Wiki가 실제로 어떻게 동작하나." : "How Memory.Wiki actually works."}
+              {isKo ? "memory.wiki가 실제로 어떻게 동작하나." : "How memory.wiki actually works."}
             </h1>
             <p className="pure-manifesto-intro">
               {isKo
@@ -462,8 +462,8 @@ export default function HowPure({ locale = "en" }: { locale?: "en" | "ko" }) {
               <h2 id="paste">{isKo ? "5. 붙여넣었을 때 AI가 보는 것" : "5. What the AI sees when you paste"}</h2>
               <p>
                 {isKo
-                  ? "전체 아키텍처는 받는 AI가 깨끗하게 읽을 수 있을 때만 의미가 있습니다. Claude나 ChatGPT에 Memory.Wiki URL을 붙여넣었을 때 일어나는 일:"
-                  : "The whole architecture only matters if the receiving AI can read it cleanly. Here’s what happens when you paste a Memory.Wiki URL into Claude or ChatGPT:"}
+                  ? "전체 아키텍처는 받는 AI가 깨끗하게 읽을 수 있을 때만 의미가 있습니다. Claude나 ChatGPT에 memory.wiki URL을 붙여넣었을 때 일어나는 일:"
+                  : "The whole architecture only matters if the receiving AI can read it cleanly. Here’s what happens when you paste a memory.wiki URL into Claude or ChatGPT:"}
               </p>
             </PureProse>
 
@@ -550,15 +550,15 @@ export default function HowPure({ locale = "en" }: { locale?: "en" | "ko" }) {
               <ul>
                 {isKo ? (
                   <>
-                    <li><strong><code>[[wikilink]]</code> 없음.</strong> 전통적 위키는 사람이 그래프를 타이핑하게 합니다. Memory.Wiki는 concept index를 자동 추출합니다 — 링크는 AI가 걸고, 당신은 글만 씁니다.</li>
+                    <li><strong><code>[[wikilink]]</code> 없음.</strong> 전통적 위키는 사람이 그래프를 타이핑하게 합니다. memory.wiki는 concept index를 자동 추출합니다 — 링크는 AI가 걸고, 당신은 글만 씁니다.</li>
                     <li><strong>SDK 없음.</strong> 인터페이스는 URL입니다. URL을 fetch할 수 있는 모든 것이 클라이언트.</li>
-                    <li><strong>독자 블록 없음.</strong> 포맷은 마크다운 그 자체. Memory.Wiki가 내일 사라져도 당신 문서는 여전히 어떤 에디터에서든 열리는 마크다운 파일.</li>
+                    <li><strong>독자 블록 없음.</strong> 포맷은 마크다운 그 자체. memory.wiki가 내일 사라져도 당신 문서는 여전히 어떤 에디터에서든 열리는 마크다운 파일.</li>
                   </>
                 ) : (
                   <>
-                    <li><strong>No <code>[[wikilinks]]</code>.</strong> Traditional wikis make humans type the graph. Memory.Wiki extracts a concept index automatically — the AI does the linking, you write.</li>
+                    <li><strong>No <code>[[wikilinks]]</code>.</strong> Traditional wikis make humans type the graph. memory.wiki extracts a concept index automatically — the AI does the linking, you write.</li>
                     <li><strong>No SDK.</strong> The interface is the URL. Anything that can fetch a URL is a client.</li>
-                    <li><strong>No proprietary blocks.</strong> Markdown is the entire format. If Memory.Wiki disappears tomorrow, your docs are still markdown files you can open in any editor.</li>
+                    <li><strong>No proprietary blocks.</strong> Markdown is the entire format. If memory.wiki disappears tomorrow, your docs are still markdown files you can open in any editor.</li>
                   </>
                 )}
               </ul>

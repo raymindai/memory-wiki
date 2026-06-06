@@ -20,7 +20,7 @@ export interface DocAIGraph {
   relatedDocs?: Array<{ id?: string; title?: string; relationship?: string }>;
 }
 
-const PROMPT = `Analyze this Memory.Wiki document and return a structured JSON graph an AI could use as navigation when answering questions about it. Skip metadata (capture date, source).
+const PROMPT = `Analyze this memory.wiki document and return a structured JSON graph an AI could use as navigation when answering questions about it. Skip metadata (capture date, source).
 
 DOCUMENT:
 {{BODY}}

@@ -20,7 +20,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "v8 Preview — Memory.Wiki",
+  title: "v8 Preview — memory.wiki",
   description: "v8 visual direction prototype. Not for production.",
   robots: { index: false, follow: false },
 };

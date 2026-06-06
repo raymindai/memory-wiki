@@ -49,7 +49,7 @@ export function ModernVariant() {
             your context to AI.
           </h1>
           <p className="lede">
-            Memory.Wiki captures every thought, document, and conversation,
+            memory.wiki captures every thought, document, and conversation,
             organizes them with AI, and ships the result as a single URL any
             AI can read. Cross-AI by design.
           </p>
@@ -161,7 +161,7 @@ export function ModernVariant() {
           <span className="eyebrow">The product</span>
           <h2 className="display-md">A real workspace, not a feature.</h2>
           <p className="section-lede">
-            Memory.Wiki is a daily app. Below is the actual surface a user
+            memory.wiki is a daily app. Below is the actual surface a user
             opens to think.
           </p>
         </div>
@@ -242,7 +242,7 @@ export function ModernVariant() {
                   <span className="mono">read by 5 AIs</span>
                 </div>
                 <p className="app-doc-body">
-                  Memory.Wiki이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+                  memory.wiki이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
                   그래서 <em>capture everything</em>이 자연스러운 입구.
                   AI가 organize 하는 layer가 그 다음, 어떤 AI한테든 paste 가능한
                   URL이 마지막 단계.
@@ -262,7 +262,7 @@ export function ModernVariant() {
 
             <aside className="app-ai">
               <div className="app-ai-head">
-                <span className="badge-ai">Memory.Wiki AI</span>
+                <span className="badge-ai">memory.wiki AI</span>
                 <button className="btn-pill">Close</button>
               </div>
               <div className="ai-msg ai-msg-user">
@@ -274,7 +274,7 @@ export function ModernVariant() {
                 <div className="ai-cite mono">source / memory.wiki/nvF3Li2x</div>
               </div>
               <div className="ai-input">
-                <input placeholder="Ask Memory.Wiki" />
+                <input placeholder="Ask memory.wiki" />
                 <button className="ai-send">→</button>
               </div>
             </aside>
@@ -314,7 +314,7 @@ export function ModernVariant() {
             </header>
             <div className="pd-body">
               <p>
-                Memory.Wiki이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+                memory.wiki이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
                 그래서 capture everything이 자연스러운 입구.
               </p>
               <p>
@@ -356,7 +356,7 @@ export function ModernVariant() {
               <div className="hub-head-text">
                 <h1 className="hub-name">raymind</h1>
                 <p className="hub-bio">
-                  Solo founder of Memory.Wiki. Building a cross-AI context
+                  Solo founder of memory.wiki. Building a cross-AI context
                   layer. Ships fast, prefers TypeScript, lives in markdown.
                 </p>
                 <div className="hub-meta">
@@ -367,7 +367,7 @@ export function ModernVariant() {
                   <span className="mono">247 captures</span>
                 </div>
               </div>
-              <button className="btn-primary">Paste my Memory.Wiki</button>
+              <button className="btn-primary">Paste my memory.wiki</button>
             </div>
             <div className="hub-stats">
               <div className="hub-stat">
@@ -507,7 +507,7 @@ export function ModernVariant() {
         </div>
         <div className="footer-rule" />
         <div className="footer-bottom">
-          <span className="mono">© 2026 Memory.Wiki</span>
+          <span className="mono">© 2026 memory.wiki</span>
           <span className="mono">Built in public / v8 preview</span>
         </div>
       </footer>

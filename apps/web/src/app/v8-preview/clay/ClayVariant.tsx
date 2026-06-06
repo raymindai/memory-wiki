@@ -12,7 +12,7 @@ export function ClayVariant() {
         <div className="topnav-inner">
           <a href="#" className="brand">
             <span className="brand-blob" />
-            <span className="brand-word">Memory.Wiki</span>
+            <span className="brand-word">memory.wiki</span>
           </a>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Product</a>
@@ -67,7 +67,7 @@ export function ClayVariant() {
             <h3 className="card-title">From anywhere.</h3>
             <p className="card-body">
               Chrome, Cursor, mobile, MCP, CLI — any surface drops into your
-              Memory.Wiki at the same URL.
+              memory.wiki at the same URL.
             </p>
           </div>
           <div className="feature-card feature-teal">
@@ -105,7 +105,7 @@ export function ClayVariant() {
             <div className="feature-tag">Cross-AI</div>
             <h3 className="card-title">Built for the post-vendor era.</h3>
             <p className="card-body">
-              Vendor memories lock you in. Memory.Wiki ports across every AI.
+              Vendor memories lock you in. memory.wiki ports across every AI.
               One URL, no walls.
             </p>
           </div>
@@ -147,7 +147,7 @@ export function ClayVariant() {
           <p className="section-lede" style={{ marginBottom: 28 }}>
             Free during beta. No credit card.
           </p>
-          <button className="btn-primary">Start your Memory.Wiki</button>
+          <button className="btn-primary">Start your memory.wiki</button>
           <div className="cta-illo">
             <div className="claymation-shape shape-cta-1" />
             <div className="claymation-shape shape-cta-2" />
@@ -161,7 +161,7 @@ export function ClayVariant() {
           <div className="footer-top">
             <div className="brand">
               <span className="brand-blob" />
-              <span className="brand-word">Memory.Wiki</span>
+              <span className="brand-word">memory.wiki</span>
             </div>
             <div className="caption">v8 Variant I · Clay-inspired</div>
           </div>

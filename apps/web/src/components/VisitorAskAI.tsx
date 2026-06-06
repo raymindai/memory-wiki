@@ -7,9 +7,9 @@
  * comparison. Without this they'd copy-paste the doc into their own
  * AI tool. Letting them ask in-place does two things:
  *
- *   1. Keeps them on Memory.Wiki long enough to notice the "Save this as
+ *   1. Keeps them on memory.wiki long enough to notice the "Save this as
  *      your own doc" CTA at the bottom of the chat.
- *   2. Gives Memory.Wiki a real signal of what visitors do with each doc —
+ *   2. Gives memory.wiki a real signal of what visitors do with each doc —
  *      useful for trending / recommendation later.
  *
  * Read-only — the chat answer never modifies the underlying doc.
@@ -287,7 +287,7 @@ export default function VisitorAskAI({
               className="font-medium transition-colors"
               style={{ color: "var(--text-primary)" }}
             >
-              Save in Memory.Wiki →
+              Save in memory.wiki →
             </a>
           </div>
         )}

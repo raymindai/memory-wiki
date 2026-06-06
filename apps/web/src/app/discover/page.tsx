@@ -6,7 +6,7 @@ import ViewerHeader from "@/components/ViewerHeader";
 import ViewerFooter from "@/components/ViewerFooter";
 
 // Discover / Trending — public-facing landing showing GitHub trending
-// repos' .md files routed through Memory.Wiki. Pure design pass:
+// repos' .md files routed through memory.wiki. Pure design pass:
 // canvas bg, Cal Sans hero, JetBrains Mono labels with Title Case,
 // soft segmented chip toggle, micro-color (info/lime) instead of
 // `var(--accent)` for emphasis.
@@ -153,7 +153,7 @@ export default function DiscoverPage() {
           className="mb-8"
           style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.6, maxWidth: 560 }}
         >
-          Explore documentation from the hottest GitHub projects. Every <code className="font-mono" style={{ color: "var(--text-primary)" }}>.md</code> file rendered with Memory.Wiki.
+          Explore documentation from the hottest GitHub projects. Every <code className="font-mono" style={{ color: "var(--text-primary)" }}>.md</code> file rendered with memory.wiki.
         </p>
 
         {/* Period segmented chip */}
@@ -318,7 +318,7 @@ export default function DiscoverPage() {
                                       letterSpacing: "0.04em",
                                     }}
                                   >
-                                    {isOpening ? "Opening…" : "Open in Memory.Wiki"}
+                                    {isOpening ? "Opening…" : "Open in memory.wiki"}
                                   </span>
                                 </button>
                               );

@@ -38,7 +38,7 @@ export function ClayMonoVariant() {
             <span className="brand-square brand-square-blob">
               <img src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"} alt="" aria-hidden />
             </span>
-            <span className="brand-word">Memory.Wiki</span>
+            <span className="brand-word">memory.wiki</span>
           </a>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Product</a>
@@ -140,7 +140,7 @@ export function ClayMonoVariant() {
             <span className="feature-tag">/cross-ai</span>
             <h3 className="card-title">Built for the post-vendor era.</h3>
             <p className="card-body">
-              Vendor memories lock you in. Memory.Wiki ports across every AI.
+              Vendor memories lock you in. memory.wiki ports across every AI.
             </p>
             <div className="card-meta"><span className="mono">MCP / API / OpenAPI 3.1</span></div>
           </div>
@@ -153,7 +153,7 @@ export function ClayMonoVariant() {
           <span className="eyebrow">/components / live</span>
           <h2 className="display-md">Actual product surfaces.</h2>
           <p className="section-lede">
-            These are the components you meet inside Memory.Wiki. Sidebar, doc
+            These are the components you meet inside memory.wiki. Sidebar, doc
             card, AI cluster, capture flow, command palette, code block. Switch
             the theme above to see them in light or dark.
           </p>
@@ -224,7 +224,7 @@ export function ClayMonoVariant() {
               </div>
               <h3 className="doc-card-title">v8 thinking, capture vs memory</h3>
               <p className="doc-card-body">
-                Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함. 그래서 capture
+                memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함. 그래서 capture
                 everything 이 자연스러운 입구.
               </p>
               <div className="doc-card-foot">
@@ -250,7 +250,7 @@ export function ClayMonoVariant() {
               </div>
               <h3 className="cluster-title">v8 launch</h3>
               <p className="cluster-desc">
-                8 docs about Memory.Wiki v8 (design direction, framework,
+                8 docs about memory.wiki v8 (design direction, framework,
                 surfaces). Strongest signal: design connects to framework at 0.84
                 similarity.
               </p>
@@ -327,10 +327,10 @@ export function ClayMonoVariant() {
             <div className="capture-shell">
               <textarea
                 className="capture-textarea"
-                placeholder="Paste any text, URL, AI chat, or screenshot. Memory.Wiki organizes it."
+                placeholder="Paste any text, URL, AI chat, or screenshot. memory.wiki organizes it."
                 rows={3}
                 readOnly
-                defaultValue="Memory.Wiki is the cross-AI context layer. Capture, organize, use, with attribution and a single URL that every AI can read."
+                defaultValue="memory.wiki is the cross-AI context layer. Capture, organize, use, with attribution and a single URL that every AI can read."
               />
               <div className="capture-row">
                 <div className="capture-pills">
@@ -339,7 +339,7 @@ export function ClayMonoVariant() {
                   <button className="btn-pill">Smart capture</button>
                 </div>
                 <button className="btn-primary" onClick={triggerToast}>
-                  Save to Memory.Wiki
+                  Save to memory.wiki
                 </button>
               </div>
             </div>
@@ -458,7 +458,7 @@ export function ClayMonoVariant() {
           <span className="eyebrow">/screens / live</span>
           <h2 className="display-md">Real product screens.</h2>
           <p className="section-lede">
-            Same design system, applied to the surfaces a Memory.Wiki user
+            Same design system, applied to the surfaces a memory.wiki user
             actually meets. App shell, public doc, hub profile, AI panel.
           </p>
         </div>
@@ -477,7 +477,7 @@ export function ClayMonoVariant() {
                 <span className="brand-square brand-square-blob">
                   <img src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"} alt="" aria-hidden />
                 </span>
-                <span className="brand-word">Memory.Wiki</span>
+                <span className="brand-word">memory.wiki</span>
               </div>
               <button className="app-cta">
                 <span className="mono app-cta-key">N</span> New document
@@ -528,7 +528,7 @@ export function ClayMonoVariant() {
                   <span className="mono app-doc-sep">read by 5 AIs</span>
                 </div>
                 <p className="app-doc-body">
-                  Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+                  memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
                   그래서 capture everything 이 자연스러운 입구. AI 가 organize 하는
                   layer 가 그 다음, 어떤 AI 한테든 paste 가능한 URL 이 마지막 단계.
                 </p>
@@ -546,7 +546,7 @@ export function ClayMonoVariant() {
             </main>
             <aside className="app-ai">
               <div className="app-ai-head">
-                <span className="badge-ai-pill">Memory.Wiki AI</span>
+                <span className="badge-ai-pill">memory.wiki AI</span>
                 <button className="btn-pill mono">close</button>
               </div>
               <div className="ai-msg ai-msg-user">
@@ -562,7 +562,7 @@ export function ClayMonoVariant() {
                 </div>
               </div>
               <div className="ai-input mono">
-                Ask Memory.Wiki
+                Ask memory.wiki
               </div>
             </aside>
           </div>
@@ -603,7 +603,7 @@ export function ClayMonoVariant() {
             </header>
             <div className="public-doc-body">
               <p>
-                Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+                memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
                 그래서 capture everything 이 자연스러운 입구.
               </p>
               <p>
@@ -645,7 +645,7 @@ export function ClayMonoVariant() {
               <div>
                 <h1 className="hub-name">raymind</h1>
                 <p className="hub-bio">
-                  Solo founder of Memory.Wiki. Building a cross-AI context layer.
+                  Solo founder of memory.wiki. Building a cross-AI context layer.
                   Korean. Ships fast. Prefers TypeScript and minimal dependencies.
                 </p>
                 <div className="hub-meta">
@@ -655,7 +655,7 @@ export function ClayMonoVariant() {
                 </div>
               </div>
               <div className="hub-actions">
-                <button className="btn-primary">Paste my Memory.Wiki</button>
+                <button className="btn-primary">Paste my memory.wiki</button>
               </div>
             </div>
             <div className="hub-stats">
@@ -751,7 +751,7 @@ export function ClayMonoVariant() {
               <span className="brand-square brand-square-blob">
                 <img src={theme === "dark" ? "/brand/mwblob_morph.svg" : "/brand/mwblob_morph_dark.svg"} alt="" aria-hidden />
               </span>
-              <span className="brand-word">Memory.Wiki</span>
+              <span className="brand-word">memory.wiki</span>
             </div>
             <span className="mono caption">v8 / variant I.2 / clay-mono / {theme}</span>
           </div>
@@ -787,7 +787,7 @@ export function ClayMonoVariant() {
         <div className="toast">
           <span className="toast-icon">OK</span>
           <div className="toast-body">
-            <div className="toast-title">Saved to Memory.Wiki</div>
+            <div className="toast-title">Saved to memory.wiki</div>
             <span className="mono toast-url">memory.wiki/aBc123De</span>
           </div>
           <button className="toast-copy mono">copy</button>

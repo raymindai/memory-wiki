@@ -184,14 +184,14 @@ export async function importFromYouTube(
     lines.push(transcript);
   } else {
     // Honest fallback. YouTube blocks every public scrape path from
-    // datacenter IPs (where Memory.Wiki runs). Two one-click recovery
+    // datacenter IPs (where memory.wiki runs). Two one-click recovery
     // paths the user can take right now:
     //   1. youtubetranscript.com gives a plain-text transcript page
     //      they can copy in one drag.
     //   2. youtube.com itself shows a "transcript" panel under the
     //      video they can copy from.
     // We point at both and clearly mark this as a known limitation,
-    // not a Memory.Wiki bug, so support questions land softly.
+    // not a memory.wiki bug, so support questions land softly.
     const transcriptHelperUrl = `https://youtubetranscript.com/?server_vid2=${videoId}`;
     const why = transcriptBlockReason === "login_required"
       ? "YouTube now blocks server-side transcript fetches from datacenter IPs (it asks for a sign-in to prove the request isn't a bot)."

@@ -82,7 +82,7 @@ const TOOLS_EN: ToolEntry[] = [
       { name: "isDraft",  type: "boolean", required: false, desc: "Create as draft. Default: false." },
     ],
     example: `// In Claude Code:
-"Publish this analysis as a document on Memory.Wiki"
+"Publish this analysis as a document on memory.wiki"
 
 // Claude calls mw_create:
 {
@@ -179,7 +179,7 @@ const TOOLS_KO: ToolEntry[] = [
       { name: "isDraft",  type: "boolean", required: false, desc: "임시 저장으로 생성. 기본값: false." },
     ],
     example: `// Claude Code에서:
-"이 분석 내용을 Memory.Wiki에 문서로 게시해줘"
+"이 분석 내용을 memory.wiki에 문서로 게시해줘"
 
 // Claude가 mw_create를 호출:
 {
@@ -270,7 +270,7 @@ const HOSTED_ENDPOINT = `https://memory.wiki/api/mcp`;
 const INSTALL_CODE = `npm install -g memory-wiki-cli && mw login`;
 const MCP_JSON_CODE = `{
   "mcpServers": {
-    "Memory.Wiki": {
+    "memory.wiki": {
       "command": "npx",
       "args": ["memory-wiki-mcp"]
     }
@@ -278,14 +278,14 @@ const MCP_JSON_CODE = `{
 }`;
 const CURSOR_JSON_CODE = `{
   "mcpServers": {
-    "Memory.Wiki": {
+    "memory.wiki": {
       "url": "https://memory.wiki/api/mcp"
     }
   }
 }`;
 
 // ─── Usage example transcripts (verbatim from source) ────────────────
-const EX1_EN = `You: "Write a blog post about WebAssembly and publish it on Memory.Wiki"
+const EX1_EN = `You: "Write a blog post about WebAssembly and publish it on memory.wiki"
 
 Claude: I'll write the blog post and publish it for you.
 
@@ -318,7 +318,7 @@ You: "Yes"
 
 Done! Deleted 2 documents.`;
 
-const EX1_KO = `You: "WebAssembly에 대한 블로그 글을 써서 Memory.Wiki에 게시해줘"
+const EX1_KO = `You: "WebAssembly에 대한 블로그 글을 써서 memory.wiki에 게시해줘"
 
 Claude: 블로그 글을 작성하고 게시하겠습니다.
 
@@ -379,8 +379,8 @@ export default function McpDocsPure({ locale = "en" }: { locale?: Locale }) {
       <h1 className="pure-mcp-docs-title">MCP Server</h1>
       <p className="pure-mcp-docs-intro">
         {ko
-          ? "Claude, Cursor, Windsurf 및 기타 AI 도구에서 Memory.Wiki 문서를 직접 생성하고 관리할 수 있습니다."
-          : "Let Claude, Cursor, Windsurf, and other AI tools create and manage documents on Memory.Wiki directly."}
+          ? "Claude, Cursor, Windsurf 및 기타 AI 도구에서 memory.wiki 문서를 직접 생성하고 관리할 수 있습니다."
+          : "Let Claude, Cursor, Windsurf, and other AI tools create and manage documents on memory.wiki directly."}
       </p>
 
       {/* ─── Memory layer intro card ─────────────────────────── */}
@@ -390,8 +390,8 @@ export default function McpDocsPure({ locale = "en" }: { locale?: Locale }) {
         </p>
         <p className="pure-mcp-docs-memory-lede">
           {ko
-            ? "오늘 Memory.Wiki URL을 컨텍스트로 읽고, Phase 2에서 MCP를 통해 메모리를 기록합니다."
-            : "Read Memory.Wiki URLs as context today. Write memory back via MCP in Phase 2."}
+            ? "오늘 memory.wiki URL을 컨텍스트로 읽고, Phase 2에서 MCP를 통해 메모리를 기록합니다."
+            : "Read memory.wiki URLs as context today. Write memory back via MCP in Phase 2."}
         </p>
         <div className="pure-mcp-docs-memory-grid">
           <div>
@@ -399,7 +399,7 @@ export default function McpDocsPure({ locale = "en" }: { locale?: Locale }) {
               {ko ? "오늘" : "Today"} <span className="pure-mcp-docs-memory-badge is-live">Live</span>
             </div>
             <ul className="pure-mcp-docs-memory-list">
-              <li>{ko ? "Memory.Wiki URL을 AI 컨텍스트로 읽기" : "Read Memory.Wiki URLs as AI context"}</li>
+              <li>{ko ? "memory.wiki URL을 AI 컨텍스트로 읽기" : "Read memory.wiki URLs as AI context"}</li>
               <li>{ko ? "25개 MCP 도구를 통한 문서 CRUD" : "Document CRUD via 25 MCP tools"}</li>
               <li>{ko ? "자동 소스 감지" : "Auto-source detection"}</li>
             </ul>
@@ -426,14 +426,14 @@ export default function McpDocsPure({ locale = "en" }: { locale?: Locale }) {
             {ko ? (
               <>
                 <strong>Model Context Protocol (MCP)</strong>은 AI 어시스턴트가 외부 도구 및 서비스와 상호작용할 수 있게
-                하는 개방형 표준입니다. Memory.Wiki MCP 서버는 7개 카테고리에 걸쳐 25개 도구를 제공합니다 — 핵심 CRUD,
+                하는 개방형 표준입니다. memory.wiki MCP 서버는 7개 카테고리에 걸쳐 25개 도구를 제공합니다 — 핵심 CRUD,
                 append/prepend, 섹션 편집, 공유 설정, 버전 이력, 폴더, 통계. <code>https://memory.wiki/api/mcp</code>의
                 호스팅 엔드포인트는 모든 MCP 호환 클라이언트(Claude Web, Cursor 등)에서 사용할 수 있습니다.
               </>
             ) : (
               <>
                 The <strong>Model Context Protocol (MCP)</strong> is an open standard that lets AI assistants interact
-                with external tools and services. The Memory.Wiki MCP server exposes 25 tools across 7 categories — core
+                with external tools and services. The memory.wiki MCP server exposes 25 tools across 7 categories — core
                 CRUD, append/prepend, section editing, sharing controls, version history, folders, and stats. The hosted
                 endpoint at <code>https://memory.wiki/api/mcp</code> works with any MCP-compatible client (Claude Web,
                 Cursor, etc.).
@@ -448,9 +448,9 @@ export default function McpDocsPure({ locale = "en" }: { locale?: Locale }) {
         <h2 className="pure-mcp-docs-section-title">{ko ? "Claude Web (호스팅 MCP)" : "Claude Web (Hosted MCP)"}</h2>
         <p className="pure-mcp-docs-body">
           {ko ? (
-            <>호스팅 MCP 엔드포인트를 통해 <strong>claude.ai</strong>에서 바로 Memory.Wiki를 사용할 수 있습니다 — 로컬 설치가 필요 없습니다.</>
+            <>호스팅 MCP 엔드포인트를 통해 <strong>claude.ai</strong>에서 바로 memory.wiki를 사용할 수 있습니다 — 로컬 설치가 필요 없습니다.</>
           ) : (
-            <>Use Memory.Wiki directly in <strong>claude.ai</strong> via our hosted MCP endpoint — no local install required.</>
+            <>Use memory.wiki directly in <strong>claude.ai</strong> via our hosted MCP endpoint — no local install required.</>
           )}
         </p>
         <div className="pure-prose-callout">
@@ -552,8 +552,8 @@ export default function McpDocsPure({ locale = "en" }: { locale?: Locale }) {
         <h2 className="pure-mcp-docs-section-title">{ko ? "전체 25개 도구" : "All 25 Tools"}</h2>
         <p className="pure-mcp-docs-body">
           {ko
-            ? "호스팅 MCP는 7개 카테고리에 걸쳐 25개 도구를 제공합니다. 인증은 사용자의 Memory.Wiki 세션을 통해 이루어집니다 (API 키 불필요)."
-            : "The hosted MCP exposes 25 tools across 8 categories. Auth happens via the user's Memory.Wiki session (no API keys)."}
+            ? "호스팅 MCP는 7개 카테고리에 걸쳐 25개 도구를 제공합니다. 인증은 사용자의 memory.wiki 세션을 통해 이루어집니다 (API 키 불필요)."
+            : "The hosted MCP exposes 25 tools across 8 categories. Auth happens via the user's memory.wiki session (no API keys)."}
         </p>
 
         <div className="pure-mcp-docs-tool-groups">

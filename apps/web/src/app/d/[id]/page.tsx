@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isRestricted = (doc.allowed_emails || []).length > 0;
 
   if (isExpired) {
-    return { title: "Expired — Memory.Wiki", robots: { index: false, follow: false } };
+    return { title: "Expired — memory.wiki", robots: { index: false, follow: false } };
   }
 
   // Don't index restricted content. The password gate was removed,
@@ -89,20 +89,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `https://memory.wiki/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(features.slice(0, 5).join(","))}${authorParam}`;
 
   return {
-    title: `${title} — Memory.Wiki`,
+    title: `${title} — memory.wiki`,
     description,
     robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${title} — Memory.Wiki`,
+      title: `${title} — memory.wiki`,
       description,
       url: `https://memory.wiki/${id}`,
-      siteName: "Memory.Wiki",
+      siteName: "memory.wiki",
       type: "article",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} — Memory.Wiki`,
+      title: `${title} — memory.wiki`,
       description,
       images: [ogImageUrl],
     },
@@ -168,10 +168,10 @@ export default async function DocPage({ params }: Props) {
         dateModified: doc.updated_at || doc.created_at,
         author: doc.ownerName
           ? { "@type": "Person", name: doc.ownerName }
-          : { "@type": "Organization", name: "Memory.Wiki" },
+          : { "@type": "Organization", name: "memory.wiki" },
         publisher: {
           "@type": "Organization",
-          name: "Memory.Wiki",
+          name: "memory.wiki",
           url: "https://memory.wiki",
         },
         mainEntityOfPage: `https://memory.wiki/${doc.id}`,

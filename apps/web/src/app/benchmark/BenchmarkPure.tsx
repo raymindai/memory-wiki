@@ -84,8 +84,8 @@ export default function BenchmarkPure({ locale = "en" }: { locale?: "en" | "ko" 
             </h1>
             <p className="pure-manifesto-intro">
               {isKo
-                ? "Memory.Wiki URL은 모든 AI에 붙여넣는 단 하나의 것이어야 합니다. 이 페이지는 그게 사실임을 증명하는 오픈 평가입니다 — 모델이 학습 중에 절대로 못 봤을 허브에 대해서도. Harness, judge, 라운드별 결과 전부 공개."
-                : "The Memory.Wiki URL is supposed to be the single thing you paste into every AI. This page is the open evaluation that proves it — including against hubs the model could not possibly have seen during training. Harness, judge, and round-by-round results are all public."}
+                ? "memory.wiki URL은 모든 AI에 붙여넣는 단 하나의 것이어야 합니다. 이 페이지는 그게 사실임을 증명하는 오픈 평가입니다 — 모델이 학습 중에 절대로 못 봤을 허브에 대해서도. Harness, judge, 라운드별 결과 전부 공개."
+                : "The memory.wiki URL is supposed to be the single thing you paste into every AI. This page is the open evaluation that proves it — including against hubs the model could not possibly have seen during training. Harness, judge, and round-by-round results are all public."}
             </p>
 
             {/* Headline numbers */}
@@ -121,8 +121,8 @@ export default function BenchmarkPure({ locale = "en" }: { locale?: "en" | "ko" 
               <h2 id="hypothesis">{isKo ? "1. 가설" : "1. The hypothesis"}</h2>
               <p>
                 {isKo
-                  ? "Memory.Wiki URL contract는 하나의 주소로 당신의 지식을 어떤 AI에든 전달할 수 있다고 주장합니다. 강한 주장입니다. 틀릴 수 있는 방식이 최소한 네 가지:"
-                  : "The Memory.Wiki URL contract claims a single address can deliver your knowledge to any AI. That’s a strong claim. There are at least four ways it could be wrong:"}
+                  ? "memory.wiki URL contract는 하나의 주소로 당신의 지식을 어떤 AI에든 전달할 수 있다고 주장합니다. 강한 주장입니다. 틀릴 수 있는 방식이 최소한 네 가지:"
+                  : "The memory.wiki URL contract claims a single address can deliver your knowledge to any AI. That’s a strong claim. There are at least four ways it could be wrong:"}
               </p>
               <ul>
                 {isKo ? (
@@ -353,14 +353,14 @@ export default function BenchmarkPure({ locale = "en" }: { locale?: "en" | "ko" 
               <h2 id="takehome">{isKo ? "7. 결론" : "7. The bottom line"}</h2>
               <p>
                 {isKo
-                  ? "Claude, ChatGPT, Gemini, Cursor, Codex 어디에든 Memory.Wiki URL을 붙여넣으면 AI는 충실히 읽습니다. AI가 학습 때 절대로 못 봤을 콘텐츠에 대해서도 마찬가지. URL이 인터페이스고, 모델이 reader고, contract는 성립."
-                  : "If you paste a Memory.Wiki URL into Claude, ChatGPT, Gemini, Cursor, or Codex, the AI will read it faithfully. The same is true for content the AI cannot possibly have seen during training. The URL is the interface; the model is the reader; the contract holds."}
+                  ? "Claude, ChatGPT, Gemini, Cursor, Codex 어디에든 memory.wiki URL을 붙여넣으면 AI는 충실히 읽습니다. AI가 학습 때 절대로 못 봤을 콘텐츠에 대해서도 마찬가지. URL이 인터페이스고, 모델이 reader고, contract는 성립."
+                  : "If you paste a memory.wiki URL into Claude, ChatGPT, Gemini, Cursor, or Codex, the AI will read it faithfully. The same is true for content the AI cannot possibly have seen during training. The URL is the interface; the model is the reader; the contract holds."}
               </p>
               <p>
                 {isKo ? (
-                  <>실제 동작 보기: <Link href={isKo ? "/ko/how" : "/how"}>Memory.Wiki가 어떻게 동작하나</Link>. 직접 써보기: <Link href="/">마크다운 붙여넣고 3초 안에 URL</Link>.</>
+                  <>실제 동작 보기: <Link href={isKo ? "/ko/how" : "/how"}>memory.wiki가 어떻게 동작하나</Link>. 직접 써보기: <Link href="/">마크다운 붙여넣고 3초 안에 URL</Link>.</>
                 ) : (
-                  <>See it in motion: <Link href="/how">how Memory.Wiki actually works</Link>. Try it: <Link href="/">paste any markdown and get a URL in three seconds</Link>.</>
+                  <>See it in motion: <Link href="/how">how memory.wiki actually works</Link>. Try it: <Link href="/">paste any markdown and get a URL in three seconds</Link>.</>
                 )}
               </p>
             </PureProse>

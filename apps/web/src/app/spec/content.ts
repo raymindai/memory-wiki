@@ -58,8 +58,8 @@ export const specEn: SpecContent = {
   hero: {
     eyebrow: "memory.wiki / spec",
     title: "An open spec for an AI-era wiki.",
-    intro: "memory.wiki is a personal knowledge wiki that any AI can read. This page documents the URL contract, the retrieval API, the llms.txt manifest, and the bundle digest — the same primitives the Memory.Wiki reference implementation ships today. Other tools can implement this spec and interop with no platform lock-in.",
-    meta: "Engine licence: MIT. Reference implementation: <a href=\"https://memory.wiki\">Memory.Wiki</a>. Spec version: 0.1 (draft, 2026-05-15).",
+    intro: "memory.wiki is a personal knowledge wiki that any AI can read. This page documents the URL contract, the retrieval API, the llms.txt manifest, and the bundle digest — the same primitives the memory.wiki reference implementation ships today. Other tools can implement this spec and interop with no platform lock-in.",
+    meta: "Engine licence: MIT. Reference implementation: <a href=\"https://memory.wiki\">memory.wiki</a>. Spec version: 0.1 (draft, 2026-05-15).",
   },
   toc: {
     heading: "Contents",
@@ -155,7 +155,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>
 analysis_stale: true        # only when a member doc was edited after the analysis
-source: "Memory.Wiki"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -293,7 +293,7 @@ Content-Type: application/json
       ]},
     ],
     bottomLeft: "A product of Raymind.AI",
-    bottomRight: "© 2026 Memory.Wiki. All rights reserved.",
+    bottomRight: "© 2026 memory.wiki. All rights reserved.",
     tagline: "Personal knowledge hub for the AI era.",
     parent: { label: "A product of Raymind.AI", href: "https://raymind.ai" },
   },
@@ -315,8 +315,8 @@ export const specKo: SpecContent = {
   hero: {
     eyebrow: "memory.wiki / spec",
     title: "AI 시대 wiki의 공개 스펙.",
-    intro: "memory.wiki는 어떤 AI도 읽을 수 있는 개인 지식 wiki입니다. 이 페이지는 URL 계약, retrieval API, llms.txt 매니페스트, bundle digest를 문서화합니다 — Memory.Wiki 레퍼런스 구현이 오늘 ship하는 같은 primitives. 다른 도구도 이 스펙을 구현해서 플랫폼 lock-in 없이 interop 가능합니다.",
-    meta: "엔진 라이선스: MIT. 레퍼런스 구현: <a href=\"https://memory.wiki\">Memory.Wiki</a>. 스펙 버전: 0.1 (draft, 2026-05-15).",
+    intro: "memory.wiki는 어떤 AI도 읽을 수 있는 개인 지식 wiki입니다. 이 페이지는 URL 계약, retrieval API, llms.txt 매니페스트, bundle digest를 문서화합니다 — memory.wiki 레퍼런스 구현이 오늘 ship하는 같은 primitives. 다른 도구도 이 스펙을 구현해서 플랫폼 lock-in 없이 interop 가능합니다.",
+    meta: "엔진 라이선스: MIT. 레퍼런스 구현: <a href=\"https://memory.wiki\">memory.wiki</a>. 스펙 버전: 0.1 (draft, 2026-05-15).",
   },
   toc: {
     heading: "목차",
@@ -412,7 +412,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>
 analysis_stale: true        # 분석 이후 멤버 doc이 수정됐을 때만
-source: "Memory.Wiki"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -550,7 +550,7 @@ Content-Type: application/json
       ]},
     ],
     bottomLeft: "Raymind.AI 가 만든 제품",
-    bottomRight: "© 2026 Memory.Wiki. All rights reserved.",
+    bottomRight: "© 2026 memory.wiki. All rights reserved.",
     tagline: "AI 시대의 개인 지식 허브.",
     parent: { label: "Raymind.AI 가 만든 제품", href: "https://raymind.ai" },
   },

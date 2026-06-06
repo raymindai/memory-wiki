@@ -61,8 +61,8 @@ export default function Home() {
       const here = window.location.pathname;
       // Skip the /about redirect when the URL carries intent to use
       // the editor: a hash payload (`#md=…` from /discover's Open in
-      // Memory.Wiki, `#file=…` from desktop, etc.) or any search
-      // param. Without this, "Open in Memory.Wiki" on /discover
+      // memory.wiki, `#file=…` from desktop, etc.) or any search
+      // param. Without this, "Open in memory.wiki" on /discover
       // opened a new tab at /#md=<gzip>, the redirect fired before
       // MdEditor could decode the hash, and the markdown was lost.
       const hasHash = !!window.location.hash;
@@ -78,7 +78,7 @@ export default function Home() {
     <>
       <noscript>
         <div style={{ padding: "60px 24px", maxWidth: 800, margin: "0 auto", fontFamily: "system-ui, sans-serif", color: "#fafafa", background: "#09090b" }}>
-          <h1>Memory.Wiki — Stop re-explaining your context to every AI</h1>
+          <h1>memory.wiki — Stop re-explaining your context to every AI</h1>
           <p>Put your knowledge in one URL every AI can read. Capture from anywhere, AI organizes in the background, paste the URL into Claude / ChatGPT / Cursor and it knows you. No login required — paste or type, get a permanent URL in seconds.</p>
           <h2>Features</h2>
           <ul>
@@ -92,7 +92,7 @@ export default function Home() {
             <li>Export to PDF, copy as rich text for Google Docs and email</li>
           </ul>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- noscript context, Link component won't work */}
-          <p><a href="/about">About Memory.Wiki</a> | <a href="/plugins">Plugins and Extensions</a> | <a href="/docs">Developer Documentation</a> | <a href="/manifesto">Manifesto</a></p>
+          <p><a href="/about">About memory.wiki</a> | <a href="/plugins">Plugins and Extensions</a> | <a href="/docs">Developer Documentation</a> | <a href="/manifesto">Manifesto</a></p>
         </div>
       </noscript>
       <WelcomeOverlay />

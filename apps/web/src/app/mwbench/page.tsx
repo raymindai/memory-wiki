@@ -6,11 +6,11 @@ import ViewerFooter from "@/components/ViewerFooter";
 export const metadata: Metadata = {
   title: "MWBench: cross-AI eval, one URL works on Claude, ChatGPT, and Gemini",
   description:
-    "Memory.Wiki's open methodology for proving the cross-AI URL delivery model. 100% accuracy across Claude / OpenAI / Gemini, verified on content the AIs have never seen during training. Quote-evidence judge (every claim audited against a literal corpus quote), adversarial subset, reproducible harness. Browse vs paste, familiar vs unseen, four cells, all 100%.",
+    "memory.wiki's open methodology for proving the cross-AI URL delivery model. 100% accuracy across Claude / OpenAI / Gemini, verified on content the AIs have never seen during training. Quote-evidence judge (every claim audited against a literal corpus quote), adversarial subset, reproducible harness. Browse vs paste, familiar vs unseen, four cells, all 100%.",
   keywords: [
     "cross-AI",
     "MWBench",
-    "Memory.Wiki",
+    "memory.wiki",
     "Claude eval",
     "ChatGPT eval",
     "Gemini eval",
@@ -26,17 +26,17 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "https://memory.wiki/mwbench" },
   openGraph: {
-    title: "MWBench / Cross-AI eval for Memory.Wiki",
+    title: "MWBench / Cross-AI eval for memory.wiki",
     description:
       "100% across Claude / OpenAI / Gemini, including on truly unseen content. Open methodology, reproducible harness.",
     url: "https://memory.wiki/mwbench",
-    siteName: "Memory.Wiki",
+    siteName: "memory.wiki",
     type: "article",
     images: [{ url: "/api/og?title=MWBench", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MWBench / Cross-AI eval for Memory.Wiki",
+    title: "MWBench / Cross-AI eval for memory.wiki",
     description:
       "100% across Claude / OpenAI / Gemini on truly unseen content. Open methodology, reproducible harness.",
     images: ["/api/og?title=MWBench"],
@@ -48,12 +48,12 @@ export const metadata: Metadata = {
 const STRUCTURED_DATA = {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  headline: "MWBench / Cross-AI eval for Memory.Wiki",
+  headline: "MWBench / Cross-AI eval for memory.wiki",
   description:
     "Open methodology for verifying that a single URL paste into Claude / OpenAI / Gemini produces 100% correct answers, including on content the AIs have never seen during training.",
   url: "https://memory.wiki/mwbench",
-  author: { "@type": "Organization", name: "Memory.Wiki" },
-  publisher: { "@type": "Organization", name: "Memory.Wiki", url: "https://memory.wiki" },
+  author: { "@type": "Organization", name: "memory.wiki" },
+  publisher: { "@type": "Organization", name: "memory.wiki", url: "https://memory.wiki" },
   datePublished: "2026-05-24",
   dateModified: "2026-05-25",
   keywords:
@@ -92,7 +92,7 @@ export default function MWBenchPage() {
             className="text-body leading-relaxed max-w-2xl"
             style={{ color: "var(--text-secondary)" }}
           >
-            Memory.Wiki delivers your knowledge to Claude, ChatGPT, and Gemini through a single URL. MWBench is the open eval that measures whether the wedge actually works, including on content the AI has never seen during training.
+            memory.wiki delivers your knowledge to Claude, ChatGPT, and Gemini through a single URL. MWBench is the open eval that measures whether the wedge actually works, including on content the AI has never seen during training.
           </p>
         </section>
 
@@ -200,7 +200,7 @@ export default function MWBenchPage() {
                 <strong>Paste</strong>: the bench tool fetches the URL itself and includes the body in the prompt. The AI reads what is in front of it. Internal sanity check.
               </p>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                <strong>Browse</strong>: the AI gets only the URL plus a <code>fetch_url</code> tool. It decides to fetch, follows links inside the hub, then answers. This is what happens when a user pastes a Memory.Wiki URL into Claude.ai or ChatGPT.
+                <strong>Browse</strong>: the AI gets only the URL plus a <code>fetch_url</code> tool. It decides to fetch, follows links inside the hub, then answers. This is what happens when a user pastes a memory.wiki URL into Claude.ai or ChatGPT.
               </p>
             </div>
             <div
@@ -242,7 +242,7 @@ export default function MWBenchPage() {
               We don&apos;t bench every hub
             </h3>
             <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-              The cross-AI wedge is proven at the <strong>system level</strong>, not per-hub. The unseen-hub result (100% on content the AIs have never seen) means every hub built on Memory.Wiki inherits the same property automatically. Re-running the bench on every customer hub would be repeating a proof we&apos;ve already given.
+              The cross-AI wedge is proven at the <strong>system level</strong>, not per-hub. The unseen-hub result (100% on content the AIs have never seen) means every hub built on memory.wiki inherits the same property automatically. Re-running the bench on every customer hub would be repeating a proof we&apos;ve already given.
             </p>
             <p className="text-sm leading-relaxed mt-3" style={{ color: "var(--text-secondary)" }}>
               The harness, the data, and the deeper write-ups are below for anyone who wants to audit the claim or run it themselves.
@@ -350,7 +350,7 @@ export default function MWBenchPage() {
               Try it yourself
             </h3>
             <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--text-secondary)" }}>
-              Sign up at Memory.Wiki, capture five docs from any AI chat, and paste your hub URL into Claude.ai or ChatGPT. The AI will fetch, read, and answer, even on content it has never seen during training.
+              Sign up at memory.wiki, capture five docs from any AI chat, and paste your hub URL into Claude.ai or ChatGPT. The AI will fetch, read, and answer, even on content it has never seen during training.
             </p>
             <Link
               href="/auth/signin"

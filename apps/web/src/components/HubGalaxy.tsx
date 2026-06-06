@@ -2,10 +2,10 @@
 
 // Hub Galaxy — pure SVG cosmos.
 //
-// Chrome (header / sidebar / detail panel / scrubber) uses Memory.Wiki CSS vars
+// Chrome (header / sidebar / detail panel / scrubber) uses memory.wiki CSS vars
 // (--background, --surface, --border, --text-*, --accent), forced to
 // dark theme. Canvas uses hand-picked hex (SVG gradient stops need
-// explicit colours) inside Memory.Wiki's warm zinc + orange family.
+// explicit colours) inside memory.wiki's warm zinc + orange family.
 //
 // API:  GET /api/user/hub/constellation  (owner-only)
 
@@ -1299,7 +1299,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
           className="text-caption font-mono"
           style={{ background: "var(--text-primary)", color: "var(--background)", padding: "8px 16px", borderRadius: 6, textDecoration: "none", fontWeight: 600, letterSpacing: 0.3 }}
         >
-          Go to Memory.Wiki
+          Go to memory.wiki
         </Link>
       </div>
     );
@@ -2118,7 +2118,7 @@ export default function HubGalaxy({ authHeaders, userEmail, embedded, onOpenDoc,
           </svg>
         </div>
 
-        {/* Detail panel — typography + spacing tracks Memory.Wiki's left
+        {/* Detail panel — typography + spacing tracks memory.wiki's left
             sidebar. Doc/concept references reuse the SidebarFolder
             TabRow look: compact rounded rows, hover:bg-[var(--toggle-bg)],
             tiny coloured dot prefix instead of bordered chips. */}

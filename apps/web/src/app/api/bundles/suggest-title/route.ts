@@ -13,7 +13,7 @@ import { callAI } from "@/lib/ai-providers";
 // Used by the BundleCreator modal's "✨ AI" button — title field is
 // empty by default, AI fills it on demand.
 
-const SYSTEM = `You are Memory.Wiki's bundle namer. The user is about to group a small set of their own documents into one "bundle" (a themed sub-folder of their knowledge hub). Read what the docs have in common, then return a short title.
+const SYSTEM = `You are memory.wiki's bundle namer. The user is about to group a small set of their own documents into one "bundle" (a themed sub-folder of their knowledge hub). Read what the docs have in common, then return a short title.
 
 Rules:
 - 2 to 6 words.

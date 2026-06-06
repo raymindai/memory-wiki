@@ -77,7 +77,7 @@ Structured Markdown:`;
     });
 
     if (!result.ok) {
-      console.error("Memory.Wiki formatter failover exhausted:", result.status, result.error);
+      console.error("memory.wiki formatter failover exhausted:", result.status, result.error);
       return NextResponse.json(
         { error: result.error },
         { status: result.rateLimited ? 429 : result.status >= 500 ? 502 : result.status },
@@ -93,7 +93,7 @@ Structured Markdown:`;
         : {}),
     });
   } catch (err) {
-    console.error("Memory.Wiki API error:", err);
+    console.error("memory.wiki API error:", err);
     return NextResponse.json({ error: "AI service unreachable. Check your connection." }, { status: 500 });
   }
 }

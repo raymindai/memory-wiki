@@ -30,7 +30,7 @@ export default function BookmarkletPure({ locale = "en" }: { locale?: "en" | "ko
     >
       <div className="pure-manifesto-page">
         <h1 className="pure-manifesto-title">
-          {isKo ? "Memory.Wiki 북마클릿." : "The Memory.Wiki bookmarklet."}
+          {isKo ? "memory.wiki 북마클릿." : "The memory.wiki bookmarklet."}
         </h1>
         <p className="pure-manifesto-intro">
           {isKo
@@ -82,14 +82,14 @@ export default function BookmarkletPure({ locale = "en" }: { locale?: "en" | "ko
               <>
                 <li>북마클릿이 현재 어떤 AI인지 감지.</li>
                 <li>페이지 DOM의 보이는 대화를 따라가며 깨끗한 마크다운으로 변환.</li>
-                <li>마크다운을 Memory.Wiki에 저장하고 새 문서 URL을 새 탭에서 엽니다.</li>
+                <li>마크다운을 memory.wiki에 저장하고 새 문서 URL을 새 탭에서 엽니다.</li>
                 <li>기본은 익명 — 나중에 로그인하면 캡처한 모든 문서를 허브에 귀속시킬 수 있음.</li>
               </>
             ) : (
               <>
                 <li>The bookmarklet detects which AI you&apos;re on.</li>
                 <li>It walks the visible conversation in the page DOM and converts it to clean markdown.</li>
-                <li>It saves the markdown to Memory.Wiki and opens the new doc URL in a new tab.</li>
+                <li>It saves the markdown to memory.wiki and opens the new doc URL in a new tab.</li>
                 <li>Anonymous by default — sign in later to claim every doc you&apos;ve captured into your hub.</li>
               </>
             )}

@@ -206,7 +206,7 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                 id="desktop"
                 num="05"
                 brand="mac"
-                title={isKo ? "Memory.Wiki for Mac" : "Memory.Wiki for Mac"}
+                title={isKo ? "memory.wiki for Mac" : "memory.wiki for Mac"}
                 blurb={isKo
                   ? "네이티브 사이드바, 폴더, 오프라인 편집. Apple Silicon + Developer ID 사인 + notarize."
                   : "Native sidebar, folders, offline edit. Apple Silicon + Developer ID signed + notarized."}

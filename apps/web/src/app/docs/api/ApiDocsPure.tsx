@@ -192,7 +192,7 @@ const AUTH_CARDS_EN = [
   },
   {
     title: "MCP / CLI auth",
-    desc: "Both MCP server and CLI use JWT from Memory.Wiki login. Run: npm install -g memory-wiki-cli && Memory.Wiki login",
+    desc: "Both MCP server and CLI use JWT from memory.wiki login. Run: npm install -g memory-wiki-cli && memory.wiki login",
   },
 ];
 
@@ -211,7 +211,7 @@ const AUTH_CARDS_KO = [
   },
   {
     title: "MCP / CLI 인증",
-    desc: "MCP 서버와 CLI 모두 Memory.Wiki login의 JWT를 사용합니다. 실행: npm install -g memory-wiki-cli && Memory.Wiki login",
+    desc: "MCP 서버와 CLI 모두 memory.wiki login의 JWT를 사용합니다. 실행: npm install -g memory-wiki-cli && memory.wiki login",
   },
 ];
 
@@ -821,10 +821,10 @@ url = res.json()["url"]`} />
         <h2 className="pure-api-docs-section-title">{t.rawAndLlms}</h2>
         <p className="pure-api-docs-body">
           {locale === "ko" ? (
-            <>모든 공개 Memory.Wiki URL 은 AI 에이전트용 클린 마크다운 변형을 함께 제공합니다.{" "}
+            <>모든 공개 memory.wiki URL 은 AI 에이전트용 클린 마크다운 변형을 함께 제공합니다.{" "}
             <code>?compact</code> 또는 <code>?digest</code> 을 붙이면 토큰을 줄일 수 있습니다 — 답변은 동일하고, 비용만 줄어듭니다.</>
           ) : (
-            <>Every public Memory.Wiki URL also exposes a clean-markdown variant for AI agents.
+            <>Every public memory.wiki URL also exposes a clean-markdown variant for AI agents.
             Append <code>?compact</code> or <code>?digest</code> to cut tokens — the answer is the same; the bill is smaller.</>
           )}
         </p>
@@ -904,7 +904,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>   # 캔버스가 실행된 적이 있을 때만
 analysis_stale: true           # 분석 이후 멤버 문서가 수정된 경우에만
-source: "Memory.Wiki"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -948,7 +948,7 @@ document_count: N
 updated: <ISO>
 analysis_generated_at: <ISO>   # present when the canvas has run
 analysis_stale: true           # only when a member doc was edited after that run
-source: "Memory.Wiki"
+source: "memory.wiki"
 ---
 
 # <Bundle title>
@@ -1019,8 +1019,8 @@ source: "Memory.Wiki"
         <h3 className="pure-api-docs-subhead">{t.twoOntologyLayers}</h3>
         <p className="pure-api-docs-body">
           {locale === "ko"
-            ? "Memory.Wiki 는 두 개의 서로 다른 온톨로지 레이어를 제공하며, 각각 별도의 URL 에 실립니다:"
-            : "Memory.Wiki ships two distinct ontology layers, and each lives on its own URL:"}
+            ? "memory.wiki 는 두 개의 서로 다른 온톨로지 레이어를 제공하며, 각각 별도의 URL 에 실립니다:"
+            : "memory.wiki ships two distinct ontology layers, and each lives on its own URL:"}
         </p>
         <ul className="pure-api-docs-list">
           {locale === "ko" ? (
@@ -1066,8 +1066,8 @@ source: "Memory.Wiki"
         <h2 className="pure-api-docs-section-title">{t.authentication}</h2>
         <p className="pure-api-docs-body">
           {locale === "ko"
-            ? "Memory.Wiki는 점진적 인증 방식을 사용합니다. 기본 작업은 인증이 필요 없습니다. 고급 기능은 edit token 또는 사용자 식별 정보를 사용합니다."
-            : "Memory.Wiki uses progressive authentication. Basic operations require no auth. Advanced features use edit tokens or user identity."}
+            ? "memory.wiki는 점진적 인증 방식을 사용합니다. 기본 작업은 인증이 필요 없습니다. 고급 기능은 edit token 또는 사용자 식별 정보를 사용합니다."
+            : "memory.wiki uses progressive authentication. Basic operations require no auth. Advanced features use edit tokens or user identity."}
         </p>
 
         <div className="pure-api-docs-auth-grid">

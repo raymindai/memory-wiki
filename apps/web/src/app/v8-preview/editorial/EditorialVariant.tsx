@@ -8,7 +8,7 @@ export function EditorialVariant() {
   const [streamedText, setStreamedText] = useState("");
   const fullText =
     "Your weekly digest: 12 captures this week, clustered into 3 themes. " +
-    "Memory.Wiki noticed a strong connection between your TypeScript notes " +
+    "memory.wiki noticed a strong connection between your TypeScript notes " +
     "and the new design system you started capturing on Thursday.";
 
   const startStream = () => {
@@ -30,7 +30,7 @@ export function EditorialVariant() {
         <div className="topnav-inner">
           <div className="topnav-brand">
             <Spike size={18} />
-            <span className="topnav-wordmark">Memory.Wiki</span>
+            <span className="topnav-wordmark">memory.wiki</span>
           </div>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Product</a>
@@ -40,7 +40,7 @@ export function EditorialVariant() {
           </nav>
           <div className="topnav-right">
             <a href="#" className="text-link">Sign in</a>
-            <button className="btn-primary">Try Memory.Wiki</button>
+            <button className="btn-primary">Try memory.wiki</button>
           </div>
         </div>
       </header>
@@ -62,7 +62,7 @@ export function EditorialVariant() {
               community&apos;s.
             </p>
             <div className="cta-row">
-              <button className="btn-primary">Start your Memory.Wiki</button>
+              <button className="btn-primary">Start your memory.wiki</button>
               <button className="btn-secondary">See an example →</button>
             </div>
           </div>
@@ -89,7 +89,7 @@ export function EditorialVariant() {
                   <span className="code-sparkle">✦</span> Claude · fetched 12 KB
                 </div>
                 <div className="code-line code-output">
-                  Raymind is solo-founder shipping Memory.Wiki v8. Capture →
+                  Raymind is solo-founder shipping memory.wiki v8. Capture →
                   Organize → Use framework. Cross-AI is the wedge. Today: working
                   on visual direction. Let me help —
                 </div>
@@ -111,7 +111,7 @@ export function EditorialVariant() {
         <div className="section-head">
           <h2 className="display-lg">Three primitives. One URL.</h2>
           <p className="section-lede">
-            Every Memory.Wiki page is composed of three layers: capture, organize,
+            Every memory.wiki page is composed of three layers: capture, organize,
             and use. AI lives in the middle.
           </p>
         </div>
@@ -161,7 +161,7 @@ export function EditorialVariant() {
             </div>
             <h3 className="title-md">v8 thinking — capture vs memory</h3>
             <p className="body-md">
-              Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+              memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
               그래서 capture everything 이 자연스러운 입구.
             </p>
             <div className="tags">
@@ -197,7 +197,7 @@ export function EditorialVariant() {
             </div>
             <h3 className="title-md">My current focus</h3>
             <p className="body-md">
-              Shipping Memory.Wiki v8 over 20 weeks. Capture → Organize → Use.
+              Shipping memory.wiki v8 over 20 weeks. Capture → Organize → Use.
               Cross-AI delivery is the wedge giants cannot build.
             </p>
             <div className="tags">
@@ -309,12 +309,12 @@ export function EditorialVariant() {
       <section className="section">
         <div className="callout-coral">
           <h2 className="display-md callout-headline">
-            Try Memory.Wiki with Claude today.
+            Try memory.wiki with Claude today.
           </h2>
           <p className="callout-sub">
             Paste your memory.wiki URL into any AI conversation. It just works.
           </p>
-          <button className="btn-on-coral">Start your Memory.Wiki</button>
+          <button className="btn-on-coral">Start your memory.wiki</button>
         </div>
       </section>
 
@@ -323,7 +323,7 @@ export function EditorialVariant() {
         <div className="footer-inner">
           <div className="footer-brand">
             <Spike size={20} light />
-            <span className="footer-wordmark">Memory.Wiki</span>
+            <span className="footer-wordmark">memory.wiki</span>
           </div>
           <div className="footer-cols">
             <div className="footer-col">

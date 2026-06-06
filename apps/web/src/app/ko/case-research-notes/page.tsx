@@ -5,7 +5,7 @@ const data: CaseData = {
   slug: "research-notes",
   kicker: "연구 노트",
   title: "논문 + PDF를 하나의 인용 가능한 URL로.",
-  sub: "기억하는 것보다 더 많이 읽는 사람을 위해 — 연구자, 파운더, 박사과정. Memory.Wiki는 PDF 더미를 어떤 AI든 인용할 수 있는 허브로 만듭니다.",
+  sub: "기억하는 것보다 더 많이 읽는 사람을 위해 — 연구자, 파운더, 박사과정. memory.wiki는 PDF 더미를 어떤 AI든 인용할 수 있는 허브로 만듭니다.",
   pain: [
     "분기에 논문 30편을 읽음. 두 달째 되면 어느 논문에 필요한 주장이 있었는지 기억 못 함.",
     "AI 어시스턴트는 논문 하나씩 요약은 잘 함. 전체 스택을 가로질러 종합은 못 함.",
@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "각 PDF 드롭",
-      detail: "Memory.Wiki가 텍스트를 추출하고, 선택적 AI \"정리\" 패스를 돌리고, 영구 URL에 저장. Source 페이지는 그대로 — section anchor로 re-quote 가능.",
+      detail: "memory.wiki가 텍스트를 추출하고, 선택적 AI \"정리\" 패스를 돌리고, 영구 URL에 저장. Source 페이지는 그대로 — section anchor로 re-quote 가능.",
     },
     {
       step: "Concept index가 빌드되게",

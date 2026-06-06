@@ -38,15 +38,15 @@ export default function NotFoundPure() {
               <div className="pure-notfound-code mono">404</div>
               <h1 className="pure-notfound-title">Page not found.</h1>
               <p className="pure-notfound-lede">
-                That URL doesn&apos;t exist on Memory.Wiki. Maybe it was renamed, or the link is wrong.
+                That URL doesn&apos;t exist on memory.wiki. Maybe it was renamed, or the link is wrong.
               </p>
               <p className="pure-notfound-hint mono">
-                Memory.Wiki URLs look like <code>memory.wiki/&lt;id&gt;</code>, <code>memory.wiki/b/&lt;id&gt;</code>, or <code>memory.wiki/@&lt;you&gt;</code>.
+                memory.wiki URLs look like <code>memory.wiki/&lt;id&gt;</code>, <code>memory.wiki/b/&lt;id&gt;</code>, or <code>memory.wiki/@&lt;you&gt;</code>.
               </p>
               <div className="pure-notfound-actions">
                 <PureButton href="/">Go home</PureButton>
                 <Link href="/about" className="btn-ghost btn-lg">
-                  What is Memory.Wiki?
+                  What is memory.wiki?
                 </Link>
               </div>
             </div>

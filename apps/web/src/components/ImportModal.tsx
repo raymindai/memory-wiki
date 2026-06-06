@@ -354,7 +354,7 @@ export default function ImportModal({
 
           {active === "url" && (
             <SimpleUrlForm
-              hint="Any public http(s) page. YouTube URLs auto-extract the transcript. Everything else: Memory.Wiki strips chrome (nav, footer, ads) and converts the main content."
+              hint="Any public http(s) page. YouTube URLs auto-extract the transcript. Everything else: memory.wiki strips chrome (nav, footer, ads) and converts the main content."
               placeholder="https://example.com/article  or  https://youtube.com/watch?v=…"
               busy={busy}
               error={error}

@@ -41,7 +41,7 @@ RULES:
 - For tree/hierarchy diagrams, use "graph TD" (top-down).
 - For flowcharts with decisions, use "graph TD" with diamond nodes for conditions.
 - For sequence diagrams, use "sequenceDiagram".
-- For each node, include ALL text associated with it. If a node has sub-labels below it (like "Browser" with "Memory.Wiki" below), combine them: A["Browser<br/>Memory.Wiki"]
+- For each node, include ALL text associated with it. If a node has sub-labels below it (like "Browser" with "memory.wiki" below), combine them: A["Browser<br/>memory.wiki"]
 - Use descriptive node IDs (left of the bracket): A, B1, node_x. **IDs must be ASCII letters/digits/underscores only — no spaces, no punctuation, no slashes, no dots.**
 - **CRITICAL: ALWAYS wrap node labels in double quotes**: \`A["any text"]\` not \`A[any text]\`. This prevents parse errors on labels containing \`{ } ( ) / | : . , < > # @ %\` or whitespace. NEVER write \`G[memory.wiki/{id}]\` — write \`G["memory.wiki/{id}"]\`.
 - Edge labels also quoted: \`A -->|"label"| B\`.

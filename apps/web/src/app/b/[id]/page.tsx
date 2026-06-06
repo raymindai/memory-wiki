@@ -85,20 +85,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImageUrl = `https://memory.wiki/api/og?title=${encodeURIComponent(title)}&features=${encodeURIComponent(`Bundle,${bundle.documentCount} docs,Knowledge Graph`)}${authorParam}`;
 
   return {
-    title: `${title} — Memory.Wiki`,
+    title: `${title} — memory.wiki`,
     description,
     robots: isProtected ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${title} — Memory.Wiki`,
+      title: `${title} — memory.wiki`,
       description,
       url: `https://memory.wiki/b/${id}`,
-      siteName: "Memory.Wiki",
+      siteName: "memory.wiki",
       type: "article",
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} — Memory.Wiki`,
+      title: `${title} — memory.wiki`,
       description,
       images: [ogImageUrl],
     },
@@ -151,10 +151,10 @@ export default async function BundlePage({ params }: Props) {
         dateModified: bundle.updated_at || bundle.created_at,
         author: bundle.ownerName
           ? { "@type": "Person", name: bundle.ownerName }
-          : { "@type": "Organization", name: "Memory.Wiki" },
+          : { "@type": "Organization", name: "memory.wiki" },
         publisher: {
           "@type": "Organization",
-          name: "Memory.Wiki",
+          name: "memory.wiki",
           url: "https://memory.wiki",
         },
         numberOfItems: bundle.documentCount,

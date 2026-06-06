@@ -38,7 +38,7 @@ interface PreviewResponse {
  * Diff/accept panel for the synthesis exceed-move.
  *
  * Karpathy's wiki pattern can only regenerate pages — every refresh
- * blows away the previous version with no review surface. Memory.Wiki lets the
+ * blows away the previous version with no review surface. memory.wiki lets the
  * owner see a line-level diff between the existing synthesis and the
  * LLM's proposed update, then accept or reject as a whole.
  *

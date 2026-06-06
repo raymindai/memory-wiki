@@ -1,5 +1,5 @@
 // Curator options — user-configurable list of auto-management
-// signals that Memory.Wiki runs against the user's hub. Each option owns
+// signals that memory.wiki runs against the user's hub. Each option owns
 // one rule; the user toggles which ones surface in Needs Review.
 //
 // Storage: localStorage in v1 (key `mw-curator-settings`). v2 can
@@ -78,7 +78,7 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
   {
     id: "rollup",
     label: "Roll-up suggestions",
-    description: "When 10+ docs share a concept, Memory.Wiki suggests synthesising them into a single summary doc you can compile.",
+    description: "When 10+ docs share a concept, memory.wiki suggests synthesising them into a single summary doc you can compile.",
     shipped: true,
     defaultEnabled: false,
   },
@@ -99,7 +99,7 @@ export const CURATOR_OPTIONS: CuratorOption[] = [
   {
     id: "bundle-suggestion",
     label: "Bundle suggestions",
-    description: "When 5+ docs share a topical cluster, Memory.Wiki suggests bundling them. You decide whether to accept — nothing is auto-created.",
+    description: "When 5+ docs share a topical cluster, memory.wiki suggests bundling them. You decide whether to accept — nothing is auto-created.",
     shipped: true,
     defaultEnabled: true,
   },

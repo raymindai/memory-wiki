@@ -12,7 +12,7 @@ export function ClayStackVariant() {
         <div className="topnav-inner">
           <a href="#" className="brand">
             <span className="brand-blob" />
-            <span className="brand-word">Memory.Wiki</span>
+            <span className="brand-word">memory.wiki</span>
           </a>
           <nav className="topnav-links">
             <a href="#" className="topnav-link">Product</a>
@@ -39,7 +39,7 @@ export function ClayStackVariant() {
         </h1>
         <p className="hero-sub">
           Stop re-explaining yourself. Capture from anywhere — Claude, ChatGPT,
-          Cursor all read the same context from one Memory.Wiki URL.
+          Cursor all read the same context from one memory.wiki URL.
         </p>
         <div className="cta-row">
           <button className="btn-primary">Try free</button>
@@ -211,7 +211,7 @@ export function ClayStackVariant() {
           <div className="footer-top">
             <div className="brand">
               <span className="brand-blob" />
-              <span className="brand-word">Memory.Wiki</span>
+              <span className="brand-word">memory.wiki</span>
             </div>
             <span className="mono caption">v8 / variant I.3 / clay-stack</span>
           </div>

@@ -57,7 +57,7 @@ export async function GET(
   const description = (profile.hub_description || "").trim();
   const base = `https://memory.wiki/hub/${slug}`;
 
-  const md = `# AGENTS.md — ${author}'s Memory.Wiki hub
+  const md = `# AGENTS.md — ${author}'s memory.wiki hub
 
 > Operating manual for AI agents (Claude, ChatGPT, Cursor, Codex, Gemini,
 > MCP-aware tools). Read this first; then pick the right URL for your

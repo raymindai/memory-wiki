@@ -80,7 +80,7 @@ export const SITE_FOOTER_COLUMNS_EN: FooterColumns = [
 ];
 
 export const SITE_FOOTER_BOTTOM_LEFT_EN = "A product of Raymind.AI";
-export const SITE_FOOTER_BOTTOM_RIGHT = "© 2026 Memory.Wiki. All rights reserved.";
+export const SITE_FOOTER_BOTTOM_RIGHT = "© 2026 memory.wiki. All rights reserved.";
 export const SITE_FOOTER_TAGLINE_EN = "Personal knowledge hub for the AI era.";
 export const SITE_FOOTER_PARENT_EN: FooterParent = {
   label: "A product of Raymind.AI",

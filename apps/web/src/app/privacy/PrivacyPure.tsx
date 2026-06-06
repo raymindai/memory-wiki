@@ -62,14 +62,14 @@ export default function PrivacyPure({ locale = "en" }: { locale?: "en" | "ko" })
             </h1>
             <p className="pure-manifesto-intro">
               {isKo
-                ? "Memory.Wiki는 Raymind AI가 운영하는 문서 발행 서비스입니다. 사용자의 프라이버시를 존중하고 데이터 보호에 책임을 다합니다. 본 방침은 Memory.Wiki 웹사이트, Memory.Wiki Chrome 확장, Memory.Wiki VS Code 확장, Memory.Wiki for Mac 데스크톱 앱, Memory.Wiki MCP 서버에 모두 적용됩니다."
-                : "Memory.Wiki is a document publishing service operated by Raymind AI. We respect your privacy and are committed to protecting your data. This policy covers the Memory.Wiki website, the Memory.Wiki Chrome Extension, the Memory.Wiki VS Code Extension, the Memory.Wiki for Mac desktop app, and the Memory.Wiki MCP server."}
+                ? "memory.wiki는 Raymind AI가 운영하는 문서 발행 서비스입니다. 사용자의 프라이버시를 존중하고 데이터 보호에 책임을 다합니다. 본 방침은 memory.wiki 웹사이트, memory.wiki Chrome 확장, memory.wiki VS Code 확장, memory.wiki for Mac 데스크톱 앱, memory.wiki MCP 서버에 모두 적용됩니다."
+                : "memory.wiki is a document publishing service operated by Raymind AI. We respect your privacy and are committed to protecting your data. This policy covers the memory.wiki website, the memory.wiki Chrome Extension, the memory.wiki VS Code Extension, the memory.wiki for Mac desktop app, and the memory.wiki MCP server."}
             </p>
 
             <PureProse>
               <h2>{isKo ? "수집 항목" : "What we collect"}</h2>
 
-              <h3>{isKo ? "Memory.Wiki 웹사이트" : "Memory.Wiki website"}</h3>
+              <h3>{isKo ? "memory.wiki 웹사이트" : "memory.wiki website"}</h3>
               <ul>
                 {isKo ? (
                   <>
@@ -92,15 +92,15 @@ export default function PrivacyPure({ locale = "en" }: { locale?: "en" | "ko" })
               <ul>
                 {isKo ? (
                   <>
-                    <li><strong>페이지 콘텐츠</strong> — 확장은 AI 채팅 페이지 (ChatGPT, Claude, Gemini) 콘텐츠를 사용자가 &ldquo;캡처&rdquo; 버튼을 누를 때만 읽습니다. 콘텐츠는 Memory.Wiki로 직접 전송되며 다른 곳에 저장하지 않습니다.</li>
+                    <li><strong>페이지 콘텐츠</strong> — 확장은 AI 채팅 페이지 (ChatGPT, Claude, Gemini) 콘텐츠를 사용자가 &ldquo;캡처&rdquo; 버튼을 누를 때만 읽습니다. 콘텐츠는 memory.wiki로 직접 전송되며 다른 곳에 저장하지 않습니다.</li>
                     <li><strong>백그라운드 수집 없음</strong> — 확장은 어떤 브라우징 데이터도 모니터링하거나 수집하지 않습니다. 명시적으로 사용할 때만 작동.</li>
-                    <li><strong>인증</strong> — Memory.Wiki에 로그인되어 있다면, 확장이 인증 쿠키를 읽어 이미지 업로드와 영구 URL 등 기능을 활성화.</li>
+                    <li><strong>인증</strong> — memory.wiki에 로그인되어 있다면, 확장이 인증 쿠키를 읽어 이미지 업로드와 영구 URL 등 기능을 활성화.</li>
                   </>
                 ) : (
                   <>
-                    <li><strong>Page content</strong> — the extension reads content from AI chat pages (ChatGPT, Claude, Gemini) only when you click &ldquo;Capture.&rdquo; Content is sent directly to Memory.Wiki — we do not store it elsewhere.</li>
+                    <li><strong>Page content</strong> — the extension reads content from AI chat pages (ChatGPT, Claude, Gemini) only when you click &ldquo;Capture.&rdquo; Content is sent directly to memory.wiki — we do not store it elsewhere.</li>
                     <li><strong>No background collection</strong> — the extension does not monitor, track, or collect any browsing data. It only activates when you explicitly use it.</li>
-                    <li><strong>Authentication</strong> — if you are logged into Memory.Wiki, the extension reads your auth cookie to enable features like image upload and permanent URLs.</li>
+                    <li><strong>Authentication</strong> — if you are logged into memory.wiki, the extension reads your auth cookie to enable features like image upload and permanent URLs.</li>
                   </>
                 )}
               </ul>
@@ -109,27 +109,27 @@ export default function PrivacyPure({ locale = "en" }: { locale?: "en" | "ko" })
               <ul>
                 {isKo ? (
                   <>
-                    <li><strong>파일 콘텐츠</strong> — 확장은 사용자가 명시적으로 열거나 발행하는 마크다운 파일을 읽습니다. Publish나 Sync 기능을 사용할 때만 Memory.Wiki로 전송.</li>
+                    <li><strong>파일 콘텐츠</strong> — 확장은 사용자가 명시적으로 열거나 발행하는 마크다운 파일을 읽습니다. Publish나 Sync 기능을 사용할 때만 memory.wiki로 전송.</li>
                     <li><strong>텔레메트리 없음</strong> — VS Code 확장에서 사용 텔레메트리를 수집하지 않습니다.</li>
                   </>
                 ) : (
                   <>
-                    <li><strong>File content</strong> — the extension reads Markdown files you explicitly open or publish. Content is sent to Memory.Wiki only when you use the Publish or Sync features.</li>
+                    <li><strong>File content</strong> — the extension reads Markdown files you explicitly open or publish. Content is sent to memory.wiki only when you use the Publish or Sync features.</li>
                     <li><strong>No telemetry</strong> — we do not collect usage telemetry from the VS Code extension.</li>
                   </>
                 )}
               </ul>
 
-              <h3>{isKo ? "Memory.Wiki for Mac" : "Memory.Wiki for Mac"}</h3>
+              <h3>{isKo ? "memory.wiki for Mac" : "memory.wiki for Mac"}</h3>
               <ul>
                 {isKo ? (
                   <>
-                    <li><strong>로컬 파일</strong> — Finder나 Cmd+O로 여는 파일을 데스크톱 앱이 읽습니다. 파일은 Memory.Wiki에서 편집되고 로컬에 자동 저장.</li>
+                    <li><strong>로컬 파일</strong> — Finder나 Cmd+O로 여는 파일을 데스크톱 앱이 읽습니다. 파일은 memory.wiki에서 편집되고 로컬에 자동 저장.</li>
                     <li><strong>Phone-home 없음</strong> — 사용자가 명시적으로 발행하거나 sync하지 않는 한, 앱은 어떤 서버로도 데이터를 보내지 않습니다.</li>
                   </>
                 ) : (
                   <>
-                    <li><strong>Local files</strong> — the desktop app reads files you open via Finder or Cmd+O. Files are edited through Memory.Wiki and auto-saved locally.</li>
+                    <li><strong>Local files</strong> — the desktop app reads files you open via Finder or Cmd+O. Files are edited through memory.wiki and auto-saved locally.</li>
                     <li><strong>No phone-home</strong> — the app does not send data to any server unless you explicitly publish or sync a document.</li>
                   </>
                 )}
@@ -139,13 +139,13 @@ export default function PrivacyPure({ locale = "en" }: { locale?: "en" | "ko" })
               <ul>
                 {isKo ? (
                   <>
-                    <li><strong>문서 작업</strong> — MCP 서버는 Memory.Wiki API를 통해 문서를 생성, 읽기, 관리합니다. 문서는 Memory.Wiki 서버에 저장.</li>
+                    <li><strong>문서 작업</strong> — MCP 서버는 memory.wiki API를 통해 문서를 생성, 읽기, 관리합니다. 문서는 memory.wiki 서버에 저장.</li>
                     <li><strong>로컬 토큰</strong> — 편집 토큰은 <code>~/.memory.wiki/tokens.json</code>에 owner-only 권한 (0600) 으로 로컬 저장.</li>
                     <li><strong>이메일</strong> — 사용자 이메일 (<code>MDFY_EMAIL</code>) 은 문서 소유권을 위해 API로 전송. 제3자에 공유하지 않음.</li>
                   </>
                 ) : (
                   <>
-                    <li><strong>Document operations</strong> — the MCP server creates, reads, and manages documents on Memory.Wiki via its API. Documents are stored on Memory.Wiki servers.</li>
+                    <li><strong>Document operations</strong> — the MCP server creates, reads, and manages documents on memory.wiki via its API. Documents are stored on memory.wiki servers.</li>
                     <li><strong>Local tokens</strong> — edit tokens are stored locally at <code>~/.memory.wiki/tokens.json</code> with owner-only permissions (0600).</li>
                     <li><strong>Email</strong> — your email (<code>MDFY_EMAIL</code>) is sent to the API for document ownership. It is not shared with third parties.</li>
                   </>

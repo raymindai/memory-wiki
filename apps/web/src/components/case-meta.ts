@@ -5,11 +5,11 @@ import type { Metadata } from "next";
  *  without dragging the CasePure client bundle into RSC scope. */
 export function caseMetadata(slug: string, title: string, sub: string): Metadata {
   return {
-    title: `${title} — Memory.Wiki`,
+    title: `${title} — memory.wiki`,
     description: sub,
     alternates: { canonical: `https://memory.wiki/case-${slug}` },
     openGraph: {
-      title: `${title} — Memory.Wiki`,
+      title: `${title} — memory.wiki`,
       description: sub,
       url: `https://memory.wiki/case-${slug}`,
       images: [{ url: `/api/og?title=${encodeURIComponent(title)}`, width: 1200, height: 630 }],

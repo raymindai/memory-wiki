@@ -5,7 +5,7 @@ const data: CaseData = {
   slug: "agent-memory",
   kicker: "에이전트 영구 메모리",
   title: "어제 한 일을 기억하는 장기 에이전트.",
-  sub: "자율 AI 에이전트를 만들거나 운영하는 사람을 위해. 기본은 매 런이 처음부터 — Memory.Wiki는 허브 URL을 에이전트의 런 간 메모리로 만들고, MCP 서버를 통해 읽기/쓰기 가능.",
+  sub: "자율 AI 에이전트를 만들거나 운영하는 사람을 위해. 기본은 매 런이 처음부터 — memory.wiki는 허브 URL을 에이전트의 런 간 메모리로 만들고, MCP 서버를 통해 읽기/쓰기 가능.",
   pain: [
     "에이전트 (Claude Code, Cursor agent, Aider, 커스텀 등) 가 한 시간 동안 돌아가서 12개 결정을 내리고 작업을 마칩니다. 다음 런은 처음부터.",
     "벤더 방식으로 메모리를 붙입니다 — Cursor rules 파일, OpenAI Memories, 에이전트별 JSON 상태. 각각 다른 포맷에 살고, 도구 간 공유 안 되고, 문서처럼 읽을 수도 없음.",
@@ -14,7 +14,7 @@ const data: CaseData = {
   ],
   action: [
     {
-      step: "에이전트에 Memory.Wiki 허브 부여",
+      step: "에이전트에 memory.wiki 허브 부여",
       detail: "허브 생성 (memory.wiki/hub/<slug>). 허브 URL이 에이전트의 메모리 주소. 안에 있는 번들 URL이 프로젝트/태스크 타입별로 메모리를 스코프.",
     },
     {
@@ -23,11 +23,11 @@ const data: CaseData = {
     },
     {
       step: "런 전: 허브 URL을 컨텍스트로 pull",
-      detail: "모든 에이전트 런의 첫 단계는 `Memory.Wiki pull <hub_url>` 또는 `Memory.Wiki search <task topic>`. 허브는 plain 마크다운으로 fetch됨 — 벡터 셋업 없음, 벤더 SDK 없음.",
+      detail: "모든 에이전트 런의 첫 단계는 `memory.wiki pull <hub_url>` 또는 `memory.wiki search <task topic>`. 허브는 plain 마크다운으로 fetch됨 — 벡터 셋업 없음, 벤더 SDK 없음.",
     },
     {
       step: "런 후: 결정을 다시 write",
-      detail: "에이전트가 끝나면 `Memory.Wiki capture` (또는 `mw_create` MCP 도구) 를 호출 — 구조화된 요약 (결정, 근거, 수정한 파일, follow-up) 과 함께. 다음 런이 이를 이전 모든 것과 함께 읽음.",
+      detail: "에이전트가 끝나면 `memory.wiki capture` (또는 `mw_create` MCP 도구) 를 호출 — 구조화된 요약 (결정, 근거, 수정한 파일, follow-up) 과 함께. 다음 런이 이를 이전 모든 것과 함께 읽음.",
     },
   ],
   result: [

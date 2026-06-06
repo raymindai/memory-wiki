@@ -8,7 +8,7 @@ export function LightVariant() {
   const [streamedText, setStreamedText] = useState("");
   const fullText =
     "Your weekly digest: 12 captures this week, clustered into 3 themes. " +
-    "Memory.Wiki noticed a strong connection between your TypeScript notes " +
+    "memory.wiki noticed a strong connection between your TypeScript notes " +
     "and the new design system you started capturing on Thursday.";
 
   const startStream = () => {
@@ -36,7 +36,7 @@ export function LightVariant() {
           One URL every AI fetches. Yours, your team&apos;s, or your community&apos;s.
         </p>
         <div className="cta-row">
-          <button className="btn-primary">Start your Memory.Wiki</button>
+          <button className="btn-primary">Start your memory.wiki</button>
           <button className="btn-ghost">See an example →</button>
         </div>
       </section>
@@ -71,7 +71,7 @@ export function LightVariant() {
             </div>
             <h3 className="card-title">v8 thinking — capture vs memory</h3>
             <p className="card-body">
-              Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+              memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
               그래서 capture everything 이 자연스러운 입구.
             </p>
             <div className="card-tags">
@@ -110,7 +110,7 @@ export function LightVariant() {
             </div>
             <h3 className="card-title">My current focus</h3>
             <p className="card-body">
-              Shipping Memory.Wiki v8 over 20 weeks. Capture → Organize →
+              Shipping memory.wiki v8 over 20 weeks. Capture → Organize →
               Use framework. Cross-AI delivery is the wedge giants cannot build.
             </p>
             <div className="card-tags">
@@ -127,7 +127,7 @@ export function LightVariant() {
         <div className="card card-ai streaming-demo">
           <div className="card-meta">
             <span className="badge-ai">
-              <span className="sparkle">✦</span> Memory.Wiki AI
+              <span className="sparkle">✦</span> memory.wiki AI
             </span>
             <button className="stream-btn" onClick={startStream}>
               Generate again

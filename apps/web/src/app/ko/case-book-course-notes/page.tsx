@@ -15,7 +15,7 @@ const data: CaseData = {
   action: [
     {
       step: "챕터당 (또는 강의당) 문서 하나",
-      detail: "Raw takeaway를 드롭. Memory.Wiki는 bullet 형태든 prose든 신경 안 씀. 제목이 챕터 — H1이고 주소.",
+      detail: "Raw takeaway를 드롭. memory.wiki는 bullet 형태든 prose든 신경 안 씀. 제목이 챕터 — H1이고 주소.",
     },
     {
       step: "재발생 개념이 스스로 드러나게",

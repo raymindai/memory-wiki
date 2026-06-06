@@ -9,7 +9,7 @@ export function GlassVariant() {
   const [showModal, setShowModal] = useState(false);
   const fullText =
     "Your weekly digest: 12 captures this week, clustered into 3 themes. " +
-    "Memory.Wiki noticed a strong connection between your TypeScript notes " +
+    "memory.wiki noticed a strong connection between your TypeScript notes " +
     "and the design system you started capturing on Thursday.";
 
   const startStream = () => {
@@ -42,7 +42,7 @@ export function GlassVariant() {
         </p>
         <div className="cta-row">
           <button className="btn-primary">
-            <span>Start your Memory.Wiki</span>
+            <span>Start your memory.wiki</span>
             <span className="btn-glow" aria-hidden />
           </button>
           <button className="btn-ghost">See an example →</button>
@@ -82,7 +82,7 @@ export function GlassVariant() {
             </div>
             <h3 className="card-title">v8 thinking — capture vs memory</h3>
             <p className="card-body">
-              Memory.Wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
+              memory.wiki 이 메모리 레이어가 되려면 나에 대해서 잘 알아야 함.
               그래서 capture everything 이 자연스러운 입구.
             </p>
             <div className="card-tags">
@@ -120,7 +120,7 @@ export function GlassVariant() {
             </div>
             <h3 className="card-title">My current focus</h3>
             <p className="card-body">
-              Shipping Memory.Wiki v8 over 20 weeks. Capture → Organize → Use
+              Shipping memory.wiki v8 over 20 weeks. Capture → Organize → Use
               framework. Cross-AI delivery is the wedge giants cannot build.
             </p>
             <div className="card-tags">
@@ -139,7 +139,7 @@ export function GlassVariant() {
           <div className="card-meta">
             <span className="badge-ai">
               <span className="sparkle">✦</span>
-              Memory.Wiki AI
+              memory.wiki AI
             </span>
             <button className="stream-btn" onClick={startStream}>
               Generate again
@@ -203,10 +203,10 @@ export function GlassVariant() {
         <div className="modal-backdrop" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="section-title" style={{ marginBottom: 12 }}>
-              Save to Memory.Wiki
+              Save to memory.wiki
             </h2>
             <p className="card-body">
-              This conversation will be saved to your Memory.Wiki at a fresh URL.
+              This conversation will be saved to your memory.wiki at a fresh URL.
               Any AI can fetch it.
             </p>
             <div className="modal-actions">

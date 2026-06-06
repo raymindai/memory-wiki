@@ -42,7 +42,7 @@ export default function DocNotFound() {
             className="mt-2 mb-6 leading-relaxed"
             style={{ color: "var(--text-faint)", fontSize: 12, lineHeight: 1.55 }}
           >
-            Memory.Wiki documents are permanent. If you saved one earlier and it&apos;s gone, the owner likely deleted or restricted it.
+            memory.wiki documents are permanent. If you saved one earlier and it&apos;s gone, the owner likely deleted or restricted it.
           </p>
           <div className="flex flex-col items-center gap-3">
             <Link
@@ -63,7 +63,7 @@ export default function DocNotFound() {
               className="inline-flex items-center transition-colors hover:underline"
               style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "none" }}
             >
-              What is Memory.Wiki?
+              What is memory.wiki?
             </Link>
           </div>
         </div>

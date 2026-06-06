@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-// Memory.Wiki's pitch is "deploy any URL to any AI." That requires AI fetchers and
+// memory.wiki's pitch is "deploy any URL to any AI." That requires AI fetchers and
 // crawlers to actually be able to read public docs. Default-allow for `*`
 // covers that, but several major LLM crawlers ignore generic `*` rules and
 // only honor an explicit entry for their UA — so each one is listed below

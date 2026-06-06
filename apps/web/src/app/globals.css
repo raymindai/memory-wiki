@@ -2789,7 +2789,7 @@ textarea::selection {
 }
 
 /* ── Bundle Canvas Detail Level slider ──
-   Native <input type="range"> styled to match the Memory.Wiki palette.
+   Native <input type="range"> styled to match the memory.wiki palette.
    Track is rendered via the inline `background: linear-gradient`
    on the input (so the filled portion follows the value). Thumb
    is a draggable accent circle.

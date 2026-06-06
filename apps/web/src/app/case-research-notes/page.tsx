@@ -5,7 +5,7 @@ const data: CaseData = {
   slug: "research-notes",
   kicker: "Research notes",
   title: "Papers + PDFs into one cited URL.",
-  sub: "For people who read more than they remember — researchers, founders, doctoral students. Memory.Wiki turns a pile of PDFs into a hub any AI can quote back to you.",
+  sub: "For people who read more than they remember — researchers, founders, doctoral students. memory.wiki turns a pile of PDFs into a hub any AI can quote back to you.",
   accent: "#fb923c",
   pain: [
     "You read 30 papers a quarter. By month two you can't remember which one had the argument you need.",
@@ -16,7 +16,7 @@ const data: CaseData = {
   action: [
     {
       step: "Drop each PDF in",
-      detail: "Memory.Wiki extracts the text, runs the optional AI \"clean up\" pass, and saves it at a permanent URL. Source pages stay intact — you can re-quote with section anchors.",
+      detail: "memory.wiki extracts the text, runs the optional AI \"clean up\" pass, and saves it at a permanent URL. Source pages stay intact — you can re-quote with section anchors.",
     },
     {
       step: "Let the concept index build",

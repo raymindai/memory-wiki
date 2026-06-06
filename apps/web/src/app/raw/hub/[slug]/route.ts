@@ -20,7 +20,7 @@ import { extractFacts, extractSkeleton, firstParagraph } from "@/lib/doc-gist";
  *   document_count: N
  *   bundle_count: M
  *   updated: <ISO>
- *   source: "Memory.Wiki"
+ *   source: "memory.wiki"
  *   ---
  *
  *   # <author>'s knowledge hub
@@ -169,7 +169,7 @@ export async function GET(
     `document_count: ${docsList.length}`,
     `bundle_count: ${bundlesList.length}`,
     hubUpdated ? `updated: ${new Date(hubUpdated).toISOString()}` : null,
-    'source: "Memory.Wiki"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].filter(Boolean).join("\n");
@@ -424,7 +424,7 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
     `concept_count: ${concepts.length}`,
     ...(since ? [`since: ${since}`] : []),
     `updated: ${updatedAt}`,
-    'source: "Memory.Wiki"',
+    'source: "memory.wiki"',
     "---",
     "",
   ].join("\n");
