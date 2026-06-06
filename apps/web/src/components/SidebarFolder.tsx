@@ -1026,9 +1026,14 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
       style={{
         // Min-height + bottom padding gives a real catchment area under
         // the last row so users can drop into the empty space without
-        // hunting for the explicit "Drop here…" tile.
-        minHeight: 120,
-        paddingBottom: 16,
+        // hunting for the explicit "Drop here…" tile. ONLY applies
+        // when there's at least one item to drag — when the tree is
+        // empty, the catchment is wasted space (and the parent
+        // section's "No documents yet" message looks orphaned below
+        // 120px of nothing, while sibling sections without trees stay
+        // tight). Founder caught this on a fresh signed-out account.
+        minHeight: (props.tabs.length + props.folders.length) > 0 ? 120 : undefined,
+        paddingBottom: (props.tabs.length + props.folders.length) > 0 ? 16 : undefined,
         // Subtle background tint while a non-root item is being dragged
         // — communicates "drop anywhere here = move out of folder".
         background: treeRootHover && (draggingTab || draggingFolder) && !itemAlreadyAtRoot
