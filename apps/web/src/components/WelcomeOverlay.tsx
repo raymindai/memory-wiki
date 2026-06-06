@@ -1,35 +1,86 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 
-// v12. Stop trying to design custom illustrations — the user
-// corrected me 5+ times in a row. Trust the brand system:
-// real morph blob asset + big Cal Sans typography + generous
-// whitespace. 3 slides instead of 5. No fake mockups, no fake
-// product screenshots. The brand doc (memory.wiki/L2SHNVir §2.4)
-// is explicit: monochrome ink base, color only as small dots.
-const STORAGE_KEY = "mw-welcome-seen-v12";
+// Bumped to v7 so anyone who saw the old "mdfy.app" welcome card
+// gets the new "memory.wiki" version of the tour after rebrand.
+const STORAGE_KEY = "mw-welcome-seen-v7";
+
+// v6 welcome flow. Five slides, each with one role and one CTA:
+//   intro — hook on the v6 thesis (knowledge hub for the AI era)
+//   01 capture — paste anything (incl. AI share URLs), get a URL
+//   02 hub — captures roll up into a single deployable URL
+//   03 deploy — paste hub URL into any AI as context
+//   04 surfaces — works from every AI tool
+//
+// One CTA per slide (the Next button). No inline links — those competed
+// with Next and broke the "one screen, one action" rule. The dashboard
+// surfaces (Install /memory.wiki, memory.wiki Foundations bundle, etc.) are the
+// click targets once the user dismisses the overlay.
+
+type Surface = { name: string; desc: string; color: string };
 
 type Slide = {
-  eyebrow?: string;
+  step: string | null;
+  badge?: string;
   title: string;
-  desc?: string;
+  desc: string | null;
+  icon: React.ReactNode | null;
+  surfaces?: Surface[];
 };
 
 const slides: Slide[] = [
   {
-    eyebrow: "memory.wiki",
-    title: "Your knowledge as a URL\nany AI can read.",
-    desc: "ChatGPT, Claude, Cursor, Gemini all read the same URL. Capture from anywhere. Use everywhere.",
+    step: null,
+    // Explicit line break: keeps the badge on two clean lines instead
+    // of orphaning the last word when it wraps on narrow viewports.
+    badge: "Your knowledge graph\nas a URL for any AI",
+    title: "Your AI memory,\ndeployable to any AI.",
+    desc: "ChatGPT, Claude, and Cursor forget you between sessions. memory.wiki turns what you write into a URL any AI can read. You decide the shape, memory.wiki keeps the index.",
+    icon: null,
   },
   {
-    eyebrow: "the loop",
-    title: "Capture.\nOrganize.\nUse.",
-    desc: "Chrome / Mac / VS Code / CLI / iOS / Android — pick the surface, drop in any content. memory.wiki structures it, your hub URL delivers it to every AI.",
+    step: "01",
+    title: "Capture anything.",
+    desc: "Paste a ChatGPT or Claude share link. Drop a PDF, DOCX, or code file. Pull a GitHub repo of `.md` files. Each becomes clean markdown at a permanent URL. No signup, no formatting cleanup.",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--micro-orange)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    ),
   },
   {
-    eyebrow: "ready",
-    title: "Start with the\nwelcome guide.",
-    desc: "Opens as a real doc in the editor. Read it, edit it, delete when you're done. Sign in anytime from the sidebar to sync everywhere.",
+    step: "02",
+    title: "Captures become a hub.",
+    desc: "Everything you save lives at one URL: memory.wiki/@you. Bundles group related docs, a concept index links them, and Related-in-your-hub surfaces the connections you didn't draw yourself.",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--micro-lime)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" /><circle cx="4" cy="6" r="2" /><circle cx="20" cy="6" r="2" /><circle cx="4" cy="18" r="2" /><circle cx="20" cy="18" r="2" /><path d="M6 7l4 3M18 7l-4 3M6 17l4-3M18 17l-4-3" />
+      </svg>
+    ),
+  },
+  {
+    step: "03",
+    title: "Paste the URL.\nAny AI reads it.",
+    desc: "Drop your hub URL into Claude, ChatGPT, Cursor, or Codex. They fetch the markdown directly. /llms.txt + ?compact keep the token cost low.",
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--micro-info)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+      </svg>
+    ),
+  },
+  {
+    step: "04",
+    title: "Use it from where you already work.",
+    desc: null,
+    icon: null,
+    surfaces: [
+      { name: "Claude Code", desc: "/memory.wiki capture, bundle, hub", color: "var(--micro-orange)" },
+      { name: "Cursor", desc: ".mdc rule + project context", color: "var(--micro-warn)" },
+      { name: "Codex CLI", desc: "AGENTS.md block, idempotent", color: "var(--micro-lime)" },
+      { name: "Aider", desc: "CONVENTIONS.md", color: "var(--micro-info)" },
+      { name: "Chrome", desc: "Capture from any web AI", color: "var(--micro-ai)" },
+      { name: "VS Code, Mac, CLI, MCP", desc: "Native everywhere else", color: "var(--micro-pink)" },
+    ],
   },
 ];
 
@@ -59,9 +110,6 @@ export default function WelcomeOverlay() {
       setCurrent((c) => c + 1);
     } else {
       dismiss();
-      setTimeout(() => {
-        try { window.dispatchEvent(new CustomEvent("mw:open-welcome-doc")); } catch { /* ignore */ }
-      }, 320);
     }
   }, [current, dismiss]);
 
@@ -81,78 +129,109 @@ export default function WelcomeOverlay() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "max(env(safe-area-inset-top), 16px) 16px max(env(safe-area-inset-bottom), 16px)",
-        overflowY: "auto",
-        background: "rgba(0, 0, 0, 0.78)",
-        backdropFilter: "blur(10px)",
+        background: "rgba(0, 0, 0, 0.7)",
+        backdropFilter: "blur(8px)",
         opacity: exiting ? 0 : 1,
         transition: "opacity 0.3s",
       }}
+      onClick={() => {}}
     >
-      <style>{`
-        @keyframes welcome-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
       <div
         style={{
+          // Flat surface — matches the system-wide flat-design
+          // direction. The dim backdrop above already provides the
+          // separation; the card itself stays a single tone with
+          // a 1px border and no shadow.
           background: "var(--surface)",
           border: "1px solid var(--border-dim)",
           borderRadius: 20,
           width: "100%",
           maxWidth: 480,
+          margin: "0 24px",
           overflow: "hidden",
           animation: "welcome-in 0.4s ease-out",
-          display: "flex",
-          flexDirection: "column",
         }}
       >
-        {/* Real animated brand mark — only on first slide.
-            Subsequent slides drop the visual entirely to give
-            the typography all the air. */}
-        {isFirst && (
-          <div style={{ display: "flex", justifyContent: "center", padding: "44px 0 12px" }}>
-            <picture>
-              <source srcSet="/brand/mwblob_morph_dark.svg" media="(prefers-color-scheme: dark)" />
-              <img src="/brand/mwblob_morph.svg" alt="" aria-hidden width={84} height={84} style={{ display: "block" }} />
-            </picture>
-          </div>
-        )}
+        {/* Content */}
+        <div style={{ padding: slide.icon ? "44px 40px 28px" : "32px 40px 24px", textAlign: "center" }}>
+          {/* Icon */}
+          {slide.icon && (
+            <div style={{ marginBottom: 18, display: "flex", justifyContent: "center" }}>{slide.icon}</div>
+          )}
 
-        {/* Eyebrow + title + body — all generous space + Cal Sans on
-            the headline. Letter-spacing 0 (brand rule). */}
-        <div style={{ padding: isFirst ? "8px 36px 24px" : "48px 36px 24px", textAlign: "center" }}>
-          {slide.eyebrow && (
+          {/* Step badge */}
+          {slide.step && (
             <span
               style={{
                 display: "inline-block",
                 fontSize: 10,
                 fontWeight: 700,
-                color: "var(--text-faint)",
-                marginBottom: 18,
-                fontFamily: "var(--font-mono)",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
+                color: "var(--text-primary)",
+                background: "var(--border)",
+                padding: "3px 10px",
+                borderRadius: 8,
+                fontFamily: "var(--font-geist-mono), monospace",
+                letterSpacing: 1,
+                marginBottom: 16,
               }}
             >
-              {slide.eyebrow}
+              STEP {slide.step}
             </span>
           )}
+
+          {/* Hero badge (intro slide) — pre-line so the explicit \n in the
+              badge text wraps "for the AI era" onto its own line cleanly. */}
+          {!slide.step && slide.badge && (
+            <span
+              style={{
+                display: "inline-block",
+                fontSize: 10,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                textTransform: "uppercase",
+                letterSpacing: 1.4,
+                marginBottom: 12,
+                fontFamily: "var(--font-geist-mono), monospace",
+                whiteSpace: "pre-line",
+                lineHeight: 1.5,
+              }}
+            >
+              {slide.badge}
+            </span>
+          )}
+
+          {/* Wordmark on first slide */}
+          {isFirst && (
+            <div style={{ marginBottom: 16 }}>
+              <span
+                style={{
+                  fontSize: 28,
+                  fontWeight: 800,
+                  letterSpacing: -1,
+                  color: "var(--text-primary)",
+                }}
+              >
+                memory.wiki
+              </span>
+            </div>
+          )}
+
+          {/* Title */}
           <h2
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 30,
-              fontWeight: 700,
+              fontSize: isFirst ? 28 : 22,
+              fontWeight: 800,
               color: "var(--text-primary)",
-              lineHeight: 1.18,
-              letterSpacing: 0,
-              margin: "0 0 16px",
+              lineHeight: 1.25,
+              letterSpacing: "-0.02em",
+              margin: "0 0 12px",
               whiteSpace: "pre-line",
             }}
           >
             {slide.title}
           </h2>
+
+          {/* Description */}
           {slide.desc && (
             <p
               style={{
@@ -160,7 +239,7 @@ export default function WelcomeOverlay() {
                 color: "var(--text-muted)",
                 lineHeight: 1.6,
                 margin: 0,
-                maxWidth: 360,
+                maxWidth: 380,
                 marginLeft: "auto",
                 marginRight: "auto",
               }}
@@ -168,10 +247,38 @@ export default function WelcomeOverlay() {
               {slide.desc}
             </p>
           )}
+
+          {/* Surfaces grid (slide 04) */}
+          {slide.surfaces && (
+            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 6, maxWidth: 360, marginLeft: "auto", marginRight: "auto" }}>
+              {slide.surfaces.map((s) => (
+                <div
+                  key={s.name}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "7px 12px",
+                    borderRadius: 8,
+                    background: "var(--background)",
+                    textAlign: "left",
+                  }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: 3, background: s.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", minWidth: 130 }}>{s.name}</span>
+                  <span style={{ fontSize: 11, color: "var(--text-faint)" }}>{s.desc}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Inline CTAs intentionally removed — one CTA per slide rule.
+              Next / Get started is the only primary action; users explore
+              specific surfaces from the dashboard after dismissal. */}
         </div>
 
         {/* Dots */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "0 0 18px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "0 0 24px" }}>
           {slides.map((_, i) => (
             <button
               key={i}
@@ -186,25 +293,25 @@ export default function WelcomeOverlay() {
                 padding: 0,
                 transition: "width 0.2s, background 0.2s",
               }}
-              aria-label={`Slide ${i + 1}`}
             />
           ))}
         </div>
 
-        {/* Actions */}
-        <div style={{ padding: "8px 36px 32px" }}>
-          <div style={{ display: "flex", gap: 8 }}>
+        {/* Actions — primary CTA is the accent-fill button. Flat, no
+            glow / no lift — the fill alone carries the contrast. */}
+        <div style={{ padding: "16px 40px 32px" }}>
+          <div style={{ display: "flex", gap: 10 }}>
             {!isFirst && (
               <button
                 onClick={() => setCurrent((c) => c - 1)}
                 style={{
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 600,
                   color: "var(--text-faint)",
                   background: "transparent",
                   border: "none",
                   borderRadius: 10,
-                  padding: "13px 16px",
+                  padding: "12px 14px",
                   cursor: "pointer",
                   flexShrink: 0,
                 }}
@@ -219,19 +326,19 @@ export default function WelcomeOverlay() {
                 background: "var(--text-primary)",
                 color: "var(--background)",
                 border: "none",
-                padding: "13px 24px",
+                padding: "13px 28px",
                 borderRadius: 10,
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: 700,
                 cursor: "pointer",
-                letterSpacing: 0,
+                letterSpacing: "-0.01em",
               }}
             >
-              {isLast ? "Open the welcome guide" : "Next"}
+              {isLast ? "Get started" : "Next"}
             </button>
           </div>
           {!isLast && (
-            <div style={{ textAlign: "center", marginTop: 10 }}>
+            <div style={{ textAlign: "center", marginTop: 12 }}>
               <button
                 onClick={dismiss}
                 style={{

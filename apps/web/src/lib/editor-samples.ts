@@ -15,125 +15,56 @@ import { extractTitleFromMd } from "@/lib/editor-types";
 
 export const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
-You're inside the editor. This doc you're reading is a regular memory.wiki doc — the same kind you'll create. Read it as a tour, edit it as a sandbox, delete it when you're done.
+> **The Markdown Hub.** Collect from anywhere. Edit with AI. Publish with a permanent URL.
 
-> **The core idea.** Anything you capture lives at a URL Claude, ChatGPT, Cursor, and Gemini all read the same way. Three movements: **capture, organize, use**.
+## Get Started
 
----
+1. **Type or paste** anything — Markdown, plain text, AI output, code
+2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
+3. **Edit** inline in the MD view, or use Source for raw Markdown
+4. **Share** with one click — generates a permanent URL like \`memory.wiki/abc123\`
 
-## 1. Capture
+## What You Can Do
 
-You'll rarely write in this editor from scratch. memory.wiki has surfaces wherever you already work — pick the one closest to where you already are.
+- **WYSIWYG editing** — click any text in the MD view and start typing
+- **AI Tools** — Polish, Summary, TL;DR, Translate, Chat (right panel)
+- **Document Outline** — heading structure panel on the right
+- **Image Gallery** — upload, manage, and insert images (right panel)
+- **Multi-format import** — drag & drop PDF, DOCX, PPTX, XLSX, or 10+ other formats
+- **Export anywhere** — download as MD/HTML/TXT, print PDF, copy for Docs/Email/Slack
+- **Flavor conversion** — click the flavor badge (GFM ▾) to convert between formats
+- **Folders + Trash** — organize with folders, drag to move, soft delete with restore
+- **Cross-platform sync** — edit on Web, VS Code, Mac Desktop, or CLI. Same URL everywhere
 
-| Surface | What it does | How to start |
-|---|---|---|
-| **Chrome extension** | Add button on every web page, AI chat, X / Threads / Reddit post. Site-aware intent suggestions (YouTube: summarize from transcript, arXiv: abstract + contributions). | Install from Chrome Web Store. Click **Add** on any post. |
-| **Mac desktop** | Local .md library + cloud sync in one editor. QuickLook preview on .md files in Finder. | Download DMG. Drop .md into the app. Press **Space** in Finder to preview. |
-| **VS Code extension** | Sidebar to your cloud right in the IDE. Two-way sync. WYSIWYG preview matches the web. | Install \`raymindai.memory-wiki-vscode\`. Right-click any .md → **Publish to memory.wiki**. |
-| **CLI** | Pipe anything to a URL from the terminal. Scriptable for cron jobs, git hooks, AI agent loops. | \`npm install -g memory-wiki-cli\` → \`mw login\` → \`cat file.md \\| mw capture\`. |
-| **iOS / Android** | Share Sheet capture from any app. Home / Lock screen widget. Offline-first. | App Store / Play Store. Tap **Share** in any app → select **memory.wiki**. |
+## Keyboard Shortcuts
 
-Right here in the editor, you can also:
+| Shortcut | Action |
+|----------|--------|
+| Cmd+B | Bold |
+| Cmd+I | Italic |
+| Cmd+K | Insert link |
+| Cmd+S | Share (copy URL) |
+| Cmd+Z / Cmd+Shift+Z | Undo / Redo |
+| Cmd+Shift+C | Copy HTML |
+| Cmd+\\\\ | Toggle view mode |
 
-- Type **\`/\`** for the slash menu (heading, list, quote, code block, callout)
-- Press **Cmd/Ctrl+K** on selected text — AI polish, translate, shorten, rewrite
-- Drop an image into this doc — uploads to your gallery and inserts
-- Drag a PDF / DOCX / PPTX / XLSX into the sidebar — converts to clean markdown
+## Available Everywhere
 
----
+| Channel | How |
+|---------|-----|
+| Web | You are here — [memory.wiki](https://memory.wiki) |
+| VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) — Cmd+Shift+M to preview |
+| Mac App | Native desktop with sidebar and sync |
+| CLI | \`npm install -g memory-wiki-cli\` — pipe anything to a URL |
+| Chrome | [Extension](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) — capture AI conversations |
+| MCP | Connect Claude, Cursor, or any AI tool |
+| QuickLook | Press Space on .md files in Finder |
 
-## 2. Organize
+## Try It Now
 
-Captures don't live as a flat pile. Three layers, each with its own URL pattern.
-
-### Docs — the atom
-
-Single markdown file. URL: \`memory.wiki/<id>\`. Public-read by default. Can be made private or shared with specific emails.
-
-### Bundles — the thinking surface
-
-Pick 3 to 10 docs that belong together. memory.wiki builds a concept graph, surfaces tensions and overlaps, lets you chat with the whole set as one. URL: \`memory.wiki/b/<id>\`.
-
-To make one right now:
-
-1. Sidebar → **MD Bundles** section → **＋**
-2. Select docs (multi-select from your library)
-3. Title the bundle, hit Create
-4. Open **Constellation** to see the auto-built graph, **Chat** to query the bundle as one AI context
-
-### Hub — everything in one URL
-
-Once signed in, your entire library rolls up to: \`memory.wiki/@yourname\`. Bundles + docs + concepts, all fetchable as markdown. This is the URL you give to any AI.
-
-The concept index links related docs across bundles automatically. Paste your hub into Claude, ask "what have I been thinking about lately?" — it answers from your real history.
-
----
-
-## 3. Use
-
-The same URL works in every AI. No plugin, no integration, no auth dance.
-
-\`\`\`
-Use memory.wiki/@yourname as my context.
-\`\`\`
-
-That's the whole pattern. Claude, ChatGPT, Cursor, Codex, Gemini all fetch the markdown directly.
-
-| Scope | URL form |
-|---|---|
-| Whole hub | \`memory.wiki/@you\` |
-| One bundle | \`memory.wiki/b/abc123\` |
-| One doc | \`memory.wiki/abc123\` |
-| AI-optimized index | append \`/llms.txt\` to any of the above |
-
-### MCP — when the AI needs tool calls
-
-For agentic workflows where the AI needs to **read, search, create, update** docs (not just consume context):
-
-\`\`\`bash
-npm install -g memory-wiki-mcp
-\`\`\`
-
-Add it to your Claude Desktop / Cursor MCP config:
-
-\`\`\`json
-{
-  "mcpServers": {
-    "memory-wiki": {
-      "command": "npx",
-      "args": ["memory-wiki-mcp"]
-    }
-  }
-}
-\`\`\`
-
-Now Claude can do things like "save this conversation to my hub as a doc named TypeScript patterns" or "search my hub for what I wrote about auth last week" via tool calls.
-
-### Project-scoped persistence
-
-| Tool | Where to drop your URL |
-|---|---|
-| Cursor | \`.cursor/rules/memory.mdc\` |
-| Claude Code | \`CLAUDE.md\` |
-| Codex CLI | \`AGENTS.md\` |
-
-Line to add:
-
-\`\`\`
-Use memory.wiki/b/<your-bundle-id> as project context.
-\`\`\`
-
-The AI pulls your bundle every session. No copy-paste, no expiring context.
-
----
-
-## When you're ready
-
-- **Edit this doc freely** — it's local-only and won't sync until you sign in
-- **Right-click in the sidebar → Move to Trash** when you're done
-- **Click ＋ in the sidebar's MDs section** to start your own
-
-Sign in from the bottom of the sidebar anytime to keep everything synced across web, mac, vscode, and mobile.
+- **Drop a PDF here** — AI converts it into clean Markdown
+- **Click +** in the sidebar to start from a template
+- **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during beta
 `;
 
 export const SAMPLE_FORMATTING = `# Markdown Syntax Guide
