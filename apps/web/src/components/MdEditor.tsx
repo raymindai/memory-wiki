@@ -14920,48 +14920,66 @@ ${clone.innerHTML}
 
             {!authEmailMode && !authEmailSent && (
               <div className="px-6 pt-3 pb-5 space-y-2">
+                {/* All four buttons share the same shape:
+                      [18px icon slot] gap [centered text label]
+                    The icon slot is a fixed inline-flex box so every
+                    SVG lands at the SAME column regardless of its
+                    intrinsic viewBox padding. Bumped from 15px → 18px
+                    so the icons stop looking undersized against the
+                    13px label. */}
                 <button
                   onClick={() => { signInWithGoogle(); setShowAuthMenu(false); }}
-                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
                   style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden>
-                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 1 1-3.3-13l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/>
-                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
-                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28.4l-6.6 5A20 20 0 0 0 24 44z"/>
-                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.6l6.2 5.2C39.9 36 44 30.5 44 24c0-1.2-.1-2.3-.4-3.5z"/>
-                  </svg>
+                  <span className="inline-flex items-center justify-center shrink-0" style={{ width: 18, height: 18 }}>
+                    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
+                      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 1 1-3.3-13l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+                      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28.4l-6.6 5A20 20 0 0 0 24 44z"/>
+                      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.6l6.2 5.2C39.9 36 44 30.5 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                    </svg>
+                  </span>
                   Continue with Google
                 </button>
                 <button
                   onClick={() => { signInWithApple(); setShowAuthMenu(false); }}
-                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
                   style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                  </svg>
+                  <span className="inline-flex items-center justify-center shrink-0" style={{ width: 18, height: 18 }}>
+                    {/* Apple SVG renders with empty top space at default
+                        viewBox; nudge baseline down 0.5px so the visual
+                        center matches the Google / GitHub / mail icons. */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden style={{ transform: "translateY(-0.5px)" }}>
+                      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                    </svg>
+                  </span>
                   Continue with Apple
                 </button>
                 <button
                   onClick={() => { signInWithGitHub(); setShowAuthMenu(false); }}
-                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
                   style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
-                  </svg>
+                  <span className="inline-flex items-center justify-center shrink-0" style={{ width: 18, height: 18 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                  </span>
                   Continue with GitHub
                 </button>
                 <button
                   onClick={() => setAuthEmailMode(true)}
-                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
                   style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <rect x="3" y="5" width="18" height="14" rx="2"/>
-                    <path d="m3 7 9 6 9-6"/>
-                  </svg>
+                  <span className="inline-flex items-center justify-center shrink-0" style={{ width: 18, height: 18 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <rect x="3" y="5" width="18" height="14" rx="2"/>
+                      <path d="m3 7 9 6 9-6"/>
+                    </svg>
+                  </span>
                   Continue with email
                 </button>
               </div>
