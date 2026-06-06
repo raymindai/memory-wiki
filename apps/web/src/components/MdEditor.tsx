@@ -375,6 +375,11 @@ export default function MdEditor() {
   const newMenuRef = useRef<HTMLDivElement>(null);
   const [authEmailInput, setAuthEmailInput] = useState("");
   const [authEmailSent, setAuthEmailSent] = useState(false);
+  // Email pill behaves like the other OAuth pills until clicked. On
+  // click, it expands inline (input swaps in below the wordmark + OAuth
+  // pills) so there's no "or with email" divider — keeps the modal
+  // visually one region instead of three.
+  const [authEmailMode, setAuthEmailMode] = useState(false);
   const [folders, setFolders] = useState<FolderType[]>(() => {
     if (typeof window === "undefined") return INITIAL_FOLDERS;
     try { const s = localStorage.getItem("mw-folders"); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length > 0) return p; } } catch { /* */ }
@@ -14895,94 +14900,82 @@ ${clone.innerHTML}
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
           style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
-          onClick={() => { setShowAuthMenu(false); setAuthEmailSent(false); }}
+          onClick={() => { setShowAuthMenu(false); setAuthEmailSent(false); setAuthEmailMode(false); }}
         >
           <div
             className="rounded-2xl w-[420px] max-w-full"
             style={{ background: "var(--canvas)", border: "1px solid var(--border-dim)", boxShadow: "0 20px 80px rgba(0,0,0,0.45)" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 pt-6 pb-5 text-center">
-              {/* Brand lockup carries the "this is memory.wiki" signal.
-                  The old "Sign in to memory.wiki" h2 underneath was
-                  pure repetition (and brand-case-wrong). The OAuth
-                  buttons below say "Continue with…" which is the
-                  actual action CTA — no extra heading needed. */}
-              <div className="mx-auto mb-4 flex items-center justify-center">
-                <MemoryWikiLogo size={20} variant="full" />
+            {/* Cleaner layout: brand lockup at top, 4 identical
+                outlined pills (Google / Apple / GitHub / Email) in
+                one column, no "or with email" divider, no marketing
+                subtitle, minimal footer. Email pill expands inline
+                so the modal never reflows between two layouts. */}
+            <div className="px-6 pt-7 pb-3 text-center">
+              <div className="mx-auto flex items-center justify-center">
+                <MemoryWikiLogo size={26} variant="full" />
               </div>
-              <p className="mt-2" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.5 }}>
-                Save, sync, and publish your knowledge hub.
-              </p>
             </div>
 
-            {/* OAuth — outlined pills, brand glyph keeps its own
-                colour so the row reads as a quiet "pick a provider"
-                instead of two competing vivid buttons. */}
-            <div className="px-6 space-y-2">
-              <button
-                onClick={() => { signInWithGoogle(); setShowAuthMenu(false); }}
-                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
-              >
-                <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden>
-                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 1 1-3.3-13l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/>
-                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
-                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28.4l-6.6 5A20 20 0 0 0 24 44z"/>
-                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.6l6.2 5.2C39.9 36 44 30.5 44 24c0-1.2-.1-2.3-.4-3.5z"/>
-                </svg>
-                Continue with Google
-              </button>
-              <button
-                onClick={() => { signInWithGitHub(); setShowAuthMenu(false); }}
-                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-                Continue with GitHub
-              </button>
-              {/* Apple — matches the AuthProviderStack used by every
-                  non-web auth surface (desktop / vscode / cli / chrome).
-                  The web editor inline menu had drifted to a 2-provider
-                  set (Google + GitHub only) by accident.
-                  SVG: simple-icons canonical Apple mark (verified). */}
-              <button
-                onClick={() => { signInWithApple(); setShowAuthMenu(false); }}
-                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
-                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                </svg>
-                Continue with Apple
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3 px-6 my-4">
-              <div className="flex-1 h-px" style={{ background: "var(--border-dim)" }} />
-              <span className="font-mono" style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em" }}>
-                or with email
-              </span>
-              <div className="flex-1 h-px" style={{ background: "var(--border-dim)" }} />
-            </div>
-
-            <div className="px-6 mb-5">
-              {authEmailSent ? (
-                <div
-                  className="text-center py-3 rounded-lg inline-flex items-center justify-center gap-2 w-full"
-                  style={{ background: "rgba(181, 255, 26, 0.10)", color: "var(--micro-lime)", border: "1px solid rgba(181, 255, 26, 0.25)", fontSize: 13 }}
+            {!authEmailMode && !authEmailSent && (
+              <div className="px-6 pt-3 pb-5 space-y-2">
+                <button
+                  onClick={() => { signInWithGoogle(); setShowAuthMenu(false); }}
+                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
                 >
-                  Check your email for the login link
-                </div>
-              ) : (
+                  <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden>
+                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 1 1-3.3-13l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28.4l-6.6 5A20 20 0 0 0 24 44z"/>
+                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.6l6.2 5.2C39.9 36 44 30.5 44 24c0-1.2-.1-2.3-.4-3.5z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+                <button
+                  onClick={() => { signInWithApple(); setShowAuthMenu(false); }}
+                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  </svg>
+                  Continue with Apple
+                </button>
+                <button
+                  onClick={() => { signInWithGitHub(); setShowAuthMenu(false); }}
+                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                  Continue with GitHub
+                </button>
+                <button
+                  onClick={() => setAuthEmailMode(true)}
+                  className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                  style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                    <path d="m3 7 9 6 9-6"/>
+                  </svg>
+                  Continue with email
+                </button>
+              </div>
+            )}
+
+            {authEmailMode && !authEmailSent && (
+              <div className="px-6 pt-3 pb-5">
                 <div
                   className="flex items-stretch rounded-full overflow-hidden"
                   style={{ background: "var(--background)", border: "1px solid var(--border)" }}
                 >
                   <input
                     type="email"
+                    autoFocus
                     placeholder="you@email.com"
                     value={authEmailInput}
                     onChange={(e) => setAuthEmailInput(e.target.value)}
@@ -15016,10 +15009,28 @@ ${clone.innerHTML}
                     Send link
                   </button>
                 </div>
-              )}
-            </div>
+                <button
+                  onClick={() => setAuthEmailMode(false)}
+                  className="mt-3 text-caption transition-colors hover:underline"
+                  style={{ color: "var(--text-muted)", fontSize: 12 }}
+                >
+                  Back to all sign-in options
+                </button>
+              </div>
+            )}
 
-            <div className="px-6 pb-5 flex items-center justify-between" style={{ color: "var(--text-faint)" }}>
+            {authEmailSent && (
+              <div className="px-6 pt-3 pb-5">
+                <div
+                  className="text-center py-3 rounded-lg inline-flex items-center justify-center gap-2 w-full"
+                  style={{ background: "rgba(181, 255, 26, 0.10)", color: "var(--micro-lime)", border: "1px solid rgba(181, 255, 26, 0.25)", fontSize: 13 }}
+                >
+                  Check your email for the login link
+                </div>
+              </div>
+            )}
+
+            <div className="px-6 pb-5 pt-1 flex items-center justify-between" style={{ color: "var(--text-faint)" }}>
               <span className="font-mono" style={{ fontSize: 11, letterSpacing: "0.04em" }}>
                 Free during beta, no card.
               </span>
