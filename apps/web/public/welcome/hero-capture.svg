@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" fill="none">
+  <!-- Honest visual: source shapes (web/file/chat) → arrow → URL chip -->
+  <!-- Sources, left side, slightly stacked + rotated -->
+  <g opacity="0.95">
+    <rect x="32" y="38" width="80" height="104" rx="6" fill="#27272a" />
+    <rect x="44" y="46" width="80" height="104" rx="6" fill="#3f3f46" />
+    <rect x="56" y="54" width="80" height="104" rx="6" fill="#52525b" stroke="#71717a" stroke-width="1" />
+    <rect x="66" y="68" width="56" height="3" rx="1.5" fill="#a1a1aa" />
+    <rect x="66" y="78" width="44" height="3" rx="1.5" fill="#a1a1aa" />
+    <rect x="66" y="88" width="50" height="3" rx="1.5" fill="#a1a1aa" />
+    <rect x="66" y="98" width="38" height="3" rx="1.5" fill="#a1a1aa" />
+    <rect x="66" y="120" width="40" height="3" rx="1.5" fill="#a1a1aa" />
+    <rect x="66" y="130" width="44" height="3" rx="1.5" fill="#a1a1aa" />
+  </g>
+  <!-- Arrow -->
+  <g stroke="#fb923c" stroke-width="2" stroke-linecap="round">
+    <line x1="172" y1="90" x2="240" y2="90" />
+    <polyline points="232,82 240,90 232,98" fill="none" stroke-linejoin="round" />
+  </g>
+  <!-- URL chip target -->
+  <g>
+    <rect x="262" y="68" width="186" height="44" rx="22" fill="#0a0a0c" stroke="#27272a" stroke-width="1" />
+    <text x="355" y="95" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="600" fill="#fafafa">memory.wiki/abc</text>
+  </g>
+  <!-- Tag below arrow -->
+  <text x="206" y="120" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" letter-spacing="0.05em" fill="#71717a">CAPTURE</text>
+</svg>

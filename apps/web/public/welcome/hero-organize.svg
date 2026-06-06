@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" fill="none">
+  <!-- Hub composition: doc tiles → bundles → hub URL -->
+  <!-- Left column: individual docs -->
+  <g>
+    <rect x="34" y="40" width="56" height="12" rx="2" fill="#52525b" />
+    <rect x="34" y="60" width="56" height="12" rx="2" fill="#52525b" />
+    <rect x="34" y="80" width="56" height="12" rx="2" fill="#52525b" />
+    <rect x="34" y="100" width="56" height="12" rx="2" fill="#52525b" />
+    <rect x="34" y="120" width="56" height="12" rx="2" fill="#52525b" />
+    <text x="62" y="150" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" letter-spacing="0.05em" fill="#71717a">DOCS</text>
+  </g>
+  <!-- Arrow to bundles -->
+  <g stroke="#52525b" stroke-width="1.5" fill="none">
+    <path d="M100 86 L168 60" stroke-linecap="round" />
+    <path d="M100 90 L168 90" stroke-linecap="round" />
+    <path d="M100 94 L168 120" stroke-linecap="round" />
+  </g>
+  <!-- Middle: bundles -->
+  <g>
+    <rect x="174" y="46" width="80" height="32" rx="6" fill="#3f3f46" stroke="#71717a" stroke-width="1" />
+    <text x="214" y="66" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#fafafa">Bundle</text>
+    <rect x="174" y="78" width="80" height="32" rx="6" fill="#3f3f46" stroke="#71717a" stroke-width="1" />
+    <text x="214" y="98" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#fafafa">Bundle</text>
+    <rect x="174" y="110" width="80" height="32" rx="6" fill="#3f3f46" stroke="#71717a" stroke-width="1" />
+    <text x="214" y="130" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#fafafa">Bundle</text>
+    <text x="214" y="160" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" letter-spacing="0.05em" fill="#71717a">BUNDLES</text>
+  </g>
+  <!-- Arrow to hub -->
+  <g stroke="#fb923c" stroke-width="1.5" fill="none">
+    <path d="M264 60 Q300 90 326 90" stroke-linecap="round" />
+    <path d="M264 94 L326 90" stroke-linecap="round" />
+    <path d="M264 124 Q300 90 326 90" stroke-linecap="round" />
+  </g>
+  <!-- Right: hub URL -->
+  <g>
+    <rect x="328" y="70" width="124" height="40" rx="20" fill="#0a0a0c" stroke="#27272a" stroke-width="1" />
+    <text x="390" y="95" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="600" fill="#fafafa">memory.wiki/@you</text>
+    <text x="390" y="135" text-anchor="middle" font-family="ui-monospace, monospace" font-size="9" letter-spacing="0.05em" fill="#71717a">HUB</text>
+  </g>
+</svg>
