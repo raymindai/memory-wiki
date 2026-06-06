@@ -1892,6 +1892,23 @@ export default function MdEditor() {
       return next;
     });
   }, []);
+
+  // Welcome guide card — sits at the top of the Start surface so new
+  // users have a clear entry into the SAMPLE_WELCOME doc (the
+  // narrative "this is what memory.wiki is" tour). User can dismiss
+  // it once they've read or skipped; the card stays hidden after.
+  // The click-to-open handler is inlined in JSX (right next to the
+  // existing Guides & Examples buttons) because switchTab is declared
+  // further down in this file — extracting a helper here would hit
+  // a TDZ error.
+  const [welcomeCardDismissed, setWelcomeCardDismissed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try { return localStorage.getItem("mw-welcome-card-dismissed") === "1"; } catch { return false; }
+  });
+  const dismissWelcomeCard = useCallback(() => {
+    setWelcomeCardDismissed(true);
+    try { localStorage.setItem("mw-welcome-card-dismissed", "1"); } catch {}
+  }, []);
   // Auto-resolve trigger A — fires when the Hub overlay opens and
   // the user picked "on-open" as their auto-management trigger. The
   // overlay opening is the user's intent-signal that they care
@@ -2758,6 +2775,20 @@ export default function MdEditor() {
       return saved;
     });
   }, [loadTab]);
+
+  // WelcomeOverlay dispatches "mw:open-welcome-doc" on its last-slide
+  // CTA. Listen here so the welcome guide actually opens after the
+  // modal dismisses; otherwise the user lands on Start with no signal
+  // that the tour pointed them to a specific doc.
+  useEffect(() => {
+    const handler = () => {
+      setShowOnboarding(false);
+      try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+      switchTab("tab-welcome");
+    };
+    window.addEventListener("mw:open-welcome-doc", handler);
+    return () => window.removeEventListener("mw:open-welcome-doc", handler);
+  }, [switchTab]);
 
   // Bind the switchTab ref so the earlier-declared openDocBySlug
   // helper (used by Start screen cards) can invoke it.
@@ -12032,6 +12063,56 @@ ${clone.innerHTML}
                     </div>
                   );
                 })()}
+
+                {/* Welcome guide card — opens the SAMPLE_WELCOME doc
+                    in the editor so users get a hands-on intro. Sits
+                    at the top of the Start surface so it's the first
+                    thing a new user sees. Dismissable; stays hidden
+                    after dismiss. */}
+                {!welcomeCardDismissed && (
+                  <div className="mb-5">
+                    <div
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors"
+                      style={{
+                        background: "var(--surface)",
+                        border: "1px solid var(--border-dim)",
+                      }}
+                      onClick={() => {
+                        setShowOnboarding(false);
+                        try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+                        switchTab("tab-welcome");
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--text-primary)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-dim)"; }}
+                    >
+                      <div className="flex items-center justify-center shrink-0" style={{ width: 36, height: 36, borderRadius: 10, background: "var(--border)" }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-primary)" }}>
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-body font-semibold" style={{ color: "var(--text-primary)" }}>
+                          New to memory.wiki? Open the welcome guide.
+                        </div>
+                        <div className="text-caption" style={{ color: "var(--text-faint)" }}>
+                          A short tour written as a real doc — read it, edit it, delete when you're done.
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); dismissWelcomeCard(); }}
+                        className="shrink-0 flex items-center justify-center rounded-md transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ width: 28, height: 28, color: "var(--text-faint)" }}
+                        title="Hide this card"
+                        aria-label="Hide welcome card"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Create — 3 column grid like About page */}
                 <div className="mb-6">

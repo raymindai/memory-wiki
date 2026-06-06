@@ -15,56 +15,69 @@ import { extractTitleFromMd } from "@/lib/editor-types";
 
 export const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
-> **The Markdown Hub.** Collect from anywhere. Edit with AI. Publish with a permanent URL.
+You're inside the editor. This doc you're reading is a regular memory.wiki doc — the same kind you'll create. Read it as a tour, edit it as a sandbox, delete it when you're done.
 
-## Get Started
+> **The core idea.** Anything you capture here lives at a URL Claude, ChatGPT, Cursor, and Gemini can all read the same way. **One memory, every AI.**
 
-1. **Type or paste** anything — Markdown, plain text, AI output, code
-2. **Import** files — PDF, Word, PowerPoint, Excel, HTML, CSV, LaTeX, and more
-3. **Edit** inline in the MD view, or use Source for raw Markdown
-4. **Share** with one click — generates a permanent URL like \`memory.wiki/abc123\`
+---
 
-## What You Can Do
+## 1. Try the editor
 
-- **WYSIWYG editing** — click any text in the MD view and start typing
-- **AI Tools** — Polish, Summary, TL;DR, Translate, Chat (right panel)
-- **Document Outline** — heading structure panel on the right
-- **Image Gallery** — upload, manage, and insert images (right panel)
-- **Multi-format import** — drag & drop PDF, DOCX, PPTX, XLSX, or 10+ other formats
-- **Export anywhere** — download as MD/HTML/TXT, print PDF, copy for Docs/Email/Slack
-- **Flavor conversion** — click the flavor badge (GFM ▾) to convert between formats
-- **Folders + Trash** — organize with folders, drag to move, soft delete with restore
-- **Cross-platform sync** — edit on Web, VS Code, Mac Desktop, or CLI. Same URL everywhere
+Click anywhere in this paragraph and start typing. You're editing the live doc — the WYSIWYG view stays in sync with the Markdown source. Toggle **MD / Split / Source** up top to see how.
 
-## Keyboard Shortcuts
+A few things to try right here:
 
-| Shortcut | Action |
-|----------|--------|
-| Cmd+B | Bold |
-| Cmd+I | Italic |
-| Cmd+K | Insert link |
-| Cmd+S | Share (copy URL) |
-| Cmd+Z / Cmd+Shift+Z | Undo / Redo |
-| Cmd+Shift+C | Copy HTML |
-| Cmd+\\\\ | Toggle view mode |
+- Type \`**bold**\` and watch it render
+- Press **Cmd/Ctrl+K** with text selected to ask AI to polish, translate, shorten, or rewrite it
+- Drop an image into this doc — uploads to your gallery and inserts
+- Type \`/\` for the slash menu (heading, list, quote, code block, callout)
 
-## Available Everywhere
+## 2. Save it to the cloud
 
-| Channel | How |
-|---------|-----|
-| Web | You are here — [memory.wiki](https://memory.wiki) |
-| VS Code | [Extension](https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode) — Cmd+Shift+M to preview |
-| Mac App | Native desktop with sidebar and sync |
-| CLI | \`npm install -g memory-wiki-cli\` — pipe anything to a URL |
-| Chrome | [Extension](https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold) — capture AI conversations |
-| MCP | Connect Claude, Cursor, or any AI tool |
-| QuickLook | Press Space on .md files in Finder |
+Top right corner: **Share**. Anything you save gets a permanent URL like \`memory.wiki/abc123\`. The URL **is** the doc — open it anywhere, anyone with the link can read it, the markdown is fetched directly so any AI can ingest it.
 
-## Try It Now
+Signed in? The doc joins your library on the left. Signed out? The URL still works forever — only you (with the edit token) can change it.
 
-- **Drop a PDF here** — AI converts it into clean Markdown
-- **Click +** in the sidebar to start from a template
-- **Sign in** (sidebar bottom) for cloud sync and short URL sharing — free during beta
+## 3. Group docs into a Bundle
+
+A **Bundle** is a thinking surface — pick 3 to 10 docs that belong together and memory.wiki builds a concept graph, finds tensions and overlaps, lets you chat with the whole set as one. URL pattern: \`memory.wiki/b/xyz\`.
+
+Open any sample bundle in the left sidebar to see what one looks like.
+
+## 4. Your hub is one URL any AI can read
+
+Sign in and your entire library rolls up into a single URL: \`memory.wiki/@yourname\`. Paste it into Claude, ChatGPT, Cursor, or Codex and they all read your knowledge as context — no integration, no plugin needed.
+
+Try it after sign-in:
+
+\`\`\`
+Use memory.wiki/@yourname as my context.
+\`\`\`
+
+## 5. Capture from anywhere
+
+You'll rarely write in this editor from scratch. memory.wiki has surfaces wherever you already work:
+
+| Surface | What it does |
+|---|---|
+| Chrome extension | **Add** button on every web page, AI chat, X / Threads post |
+| Mac app | Local .md files, QuickLook in Finder, sync to cloud |
+| VS Code extension | Sidebar to your hub right in the IDE |
+| CLI (\`mw\`) | Pipe anything to a URL from the terminal |
+| MCP server | Claude / Cursor reach your hub via tool calls |
+| iOS / Android | Share Sheet capture + Home screen widget |
+
+Install the ones you need from the Start tab → \`Install\` section.
+
+---
+
+## When you're ready
+
+- **Edit this doc freely** — it's local-only and won't sync until you sign in
+- **Right-click in the sidebar → Move to Trash** when you're done with the tour
+- **Click ＋ in the sidebar's MDs section** to start your own
+
+Sign in anytime from the bottom of the sidebar to keep everything synced across web, mac, vscode, and mobile.
 `;
 
 export const SAMPLE_FORMATTING = `# Markdown Syntax Guide
