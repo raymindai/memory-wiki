@@ -485,7 +485,7 @@ export default function DocumentViewer({
               This document is shared with specific people.
               Sign in with an authorized email, or ask the owner for access.
             </p>
-            <div className="flex gap-3 mt-2">
+            <div className="flex gap-3 mt-2 flex-wrap">
               <button
                 onClick={async () => {
                   try {
@@ -501,6 +501,38 @@ export default function DocumentViewer({
                 style={{ background: "var(--text-primary)", color: "var(--background)" }}
               >
                 Sign in with Google
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+                    const supabase = getSupabaseBrowserClient();
+                    await supabase.auth.signInWithOAuth({
+                      provider: "apple",
+                      options: { redirectTo: window.location.href },
+                    });
+                  } catch { window.location.href = "/"; }
+                }}
+                className="px-5 py-2 rounded-lg text-sm font-medium"
+                style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              >
+                Apple
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+                    const supabase = getSupabaseBrowserClient();
+                    await supabase.auth.signInWithOAuth({
+                      provider: "github",
+                      options: { redirectTo: window.location.href },
+                    });
+                  } catch { window.location.href = "/"; }
+                }}
+                className="px-5 py-2 rounded-lg text-sm font-medium"
+                style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              >
+                GitHub
               </button>
               <button
                 onClick={async () => {

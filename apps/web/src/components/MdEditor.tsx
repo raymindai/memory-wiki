@@ -323,7 +323,7 @@ export default function MdEditor() {
   const isMac = typeof navigator !== "undefined" && /Mac/.test(navigator.platform);
   const mod = isMac ? "Cmd" : "Ctrl";
   const { theme, toggleTheme, accentColor, setAccentColor, colorScheme, setColorScheme, setActiveOwnerAccent, setActiveOwnerScheme } = useTheme();
-  const { user, profile, loading: authLoading, accessToken, isAuthenticated, signInWithGoogle, signInWithGitHub, signInWithEmail, signOut } = useAuth();
+  const { user, profile, loading: authLoading, accessToken, isAuthenticated, signInWithGoogle, signInWithGitHub, signInWithApple, signInWithEmail, signOut } = useAuth();
   // Only use anonymousId when not logged in
   const anonymousId = (!user?.id && typeof window !== "undefined") ? getAnonymousId() : "";
   const authHeaders = useMemo(() => buildAuthHeaders({ accessToken, userId: user?.id, userEmail: user?.email, anonymousId }), [accessToken, user?.id, user?.email, anonymousId]);
@@ -11453,6 +11453,9 @@ ${clone.innerHTML}
                     <button onClick={signInWithGitHub} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
                       GitHub
                     </button>
+                    <button onClick={signInWithApple} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+                      Apple
+                    </button>
                   </div>
                 </>
               )}
@@ -14947,6 +14950,20 @@ ${clone.innerHTML}
                   <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
                 </svg>
                 Continue with GitHub
+              </button>
+              {/* Apple — matches the AuthProviderStack used by every
+                  non-web auth surface (desktop / vscode / cli / chrome).
+                  The web editor inline menu had drifted to a 2-provider
+                  set (Google + GitHub only) by accident. */}
+              <button
+                onClick={() => { signInWithApple(); setShowAuthMenu(false); }}
+                className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-full transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)", fontSize: 13, fontWeight: 500 }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M16.365 1.43c0 1.14-.41 2.23-1.22 3.05-.81.82-1.86 1.29-2.81 1.21-.12-1.07.34-2.2 1.18-3.04.83-.84 2-1.32 2.85-1.22zM19.5 17.17c-.45 1.05-.99 2.07-1.74 2.96-.96 1.13-2.32 2.53-3.99 2.54-1.5.01-1.89-.97-3.92-.97-2.03 0-2.46.97-3.93.99-1.61.02-2.84-1.22-3.8-2.35-2.02-2.38-3.6-6.74-1.51-9.66 1.04-1.46 2.9-2.4 4.79-2.43 1.49-.03 2.89.99 3.81.99.92 0 2.66-1.22 4.48-1.04.76.03 2.91.31 4.29 2.33-.11.07-2.56 1.49-2.53 4.46.03 3.54 3.1 4.72 3.13 4.74z"/>
+                </svg>
+                Continue with Apple
               </button>
             </div>
 
