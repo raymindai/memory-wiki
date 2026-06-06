@@ -12096,7 +12096,7 @@ ${clone.innerHTML}
                           New to memory.wiki? Open the welcome guide.
                         </div>
                         <div className="text-caption" style={{ color: "var(--text-faint)" }}>
-                          A short tour written as a real doc — read it, edit it, delete when you're done.
+                          A short tour written as a real doc — read it, edit it, delete when you&apos;re done.
                         </div>
                       </div>
                       <button
