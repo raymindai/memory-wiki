@@ -326,11 +326,15 @@ export default function WelcomeOverlay() {
           )}
           <h2
             style={{
+              fontFamily: "var(--font-display)",
               fontSize: isFirst ? 22 : 19,
               fontWeight: 800,
               color: "var(--text-primary)",
               lineHeight: 1.25,
-              letterSpacing: "-0.02em",
+              // Cal Sans always uses letter-spacing 0 — the typeface
+              // is designed for the spacing the brand wants; tightening
+              // makes it read cramped and drifts off-brand.
+              letterSpacing: 0,
               margin: "0 0 10px",
               whiteSpace: "pre-line",
             }}
@@ -408,7 +412,9 @@ export default function WelcomeOverlay() {
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: "pointer",
-                letterSpacing: "-0.01em",
+                // System-ui body face — neutral 0 to match the Cal
+                // Sans rule applied to all brand surfaces.
+                letterSpacing: 0,
               }}
             >
               {isLast ? "Open the welcome guide" : "Next"}
