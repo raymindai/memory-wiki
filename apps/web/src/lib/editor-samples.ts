@@ -17,128 +17,78 @@ export const SAMPLE_WELCOME = `# Welcome to memory.wiki
 
 You're inside the editor. This doc you're reading is a regular memory.wiki doc — the same kind you'll create. Read it as a tour, edit it as a sandbox, delete it when you're done.
 
-> **The core idea.** Anything you capture lives at a URL Claude, ChatGPT, Cursor, and Gemini can all read the same way. memory.wiki has three movements — **capture, organize, use** — built on that one truth.
+> **The core idea.** Anything you capture lives at a URL Claude, ChatGPT, Cursor, and Gemini all read the same way. Three movements: **capture, organize, use**.
 
 ---
 
 ## 1. Capture
 
-![Capture: anything from anywhere becomes a URL](/welcome/hero-capture.svg)
+You'll rarely write in this editor from scratch. memory.wiki has surfaces wherever you already work — pick the one closest to where you already are.
 
-Web pages, AI chats, social posts, files, terminal output — each becomes a clean markdown doc at a permanent URL. You rarely write from scratch in this editor; you capture from where you already work.
+| Surface | What it does | How to start |
+|---|---|---|
+| **Chrome extension** | Add button on every web page, AI chat, X / Threads / Reddit post. Site-aware intent suggestions (YouTube: summarize from transcript, arXiv: abstract + contributions). | Install from Chrome Web Store. Click **Add** on any post. |
+| **Mac desktop** | Local .md library + cloud sync in one editor. QuickLook preview on .md files in Finder. | Download DMG. Drop .md into the app. Press **Space** in Finder to preview. |
+| **VS Code extension** | Sidebar to your cloud right in the IDE. Two-way sync. WYSIWYG preview matches the web. | Install \`raymindai.memory-wiki-vscode\`. Right-click any .md → **Publish to memory.wiki**. |
+| **CLI** | Pipe anything to a URL from the terminal. Scriptable for cron jobs, git hooks, AI agent loops. | \`npm install -g memory-wiki-cli\` → \`mw login\` → \`cat file.md \\| mw capture\`. |
+| **iOS / Android** | Share Sheet capture from any app. Home / Lock screen widget. Offline-first. | App Store / Play Store. Tap **Share** in any app → select **memory.wiki**. |
 
-### Chrome — Add button on every page
+Right here in the editor, you can also:
 
-![Chrome extension Add button overlay](/welcome/surface-chrome.svg)
-
-Install the extension. Open any page — a web article, a ChatGPT / Claude conversation, an X / Threads / Reddit post. The **Add** button floats top-right of the post.
-
-1. Click **Add** → the page (or selected post) saves as a memory.wiki URL
-2. Optional: type an intent like \`Action items as checklist\` to AI-transform on the fly
-3. The result URL is copied to your clipboard — paste anywhere
-
-> The popup shows site-aware suggestions. On YouTube: "Summarize from transcript". On arXiv: "Abstract + contributions". On GitHub: "README in 5 bullets". 24+ sites covered.
-
-### Mac desktop — local files + QuickLook
-
-![Mac app with sidebar and QuickLook .md badge](/welcome/surface-desktop.svg)
-
-The Mac app is your local .md library plus cloud sync in one editor.
-
-1. Drop any \`.md\` file into the app → opens in TipTap WYSIWYG
-2. Press **Cmd+S** → file lives on disk AND syncs to your hub
-3. In Finder: press **Space** on any \`.md\` → rendered preview (QuickLook)
-4. Sidebar groups by **Synced / Local / Cloud** so you always know where a doc lives
-
-### VS Code — sidebar inside the IDE
-
-![VS Code sidebar showing memory.wiki cloud + local docs](/welcome/surface-vscode.svg)
-
-Right-click any \`.md\` in the explorer → **Publish to memory.wiki** → permanent URL. The memory.wiki sidebar lists every cloud doc grouped by visibility (Public / Shared / Private / View-only) with two-way sync.
-
-1. Install \`raymindai.memory-wiki-vscode\` from the Marketplace
-2. Cmd+Shift+M opens the preview pane (same renderer as the web)
-3. Cmd+Shift+P → "memory.wiki: Sign in" once, then everything syncs
-
-### CLI — pipe anything to a URL
-
-![Terminal with mw capture command + URL response](/welcome/surface-cli.svg)
-
-\`\`\`bash
-npm install -g memory-wiki-cli
-mw login                                  # one-time browser OAuth
-cat meeting.md | mw capture               # → memory.wiki/x9k2j
-mw read x9k2j                             # fetch back as markdown
-gh issue view 42 --json body -q .body | mw capture
-\`\`\`
-
-The CLI is also how you script captures (cron jobs, git hooks, AI agent loops).
-
-### iOS / Android — share from any app
-
-![iPhone Share Sheet + Android Home widget](/welcome/surface-mobile.svg)
-
-- **iOS**: Open any app → tap **Share** → select **memory.wiki** in the Share Sheet. The Home / Lock screen widget surfaces your recent docs.
-- **Android**: Same flow via the system Share intent. The Home widget gives one-tap access to recent captures.
-- Both apps: Spotlight / search finds your docs by title or body, offline-first.
+- Type **\`/\`** for the slash menu (heading, list, quote, code block, callout)
+- Press **Cmd/Ctrl+K** on selected text — AI polish, translate, shorten, rewrite
+- Drop an image into this doc — uploads to your gallery and inserts
+- Drag a PDF / DOCX / PPTX / XLSX into the sidebar — converts to clean markdown
 
 ---
 
 ## 2. Organize
 
-![Organize: docs → bundles → hub URL](/welcome/hero-organize.svg)
-
-Captures don't live as a flat pile. memory.wiki has three layers, each with its own URL pattern.
+Captures don't live as a flat pile. Three layers, each with its own URL pattern.
 
 ### Docs — the atom
 
-Single markdown file. URL: \`memory.wiki/<id>\` (e.g. \`memory.wiki/abc123\`). Always editable by the owner, public-read by default, can be made private or shared with specific emails.
+Single markdown file. URL: \`memory.wiki/<id>\`. Public-read by default. Can be made private or shared with specific emails.
 
 ### Bundles — the thinking surface
 
-Pick 3 to 10 docs that belong together → memory.wiki builds a concept graph, surfaces tensions and overlaps, lets you chat with the whole set as one entity. URL: \`memory.wiki/b/<id>\`.
+Pick 3 to 10 docs that belong together. memory.wiki builds a concept graph, surfaces tensions and overlaps, lets you chat with the whole set as one. URL: \`memory.wiki/b/<id>\`.
 
 To make one right now:
 
 1. Sidebar → **MD Bundles** section → **＋**
 2. Select docs (multi-select from your library)
 3. Title the bundle, hit Create
-4. The bundle page opens — open the **Constellation** tab to see the auto-built concept graph, or **Chat** to query the bundle as a single AI context
+4. Open **Constellation** to see the auto-built graph, **Chat** to query the bundle as one AI context
 
 ### Hub — everything in one URL
 
 Once signed in, your entire library rolls up to: \`memory.wiki/@yourname\`. Bundles + docs + concepts, all fetchable as markdown. This is the URL you give to any AI.
 
-The concept index links related docs across bundles automatically — paste your hub into Claude and ask "what have I been thinking about lately?" → it actually answers from your real history.
+The concept index links related docs across bundles automatically. Paste your hub into Claude, ask "what have I been thinking about lately?" — it answers from your real history.
 
 ---
 
 ## 3. Use
 
-![Use: hub URL fans out to Claude, ChatGPT, Cursor, Codex, Gemini](/welcome/hero-use.svg)
-
-The same URL works in every AI you use. No plugin, no integration, no auth dance — just paste.
-
-### Paste into any AI
+The same URL works in every AI. No plugin, no integration, no auth dance.
 
 \`\`\`
 Use memory.wiki/@yourname as my context.
 \`\`\`
 
-That's the whole pattern. Claude, ChatGPT, Cursor, Codex, Gemini all fetch the markdown directly. The \`/llms.txt\` and \`?compact\` endpoints keep token cost low.
+That's the whole pattern. Claude, ChatGPT, Cursor, Codex, Gemini all fetch the markdown directly.
 
-Variants for specific scopes:
+| Scope | URL form |
+|---|---|
+| Whole hub | \`memory.wiki/@you\` |
+| One bundle | \`memory.wiki/b/abc123\` |
+| One doc | \`memory.wiki/abc123\` |
+| AI-optimized index | append \`/llms.txt\` to any of the above |
 
-- **Whole hub**: \`memory.wiki/@you\`
-- **One bundle**: \`memory.wiki/b/abc123\`
-- **One doc**: \`memory.wiki/abc123\`
-- **Hub-aware AI agent**: append \`/llms.txt\` for an AI-optimized index
+### MCP — when the AI needs tool calls
 
-### MCP server — tool calls from Claude / Cursor
-
-![MCP server bridging Claude / Cursor / Codex to your hub](/welcome/surface-mcp.svg)
-
-For agentic workflows where the AI needs to **read, search, create, update** docs in your hub (not just consume context):
+For agentic workflows where the AI needs to **read, search, create, update** docs (not just consume context):
 
 \`\`\`bash
 npm install -g memory-wiki-mcp
@@ -157,25 +107,33 @@ Add it to your Claude Desktop / Cursor MCP config:
 }
 \`\`\`
 
-Now Claude can do things like "save this conversation to my hub as a doc named 'TypeScript patterns'" or "search my hub for what I wrote about auth last week" via tool calls.
+Now Claude can do things like "save this conversation to my hub as a doc named TypeScript patterns" or "search my hub for what I wrote about auth last week" via tool calls.
 
-### Drop URLs into Cursor rules / AGENTS.md / CLAUDE.md
+### Project-scoped persistence
 
-For project-scoped persistence:
+| Tool | Where to drop your URL |
+|---|---|
+| Cursor | \`.cursor/rules/memory.mdc\` |
+| Claude Code | \`CLAUDE.md\` |
+| Codex CLI | \`AGENTS.md\` |
 
-- Cursor: \`.cursor/rules/memory.mdc\` → \`Use memory.wiki/b/<bundle-id> as project context\`
-- Claude Code: \`AGENTS.md\` or \`CLAUDE.md\` → same line
-- The AI now pulls your bundle every session, no copy-paste
+Line to add:
+
+\`\`\`
+Use memory.wiki/b/<your-bundle-id> as project context.
+\`\`\`
+
+The AI pulls your bundle every session. No copy-paste, no expiring context.
 
 ---
 
 ## When you're ready
 
 - **Edit this doc freely** — it's local-only and won't sync until you sign in
-- **Right-click in the sidebar → Move to Trash** when you're done with the tour
+- **Right-click in the sidebar → Move to Trash** when you're done
 - **Click ＋ in the sidebar's MDs section** to start your own
 
-Sign in anytime from the bottom of the sidebar to keep everything synced across web, mac, vscode, and mobile.
+Sign in from the bottom of the sidebar anytime to keep everything synced across web, mac, vscode, and mobile.
 `;
 
 export const SAMPLE_FORMATTING = `# Markdown Syntax Guide
