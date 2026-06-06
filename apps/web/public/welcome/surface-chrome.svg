@@ -19,7 +19,7 @@
   <!-- memory.wiki Add button (floating in top-right of page) -->
   <g>
     <rect x="234" y="68" width="62" height="22" rx="11" fill="#fafafa" />
-    <circle cx="246" cy="79" r="6" fill="#fb923c" />
+    <circle cx="246" cy="79" r="6" fill="#FF6B1A" />
     <text x="246" y="83" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#0a0a0c">+</text>
     <text x="276" y="83" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" font-weight="600" fill="#0a0a0c">Add</text>
   </g>
