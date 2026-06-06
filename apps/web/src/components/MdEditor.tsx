@@ -14903,23 +14903,15 @@ ${clone.innerHTML}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 pt-6 pb-5 text-center">
-              <div className="mx-auto mb-6 flex items-center justify-center" style={{ width: 44, height: 44 }}>
-                <MemoryWikiLogo size={36} variant="icon-only" withBlob />
+              {/* Brand lockup carries the "this is memory.wiki" signal.
+                  The old "Sign in to Memory.Wiki" h2 underneath was
+                  pure repetition (and brand-case-wrong). The OAuth
+                  buttons below say "Continue with…" which is the
+                  actual action CTA — no extra heading needed. */}
+              <div className="mx-auto mb-4 flex items-center justify-center">
+                <MemoryWikiLogo size={20} variant="full" />
               </div>
-              <h2
-                style={{
-                  color: "var(--text-primary)",
-                  fontFamily: "var(--font-display)",
-                  fontSize: 18,
-                  fontWeight: 500,
-                  letterSpacing: 0,
-                  lineHeight: 1.2,
-                  margin: 0,
-                }}
-              >
-                Sign in to Memory.Wiki
-              </h2>
-              <p className="mt-1.5" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.5 }}>
+              <p className="mt-2" style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.5 }}>
                 Save, sync, and publish your knowledge hub.
               </p>
             </div>
