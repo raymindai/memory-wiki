@@ -17,10 +17,10 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "0.2.0"
     # Bump per TestFlight / App Store upload. Apple rejects
     # duplicates within the same MARKETING_VERSION.
-    CURRENT_PROJECT_VERSION: "3"
+    CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.9"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     ENABLE_USER_SCRIPT_SANDBOXING: YES
