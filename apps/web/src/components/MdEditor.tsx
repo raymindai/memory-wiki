@@ -4624,6 +4624,15 @@ export default function MdEditor() {
   const markdownRef = useRef(markdown);
   markdownRef.current = markdown;
 
+  // Last body we know matches the server. Updated on every successful
+  // auto-pull (realtime channel + focus/visibility refetch). Without
+  // this, after the first auto-pull the realtime closure's captured
+  // `currentTab.markdown` stayed at the load-time body — so a second
+  // external update made `localMd !== baseline` look true and fired
+  // a false "updated elsewhere" toast for a clean viewer. (Closure
+  // re-binds only on activeTabId/docId change, not on setTabs.)
+  const lastSyncedMdRef = useRef<string>("");
+
   // Ref for Yjs collaboration state (avoids stale closures in Realtime handler)
   const isCollaboratingRef = useRef(isCollaborating);
   isCollaboratingRef.current = isCollaborating;
@@ -4763,11 +4772,15 @@ export default function MdEditor() {
             // overwrite the user's typing without a conflict notice —
             // exact data-loss bug founder reported (input vanishes,
             // cursor jumps to end via setMarkdown -> setContent).
-            // Baseline: last successfully saved body, or — if we haven't
-            // saved this session — the body the tab loaded with.
+            // Baseline = last body we know server agrees with. Cascade:
+            //   lastSaved (post-PATCH) > lastSynced (post-pull) > loadedBody.
+            // The lastSynced ref is critical for repeated external updates:
+            // after the first auto-pull, the captured currentTab.markdown
+            // is stale (effect closure rebinds only on activeTabId/docId).
             const lastSaved = autoSave.getLastSavedMarkdown();
+            const lastSynced = lastSyncedMdRef.current;
             const loadedBody = currentTab?.markdown ?? "";
-            const baseline = lastSaved !== "" ? lastSaved : loadedBody;
+            const baseline = lastSaved || lastSynced || loadedBody;
             const localIsDirty = autoSave.isSaving || localMd !== baseline;
 
             if (!localIsDirty) {
@@ -4783,6 +4796,7 @@ export default function MdEditor() {
               cmSetDocRef.current?.(serverMd);
               tiptapRef.current?.setMarkdown(serverMd);
               if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
+              lastSyncedMdRef.current = serverMd;
               setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: serverTitle || t.title } : t));
               markTabFresh(cloudId);
               highlightDiff(oldMd, serverMd);
@@ -4850,8 +4864,9 @@ export default function MdEditor() {
         // tab loaded with, so a focus-return mid-typing never wipes
         // the buffer.
         const lastSaved = autoSave.getLastSavedMarkdown();
+        const lastSynced = lastSyncedMdRef.current;
         const loadedBody = currentTab?.markdown ?? "";
-        const baseline = lastSaved !== "" ? lastSaved : loadedBody;
+        const baseline = lastSaved || lastSynced || loadedBody;
         const localIsDirty = autoSave.isSaving || localMd !== baseline;
         if (localIsDirty) {
           showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
@@ -4864,6 +4879,7 @@ export default function MdEditor() {
         cmSetDocRef.current?.(serverMd);
         tiptapRef.current?.setMarkdown(serverMd);
         if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
+        lastSyncedMdRef.current = serverMd;
         setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: (doc.title as string) || t.title } : t));
         markTabFresh(cloudId);
         highlightDiff(oldMd, serverMd);
