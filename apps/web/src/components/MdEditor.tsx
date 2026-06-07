@@ -9,6 +9,7 @@ import nextDynamic from "next/dynamic";
 import { userColor } from "@/lib/user-color";
 import { useCursorPresence } from "@/lib/useCursorPresence";
 import { render } from "@/lib/render";
+import { isLocalDirty } from "@/lib/external-update-dirty";
 import katex from "katex";
 import { htmlToMarkdown, isHtmlContent } from "@/lib/html-to-md";
 import {
@@ -2532,6 +2533,11 @@ export default function MdEditor() {
           tiptapRef.current?.setMarkdown(md);
           // Seed the conflict detection timestamp
           if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at);
+          // Tab body just fetched from server is the in-sync baseline.
+          // Without this, the init effect leaves lastSynced=null (the
+          // tab was activated before the body arrived) and the next
+          // external edit would false-flag dirty.
+          lastSyncedMdRef.current = md;
           // Reconcile permission from the server. Sidebar entries
           // populated from the recent-visit / notification feeds
           // didn't always have an up-to-date role (the cached tab
@@ -2641,6 +2647,8 @@ export default function MdEditor() {
       markdownRef.current = newMarkdown;
       doRenderRef.current(newMarkdown);
       tiptapRef.current?.setMarkdown(newMarkdown);
+      // Synthesis-accept persisted newMarkdown server-side → in-sync.
+      lastSyncedMdRef.current = newMarkdown;
     }
     showToast("Synthesis updated.", "info");
   }, [synthesisDiffDocId, tabs]);
@@ -2668,6 +2676,8 @@ export default function MdEditor() {
           markdownRef.current = data.markdown;
           doRenderRef.current(data.markdown);
           tiptapRef.current?.setMarkdown(data.markdown);
+          // Recompile persisted server-side → in-sync.
+          lastSyncedMdRef.current = data.markdown;
         }
         showToast("Recompiled with latest sources.", "info");
       } else {
@@ -4273,6 +4283,12 @@ export default function MdEditor() {
                 setMarkdownRaw(doc.markdown);
                 doRender(doc.markdown);
                 tiptapRef.current?.setMarkdown(doc.markdown);
+                // Rehydrate just replaced the editor body with the fresh
+                // server copy — that IS the new in-sync baseline. Without
+                // this update, an external edit landing right after
+                // rehydrate would see lastSynced = the (now-overwritten)
+                // cached body and false-flag a conflict.
+                lastSyncedMdRef.current = doc.markdown;
               }
             }
           } else if (res.status === 404 || res.status === 410) {
@@ -4624,14 +4640,28 @@ export default function MdEditor() {
   const markdownRef = useRef(markdown);
   markdownRef.current = markdown;
 
-  // Last body we know matches the server. Updated on every successful
-  // auto-pull (realtime channel + focus/visibility refetch). Without
-  // this, after the first auto-pull the realtime closure's captured
-  // `currentTab.markdown` stayed at the load-time body — so a second
-  // external update made `localMd !== baseline` look true and fired
-  // a false "updated elsewhere" toast for a clean viewer. (Closure
-  // re-binds only on activeTabId/docId change, not on setTabs.)
-  const lastSyncedMdRef = useRef<string>("");
+  // Last body we know matches the server.
+  //
+  // The dirty check in the realtime + focus/visibility handlers must
+  // compare localMd against SOMETHING — and `currentTab.markdown`
+  // from the closure goes stale the moment we apply the first
+  // auto-pull (the closure rebinds only on activeTabId/docId, not
+  // on setTabs). With only a stale baseline:
+  //   1) viewer-only doc, 1st external edit → clean → auto-pull ✓
+  //   2) 2nd external edit → localMd matches the JUST-pulled body,
+  //      but baseline still has the load-time body → false "updated
+  //      elsewhere" toast on a clean viewer.
+  //
+  // This ref is the single source of truth for "what body is in-sync
+  // with the server right now". It's set on:
+  //   - tab activation (init = the body the tab loaded with)
+  //   - successful auto-pull (= the just-pulled serverMd)
+  //   - user "Keep theirs" conflict resolve (= the chosen serverMd)
+  //
+  // null sentinel = "not yet initialized" so an empty doc ("" body)
+  // is still considered a valid in-sync state.
+  const lastSyncedMdRef = useRef<string | null>(null);
+  const lastSyncedCloudIdRef = useRef<string>("");
 
   // Ref for Yjs collaboration state (avoids stale closures in Realtime handler)
   const isCollaboratingRef = useRef(isCollaborating);
@@ -4676,6 +4706,35 @@ export default function MdEditor() {
       timers.clear();
     };
   }, []);
+
+  // Initialize lastSyncedMdRef on tab activation.
+  //
+  //   tab switch (different cloudId) →
+  //     - tab.markdown already populated → seed lastSynced from it.
+  //     - tab.markdown still "" (cloudId set, body fetch pending) →
+  //       leave null. The loadTab fetch result will set it. Treating
+  //       null as "no baseline" keeps the dirty check safely
+  //       conservative if a realtime payload lands during the
+  //       fetch window.
+  //
+  //   same cloudId, lastSynced still null, tab.markdown now populated →
+  //     backfill (the deferred-fetch path).
+  //
+  //   same cloudId, lastSynced already set → no-op. The auto-pull /
+  //     rehydrate / conflict-resolve sites update lastSyncedMdRef
+  //     synchronously and we must not stomp on those values.
+  useEffect(() => {
+    const t = tabs.find(t => t.id === activeTabId);
+    if (!t?.cloudId) return;
+    if (lastSyncedCloudIdRef.current !== t.cloudId) {
+      lastSyncedMdRef.current = t.markdown !== "" ? t.markdown : null;
+      lastSyncedCloudIdRef.current = t.cloudId;
+      return;
+    }
+    if (lastSyncedMdRef.current === null && t.markdown !== "") {
+      lastSyncedMdRef.current = t.markdown;
+    }
+  }, [activeTabId, tabs]);
 
   // Subscribe to document updates when a cloud document is active in the editor.
   // If local is clean → auto-pull; if dirty → show toast with Pull/Ignore.
@@ -4772,16 +4831,13 @@ export default function MdEditor() {
             // overwrite the user's typing without a conflict notice —
             // exact data-loss bug founder reported (input vanishes,
             // cursor jumps to end via setMarkdown -> setContent).
-            // Baseline = last body we know server agrees with. Cascade:
-            //   lastSaved (post-PATCH) > lastSynced (post-pull) > loadedBody.
-            // The lastSynced ref is critical for repeated external updates:
-            // after the first auto-pull, the captured currentTab.markdown
-            // is stale (effect closure rebinds only on activeTabId/docId).
-            const lastSaved = autoSave.getLastSavedMarkdown();
-            const lastSynced = lastSyncedMdRef.current;
-            const loadedBody = currentTab?.markdown ?? "";
-            const baseline = lastSaved || lastSynced || loadedBody;
-            const localIsDirty = autoSave.isSaving || localMd !== baseline;
+            // Cleanness check — see lib/external-update-dirty.ts for the rule.
+            const localIsDirty = isLocalDirty({
+              localMd,
+              lastSaved: autoSave.getLastSavedMarkdown(),
+              lastSynced: lastSyncedMdRef.current,
+              isSaving: autoSave.isSaving,
+            });
 
             if (!localIsDirty) {
               // Server changed, local clean → auto-pull. Previously
@@ -4863,11 +4919,14 @@ export default function MdEditor() {
         // body, or — if we haven't saved this session — the body the
         // tab loaded with, so a focus-return mid-typing never wipes
         // the buffer.
-        const lastSaved = autoSave.getLastSavedMarkdown();
-        const lastSynced = lastSyncedMdRef.current;
-        const loadedBody = currentTab?.markdown ?? "";
-        const baseline = lastSaved || lastSynced || loadedBody;
-        const localIsDirty = autoSave.isSaving || localMd !== baseline;
+        // Cleanness check — same as the realtime channel above. See
+        // lib/external-update-dirty.ts for the rule.
+        const localIsDirty = isLocalDirty({
+          localMd,
+          lastSaved: autoSave.getLastSavedMarkdown(),
+          lastSynced: lastSyncedMdRef.current,
+          isSaving: autoSave.isSaving,
+        });
         if (localIsDirty) {
           showToast("This document was updated elsewhere. Your changes are preserved. Save to keep yours, or reload to see theirs.", "info");
           return;
@@ -15666,6 +15725,8 @@ ${clone.innerHTML}
                     setMarkdownRaw(autoSave.conflict.serverMarkdown);
                     doRender(autoSave.conflict.serverMarkdown);
                     autoSave.setLastServerUpdatedAt(autoSave.conflict.serverUpdatedAt);
+                    // User accepted server body — now the in-sync baseline.
+                    lastSyncedMdRef.current = autoSave.conflict.serverMarkdown;
                     autoSave.dismissConflict();
                     setShowConflictModal(false);
                     showToast("Server version loaded", "info");
