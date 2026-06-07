@@ -158,25 +158,6 @@ export default function VSCodeAuthPage() {
 
         {status === "choose-provider" && (
           <>
-            <h1
-              style={{
-                color: "var(--text-primary)",
-                fontFamily: "var(--font-display)",
-                fontSize: 22,
-                fontWeight: 500,
-                letterSpacing: 0,
-                lineHeight: 1.25,
-                margin: 0,
-              }}
-            >
-              Sign in to connect VS Code
-            </h1>
-            <p
-              className="text-center"
-              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
-            >
-              Use the same account you use on memory.wiki.
-            </p>
             <AuthProviderStack redirectTo={`${typeof window !== "undefined" ? window.location.origin : ""}/auth/vscode`} />
             <p
               className="font-mono text-center"
