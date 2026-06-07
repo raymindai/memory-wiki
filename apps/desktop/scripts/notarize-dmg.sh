@@ -15,9 +15,16 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DIST_DIR="$SCRIPT_DIR/../dist"
 PROFILE="${NOTARIZE_PROFILE:-mdfy-notarize}"
 
-DMG=$(/bin/ls -1 "$DIST_DIR"/*.dmg 2>/dev/null | /usr/bin/head -1)
+# Find the DMG for the CURRENT package.json version. The older
+# `ls | head -1` picked alphabetically and would notarize a stale
+# previous-version DMG when both lived in dist/ at once (e.g. 2.7.3
+# + 2.7.4 → "ls | head -1" returned 2.7.3 even though we just built
+# 2.7.4). Reading the version from package.json keeps this
+# deterministic regardless of dist/ contents.
+PKG_VERSION=$(node -p "require('$SCRIPT_DIR/../package.json').version")
+DMG=$(/bin/ls -1 "$DIST_DIR"/memory.wiki-${PKG_VERSION}-*.dmg 2>/dev/null | /usr/bin/head -1)
 if [ -z "$DMG" ]; then
-  echo "[notarize] No DMG found in $DIST_DIR — skipping."
+  echo "[notarize] No DMG for v$PKG_VERSION in $DIST_DIR — skipping."
   exit 0
 fi
 

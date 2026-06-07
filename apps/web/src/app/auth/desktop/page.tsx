@@ -79,10 +79,45 @@ export default function DesktopAuthPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-6"
+      className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden"
       style={{ background: "var(--canvas)", color: "var(--text-primary)" }}
     >
-      <div className="flex flex-col items-center" style={{ gap: 20, maxWidth: 480, width: "100%" }}>
+      {/* Ambient morph blob — same shape used on the desktop Home tab and
+          the marketing site, so the auth screen no longer reads as a
+          generic OAuth interstitial. Low opacity + heavy blur keeps it
+          purely atmospheric: it never competes with the wordmark or the
+          provider stack. Hidden under the content via z-index 0. */}
+      <img
+        src="/brand/mwblob_morph.svg"
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="absolute pointer-events-none select-none mw-auth-blob-darktheme"
+        style={{
+          width: 560, height: 560,
+          left: "50%", top: "50%",
+          transform: "translate(-50%, -50%)",
+          opacity: 0.08,
+          filter: "blur(80px)",
+          zIndex: 0,
+        }}
+      />
+      <img
+        src="/brand/mwblob_morph_dark.svg"
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="absolute pointer-events-none select-none mw-auth-blob-lighttheme"
+        style={{
+          width: 560, height: 560,
+          left: "50%", top: "50%",
+          transform: "translate(-50%, -50%)",
+          opacity: 0.06,
+          filter: "blur(80px)",
+          zIndex: 0,
+        }}
+      />
+      <div className="flex flex-col items-center relative" style={{ gap: 20, maxWidth: 480, width: "100%", zIndex: 1 }}>
         <MemoryWikiLogo size={28} withBlob />
 
         {status === "choose-provider" && (
@@ -105,32 +140,54 @@ export default function DesktopAuthPage() {
 
         {status === "success" && (
           <>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 12l3 3 5-5" />
-            </svg>
-            <h1
+            {/* Status chip — small inline ✓ + label, sized like a pill
+                so it reads as a state badge rather than a hero icon.
+                Previous design used a 40px circle-check on its own line
+                which dominated the layout and felt like a generic OAuth
+                "success" stock illustration. */}
+            <div
+              className="inline-flex items-center"
               style={{
-                color: "var(--text-primary)",
-                fontFamily: "var(--font-display)",
-                fontSize: 22,
+                gap: 8,
+                padding: "6px 12px",
+                borderRadius: 999,
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                fontSize: 13,
                 fontWeight: 500,
-                letterSpacing: 0,
-                lineHeight: 1.25,
-                margin: 0,
+                color: "var(--text-primary)",
               }}
             >
-              You&apos;re signed in
-            </h1>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M5 12l5 5L20 7" />
+              </svg>
+              Signed in
+            </div>
+
+            {email && (
+              <div
+                className="font-mono"
+                style={{
+                  padding: "5px 10px",
+                  borderRadius: 6,
+                  background: "var(--surface)",
+                  border: "1px solid var(--border-dim, var(--border))",
+                  color: "var(--text-primary)",
+                  fontSize: 12,
+                  letterSpacing: 0,
+                }}
+              >
+                {email}
+              </div>
+            )}
+
             <p
-              className="text-center leading-relaxed"
-              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
+              className="text-center"
+              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.55, maxWidth: 360 }}
             >
-              {email ? (
-                <>Signed in as <strong style={{ color: "var(--text-primary)" }}>{email}</strong>. </>
-              ) : null}
               Return to the Mac app. This tab is safe to close.
             </p>
+
             <a
               href="?switch=1"
               className="transition-opacity hover:opacity-80"
