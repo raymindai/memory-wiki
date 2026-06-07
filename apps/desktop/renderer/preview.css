@@ -2726,20 +2726,20 @@ body.sidebar-resizing * {
 .header-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 4px 12px;
+  height: 28px;
+  padding: 0 12px;
   font-size: 11px;
   font-weight: 600;
-  /* Use tokens, not hardcoded colors. Founder report: hardcoded
-     lime border `rgba(181, 255, 26, 0.25)` was a stale brand color
-     that read as a "dull green" against the muted accent-dim fill
-     (current --accent resolves to ink, not lime). Token-only fill
-     + border gives a clean ink-on-surface primary-action button
-     that follows whatever palette is active. */
+  /* Token-only fill + border so the button follows whatever palette
+     is active (was hardcoded `rgba(181, 255, 26, 0.25)` lime, which
+     read as dull green against the muted accent-dim fill). */
   background: var(--accent-dim);
   color: var(--accent);
   border: 1px solid var(--border);
   border-radius: 6px;
+  box-sizing: border-box;
   cursor: pointer;
   transition: all 0.12s;
   font-family: inherit;
@@ -2753,14 +2753,15 @@ body.sidebar-resizing * {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: none;
-  border-radius: 5px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: var(--toggle-bg, var(--surface));
   color: var(--fg-muted);
+  box-sizing: border-box;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.header-icon-btn:hover { background: var(--surface-hover); color: var(--fg); }
+.header-icon-btn:hover { background: var(--surface-hover); color: var(--fg); border-color: var(--border); }
 
 /* View Switcher — in header center */
 .view-switcher {
