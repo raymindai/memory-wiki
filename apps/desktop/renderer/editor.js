@@ -98,26 +98,79 @@
   // its own bindings. Native inputs use the browser default.
 
   // ─── Theme ───
+  //
+  // Three modes:
+  //   "system" → follow macOS Dark/Light Mode (nativeTheme + prefers-color-scheme)
+  //   "light"  → force light, ignore system
+  //   "dark"   → force dark, ignore system
+  //
+  // The header's #btn-theme cycles system → light → dark → system on
+  // click. Persists to localStorage("mw-theme"). Defaults to "system"
+  // so a fresh install still respects the user's OS preference.
 
-  (function initTheme() {
-    if (window.mwDesktop) {
-      window.mwDesktop.getTheme().then(function(theme) {
-        document.documentElement.setAttribute("data-theme", theme);
-      });
-    }
-    if (window.matchMedia) {
-      var mq = window.matchMedia("(prefers-color-scheme: light)");
-      if (mq.matches) document.documentElement.setAttribute("data-theme", "light");
-      mq.addEventListener("change", function(e) {
-        document.documentElement.setAttribute("data-theme", e.matches ? "light" : "dark");
-      });
-    }
-  })();
+  var themePreference = "system";
+  try {
+    var stored = localStorage.getItem("mw-theme");
+    if (stored === "light" || stored === "dark" || stored === "system") themePreference = stored;
+  } catch (e) { /* localStorage blocked — keep default */ }
 
-  if (window.mwDesktop && window.mwDesktop.onThemeChanged) {
-    window.mwDesktop.onThemeChanged(function(theme) {
-      document.documentElement.setAttribute("data-theme", theme);
+  function resolveSystemTheme() {
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) return "light";
+    return "dark";
+  }
+
+  function applyTheme() {
+    var resolved = themePreference === "system" ? resolveSystemTheme() : themePreference;
+    document.documentElement.setAttribute("data-theme", resolved);
+    syncThemeToggleUI(resolved);
+  }
+
+  function syncThemeToggleUI(resolved) {
+    var btn = document.getElementById("btn-theme");
+    if (!btn) return;
+    var systemIcon = btn.querySelector(".theme-icon-system");
+    var lightIcon = btn.querySelector(".theme-icon-light");
+    var darkIcon = btn.querySelector(".theme-icon-dark");
+    if (systemIcon) systemIcon.style.display = themePreference === "system" ? "" : "none";
+    if (lightIcon) lightIcon.style.display = themePreference === "light" ? "" : "none";
+    if (darkIcon) darkIcon.style.display = themePreference === "dark" ? "" : "none";
+    var next = themePreference === "system" ? "light" : themePreference === "light" ? "dark" : "system";
+    btn.title = "Theme: " + themePreference + (themePreference === "system" ? " (" + resolved + ")" : "") + ". Click for " + next + ".";
+  }
+
+  // Initial apply + listen to system changes (only fires effect when
+  // themePreference === "system", because applyTheme reads preference
+  // each time and picks resolved accordingly).
+  applyTheme();
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", function () {
+      if (themePreference === "system") applyTheme();
     });
+  }
+  if (window.mwDesktop && window.mwDesktop.onThemeChanged) {
+    window.mwDesktop.onThemeChanged(function () {
+      if (themePreference === "system") applyTheme();
+    });
+  }
+
+  // Wire the header toggle button. Use a deferred binder because the
+  // DOM may not have #btn-theme yet at script-init time (the header
+  // template is rendered later by other init code on first paint).
+  function bindThemeToggle() {
+    var btn = document.getElementById("btn-theme");
+    if (!btn || btn._mwBound) return;
+    btn._mwBound = true;
+    btn.addEventListener("click", function () {
+      themePreference = themePreference === "system" ? "light" : themePreference === "light" ? "dark" : "system";
+      try { localStorage.setItem("mw-theme", themePreference); } catch (e) {}
+      applyTheme();
+    });
+    syncThemeToggleUI(themePreference === "system" ? resolveSystemTheme() : themePreference);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindThemeToggle);
+  } else {
+    bindThemeToggle();
   }
 
   // ════════════════════════════════════════════════════════
