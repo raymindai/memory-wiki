@@ -373,15 +373,32 @@ async function apiUpdate(docId, editToken, markdown, title, expectedUpdatedAt) {
 
 async function apiPull(docId) {
   const headers = await AuthManager.getHeadersWithRefresh();
-  const resp = await net.fetch(`${MDFY_URL}/api/docs/${docId}`, {
-    method: "GET",
-    headers,
-  });
-  if (!resp.ok) {
-    handleApiAuthError(resp.status);
-    throw new Error(`Pull failed: ${resp.status}`);
+  // 15s hard timeout — without this, a stalled connection (captive
+  // portal, server hang, partial CORS preflight) leaves the fetch
+  // pending forever, which leaves the renderer's loading spinner
+  // stuck forever. AbortController + setTimeout gives a deterministic
+  // failure path that the renderer can render an error from.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const resp = await net.fetch(`${MDFY_URL}/api/docs/${docId}`, {
+      method: "GET",
+      headers,
+      signal: ctrl.signal,
+    });
+    if (!resp.ok) {
+      handleApiAuthError(resp.status);
+      throw new Error(`Pull failed: ${resp.status}`);
+    }
+    return resp.json();
+  } catch (err) {
+    if (err && err.name === "AbortError") {
+      throw new Error("Network timeout (15s). Check your connection.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  return resp.json();
 }
 
 async function apiCheckUpdatedAt(docId) {

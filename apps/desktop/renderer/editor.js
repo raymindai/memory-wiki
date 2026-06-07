@@ -788,7 +788,25 @@
             isApplyingRemoteContent = false;
           }
           if (headerTitle) headerTitle.textContent = t + " (Cloud)";
-          window.mwDesktop.previewCloudDoc(docId, t);
+          // Catch IPC failures (network down, auth expired, server 5xx)
+          // so the loading state doesn't get stuck forever. Without this
+          // the spinner stays on screen indefinitely when main returns
+          // {error: ...} from preview-cloud-doc — there's no handler.
+          window.mwDesktop.previewCloudDoc(docId, t)
+            .then(function (result) {
+              if (result && result.error && liveEditor) {
+                isApplyingRemoteContent = true;
+                liveEditor.setMarkdownSilent("# Could not load " + t + "\n\n_" + (result.error || "Unknown error") + "_\n\nTry again from the sidebar, or check your connection.");
+                isApplyingRemoteContent = false;
+              }
+            })
+            .catch(function (err) {
+              if (liveEditor) {
+                isApplyingRemoteContent = true;
+                liveEditor.setMarkdownSilent("# Could not load " + t + "\n\n_" + (err && err.message ? err.message : "Unknown error") + "_");
+                isApplyingRemoteContent = false;
+              }
+            });
         }
       });
     });
@@ -1830,7 +1848,20 @@
           }
           var ht = document.getElementById("header-title");
           if (ht) ht.textContent = title + " (Cloud)";
-          window.mwDesktop.previewCloudDoc(item.dataset.cloudid, title);
+          // Same error handling as the sidebar cloud-doc click — clear
+          // the spinner if IPC returns an error or rejects, otherwise
+          // the user just stares at "Loading ..." forever.
+          window.mwDesktop.previewCloudDoc(item.dataset.cloudid, title)
+            .then(function (result) {
+              if (result && result.error && c) {
+                c.innerHTML = '<div class="cloud-loading-error" style="padding: 40px; text-align: center; color: var(--text-muted);"><p style="font-size: 14px; margin-bottom: 8px;">Could not load <strong style="color: var(--text-primary)">' + esc(title) + '</strong></p><p style="font-size: 12px;">' + esc(result.error || "Unknown error") + '</p><p style="font-size: 11px; margin-top: 12px; color: var(--text-faint);">Try again from the sidebar, or check your connection.</p></div>';
+              }
+            })
+            .catch(function (err) {
+              if (c) {
+                c.innerHTML = '<div class="cloud-loading-error" style="padding: 40px; text-align: center; color: var(--text-muted);"><p style="font-size: 14px; margin-bottom: 8px;">Could not load <strong style="color: var(--text-primary)">' + esc(title) + '</strong></p><p style="font-size: 12px;">' + esc(err && err.message ? err.message : "Unknown error") + '</p></div>';
+              }
+            });
         }
       };
     }
