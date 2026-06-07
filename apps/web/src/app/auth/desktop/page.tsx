@@ -71,11 +71,11 @@ export default function DesktopAuthPage() {
     })();
   }, [supabase]);
 
-  // Eyebrow stays short + factual; the H1 below carries the status. Don't
-  // duplicate the same line twice stacked.
-  const contextLabel =
-    status === "error" ? "Couldn't connect"
-    : "memory.wiki for Mac";
+  // Mono surface eyebrow shows only on choose-provider — it disambiguates
+  // which surface the user is signing into. On success / error / loading,
+  // the explicit H1 + body sentence carry surface context (e.g. "Return
+  // to the Mac app"), so the eyebrow would just stack as a duplicate.
+  const contextLabel = "memory.wiki for Mac";
 
   return (
     <div
@@ -85,12 +85,14 @@ export default function DesktopAuthPage() {
       <div className="flex flex-col items-center" style={{ gap: 20, maxWidth: 480, width: "100%" }}>
         <MemoryWikiLogo size={28} withBlob />
 
-        <div
-          className="font-mono"
-          style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
-        >
-          {contextLabel}
-        </div>
+        {status === "choose-provider" && (
+          <div
+            className="font-mono"
+            style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
+          >
+            {contextLabel}
+          </div>
+        )}
 
         {status === "loading" && (
           <>

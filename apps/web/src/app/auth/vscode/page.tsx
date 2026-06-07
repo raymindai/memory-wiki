@@ -74,14 +74,10 @@ export default function VSCodeAuthPage() {
     })();
   }, [supabase]);
 
-  // Eyebrow stays short + factual; the H1 below carries the status. Don't
-  // duplicate "Connected to VS Code" in both — the prior version did and
-  // the page read as the same line twice stacked.
-  const contextLabel =
-    status === "success" ? "VS Code"
-    : status === "error" ? "Couldn't connect"
-    : status === "choose-provider" ? "VS Code"
-    : "VS Code";
+  // Mono surface eyebrow shows only on choose-provider — disambiguates
+  // which surface the user is connecting to. Hidden on success / error
+  // / loading because the explicit H1 + body there already carry context.
+  const contextLabel = "VS Code";
 
   return (
     <div
@@ -91,12 +87,14 @@ export default function VSCodeAuthPage() {
       <div className="flex flex-col items-center" style={{ gap: 20, maxWidth: 480, width: "100%" }}>
         <MemoryWikiLogo size={28} withBlob />
 
-        <div
-          className="font-mono"
-          style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
-        >
-          {contextLabel}
-        </div>
+        {status === "choose-provider" && (
+          <div
+            className="font-mono"
+            style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
+          >
+            {contextLabel}
+          </div>
+        )}
 
         {status === "loading" && (
           <>

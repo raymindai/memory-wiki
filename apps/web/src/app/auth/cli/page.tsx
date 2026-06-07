@@ -74,14 +74,10 @@ export default function CliAuthPage() {
     } catch { /* clipboard blocked */ }
   };
 
-  // Mono context eyebrow — small, uppercase-ish via letter-spacing,
-  // text-muted. Tells the user which surface they're connecting to
-  // without competing with the title.
-  // Eyebrow stays short + factual; the H1 below carries the status. Don't
-  // duplicate the same line twice stacked.
-  const contextLabel =
-    status === "error" ? "Couldn't connect"
-    : "CLI / MCP";
+  // Mono surface eyebrow shows only on choose-provider — disambiguates
+  // which surface the user is connecting to. Hidden on success / error
+  // / loading because the explicit H1 + body there already carry context.
+  const contextLabel = "CLI / MCP";
 
   return (
     <div
@@ -91,12 +87,14 @@ export default function CliAuthPage() {
       <div className="flex flex-col items-center" style={{ gap: 20, maxWidth: 560, width: "100%" }}>
         <MemoryWikiLogo size={28} withBlob />
 
-        <div
-          className="font-mono"
-          style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
-        >
-          {contextLabel}
-        </div>
+        {status === "choose-provider" && (
+          <div
+            className="font-mono"
+            style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
+          >
+            {contextLabel}
+          </div>
+        )}
 
         {status === "loading" && (
           <>

@@ -52,10 +52,10 @@ export default function ChromeAuthPage() {
     })();
   }, [supabase]);
 
-  const contextLabel =
-    status === "success" ? "Chrome"
-    : status === "error" ? "Couldn't connect"
-    : "Chrome";
+  // Mono surface eyebrow shows only on choose-provider — disambiguates
+  // which surface the user is connecting to. Hidden on success / error
+  // / loading because the explicit H1 + body there already carry context.
+  const contextLabel = "Chrome";
 
   return (
     <div
@@ -65,12 +65,14 @@ export default function ChromeAuthPage() {
       <div className="flex flex-col items-center" style={{ gap: 20, maxWidth: 480, width: "100%" }}>
         <MemoryWikiLogo size={28} withBlob />
 
-        <div
-          className="font-mono"
-          style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
-        >
-          {contextLabel}
-        </div>
+        {status === "choose-provider" && (
+          <div
+            className="font-mono"
+            style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
+          >
+            {contextLabel}
+          </div>
+        )}
 
         {status === "loading" && (
           <>
