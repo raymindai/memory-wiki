@@ -67,13 +67,13 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/downloads/memory-wiki-desktop.dmg",
-        destination: "https://github.com/raymindai/memory-wiki/releases/download/desktop-v2.7.3/memory.wiki-2.7.3-arm64.dmg",
+        destination: "https://github.com/raymindai/memory-wiki/releases/download/desktop-v2.7.4/memory.wiki-2.7.4-arm64.dmg",
         permanent: false,
       },
       // Bare alias — short URL we can share in tweets / docs.
       {
         source: "/download/mac",
-        destination: "https://github.com/raymindai/memory-wiki/releases/download/desktop-v2.7.3/memory.wiki-2.7.3-arm64.dmg",
+        destination: "https://github.com/raymindai/memory-wiki/releases/download/desktop-v2.7.4/memory.wiki-2.7.4-arm64.dmg",
         permanent: false,
       },
       // Chrome extension zip — same pattern; Web Store link is the
