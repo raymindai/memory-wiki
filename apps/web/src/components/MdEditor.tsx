@@ -13789,7 +13789,15 @@ ${clone.innerHTML}
                       <X width={12} height={12} style={{ color: "var(--text-faint)" }} />
                     </button>
                   </div>
-                  <div className="flex-1 overflow-y-auto py-2" style={{ fontSize: 12 }}>
+                  {/* key={activeTabId} forces React to unmount + remount the
+                      heading list whenever the active doc changes. The IIFE
+                      already reads `markdown` state directly so it SHOULD
+                      auto-update, but founder reported a stale-outline bug:
+                      switching docs left the previous doc's outline visible
+                      until the panel was closed and reopened. Forcing the
+                      subtree to discard on tab switch sidesteps whatever
+                      reconciliation edge case is leaking the closure. */}
+                  <div key={activeTabId || "no-tab"} className="flex-1 overflow-y-auto py-2" style={{ fontSize: 12 }}>
                     {(() => {
                       const md = markdown || "";
                       const headings = md.split("\n")
