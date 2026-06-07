@@ -23,8 +23,12 @@ APP=dist/mas-arm64/memory.wiki.app
 PKG=dist/memory.wiki-${VERSION}.pkg
 INSTALLER_IDENTITY="3rd Party Mac Developer Installer: Hyunsang Cho (W7NL89YGSD)"
 
-echo "▶ Cleaning dist/"
-rm -rf dist
+echo "▶ Cleaning previous MAS artifacts (preserves DMG + notarized files)"
+# Only clear MAS-specific outputs. The full `rm -rf dist` we used to do
+# wiped the notarized DMG too — if build-mas.sh ran after build:dmg in
+# the same session, the GH Release upload step would 404 on the DMG.
+rm -rf dist/mas-arm64
+rm -f dist/memory.wiki-*.pkg
 
 echo "▶ Running electron-builder (app sign + .appex embed)"
 # Tolerate the productbuild step failing — we wrap it manually below.
