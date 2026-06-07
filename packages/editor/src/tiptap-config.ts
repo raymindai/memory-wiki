@@ -402,8 +402,32 @@ function buildSimpleCodeBlockNodeView(
         return;
       }
       const id = `mmd-${Math.random().toString(36).slice(2, 8)}`;
+      // Sweep any leaked bomb / temp-container that an earlier render
+      // attempt left on document.body. Mermaid v11's render() creates
+      // a hidden div (`d<id>`) on body to extract the SVG from; on
+      // parse failure the cleanup path doesn't always remove it, and
+      // the error-bomb SVG ends up positioned over the app chrome.
+      // Removing here covers both "before this render" stragglers
+      // and any our previous attempt failed to tidy.
+      const sweepLeakedBombs = (): void => {
+        document
+          .querySelectorAll('body > svg[aria-roledescription="error"], body > div[id^="d"]')
+          .forEach((el) => {
+            const id0 = el.getAttribute("id") || "";
+            const isMermaidTemp = id0.startsWith("dmmd-") || id0.startsWith("dmermaid-");
+            const isErrorSvg = el.tagName.toLowerCase() === "svg";
+            if (!isMermaidTemp && !isErrorSvg) return;
+            if (el.closest(".tiptap-codeblock-wrapper, .tiptap-mermaid-render")) return;
+            el.remove();
+          });
+      };
+      sweepLeakedBombs();
       try {
-        const result = m.render(id, src);
+        // Third arg = render target. With it, Mermaid v11 writes the
+        // temp container under OUR element instead of document.body —
+        // any bomb / leftover stays scoped to mermaidContainer where
+        // the catch handler below overwrites it cleanly.
+        const result = m.render(id, src, mermaidContainer);
         Promise.resolve(result)
           .then((r: unknown) => {
             if (myToken !== renderToken) return; // stale render — drop
@@ -412,8 +436,10 @@ function buildSimpleCodeBlockNodeView(
                 ? r
                 : (r as { svg?: string } | null)?.svg || "";
             if (mermaidContainer) mermaidContainer.innerHTML = svg;
+            sweepLeakedBombs();
           })
           .catch((err: unknown) => {
+            sweepLeakedBombs();
             if (myToken !== renderToken) return;
             if (mermaidContainer)
               mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String(
@@ -421,6 +447,7 @@ function buildSimpleCodeBlockNodeView(
               )}</div>`;
           });
       } catch (err) {
+        sweepLeakedBombs();
         if (mermaidContainer)
           mermaidContainer.innerHTML = `<div style="color:var(--text-primary);font-size:11px;padding:8px;white-space:pre-wrap;">Mermaid error: ${String(
             (err as Error)?.message || err

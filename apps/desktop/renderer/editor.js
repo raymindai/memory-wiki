@@ -2874,10 +2874,22 @@
         // delimiter text and let the plugin render the KaTeX widget.
         return tiptapDo(function (c) { c.insertContent("$E = mc^2$").run(); });
       case "mermaid":
-        // Convert the current line into a fenced mermaid block.
-        // setCodeBlock with language=mermaid triggers the NodeView's
-        // mermaid render branch in @mdcore/editor.
-        return tiptapDo(function (c) { c.setCodeBlock({ language: "mermaid" }).run(); });
+        // Insert a fresh mermaid block with a usable template. Earlier
+        // we did `setCodeBlock({language:"mermaid"})` which converted
+        // whatever was on the current line — usually prose or a
+        // heading — into the mermaid source. That text didn't parse
+        // as a diagram and Mermaid v11's renderer appends a "Syntax
+        // error" bomb SVG to document.body that ends up positioned
+        // over the app chrome (see Mermaid issue: render() leaks the
+        // temp container on parse failure). A template avoids the
+        // failure entirely and gives users a real starting point.
+        return tiptapDo(function (c) {
+          c.insertContent({
+            type: "codeBlock",
+            attrs: { language: "mermaid" },
+            content: [{ type: "text", text: "flowchart LR\n  A[Start] --> B[End]" }],
+          }).run();
+        });
       case "hr":
         return tiptapDo(function (c) { c.setHorizontalRule().run(); });
       case "removeFormat":
