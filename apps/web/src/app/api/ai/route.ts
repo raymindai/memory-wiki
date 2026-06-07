@@ -279,11 +279,18 @@ ${markdown.slice(0, 3 * 1024 * 1024)}
 ${trailingLabel}`;
 
   // Per-action knobs: summary/tldr/selection-ops + visitor_chat + format
-  // can use the lite model. `format` was on the primary tier before
-  // and routinely sat for minutes because it's a pure structural pass
-  // (raw text → headings/lists/tables) — exactly what Flash-class
+  // + chat can use the lite model. `format` was on the primary tier
+  // before and routinely sat for minutes because it's a pure structural
+  // pass (raw text → headings/lists/tables) — exactly what Flash-class
   // models nail without the Pro overhead.
-  const useLite = action === "summary" || action === "tldr" || action === "visitor_chat" || action === "format" || action.startsWith("selection_");
+  //
+  // `chat` moved to lite after founder reports: a chat turn on a
+  // 50KB doc was taking 8-15 seconds on Pro. Most chat traffic is
+  // Q&A ("explain section X", "what does this say about Y") — lite
+  // models handle that in 1-3s with no perceptible quality drop.
+  // For chat-driven full-doc rewrites the output cap below keeps
+  // the slowdown contained even when the model wants to be verbose.
+  const useLite = action === "summary" || action === "tldr" || action === "visitor_chat" || action === "format" || action === "chat" || action.startsWith("selection_");
   const temperature =
     action === "polish" || action === "translate" || action === "compact"
       || action === "format"
@@ -303,9 +310,15 @@ ${trailingLabel}`;
       ? 2048
       : action.startsWith("selection_")
         ? 8192
-        : action === "format" || action === "polish" || action === "translate" || action === "compact"
-          ? Math.min(65536, Math.max(4096, Math.ceil(inputTokensEstimate * 1.4)))
-          : 65536;
+        : action === "chat"
+          // Chat is usually Q&A returning ANSWER:<short text>; the EDIT
+          // branch rewrites the doc but rarely needs more than input ×
+          // 1.4. The earlier 65k cap let chat run on for tens of
+          // seconds past the natural end of a short answer.
+          ? Math.min(16384, Math.max(2048, Math.ceil(inputTokensEstimate * 1.4)))
+          : action === "format" || action === "polish" || action === "translate" || action === "compact"
+            ? Math.min(65536, Math.max(4096, Math.ceil(inputTokensEstimate * 1.4)))
+            : 65536;
 
   // Resolve caller identity for usage attribution. The AI button is
   // user-facing; in practice the signed-in JWT lands via the auth

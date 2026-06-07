@@ -1549,33 +1549,41 @@
     headings.forEach(function(heading, idx) {
       var level = parseInt(heading.tagName.charAt(1));
       var text = heading.textContent || "";
-      if (!heading.id) {
-        heading.id = "outline-heading-" + idx;
-      }
-      html += '<button class="outline-item" data-level="' + level + '" data-target="' + heading.id + '" title="' + text.replace(/"/g, '&quot;') + '">' + text + '</button>';
+      // Identify by INDEX, not by id. Previously we did
+      // `heading.id = "outline-heading-" + idx` and looked it up
+      // via document.getElementById on click — but TipTap's
+      // ProseMirror reconciler reparents / rebuilds its DOM on
+      // every transaction, wiping the id we attached. Next click
+      // would find no element and the scroll silently no-op'd.
+      // Re-querying live headings at click time is robust to any
+      // ProseMirror re-render.
+      html += '<button class="outline-item" data-level="' + level + '" data-idx="' + idx + '" title="' + text.replace(/"/g, '&quot;') + '">' + text + '</button>';
     });
 
     outlinePanelBody.innerHTML = html;
 
     outlinePanelBody.querySelectorAll(".outline-item").forEach(function(btn) {
       btn.addEventListener("click", function() {
-        var targetId = btn.getAttribute("data-target");
-        var target = document.getElementById(targetId);
-        if (target) {
-          var scrollContainer = content.closest(".pane-content");
-          if (scrollContainer) {
-            var containerRect = scrollContainer.getBoundingClientRect();
-            var targetRect = target.getBoundingClientRect();
-            var scrollTop = scrollContainer.scrollTop + targetRect.top - containerRect.top - 20;
-            scrollContainer.scrollTo({ top: scrollTop, behavior: "smooth" });
-          } else {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          target.classList.remove("outline-heading-highlight");
-          void target.offsetWidth;
-          target.classList.add("outline-heading-highlight");
-          setTimeout(function() { target.classList.remove("outline-heading-highlight"); }, 1500);
+        var idx = parseInt(btn.getAttribute("data-idx") || "-1", 10);
+        if (idx < 0) return;
+        var liveHeadings = content.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        var target = liveHeadings[idx];
+        if (!target) return;
+        var scrollContainer = content.closest(".pane-content");
+        if (scrollContainer) {
+          var containerRect = scrollContainer.getBoundingClientRect();
+          var targetRect = target.getBoundingClientRect();
+          var scrollTop = scrollContainer.scrollTop + targetRect.top - containerRect.top - 20;
+          scrollContainer.scrollTo({ top: scrollTop, behavior: "smooth" });
+        } else {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
         }
+        target.classList.remove("outline-heading-highlight");
+        void target.offsetWidth;
+        target.classList.add("outline-heading-highlight");
+        setTimeout(function() {
+          if (target && target.classList) target.classList.remove("outline-heading-highlight");
+        }, 1500);
       });
     });
   }
