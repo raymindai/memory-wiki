@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "memory.wiki Clipper",
-  "version": "2.7.0",
-  "description": "Save anything on the web — pages, AI chats, X & Threads posts, images — to a memory.wiki URL any AI can read. AI-transform on the fly, image library, per-post capture.",
+  "version": "2.7.1",
+  "description": "Save pages, AI chats, social posts, images to a memory.wiki URL any AI reads. Per-site capture suggestions, AI transforms.",
   "permissions": [
     "activeTab",
     "tabs",
