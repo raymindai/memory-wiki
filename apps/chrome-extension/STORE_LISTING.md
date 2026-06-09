@@ -22,7 +22,7 @@ memory.wiki Clipper is the Chrome companion to memory.wiki on the web. Tell the 
 
 The headline: Per-site Intent Capture
 
-Open the popup on YouTube and the first chip is "Summarize from transcript." On arXiv: "Abstract + contributions." On Stack Overflow: "Accepted answer + code." On GitHub: "README in 5 bullets." 24+ sites have hand-tuned intent suggestions out of the box. Click a chip, capture, done — no typing.
+Open the popup on YouTube and the first chip is "Summarize from transcript." On Wikipedia: "Overview + key dates." On Reddit: "Top comments distilled." On Stack Overflow: "Accepted answer + code." On GitHub: "README in 5 bullets." On Medium: "Main argument + evidence." 24+ sites have hand-tuned intent suggestions out of the box. Click a chip, capture, done — no typing.
 
 For sites without a curated chip, type whatever you want ("action items as a checklist", "Cursor-ready reference", "rewrite for a teammate", "TL;DR in 2 sentences") and the extension runs that intent against the page before saving. Your prompt, your call.
 
