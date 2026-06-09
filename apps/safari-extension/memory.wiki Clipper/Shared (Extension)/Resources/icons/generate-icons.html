@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Memory.Wiki Icon Generator</title>
+  <style>
+    body {
+      background: #18181b;
+      color: #fafafa;
+      font-family: system-ui, sans-serif;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    h1 { color: #fb923c; }
+    .icon-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .icon-row canvas {
+      border: 1px solid #333;
+    }
+    .icon-row label {
+      width: 80px;
+      text-align: right;
+    }
+    a {
+      color: #fb923c;
+      text-decoration: none;
+      padding: 6px 16px;
+      border: 1px solid #fb923c;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    a:hover { background: rgba(251, 146, 60, 0.1); }
+    .instructions {
+      color: #71717a;
+      font-size: 13px;
+      max-width: 500px;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Memory.Wiki Icon Generator</h1>
+  <p class="instructions">
+    Click the download links below each icon to save as PNG.
+    Place the PNG files in the icons/ directory.
+  </p>
+
+  <div class="icon-row">
+    <label>16x16</label>
+    <canvas id="c16" width="16" height="16"></canvas>
+    <a id="dl16" download="icon16.png">Download</a>
+  </div>
+
+  <div class="icon-row">
+    <label>48x48</label>
+    <canvas id="c48" width="48" height="48"></canvas>
+    <a id="dl48" download="icon48.png">Download</a>
+  </div>
+
+  <div class="icon-row">
+    <label>128x128</label>
+    <canvas id="c128" width="128" height="128"></canvas>
+    <a id="dl128" download="icon128.png">Download</a>
+  </div>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext("2d");
+      const r = size * 0.15; // corner radius
+
+      // Rounded rect background
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, r);
+      ctx.fillStyle = "#09090b";
+      ctx.fill();
+
+      // "md" text
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      if (size <= 16) {
+        // Small: just "md" in orange
+        ctx.font = `800 ${size * 0.6}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = "#fb923c";
+        ctx.fillText("md", size / 2, size / 2 + 1);
+      } else if (size <= 48) {
+        // Medium: "md" in orange
+        ctx.font = `800 ${size * 0.5}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = "#fb923c";
+        ctx.fillText("md", size / 2, size / 2 + 1);
+      } else {
+        // Large: "md" in orange + "fy.cc" below in gray
+        ctx.font = `800 ${size * 0.42}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = "#fb923c";
+        ctx.fillText("md", size / 2, size * 0.42);
+
+        ctx.font = `600 ${size * 0.14}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        ctx.fillStyle = "#737373";
+        ctx.fillText("fy.cc", size / 2, size * 0.72);
+      }
+
+      return canvas;
+    }
+
+    function setupDownload(canvasId, linkId, size) {
+      const canvas = document.getElementById(canvasId);
+      drawIcon(canvas, size);
+      const link = document.getElementById(linkId);
+      link.href = canvas.toDataURL("image/png");
+    }
+
+    setupDownload("c16", "dl16", 16);
+    setupDownload("c48", "dl48", 48);
+    setupDownload("c128", "dl128", 128);
+  </script>
+</body>
+</html>

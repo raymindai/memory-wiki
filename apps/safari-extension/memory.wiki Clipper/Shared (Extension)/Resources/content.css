@@ -1,0 +1,290 @@
+/* memory.wiki chrome extension — content styles */
+
+/* ─── Floating Button Container ─── */
+
+#mw-float-container {
+  position: fixed;
+  bottom: var(--mw-input-h, 100px);
+  right: var(--mw-content-right, 24px);
+  z-index: 999999;
+  display: flex;
+  align-items: stretch;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#mw-float-container:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* ─── Floating Button (Main) ─── */
+
+#mw-float-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-right: none;
+  border-radius: 15px 0 0 15px;
+  background: #09090b;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+#mw-float-btn:hover {
+  background: #111113;
+}
+
+#mw-float-btn:active {
+  transform: scale(0.97);
+}
+
+/* ─── Floating Button Dropdown Toggle ─── */
+
+#mw-float-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 15px 15px 0;
+  background: #09090b;
+  cursor: pointer;
+  color: #737373;
+  font-size: 9px;
+  font-family: inherit;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: color 0.15s, background 0.15s;
+}
+
+#mw-float-toggle:hover {
+  color: #fb923c;
+  background: #18181b;
+}
+
+/* ─── Floating Button States ─── */
+
+#mw-float-container.mw-loading,
+#mw-float-container.mw-done,
+#mw-float-container.mw-error {
+  pointer-events: none;
+  opacity: 1;
+}
+
+#mw-float-container.mw-loading .mw-btn-label {
+  animation: mw-pulse 1.2s ease-in-out infinite;
+}
+
+#mw-float-container.mw-loading #mw-float-btn,
+#mw-float-container.mw-loading #mw-float-toggle {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+#mw-float-container.mw-done #mw-float-btn,
+#mw-float-container.mw-done #mw-float-toggle {
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+#mw-float-container.mw-error #mw-float-btn,
+#mw-float-container.mw-error #mw-float-toggle {
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.mw-btn-status-done { color: #fb923c !important; }
+.mw-btn-status-error { color: #f87171 !important; }
+
+/* ─── Floating Button Dropdown Menu ─── */
+
+#mw-float-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+#mw-float-menu.mw-menu-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.mw-menu-item {
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+
+.mw-menu-item:hover {
+  background: #18181b;
+  color: #fafafa;
+}
+
+.mw-menu-item:first-child { border-radius: 9px 9px 0 0; }
+.mw-menu-item:last-child { border-radius: 0 0 9px 9px; }
+.mw-menu-accent { color: #fb923c; }
+
+/* ─── Floating Button Logo & Label ─── */
+
+.mw-btn-logo {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  display: inline-flex;
+}
+
+.mw-logo-md { color: #fb923c; }
+.mw-logo-dot { color: #fafafa; }
+.mw-logo-fy { color: #fafafa; }
+
+.mw-btn-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #71717a;
+  border-left: 1px solid #27272a;
+  padding-left: 5px;
+}
+
+/* ─── Per-Message Mini Button ─── */
+
+.mw-mini-btn {
+  position: sticky;
+  top: var(--mw-header-h, 8px);
+  float: right;
+  margin-right: 8px;
+  z-index: 99;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  background: #09090b;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  transition: opacity 0.15s ease, transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
+  opacity: 0;
+  pointer-events: none;
+  line-height: 0;
+}
+
+/* Show on hover of the parent message */
+*:hover > .mw-mini-btn,
+.mw-mini-btn:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mw-mini-btn:hover {
+  border-color: rgba(255, 255, 255, 0.20);
+  transform: scale(1.04);
+}
+
+.mw-mini-btn:active { transform: scale(0.96); }
+
+.mw-mini-btn.mw-loading {
+  pointer-events: none;
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.mw-mini-btn.mw-done {
+  pointer-events: none;
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.50);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.mw-mini-btn.mw-error {
+  pointer-events: none;
+  opacity: 1;
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.10);
+}
+
+.mw-mini-mark {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.mw-mini-mark svg { width: 100%; height: 100%; display: block; }
+
+.mw-mini-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: #a1a1aa;
+  flex-shrink: 0;
+}
+.mw-mini-glyph svg { width: 100%; height: 100%; display: block; }
+
+.mw-mini-btn:hover .mw-mini-glyph { color: #fafafa; }
+.mw-mini-btn.mw-loading .mw-mini-glyph { color: #fb923c; animation: mw-mini-spin 0.9s linear infinite; }
+.mw-mini-btn.mw-done .mw-mini-glyph    { color: #fb923c; }
+.mw-mini-btn.mw-error .mw-mini-glyph   { color: #f87171; }
+
+@keyframes mw-mini-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Toast Notification ─── */
+
+#mw-toast {
+  position: fixed;
+  bottom: calc(var(--mw-input-h, 100px) + 48px);
+  right: 24px;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #18181b;
+  border: 1px solid #27272a;
+  color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transform: translateY(10px);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  max-width: 300px;
+}
+
+#mw-toast.mw-toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mw-toast-icon {
+  color: #fb923c;
+  flex-shrink: 0;
+}

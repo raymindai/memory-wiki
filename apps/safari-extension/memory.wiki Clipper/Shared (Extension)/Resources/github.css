@@ -1,0 +1,89 @@
+/* memory.wiki github integration — styles */
+
+.mw-github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  margin-right: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fafafa;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  line-height: 20px;
+  height: 28px;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.mw-gh-icon {
+  flex-shrink: 0;
+  display: block;
+}
+
+.mw-github-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.mw-github-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mw-gh-label {
+  font-weight: 500;
+}
+
+/* Loading state */
+.mw-github-btn.mw-gh-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.mw-github-btn.mw-gh-loading .mw-gh-label {
+  animation: mw-gh-pulse 1.5s infinite;
+}
+
+@keyframes mw-gh-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Success state */
+.mw-github-btn.mw-gh-done {
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.mw-github-btn.mw-gh-done .mw-gh-label {
+  color: #fafafa;
+}
+
+/* Error state */
+.mw-github-btn.mw-gh-error {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.mw-github-btn.mw-gh-error .mw-gh-label {
+  color: #ef4444;
+}
+
+/* Dark mode support (GitHub dark themes) */
+@media (prefers-color-scheme: dark) {
+  .mw-gh-fy {
+    color: #a1a1aa;
+  }
+}
+
+/* GitHub's dark theme class */
+[data-color-mode="dark"] .mw-gh-fy,
+[data-dark-theme] .mw-gh-fy {
+  color: #a1a1aa;
+}

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>memory.wiki settings</title>
+  <style>
+    @font-face {
+      font-family: "Cal Sans";
+      src: url("fonts/CalSans-Regular.ttf") format("truetype");
+      font-weight: 400 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0c;
+      --surface: #141416;
+      --border: #1c1c20;
+      --text-primary: #e4e4e7;
+      --text-secondary: #a1a1aa;
+      --text-tertiary: #71717a;
+      --text-muted: #52525b;
+      --accent: #e4e4e7;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+
+    .wordmark {
+      font-family: "Cal Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .wordmark .dot { color: var(--accent); }
+
+    .sub {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 40px;
+    }
+
+    section {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    section:last-of-type { border-bottom: none; }
+
+    h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-tertiary);
+      margin-bottom: 14px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 0;
+    }
+    .row + .row { border-top: 1px solid rgba(255,255,255,0.04); }
+
+    .row .body { flex: 1; min-width: 0; }
+    .row .title {
+      font-size: 13px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .row .desc {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+    }
+    .pill.accent {
+      border-color: var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 7px;
+      border: 1px solid var(--border);
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      background: var(--surface);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .kbd + .kbd { margin-left: 4px; }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    a:hover { opacity: 0.75; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #0a0a0c;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    .btn.primary:hover { background: #c8ff45; border-color: #c8ff45; }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle .track {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .toggle .track::after {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: var(--text-tertiary);
+      border-radius: 50%;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .toggle input:checked + .track { background: var(--text-primary); }
+    .toggle input:checked + .track::after {
+      transform: translateX(16px);
+      background: var(--accent);
+    }
+
+    .footer {
+      margin-top: 48px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="wordmark">memory<span class="dot">.</span>wiki</div>
+    <div class="sub">extension settings</div>
+
+    <section>
+      <h2>account</h2>
+      <div class="row" id="account-row">
+        <div class="body">
+          <div class="title" id="account-title">checking sign-in</div>
+          <div class="desc" id="account-desc">reading memory.wiki cookies</div>
+        </div>
+        <button class="btn" id="account-action">open memory.wiki</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>keyboard shortcuts</h2>
+      <div class="row">
+        <div class="body">
+          <div class="title">capture current page</div>
+          <div class="desc">runs Readability on the page, publishes to memory.wiki, copies the AI-paste sentence</div>
+        </div>
+        <div><span class="kbd" id="kbd-page"></span></div>
+      </div>
+      <div class="row">
+        <div class="body">
+          <div class="title">capture selection</div>
+          <div class="desc">publishes just the highlighted text as its own document</div>
+        </div>
+        <div><span class="kbd" id="kbd-sel"></span></div>
+      </div>
+      <div class="row">
+        <div class="body">
+          <div class="desc">change the bindings in <a href="#" id="shortcuts-link">chrome shortcuts</a> (chrome doesn't let extensions reassign their own keys).</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>on AI pages</h2>
+      <div class="row">
+        <div class="body">
+          <div class="title">show "memory.wiki all" floating button</div>
+          <div class="desc">a small dock on ChatGPT / Claude / Gemini for one-click full-conversation capture. off by default.</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="chk-float">
+          <span class="track"></span>
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>about</h2>
+      <div class="row">
+        <div class="body">
+          <div class="title">version <span id="version-pill" class="pill">...</span></div>
+          <div class="desc">memory.wiki chrome extension</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="body">
+          <div class="desc">
+            <a href="https://memory.wiki/about" target="_blank" rel="noopener">about memory.wiki</a>
+            ,
+            <a href="https://github.com/raymindai/memory-wiki" target="_blank" rel="noopener">source on github</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <span>memory.wiki</span>
+      <span>one URL for your markdown, everywhere</span>
+    </div>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>

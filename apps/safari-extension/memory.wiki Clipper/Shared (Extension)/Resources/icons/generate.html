@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p>Right-click each image and "Save Image As" to replace the PNG files.</p>
+<div style="display:flex;gap:32px;align-items:end;padding:32px;background:#333">
+  <div>
+    <p style="color:#fff">icon16.png</p>
+    <canvas id="c16" width="16" height="16"></canvas>
+  </div>
+  <div>
+    <p style="color:#fff">icon48.png</p>
+    <canvas id="c48" width="48" height="48"></canvas>
+  </div>
+  <div>
+    <p style="color:#fff">icon128.png</p>
+    <canvas id="c128" width="128" height="128"></canvas>
+  </div>
+</div>
+
+<script>
+function draw(id, size) {
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  const r = size * 0.18; // corner radius
+
+  // Rounded rect background
+  ctx.beginPath();
+  ctx.roundRect(0, 0, size, size, r);
+  ctx.fillStyle = '#09090b';
+  ctx.fill();
+
+  // "m" in orange
+  const fontSize = size * 0.55;
+  ctx.font = `800 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const y = size * 0.48;
+  const totalWidth = ctx.measureText('md').width;
+  const mWidth = ctx.measureText('m').width;
+  const startX = (size - totalWidth) / 2;
+
+  ctx.fillStyle = '#fb923c';
+  ctx.fillText('m', startX + mWidth / 2, y);
+
+  ctx.fillStyle = '#e5e5e5';
+  ctx.fillText('d', startX + mWidth + ctx.measureText('d').width / 2, y);
+
+  // "fy.cc" subtitle for 128px only
+  if (size >= 128) {
+    ctx.font = `500 ${size * 0.12}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillStyle = '#737373';
+    ctx.textAlign = 'center';
+    ctx.fillText('fy.cc', size / 2, size * 0.78);
+  }
+}
+
+draw('c16', 16);
+draw('c48', 48);
+draw('c128', 128);
+</script>
+</body>
+</html>
