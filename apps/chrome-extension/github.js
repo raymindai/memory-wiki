@@ -42,8 +42,8 @@
     const btn = document.createElement("button");
     btn.id = "mw-github-btn";
     btn.className = "mw-github-btn";
-    btn.innerHTML = '<span class="mw-gh-label">open in memory.wiki</span>';
-    btn.title = "open this markdown file in memory.wiki for beautiful rendering and editing";
+    btn.innerHTML = '<svg class="mw-gh-icon" width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="16" height="16" rx="3.5" ry="3.5" fill="#09090b"/><path d="M3.05,5.62l1.27,3.09h.06l1.27-3.09h1.74v5.32h-1.37v-3.13h-.04l-1.21,3.09h-.84l-1.21-3.1h-.04v3.14h-1.37v-5.32h1.73Z" fill="#fb923c"/><path d="M7.61,5.62h1.55l.75,3.33h.04l.87-3.33h1.24l.88,3.34h.04l.75-3.34h1.56l-1.56,5.32h-1.35l-.91-3.05h-.04l-.92,3.05h-1.34l-1.56-5.32Z" fill="#fafafa"/></svg><span class="mw-gh-label">Open in memory.wiki</span>';
+    btn.title = "Open this Markdown file in memory.wiki for rendering and editing";
 
     btn.addEventListener("click", async (e) => {
       e.preventDefault();
@@ -215,7 +215,7 @@
 
   function resetButton(btn) {
     btn.classList.remove("mw-gh-loading", "mw-gh-done", "mw-gh-error");
-    btn.innerHTML = '<span class="mw-gh-label">open in memory.wiki</span>';
+    btn.innerHTML = '<svg class="mw-gh-icon" width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="16" height="16" rx="3.5" ry="3.5" fill="#09090b"/><path d="M3.05,5.62l1.27,3.09h.06l1.27-3.09h1.74v5.32h-1.37v-3.13h-.04l-1.21,3.09h-.84l-1.21-3.1h-.04v3.14h-1.37v-5.32h1.73Z" fill="#fb923c"/><path d="M7.61,5.62h1.55l.75,3.33h.04l.87-3.33h1.24l.88,3.34h.04l.75-3.34h1.56l-1.56,5.32h-1.35l-.91-3.05h-.04l-.92,3.05h-1.34l-1.56-5.32Z" fill="#fafafa"/></svg><span class="mw-gh-label">Open in memory.wiki</span>';
   }
 
   // Compression (same as content.js)
