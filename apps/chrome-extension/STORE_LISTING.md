@@ -1,228 +1,83 @@
-# web store listing — memory.wiki
+# Chrome Web Store listing — memory.wiki Clipper
 
-## extension name
+Canonical copy for the Web Store dashboard. Update here BEFORE editing the
+dashboard so the repo version stays the source of truth.
 
-memory.wiki: capture any page or AI chat as a markdown URL
+## Extension name
 
-## short description (132 chars max)
+memory.wiki Clipper
 
-clip any web page or AI conversation (ChatGPT, Claude, Gemini) to a clean
-markdown URL on memory.wiki. one URL, every surface.
+## Short description (132 chars max)
 
-## detailed description (16,000 chars max)
+```
+Save pages, AI chats, social posts, images to a memory.wiki URL any AI reads. Per-site capture suggestions, AI transforms.
+```
 
-one URL for your markdown, everywhere.
+(122 chars — also lives in manifest.json `description` so the two stay in sync.)
 
-clip any web page or AI conversation, edit in WYSIWYG, share with a permanent
-link. available on web, Mac, VS Code, CLI, chrome extension, and MCP server
-(same document, same URL, every surface).
+## Detailed description (16,000 chars max)
 
-what it does
+```
+memory.wiki Clipper is the Chrome companion to memory.wiki on the web. Tell the extension what you want — it captures the page and writes it as a clean memory.wiki URL any AI tool can read.
 
-- capture full conversations from ChatGPT, Claude, and Gemini
-- capture individual messages with per-message "memory.wiki this" buttons
-- capture any web page (Readability-clean markdown, code blocks preserved)
-- capture only the highlighted selection from any page
-- open GitHub .md files directly in memory.wiki for beautiful rendering
-- keyboard shortcuts (Cmd+Shift+E to capture page, Cmd+Shift+X for selection)
-- publish instantly and get a permanent URL (memory.wiki/abc123)
-- every successful capture copies "Use memory.wiki/<id> as my context." to
-  the clipboard so you can paste straight into your next AI session
+The headline: Per-site Intent Capture
 
-how it works
+Open the popup on YouTube and the first chip is "Summarize from transcript." On arXiv: "Abstract + contributions." On Stack Overflow: "Accepted answer + code." On GitHub: "README in 5 bullets." 24+ sites have hand-tuned intent suggestions out of the box. Click a chip, capture, done — no typing.
 
-1. chat with any AI, or browse any web page
-2. press Cmd+Shift+E or click the extension popup
-3. your content is published as a formatted markdown document
-4. paste the AI-paste sentence into the next AI to share the context
+For sites without a curated chip, type whatever you want ("action items as a checklist", "Cursor-ready reference", "rewrite for a teammate", "TL;DR in 2 sentences") and the extension runs that intent against the page before saving. Your prompt, your call.
 
-supported surfaces
+What it captures
 
-- ChatGPT (chatgpt.com)
-- Claude (claude.ai)
-- Gemini (gemini.google.com)
-- GitHub (any .md file)
-- any other web page (via Mozilla Readability)
+- Any web page (Readability extracts the article body, drops nav and ads).
+- The current selection (highlight, click capture — only the selected text saves).
+- AI chats end to end (ChatGPT, Claude, Gemini, Perplexity — user and assistant turns preserved with proper formatting).
+- Per-message capture from inside AI chats (hover any message, click the inline "Save" button).
+- Social posts (X, Threads, Reddit, Hacker News, Medium, Substack) with the post body, author, and embedded media intact.
+- GitHub .md files (rendered as a memory.wiki URL with KaTeX, Mermaid, syntax-highlighted code).
 
-key features
+What lands on memory.wiki
 
-conversation capture
+Every capture publishes as a clean Markdown document and gets a permanent memory.wiki URL like memory.wiki/abc123. That URL serves the same Markdown payload to every AI tool — Claude, ChatGPT, Cursor, Gemini, Perplexity, Codex — so pasting the URL into any model gives that model your captured context.
 
-- full conversation with proper user / assistant formatting
-- range selection: capture last 3, 5, or 10 exchanges
-- per-message mini buttons on hover
-- optional floating "memory.wiki all" dock (toggle in settings)
+After every capture, the sentence "Use memory.wiki/abc123 as my context." is copied to your clipboard. Paste-into-next-AI is one keystroke.
 
-general web capture
+What's new in 2.7
 
-- Mozilla Readability extracts the article body, drops nav / footer / ads
-- code blocks with language detection, tables, lists, math intact
-- selection-only capture for pull-quotes and snippets
+- Per-site Intent Capture (24+ curated sites).
+- Chip rail wraps at the ends, no more dead clicks.
+- X quote-tweet body leak fixed (captures the focal tweet, not the quoted one).
+- Threads long-post body extraction fixed (falls back to og:description on permalinks).
+- Add button no longer covers the pencil or more-menu icons on social sites.
 
-smart formatting
+Keyboard shortcuts
 
-- code blocks with syntax highlighting preserved
-- mathematical equations (KaTeX / MathJax) preserved
-- mermaid diagrams preserved as source code
-- tables, lists, and all markdown formatting intact
+- Cmd+Shift+E (Ctrl+Shift+E on Windows) — capture the current page.
+- Cmd+Shift+X — capture only the highlighted selection.
 
-AI-readable URLs
+What this extension is NOT
 
-- published documents are readable by Claude, ChatGPT, Gemini, Cursor
-- the "Use memory.wiki/<id> as my context." sentence is dropped on your
-  clipboard after every capture so paste-into-next-AI is one keystroke
-- cross-AI knowledge sharing: capture from one AI, paste into another
+It is a capture surface, not the full memory.wiki product. Editing existing documents, organising into bundles and hubs, the AI chat panel, account management, and sharing permissions all live on memory.wiki on the web. Use the extension to feed material in, then jump to memory.wiki to organise and share.
 
-publishing options
+Account
 
-- permanent short URL (memory.wiki/abc123)
-- no account required for basic publishing
-- signed-in users get documents saved to their account and searchable
+No login required for one-off captures. Sign in (free during beta, sign up at memory.wiki) to attach captures to your account, search across them, and keep them in sync with the Mac, iOS, Android, VS Code, and CLI surfaces.
 
-GitHub integration
+Privacy
 
-- "open in memory.wiki" button on any .md file
-- beautiful rendering with code highlighting, math, and diagrams
-- works on repository file views
+No tracking. No third-party data sharing. No ads. Source on GitHub at github.com/raymindai/memory-wiki. The extension only contacts memory.wiki for publishing and the AI providers your captures route through (Claude or GPT for intent transforms) — see memory.wiki/privacy for the full policy.
+```
 
-privacy
+## Category
 
-- no data is collected or stored by the extension itself
-- content is published to memory.wiki servers only when you click publish
-- no tracking, no analytics in the extension
-- open source: github.com/raymindai/memory-wiki
+Productivity
 
-permissions explained
+## Language
 
-- activeTab: read the current tab's content when you click capture
-- tabs: detect which AI platform / general page you're on
-- contextMenus: right-click "send selection / page to memory.wiki"
-- storage: persist preferences (floating button visibility)
-- scripting: inject capture functionality into pages on demand
-- cookies: read memory.wiki login state for authenticated publishing
-- notifications: brief toast after keyboard-shortcut captures
-- offscreen: copy the AI-paste sentence to the clipboard from the service
-  worker after a keyboard-shortcut capture
+English (default)
 
----
+## Other store fields
 
-memory.wiki: one URL for your markdown, everywhere.
-
-## category
-
-productivity
-
-## language
-
-english
-
-## single purpose description (required by chrome policy)
-
-captures content from any web page or AI conversation (ChatGPT, Claude,
-Gemini) and publishes it as a formatted markdown document on memory.wiki.
-
----
-
-## store assets needed
-
-### icon
-
-- 128x128 PNG (already at icons/icon128.png)
-
-### screenshots (1280x800 or 640x400, min 1, max 5)
-
-screenshot 1 — capture from any web page
-show: an article page (blog or MDN) with the popup open, capture button
-visible.
-caption: capture any page as clean markdown
-
-screenshot 2 — capture from ChatGPT
-show: ChatGPT page with floating memory.wiki button visible, conversation
-in background.
-caption: one-click capture from ChatGPT
-
-screenshot 3 — capture from Claude
-show: claude.ai page with per-message mini buttons visible on hover.
-caption: per-message capture from Claude
-
-screenshot 4 — published document
-show: memory.wiki page with a beautifully rendered document (code blocks,
-headings).
-caption: beautiful, shareable documents
-
-screenshot 5 — extension popup
-show: the popup UI with the account chip + platform detection + capture
-options.
-caption: signed-in account chip and keyboard shortcuts visible
-
-### promotional tile (1280x800)
-
-hero image with memory.wiki branding + "one URL for your markdown,
-everywhere" tagline.
-
----
-
-## privacy practices (chrome web store developer dashboard)
-
-### single purpose
-
-captures content from any web page or AI conversation and publishes it as a
-formatted markdown document on memory.wiki.
-
-### permission justifications
-
-activeTab: required to read content from the current page when the user
-clicks capture (AI conversation extraction or general page extraction via
-Mozilla Readability).
-
-tabs: required to detect which AI platform / general page the user is on,
-to show the correct platform indicator in the popup and route capture
-requests to the right content script.
-
-contextMenus: required to add right-click menu options for sending
-selection or whole-page content to memory.wiki.
-
-storage: required to persist user preferences such as floating button
-visibility setting across browser sessions.
-
-scripting: required to inject the content capture script into pages on
-demand (used as a fallback when the manifest content_scripts haven't
-landed yet).
-
-cookies: required to check if the user is signed into memory.wiki,
-enabling authenticated publishing that saves documents to their account.
-
-notifications: required for a brief confirmation toast after captures
-triggered by keyboard shortcuts (which happen outside the popup UI).
-
-offscreen: required to copy the "Use memory.wiki/<id> as my context."
-sentence to the clipboard from the service worker after a keyboard-shortcut
-capture (service workers can't touch the clipboard directly).
-
-host_permissions (<all_urls>): required for the general web clipper to
-work on any page, for the context menu to work on any page, and for the
-background service worker to make API calls to memory.wiki on behalf of
-content scripts (CORS bypass).
-
-### data usage disclosure
-
-- personally identifiable information: no
-- health information: no
-- financial information: no
-- authentication information: no (cookies are read-only, not collected)
-- personal communications: no
-- location: no
-- web history: no
-- user activity: no
-- website content: yes — content is sent to memory.wiki servers only when
-  the user explicitly clicks publish (popup, context menu, or keyboard
-  shortcut)
-
-### data sale
-
-we do not sell user data.
-
-### data use purposes
-
-- captured content is sent to memory.wiki solely to create a shareable
-  document at the user's explicit request.
+- Single purpose: capture web content as memory.wiki Markdown URLs.
+- Privacy policy URL: https://memory.wiki/privacy
+- Support email: hi@raymind.ai
+- Website: https://memory.wiki
