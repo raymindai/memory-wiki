@@ -75,9 +75,12 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
       navGroups={memoryWikiNavGroups(locale)}
       toc={[
         { id: "chrome",    label: isKo ? "Chrome 확장"      : "Chrome extension" },
+        { id: "safari",    label: isKo ? "Safari 확장"      : "Safari extension" },
         { id: "mcp",       label: isKo ? "MCP 서버"         : "MCP server" },
         { id: "vscode",    label: isKo ? "VS Code 확장"     : "VS Code extension" },
         { id: "desktop",   label: isKo ? "Mac 데스크톱"     : "Mac desktop" },
+        { id: "ios",       label: isKo ? "iOS 앱"           : "iOS app" },
+        { id: "android",   label: isKo ? "Android 앱"       : "Android app" },
         { id: "cli",       label: "CLI" },
         { id: "quicklook", label: "QuickLook" },
       ]}
@@ -140,8 +143,18 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               />
             </PluginBlock>
 
+            {/* Safari */}
+            <PluginBlock id="safari" num="02" brand="safari" t={t.safari}>
+              <PluginFeatures groups={t.safari.features} />
+              <PluginInstall heading={t.safari.installHeading} steps={t.safari.installSteps} />
+              <PluginDownload
+                primary={{ label: t.safari.downloadLabel, href: "https://apps.apple.com" }}
+                secondary={{ label: t.safari.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+              />
+            </PluginBlock>
+
             {/* MCP */}
-            <PluginBlock id="mcp" num="02" brand="mcp" t={t.mcp}>
+            <PluginBlock id="mcp" num="03" brand="mcp" t={t.mcp}>
               <PluginTerminal title={t.mcp.terminal.title} lines={t.mcp.terminal.lines as TerminalLine[]} />
               <PluginFeatures groups={t.mcp.features} />
               <h3 className="pure-plugins-install-heading">{t.mcp.installHeading}</h3>
@@ -174,7 +187,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
             </PluginBlock>
 
             {/* VS Code */}
-            <PluginBlock id="vscode" num="03" brand="vscode" t={t.vscode}>
+            <PluginBlock id="vscode" num="04" brand="vscode" t={t.vscode}>
               <PluginFeatures groups={t.vscode.features} />
               <PluginInstall heading={t.vscode.installHeading} steps={t.vscode.installSteps} />
               <PluginDownload
@@ -184,7 +197,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
             </PluginBlock>
 
             {/* Desktop */}
-            <PluginBlock id="desktop" num="04" brand="mac" t={t.desktop}>
+            <PluginBlock id="desktop" num="05" brand="mac" t={t.desktop}>
               <PluginFeatures groups={t.desktop.features} />
               <PluginInstall heading={t.desktop.installHeading} steps={t.desktop.installSteps} />
               <PluginDownload
@@ -193,8 +206,28 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               />
             </PluginBlock>
 
+            {/* iOS */}
+            <PluginBlock id="ios" num="06" brand="ios" t={t.ios}>
+              <PluginFeatures groups={t.ios.features} />
+              <PluginInstall heading={t.ios.installHeading} steps={t.ios.installSteps} />
+              <PluginDownload
+                primary={{ label: t.ios.downloadLabel, href: "https://apps.apple.com" }}
+                secondary={{ label: t.ios.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+              />
+            </PluginBlock>
+
+            {/* Android */}
+            <PluginBlock id="android" num="07" brand="android" t={t.android}>
+              <PluginFeatures groups={t.android.features} />
+              <PluginInstall heading={t.android.installHeading} steps={t.android.installSteps} />
+              <PluginDownload
+                primary={{ label: t.android.downloadLabel, href: "https://play.google.com/store" }}
+                secondary={{ label: t.android.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+              />
+            </PluginBlock>
+
             {/* CLI */}
-            <PluginBlock id="cli" num="05" brand="cli" t={t.cli}>
+            <PluginBlock id="cli" num="08" brand="cli" t={t.cli}>
               <PureCodeBlock code={t.cli.installCmd} lang="bash" />
               <div className="pure-plugins-cli-examples">
                 {t.cli.examples.map((ex, i) => (
@@ -211,7 +244,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
             </PluginBlock>
 
             {/* QuickLook */}
-            <PluginBlock id="quicklook" num="06" brand="finder" t={t.quicklook}>
+            <PluginBlock id="quicklook" num="09" brand="finder" t={t.quicklook}>
               <PluginFeatures groups={t.quicklook.features} />
               <PluginInstall heading={t.quicklook.installHeading} steps={t.quicklook.installSteps} />
               <PluginDownload

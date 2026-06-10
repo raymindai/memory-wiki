@@ -19,5 +19,5 @@ export const microVar = (c: PureMicroColor) => `var(--micro-${c})`;
 /** Brand identifiers for ProviderIcon and provider chips. */
 export type ProviderBrand =
   | "claude" | "chatgpt" | "gemini" | "cursor" | "codex" | "copilot"
-  | "chrome" | "vscode" | "mac" | "ios" | "android"
+  | "chrome" | "safari" | "vscode" | "mac" | "ios" | "android"
   | "cli" | "mcp" | "browser" | "terminal" | "finder";

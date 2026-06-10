@@ -100,6 +100,42 @@ const texts = {
       guideLabel: "Quick Start Guide",
     },
 
+    safari: {
+      title: "Safari Extension",
+      subtitle: "memory.wiki Clipper for Safari",
+      desc: "Same one-click capture as the Chrome extension, native on Safari. Works on macOS, iPadOS, and iOS Safari. Per-site intent suggestions, AI transforms, sign in once and every capture is synced to your memory.wiki account.",
+      ctaLabel: "Add to Safari",
+      features: [
+        {
+          title: "Platforms",
+          items: ["Safari for Mac", "Safari for iPad", "Safari for iPhone", "Same toolbar everywhere"],
+        },
+        {
+          title: "Capture Methods",
+          items: ["Toolbar button \u2014 full page or selection", "Per-site intent chips", "Right-click \u2014 any selected text", "AI transform with one tap"],
+        },
+        {
+          title: "Account Sync",
+          items: ["Sign in to memory.wiki once", "Captures land in your account", "Recent captures in the popup", "Open results directly in any AI"],
+        },
+        {
+          title: "Native Integration",
+          items: ["Safari template toolbar icon", "OS-tinted, no chrome clash", "Reads cookies through the page bridge", "No third-party tracker pings"],
+        },
+      ],
+      installHeading: "Install",
+      installSteps: [
+        "Open the Mac App Store or iOS App Store and search \u201cmemory.wiki Clipper\u201d",
+        "Install the app \u2014 it is the container for the Safari extension",
+        "Open Safari > Settings > Extensions and enable memory.wiki Clipper",
+        "On iOS / iPadOS, tap the AA menu in Safari > Manage Extensions and turn it on",
+        "Sign in to memory.wiki once \u2014 every capture goes to your account",
+      ],
+      downloadLabel: "App Store (coming soon)",
+      downloadSize: "Mac App Store and iOS App Store",
+      guideLabel: "Quick Start Guide",
+    },
+
     mcp: {
       title: "MCP Server",
       subtitle: "memory-wiki-mcp on npm",
@@ -238,6 +274,76 @@ const texts = {
       downloadLabel: "Download for Mac",
       downloadSize: "97 MB (Apple Silicon)",
       appStoreLabel: "App Store (coming soon)",
+      guideLabel: "Quick Start Guide",
+    },
+
+    ios: {
+      title: "memory.wiki for iOS",
+      subtitle: "Native iPhone and iPad app",
+      desc: "Full memory.wiki on iPhone and iPad — capture pages, edit docs, manage bundles and hubs from anywhere. Share Sheet integration: send a page or selection from any iOS app into a new memory.wiki document with one tap.",
+      ctaLabel: "Get for iPhone",
+      features: [
+        {
+          title: "Capture",
+          items: ["Share Sheet from any app", "Camera scan to markdown", "Voice dictation with cleanup", "Paste any URL — pulls the article"],
+        },
+        {
+          title: "Edit",
+          items: ["Same WYSIWYG as the web editor", "Outline view for navigation", "Markdown source toggle", "Offline drafts, sync on reconnect"],
+        },
+        {
+          title: "Organize",
+          items: ["Recent and starred", "Bundle and hub view", "Multi-doc selection", "Quick share with sentence + link"],
+        },
+        {
+          title: "Native Touches",
+          items: ["Haptic feedback on key actions", "Dynamic Type respected", "Dark mode auto", "App Shortcuts (long-press icon)"],
+        },
+      ],
+      installHeading: "Install",
+      installSteps: [
+        "Open the App Store on iPhone or iPad",
+        "Search “memory.wiki” and install",
+        "Sign in to your memory.wiki account",
+        "Open Settings > Sharing and add memory.wiki to your Share Sheet favorites",
+      ],
+      downloadLabel: "App Store (in review)",
+      downloadSize: "Universal iPhone and iPad",
+      guideLabel: "Quick Start Guide",
+    },
+
+    android: {
+      title: "memory.wiki for Android",
+      subtitle: "Native Android app",
+      desc: "Same memory.wiki experience on Android. Share Sheet integration, App Shortcuts on the launcher icon, voice capture, and full offline drafts that sync when you reconnect.",
+      ctaLabel: "Get on Google Play",
+      features: [
+        {
+          title: "Capture",
+          items: ["Share Sheet from any app", "Camera and gallery to markdown", "Voice dictation", "Paste any URL — pulls the article"],
+        },
+        {
+          title: "Edit",
+          items: ["Same WYSIWYG as the web editor", "Outline view for navigation", "Markdown source toggle", "Offline drafts, sync on reconnect"],
+        },
+        {
+          title: "Organize",
+          items: ["Recent and starred", "Bundle and hub view", "Multi-doc selection", "Quick share with sentence + link"],
+        },
+        {
+          title: "Native Touches",
+          items: ["Material You theming", "App Shortcuts (long-press launcher icon)", "System Share Sheet", "Predictive back gesture"],
+        },
+      ],
+      installHeading: "Install",
+      installSteps: [
+        "Open Google Play on your Android device",
+        "Search “memory.wiki” and install",
+        "Sign in to your memory.wiki account",
+        "Long-press the launcher icon to use Capture / Search / Ask / Paste shortcuts",
+      ],
+      downloadLabel: "Google Play (in review)",
+      downloadSize: "Phone and tablet",
       guideLabel: "Quick Start Guide",
     },
 
@@ -405,6 +511,42 @@ const texts = {
       guideLabel: "Quick Start Guide",
     },
 
+    safari: {
+      title: "Safari Extension",
+      subtitle: "memory.wiki Clipper for Safari",
+      desc: "Chrome 확장과 동일한 원클릭 캡처를 Safari에서 네이티브로. macOS · iPadOS · iOS Safari 모두 지원. 사이트별 의도 칩, AI 변환, 한 번 로그인하면 모든 캡처가 memory.wiki 계정으로 자동 sync.",
+      ctaLabel: "Add to Safari",
+      features: [
+        {
+          title: "지원 플랫폼",
+          items: ["Mac Safari", "iPad Safari", "iPhone Safari", "동일한 툴바 UX"],
+        },
+        {
+          title: "캡처 방식",
+          items: ["툴바 버튼 — 전체 페이지 또는 선택 영역", "사이트별 의도 칩", "우클릭 — 선택한 텍스트", "한 번의 탭으로 AI 변환"],
+        },
+        {
+          title: "계정 sync",
+          items: ["memory.wiki 한 번 로그인", "캡처가 계정에 저장", "팝업의 최근 캡처 목록", "결과를 바로 AI에 열기"],
+        },
+        {
+          title: "네이티브 통합",
+          items: ["Safari template 툴바 아이콘", "OS 액센트 색으로 자연스럽게", "페이지 브릿지로 쿠키 읽기", "써드파티 트래커 없음"],
+        },
+      ],
+      installHeading: "설치",
+      installSteps: [
+        "Mac App Store 또는 iOS App Store에서 “memory.wiki Clipper” 검색",
+        "앱 설치 — Safari 확장의 컨테이너 역할",
+        "Safari > 설정 > 확장 프로그램에서 memory.wiki Clipper 활성화",
+        "iOS / iPadOS에서는 Safari의 AA 메뉴 > 확장 프로그램 관리에서 켜기",
+        "memory.wiki에 한 번 로그인 — 이후 모든 캡처가 계정에 저장",
+      ],
+      downloadLabel: "App Store (출시 준비 중)",
+      downloadSize: "Mac App Store · iOS App Store",
+      guideLabel: "Quick Start Guide",
+    },
+
     mcp: {
       title: "MCP Server",
       subtitle: "memory-wiki-mcp on npm",
@@ -543,6 +685,76 @@ const texts = {
       downloadLabel: "Download for Mac",
       downloadSize: "97 MB (Apple Silicon)",
       appStoreLabel: "App Store (coming soon)",
+      guideLabel: "Quick Start Guide",
+    },
+
+    ios: {
+      title: "memory.wiki for iOS",
+      subtitle: "iPhone · iPad 네이티브 앱",
+      desc: "iPhone과 iPad에서 memory.wiki 전체 — 페이지 캡처, 문서 편집, 번들과 허브 관리까지. Share Sheet 통합으로 어떤 iOS 앱에서든 한 번의 탭으로 memory.wiki 문서로 보냄.",
+      ctaLabel: "Get for iPhone",
+      features: [
+        {
+          title: "캡처",
+          items: ["어떤 앱에서든 Share Sheet", "카메라 스캔 → 마크다운", "음성 받아쓰기 + 자동 정리", "URL 붙여넣기 → 본문 추출"],
+        },
+        {
+          title: "편집",
+          items: ["웹 에디터와 동일한 WYSIWYG", "아웃라인 뷰 탐색", "마크다운 소스 토글", "오프라인 초안, 재연결 시 sync"],
+        },
+        {
+          title: "정리",
+          items: ["최근 / 즐겨찾기", "번들 · 허브 뷰", "다중 문서 선택", "문장 + 링크 빠른 공유"],
+        },
+        {
+          title: "네이티브 디테일",
+          items: ["주요 액션 햅틱", "Dynamic Type 준수", "다크 모드 자동", "App Shortcuts (아이콘 길게 누르기)"],
+        },
+      ],
+      installHeading: "설치",
+      installSteps: [
+        "iPhone 또는 iPad에서 App Store 열기",
+        "“memory.wiki” 검색 후 설치",
+        "memory.wiki 계정으로 로그인",
+        "설정 > 공유에서 memory.wiki를 Share Sheet 즐겨찾기에 추가",
+      ],
+      downloadLabel: "App Store (심사 중)",
+      downloadSize: "iPhone · iPad 유니버설",
+      guideLabel: "Quick Start Guide",
+    },
+
+    android: {
+      title: "memory.wiki for Android",
+      subtitle: "Android 네이티브 앱",
+      desc: "Android에서도 동일한 memory.wiki 경험. Share Sheet 통합, 런처 아이콘의 App Shortcuts, 음성 캡처, 재연결 시 sync되는 오프라인 초안.",
+      ctaLabel: "Get on Google Play",
+      features: [
+        {
+          title: "캡처",
+          items: ["어떤 앱에서든 Share Sheet", "카메라 · 갤러리 → 마크다운", "음성 받아쓰기", "URL 붙여넣기 → 본문 추출"],
+        },
+        {
+          title: "편집",
+          items: ["웹 에디터와 동일한 WYSIWYG", "아웃라인 뷰 탐색", "마크다운 소스 토글", "오프라인 초안, 재연결 시 sync"],
+        },
+        {
+          title: "정리",
+          items: ["최근 / 즐겨찾기", "번들 · 허브 뷰", "다중 문서 선택", "문장 + 링크 빠른 공유"],
+        },
+        {
+          title: "네이티브 디테일",
+          items: ["Material You 테마", "App Shortcuts (런처 길게 누르기)", "시스템 Share Sheet", "예측 뒤로가기 제스처"],
+        },
+      ],
+      installHeading: "설치",
+      installSteps: [
+        "Android 기기에서 Google Play 열기",
+        "“memory.wiki” 검색 후 설치",
+        "memory.wiki 계정으로 로그인",
+        "런처 아이콘 길게 누르기 → Capture / Search / Ask / Paste 빠른 작업 사용",
+      ],
+      downloadLabel: "Google Play (심사 중)",
+      downloadSize: "폰 · 태블릿",
       guideLabel: "Quick Start Guide",
     },
 

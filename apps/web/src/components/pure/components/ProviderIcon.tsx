@@ -101,6 +101,23 @@ export function ProviderIcon({ brand }: { brand: ProviderBrand }) {
           <path d="M13.61 30L3.22 12A23.99 23.99 0 0 0 24 48l10.39-18a11.99 11.99 0 0 1-20.78 0z" fill="url(#pi-chrome-c)"/>
         </svg>
       );
+    case "safari":
+      // Apple Safari — official compass with red needle (simplified)
+      return (
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden style={{ flexShrink: 0 }}>
+          <defs>
+            <linearGradient id="pi-safari-bg" x1="8" y1="0" x2="8" y2="16" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stopColor="#23B0FB"/>
+              <stop offset="1" stopColor="#1066D7"/>
+            </linearGradient>
+          </defs>
+          <circle cx="8" cy="8" r="7" fill="url(#pi-safari-bg)"/>
+          <circle cx="8" cy="8" r="5.5" fill="#fff"/>
+          <path d="M8 3l1.4 4.6L8 8 6.6 7.4z" fill="#E94B3C"/>
+          <path d="M8 13l-1.4-4.6L8 8l1.4.4z" fill="#B8B8B8"/>
+          <circle cx="8" cy="8" r="0.7" fill="#333"/>
+        </svg>
+      );
     case "vscode":
       // VS Code — official blue fold mark (Wikimedia, simplified mask)
       return (
