@@ -63,23 +63,32 @@ async function compressToBase64Url(text) {
 
 function readUserIdFromCookies() {
   return new Promise((resolve) => {
-    // Safari Web Extension first: hit /api/me which reads cookies
-    // server-side and returns user info. Reliable across Safari's
-    // strict Storage Partitioning where chrome.cookies.getAll
-    // returns nothing for cross-context cookies. Chrome users go
-    // down the same path — one less local-parsing concern.
-    fetch(`${MDFY_URL}/api/me`, { credentials: "include", cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (j && j.signedIn && j.userId) {
-          resolve(j.userId);
-          return;
-        }
-        // Fall back to local cookie parse (kept for legacy Chrome
-        // installs and in case /api/me is unreachable).
-        cookieFallback(resolve);
-      })
-      .catch(() => cookieFallback(resolve));
+    // Cascade — try in order:
+    //  1) chrome.storage.local cache populated by auth-bridge.js
+    //     content script (Safari-friendly: reads document.cookie in
+    //     PAGE context, not ext context, so Storage Partitioning
+    //     doesn't apply).
+    //  2) /api/me with credentials (works in Chrome where the cookie
+    //     attaches; usually 401 in Safari).
+    //  3) chrome.cookies.getAll (works in Chrome; usually count=0
+    //     in Safari).
+    chrome.storage.local.get(["mw-auth-session"], (data) => {
+      const cached = data["mw-auth-session"];
+      if (cached && cached.userId) {
+        resolve(cached.userId);
+        return;
+      }
+      fetch(`${MDFY_URL}/api/me`, { credentials: "include", cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (j && j.signedIn && j.userId) {
+            resolve(j.userId);
+            return;
+          }
+          cookieFallback(resolve);
+        })
+        .catch(() => cookieFallback(resolve));
+    });
   });
 }
 
@@ -373,6 +382,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // Offscreen document is the only recipient of "target: offscreen" messages.
   if (request && request.target === "offscreen") return;
 
+  // auth-bridge.js (content script on memory.wiki) forwards the
+  // page-context Supabase session here. Cache in chrome.storage.local
+  // so the popup's auth check works in Safari, where ext-context
+  // chrome.cookies.getAll returns nothing due to Storage Partitioning.
+  // Session = null means the page is signed out — clear the cache.
+  if (request.action === "auth-from-page") {
+    const s = request.session;
+    if (s && s.userId) {
+      chrome.storage.local.set({ "mw-auth-session": s }, () => {
+        sendResponse({ ok: true });
+      });
+    } else {
+      chrome.storage.local.remove("mw-auth-session", () => {
+        sendResponse({ ok: true, cleared: true });
+      });
+    }
+    return true;
+  }
+
   // Open a URL in a new tab from a context that doesn't have a fresh
   // user gesture (content scripts after `await fetch(...)`). Safari's
   // popup blocker rejects content-script window.open after async work
@@ -604,25 +632,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === "get-user-info") {
     // Returns { userId, email, displayName, avatarUrl } if signed in,
-    // { userId: null } otherwise. Hits /api/me which reads the
-    // Supabase session cookie server-side — works in Safari where
-    // chrome.cookies.getAll returns nothing for cross-context cookies
-    // due to Storage Partitioning.
-    fetch(`${MDFY_URL}/api/me`, { credentials: "include", cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (j && j.signedIn && j.userId) {
-          sendResponse({
-            userId: j.userId,
-            email: j.email || null,
-            displayName: j.displayName || null,
-            avatarUrl: j.avatarUrl || null,
-          });
-        } else {
-          sendResponse({ userId: null });
-        }
-      })
-      .catch(() => sendResponse({ userId: null }));
+    // { userId: null } otherwise. Same cascade as readUserIdFromCookies:
+    //  1) chrome.storage.local cache populated by auth-bridge.js
+    //  2) /api/me with credentials
+    //  3) silent null
+    chrome.storage.local.get(["mw-auth-session"], (data) => {
+      const cached = data["mw-auth-session"];
+      if (cached && cached.userId) {
+        sendResponse({
+          userId: cached.userId,
+          email: cached.email || null,
+          displayName: cached.displayName || null,
+          avatarUrl: cached.avatarUrl || null,
+        });
+        return;
+      }
+      fetch(`${MDFY_URL}/api/me`, { credentials: "include", cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (j && j.signedIn && j.userId) {
+            sendResponse({
+              userId: j.userId,
+              email: j.email || null,
+              displayName: j.displayName || null,
+              avatarUrl: j.avatarUrl || null,
+            });
+          } else {
+            sendResponse({ userId: null });
+          }
+        })
+        .catch(() => sendResponse({ userId: null }));
+    });
     return true;
   }
 });

@@ -1285,3 +1285,72 @@ function startTransformProgress(mode) {
   // Initial sync.
   setTimeout(syncBodyState, 50);
 })();
+
+// ─── Safari debug panel ───
+// Temporary: surface sign-in diagnostic at the top of the popup so we
+// can identify the broken layer without Web Inspector (which the
+// current Safari build doesn't expose on extension popups). Remove
+// before App Store submission.
+(function () {
+  const MDFY = "https://memory.wiki";
+  const panel = document.createElement("div");
+  panel.id = "mw-debug-panel";
+  panel.style.cssText = "position:relative;z-index:9999;padding:8px 10px;margin:6px;background:#111;color:#fafafa;font:11px/1.4 ui-monospace,monospace;border:1px solid #333;border-radius:4px;white-space:pre-wrap;word-break:break-all";
+  panel.textContent = "[debug] running diagnostic…";
+  function setText(t) { panel.textContent = "[debug]\n" + t; }
+  function attach() {
+    if (document.body && !document.getElementById("mw-debug-panel")) {
+      document.body.insertBefore(panel, document.body.firstChild);
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", attach);
+  } else {
+    attach();
+  }
+  const lines = [];
+  function emit() { setText(lines.join("\n")); }
+  // 1) Direct fetch to /api/me
+  lines.push("1) GET /api/me (credentials:include)…");
+  emit();
+  fetch(MDFY + "/api/me", { credentials: "include", cache: "no-store" })
+    .then(r => r.text().then(body => ({ status: r.status, body })))
+    .then(({ status, body }) => {
+      lines.push("   status=" + status);
+      lines.push("   body=" + (body || "").slice(0, 200));
+      emit();
+    })
+    .catch(e => { lines.push("   FAIL: " + (e && e.message || e)); emit(); });
+  // 2) chrome.cookies by url
+  if (chrome.cookies && chrome.cookies.getAll) {
+    chrome.cookies.getAll({ url: MDFY }, (cs) => {
+      const names = (cs || []).map(c => c.name).slice(0, 10);
+      lines.push("2) cookies by url=" + MDFY + " count=" + (cs ? cs.length : "null"));
+      if (names.length) lines.push("   names=" + names.join(","));
+      emit();
+    });
+  } else {
+    lines.push("2) chrome.cookies API UNAVAILABLE");
+    emit();
+  }
+  // 3) chrome.cookies by domain
+  if (chrome.cookies && chrome.cookies.getAll) {
+    chrome.cookies.getAll({ domain: "memory.wiki" }, (cs) => {
+      const names = (cs || []).map(c => c.name).slice(0, 10);
+      lines.push("3) cookies by domain=memory.wiki count=" + (cs ? cs.length : "null"));
+      if (names.length) lines.push("   names=" + names.join(","));
+      emit();
+    });
+  }
+  // 4) Ping background get-user-info
+  chrome.runtime.sendMessage({ action: "get-user-info" }, (resp) => {
+    lines.push("4) bg get-user-info -> " + JSON.stringify(resp));
+    emit();
+  });
+  // 5) Storage cache populated by auth-bridge content script
+  chrome.storage.local.get(["mw-auth-session"], (data) => {
+    const s = data["mw-auth-session"];
+    lines.push("5) storage cache mw-auth-session -> " + JSON.stringify(s));
+    emit();
+  });
+})();
