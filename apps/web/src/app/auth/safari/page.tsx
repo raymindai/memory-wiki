@@ -16,6 +16,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function SafariAuthPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error" | "choose-provider">("loading");
+  const [email, setEmail] = useState<string | null>(null);
   const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
@@ -33,19 +34,20 @@ export default function SafariAuthPage() {
       }
 
       const { data: { session } } = await supabase.auth.getSession() as {
-        data: { session: { access_token: string } | null };
+        data: { session: { access_token: string; user?: { email?: string } } | null };
       };
 
       if (!session?.access_token) {
         setStatus("choose-provider");
         return;
       }
+      setEmail(session.user?.email || null);
       setStatus("success");
-      // Auto-close. Safari is stricter than Chrome about window.close()
-      // on script-opened tabs but the ext used chrome.tabs.create, which
-      // Safari treats as "opened by an extension" — close usually works.
-      // If it doesn't, the success copy tells the user to close manually.
-      setTimeout(() => { try { window.close(); } catch { /* noop */ } }, 1400);
+      // No auto-close. Founder feedback: when a tab auto-closes the
+      // user can't visually verify which account they signed into.
+      // The success copy below explicitly tells them to close the tab
+      // themselves and surfaces a clear "Use a different account"
+      // option in case the session belongs to the wrong account.
     })();
   }, [supabase]);
 
@@ -87,26 +89,19 @@ export default function SafariAuthPage() {
 
         {status === "success" && (
           <>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 12l3 3 5-5" />
-            </svg>
-            <h1
-              style={{
-                color: "var(--text-primary)",
-                fontFamily: "var(--font-display)",
-                fontSize: 22,
-                fontWeight: 500,
-                letterSpacing: 0,
-                lineHeight: 1.25,
-                margin: 0,
-              }}
-            >
-              You&apos;re signed in
-            </h1>
             <p
-              className="text-center leading-relaxed"
-              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
+              className="text-center"
+              style={{ color: "var(--text-primary)", fontSize: 14, lineHeight: 1.55, margin: 0 }}
+            >
+              {email ? (
+                <>Signed in as <span className="font-mono">{email}</span>.</>
+              ) : (
+                <>Signed in.</>
+              )}
+            </p>
+            <p
+              className="text-center"
+              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.55 }}
             >
               Close this tab and click the memory.wiki Clipper icon in your Safari toolbar to start capturing.
             </p>
@@ -115,14 +110,8 @@ export default function SafariAuthPage() {
               className="transition-opacity hover:opacity-80"
               style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "underline" }}
             >
-              Wrong account? Use a different one
+              Use a different account
             </a>
-            <p
-              className="font-mono text-center"
-              style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", marginTop: 0 }}
-            >
-              Don&apos;t see the icon? Enable memory.wiki Clipper in Safari Settings &rarr; Extensions.
-            </p>
           </>
         )}
 
