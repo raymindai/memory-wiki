@@ -63,27 +63,49 @@ async function compressToBase64Url(text) {
 
 function readUserIdFromCookies() {
   return new Promise((resolve) => {
-    try {
-      chrome.cookies.getAll({ url: MDFY_COOKIE_URL }, (cookies) => {
-        if (!cookies) { resolve(null); return; }
-        const authParts = cookies
-          .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        if (authParts.length === 0) { resolve(null); return; }
-        try {
-          const combined = authParts.map((c) => c.value).join("").replace(/^base64-/, "");
-          const json = JSON.parse(atob(combined));
-          resolve(json.user?.id || null);
-        } catch {
-          resolve(null);
+    // Safari Web Extension first: hit /api/me which reads cookies
+    // server-side and returns user info. Reliable across Safari's
+    // strict Storage Partitioning where chrome.cookies.getAll
+    // returns nothing for cross-context cookies. Chrome users go
+    // down the same path — one less local-parsing concern.
+    fetch(`${MDFY_URL}/api/me`, { credentials: "include", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j && j.signedIn && j.userId) {
+          resolve(j.userId);
+          return;
         }
-      });
-    } catch (err) {
-      console.warn("[memory.wiki] Cookie access error:", err);
-      resolve(null);
-    }
+        // Fall back to local cookie parse (kept for legacy Chrome
+        // installs and in case /api/me is unreachable).
+        cookieFallback(resolve);
+      })
+      .catch(() => cookieFallback(resolve));
   });
 }
+
+function cookieFallback(resolve) {
+  try {
+    if (!chrome.cookies || !chrome.cookies.getAll) { resolve(null); return; }
+    chrome.cookies.getAll({ url: MDFY_COOKIE_URL }, (cookies) => {
+      if (!cookies) { resolve(null); return; }
+      const authParts = cookies
+        .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      if (authParts.length === 0) { resolve(null); return; }
+      try {
+        const combined = authParts.map((c) => c.value).join("").replace(/^base64-/, "");
+        const json = JSON.parse(atob(combined));
+        resolve(json.user?.id || null);
+      } catch {
+        resolve(null);
+      }
+    });
+  } catch (err) {
+    console.warn("[memory.wiki] Cookie access error:", err);
+    resolve(null);
+  }
+}
+
 
 // ─── Publish pipeline (used by command-triggered captures) ───
 
@@ -351,6 +373,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // Offscreen document is the only recipient of "target: offscreen" messages.
   if (request && request.target === "offscreen") return;
 
+  // Open a URL in a new tab from a context that doesn't have a fresh
+  // user gesture (content scripts after `await fetch(...)`). Safari's
+  // popup blocker rejects content-script window.open after async work
+  // because the user gesture has expired; chrome.tabs.create from the
+  // background service worker is always allowed.
+  if (request.action === "open-tab") {
+    if (request.url) {
+      chrome.tabs.create({ url: request.url });
+      sendResponse({ ok: true });
+    } else {
+      sendResponse({ ok: false, error: "missing url" });
+    }
+    return false;
+  }
+
   // Screenshot the active tab (used by AI conversation capture for diagrams).
   if (request.action === "capture-tab") {
     chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
@@ -566,24 +603,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "get-user-info") {
-    // Returns { userId, email } if signed in, { userId: null } otherwise.
-    chrome.cookies.getAll({ url: MDFY_COOKIE_URL }, (cookies) => {
-      if (!cookies) { sendResponse({ userId: null }); return; }
-      const authParts = cookies
-        .filter((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      if (authParts.length === 0) { sendResponse({ userId: null }); return; }
-      try {
-        const combined = authParts.map((c) => c.value).join("").replace(/^base64-/, "");
-        const json = JSON.parse(atob(combined));
-        sendResponse({
-          userId: json.user?.id || null,
-          email: json.user?.email || null,
-        });
-      } catch {
-        sendResponse({ userId: null });
-      }
-    });
+    // Returns { userId, email, displayName, avatarUrl } if signed in,
+    // { userId: null } otherwise. Hits /api/me which reads the
+    // Supabase session cookie server-side — works in Safari where
+    // chrome.cookies.getAll returns nothing for cross-context cookies
+    // due to Storage Partitioning.
+    fetch(`${MDFY_URL}/api/me`, { credentials: "include", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j && j.signedIn && j.userId) {
+          sendResponse({
+            userId: j.userId,
+            email: j.email || null,
+            displayName: j.displayName || null,
+            avatarUrl: j.avatarUrl || null,
+          });
+        } else {
+          sendResponse({ userId: null });
+        }
+      })
+      .catch(() => sendResponse({ userId: null }));
     return true;
   }
 });

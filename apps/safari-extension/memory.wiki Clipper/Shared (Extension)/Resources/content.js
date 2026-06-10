@@ -1028,7 +1028,11 @@
           }
           const { id, editToken } = parsed;
           const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
-          window.open(MDFY_URL + "/?from=" + id + tokenParam, "memorywiki_" + Date.now());
+          // Route through background — Safari blocks content-script
+          // window.open after async work (the await fetch above
+          // expires the user-gesture window). chrome.tabs.create from
+          // the background is always allowed.
+          chrome.runtime.sendMessage({ action: "open-tab", url: MDFY_URL + "/?from=" + id + tokenParam });
           // Push to popup Recent so per-message captures show up
           // in the extension's capture history alongside everything else.
           try {
@@ -1065,7 +1069,7 @@
     const url = MDFY_URL + "/#md=" + compressed;
 
     if (url.length <= MAX_URL_BYTES) {
-      window.open(url, "memorywiki_" + Date.now());
+      chrome.runtime.sendMessage({ action: "open-tab", url });
     } else {
       try {
         await navigator.clipboard.writeText(markdown);
@@ -1079,7 +1083,7 @@
         document.execCommand("copy");
         document.body.removeChild(textarea);
       }
-      window.open(MDFY_URL, "memorywiki_" + Date.now());
+      chrome.runtime.sendMessage({ action: "open-tab", url: MDFY_URL });
     }
   }
 

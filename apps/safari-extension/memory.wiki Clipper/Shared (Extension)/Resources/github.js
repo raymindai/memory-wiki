@@ -95,7 +95,12 @@
               try { parsed = JSON.parse(uploadRes.body); } catch { throw new Error("Invalid response"); }
               const { id, editToken } = parsed;
               const tokenParam = editToken ? "&token=" + encodeURIComponent(editToken) : "";
-              window.open(MDFY_URL + "/?from=" + id + tokenParam, "_blank");
+              // Route through background so chrome.tabs.create runs in a
+              // context that doesn't need a fresh user gesture. Safari's
+              // popup blocker rejects content-script window.open after an
+              // await chain; chrome.tabs.create from the background is
+              // always allowed.
+              chrome.runtime.sendMessage({ action: "open-tab", url: MDFY_URL + "/?from=" + id + tokenParam });
               btn.classList.remove("mw-gh-loading");
               btn.classList.add("mw-gh-done");
               btn.querySelector(".mw-gh-label").textContent = "opened!";
@@ -112,11 +117,11 @@
         const url = MDFY_URL + "/#md=" + compressed;
 
         if (url.length <= 8000) {
-          window.open(url, "_blank");
+          chrome.runtime.sendMessage({ action: "open-tab", url });
         } else {
           // Too large for URL — copy to clipboard and open empty editor
           try { await navigator.clipboard.writeText(markdown); } catch {}
-          window.open(MDFY_URL, "_blank");
+          chrome.runtime.sendMessage({ action: "open-tab", url: MDFY_URL });
         }
 
         btn.classList.remove("mw-gh-loading");
