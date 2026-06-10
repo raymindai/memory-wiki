@@ -21,6 +21,7 @@ type Surface = {
 
 const SURFACES: Surface[] = [
   { slug: "chrome",  title: "Chrome extension", blurb: "Page / selection / per-message / social / image / intent capture.", href: "/help/chrome",  status: "live" },
+  { slug: "safari",  title: "Safari extension", blurb: "Same capture toolbar on macOS Safari and iOS / iPadOS Safari.",   href: "/help/safari",  status: "stub" },
   { slug: "web",     title: "Web editor",       blurb: "Editing, sharing, AI panel, image library, bundles, hubs.",      href: "/help/web",     status: "stub" },
   { slug: "desktop", title: "Desktop (macOS)",  blurb: "Native app + QuickLook for .md files in Finder.",                href: "/help/desktop", status: "stub" },
   { slug: "vscode",  title: "VS Code extension",blurb: "Sidebar workspace, WYSIWYG editor, in-place sync.",              href: "/help/vscode",  status: "stub" },

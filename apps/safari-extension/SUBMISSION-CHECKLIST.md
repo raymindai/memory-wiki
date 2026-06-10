@@ -82,7 +82,7 @@ This extension does not track you or sell any data. Pages you capture are sent o
 markdown,ai,context,clipper,save page,chatgpt,claude,gemini,perplexity,cursor,memory,knowledge
 ```
 
-**Support URL**: `https://memory.wiki/support`
+**Support URL**: `https://memory.wiki/help`
 **Marketing URL**: `https://memory.wiki`
 **Privacy Policy URL**: `https://memory.wiki/privacy`
 
