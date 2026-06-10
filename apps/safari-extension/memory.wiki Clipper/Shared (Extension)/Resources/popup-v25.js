@@ -1212,7 +1212,7 @@ function startTransformProgress(mode) {
 // Override after popup.js binds, and re-bind whenever the .signin class
 // flips (which is when popup.js re-renders the chip).
 (function () {
-  const AUTH_URL = "https://memory.wiki/auth/chrome";
+  const AUTH_URL = "https://memory.wiki/auth/safari";
   const chip = document.getElementById("account-chip");
   if (!chip) return;
   function bindSignInClick() {

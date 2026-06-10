@@ -1,0 +1,187 @@
+"use client";
+
+// /auth/safari — Safari Web Extension auth handoff. Mirror of /auth/chrome
+// with Safari-specific wording. The Safari ext can't read the Supabase
+// auth cookie via chrome.cookies (Storage Partitioning), so the background
+// hits /api/me which reads the cookie server-side. This page's job is the
+// same as the Chrome one: get the user signed in to memory.wiki in the
+// browser, then tell them to close the tab and return to the toolbar
+// popup.
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import MemoryWikiLogo from "@/components/MemoryWikiLogo";
+import AuthProviderStack from "@/components/AuthProviderStack";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+export default function SafariAuthPage() {
+  const [status, setStatus] = useState<"loading" | "success" | "error" | "choose-provider">("loading");
+  const supabase = getSupabaseBrowserClient();
+
+  useEffect(() => {
+    (async () => {
+      if (!supabase) {
+        setStatus("error");
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("switch") === "1") {
+        await supabase.auth.signOut();
+        setStatus("choose-provider");
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession() as {
+        data: { session: { access_token: string } | null };
+      };
+
+      if (!session?.access_token) {
+        setStatus("choose-provider");
+        return;
+      }
+      setStatus("success");
+      // Auto-close. Safari is stricter than Chrome about window.close()
+      // on script-opened tabs but the ext used chrome.tabs.create, which
+      // Safari treats as "opened by an extension" — close usually works.
+      // If it doesn't, the success copy tells the user to close manually.
+      setTimeout(() => { try { window.close(); } catch { /* noop */ } }, 1400);
+    })();
+  }, [supabase]);
+
+  const contextLabel = "Safari";
+
+  return (
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-6"
+      style={{ background: "var(--canvas)", color: "var(--text-primary)" }}
+    >
+      <div className="flex flex-col items-center" style={{ gap: 20, maxWidth: 480, width: "100%" }}>
+        <MemoryWikiLogo size={28} withBlob />
+
+        {status === "choose-provider" && (
+          <div
+            className="font-mono"
+            style={{ color: "var(--text-muted)", fontSize: 11, letterSpacing: "0.04em" }}
+          >
+            {contextLabel}
+          </div>
+        )}
+
+        {status === "loading" && (
+          <>
+            <div
+              style={{
+                width: 128,
+                height: 2,
+                borderRadius: 2,
+                overflow: "hidden",
+                background: "var(--border-dim)",
+              }}
+            >
+              <div style={{ height: "100%", borderRadius: 2, background: "var(--text-primary)", animation: "loadbar 1.2s ease-in-out infinite" }} />
+            </div>
+            <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>One moment.</p>
+          </>
+        )}
+
+        {status === "success" && (
+          <>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12l3 3 5-5" />
+            </svg>
+            <h1
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: 22,
+                fontWeight: 500,
+                letterSpacing: 0,
+                lineHeight: 1.25,
+                margin: 0,
+              }}
+            >
+              You&apos;re signed in
+            </h1>
+            <p
+              className="text-center leading-relaxed"
+              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
+            >
+              Close this tab and click the memory.wiki Clipper icon in your Safari toolbar to start capturing.
+            </p>
+            <a
+              href="?switch=1"
+              className="transition-opacity hover:opacity-80"
+              style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "underline" }}
+            >
+              Wrong account? Use a different one
+            </a>
+            <p
+              className="font-mono text-center"
+              style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", marginTop: 0 }}
+            >
+              Don&apos;t see the icon? Enable memory.wiki Clipper in Safari Settings &rarr; Extensions.
+            </p>
+          </>
+        )}
+
+        {status === "choose-provider" && (
+          <>
+            <AuthProviderStack redirectTo={`${typeof window !== "undefined" ? window.location.origin : ""}/auth/safari`} />
+            <p
+              className="font-mono text-center"
+              style={{ color: "var(--text-faint)", fontSize: 11, letterSpacing: "0.04em", marginTop: 4 }}
+            >
+              Same account works on web, iOS, Android, CLI, MCP, Desktop, VS Code.
+            </p>
+          </>
+        )}
+
+        {status === "error" && (
+          <>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--micro-red)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M15 9l-6 6" />
+              <path d="M9 9l6 6" />
+            </svg>
+            <h1
+              style={{
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-display)",
+                fontSize: 22,
+                fontWeight: 500,
+                letterSpacing: 0,
+                lineHeight: 1.25,
+                margin: 0,
+              }}
+            >
+              Connection failed
+            </h1>
+            <p
+              className="text-center"
+              style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6, maxWidth: 400 }}
+            >
+              Please sign in to memory.wiki first, then try again from the Safari toolbar popup.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex items-center transition-opacity hover:opacity-90"
+              style={{
+                padding: "10px 18px",
+                borderRadius: 8,
+                background: "var(--text-primary)",
+                color: "var(--background)",
+                textDecoration: "none",
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+            >
+              Go to memory.wiki
+            </Link>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
