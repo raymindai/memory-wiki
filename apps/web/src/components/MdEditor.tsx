@@ -7588,10 +7588,9 @@ ${clone.innerHTML}
             {/* On mobile the icon row to the right gets dense and the
                 wordmark collides with the first icon — drop the
                 "memory.wiki" text and keep only the animated blob so
-                the row breathes. Slightly larger blob size so it
-                still reads as the brand mark. */}
+                the row breathes. */}
             <MemoryWikiLogo
-              size={isMobile ? 20 : 18}
+              size={isMobile ? 14 : 18}
               variant={isMobile ? "icon-only" : "full"}
             />
           </h1>
@@ -7730,13 +7729,16 @@ ${clone.innerHTML}
         <div
           className="flex items-center gap-1.5 shrink-0 pointer-events-auto sm:absolute sm:left-1/2 sm:-translate-x-1/2"
         >
-          {/* Back / Forward — own group, separate from Home */}
+          {/* Back / Forward — own group, separate from Home.
+              Hidden on mobile to free up horizontal room for the
+              denser action rail; users navigate via the system
+              back/forward (browser chrome) on phones. */}
           {(() => {
             void navTick; // re-evaluate on history tick
             const canBack = navIndexRef.current > 0;
             const canForward = navIndexRef.current >= 0 && navIndexRef.current < navHistoryRef.current.length - 1;
             return (
-              <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+              <div className="hidden sm:flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
                 <Tooltip text="Back" position="bottom">
                   <button
                     onClick={goBack}
