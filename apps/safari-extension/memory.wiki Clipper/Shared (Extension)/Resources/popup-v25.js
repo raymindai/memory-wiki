@@ -770,15 +770,23 @@
     actions.appendChild(del);
     el.appendChild(actions);
 
-    // Click chip body → populate textarea
+    // Click chip body → populate textarea AND submit immediately.
+    // Previously this only filled the textarea, requiring a second
+    // click on the submit arrow to fire the capture. UX expectation:
+    // chip click = run that intent right now.
     el.addEventListener("click", (e) => {
       if (e.target.closest(".chip-btn")) return;   // ignore clicks on buttons
       const ta = document.getElementById("ask-input");
+      const sub = document.getElementById("ask-submit");
       if (!ta) return;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
-      ta.focus();
-      try { ta.setSelectionRange(text.length, text.length); } catch {}
+      // Auto-fire submit so the chip click reads as a single
+      // intent-capture action.
+      if (sub) {
+        sub.disabled = false;
+        sub.click();
+      }
     });
 
     // Marquee on hover when text overflows the clipped wrap
