@@ -17,12 +17,21 @@ Save pages, AI chats, social posts, images to a memory.wiki URL any AI reads. Pe
 
 ## Detailed description (16,000 chars max)
 
+**Important — Web Store keyword-spam rejection (2026-06-10):**
+Google rejected v2.7.4 metadata for "excessive and / or irrelevant
+keywords." Specifically the parenthetical brand-name list
+`Social posts (X, Threads, Reddit, Hacker News, Medium, Substack)`
+tripped the keyword-spam filter. Below is the rewritten description
+that proactively removes ALL multi-brand comma lists. Single brand
+mentions in context (e.g. "fixed quote-tweet body leak on X") are
+fine; comma-separated brand lineups are not.
+
 ```
 memory.wiki Clipper is the Chrome companion to memory.wiki on the web. Tell the extension what you want — it captures the page and writes it as a clean memory.wiki URL any AI tool can read.
 
 The headline: Per-site Intent Capture
 
-Open the popup on YouTube and the first chip is "Summarize from transcript." On Wikipedia: "Overview + key dates." On Reddit: "Top comments distilled." On Stack Overflow: "Accepted answer + code." On GitHub: "README in 5 bullets." On Medium: "Main argument + evidence." 24+ sites have hand-tuned intent suggestions out of the box. Click a chip, capture, done — no typing.
+Open the popup on YouTube and the first chip is "Summarize from transcript." On a Q&A site: "Accepted answer + code." On a code repository: "README in 5 bullets." On a discussion thread: "Top comments distilled." 24+ sites have hand-tuned intent suggestions out of the box. Click a chip, capture, done — no typing.
 
 For sites without a curated chip, type whatever you want ("action items as a checklist", "Cursor-ready reference", "rewrite for a teammate", "TL;DR in 2 sentences") and the extension runs that intent against the page before saving. Your prompt, your call.
 
@@ -30,14 +39,14 @@ What it captures
 
 - Any web page (Readability extracts the article body, drops nav and ads).
 - The current selection (highlight, click capture — only the selected text saves).
-- AI chats end to end (ChatGPT, Claude, Gemini, Perplexity — user and assistant turns preserved with proper formatting).
+- AI chat conversations end to end (user and assistant turns preserved with proper formatting).
 - Per-message capture from inside AI chats (hover any message, click the inline "Save" button).
-- Social posts (X, Threads, Reddit, Hacker News, Medium, Substack) with the post body, author, and embedded media intact.
-- GitHub .md files (rendered as a memory.wiki URL with KaTeX, Mermaid, syntax-highlighted code).
+- Posts from social platforms, with the post body, author, and embedded media intact.
+- Markdown files on code repositories (rendered as a memory.wiki URL with math, diagrams, syntax-highlighted code).
 
 What lands on memory.wiki
 
-Every capture publishes as a clean Markdown document and gets a permanent memory.wiki URL like memory.wiki/abc123. That URL serves the same Markdown payload to every AI tool — Claude, ChatGPT, Cursor, Gemini, Perplexity, Codex — so pasting the URL into any model gives that model your captured context.
+Every capture publishes as a clean Markdown document and gets a permanent memory.wiki URL like memory.wiki/abc123. That URL serves the same Markdown payload to every AI tool — paste it into any model to give that model your captured context.
 
 After every capture, the sentence "Use memory.wiki/abc123 as my context." is copied to your clipboard. Paste-into-next-AI is one keystroke.
 
@@ -45,9 +54,8 @@ What's new in 2.7
 
 - Per-site Intent Capture (24+ curated sites).
 - Chip rail wraps at the ends, no more dead clicks.
-- X quote-tweet body leak fixed (captures the focal tweet, not the quoted one).
-- Threads long-post body extraction fixed (falls back to og:description on permalinks).
-- Add button no longer covers the pencil or more-menu icons on social sites.
+- Social post capture: quote-tweet body leak fixed; long-post body extraction improved.
+- Add button no longer covers icons on social sites.
 
 Keyboard shortcuts
 
@@ -60,11 +68,11 @@ It is a capture surface, not the full memory.wiki product. Editing existing docu
 
 Account
 
-No login required for one-off captures. Sign in (free during beta, sign up at memory.wiki) to attach captures to your account, search across them, and keep them in sync with the Mac, iOS, Android, VS Code, and CLI surfaces.
+No login required for one-off captures. Sign in (free during beta, sign up at memory.wiki) to attach captures to your account, search across them, and keep them in sync with other surfaces.
 
 Privacy
 
-No tracking. No third-party data sharing. No ads. Source on GitHub at github.com/raymindai/memory-wiki. The extension only contacts memory.wiki for publishing and the AI providers your captures route through (Claude or GPT for intent transforms) — see memory.wiki/privacy for the full policy.
+No tracking. No third-party data sharing. No ads. Source on GitHub at github.com/raymindai/memory-wiki. The extension only contacts memory.wiki for publishing and the AI providers your captures route through — see memory.wiki/privacy for the full policy.
 ```
 
 ## Category
