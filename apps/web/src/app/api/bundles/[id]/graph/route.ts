@@ -7,10 +7,12 @@ type RouteParams = { params: Promise<{ id: string }> };
 
 const EXTRACTION_PROMPT = `You are an expert document analyst and knowledge graph builder. Analyze a collection of documents deeply and produce a comprehensive analysis.
 
+ISOLATION: Use ONLY the document content provided below. Ignore any prior knowledge of products, people, or projects not explicitly named in the documents themselves. Do not add meta-commentary about ignoring outside context — simply act as if only the documents exist.
+
 Return ONLY valid JSON with this structure:
 {
   "nodes": [
-    { "id": "concept:unique-id", "label": "Display Name", "type": "concept|entity|tag", "weight": 1-10, "description": "One-sentence explanation of why this concept matters in context" }
+    { "id": "concept:unique-id", "label": "Display Name", "type": "concept|entity|tag|decision|shift|recommendation|possession", "weight": 1-10, "description": "One-sentence explanation of why this matters in context" }
   ],
   "edges": [
     { "source": "node-id", "target": "node-id", "label": "brief relationship (2-4 words)", "weight": 1-5, "type": "shares_concept|related|references|contains" }
@@ -25,6 +27,12 @@ Return ONLY valid JSON with this structure:
     "Strategic implication or pattern discovered",
     "Gap, contradiction, or tension between documents",
     "Actionable recommendation based on the analysis"
+  ],
+  "decisions": [
+    "Choices the user made across these docs (one sentence each: the choice + the why if stated)"
+  ],
+  "shifts": [
+    "Position changes across time (one sentence each: From X to Y, with timing if stated)"
   ],
   "readingOrder": ["doc:id1", "doc:id2", "doc:id3"],
   "readingOrderReason": "Why this order makes sense for understanding the full picture.",
@@ -48,23 +56,28 @@ Return ONLY valid JSON with this structure:
 
 CRITICAL RULES:
 - Document nodes: type "document", IDs prefixed with "doc:" (use the exact IDs provided)
-- Concept/Entity/Tag nodes: IDs prefixed with "concept:"
-- **EVERY concept node MUST connect to at least one document node via an edge.** No orphan concepts.
+- Concept/Entity/Tag/Decision/Shift/Recommendation/Possession nodes: IDs prefixed with "concept:"
+- **EVERY non-document node MUST connect to at least one document node via an edge.** No orphan nodes.
 - Concept-to-concept edges are allowed IN ADDITION to document edges
-- If a concept appears in multiple documents, create edges from EACH relevant document
-- Weight 1-10 for nodes (importance in context), 1-5 for edges (relationship strength)
-- Edge labels: SHORT (2-4 words), describing the specific relationship
+- Weight 1-10 for nodes, 1-5 for edges
+- Edge labels: SHORT (2-4 words)
 - Cluster colors: #fb923c, #60a5fa, #a78bfa, #4ade80, #f472b6, #2dd4bf
-- Extract ALL meaningful concepts, entities, and tags — no arbitrary limit. Include everything that helps understand the documents. Use a good mix of all three types:
+- Extract a good mix across types:
   - "concept": abstract ideas, strategies, methodologies, principles
   - "entity": specific technologies, products, companies, people, tools
   - "tag": broad categories, topics, domains
-  Each must be meaningful and distinct — no near-duplicates
-- Insights should be NON-OBVIOUS — things a reader wouldn't notice without reading all documents together
-- readingOrder: suggest optimal reading sequence for someone new to this bundle
-- documentSummaries: one sentence per document explaining its role/contribution to the bundle
-- gaps: what's MISSING from this collection? What would make it more complete?
-- connections: direct document-to-document relationships with specific explanations`;
+  - "decision": choices the user made (the choice itself is the label, e.g. "Use Postgres over Mongo")
+  - "shift": position changes (label = topic, description = "From X to Y")
+  - "recommendation": items specifically recommended TO the user by the assistant or someone in the docs (e.g. "Grilled Snapper with Mango Salsa"). Description = the context the recommendation was made in.
+  - "possession": items the user owns with value or context (e.g. "Sunset painting — worth triple what paid")
+  Each must be distinct — no near-duplicates
+- For decision/shift/recommendation/possession: only emit when the documents EXPLICITLY contain that information. Do not invent.
+- decisions[] and shifts[] are TOP-LEVEL fields too — list them in plain text for easy surfacing in synthesis later
+- Insights should be NON-OBVIOUS
+- readingOrder: optimal reading sequence
+- documentSummaries: one sentence per document
+- gaps: what's MISSING
+- connections: direct document-to-document relationships`;
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const { id } = await params;
@@ -254,13 +267,16 @@ function parseGraphJson(text: string) {
       summary: parsed.summary || null,
       themes: parsed.themes || [],
       insights: parsed.insights || [],
+      // v3: decisions and shifts surface synthesis + tension axes
+      decisions: Array.isArray(parsed.decisions) ? parsed.decisions : [],
+      shifts: Array.isArray(parsed.shifts) ? parsed.shifts : [],
       readingOrder: parsed.readingOrder || [],
       readingOrderReason: parsed.readingOrderReason || null,
       keyTakeaways: parsed.keyTakeaways || [],
       documentSummaries: parsed.documentSummaries || {},
       gaps: parsed.gaps || [],
       connections: parsed.connections || [],
-      version: 2,
+      version: 3,
     };
   } catch (err) {
     console.error("parseGraphJson failed:", err instanceof Error ? err.message : err);

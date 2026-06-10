@@ -18,7 +18,7 @@ import { callAI } from "@/lib/ai-providers";
 
 interface ExtractedConcept {
   label: string;
-  type?: "concept" | "entity" | "tag";
+  type?: "concept" | "entity" | "tag" | "decision" | "shift" | "recommendation" | "possession";
   weight?: number;
   description?: string;
 }
@@ -45,16 +45,18 @@ interface ExtractedDoc {
   intent: DocIntent | null;
 }
 
-const PER_DOC_PROMPT = `You analyze ONE document and return JSON with three things:
+const PER_DOC_PROMPT = `You analyze ONE document and return JSON.
+
+ISOLATION: Use ONLY the document content below. Ignore prior knowledge of products, people, or projects not explicitly named in the document itself. Do NOT add meta-commentary like "ignored per instructions" — simply act as if only this document exists.
 
 Return ONLY valid JSON with this exact shape:
 {
   "doc_intent": "note|definition|comparison|decision|question|reference",
   "concepts": [
-    { "label": "Display name", "type": "concept|entity|tag", "weight": 1-5, "description": "One sentence: why this concept matters in THIS document" }
+    { "label": "Display name", "type": "concept|entity|tag|decision|shift|recommendation|possession", "weight": 1-5, "description": "One sentence: why this matters in THIS document" }
   ],
   "relations": [
-    { "source": "Concept A label", "target": "Concept B label", "label": "2-4 word relationship", "weight": 1-3 }
+    { "source": "A label", "target": "B label", "label": "2-4 word relationship", "weight": 1-3 }
   ]
 }
 
@@ -65,17 +67,26 @@ DOC_INTENT — pick the ONE that best describes the document's primary shape:
 - "question"    : the doc poses an open question / unresolved investigation.
 - "reference"   : factual material the author goes back to (cheatsheet, API notes, playbook).
 - "note"        : everything else — meeting notes, journal-style writing, brainstorms.
-If genuinely uncertain, use "note". The user can override; default conservatively.
+If genuinely uncertain, use "note".
 
-CONCEPTS:
-- 5-15 concepts max. Quality over quantity. Skip filler.
-- Mix types thoughtfully:
-  - "concept" = abstract ideas, methodologies, principles
-  - "entity"  = specific products, technologies, companies, people, tools
-  - "tag"     = broad domains, topics
-- weight 1-5 (5 = central thesis of this doc, 1 = passing mention)
+CONCEPTS — 7-20 entries max, distributed across these types:
+
+Knowledge dimensions (most docs will have these):
+- "concept" : abstract ideas, methodologies, principles
+- "entity"  : specific products, technologies, companies, people, tools
+- "tag"     : broad domains, topics
+
+Behavioral dimensions (capture when the document records them; skip otherwise):
+- "decision"       : a choice the author/user made. Label = the choice ("Use Postgres over Mongo"). Description = why + when if stated.
+- "shift"          : a position change. Label = the topic ("Remote work preference"). Description = "From X to Y" with timing if stated.
+- "recommendation" : a specific thing the assistant or another party recommended TO the user. Label = the recommended item ("Grilled Snapper with Mango Salsa"). Description = the context the recommendation was made in ("Jamaican dish with fruit, snapper-based").
+- "possession"     : an item the user owns, with valuation or context. Label = the item ("Sunset painting"). Description = price, value, ownership story if stated.
+
+Rules:
+- weight 1-5 (5 = central to this doc, 1 = passing mention)
 - relations only between concepts you actually return. No orphan refs.
-- Use the SAME label string in relations as in concepts (case + spacing).
+- Use the SAME label string in relations as in concepts.
+- For decisions, shifts, recommendations, possessions: only emit when the document EXPLICITLY contains that information. Do not invent.
 - No prose, no fences, no commentary. JSON object only.`;
 
 const ALLOWED_INTENTS: Set<DocIntent> = new Set([
@@ -131,7 +142,11 @@ export async function extractDocOntology(
   for (const c of extracted.concepts) {
     const norm = normalizeConceptLabel(c.label || "");
     if (!norm) continue;
-    const conceptType: "concept" | "entity" | "tag" = c.type === "entity" || c.type === "tag" ? c.type : "concept";
+    const ALLOWED_TYPES = ["concept", "entity", "tag", "decision", "shift", "recommendation", "possession"] as const;
+    type ConceptType = (typeof ALLOWED_TYPES)[number];
+    const conceptType: ConceptType = (ALLOWED_TYPES as readonly string[]).includes(c.type as string)
+      ? (c.type as ConceptType)
+      : "concept";
 
     const { data: existing } = await supabase
       .from("concept_index")

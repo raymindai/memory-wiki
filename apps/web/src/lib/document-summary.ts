@@ -28,6 +28,8 @@ that capture the load-bearing claim or fact. Skip metadata (capture date,
 source, author), boilerplate, and table-of-contents lines. Return the
 summary alone, with no preface, no markdown, no quotes.
 
+ISOLATION: Use ONLY the document content below. Do not draw on prior knowledge of any product or person not named in the document itself. Do not add meta-commentary.
+
 Do NOT use em-dashes (—), en-dashes (–), middle-dots (·), arrows (→), check marks (✓), or emoji inside the summary. Use comma, colon, slash, parentheses, or a sentence break instead.
 
 DOCUMENT:

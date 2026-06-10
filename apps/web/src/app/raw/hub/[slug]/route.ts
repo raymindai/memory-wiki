@@ -297,21 +297,47 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
 
   // Top concepts by weight × occurrence — central themes first. Capped
   // at 40 so a 500-doc hub still fits comfortably under 4k tokens.
+  // Only the three classical types here; the four behavioral types
+  // (decision / shift / recommendation / possession) get their own
+  // dedicated sections below and are queried separately so they don't
+  // crowd the concept list.
   let q = supabase
     .from("concept_index")
     .select("id, label, concept_type, description, weight, occurrence_count, doc_ids")
     .eq("user_id", profile.id)
+    .in("concept_type", ["concept", "entity", "tag"])
     .order("weight", { ascending: false })
     .limit(40);
   if (since) q = q.gte("created_at", since);
   const { data: rawConcepts } = await q;
   const concepts = (rawConcepts as ConceptRow[] | null) || [];
 
+  // Behavioral dimensions — decisions, shifts (= position changes the
+  // user made over time), recommendations the assistant gave the user,
+  // and possessions/valuations. These are the v3 LongMemEval lessons
+  // baked into the hub digest: synthesis + tension detection + needle
+  // preservation (assistant turns + user possessions) all start from
+  // having these rows surfaced separately, not folded into "concepts".
+  // Capped at 20 each — generous but keeps the digest under control.
+  const { data: rawBehavioral } = await supabase
+    .from("concept_index")
+    .select("id, label, concept_type, description, weight, doc_ids")
+    .eq("user_id", profile.id)
+    .in("concept_type", ["decision", "shift", "recommendation", "possession"])
+    .order("weight", { ascending: false })
+    .limit(80);
+  const behavioral = (rawBehavioral as ConceptRow[] | null) || [];
+  const decisions = behavioral.filter((c) => c.concept_type === "decision").slice(0, 20);
+  const shifts = behavioral.filter((c) => c.concept_type === "shift").slice(0, 20);
+  const recommendations = behavioral.filter((c) => c.concept_type === "recommendation").slice(0, 20);
+  const possessions = behavioral.filter((c) => c.concept_type === "possession").slice(0, 20);
+
   // Resolve doc titles in one round-trip, only for the docs referenced
-  // by the top concepts AND visible to the public (no draft, no
-  // password, no email allow-list).
+  // by the top concepts (and behavioral dimensions) AND visible to the
+  // public (no draft, no password, no email allow-list).
   const docIdSet = new Set<string>();
   for (const c of concepts) for (const id of c.doc_ids || []) docIdSet.add(id);
+  for (const c of behavioral) for (const id of c.doc_ids || []) docIdSet.add(id);
   let docTitleById = new Map<string, string>();
   // Per-doc gist for compact digest. Priority:
   //   1) Phase B  — `## Facts` block from the body (owner-curated)
@@ -523,6 +549,65 @@ async function renderDigest({ supabase, profile, slug, compact, since }: DigestA
       );
     }
   }
+
+  // ── Behavioral dimensions — decisions, shifts, recommendations,
+  // possessions. Each renders only when there are entries. Surface them
+  // BEFORE the all-documents catalog so an AI reading top-down sees the
+  // user's structured behavioral state before scanning the long tail.
+  // Same doc-link/gist treatment as the concept section for consistency.
+  function renderBehavioralSection(
+    title: string,
+    rows: ConceptRow[],
+    blurb: string,
+  ): string | null {
+    if (rows.length === 0) return null;
+    const visible = rows.filter((c) => {
+      const docs = (c.doc_ids || []).filter((id) => docTitleById.has(id));
+      return docs.length > 0;
+    });
+    if (visible.length === 0) return null;
+    const lines: string[] = [];
+    lines.push(`## ${title}`);
+    lines.push(`_${blurb}_`);
+    for (const c of visible) {
+      const docs = (c.doc_ids || []).filter((id) => docTitleById.has(id)).slice(0, 4);
+      lines.push(`### ${c.label}`);
+      if (c.description) lines.push(`> ${c.description.split("\n")[0]}`);
+      const docList = docs
+        .map((id) => `- [${docTitleById.get(id)}](https://memory.wiki/${id})`)
+        .join("\n");
+      if (docList) lines.push(docList);
+    }
+    return lines.join("\n");
+  }
+
+  const decisionsSection = renderBehavioralSection(
+    "Decisions",
+    decisions,
+    `${decisions.length} decision${decisions.length === 1 ? "" : "s"} the user has recorded across this hub. Useful for synthesis — what choices have been made.`,
+  );
+  if (decisionsSection) sections.push(decisionsSection);
+
+  const shiftsSection = renderBehavioralSection(
+    "Shifts",
+    shifts,
+    `${shifts.length} position change${shifts.length === 1 ? "" : "s"} over time. Useful for tension detection — where the user's view has evolved.`,
+  );
+  if (shiftsSection) sections.push(shiftsSection);
+
+  const recsSection = renderBehavioralSection(
+    "Recommendations",
+    recommendations,
+    `${recommendations.length} item${recommendations.length === 1 ? "" : "s"} the assistant (or another party in the conversation) recommended to the user. Often the answer to "what was that thing you suggested?" questions.`,
+  );
+  if (recsSection) sections.push(recsSection);
+
+  const possSection = renderBehavioralSection(
+    "Possessions and valuations",
+    possessions,
+    `${possessions.length} item${possessions.length === 1 ? "" : "s"} the user owns, often with prices, values, or ownership stories.`,
+  );
+  if (possSection) sections.push(possSection);
 
   // ── All-documents catalog — every public doc in the hub with its
   // gist inlined, even when the doc isn't part of the top-40 concept
