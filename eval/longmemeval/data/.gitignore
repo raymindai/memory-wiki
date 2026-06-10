@@ -1,0 +1,8 @@
+# Raw upstream dataset (265 MB) — exceeds GitHub 100 MB file cap.
+# README.md explains how to fetch:
+#   curl -L -o data/longmemeval_s.json \
+#     https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json
+longmemeval_s.json
+
+# Per-seed random samples are reproducible from sample-random.mjs.
+random-*.json

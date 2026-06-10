@@ -1,0 +1,56 @@
+{
+  "bench": "LongMemEval-S",
+  "mode": "raw-vs-compact",
+  "via": "Claude Code Workflow (Opus 4.7, subscription, $0 cost)",
+  "n_questions": 6,
+  "selection": "smallest-haystack per question_type (script-cap workaround); NOT a uniform random sample",
+  "overall": {
+    "raw":     { "correct": 2, "total": 6, "accuracy": 0.333 },
+    "compact": { "correct": 3, "total": 6, "accuracy": 0.500 }
+  },
+  "delta": "+0.167 (compact - raw), but n=6 is too small for significance",
+  "compression_ratio": "30-50x typical (120k -> 3-6k tokens)",
+  "by_question": [
+    { "qid": "b86304ba", "type": "single-session-user",       "raw": "✓",         "compact": "✗ broken-digest (94 tokens)", "note": "compress agent echoed haystack fragment instead of producing digest" },
+    { "qid": "4f54b7c9", "type": "multi-session",              "raw": "✗ said 3", "compact": "✓ said 5",                     "note": "compact WIN — structured digest let model count across sessions" },
+    { "qid": "d24813b1", "type": "single-session-preference",  "raw": "✗ refuse", "compact": "✗ Lemon Lavender Pound Cake",   "note": "both fail; compact hallucinated wrong cake — digest missed 'lemon poppyseed' detail" },
+    { "qid": "c8090214", "type": "temporal-reasoning",         "raw": "✗ refuse", "compact": "✓ 7 days",                     "note": "compact WIN — Holiday Market + iPhone facts surfaced in same digest section, model connected them" },
+    { "qid": "cc5ded98", "type": "knowledge-update",           "raw": "✓",         "compact": "✓",                            "note": "tie at top" },
+    { "qid": "778164c6", "type": "single-session-assistant",   "raw": "✗ wrong",  "compact": "✗ wrong",                      "note": "both gave wrong dish (Escovitch); needle lost in both raw AND digest" }
+  ],
+  "showstopping_methodology_issues": [
+    {
+      "issue": "memory-contamination",
+      "evidence": "compact digests for q3 and q4 contain real user identity (Hyunsang Cho, memory.wiki, Emdy Hummingbird, Claude Opus 4.7) that is NOT in the LongMemEval haystack. Claude Code subagents inherit MEMORY.md / CLAUDE.md from the parent session — invalidates 'AI given only this corpus' premise.",
+      "fix": "spawn agents via a context-clean entrypoint, OR use `claude -p` headless with explicit empty session, OR explicitly prepend 'IGNORE ALL PRIOR KNOWLEDGE / MEMORY FILES — USE ONLY THIS CONTEXT' to the prompt"
+    },
+    {
+      "issue": "run-to-run variance",
+      "evidence": "first 6-question pilot (baseline only): RAW 5/6 = 83%. This run, RAW on same 6 questions: 2/6 = 33%. Same model, same prompt, same input. The 50-percentage-point swing means n=1 is essentially noise.",
+      "fix": "N>=3 (recommend 5) runs per condition; report mean+/-stddev"
+    },
+    {
+      "issue": "compress agent occasionally breaks",
+      "evidence": "q0 (painting): compress agent returned 94 tokens of haystack echo instead of a digest. Hard fail.",
+      "fix": "stronger end-of-prompt instruction marker ('BEGIN DIGEST BELOW. Output ONLY the four markdown sections.'); detect and retry when output is suspiciously short"
+    },
+    {
+      "issue": "selection bias",
+      "evidence": "picked smallest-haystack question per type to fit script size cap. Real LongMemEval-S samples have larger contexts (median 122k). Our results are best-case for raw; bias direction for compact is unclear.",
+      "fix": "random sample once memory contamination is fixed; use args-passing instead of script-embed to fit larger questions"
+    }
+  ],
+  "real_takeaways": [
+    "Within-workflow (variance controlled across conditions), compact won 2, tied 3, lost 1 vs raw. The two compact wins were on questions where raw REFUSED — compression made facts more reachable across long context.",
+    "Compression ratio is 30-50x (matches our production claim of '5-9x' for compact mode being conservative).",
+    "Compact LOSES when the question requires a needle detail that the compressor decided not to include (q2 lemon poppyseed). Structured compression has a recall-precision tradeoff — needles get pruned.",
+    "Long-context Q&A is intrinsically noisy at this scale (the 33% vs 83% swing). This is the same instability memory.inc, Mastra et al. are trying to solve — but our specific compression v1 only mildly helps."
+  ],
+  "honest_next_steps": [
+    "DO NOT publish any number from this run. n is too small, variance too high, memory contamination corrupts compact condition.",
+    "Fix memory contamination first (explicit prompt OR alternative subagent type). Re-run small sample to confirm fix.",
+    "Then run N=5 per (question, condition) for variance estimate.",
+    "Then expand to 30-60 questions with random sampling once methodology is solid.",
+    "Only at that point compare to memory.inc / Mastra / Supermemory numbers."
+  ]
+}

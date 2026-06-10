@@ -1,0 +1,136 @@
+{
+  "bench": "LongMemEval-S",
+  "mode": "raw-vs-compact-v2-seq",
+  "via": "Claude Code Workflow (Opus 4.7, subscription, $0 cost)",
+  "n_questions": 6,
+  "selection": "smallest-haystack per question_type (script-cap workaround); NOT a uniform random sample",
+  "N_per_question": 3,
+  "by_question": [
+    {
+      "qid": "b86304ba",
+      "type": "single-session-user",
+      "topic": "painting worth (needle in haystack)",
+      "raw_correct": 0,
+      "raw_n": 3,
+      "raw_pct": 0.0,
+      "compact_correct": 0,
+      "compact_n": 3,
+      "compact_pct": 0.0,
+      "outcome": "tie at floor — both refused; needle not surfaced in compress digest"
+    },
+    {
+      "qid": "4f54b7c9",
+      "type": "multi-session",
+      "topic": "antique items count",
+      "raw_correct": 0,
+      "raw_n": 3,
+      "raw_pct": 0.0,
+      "compact_correct": 1,
+      "compact_n": 3,
+      "compact_pct": 0.333,
+      "outcome": "compact wins — raw consistently miscounts to 3; compact got 5/4-5/2 (noisy)"
+    },
+    {
+      "qid": "d24813b1",
+      "type": "single-session-preference",
+      "topic": "baking gathering suggestions",
+      "raw_correct": 0,
+      "raw_n": 6,
+      "raw_pct": 0.0,
+      "compact_correct": 5,
+      "compact_n": 6,
+      "compact_pct": 0.833,
+      "outcome": "compact dominant — runs combined across 2 successful workflow attempts (TPM retry); raw consistently refuses, compact connects to 'lemon poppyseed' history",
+      "note": "this question ran twice due to throttle retries — combined N=6"
+    },
+    {
+      "qid": "c8090214",
+      "type": "temporal-reasoning",
+      "topic": "Holiday Market days before iPhone",
+      "raw_correct": 0,
+      "raw_n": 3,
+      "raw_pct": 0.0,
+      "compact_correct": 3,
+      "compact_n": 3,
+      "compact_pct": 1.0,
+      "outcome": "cleanest compact win — raw refuses 3/3; compact connects 'Holiday Market = week before Black Friday' + 'iPhone bought on Black Friday' for all 3 runs"
+    },
+    {
+      "qid": "cc5ded98",
+      "type": "knowledge-update",
+      "topic": "coding hours per day",
+      "raw_correct": 3,
+      "raw_n": 3,
+      "raw_pct": 1.0,
+      "compact_correct": 3,
+      "compact_n": 3,
+      "compact_pct": 1.0,
+      "outcome": "tie at ceiling — clear fact, both surfaces find it"
+    },
+    {
+      "qid": "778164c6",
+      "type": "single-session-assistant",
+      "topic": "Jamaican snapper dish",
+      "raw_correct": 1,
+      "raw_n": 3,
+      "raw_pct": 0.333,
+      "compact_correct": 0,
+      "compact_n": 3,
+      "compact_pct": 0.0,
+      "outcome": "only RAW win — needle was in an ASSISTANT turn (recommendation), compress agent biased toward user-stated facts so digest lost it"
+    }
+  ],
+  "pooled": {
+    "raw": { "correct": 4, "total": 21, "accuracy": 0.190 },
+    "compact": { "correct": 12, "total": 21, "accuracy": 0.571 },
+    "delta_pp": 38.1
+  },
+  "by_outcome": {
+    "compact_wins": 3,
+    "raw_wins": 1,
+    "tie_at_floor": 1,
+    "tie_at_ceiling": 1
+  },
+  "memory_leak": {
+    "total_digests_inspected": 21,
+    "leaked_count": "approx 4-5 across q0/q5 (Hyunsang, Karpathy markers detected); other 16+ clean",
+    "leak_rate_estimate": 0.15,
+    "interpretation": "v2 anti-leak prefix reduced leak from 100% (v1) to ~15%; further hardening needed (perhaps explicit token-filter on output or use a non-Workflow subagent type)"
+  },
+  "compression_ratio": "~30x typical (118K -> 4K tokens)",
+  "tpm_lessons": [
+    "Parallel N>=2 within a workflow burst-triggers the Anthropic TPM cap (~1M tokens/min sustained on our subscription).",
+    "6 workflows in parallel, each running sequentially internally, also hit cap on first attempt — only q1 and q2 survived cleanly.",
+    "Sequential retry per workflow (1 at a time, 2-3 at a time after cool-down) was the only reliable path. Each workflow ~1.4M tokens / ~5 min.",
+    "Total tokens burned across all v2 attempts: ~30M+. Wall time: ~90 min including retries."
+  ],
+  "comparison_to_published": {
+    "memory_inc_full_500": 0.948,
+    "mastra_OM_full_500": 0.842,
+    "supermemory_full_500": 0.816,
+    "zep_full_500": 0.712,
+    "full_context_baseline_500": 0.602,
+    "our_raw_n21": 0.190,
+    "our_compact_n21": 0.571,
+    "caveat": "DO NOT publish this comparison. Our setup differs: (a) we sampled SMALLEST haystack per type (script-cap workaround), not random; (b) N=3 per question, not the full 500; (c) Opus 4.7 vs whatever model others used; (d) our raw 19% is far below published 60% Full-Context — suggests Opus's long-context retrieval is more conservative (refuses more) than the published baseline's model."
+  },
+  "real_takeaways": [
+    "Pooled across 6 questions × N=3 (21 total runs per condition), compact wins +38pp absolute (57% vs 19%). Large effect.",
+    "Compact wins in 3 of 6 questions, ties 2, loses 1. The 1 loss (snapper) is informative: compress agent biased to user-stated facts, lost an assistant recommendation needle.",
+    "Two ties bracket the curve: q0 (both fail at floor, needle pruned) and q4 (both succeed at ceiling, fact obvious).",
+    "The 4 compact wins (combining clean wins + dominance) all share a pattern: RAW refuses ('context does not contain answer') while COMPACT gives a real answer. Compression doesn't add information — it just restructures so the answering AI can find what's already there.",
+    "Raw 19% is a low number, but it reflects Opus 4.7's conservative refusal habit on long-context Q&A more than a real memory ceiling. Raw refuses 14/17 times = 82% refusal rate.",
+    "Compact stddev > 0 on q1, q2, q5 — same digest can give different answers run-to-run. Need N>3 for stable stddev estimate."
+  ],
+  "memory_inc_positioning_implications": [
+    "memory.inc claims 94.8% by SOLVING the long-context refusal problem at the retrieval layer. Our compact at 57% on cherry-picked easy samples is far from that.",
+    "But our 'raw' baseline (19%) is also far below their 60% Full-Context number — comparison apples-to-oranges. We need same baseline before any claim.",
+    "Real next step for category entry: run the full LongMemEval-S 500 with consistent setup. Our cherry-pick + N=3 is not in the same league as their published numbers."
+  ],
+  "honest_recommendation": [
+    "Do not publish any percentage from this pilot. It is methodologically too caveated.",
+    "What CAN be claimed internally: compact mode preserves answer-finding ability on long-context questions where the bare model refuses to engage. We have a directional signal that our /raw/hub/<slug>?digest=1&compact=1 endpoint is doing useful work.",
+    "Next investment: solve TPM throttling by using async pacing + retries in the harness, then run full 500 questions. Estimated 50M+ tokens, ~10 hours on subscription. Sane to do once.",
+    "Independently solve memory contamination: drop subagents entirely for the answer/compress role and use `claude -p` with --no-resume + explicit no-memory flag, OR build a custom 'evaluation' agent type that doesn't load MEMORY.md."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "bench": "LongMemEval-S",
+  "mode": "baseline-raw-haystack",
+  "via": "Claude Code Workflow (Opus 4.7, subscription, $0 cost)",
+  "n_input": 6,
+  "n_valid": 6,
+  "selection": "smallest-haystack per question_type (script-cap workaround) — NOT a uniform random sample",
+  "overall": { "total": 6, "correct": 5, "accuracy": 0.833 },
+  "by_type": {
+    "single-session-user":       { "total": 1, "correct": 0, "accuracy": 0.0, "qid": "b86304ba", "note": "needle-in-haystack miss: AI claimed no info about sunset painting, gold says 'triple what I paid'" },
+    "single-session-assistant":  { "total": 1, "correct": 1, "accuracy": 1.0, "qid": "778164c6" },
+    "single-session-preference": { "total": 1, "correct": 1, "accuracy": 1.0, "qid": "d24813b1" },
+    "multi-session":             { "total": 1, "correct": 1, "accuracy": 1.0, "qid": "4f54b7c9" },
+    "temporal-reasoning":        { "total": 1, "correct": 1, "accuracy": 1.0, "qid": "c8090214" },
+    "knowledge-update":          { "total": 1, "correct": 1, "accuracy": 1.0, "qid": "cc5ded98" }
+  },
+  "external_baselines_full_500": {
+    "memory.inc":     0.948,
+    "Mastra-OM":      0.842,
+    "Supermemory":    0.816,
+    "Zep":            0.712,
+    "Full-Context":   0.602
+  },
+  "caveats": [
+    "n=6 — statistical noise is large; treat as sanity check not headline",
+    "Selected smallest-haystack per type (script-cap workaround); biased toward easier questions",
+    "Single-session-user fail is a needle-in-haystack pattern that the larger LongMemEval-S sample likely amplifies",
+    "Subagent system prompt differs from end-user 'paste into claude.ai' — published numbers may not be directly comparable until we run headless `claude -p` sanity check",
+    "This is the Full-Context baseline (raw haystack inlined). Memory.wiki pipeline (concept_index / graph_data) NOT applied. Next phase is to compare baseline vs mdfy-processed corpus."
+  ]
+}
