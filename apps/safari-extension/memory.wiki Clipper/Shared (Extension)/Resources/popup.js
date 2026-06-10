@@ -123,7 +123,14 @@ function showResult({ url, source, title, isError, errorText }) {
   card.classList.add("visible");
   if (errorEl) { errorEl.style.display = "none"; errorEl.textContent = ""; }
   if (head) head.textContent = (source === "auth" ? "published" : "ready") + " · copied for AI";
-  if (urlText) urlText.textContent = url.replace(/^https?:\/\//, "");
+  if (urlText) {
+    urlText.textContent = url.replace(/^https?:\/\//, "");
+    urlText.style.cursor = "pointer";
+    urlText.onclick = (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url });
+    };
+  }
   card.dataset.url = url;
 
   // Copy button
