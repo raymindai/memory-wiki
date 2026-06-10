@@ -211,7 +211,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.ios.features} />
               <PluginInstall heading={t.ios.installHeading} steps={t.ios.installSteps} />
               <PluginDownload
-                primary={{ label: t.ios.downloadLabel, href: "https://apps.apple.com" }}
+                primary={{ label: t.ios.downloadLabel, href: "https://apps.apple.com/us/app/memory-wiki/id6774713489" }}
                 secondary={{ label: t.ios.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
