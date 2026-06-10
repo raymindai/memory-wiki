@@ -148,7 +148,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.safari.features} />
               <PluginInstall heading={t.safari.installHeading} steps={t.safari.installSteps} />
               <PluginDownload
-                primary={{ label: t.safari.downloadLabel, href: "https://apps.apple.com" }}
+                primary={{ label: t.safari.downloadLabel, href: "#" }}
                 secondary={{ label: t.safari.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
@@ -202,7 +202,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginInstall heading={t.desktop.installHeading} steps={t.desktop.installSteps} />
               <PluginDownload
                 primary={{ label: "Download v2.3.6 (Apple Silicon)", href: "https://github.com/raymindai/memory-wiki/releases/latest" }}
-                secondary={{ label: t.desktop.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+                secondary={{ label: isKo ? "Mac App Store (출시 준비 중)" : "Mac App Store (coming soon)", href: "#" }}
               />
             </PluginBlock>
 
@@ -221,7 +221,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.android.features} />
               <PluginInstall heading={t.android.installHeading} steps={t.android.installSteps} />
               <PluginDownload
-                primary={{ label: t.android.downloadLabel, href: "https://play.google.com/store" }}
+                primary={{ label: t.android.downloadLabel, href: "#" }}
                 secondary={{ label: t.android.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
