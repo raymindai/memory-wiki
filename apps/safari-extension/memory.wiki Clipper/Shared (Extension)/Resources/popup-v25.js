@@ -1353,4 +1353,30 @@ function startTransformProgress(mode) {
     lines.push("5) storage cache mw-auth-session -> " + JSON.stringify(s));
     emit();
   });
+
+  // 6) Live capture trace — click intercept on #btn-capture +
+  //    MutationObserver on #result. Fires after popup.js binds its
+  //    own click handler so the user sees progress in the debug
+  //    panel even though popup-v25.html has no visible status bar.
+  setTimeout(() => {
+    const btn = document.getElementById("btn-capture");
+    if (btn) {
+      btn.addEventListener("click", () => {
+        lines.push("6) [click] btn-capture pressed mode=" + (btn.dataset.mode || "?"));
+        emit();
+      }, true);
+    } else {
+      lines.push("6) btn-capture NOT FOUND");
+      emit();
+    }
+    const result = document.getElementById("result");
+    if (result) {
+      new MutationObserver(() => {
+        const text = (result.textContent || "").trim().slice(0, 180);
+        const cls = result.className;
+        lines.push("7) [result] cls='" + cls + "' text='" + text + "'");
+        emit();
+      }).observe(result, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+    }
+  }, 200);
 })();

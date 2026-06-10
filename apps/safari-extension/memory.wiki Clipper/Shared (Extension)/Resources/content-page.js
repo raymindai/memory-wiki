@@ -19,6 +19,22 @@
   if (document.documentElement.dataset.mwPageInjected) return;
   document.documentElement.dataset.mwPageInjected = "1";
 
+  // Hook for direct-call path used by the Safari popup (Safari's
+  // content-script messaging is unreliable from extension popup
+  // context — Storage Partitioning quirk). The popup can run
+  // chrome.scripting.executeScript({func: () => window.__mwCapture()})
+  // and bypass chrome.tabs.sendMessage entirely. Chrome users still
+  // go through the listener below; the exposed hook is harmless.
+  function __mwCaptureViaHook(kind) {
+    try {
+      if (kind === "selection") return captureSelection();
+      return capturePage();
+    } catch (err) {
+      return { markdown: "", error: String(err && err.message || err) };
+    }
+  }
+  window.__mwCapture = __mwCaptureViaHook;
+
   function siteName() {
     return location.hostname.replace(/^www\./, "");
   }

@@ -364,6 +364,42 @@ function showNotOnAiPage() {
 // timeout so the popup recovers instead of sitting on "Capturing"
 // forever. Returns the response, OR an error stub if either limit
 // hits.
+// Safari-friendly path: instead of chrome.tabs.sendMessage (which can
+// hang in Safari from popup → content-script), call the hook
+// content-page.js exposes on window.__mwCapture via executeScript
+// running in the page's isolated world. Returns the same
+// {markdown, title, pageType, error?} shape as the message path so
+// the caller is interchangeable.
+async function captureViaDirectHook(tabId, kind /* "page" | "selection" */) {
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (k) => {
+        try { return window.__mwCapture ? window.__mwCapture(k) : null; }
+        catch (e) { return { markdown: "", error: String(e && e.message || e) }; }
+      },
+      args: [kind],
+    });
+    return results && results[0] && results[0].result;
+  } catch (err) {
+    return { markdown: "", error: "executeScript failed: " + (err && err.message || err) };
+  }
+}
+
+// Make capture errors visible — popup-v25.html has #result for the
+// success card but setStatus() target #status doesn't exist, so
+// errors were silently dropped. This paints the error in the same
+// result card.
+function renderInlineError(text) {
+  const card = document.getElementById("result");
+  if (!card) { console.warn("[memory.wiki]", text); return; }
+  card.classList.add("visible", "error");
+  const head = document.getElementById("result-head-text");
+  const errEl = document.getElementById("result-error-text");
+  if (head) head.textContent = "couldn't capture";
+  if (errEl) { errEl.style.display = ""; errEl.textContent = text; }
+}
+
 function sendMessageWithTimeout(tabId, msg, ms) {
   return new Promise((resolve) => {
     let done = false;
@@ -408,13 +444,23 @@ btnCapture.addEventListener("click", async () => {
       // General web page — route through the content-page.js script
       // (manifest already injects it; we still ensure for first-load safety).
       await ensureContentScript(tab.id, "page");
-      const response = await sendMessageWithTimeout(tab.id, { action: "capture-page" }, 25000);
+      // Direct hook path — bypasses chrome.tabs.sendMessage which is
+      // unreliable in Safari (popup → content-script messaging can
+      // hang silently). content-page.js exposes window.__mwCapture
+      // for this. Try direct call first; fall back to messaging only
+      // if the hook isn't there (older content script versions).
+      let response = await captureViaDirectHook(tab.id, "page");
+      if (!response || (!response.markdown && !response.error)) {
+        response = await sendMessageWithTimeout(tab.id, { action: "capture-page" }, 25000);
+      }
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
       } else if (response && response.error) {
         setStatus("capture failed: " + response.error, "error");
+        renderInlineError("capture failed: " + response.error);
       } else {
         setStatus("no content found", "error");
+        renderInlineError("no content found on this page");
       }
     } else {
       // AI conversation — existing path.
@@ -426,8 +472,10 @@ btnCapture.addEventListener("click", async () => {
         await openInMemoryWiki(response.markdown);
       } else if (response && response.error) {
         setStatus("capture failed: " + response.error, "error");
+        renderInlineError("capture failed: " + response.error);
       } else {
         setStatus("no conversation found", "error");
+        renderInlineError("no conversation found on this page");
       }
     }
   } catch (err) {
