@@ -20,11 +20,6 @@
 // session refresh all naturally flow through.
 
 (function () {
-  // Visible signal that the content script ran. Surfaces in the
-  // memory.wiki page's Web Inspector console (which Safari does
-  // expose, unlike the extension popup inspector).
-  console.log("[memory.wiki auth-bridge] loaded on", location.href);
-
   function readSupabaseSession() {
     try {
       // Supabase auth cookies are named sb-<projectref>-auth-token,
@@ -73,7 +68,6 @@
 
   function syncOnce() {
     const session = readSupabaseSession();
-    console.log("[memory.wiki auth-bridge] syncOnce → session=", session ? session.email || session.userId : "null");
     if (session) {
       relayToBackground(session);
     } else {
