@@ -7585,7 +7585,15 @@ ${clone.innerHTML}
             onClick={() => window.open("/about", "_blank")}
             title="memory.wiki — About"
           >
-            <MemoryWikiLogo size={isMobile ? 14 : 18} variant="full" />
+            {/* On mobile the icon row to the right gets dense and the
+                wordmark collides with the first icon — drop the
+                "memory.wiki" text and keep only the animated blob so
+                the row breathes. Slightly larger blob size so it
+                still reads as the brand mark. */}
+            <MemoryWikiLogo
+              size={isMobile ? 20 : 18}
+              variant={isMobile ? "icon-only" : "full"}
+            />
           </h1>
           {/* Document / Bundle / Hub URL chip — refined chip group.
               For doc tabs: shows /{cloudId} → memory.wiki/{cloudId}.

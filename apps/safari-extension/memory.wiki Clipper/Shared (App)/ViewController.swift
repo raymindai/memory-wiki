@@ -2,7 +2,10 @@
 //  ViewController.swift
 //  Shared (App)
 //
-//  Created by Hyunsang Cho on 6/10/26.
+//  Container app for the Safari Web Extension. Hosts a WKWebView that
+//  loads Resources/Base.lproj/Main.html. JavaScript posts typed messages
+//  back through window.webkit.messageHandlers.controller.postMessage to
+//  drive native actions (open Safari prefs / Settings / external URL).
 //
 
 import WebKit
@@ -16,7 +19,16 @@ import SafariServices
 typealias PlatformViewController = NSViewController
 #endif
 
-let extensionBundleIdentifier = "wiki.memory.clipper.Extension"
+/// Bundle identifier of the Safari extension we ship. The container app
+/// asks Safari for its state via SFSafariExtensionManager (macOS only),
+/// so this must match the extension target's PRODUCT_BUNDLE_IDENTIFIER.
+let extensionBundleIdentifier: String = {
+    #if os(iOS)
+    return "wiki.memory.clipper.ios.Extension"
+    #else
+    return "wiki.memory.clipper.mac.Extension"
+    #endif
+}()
 
 class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMessageHandler {
 
@@ -27,27 +39,27 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 
         self.webView.navigationDelegate = self
 
-#if os(iOS)
-        self.webView.scrollView.isScrollEnabled = false
-#endif
+        #if os(iOS)
+        self.webView.scrollView.isScrollEnabled = true
+        self.webView.scrollView.contentInsetAdjustmentBehavior = .always
+        #endif
 
         self.webView.configuration.userContentController.add(self, name: "controller")
 
-        self.webView.loadFileURL(Bundle.main.url(forResource: "Main", withExtension: "html")!, allowingReadAccessTo: Bundle.main.resourceURL!)
+        self.webView.loadFileURL(
+            Bundle.main.url(forResource: "Main", withExtension: "html")!,
+            allowingReadAccessTo: Bundle.main.resourceURL!
+        )
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-#if os(iOS)
+        #if os(iOS)
         webView.evaluateJavaScript("show('ios')")
-#elseif os(macOS)
+        #elseif os(macOS)
         webView.evaluateJavaScript("show('mac')")
 
         SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionBundleIdentifier) { (state, error) in
-            guard let state = state, error == nil else {
-                // Insert code to inform the user that something went wrong.
-                return
-            }
-
+            guard let state = state, error == nil else { return }
             DispatchQueue.main.async {
                 if #available(macOS 13, *) {
                     webView.evaluateJavaScript("show('mac', \(state.isEnabled), true)")
@@ -56,26 +68,50 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
                 }
             }
         }
-#endif
+        #endif
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-#if os(macOS)
-        if (message.body as! String != "open-preferences") {
+        // Accept both the legacy plain-string "open-preferences" and the
+        // new typed-dictionary protocol so we don't break old Main.html
+        // shipped to existing users mid-rollout.
+        let type: String
+        var url: String? = nil
+        if let s = message.body as? String {
+            type = s
+        } else if let dict = message.body as? [String: Any], let t = dict["type"] as? String {
+            type = t
+            url = dict["url"] as? String
+        } else {
             return
         }
 
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
-            guard error == nil else {
-                // Insert code to inform the user that something went wrong.
-                return
+        switch type {
+        case "open-preferences":
+            #if os(macOS)
+            SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { _ in
+                DispatchQueue.main.async { NSApp.terminate(self) }
             }
+            #endif
 
-            DispatchQueue.main.async {
-                NSApp.terminate(self)
+        case "open-settings":
+            #if os(iOS)
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
             }
+            #endif
+
+        case "open-url":
+            guard let urlString = url, let externalURL = URL(string: urlString) else { return }
+            #if os(iOS)
+            UIApplication.shared.open(externalURL)
+            #elseif os(macOS)
+            NSWorkspace.shared.open(externalURL)
+            #endif
+
+        default:
+            break
         }
-#endif
     }
 
 }
