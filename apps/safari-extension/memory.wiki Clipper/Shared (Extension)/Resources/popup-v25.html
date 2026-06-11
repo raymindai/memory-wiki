@@ -808,6 +808,29 @@
     }
     .intent-chip .chip-btn svg { width: 12px; height: 12px; display: block; fill: currentColor; flex-shrink: 0; }
 
+    /* Touch devices (iOS Safari, Android Chrome, iPadOS) — no hover,
+       so anything we revealed on :hover stays invisible. Make every
+       hover-revealed actionable element default-visible on coarse
+       pointers and bump hit targets up so they're tappable. */
+    @media (hover: none), (pointer: coarse) {
+      /* Intent chip fav / del buttons */
+      .intent-chip .chip-actions { gap: 6px; margin-left: 6px; }
+      .intent-chip .chip-btn {
+        width: 18px;
+        height: 18px;
+        opacity: 0.55;
+      }
+      .intent-chip .chip-btn svg { width: 14px; height: 14px; }
+      .intent-chip.is-favorite .chip-btn.fav { width: 18px; }
+      /* Recent section "clear all" */
+      .recent-wrap .recent-clear { opacity: 0.7; }
+      /* Recent item open-arrow — keep faint so the row stays clean,
+         but visible enough that it reads as "tappable to open" */
+      .recent-item .open-arrow { opacity: 0.55; }
+      /* Account foot row action button (sign-in / settings) */
+      .foot:not(.signin) .act { opacity: 1; background: var(--ink); }
+    }
+
     /* ─── Result card: hidden. Capture state shows in the primary CTA
        text ("Capturing..."), and the new doc highlights in Recent. ─── */
     .result { display: none !important; }
