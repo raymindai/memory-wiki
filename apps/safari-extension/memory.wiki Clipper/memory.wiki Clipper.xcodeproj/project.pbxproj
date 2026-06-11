@@ -69,6 +69,10 @@
 		5A2B52582FD89053006BF86E /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B52222FD89053006BF86E /* fonts */; };
 		5A5C6E562FD9B52D00F78BCC /* auth-bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = 5A5C6E552FD9B52D00F78BCC /* auth-bridge.js */; };
 		5A5C6E572FD9B52D00F78BCC /* auth-bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = 5A5C6E552FD9B52D00F78BCC /* auth-bridge.js */; };
+		5A6PA0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PA0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
+		5A6PA0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PA0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
+		5A6PE0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
+		5A6PE0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -155,6 +159,8 @@
 		5A2B521F2FD89053006BF86E /* content.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content.js; path = Resources/content.js; sourceTree = "<group>"; };
 		5A2B52222FD89053006BF86E /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = Resources/fonts; sourceTree = "<group>"; };
 		5A5C6E552FD9B52D00F78BCC /* auth-bridge.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Resources/auth-bridge.js"; sourceTree = "<group>"; };
+		5A6PA0012FD89999006BF86E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +213,7 @@
 			children = (
 				5A2B51B42FD89051006BF86E /* ViewController.swift */,
 				5A2B51B52FD89053006BF86E /* Assets.xcassets */,
+				5A6PA0012FD89999006BF86E /* PrivacyInfo.xcprivacy */,
 				5A2B51AE2FD89051006BF86E /* Resources */,
 			);
 			path = "Shared (App)";
@@ -228,6 +235,7 @@
 			children = (
 				5A2B52082FD89053006BF86E /* Resources */,
 				5A2B51B72FD89053006BF86E /* SafariWebExtensionHandler.swift */,
+				5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */,
 			);
 			path = "Shared (Extension)";
 			sourceTree = "<group>";
@@ -450,6 +458,7 @@
 				5A2B51F42FD89053006BF86E /* Assets.xcassets in Resources */,
 				5A2B51C82FD89053006BF86E /* Main.storyboard in Resources */,
 				5A2B51EE2FD89053006BF86E /* Style.css in Resources */,
+				5A6PA0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -463,6 +472,7 @@
 				5A2B51F12FD89053006BF86E /* Script.js in Resources */,
 				5A2B51F52FD89053006BF86E /* Assets.xcassets in Resources */,
 				5A2B51EB2FD89053006BF86E /* Main.html in Resources */,
+				5A6PA0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,6 +500,7 @@
 				5A2B524F2FD89053006BF86E /* manifest.json in Resources */,
 				5A2B52462FD89053006BF86E /* content-social.js in Resources */,
 				5A2B52502FD89053006BF86E /* offscreen.js in Resources */,
+				5A6PE0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,6 +528,7 @@
 				5A2B52342FD89053006BF86E /* manifest.json in Resources */,
 				5A2B522B2FD89053006BF86E /* content-social.js in Resources */,
 				5A2B52352FD89053006BF86E /* offscreen.js in Resources */,
+				5A6PE0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
