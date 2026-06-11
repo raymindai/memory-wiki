@@ -96,24 +96,24 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 
         case "open-settings":
             #if os(iOS)
-            // Try the private deeplink straight into Safari > Extensions
-            // first. Apple has never documented this URL scheme but
-            // 1Password / Bitwarden / AdGuard ship with it and review
-            // generally allows it for Safari Web Extension wrappers
-            // because there's no public alternative. If iOS refuses
-            // (privacy-mode / future tightening / older iOS), fall
-            // back to the public app-settings URL.
-            let directURL = URL(string: "App-prefs:Safari&path=WEB_EXTENSIONS")
-            let fallbackURL = URL(string: UIApplication.openSettingsURLString)
-            if let direct = directURL {
-                UIApplication.shared.open(direct, options: [:]) { success in
-                    if !success, let fallback = fallbackURL {
-                        UIApplication.shared.open(fallback)
-                    }
-                }
-            } else if let fallback = fallbackURL {
-                UIApplication.shared.open(fallback)
-            }
+            // iOS has no public deeplink to Safari > Extensions. Try
+            // private URL schemes that 1Password / Bitwarden / AdGuard
+            // ship with, in decreasing specificity:
+            //   1. App-prefs:Safari&path=WEB_EXTENSIONS   -> jumps straight to the extension list (iOS 16+)
+            //   2. App-prefs:Safari                       -> just Safari settings, user taps Extensions
+            //   3. App-prefs:root=SAFARI                  -> older form
+            //   4. UIApplication.openSettingsURLString    -> public fallback (lands at app-specific section)
+            // iOS 17+/iOS 26 have been pickier about #1, so we cascade
+            // through the completion handler — first scheme that
+            // succeeds wins. Apple's review allows these for Safari
+            // Web Extension wrappers because there is no public
+            // alternative for the destination.
+            openSettingsCascade([
+                "App-prefs:Safari&path=WEB_EXTENSIONS",
+                "App-prefs:Safari",
+                "App-prefs:root=SAFARI",
+                UIApplication.openSettingsURLString,
+            ])
             #endif
 
         case "open-url":
@@ -128,5 +128,27 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
             break
         }
     }
+
+    #if os(iOS)
+    /// Try each URL string in order, using `UIApplication.open`'s
+    /// completion handler to fall through to the next if iOS refuses
+    /// (private schemes are sometimes rejected outright on newer iOS).
+    /// The last URL in the list should be a guaranteed-public one.
+    private func openSettingsCascade(_ urls: [String]) {
+        var remaining = urls
+        func tryNext() {
+            guard !remaining.isEmpty else { return }
+            let next = remaining.removeFirst()
+            guard let url = URL(string: next) else {
+                tryNext()
+                return
+            }
+            UIApplication.shared.open(url, options: [:]) { success in
+                if !success { tryNext() }
+            }
+        }
+        tryNext()
+    }
+    #endif
 
 }
