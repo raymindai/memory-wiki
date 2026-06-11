@@ -59,7 +59,13 @@ async function renderAccount() {
     accountAction.textContent = "sign in";
     accountAction.classList.add("primary");
     accountAction.onclick = () => {
-      chrome.tabs.create({ url: MDFY_URL });
+      // Go straight to the Safari auth handoff page. Plain MDFY_URL
+      // bounces signed-out visitors to /about, which leaves the user
+      // lost. This options.js is only bundled into the Safari
+      // extension (the Chrome ext has its own copy at apps/
+      // chrome-extension/options.js), so hardcoding /auth/safari is
+      // safe — both macOS Safari and iOS Safari share this path.
+      chrome.tabs.create({ url: MDFY_URL + "/auth/safari" });
     };
   }
 }
