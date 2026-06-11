@@ -96,8 +96,23 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 
         case "open-settings":
             #if os(iOS)
-            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(settingsURL)
+            // Try the private deeplink straight into Safari > Extensions
+            // first. Apple has never documented this URL scheme but
+            // 1Password / Bitwarden / AdGuard ship with it and review
+            // generally allows it for Safari Web Extension wrappers
+            // because there's no public alternative. If iOS refuses
+            // (privacy-mode / future tightening / older iOS), fall
+            // back to the public app-settings URL.
+            let directURL = URL(string: "App-prefs:Safari&path=WEB_EXTENSIONS")
+            let fallbackURL = URL(string: UIApplication.openSettingsURLString)
+            if let direct = directURL {
+                UIApplication.shared.open(direct, options: [:]) { success in
+                    if !success, let fallback = fallbackURL {
+                        UIApplication.shared.open(fallback)
+                    }
+                }
+            } else if let fallback = fallbackURL {
+                UIApplication.shared.open(fallback)
             }
             #endif
 
