@@ -106,6 +106,77 @@ markdown,ai,context,clipper,save page,chatgpt,claude,gemini,perplexity,cursor,me
 
 Same 3-part overlay pattern as Chrome Web Store screenshots: pill / headline / sub-line.
 
+## 4b. iOS-specific — App Review demo flow (REQUIRED)
+
+App Review consistently rejects Safari extension iOS apps where the
+reviewer cannot figure out how to enable + test the extension. Paste
+this verbatim into App Store Connect > App Review Information > Notes:
+
+```
+TEST PLAN — memory.wiki Clipper for iOS
+
+1. Install the app. The container app opens to an onboarding screen
+   with a 3-step Enable guide and a button to open Settings.
+
+2. Tap "Open Settings" (or go to Settings > Apps > Safari > Extensions
+   manually). Toggle "memory.wiki Clipper" on. Tap "All Websites" and
+   set to "Allow" so capture can run on any page.
+
+3. Open Safari and navigate to any web page, for example
+   https://en.wikipedia.org/wiki/Apple_Inc
+
+4. Tap the "AA" button on the left side of the address bar. Tap the
+   memory.wiki Clipper icon to open the extension popup.
+
+5. Tap "Capture this page". The popup will show a memory.wiki URL
+   like https://memory.wiki/abc123 within a few seconds. Tap the URL
+   to open the captured document in a new tab — verify the page
+   content is rendered as markdown.
+
+Sign-in is OPTIONAL. Anonymous capture works without signing in.
+To test signed-in: tap "Sign in to memory.wiki" in the container app
+or in the extension popup, complete the web auth flow, then return
+to the extension and capture again. The URL will be tied to your
+account and appear in your /docs page.
+```
+
+## 4c. iOS-specific — test on a physical device before submission
+
+The Simulator cannot enable Safari Web Extensions reliably. Before
+Archive + Upload, test on your iPhone or iPad:
+
+1. In Xcode, select scheme "memory.wiki Clipper (iOS)" with your
+   device as the destination (top bar dropdown).
+2. Hit Run. Trust the developer cert on the device if prompted
+   (Settings > General > VPN & Device Management).
+3. Walk through steps 1-5 of the test plan above on your device.
+4. Specifically verify:
+   - The 3-step guide renders cleanly on your screen size.
+   - "Open Settings" jumps to Settings.app.
+   - The extension appears in Safari > Extensions.
+   - Capture produces a memory.wiki URL and copies the AI sentence
+     to the clipboard ("Use https://memory.wiki/abc123 as my context.").
+   - Sign-in via memory.wiki/auth/safari completes and the popup
+     shows the signed-in state on return.
+
+If any of these break, fix before submission — App Review will hit
+the same path.
+
+## 4d. Privacy Manifest
+
+Already wired via PrivacyInfo.xcprivacy in both the container app and
+the .appex extension bundle (committed). Declares:
+
+  - No tracking, no tracking domains.
+  - Other user content / email / user ID — collected only when signed
+    in, linked to the account, used solely for app functionality.
+  - UserDefaults access (CA92.1) — chrome.storage.local caches sign-in
+    state and recent captures.
+
+No further action needed unless App Review reports ITMS-91056 (Apple
+sometimes wants more granular categories). If that happens, paste the
+specific ITMS code here and the manifest can be refined.
+
 ## 5. Privacy questionnaire (App Store Connect)
 
 Apple asks "Data Used to Track You?" and "Data Linked to You?":
