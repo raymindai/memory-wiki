@@ -41,8 +41,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     const iosBtn = document.getElementById("ios-open-settings");
     if (iosBtn) iosBtn.addEventListener("click", openSettings);
-    const signIn = document.getElementById("open-signin");
-    if (signIn) signIn.addEventListener("click", () => openURL("https://memory.wiki/auth/safari"));
     document.querySelectorAll("a[id^='open-']").forEach((a) => {
         a.addEventListener("click", (e) => {
             e.preventDefault();

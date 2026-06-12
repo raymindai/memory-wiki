@@ -2,13 +2,13 @@
  * memory.wiki — options page script.
  *
  * Wires:
- *   - account chip (reads memory.wiki Supabase cookies via background)
- *   - keyboard shortcut display (queries chrome.commands.getAll)
- *   - floating button toggle (storage.sync.showFloatingButton)
+ *   - keyboard shortcut display (queries chrome.commands.getAll, chrome only)
+ *   - floating button toggle (storage.sync.showFloatingButton, chrome only)
  *   - version pill
+ *
+ * Sign in is intentionally NOT here — it lives in the popup chip so
+ * the user has exactly one login entry point.
  */
-
-const MDFY_URL = "https://memory.wiki";
 
 // Detect Safari iOS — chrome.commands is undefined on iOS Safari
 // extensions, and the UA contains iPhone / iPad / iPod. We use both
@@ -23,52 +23,15 @@ const IS_IOS = (() => {
 })();
 if (IS_IOS) document.body.classList.add("is-ios");
 
-const accountTitle = document.getElementById("account-title");
-const accountDesc = document.getElementById("account-desc");
-const accountAction = document.getElementById("account-action");
+// Sign in lives in the popup chip only — the container app and this
+// Settings panel intentionally don't carry their own account section.
+// One canonical login surface = one source of truth.
 const kbdPage = document.getElementById("kbd-page");
 const kbdSel = document.getElementById("kbd-sel");
 const shortcutsLink = document.getElementById("shortcuts-link");
 const chkFloat = document.getElementById("chk-float");
 const versionPill = document.getElementById("version-pill");
 const versionDesc = document.getElementById("version-desc");
-
-// ─── Account chip ───
-
-function getUserInfo() {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage({ action: "get-user-info" }, (response) => {
-      resolve(response || { userId: null });
-    });
-  });
-}
-
-async function renderAccount() {
-  const { userId, email } = await getUserInfo();
-  if (userId) {
-    accountTitle.textContent = "signed in";
-    accountDesc.textContent = email || "memory.wiki account active";
-    accountAction.textContent = "sign out";
-    accountAction.onclick = () => {
-      // Open the memory.wiki sign-out page; the cookie clears there.
-      chrome.tabs.create({ url: MDFY_URL + "/auth/signout" });
-    };
-  } else {
-    accountTitle.textContent = "not signed in";
-    accountDesc.textContent = "sign in at memory.wiki to keep captures in your account, get permanent URLs, and search across your docs.";
-    accountAction.textContent = "sign in";
-    accountAction.classList.add("primary");
-    accountAction.onclick = () => {
-      // Go straight to the Safari auth handoff page. Plain MDFY_URL
-      // bounces signed-out visitors to /about, which leaves the user
-      // lost. This options.js is only bundled into the Safari
-      // extension (the Chrome ext has its own copy at apps/
-      // chrome-extension/options.js), so hardcoding /auth/safari is
-      // safe — both macOS Safari and iOS Safari share this path.
-      chrome.tabs.create({ url: MDFY_URL + "/auth/safari" });
-    };
-  }
-}
 
 // ─── Shortcuts ───
 
@@ -136,5 +99,4 @@ if (IS_IOS && versionDesc) {
 
 // ─── Init ───
 
-renderAccount();
 loadShortcuts();
