@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="auto">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -571,16 +571,17 @@
     .ask-input-wrap textarea {
       width: 100%;
       color: var(--ink);
-      /* Explicit CJK + emoji fallbacks. Safari iOS extension popups
-         have been observed to skip past -apple-system's automatic
-         script-specific resolver in WKWebView, which renders Korean /
-         Japanese / Chinese as tofu (U+FFFD-in-box). Naming Apple SD
-         Gothic Neo / Hiragino / PingFang explicitly forces the
-         fallback chain to land on a CJK font that actually has the
-         glyphs. */
-      font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Apple SD Gothic Neo", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-        "PingFang SC", "PingFang TC", "Segoe UI", Roboto, sans-serif;
+      /* Use the GENERIC sans-serif family rather than -apple-system or
+         system-ui. Verified on iPadOS Safari simulator: both
+         -apple-system AND system-ui resolve to a Latin-only fallback
+         in the WKWebView extension popup context, so Korean /
+         Japanese / Chinese render as tofu. The bare `sans-serif`
+         keyword lets the OS pick the script-appropriate font (Apple
+         SD Gothic Neo for KR, Hiragino for JP, PingFang for CN) the
+         same way the browser default does for text without an
+         explicit font-family. Don't name -apple-system here even as
+         a "preferred" fallback — it short-circuits the resolver. */
+      font-family: sans-serif;
       font-size: 14px; letter-spacing: 0;
       line-height: 1.4;
       padding: 9px 12px 32px;
@@ -588,7 +589,7 @@
       min-height: 50px;
       display: block;
     }
-    .ask-input-wrap textarea::placeholder { color: var(--faint); opacity: 0.7; font-family: inherit; }
+    .ask-input-wrap textarea::placeholder { color: var(--faint); opacity: 0.7; font-family: sans-serif; }
     .ask-submit {
       position: absolute;
       right: 8px; bottom: 8px;
@@ -624,9 +625,8 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Apple SD Gothic Neo", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-        "PingFang SC", "PingFang TC", "Segoe UI", Roboto, sans-serif;
+      /* Same reason as the textarea — sans-serif so CJK glyphs work. */
+      font-family: sans-serif;
     }
     .ask-input-wrap .placeholder-cycle.fading { opacity: 0; }
     .ask-input-wrap.has-content .placeholder-cycle,
