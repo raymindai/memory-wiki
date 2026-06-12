@@ -91,18 +91,19 @@
        maps to full screen on iPad and pushes content off the popover. */
     @media (hover: none), (pointer: coarse) {
       html, body {
+        /* Safari sizes the iPad extension popover to the body's
+           intrinsic / requested width (with an internal cap around
+           ~800pt). With width:100% we got whatever Safari's default
+           cap was — visibly narrow, with the "Also on" footer
+           wrapping. Force the body to request 560px so the popover
+           opens wider; iPhone sheet ignores min-width past viewport
+           and falls back to 100vw, so it doesn't hurt that side. */
         width: 100% !important;
-        min-width: 320px !important;
-        /* No max-width cap on touch — iPad popovers can give us
-           700pt+ and capping at 480/640 left visible dead margin AND
-           wrapped the "Also on" footer onto two lines. Let the host
-           decide the width; the popover already constrains us
-           sensibly on iPad and the iPhone sheet just gives us the
-           viewport width. */
+        min-width: 560px !important;
         max-width: none !important;
         overflow-x: hidden !important;
       }
-      html { overflow: visible !important; }
+      html { overflow: visible !important; min-width: 560px !important; }
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.
