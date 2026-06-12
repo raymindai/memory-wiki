@@ -372,6 +372,15 @@ function showOnMdfy() {
   paintCaptureBtn("you're already here", "create and edit documents in the app", "mdfy");
   btnCapture.disabled = true;
   paintRangesVisible(false);
+  // Disable the intent capture controls too — capturing memory.wiki
+  // through itself doesn't make sense, and without this the chip /
+  // submit path bypassed the disabled Capture button via the JS
+  // chain and fired the capture anyway.
+  const ta = document.getElementById("ask-input");
+  const sub = document.getElementById("ask-submit");
+  if (ta) ta.disabled = true;
+  if (sub) sub.disabled = true;
+  document.body.classList.add("on-mdfy");
 }
 
 function showNotOnAiPage() {

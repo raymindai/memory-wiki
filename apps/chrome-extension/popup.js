@@ -347,6 +347,11 @@ function showOnMdfy() {
   paintCaptureBtn("you're already here", "create and edit documents in the app", "mdfy");
   btnCapture.disabled = true;
   paintRangesVisible(false);
+  const ta = document.getElementById("ask-input");
+  const sub = document.getElementById("ask-submit");
+  if (ta) ta.disabled = true;
+  if (sub) sub.disabled = true;
+  document.body.classList.add("on-mdfy");
 }
 
 function showNotOnAiPage() {

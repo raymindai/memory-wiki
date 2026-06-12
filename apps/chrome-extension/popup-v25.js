@@ -76,14 +76,17 @@
   if (!ta || !sub) return;
   ta.addEventListener("input", () => { sub.disabled = !ta.value.trim(); });
   sub.addEventListener("click", () => {
+    // Gate on Capture being usable — on memory.wiki / chrome:// tabs
+    // the btn-capture is disabled, intent path must respect that.
+    const btn = document.getElementById("btn-capture");
+    if (!btn || btn.disabled || sub.disabled) return;
     const v = ta.value.trim();
     if (!v) return;
     window.__captureIntent = v;
     window.__intentCaptureActive = true;
     document.body.classList.add("intent-active");
     document.body.classList.add("capturing");
-    const btn = document.getElementById("btn-capture");
-    if (btn) btn.click();
+    btn.click();
     setTimeout(() => document.body.classList.remove("intent-active"), 60000);
   });
 })();
@@ -774,7 +777,8 @@
     el.addEventListener("click", (e) => {
       if (e.target.closest(".chip-btn")) return;   // ignore clicks on buttons
       const ta = document.getElementById("ask-input");
-      if (!ta) return;
+      const captureBtn = document.getElementById("btn-capture");
+      if (!ta || (captureBtn && captureBtn.disabled)) return;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
       ta.focus();
@@ -1021,14 +1025,32 @@
   }
 })();
 
-// Recent — clear-all button
+// Recent — clear-all button with two-tap confirm (no window.confirm
+// dialog, since Safari extension popups don't host system dialogs).
 (function () {
   const btn = document.getElementById("recent-clear");
   if (!btn) return;
+  let armed = false;
+  let armTimer = null;
+  const labelEl = btn.querySelector("span") || btn;
+  const originalText = labelEl.textContent;
+  function disarm() {
+    armed = false;
+    labelEl.textContent = originalText;
+    btn.classList.remove("is-armed");
+    if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+  }
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm("Clear recent captures from this list?")) return;
+    if (!armed) {
+      armed = true;
+      labelEl.textContent = "tap to confirm";
+      btn.classList.add("is-armed");
+      armTimer = setTimeout(disarm, 3000);
+      return;
+    }
+    disarm();
     chrome.storage.local.remove(["mw-recent"], () => {
       const list = document.getElementById("recent-list");
       const wrap = document.getElementById("recent-wrap");
