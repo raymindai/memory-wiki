@@ -60,6 +60,15 @@
     body {
       width: 384px;
       margin: 0;
+      /* On touch devices (iOS / iPadOS Safari, Android Chrome) the
+         extension popup is hosted in a system sheet whose width is
+         set by the OS, not by us. Forcing a hard 384px makes content
+         spill horizontally on phones whose sheet sits at ~370pt and
+         leaves dead margin on tablets where the sheet is wider. Let
+         the popup fill the sheet on touch contexts; keep the fixed
+         desktop width so Chrome / Mac Safari popup window sizing is
+         unchanged. */
+      box-sizing: border-box;
       background: var(--bg);
       color: var(--body);
       font-family: var(--font-sans);
@@ -67,6 +76,20 @@
       line-height: 1.55;
       letter-spacing: -0.005em;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Touch contexts (Safari iOS / iPadOS, Android Chrome) — drop the
+       hard 384px and fill the system sheet/popover instead. iPhone
+       sheets sit at ~370pt (content was spilling), iPad popovers can
+       be wider (content was leaving dead margin AND in some sheet
+       sizes apparently swallowing the popup whole). */
+    @media (hover: none), (pointer: coarse) {
+      html, body {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        overflow-x: hidden;
+      }
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.
