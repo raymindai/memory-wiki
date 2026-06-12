@@ -85,6 +85,13 @@
     if (sub.disabled) return;
     const v = ta.value.trim();
     if (!v) return;
+    // Reset any leftover "Captured" state from the previous run.
+    // Without this, the overlay reopened still showing the prior
+    // capture's "Captured" label + View button pointing at the
+    // previous URL — the user perceived the new capture as "still
+    // showing the old result." markFresh will re-flip these to the
+    // new doc once the new capture lands.
+    resetOverlay();
     window.__captureIntent = v;
     window.__intentCaptureActive = true;
     document.body.classList.add("intent-active");
@@ -92,6 +99,22 @@
     btn.click();
     setTimeout(() => document.body.classList.remove("intent-active"), 60000);
   });
+
+  // Globally exposed so the basic btn-capture path (non-intent) can
+  // reset the overlay too — see the capture-click reset binding
+  // further down the file.
+  function resetOverlay() {
+    const overlay = document.querySelector(".capturing-overlay");
+    if (!overlay) return;
+    overlay.classList.remove("is-done");
+    const label = overlay.querySelector(".label");
+    if (label) label.textContent = "Capturing...";
+    const viewBtn = document.getElementById("overlay-view");
+    if (viewBtn) { viewBtn.setAttribute("href", "#"); viewBtn.onclick = null; }
+    const okBtn = document.getElementById("overlay-ok");
+    if (okBtn) okBtn.onclick = null;
+  }
+  window.__mwResetOverlay = resetOverlay;
 })();
 
 // Detect the active tab and surface a "ChatGPT / Claude / Gemini /
@@ -1110,6 +1133,11 @@ function wipeRecent(e) {
   if (!btn) return;
   btn.addEventListener("click", () => {
     if (btn.disabled) return;
+    // Reset the overlay's previous-run state (Captured label, stale
+    // View URL) before adding capturing — otherwise the user sees
+    // the prior capture's result still on screen while the new one
+    // runs.
+    try { if (typeof window.__mwResetOverlay === "function") window.__mwResetOverlay(); } catch {}
     document.body.classList.add("capturing");
     // Safety net — if capture hangs we still un-stick after 60s.
     setTimeout(() => document.body.classList.remove("capturing"), 60000);

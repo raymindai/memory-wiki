@@ -82,6 +82,10 @@
     if (!btn || btn.disabled || sub.disabled) return;
     const v = ta.value.trim();
     if (!v) return;
+    // Reset any leftover "Captured" state from the previous run so
+    // the user doesn't see the prior capture's View URL during the
+    // new capture.
+    resetOverlay();
     window.__captureIntent = v;
     window.__intentCaptureActive = true;
     document.body.classList.add("intent-active");
@@ -89,6 +93,19 @@
     btn.click();
     setTimeout(() => document.body.classList.remove("intent-active"), 60000);
   });
+
+  function resetOverlay() {
+    const overlay = document.querySelector(".capturing-overlay");
+    if (!overlay) return;
+    overlay.classList.remove("is-done");
+    const label = overlay.querySelector(".label");
+    if (label) label.textContent = "Capturing...";
+    const viewBtn = document.getElementById("overlay-view");
+    if (viewBtn) { viewBtn.setAttribute("href", "#"); viewBtn.onclick = null; }
+    const okBtn = document.getElementById("overlay-ok");
+    if (okBtn) okBtn.onclick = null;
+  }
+  window.__mwResetOverlay = resetOverlay;
 })();
 
 // Detect the active tab and surface a "ChatGPT / Claude / Gemini /
@@ -1087,6 +1104,8 @@ function wipeRecent(e) {
   if (!btn) return;
   btn.addEventListener("click", () => {
     if (btn.disabled) return;
+    // Reset overlay's prior "Captured" state before the new run.
+    try { if (typeof window.__mwResetOverlay === "function") window.__mwResetOverlay(); } catch {}
     document.body.classList.add("capturing");
     // Safety net — if capture hangs we still un-stick after 60s.
     setTimeout(() => document.body.classList.remove("capturing"), 60000);
