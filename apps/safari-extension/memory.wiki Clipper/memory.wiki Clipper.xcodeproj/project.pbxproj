@@ -73,6 +73,10 @@
 		5A6PA0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PA0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
 		5A6PE0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
 		5A6PE0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */; };
+		5A6IPH022FD89999006BF86E /* safari-hint-iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A6IPH012FD89999006BF86E /* safari-hint-iphone.png */; };
+		5A6IPH032FD89999006BF86E /* safari-hint-iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A6IPH012FD89999006BF86E /* safari-hint-iphone.png */; };
+		5A6IPA022FD89999006BF86E /* safari-hint-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A6IPA012FD89999006BF86E /* safari-hint-ipad.png */; };
+		5A6IPA032FD89999006BF86E /* safari-hint-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A6IPA012FD89999006BF86E /* safari-hint-ipad.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -161,6 +165,8 @@
 		5A5C6E552FD9B52D00F78BCC /* auth-bridge.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Resources/auth-bridge.js"; sourceTree = "<group>"; };
 		5A6PA0012FD89999006BF86E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		5A6PE0012FD89999006BF86E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		5A6IPH012FD89999006BF86E /* safari-hint-iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "safari-hint-iphone.png"; sourceTree = "<group>"; };
+		5A6IPA012FD89999006BF86E /* safari-hint-ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "safari-hint-ipad.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,6 +232,8 @@
 				5A2B51B12FD89051006BF86E /* Icon.png */,
 				5A2B51B22FD89051006BF86E /* Style.css */,
 				5A2B51B32FD89051006BF86E /* Script.js */,
+				5A6IPH012FD89999006BF86E /* safari-hint-iphone.png */,
+				5A6IPA012FD89999006BF86E /* safari-hint-ipad.png */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -459,6 +467,8 @@
 				5A2B51C82FD89053006BF86E /* Main.storyboard in Resources */,
 				5A2B51EE2FD89053006BF86E /* Style.css in Resources */,
 				5A6PA0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
+				5A6IPH022FD89999006BF86E /* safari-hint-iphone.png in Resources */,
+				5A6IPA022FD89999006BF86E /* safari-hint-ipad.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +483,8 @@
 				5A2B51F52FD89053006BF86E /* Assets.xcassets in Resources */,
 				5A2B51EB2FD89053006BF86E /* Main.html in Resources */,
 				5A6PA0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
+				5A6IPH032FD89999006BF86E /* safari-hint-iphone.png in Resources */,
+				5A6IPA032FD89999006BF86E /* safari-hint-ipad.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

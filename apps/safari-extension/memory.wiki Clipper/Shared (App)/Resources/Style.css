@@ -129,6 +129,29 @@ body.state-off :is(.state-on, .state-unknown) { display: none; }
   color: var(--ink-soft);
 }
 
+/* Real Safari URL-bar screenshot used as the "tap the puzzle icon"
+   visual hint. Each device gets its own crop (puzzle is on the LEFT
+   of the bar on iPhone, on the RIGHT on iPad). Script.js tags body
+   with .device-iphone or .device-ipad so the matching one shows. */
+.safari-shot { display: none; flex-direction: column; align-items: center; gap: 4px; margin: 4px 0 10px; padding: 0; }
+.safari-shot img {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+.safari-shot figcaption {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--accent);
+  margin-top: 2px;
+}
+body.device-ipad   .safari-shot.device-only-ipad,
+body.device-iphone .safari-shot.device-only-iphone { display: flex; }
+body:not(.device-iphone):not(.device-ipad) .safari-shot.device-only-ipad { display: flex; }
+
 /* Safari toolbar mockup — visual hint for "where the puzzle icon is".
    iPhone and iPad point at different things: iPad puts the puzzle
    icon directly in the URL bar, iPhone hides it behind the AA menu.
@@ -186,9 +209,12 @@ body:not(.device-iphone):not(.device-ipad) .safari-mockup.device-only-ipad { dis
   animation: mw-pulse-ring 1.8s ease-in-out infinite;
 }
 .safari-mockup .reload {
-  font-size: 13px;
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
   color: var(--ink-faint);
 }
+.safari-mockup .reload svg { width: 100%; height: 100%; }
 .safari-mockup .caption {
   font-size: 11px;
   font-weight: 500;
