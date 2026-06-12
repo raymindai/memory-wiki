@@ -246,10 +246,28 @@ async function openInMemoryWiki(markdown) {
       const titleMatch = markdown.match(/^#\s+(.+)/m);
       const title = titleMatch ? titleMatch[1].trim().slice(0, 100) : "Captured content";
 
-      const res = await proxyFetch(MDFY_URL + "/api/docs", {
+      // Intent capture branches directly here rather than relying on
+      // a popup-v25.js monkey-patch around chrome.runtime.sendMessage.
+      // Safari (especially iPadOS) sometimes rejects the reassignment
+      // and the patch silently no-ops, so capture would succeed but
+      // the AI-transform path was being skipped. Reading
+      // window.__captureIntent inline at the call site makes this
+      // bulletproof.
+      const intent = (typeof window !== "undefined") ? window.__captureIntent : null;
+      const targetUrl = intent ? MDFY_URL + "/api/docs/transform" : MDFY_URL + "/api/docs";
+      const targetBody = intent
+        ? { markdown, userId, intent, source: "chrome-intent" }
+        : { markdown, userId, title, editMode: "account", source: "chrome" };
+      if (intent) {
+        // one-shot — clear so the next plain capture isn't routed back
+        // through /transform.
+        try { window.__captureIntent = null; } catch { /* noop */ }
+      }
+
+      const res = await proxyFetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markdown, userId, title, editMode: "account", source: "chrome" }),
+        body: JSON.stringify(targetBody),
       });
 
       if (res.ok) {
