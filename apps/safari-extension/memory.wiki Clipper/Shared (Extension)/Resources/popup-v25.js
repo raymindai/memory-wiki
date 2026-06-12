@@ -1223,51 +1223,16 @@ function startTransformProgress(mode) {
   setTimeout(stop, 45000);
 }
 
-(function () {
-  if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
-  const origSend = chrome.runtime.sendMessage;
-  chrome.runtime.sendMessage = function patchedRuntimeSend(...args) {
-    try {
-      const msg = args[0];
-      const intent = window.__captureIntent;
-      const pageType = window.__lastPageType;
-      const autoEligible = !intent && pageType && STRUCTURED_TYPES.has(pageType);
-      if (
-        (intent || autoEligible) && msg && msg.action === "proxy-fetch" &&
-        typeof msg.url === "string" && /\/api\/docs(?:[?#].*)?$/.test(msg.url) &&
-        msg.options && typeof msg.options.body === "string"
-      ) {
-        const body = JSON.parse(msg.options.body);
-        if (body && body.markdown) {
-          msg.url = msg.url.replace(/\/api\/docs(?:[?#].*)?$/, "/api/docs/transform");
-          const next = {
-            markdown: body.markdown,
-            userId: body.userId,
-            source: body.source || (intent ? "chrome-intent" : "chrome-auto"),
-          };
-          if (intent) {
-            next.intent = intent;
-          } else {
-            next.auto = true;
-            next.pageType = pageType;
-          }
-          msg.options.body = JSON.stringify(next);
-          window.__captureIntent = null;
-          window.__lastPageType = null; // one-shot
-          const ta = document.getElementById("ask-input");
-          if (ta) ta.value = "";
-
-          // Transform takes 5-15s (gpt-5-nano → gemini → claude
-          // cascade) and popup.js's status freezes at "publishing".
-          // Show meaningful stages so the user knows we're still
-          // working and doesn't close the popup mid-request.
-          startTransformProgress(intent ? "intent" : "auto");
-        }
-      }
-    } catch (e) { /* never block the send */ }
-    return origSend.apply(this, args);
-  };
-})();
+// (Removed the chrome.runtime.sendMessage monkey-patch that used to
+// own the /api/docs → /api/docs/transform rewrite. popup.js's
+// openInMemoryWiki now reads window.__captureIntent inline at the
+// call site and routes to the right URL directly — having both
+// code paths active at once caused state-clearing races where the
+// patch wiped __captureIntent before the inline branch finished
+// reading it, leading to intermittent "intent didn't apply"
+// results. The patched startTransformProgress was the only useful
+// side effect — drive it from popup.js openInMemoryWiki instead
+// once the result settles.)
 
 
 // Open the dedicated /auth/chrome handoff page instead of the bare home

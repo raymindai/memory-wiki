@@ -239,10 +239,24 @@ async function openInMemoryWiki(markdown) {
       const titleMatch = markdown.match(/^#\s+(.+)/m);
       const title = titleMatch ? titleMatch[1].trim().slice(0, 100) : "Captured content";
 
-      const res = await proxyFetch(MDFY_URL + "/api/docs", {
+      // Intent capture branches inline rather than via a runtime
+      // sendMessage monkey-patch. Having both code paths active at
+      // once caused state-clearing races that intermittently dropped
+      // the AI-transform routing — the inline read here is the
+      // canonical source of truth.
+      const intent = (typeof window !== "undefined") ? window.__captureIntent : null;
+      const targetUrl = intent ? MDFY_URL + "/api/docs/transform" : MDFY_URL + "/api/docs";
+      const targetBody = intent
+        ? { markdown, userId, intent, source: "chrome-intent" }
+        : { markdown, userId, title, editMode: "account", source: "chrome" };
+      if (intent) {
+        try { window.__captureIntent = null; } catch { /* noop */ }
+      }
+
+      const res = await proxyFetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markdown, userId, title, editMode: "account", source: "chrome" }),
+        body: JSON.stringify(targetBody),
       });
 
       if (res.ok) {
