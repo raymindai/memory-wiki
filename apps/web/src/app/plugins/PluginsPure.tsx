@@ -17,6 +17,7 @@ import {
 } from "@/components/pure";
 import PureDocsShell, { memoryWikiNavGroups } from "@/components/PureDocsShell";
 import { getPluginsTexts } from "@/lib/i18n/plugins";
+import { CHANNELS } from "@/lib/channel-versions";
 
 type TerminalLine = {
   type: "prompt" | "output" | "comment" | "success";
@@ -136,10 +137,13 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginInstall heading={t.chrome.installHeading} steps={t.chrome.installSteps} />
               <PluginDownload
                 primary={{
-                  label: "Download v2.2.2 · 50 KB",
-                  href: "/downloads/memory-wiki-chrome.zip",
+                  label: CHANNELS.chrome.primaryLabel,
+                  href: CHANNELS.chrome.primaryUrl,
                 }}
-                secondary={{ label: t.chrome.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+                secondary={{
+                  label: `${CHANNELS.chrome.secondaryLabel} · ${CHANNELS.chrome.size}`,
+                  href: CHANNELS.chrome.secondaryUrl!,
+                }}
               />
             </PluginBlock>
 
@@ -148,8 +152,8 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.safari.features} />
               <PluginInstall heading={t.safari.installHeading} steps={t.safari.installSteps} />
               <PluginDownload
-                primary={{ label: t.safari.downloadLabel, href: "#" }}
-                secondary={{ label: t.safari.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+                primary={{ label: CHANNELS.safari.primaryLabel, href: CHANNELS.safari.primaryUrl }}
+                secondary={{ label: CHANNELS.safari.secondaryLabel!, href: CHANNELS.safari.secondaryUrl! }}
               />
             </PluginBlock>
 
@@ -181,8 +185,8 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
                 />
               </div>
               <PluginDownload
-                primary={{ label: t.mcp.footerLinks.setupGuideLabel, href: locale === "ko" ? "/ko/docs/mcp" : "/docs/mcp" }}
-                secondary={{ label: `${t.mcp.footerLinks.npmLabel} · v1.5.1`, href: "https://www.npmjs.com/package/memory-wiki-mcp" }}
+                primary={{ label: `${CHANNELS.mcp.primaryLabel} · v${CHANNELS.mcp.version}`, href: CHANNELS.mcp.primaryUrl }}
+                secondary={{ label: t.mcp.footerLinks.setupGuideLabel, href: locale === "ko" ? "/ko/docs/mcp" : "/docs/mcp" }}
               />
             </PluginBlock>
 
@@ -191,7 +195,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.vscode.features} />
               <PluginInstall heading={t.vscode.installHeading} steps={t.vscode.installSteps} />
               <PluginDownload
-                primary={{ label: "Install v1.4.26 from Marketplace", href: "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode" }}
+                primary={{ label: `${CHANNELS.vscode.primaryLabel} · v${CHANNELS.vscode.version}`, href: CHANNELS.vscode.primaryUrl }}
                 secondary={{ label: t.vscode.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
@@ -201,8 +205,8 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.desktop.features} />
               <PluginInstall heading={t.desktop.installHeading} steps={t.desktop.installSteps} />
               <PluginDownload
-                primary={{ label: "Download v2.3.6 (Apple Silicon)", href: "https://github.com/raymindai/memory-wiki/releases/latest" }}
-                secondary={{ label: isKo ? "Mac App Store (출시 준비 중)" : "Mac App Store (coming soon)", href: "#" }}
+                primary={{ label: `${CHANNELS.desktop.primaryLabel} (${CHANNELS.desktop.size})`, href: CHANNELS.desktop.primaryUrl }}
+                secondary={{ label: isKo ? "Mac App Store (출시 준비 중)" : CHANNELS.desktop.secondaryLabel!, href: CHANNELS.desktop.secondaryUrl! }}
               />
             </PluginBlock>
 
@@ -211,7 +215,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.ios.features} />
               <PluginInstall heading={t.ios.installHeading} steps={t.ios.installSteps} />
               <PluginDownload
-                primary={{ label: t.ios.downloadLabel, href: "https://apps.apple.com/us/app/memory-wiki/id6774713489" }}
+                primary={{ label: CHANNELS.ios.primaryLabel, href: CHANNELS.ios.primaryUrl }}
                 secondary={{ label: t.ios.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
@@ -221,7 +225,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.android.features} />
               <PluginInstall heading={t.android.installHeading} steps={t.android.installSteps} />
               <PluginDownload
-                primary={{ label: t.android.downloadLabel, href: "#" }}
+                primary={{ label: CHANNELS.android.primaryLabel, href: CHANNELS.android.primaryUrl }}
                 secondary={{ label: t.android.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>
@@ -238,8 +242,8 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
                 ))}
               </div>
               <PluginDownload
-                primary={{ label: t.cli.guideLabel, href: locale === "ko" ? "/ko/docs/cli" : "/docs/cli" }}
-                secondary={{ label: `${t.cli.npmLabel}, v1.4.3`, href: "https://www.npmjs.com/package/memory-wiki-cli" }}
+                primary={{ label: `${CHANNELS.cli.primaryLabel} · v${CHANNELS.cli.version}`, href: CHANNELS.cli.primaryUrl }}
+                secondary={{ label: t.cli.guideLabel, href: locale === "ko" ? "/ko/docs/cli" : "/docs/cli" }}
               />
             </PluginBlock>
 
@@ -248,7 +252,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginFeatures groups={t.quicklook.features} />
               <PluginInstall heading={t.quicklook.installHeading} steps={t.quicklook.installSteps} />
               <PluginDownload
-                primary={{ label: t.quicklook.downloadLabel, href: "/downloads/memory-wiki-desktop.dmg" }}
+                primary={{ label: CHANNELS.quicklook.primaryLabel, href: CHANNELS.quicklook.primaryUrl }}
                 secondary={{ label: t.quicklook.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
               />
             </PluginBlock>

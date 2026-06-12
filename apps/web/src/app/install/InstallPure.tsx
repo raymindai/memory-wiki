@@ -23,6 +23,7 @@ import {
   type ProviderBrand,
 } from "@/components/pure";
 import PureDocsShell, { memoryWikiNavGroups } from "@/components/PureDocsShell";
+import { CHANNELS } from "@/lib/channel-versions";
 
 const MCP_CONFIG_JSON = `{
   "mcpServers": {
@@ -125,8 +126,8 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   { code: "mw login", lang: "bash" },
                 ]}
                 download={{
-                  label: "npm, v1.4.3",
-                  href: "https://www.npmjs.com/package/memory-wiki-cli",
+                  label: `npm, v${CHANNELS.cli.version}`,
+                  href: CHANNELS.cli.primaryUrl,
                 }}
                 guide={{
                   label: isKo ? "CLI 가이드" : "CLI guide",
@@ -148,8 +149,8 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   ? "위 블록을 도구의 MCP config에 추가 (Claude Code는 ~/.claude/mcp.json, Cursor는 Settings → MCP)."
                   : "Add the block above to your tool’s MCP config (~/.claude/mcp.json for Claude Code, Settings → MCP for Cursor)."}
                 download={{
-                  label: "npm, memory-wiki-mcp v1.5.4",
-                  href: "https://www.npmjs.com/package/memory-wiki-mcp",
+                  label: `npm, memory-wiki-mcp v${CHANNELS.mcp.version}`,
+                  href: CHANNELS.mcp.primaryUrl,
                 }}
                 guide={{
                   label: isKo ? "MCP 셋업 가이드" : "MCP setup guide",
@@ -170,8 +171,8 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   { code: "code --install-extension raymindai.memory-wiki-vscode", lang: "bash" },
                 ]}
                 download={{
-                  label: "Marketplace, v1.4.26",
-                  href: "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode",
+                  label: `Marketplace, v${CHANNELS.vscode.version}`,
+                  href: CHANNELS.vscode.primaryUrl,
                 }}
                 guide={{
                   label: isKo ? "VS Code 가이드" : "VS Code guide",
@@ -192,8 +193,8 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   ? "다운로드 후 chrome://extensions → 개발자 모드 켜기 → 압축해제된 확장 프로그램 로드."
                   : "After downloading, open chrome://extensions → enable Developer mode → Load unpacked."}
                 download={{
-                  label: isKo ? "다운로드 v2.2.2 · 50 KB" : "Download v2.2.2 · 50 KB",
-                  href: "/downloads/memory-wiki-chrome.zip",
+                  label: isKo ? `다운로드 v${CHANNELS.chrome.version} zip` : `Download v${CHANNELS.chrome.version} zip`,
+                  href: CHANNELS.chrome.secondaryUrl!,
                 }}
                 guide={{
                   label: isKo ? "Chrome 가이드" : "Chrome guide",
@@ -214,8 +215,8 @@ export default function InstallPure({ locale = "en" }: { locale?: "en" | "ko" })
                   ? "DMG 더블클릭 후 /Applications 폴더로 드래그하면 끝."
                   : "Double-click the DMG and drag the app into /Applications."}
                 download={{
-                  label: isKo ? "DMG 다운로드 v2.3.5" : "Download DMG v2.3.5",
-                  href: "https://github.com/raymindai/memory-wiki/releases/latest",
+                  label: isKo ? `DMG 다운로드 v${CHANNELS.desktop.version}` : `Download DMG v${CHANNELS.desktop.version}`,
+                  href: CHANNELS.desktop.primaryUrl,
                 }}
                 guide={{
                   label: isKo ? "데스크톱 가이드" : "Desktop guide",
