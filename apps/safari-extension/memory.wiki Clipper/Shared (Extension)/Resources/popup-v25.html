@@ -571,7 +571,16 @@
     .ask-input-wrap textarea {
       width: 100%;
       color: var(--ink);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      /* Explicit CJK + emoji fallbacks. Safari iOS extension popups
+         have been observed to skip past -apple-system's automatic
+         script-specific resolver in WKWebView, which renders Korean /
+         Japanese / Chinese as tofu (U+FFFD-in-box). Naming Apple SD
+         Gothic Neo / Hiragino / PingFang explicitly forces the
+         fallback chain to land on a CJK font that actually has the
+         glyphs. */
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Apple SD Gothic Neo", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+        "PingFang SC", "PingFang TC", "Segoe UI", Roboto, sans-serif;
       font-size: 14px; letter-spacing: 0;
       line-height: 1.4;
       padding: 9px 12px 32px;
@@ -615,7 +624,9 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Apple SD Gothic Neo", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+        "PingFang SC", "PingFang TC", "Segoe UI", Roboto, sans-serif;
     }
     .ask-input-wrap .placeholder-cycle.fading { opacity: 0; }
     .ask-input-wrap.has-content .placeholder-cycle,
