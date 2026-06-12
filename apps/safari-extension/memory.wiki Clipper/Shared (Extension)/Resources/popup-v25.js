@@ -89,8 +89,7 @@
     window.__intentCaptureActive = true;
     document.body.classList.add("intent-active");
     document.body.classList.add("capturing");
-    const btn = document.getElementById("btn-capture");
-    if (btn) btn.click();
+    btn.click();
     setTimeout(() => document.body.classList.remove("intent-active"), 60000);
   });
 })();
