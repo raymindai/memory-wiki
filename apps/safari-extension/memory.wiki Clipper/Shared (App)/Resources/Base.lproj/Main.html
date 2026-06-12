@@ -17,7 +17,9 @@
 
         <section class="platform-ios card">
             <h2>Enable in Safari</h2>
-            <div class="safari-mockup" aria-hidden="true">
+
+            <!-- iPad: puzzle icon sits on the RIGHT of the URL bar pill. -->
+            <div class="safari-mockup device-only-ipad" aria-hidden="true">
                 <div class="bar">
                     <span class="aa">AA</span>
                     <span class="url">memory.wiki</span>
@@ -28,14 +30,30 @@
                     </span>
                     <span class="reload">&#10227;</span>
                 </div>
-                <div class="caption">tap this</div>
+                <div class="caption">tap the puzzle icon</div>
             </div>
+
+            <!-- iPhone: puzzle icon sits on the LEFT of the URL bar pill,
+                 right after the back chevron. -->
+            <div class="safari-mockup device-only-iphone" aria-hidden="true">
+                <div class="bar">
+                    <span class="ext-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7a2 2 0 0 1 2-2h5v2.5a1.5 1.5 0 0 0 3 0V5h6a2 2 0 0 1 2 2v3.5h-2.5a1.5 1.5 0 0 0 0 3H21V18a2 2 0 0 1-2 2h-5v-2.5a1.5 1.5 0 0 0-3 0V20H5a2 2 0 0 1-2-2v-3.5h2.5a1.5 1.5 0 0 0 0-3H3V7z"/>
+                        </svg>
+                    </span>
+                    <span class="url">memory.wiki</span>
+                    <span class="reload">&#10227;</span>
+                </div>
+                <div class="caption">tap the puzzle icon</div>
+            </div>
+
             <ol class="steps">
-                <li><span class="num">1</span><span class="step-text">Open <strong>Safari</strong> and tap the <strong>puzzle icon</strong> next to the URL bar.</span></li>
-                <li><span class="num">2</span><span class="step-text">Tap <strong>Manage Extensions</strong> and toggle <strong>memory.wiki Clipper</strong> on.</span></li>
+                <li><span class="num">1</span><span class="step-text">Open <strong>Safari</strong> on this device.</span></li>
+                <li><span class="num">2</span><span class="step-text">Tap the <strong>puzzle icon</strong> in the URL bar, then <strong>Manage Extensions</strong> and toggle <strong>memory.wiki Clipper</strong> on.</span></li>
                 <li><span class="num">3</span><span class="step-text">Tap <strong>All Websites &rsaquo; Allow</strong> so capture works everywhere.</span></li>
             </ol>
-            <p class="muted" style="margin-top:4px;font-size:12px">If you can&rsquo;t find the puzzle icon, open Settings &rsaquo; Apps &rsaquo; Safari &rsaquo; Extensions instead.</p>
+            <p class="muted" style="margin-top:4px;font-size:12px">Can&rsquo;t find it? Open Settings &rsaquo; Apps &rsaquo; Safari &rsaquo; Extensions instead.</p>
         </section>
 
         <section class="platform-mac card">

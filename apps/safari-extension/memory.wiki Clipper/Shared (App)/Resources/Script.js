@@ -2,6 +2,22 @@
 // All "open external URL" actions tunnel through the native side so
 // they land in Safari proper, not inside this WKWebView.
 
+// Tag the body with the actual device class (iPhone vs iPad) so the
+// enable-instructions can swap the Safari toolbar mockup. iPad Safari
+// shows the puzzle icon directly in the URL bar; iPhone Safari hides
+// it behind the AA menu — same destination, very different visual cue.
+(function () {
+    try {
+        const ua = navigator.userAgent || "";
+        const isIPad =
+            /iPad/i.test(ua) ||
+            // iPadOS 13+ identifies as Macintosh; the multi-touch
+            // capability gives it away.
+            (navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua));
+        document.body.classList.add(isIPad ? "device-ipad" : "device-iphone");
+    } catch (e) { /* before-DOMReady safety; ignore */ }
+})();
+
 function show(platform, enabled, useSettingsInsteadOfPreferences) {
     document.body.classList.add(`platform-${platform}`);
 

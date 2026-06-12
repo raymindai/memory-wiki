@@ -129,14 +129,16 @@ body.state-off :is(.state-on, .state-unknown) { display: none; }
   color: var(--ink-soft);
 }
 
-/* Safari toolbar mockup — visual hint for "where the puzzle icon is" */
-.safari-mockup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin: 2px 0 6px;
-}
+/* Safari toolbar mockup — visual hint for "where the puzzle icon is".
+   iPhone and iPad point at different things: iPad puts the puzzle
+   icon directly in the URL bar, iPhone hides it behind the AA menu.
+   Script.js adds body.device-iphone or body.device-ipad on launch so
+   the right mockup shows. Default (no class yet) shows the iPad one
+   since that's the more visually-distinct shape. */
+.safari-mockup { display: none; flex-direction: column; align-items: center; gap: 6px; margin: 2px 0 6px; }
+body.device-ipad   .safari-mockup.device-only-ipad,
+body.device-iphone .safari-mockup.device-only-iphone { display: flex; }
+body:not(.device-iphone):not(.device-ipad) .safari-mockup.device-only-ipad { display: flex; }
 .safari-mockup .bar {
   display: flex;
   align-items: center;
