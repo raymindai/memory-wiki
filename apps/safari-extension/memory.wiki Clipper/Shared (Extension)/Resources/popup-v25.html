@@ -537,18 +537,20 @@
       display: flex;
       pointer-events: auto;
     }
-    /* "Captured ✓" beat — popup-v25.js flips this class on the
-       overlay for ~750ms after success so the user sees an explicit
-       done state instead of the overlay just vanishing. */
+    /* "Captured" beat — popup-v25.js flips this class on the overlay
+       for ~750ms after success so the user sees an explicit done
+       state instead of the overlay just vanishing. Stays in
+       monochrome (white ink) — lime is reserved for tiny dot/badge
+       glyphs, never headline / overlay surfaces. */
     .capturing-overlay.is-done .blob {
       animation: none;
       transform: scale(1.18);
-      filter: drop-shadow(0 0 18px var(--micro-lime, #b5ff1a));
+      filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
       transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
                   filter 220ms ease-out;
     }
     .capturing-overlay.is-done .label {
-      color: var(--micro-lime, #b5ff1a);
+      color: var(--ink);
       transform: scale(1.04);
       transition: color 220ms ease-out, transform 220ms ease-out;
     }
