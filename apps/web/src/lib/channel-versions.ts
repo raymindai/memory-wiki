@@ -47,12 +47,13 @@ export const CHANNELS: Record<Channel, ChannelInfo> = {
 
   vscode: {
     version: "1.7.0",
+    size: "VSIX",
     primaryUrl:
       "https://marketplace.visualstudio.com/items?itemName=raymindai.memory-wiki-vscode",
     primaryLabel: "Install from Marketplace",
     secondaryUrl:
-      "https://github.com/raymindai/memory-wiki/releases?q=vscode",
-    secondaryLabel: "All versions on GitHub",
+      "https://github.com/raymindai/memory-wiki/releases/download/vscode-v1.7.0/memory-wiki-vscode-1.7.0.vsix",
+    secondaryLabel: "Download v1.7.0 vsix",
   },
 
   desktop: {
@@ -71,9 +72,13 @@ export const CHANNELS: Record<Channel, ChannelInfo> = {
   },
 
   android: {
-    version: "1.0",
+    version: "1.0.0",
+    size: "APK",
     primaryUrl: "#",
     primaryLabel: "Google Play (coming soon)",
+    secondaryUrl:
+      "https://github.com/raymindai/memory-wiki/releases/download/android-v1.0.0/memory-wiki-1.0.0.apk",
+    secondaryLabel: "Download v1.0.0 apk",
   },
 
   cli: {

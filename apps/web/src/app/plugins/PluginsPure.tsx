@@ -196,7 +196,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginInstall heading={t.vscode.installHeading} steps={t.vscode.installSteps} />
               <PluginDownload
                 primary={{ label: `${CHANNELS.vscode.primaryLabel} · v${CHANNELS.vscode.version}`, href: CHANNELS.vscode.primaryUrl }}
-                secondary={{ label: t.vscode.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+                secondary={{ label: CHANNELS.vscode.secondaryLabel!, href: CHANNELS.vscode.secondaryUrl! }}
               />
             </PluginBlock>
 
@@ -226,7 +226,7 @@ export default function PluginsPure({ locale = "en" }: { locale?: "en" | "ko" })
               <PluginInstall heading={t.android.installHeading} steps={t.android.installSteps} />
               <PluginDownload
                 primary={{ label: CHANNELS.android.primaryLabel, href: CHANNELS.android.primaryUrl }}
-                secondary={{ label: t.android.guideLabel, href: locale === "ko" ? "/ko/docs" : "/docs" }}
+                secondary={{ label: CHANNELS.android.secondaryLabel!, href: CHANNELS.android.secondaryUrl! }}
               />
             </PluginBlock>
 
