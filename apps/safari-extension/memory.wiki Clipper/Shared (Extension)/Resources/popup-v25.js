@@ -770,10 +770,11 @@
     actions.appendChild(del);
     el.appendChild(actions);
 
-    // Click chip body → populate textarea AND submit immediately.
-    // Previously this only filled the textarea, requiring a second
-    // click on the submit arrow to fire the capture. UX expectation:
-    // chip click = run that intent right now.
+    // Click chip body → fill the textarea, focus it, light up the
+    // submit arrow. The user reads what they're about to send and
+    // either tweaks it or taps submit. (Auto-firing capture on chip
+    // click felt too eager — it skipped the moment where the user
+    // sees the intent in the input.)
     el.addEventListener("click", (e) => {
       if (e.target.closest(".chip-btn")) return;   // ignore clicks on buttons
       const ta = document.getElementById("ask-input");
@@ -781,23 +782,10 @@
       if (!ta) return;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
-      // Reproduce the submit-click side effects directly here rather
-      // than relying on sub.click(). iOS Safari (iPhone + iPad) is
-      // known to silently drop programmatic .click() that fires
-      // synchronously from inside another click handler, which is
-      // what was leaving window.__captureIntent unset on iPad — the
-      // capture would still run via btn-capture.click(), but the
-      // patched chrome.runtime.sendMessage couldn't see the intent
-      // and fell back to the plain /api/docs path, so the user got
-      // a regular capture URL instead of the AI-transformed one.
-      window.__captureIntent = text;
-      window.__intentCaptureActive = true;
-      document.body.classList.add("intent-active");
-      document.body.classList.add("capturing");
-      const btn = document.getElementById("btn-capture");
-      if (btn) btn.click();
-      setTimeout(() => document.body.classList.remove("intent-active"), 60000);
       if (sub) sub.disabled = false;
+      // Focus the textarea so the cursor lands at the end and the
+      // user can immediately edit / extend.
+      try { ta.focus(); ta.setSelectionRange(text.length, text.length); } catch {}
     });
 
     // Marquee on hover when text overflows the clipped wrap
