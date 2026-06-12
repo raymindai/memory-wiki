@@ -55,11 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("button.open-preferences").forEach((b) => {
         b.addEventListener("click", openPreferences);
     });
-    // Note: the iOS "Open Settings" button was removed in favor of
-    // the Safari puzzle-icon → Manage Extensions path (one tap inside
-    // Safari instead of a dive through Settings.app). The native
-    // open-settings message handler in ViewController.swift is kept
-    // as a no-op fallback in case future onboarding revisions want it.
+    // "Open Safari" jumps the user straight into Safari pointed at
+    // memory.wiki so they can find the puzzle icon and sign in in one
+    // go. The native open-url handler in ViewController.swift routes
+    // through UIApplication.shared.open.
+    const safariBtn = document.getElementById("open-safari");
+    if (safariBtn) safariBtn.addEventListener("click", () => openURL("https://memory.wiki"));
     document.querySelectorAll("a[id^='open-']").forEach((a) => {
         a.addEventListener("click", (e) => {
             e.preventDefault();
