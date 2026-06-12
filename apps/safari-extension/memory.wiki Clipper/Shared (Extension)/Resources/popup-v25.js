@@ -338,7 +338,20 @@
     if (status && status.textContent) status.textContent = "";
     window.__intentCaptureActive = false;
     document.body.classList.remove("intent-active");
-    document.body.classList.remove("capturing");
+    // Flash the capturing overlay into a "DONE" state before
+    // dismissing it — gives the user an unmissable confirmation
+    // beat instead of the overlay just popping away into "did it
+    // work?" silence.
+    const overlay = document.querySelector(".capturing-overlay");
+    const overlayLabel = overlay && overlay.querySelector(".label");
+    const originalOverlayText = overlayLabel ? overlayLabel.textContent : null;
+    if (overlay) overlay.classList.add("is-done");
+    if (overlayLabel) overlayLabel.textContent = "Captured";
+    setTimeout(() => {
+      document.body.classList.remove("capturing");
+      if (overlay) overlay.classList.remove("is-done");
+      if (overlayLabel && originalOverlayText) overlayLabel.textContent = originalOverlayText;
+    }, 750);
     document.body.classList.add("just-captured");
     setTimeout(() => {
       first.classList.remove("is-fresh");

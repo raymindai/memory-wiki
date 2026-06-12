@@ -496,6 +496,20 @@
       display: flex;
       pointer-events: auto;
     }
+    /* "Captured ✓" beat — popup-v25.js flips this class after success
+       for ~750ms so the user gets an explicit done state. */
+    .capturing-overlay.is-done .blob {
+      animation: none;
+      transform: scale(1.18);
+      filter: drop-shadow(0 0 18px var(--micro-lime, #b5ff1a));
+      transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 220ms ease-out;
+    }
+    .capturing-overlay.is-done .label {
+      color: var(--micro-lime, #b5ff1a);
+      transform: scale(1.04);
+      transition: color 220ms ease-out, transform 220ms ease-out;
+    }
     .capturing-overlay .blob {
       width: 80px;
       height: 80px;
