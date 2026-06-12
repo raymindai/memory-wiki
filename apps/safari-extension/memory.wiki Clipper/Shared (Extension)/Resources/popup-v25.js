@@ -934,6 +934,13 @@
   (function attachDragScroll() {
     const wrap = document.getElementById("intent-chips");
     if (!wrap) return;
+    // Touch devices have native horizontal scroll on overflow-x; the
+    // mouse-based drag-to-scroll handler below misreads the tiny
+    // finger wiggle during a tap as a drag and suppresses the chip
+    // click, so the textarea never gets populated. Skip the drag
+    // wiring on touch and let iOS scroll handle it natively.
+    const isTouch = (window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches);
+    if (isTouch) return;
     let isDown = false;
     let startX = 0;
     let scrollStart = 0;
