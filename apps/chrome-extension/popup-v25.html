@@ -541,13 +541,9 @@
     .capturing-overlay .blob {
       width: 80px;
       height: 80px;
-      animation: cap-pulse 1.8s ease-in-out infinite;
+      /* No CSS pulse — the SVG morphs itself via SMIL. */
     }
     .capturing-overlay .blob img { width: 100%; height: 100%; display: block; }
-    @keyframes cap-pulse {
-      0%, 100% { transform: scale(1);    opacity: 0.85; }
-      50%      { transform: scale(1.10); opacity: 1; }
-    }
     .capturing-overlay .label {
       font-family: var(--font-mono);
       font-size: 11px;
