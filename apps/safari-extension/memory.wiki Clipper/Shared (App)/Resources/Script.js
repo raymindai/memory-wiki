@@ -39,8 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("button.open-preferences").forEach((b) => {
         b.addEventListener("click", openPreferences);
     });
-    const iosBtn = document.getElementById("ios-open-settings");
-    if (iosBtn) iosBtn.addEventListener("click", openSettings);
+    // Note: the iOS "Open Settings" button was removed in favor of
+    // the Safari puzzle-icon → Manage Extensions path (one tap inside
+    // Safari instead of a dive through Settings.app). The native
+    // open-settings message handler in ViewController.swift is kept
+    // as a no-op fallback in case future onboarding revisions want it.
     document.querySelectorAll("a[id^='open-']").forEach((a) => {
         a.addEventListener("click", (e) => {
             e.preventDefault();
