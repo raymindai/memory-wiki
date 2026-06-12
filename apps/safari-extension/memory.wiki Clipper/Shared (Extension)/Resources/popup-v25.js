@@ -781,12 +781,23 @@
       if (!ta) return;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
-      // Auto-fire submit so the chip click reads as a single
-      // intent-capture action.
-      if (sub) {
-        sub.disabled = false;
-        sub.click();
-      }
+      // Reproduce the submit-click side effects directly here rather
+      // than relying on sub.click(). iOS Safari (iPhone + iPad) is
+      // known to silently drop programmatic .click() that fires
+      // synchronously from inside another click handler, which is
+      // what was leaving window.__captureIntent unset on iPad — the
+      // capture would still run via btn-capture.click(), but the
+      // patched chrome.runtime.sendMessage couldn't see the intent
+      // and fell back to the plain /api/docs path, so the user got
+      // a regular capture URL instead of the AI-transformed one.
+      window.__captureIntent = text;
+      window.__intentCaptureActive = true;
+      document.body.classList.add("intent-active");
+      document.body.classList.add("capturing");
+      const btn = document.getElementById("btn-capture");
+      if (btn) btn.click();
+      setTimeout(() => document.body.classList.remove("intent-active"), 60000);
+      if (sub) sub.disabled = false;
     });
 
     // Marquee on hover when text overflows the clipped wrap
