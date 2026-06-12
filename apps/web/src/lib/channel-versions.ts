@@ -28,13 +28,13 @@ export interface ChannelInfo {
 
 export const CHANNELS: Record<Channel, ChannelInfo> = {
   chrome: {
-    version: "2.7.4",
-    size: "510 KB",
+    version: "2.7.5",
+    size: "514 KB",
     primaryUrl:
       "https://chromewebstore.google.com/detail/mdfycc-%E2%80%94-publish-ai-outpu/nkmkgmebaeaiapjgmmalbeilggfhnold",
     primaryLabel: "Add to Chrome",
-    secondaryUrl: "/downloads/memory-wiki-clipper-2.7.4.zip",
-    secondaryLabel: "Download v2.7.4 zip",
+    secondaryUrl: "/downloads/memory-wiki-clipper-2.7.5.zip",
+    secondaryLabel: "Download v2.7.5 zip",
   },
 
   safari: {
