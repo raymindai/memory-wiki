@@ -719,18 +719,49 @@
       return false;
     }
 
-    // Find an eligible <img> at viewport (x,y), walking through any
-    // overlay siblings that elementFromPoint would normally surface
-    // first. Returns the topmost image whose bounding box contains
-    // the point.
+    // Walking the elementsFromPoint stack and returning the topmost
+    // <img> reveals the Add button even when an OPAQUE overlay
+    // (dropdown, modal, tooltip card) is visually covering the image.
+    // Scan elements ABOVE the image for occluders before returning it
+    // — but treat transparent click-targets (Pinterest / Twitter /
+    // Instagram pattern) as non-occluding so the original workaround
+    // still holds.
     function findImageAt(x, y) {
       const stack = (document.elementsFromPoint && document.elementsFromPoint(x, y)) || [];
-      for (const el of stack) {
-        if (el instanceof HTMLImageElement && isEligible(el)) return el;
+      for (let i = 0; i < stack.length; i++) {
+        const el = stack[i];
+        if (el instanceof HTMLImageElement && isEligible(el)) {
+          for (let j = 0; j < i; j++) {
+            if (isOccludingOverlay(stack[j], el)) return null;
+          }
+          return el;
+        }
       }
       // Sometimes the cursor is on the button itself — keep current img.
       if (btn && stack.includes(btn)) return currentImg;
       return null;
+    }
+
+    function isOccludingOverlay(node, imgBelow) {
+      if (!node || node.nodeType !== 1) return false;
+      if (node.contains(imgBelow)) return false;
+      if (btn && (node === btn || (btn.contains && btn.contains(node)))) return false;
+      let cs;
+      try { cs = window.getComputedStyle(node); } catch { return false; }
+      if (!cs) return false;
+      if (cs.opacity === "0") return false;
+      if (cs.visibility === "hidden") return false;
+      if (cs.display === "none") return false;
+      if (cs.pointerEvents === "none" && cs.backgroundImage === "none") {
+        const bgc = cs.backgroundColor || "";
+        if (bgc === "rgba(0, 0, 0, 0)" || bgc === "transparent" || bgc === "") return false;
+      }
+      const bgColor = cs.backgroundColor || "";
+      const bgImage = cs.backgroundImage || "none";
+      const noBgColor = bgColor === "rgba(0, 0, 0, 0)" || bgColor === "transparent" || bgColor === "";
+      const noBgImage = bgImage === "none" || bgImage === "";
+      if (noBgColor && noBgImage) return false;
+      return true;
     }
 
     let lastMouseMoveTs = 0;

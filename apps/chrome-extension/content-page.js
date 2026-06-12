@@ -703,18 +703,70 @@
       return false;
     }
 
-    // Find an eligible <img> at viewport (x,y), walking through any
-    // overlay siblings that elementFromPoint would normally surface
-    // first. Returns the topmost image whose bounding box contains
-    // the point.
+    // Find an eligible <img> at viewport (x,y).
+    //
+    // The original implementation walked the entire elementsFromPoint
+    // stack and returned the first <img> found, which was meant to
+    // handle Pinterest / Twitter / Instagram where transparent click-
+    // targets sit on top of the actual image. But that also meant the
+    // Add button showed up when an OPAQUE overlay (dropdown menu,
+    // tooltip card, modal layer) covered the image — the image was
+    // visually hidden but still in the stack, so we falsely revealed
+    // Add anyway.
+    //
+    // Fix: keep walking the stack to find the image, but before
+    // returning it, scan every element ABOVE it in the stack. If any
+    // is an opaque overlay that is NOT one of the image's ancestors
+    // / wrappers, the image is occluded and we return null.
     function findImageAt(x, y) {
       const stack = (document.elementsFromPoint && document.elementsFromPoint(x, y)) || [];
-      for (const el of stack) {
-        if (el instanceof HTMLImageElement && isEligible(el)) return el;
+      for (let i = 0; i < stack.length; i++) {
+        const el = stack[i];
+        if (el instanceof HTMLImageElement && isEligible(el)) {
+          for (let j = 0; j < i; j++) {
+            if (isOccludingOverlay(stack[j], el)) return null;
+          }
+          return el;
+        }
       }
       // Sometimes the cursor is on the button itself — keep current img.
       if (btn && stack.includes(btn)) return currentImg;
       return null;
+    }
+
+    /**
+     * Is `node` an OPAQUE overlay sitting visually on top of the
+     * image we're considering? Returns false for ancestor wrappers
+     * (figure / picture / link), our own Add button, and transparent
+     * click-targets (the case the old code worked around).
+     */
+    function isOccludingOverlay(node, imgBelow) {
+      if (!node || node.nodeType !== 1) return false;
+      // The image's own ancestor chain doesn't visually cover it.
+      if (node.contains(imgBelow)) return false;
+      // Our own UI never counts as occluding.
+      if (btn && (node === btn || (btn.contains && btn.contains(node)))) return false;
+      // Walk computed style — transparent / hidden overlays don't
+      // visually cover the image, only solid ones do.
+      let cs;
+      try { cs = window.getComputedStyle(node); } catch { return false; }
+      if (!cs) return false;
+      if (cs.opacity === "0") return false;
+      if (cs.visibility === "hidden") return false;
+      if (cs.display === "none") return false;
+      if (cs.pointerEvents === "none" && cs.backgroundImage === "none") {
+        // pointer-events:none + no bg image is a strong signal for
+        // "this is just a transparent click-capture overlay" — common
+        // on Pinterest / Twitter / Instagram.
+        const bgc = cs.backgroundColor || "";
+        if (bgc === "rgba(0, 0, 0, 0)" || bgc === "transparent" || bgc === "") return false;
+      }
+      const bgColor = cs.backgroundColor || "";
+      const bgImage = cs.backgroundImage || "none";
+      const noBgColor = bgColor === "rgba(0, 0, 0, 0)" || bgColor === "transparent" || bgColor === "";
+      const noBgImage = bgImage === "none" || bgImage === "";
+      if (noBgColor && noBgImage) return false;
+      return true;
     }
 
     let lastMouseMoveTs = 0;

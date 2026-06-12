@@ -187,6 +187,16 @@
   opacity: 0;
   pointer-events: none;
   line-height: 0;
+  /* When the parent message is a flex / grid container (Claude does
+     this when the right sidebar opens), the button defaults to
+     stretching across the full row width. Pin it to its content size
+     and anchor to the right so the icon-only pill stays compact in
+     every layout. */
+  width: max-content;
+  align-self: flex-end;
+  flex: 0 0 auto;
+  justify-self: end;
+  box-sizing: border-box;
 }
 
 /* Show on hover of the parent message */
