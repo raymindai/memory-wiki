@@ -93,12 +93,13 @@
       html, body {
         width: 100% !important;
         min-width: 320px !important;
-        /* iPad popovers comfortably give 500+pt of horizontal space;
-           the earlier 480px cap left visible dead margin on the right
-           and made the popup feel narrow. 640px lets iPad fill its
-           popover while still feeling like a popup (not a full sheet)
-           on phone landscape. */
-        max-width: 640px !important;
+        /* No max-width cap on touch — iPad popovers can give us
+           700pt+ and capping at 480/640 left visible dead margin AND
+           wrapped the "Also on" footer onto two lines. Let the host
+           decide the width; the popover already constrains us
+           sensibly on iPad and the iPhone sheet just gives us the
+           viewport width. */
+        max-width: none !important;
         overflow-x: hidden !important;
       }
       html { overflow: visible !important; }
