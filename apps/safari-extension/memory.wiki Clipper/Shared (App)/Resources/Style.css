@@ -129,6 +129,75 @@ body.state-off :is(.state-on, .state-unknown) { display: none; }
   color: var(--ink-soft);
 }
 
+/* Safari toolbar mockup — visual hint for "where the puzzle icon is" */
+.safari-mockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 6px;
+}
+.safari-mockup .bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.safari-mockup .aa {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+}
+.safari-mockup .url {
+  letter-spacing: 0;
+  font-size: 13px;
+  color: var(--ink);
+}
+.safari-mockup .ext-btn {
+  position: relative;
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+.safari-mockup .ext-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.safari-mockup .ext-btn::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--accent);
+  opacity: 0.7;
+  animation: mw-pulse-ring 1.8s ease-in-out infinite;
+}
+.safari-mockup .reload {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+.safari-mockup .caption {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--accent);
+}
+@keyframes mw-pulse-ring {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50%      { transform: scale(1.18); opacity: 0.25; }
+}
+
 /* Steps */
 .steps {
   margin: 0;
