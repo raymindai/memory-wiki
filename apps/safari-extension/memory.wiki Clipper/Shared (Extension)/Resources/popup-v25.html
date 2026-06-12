@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:">
   <style>
     @font-face {
@@ -78,18 +79,24 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Touch contexts (Safari iOS / iPadOS, Android Chrome) — drop the
-       hard 384px and fill the system sheet/popover instead. iPhone
-       sheets sit at ~370pt (content was spilling), iPad popovers can
-       be wider (content was leaving dead margin AND in some sheet
-       sizes apparently swallowing the popup whole). */
+    /* Touch contexts (Safari iOS / iPadOS, Android Chrome) — the
+       extension popup is hosted in a system sheet (iPhone) or
+       popover (iPad). The hard 384px width was spilling on iPhone and
+       — based on the iPad "popup never appears" report — likely
+       causing the iPad popover host to treat the content as
+       overflowed-or-unsized and skip presentation entirely.
+       Use width:auto so the popover sizes around our intrinsic
+       content, min-width:320px so we don't collapse, max-width:100%
+       so we never exceed the popover frame. Avoid 100vw — that
+       maps to full screen on iPad and pushes content off the popover. */
     @media (hover: none), (pointer: coarse) {
       html, body {
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100vw !important;
-        overflow-x: hidden;
+        width: auto !important;
+        min-width: 320px !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
       }
+      html { overflow: visible !important; }
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.
