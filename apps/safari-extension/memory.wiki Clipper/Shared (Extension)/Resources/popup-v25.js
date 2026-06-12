@@ -1038,42 +1038,33 @@
   }
 })();
 
-// Recent — clear-all button. Two-tap confirm: first tap flips the
-// button into "Tap to confirm" state, second tap inside 3s wipes. We
-// can't use window.confirm() because Safari extension popups don't
-// host system dialogs reliably — the dialog never appears, the
-// promise resolves false, and the user sees "nothing happens."
-(function () {
-  const btn = document.getElementById("recent-clear");
-  if (!btn) return;
-  let armed = false;
-  let armTimer = null;
-  const labelEl = btn.querySelector("span") || btn;
-  const originalText = labelEl.textContent;
-  function disarm() {
-    armed = false;
-    labelEl.textContent = originalText;
-    btn.classList.remove("is-armed");
-    if (armTimer) { clearTimeout(armTimer); armTimer = null; }
-  }
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!armed) {
-      armed = true;
-      labelEl.textContent = "tap to confirm";
-      btn.classList.add("is-armed");
-      armTimer = setTimeout(disarm, 3000);
-      return;
-    }
-    disarm();
+// Recent — clear-all. One-tap clear (no confirm dialog — Safari
+// extension popups don't render system dialogs, and a two-tap state
+// machine was failing somehow on iPad; simplest path is just to
+// wipe immediately and let the user re-capture if they tapped by
+// mistake. Wrapped in capture-phase listener too in case a parent
+// element was eating the click.)
+function wipeRecent(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try {
     chrome.storage.local.remove(["mw-recent"], () => {
       const list = document.getElementById("recent-list");
       const wrap = document.getElementById("recent-wrap");
       if (list) list.innerHTML = "";
       if (wrap) wrap.classList.remove("visible");
     });
-  });
+  } catch {}
+}
+(function () {
+  const btn = document.getElementById("recent-clear");
+  if (!btn) return;
+  // Bind on both bubble and capture phases so nothing upstream can
+  // swallow it.
+  btn.addEventListener("click", wipeRecent, false);
+  btn.addEventListener("click", wipeRecent, true);
+  // Touchstart as a belt-and-suspenders for iPad WKWebView which
+  // sometimes drops click on small toolbar buttons inside a popover.
+  btn.addEventListener("touchend", wipeRecent, false);
 })();
 
 // Mark body as .capturing when the primary CTA is pressed (covers

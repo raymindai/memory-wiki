@@ -60,6 +60,7 @@
     body {
       width: 384px;
       margin: 0;
+      position: relative; /* containing block for .capturing-overlay */
       background: var(--bg);
       color: var(--body);
       font-family: var(--font-sans);
@@ -472,9 +473,14 @@
     }
 
     /* ─── Capturing overlay: blur backdrop + animated blob + label ─── */
+    /* Use absolute (not fixed). iPad Safari extension popovers resolve
+       position:fixed against the host page viewport instead of the
+       popover's WKWebView, which made the overlay escape the popup.
+       Absolute scopes it to body (which has position: relative). */
     .capturing-overlay {
-      position: fixed;
-      inset: 0;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      min-height: 100%;
       display: none;
       flex-direction: column;
       align-items: center;

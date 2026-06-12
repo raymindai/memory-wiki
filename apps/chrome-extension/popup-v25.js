@@ -1025,39 +1025,24 @@
   }
 })();
 
-// Recent — clear-all button with two-tap confirm (no window.confirm
-// dialog, since Safari extension popups don't host system dialogs).
-(function () {
-  const btn = document.getElementById("recent-clear");
-  if (!btn) return;
-  let armed = false;
-  let armTimer = null;
-  const labelEl = btn.querySelector("span") || btn;
-  const originalText = labelEl.textContent;
-  function disarm() {
-    armed = false;
-    labelEl.textContent = originalText;
-    btn.classList.remove("is-armed");
-    if (armTimer) { clearTimeout(armTimer); armTimer = null; }
-  }
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!armed) {
-      armed = true;
-      labelEl.textContent = "tap to confirm";
-      btn.classList.add("is-armed");
-      armTimer = setTimeout(disarm, 3000);
-      return;
-    }
-    disarm();
+// Recent — clear-all (one-tap, no confirm dialog).
+function wipeRecent(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try {
     chrome.storage.local.remove(["mw-recent"], () => {
       const list = document.getElementById("recent-list");
       const wrap = document.getElementById("recent-wrap");
       if (list) list.innerHTML = "";
       if (wrap) wrap.classList.remove("visible");
     });
-  });
+  } catch {}
+}
+(function () {
+  const btn = document.getElementById("recent-clear");
+  if (!btn) return;
+  btn.addEventListener("click", wipeRecent, false);
+  btn.addEventListener("click", wipeRecent, true);
+  btn.addEventListener("touchend", wipeRecent, false);
 })();
 
 // Mark body as .capturing when the primary CTA is pressed (covers
