@@ -537,22 +537,51 @@
       display: flex;
       pointer-events: auto;
     }
-    /* "Captured" beat — popup-v25.js flips this class on the overlay
-       for ~750ms after success so the user sees an explicit done
-       state instead of the overlay just vanishing. Stays in
-       monochrome (white ink) — lime is reserved for tiny dot/badge
-       glyphs, never headline / overlay surfaces. */
-    .capturing-overlay.is-done .blob {
-      animation: none;
-      transform: scale(1.18);
-      filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
-      transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-                  filter 220ms ease-out;
+    /* "Captured" state — same animated morph blob continues, label
+       swaps to "Captured", and View / OK buttons appear so the user
+       dismisses on their own terms (no auto-fade). Monochrome — lime
+       is reserved for tiny dot/badge/icon glyphs. */
+    .capturing-overlay .done-actions {
+      display: none;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .capturing-overlay.is-done .done-actions {
+      display: flex;
     }
     .capturing-overlay.is-done .label {
       color: var(--ink);
-      transform: scale(1.04);
-      transition: color 220ms ease-out, transform 220ms ease-out;
+    }
+    .capturing-overlay .done-view,
+    .capturing-overlay .done-ok {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 18px;
+      border-radius: var(--r-pill);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid var(--hair-strong);
+      transition: background 140ms, border-color 140ms, color 140ms;
+      text-decoration: none;
+    }
+    .capturing-overlay .done-view {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .capturing-overlay .done-view:hover { filter: brightness(0.92); }
+    .capturing-overlay .done-ok {
+      background: transparent;
+      color: var(--body);
+    }
+    .capturing-overlay .done-ok:hover {
+      border-color: var(--ink);
+      color: var(--ink);
     }
     .capturing-overlay .blob {
       width: 80px;
@@ -1344,8 +1373,12 @@
 
   <!-- Capturing overlay (covers the whole popup during capture) -->
   <div class="capturing-overlay" aria-hidden="true">
-    <div class="blob"><img src="icons/icon128.png" alt=""></div>
+    <div class="blob"><img src="icons/mwblob_morph.svg" alt=""></div>
     <div class="label">Capturing...</div>
+    <div class="done-actions">
+      <a class="done-view" id="overlay-view" href="#" target="_blank" rel="noopener">View</a>
+      <button class="done-ok" id="overlay-ok" type="button">OK</button>
+    </div>
   </div>
 
   <!-- popup.js compatibility stubs -->

@@ -338,20 +338,35 @@
     if (status && status.textContent) status.textContent = "";
     window.__intentCaptureActive = false;
     document.body.classList.remove("intent-active");
-    // Flash the capturing overlay into a "DONE" state before
-    // dismissing it — gives the user an unmissable confirmation
-    // beat instead of the overlay just popping away into "did it
-    // work?" silence.
+    // Flip the capturing overlay into the "Captured" state — same
+    // animated morph blob continues, label swaps, View / OK buttons
+    // appear. User dismisses on their own terms instead of an
+    // auto-fade so the success beat is unmissable.
     const overlay = document.querySelector(".capturing-overlay");
     const overlayLabel = overlay && overlay.querySelector(".label");
-    const originalOverlayText = overlayLabel ? overlayLabel.textContent : null;
+    const viewBtn = document.getElementById("overlay-view");
+    const okBtn = document.getElementById("overlay-ok");
     if (overlay) overlay.classList.add("is-done");
     if (overlayLabel) overlayLabel.textContent = "Captured";
-    setTimeout(() => {
+    const url = first.getAttribute("data-url") || first.getAttribute("href") || "";
+    if (viewBtn) {
+      viewBtn.setAttribute("href", url || "#");
+      viewBtn.onclick = (e) => {
+        e.preventDefault();
+        if (url) {
+          try { chrome.tabs.create({ url }); } catch { try { window.open(url, "_blank"); } catch {} }
+        }
+        dismissOverlay();
+      };
+    }
+    if (okBtn) {
+      okBtn.onclick = (e) => { e.preventDefault(); dismissOverlay(); };
+    }
+    function dismissOverlay() {
       document.body.classList.remove("capturing");
       if (overlay) overlay.classList.remove("is-done");
-      if (overlayLabel && originalOverlayText) overlayLabel.textContent = originalOverlayText;
-    }, 750);
+      if (overlayLabel) overlayLabel.textContent = "Capturing...";
+    }
     document.body.classList.add("just-captured");
     setTimeout(() => {
       first.classList.remove("is-fresh");
