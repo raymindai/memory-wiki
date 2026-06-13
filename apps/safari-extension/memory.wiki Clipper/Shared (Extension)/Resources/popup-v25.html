@@ -92,21 +92,24 @@
        content, min-width:320px so we don't collapse, max-width:100%
        so we never exceed the popover frame. Avoid 100vw — that
        maps to full screen on iPad and pushes content off the popover. */
+    /* Touch hosts (iOS / iPadOS Safari, Android Chrome). Let the body
+       fill whatever width the host gives us — iPhone sheet is sized
+       to the screen, iPad popover defaults to ~400pt. */
     @media (hover: none), (pointer: coarse) {
       html, body {
-        /* Safari sizes the iPad extension popover to the body's
-           intrinsic / requested width (with an internal cap around
-           ~800pt). With width:100% we got whatever Safari's default
-           cap was — visibly narrow, with the "Also on" footer
-           wrapping. Force the body to request 560px so the popover
-           opens wider; iPhone sheet ignores min-width past viewport
-           and falls back to 100vw, so it doesn't hurt that side. */
         width: 100% !important;
-        min-width: 500px !important;
         max-width: none !important;
         overflow-x: hidden !important;
       }
-      html { overflow: visible !important; min-width: 500px !important; }
+      html { overflow: visible !important; }
+    }
+
+    /* iPad popover only — request a wider popup so the chip rail, the
+       intent input + capture pill, and the Also-on footer all fit on
+       one line. iPhone sheet would overflow at this width, so this
+       is GATED on html.is-ipad set by popup-v25.js's UA detection. */
+    html.is-ipad, html.is-ipad body {
+      min-width: 500px !important;
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.

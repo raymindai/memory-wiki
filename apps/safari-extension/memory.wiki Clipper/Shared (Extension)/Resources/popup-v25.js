@@ -1,6 +1,29 @@
 // popup-v25.html companion: headline rotation + free-form AI submit wiring.
 // Inline scripts are blocked by Manifest V3 CSP, so this lives in its own file.
 
+// ─── Device class for popup width ────────────────────────────────────
+// iPad Safari extension popover gives the popup room to expand; iPhone
+// extension sheet does not. The CSS uses html.is-ipad to opt into a
+// wider min-width on iPad only, so iPhone's sheet doesn't get content
+// pushed off the right edge.
+(function () {
+  try {
+    const ua = navigator.userAgent || "";
+    const isIPad =
+      /iPad/i.test(ua) ||
+      // iPadOS 13+ identifies as Macintosh; the multi-touch capability
+      // gives it away. Fallback to screen.width for any future devices
+      // that don't match either pattern but are tablet-sized.
+      (navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua)) ||
+      (navigator.maxTouchPoints > 1 && (screen.width || 0) >= 600);
+    if (isIPad) {
+      document.documentElement.classList.add("is-ipad");
+    } else {
+      document.documentElement.classList.add("is-iphone");
+    }
+  } catch (e) { /* before-DOMReady safety; ignore */ }
+})();
+
 (function () {
   const HEADLINES = [
     ["Hold this",   "thought."],
