@@ -40,10 +40,59 @@
         </section>
 
         <section class="platform-mac card">
-            <p class="state-msg state-unknown">Turn on memory.wiki Clipper in Safari Extensions preferences.</p>
-            <p class="state-msg state-on">memory.wiki Clipper is on. Toggle from Safari Extensions preferences.</p>
-            <p class="state-msg state-off">memory.wiki Clipper is off. Turn it on from Safari Extensions preferences.</p>
-            <button class="primary open-preferences" type="button">Quit and Open Safari Extensions Preferences&hellip;</button>
+            <h2>Enable in Safari</h2>
+
+            <!-- CSS mockup of macOS Safari Settings > Extensions panel.
+                 Shows the row the user is looking for so they don't get
+                 lost in the Settings sheet. Tinted accent ring + caption
+                 mirror the iOS .safari-mockup pattern. -->
+            <figure class="mac-mockup" aria-hidden="true">
+                <div class="mac-window">
+                    <div class="title-bar">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="title">Extensions</span>
+                    </div>
+                    <div class="tab-bar">
+                        <span class="tab">General</span>
+                        <span class="tab">Tabs</span>
+                        <span class="tab">AutoFill</span>
+                        <span class="tab active">Extensions</span>
+                        <span class="tab">Privacy</span>
+                    </div>
+                    <div class="ext-list">
+                        <div class="ext-row inactive">
+                            <span class="check"></span>
+                            <span class="ext-name">1Password</span>
+                        </div>
+                        <div class="ext-row highlight">
+                            <span class="check checked">
+                                <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <span class="ext-pulse" aria-hidden="true"></span>
+                            </span>
+                            <span class="ext-name">memory.wiki Clipper</span>
+                        </div>
+                        <div class="ext-row inactive">
+                            <span class="check"></span>
+                            <span class="ext-name">Grammarly</span>
+                        </div>
+                    </div>
+                </div>
+                <figcaption>tick to enable</figcaption>
+            </figure>
+
+            <ol class="steps">
+                <li><span class="num">1</span><span class="step-text">In <strong>Safari</strong>, open <strong>Settings</strong> from the Safari menu (<strong>Command + ,</strong>).</span></li>
+                <li><span class="num">2</span><span class="step-text">Select the <strong>Extensions</strong> tab.</span></li>
+                <li><span class="num">3</span><span class="step-text">Tick <strong>memory.wiki Clipper</strong> to enable it, then allow it on All Websites.</span></li>
+            </ol>
+
+            <button class="primary open-preferences" type="button">Quit and Open Safari Extensions Settings&hellip;</button>
+
+            <p class="state-msg state-unknown">Turn on memory.wiki Clipper from the Extensions section of Safari Settings.</p>
+            <p class="state-msg state-on">memory.wiki Clipper is on. Toggle from the Extensions section of Safari Settings.</p>
+            <p class="state-msg state-off">memory.wiki Clipper is off. Turn it on from the Extensions section of Safari Settings.</p>
         </section>
 
         <footer class="links">

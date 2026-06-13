@@ -11,7 +11,14 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Override point for customization after application launch.
+        // Center the window on first launch — storyboard's contentRect
+        // is only used as an initial size, and AppKit's default origin
+        // leaves the window in the bottom-left corner of the screen.
+        // Centering here matches what every other macOS app does for a
+        // single-window utility opened from Launchpad.
+        DispatchQueue.main.async {
+            NSApplication.shared.windows.first?.center()
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
