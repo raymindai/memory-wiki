@@ -1116,26 +1116,43 @@ export default function MdEditor() {
     collabApplyLocalRef.current?.(val);
   }, [triggerAutoSave]);
 
+  // Undo / redo must push the restored markdown into every writer
+  // the AI actions touch — markdownRaw, the legacy preview, the
+  // CodeMirror source buffer, the TipTap Live tree, the tab object,
+  // and the Yjs CRDT if collab is active. The previous version only
+  // updated markdownRaw + the preview, so when the user hit Undo
+  // after an AI Polish / Chat edit, CodeMirror and TipTap kept
+  // showing the AI result and the change didn't actually revert in
+  // the editor they were looking at. Reported case: AI chat wiped
+  // the doc, Undo button looked like a no-op because Live tab still
+  // showed the empty TipTap state.
+  const applyHistoryEntry = useCallback((md: string) => {
+    setMarkdownRaw(md);
+    doRender(md);
+    cmSetDocRef.current?.(md);
+    tiptapRef.current?.setMarkdown(md);
+    setTabs((prev) => prev.map((t) => t.id === activeTabIdRef.current ? { ...t, markdown: md } : t));
+    // CRDT reset, otherwise peers (and the next change) will yank
+    // us back to the post-AI state because Yjs has it in its log.
+    collabForceResetRef.current?.(md);
+    triggerAutoSave(md);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doRender, triggerAutoSave]);
+
   const undo = useCallback(() => {
     if (undoStack.current.length <= 1) return;
     const current = undoStack.current.pop()!;
     redoStack.current.push(current);
     const prev = undoStack.current[undoStack.current.length - 1];
-    setMarkdownRaw(prev);
-    doRender(prev);
-    triggerAutoSave(prev);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerAutoSave]);
+    applyHistoryEntry(prev);
+  }, [applyHistoryEntry]);
 
   const redo = useCallback(() => {
     if (redoStack.current.length === 0) return;
     const next = redoStack.current.pop()!;
     undoStack.current.push(next);
-    setMarkdownRaw(next);
-    doRender(next);
-    triggerAutoSave(next);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerAutoSave]);
+    applyHistoryEntry(next);
+  }, [applyHistoryEntry]);
 
   // Tab functions use doRenderRef to avoid circular dependency
   const doRenderRef = useRef<(md: string) => void>(() => {});
@@ -6559,18 +6576,59 @@ export default function MdEditor() {
         const trimmed = result.trim();
         // Check if AI answered (ANSWER:) or if response doesn't start with EDIT:
         if (trimmed.startsWith("ANSWER:") || !trimmed.startsWith("EDIT:")) {
-          // AI answered a question or casual message — show in chat, don't modify document
+          // AI answered a question or casual message, show in chat, don't modify document
           const answer = trimmed.replace(/^ANSWER:\s*/, "");
           setAiChatHistory(prev => [...prev, { role: "ai", text: answer }]);
           setAiProcessing(null);
           return; // skip document update
         }
         // AI wants to edit the document
-        newMd = trimmed.replace(/^EDIT:\s*/, "");
+        newMd = trimmed.replace(/^EDIT:\s*/, "").trim();
+        // SAFETY GUARDS — without these the chat path was a foot-gun.
+        // Reported repro: user asked the AI to reformat a single
+        // section ("split experience into lines for start/end/role")
+        // and the model returned just the reformatted section as the
+        // EDIT body. We blindly replaced the whole document with the
+        // fragment and the rest of the page vanished.
+        //
+        // (1) Empty edit. If the model returned "EDIT:" with nothing
+        // useful after it, refuse — would wipe the document otherwise.
+        if (!newMd) {
+          setAiChatHistory(prev => [...prev, {
+            role: "ai",
+            text: "I couldn't produce an edit. Tell me what to change and how (e.g. 'rewrite the experience section as one line per company') and I'll try again.",
+          }]);
+          setAiProcessing(null);
+          return;
+        }
+        // (2) Heavy shrinkage. If the result is a fraction of the
+        // original on a non-trivial doc, the model almost certainly
+        // returned only the section it touched and dropped the rest.
+        // Always refuse — silent doc-wipe is way worse than asking the
+        // user to retry. They can still get the destructive behavior
+        // by explicitly asking "replace everything with X".
+        if (md.length > 500 && newMd.length < md.length * 0.3) {
+          const safeNewMd = newMd; // capture for the chat message
+          setAiChatHistory(prev => [...prev, {
+            role: "ai",
+            text:
+              `That edit would shrink the document from ${md.length.toLocaleString()} to ${safeNewMd.length.toLocaleString()} characters — I'd be dropping most of the content. ` +
+              `Tell me to "keep everything else and only change <section>", or paste the section you want me to focus on.`,
+          }]);
+          setAiProcessing(null);
+          return;
+        }
         showToast("Document updated", "success");
       } else {
-        // Polish, translate, compact, format — replace entire document.
-        newMd = result;
+        // Polish, translate, compact, format, replace entire document.
+        newMd = (result || "").trim();
+        // Same empty guard as the chat path — Polish / Translate /
+        // Compact / Format should never return empty for a non-empty
+        // input; if they do, the safest move is to leave the document
+        // alone and surface the failure in the toast.
+        if (!newMd) {
+          throw new Error("AI returned an empty result");
+        }
         const labels: Record<string, string> = {
           polish: "Document polished",
           translate: "Document translated",
