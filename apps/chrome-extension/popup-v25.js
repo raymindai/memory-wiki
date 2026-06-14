@@ -728,7 +728,18 @@
     });
   }
   function savePrefs(prefs) {
-    chrome.storage.local.set({ [STORAGE_KEY]: prefs });
+    // Returned as a Promise so callers can await it. Safari macOS
+    // dismisses the extension popover on the slightest cursor exit,
+    // and chrome.storage.local.set is async — a fire-and-forget call
+    // would be in flight when the popup closes and the write would
+    // never commit. Result: favoriting / dismissing / pinning chips
+    // looked fine until the user reopened the popup, then everything
+    // was back to default.
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.set({ [STORAGE_KEY]: prefs }, () => resolve());
+      } catch { resolve(); }
+    });
   }
   function bumpIntent(prefs, text) {
     text = (text || "").trim();
@@ -806,7 +817,8 @@
       e.preventDefault(); e.stopPropagation();
       const prefs = await loadPrefs();
       toggleFavorite(prefs, text);
-      savePrefs(prefs);
+      // Await — see savePrefs for the Safari popup-close race story.
+      await savePrefs(prefs);
       render();
     });
     actions.appendChild(fav);
@@ -834,7 +846,8 @@
         prefs.dismissed = prefs.dismissed || [];
         if (!prefs.dismissed.includes(text)) prefs.dismissed.push(text);
       }
-      savePrefs(prefs);
+      // Await — see savePrefs for the Safari popup-close race story.
+      await savePrefs(prefs);
       el.style.transition = "opacity 140ms, transform 140ms";
       el.style.opacity = "0";
       el.style.transform = "scale(0.85)";

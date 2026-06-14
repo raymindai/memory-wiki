@@ -10,8 +10,15 @@
 <body>
     <main class="container">
         <header class="hero">
-            <img class="icon" src="../Icon.png" width="88" height="88" alt="memory.wiki Clipper">
-            <h1>memory.wiki Clipper</h1>
+            <!-- Animated SMIL blob from the brand kit. Same morphing
+                 mark used in the capture overlay so users see the same
+                 visual identity from container app to capture flow. -->
+            <div class="hero-blob" aria-hidden="true">
+                <img src="../mwblob_morph.svg" alt="">
+            </div>
+            <h1 class="brand-mark">
+                <span class="brand-name">memory.wiki</span><span class="brand-divider">&nbsp;</span><span class="brand-suffix">Clipper</span>
+            </h1>
             <p class="tagline">Capture any page into a memory.wiki URL that ChatGPT, Claude, Gemini, Cursor, and any AI can read.</p>
         </header>
 
@@ -39,7 +46,8 @@
             <p class="muted" style="margin-top:4px;font-size:12px">Can&rsquo;t find it? Open Settings &rsaquo; Apps &rsaquo; Safari &rsaquo; Extensions instead.</p>
         </section>
 
-        <section class="platform-mac card">
+        <section class="platform-mac">
+          <div class="card">
             <h2>Enable in Safari</h2>
 
             <!-- CSS mockup of macOS Safari Settings > Extensions panel.
@@ -69,8 +77,8 @@
                         <div class="ext-row highlight">
                             <span class="check checked">
                                 <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 6.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                <span class="ext-pulse" aria-hidden="true"></span>
                             </span>
+                            <img class="ext-icon" src="../Icon.png" alt="" aria-hidden="true">
                             <span class="ext-name">memory.wiki Clipper</span>
                         </div>
                         <div class="ext-row inactive">
@@ -87,12 +95,13 @@
                 <li><span class="num">2</span><span class="step-text">Select the <strong>Extensions</strong> tab.</span></li>
                 <li><span class="num">3</span><span class="step-text">Tick <strong>memory.wiki Clipper</strong> to enable it, then allow it on All Websites.</span></li>
             </ol>
+          </div>
 
-            <button class="primary open-preferences" type="button">Quit and Open Safari Extensions Settings&hellip;</button>
+          <button class="primary open-preferences" type="button">Quit and Open Safari Extensions Settings&hellip;</button>
 
-            <p class="state-msg state-unknown">Turn on memory.wiki Clipper from the Extensions section of Safari Settings.</p>
-            <p class="state-msg state-on">memory.wiki Clipper is on. Toggle from the Extensions section of Safari Settings.</p>
-            <p class="state-msg state-off">memory.wiki Clipper is off. Turn it on from the Extensions section of Safari Settings.</p>
+          <p class="state-msg state-unknown">Turn on memory.wiki Clipper from the Extensions section of Safari Settings.</p>
+          <p class="state-msg state-on">memory.wiki Clipper is on. Toggle from the Extensions section of Safari Settings.</p>
+          <p class="state-msg state-off">memory.wiki Clipper is off. Turn it on from the Extensions section of Safari Settings.</p>
         </section>
 
         <footer class="links">

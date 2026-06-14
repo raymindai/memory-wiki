@@ -19,6 +19,10 @@
 		5A2B51EB2FD89053006BF86E /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B51AF2FD89051006BF86E /* Main.html */; };
 		5A2B51EC2FD89053006BF86E /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B51B12FD89051006BF86E /* Icon.png */; };
 		5A2B51ED2FD89053006BF86E /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B51B12FD89051006BF86E /* Icon.png */; };
+		5AFA0F002FD89AAA006BF86E /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 5AFA0F0F2FD89AAA006BF86E /* fonts */; };
+		5AFA0F012FD89AAA006BF86E /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 5AFA0F0F2FD89AAA006BF86E /* fonts */; };
+		5AB10B002FD89AAA006BF86E /* mwblob_morph.svg in Resources */ = {isa = PBXBuildFile; fileRef = 5AB10B0F2FD89AAA006BF86E /* mwblob_morph.svg */; };
+		5AB10B012FD89AAA006BF86E /* mwblob_morph.svg in Resources */ = {isa = PBXBuildFile; fileRef = 5AB10B0F2FD89AAA006BF86E /* mwblob_morph.svg */; };
 		5A2B51EE2FD89053006BF86E /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B51B22FD89051006BF86E /* Style.css */; };
 		5A2B51EF2FD89053006BF86E /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B51B22FD89051006BF86E /* Style.css */; };
 		5A2B51F02FD89053006BF86E /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 5A2B51B32FD89051006BF86E /* Script.js */; };
@@ -124,6 +128,8 @@
 /* Begin PBXFileReference section */
 		5A2B51B02FD89051006BF86E /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
 		5A2B51B12FD89051006BF86E /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		5AFA0F0F2FD89AAA006BF86E /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fonts; sourceTree = "<group>"; };
+		5AB10B0F2FD89AAA006BF86E /* mwblob_morph.svg */ = {isa = PBXFileReference; lastKnownFileType = text; path = mwblob_morph.svg; sourceTree = "<group>"; };
 		5A2B51B22FD89051006BF86E /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
 		5A2B51B32FD89051006BF86E /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
 		5A2B51B42FD89051006BF86E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -234,6 +240,8 @@
 				5A2B51B32FD89051006BF86E /* Script.js */,
 				5A6IPH012FD89999006BF86E /* safari-hint-iphone.png */,
 				5A6IPA012FD89999006BF86E /* safari-hint-ipad.png */,
+				5AB10B0F2FD89AAA006BF86E /* mwblob_morph.svg */,
+				5AFA0F0F2FD89AAA006BF86E /* fonts */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -469,6 +477,8 @@
 				5A6PA0022FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
 				5A6IPH022FD89999006BF86E /* safari-hint-iphone.png in Resources */,
 				5A6IPA022FD89999006BF86E /* safari-hint-ipad.png in Resources */,
+				5AFA0F002FD89AAA006BF86E /* fonts in Resources */,
+				5AB10B002FD89AAA006BF86E /* mwblob_morph.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,6 +495,8 @@
 				5A6PA0032FD89999006BF86E /* PrivacyInfo.xcprivacy in Resources */,
 				5A6IPH032FD89999006BF86E /* safari-hint-iphone.png in Resources */,
 				5A6IPA032FD89999006BF86E /* safari-hint-ipad.png in Resources */,
+				5AFA0F012FD89AAA006BF86E /* fonts in Resources */,
+				5AB10B012FD89AAA006BF86E /* mwblob_morph.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

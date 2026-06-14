@@ -3,6 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- macOS Safari paints the popover's pointer arrow from the page's
+       theme-color (or falls back to white when no theme/scheme is set),
+       NOT from the html / body background CSS. Without these the
+       arrow shows as a white tab above our dark popup. -->
+  <meta name="theme-color" content="#08080a">
+  <meta name="color-scheme" content="dark">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:">
   <style>
     @font-face {
@@ -17,6 +23,7 @@
     }
 
     :root {
+      color-scheme: dark;
       --bg:          #08080a;
       --bg-deep:     #04040a;
       --bg-card:     #0d0d11;

@@ -217,7 +217,16 @@
     if (readabilityOut && fallbackOut) {
       const rCov = headingCoverage(readabilityOut.markdown, pageHeadings);
       const fCov = headingCoverage(fallbackOut.markdown, pageHeadings);
-      chosen = (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400)
+      // Image coverage — Readability sometimes drops <picture>/<figure>
+      // wrappers when extracting the article, leaving the text intact
+      // but no images. Apple Newsroom and similar publisher templates
+      // hit this case hard. Compare the image count between the two
+      // outputs and reject Readability if it kept fewer than half of
+      // fallback's images (assuming fallback found a meaningful number).
+      const rImg = countMdImages(readabilityOut.markdown);
+      const fImg = countMdImages(fallbackOut.markdown);
+      const imgRatioOk = fImg < 3 ? true : (rImg / fImg) >= 0.5;
+      chosen = (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400 && imgRatioOk)
         ? readabilityOut
         : fallbackOut;
     } else {
@@ -229,6 +238,14 @@
       pageType,                   // popup.js uses this to decide AI auto-apply
       metadata: meta,             // surfaced for downstream consumers
     };
+  }
+
+  /** Count `![alt](src)` occurrences in a markdown string. Cheap proxy
+      for "did this extraction path keep the page's images." */
+  function countMdImages(md) {
+    if (!md) return 0;
+    const matches = md.match(/!\[[^\]]*\]\([^)]+\)/g);
+    return matches ? matches.length : 0;
   }
 
   function collectPageHeadings() {

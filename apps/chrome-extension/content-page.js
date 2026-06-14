@@ -19,6 +19,22 @@
   if (document.documentElement.dataset.mwPageInjected) return;
   document.documentElement.dataset.mwPageInjected = "1";
 
+  // Hook for direct-call path used by the Safari popup (Safari's
+  // content-script messaging is unreliable from extension popup
+  // context — Storage Partitioning quirk). The popup can run
+  // chrome.scripting.executeScript({func: () => window.__mwCapture()})
+  // and bypass chrome.tabs.sendMessage entirely. Chrome users still
+  // go through the listener below; the exposed hook is harmless.
+  function __mwCaptureViaHook(kind) {
+    try {
+      if (kind === "selection") return captureSelection();
+      return capturePage();
+    } catch (err) {
+      return { markdown: "", error: String(err && err.message || err) };
+    }
+  }
+  window.__mwCapture = __mwCaptureViaHook;
+
   function siteName() {
     return location.hostname.replace(/^www\./, "");
   }
@@ -201,7 +217,16 @@
     if (readabilityOut && fallbackOut) {
       const rCov = headingCoverage(readabilityOut.markdown, pageHeadings);
       const fCov = headingCoverage(fallbackOut.markdown, pageHeadings);
-      chosen = (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400)
+      // Image coverage — Readability sometimes drops <picture>/<figure>
+      // wrappers when extracting the article, leaving the text intact
+      // but no images. Apple Newsroom and similar publisher templates
+      // hit this case hard. Compare the image count between the two
+      // outputs and reject Readability if it kept fewer than half of
+      // fallback's images (assuming fallback found a meaningful number).
+      const rImg = countMdImages(readabilityOut.markdown);
+      const fImg = countMdImages(fallbackOut.markdown);
+      const imgRatioOk = fImg < 3 ? true : (rImg / fImg) >= 0.5;
+      chosen = (rCov >= fCov - 0.2 && readabilityOut.markdown.length > 400 && imgRatioOk)
         ? readabilityOut
         : fallbackOut;
     } else {
@@ -213,6 +238,14 @@
       pageType,                   // popup.js uses this to decide AI auto-apply
       metadata: meta,             // surfaced for downstream consumers
     };
+  }
+
+  /** Count `![alt](src)` occurrences in a markdown string. Cheap proxy
+      for "did this extraction path keep the page's images." */
+  function countMdImages(md) {
+    if (!md) return 0;
+    const matches = md.match(/!\[[^\]]*\]\([^)]+\)/g);
+    return matches ? matches.length : 0;
   }
 
   function collectPageHeadings() {
@@ -703,21 +736,13 @@
       return false;
     }
 
-    // Find an eligible <img> at viewport (x,y).
-    //
-    // The original implementation walked the entire elementsFromPoint
-    // stack and returned the first <img> found, which was meant to
-    // handle Pinterest / Twitter / Instagram where transparent click-
-    // targets sit on top of the actual image. But that also meant the
-    // Add button showed up when an OPAQUE overlay (dropdown menu,
-    // tooltip card, modal layer) covered the image — the image was
-    // visually hidden but still in the stack, so we falsely revealed
-    // Add anyway.
-    //
-    // Fix: keep walking the stack to find the image, but before
-    // returning it, scan every element ABOVE it in the stack. If any
-    // is an opaque overlay that is NOT one of the image's ancestors
-    // / wrappers, the image is occluded and we return null.
+    // Walking the elementsFromPoint stack and returning the topmost
+    // <img> reveals the Add button even when an OPAQUE overlay
+    // (dropdown, modal, tooltip card) is visually covering the image.
+    // Scan elements ABOVE the image for occluders before returning it
+    // — but treat transparent click-targets (Pinterest / Twitter /
+    // Instagram pattern) as non-occluding so the original workaround
+    // still holds.
     function findImageAt(x, y) {
       const stack = (document.elementsFromPoint && document.elementsFromPoint(x, y)) || [];
       for (let i = 0; i < stack.length; i++) {
@@ -734,20 +759,10 @@
       return null;
     }
 
-    /**
-     * Is `node` an OPAQUE overlay sitting visually on top of the
-     * image we're considering? Returns false for ancestor wrappers
-     * (figure / picture / link), our own Add button, and transparent
-     * click-targets (the case the old code worked around).
-     */
     function isOccludingOverlay(node, imgBelow) {
       if (!node || node.nodeType !== 1) return false;
-      // The image's own ancestor chain doesn't visually cover it.
       if (node.contains(imgBelow)) return false;
-      // Our own UI never counts as occluding.
       if (btn && (node === btn || (btn.contains && btn.contains(node)))) return false;
-      // Walk computed style — transparent / hidden overlays don't
-      // visually cover the image, only solid ones do.
       let cs;
       try { cs = window.getComputedStyle(node); } catch { return false; }
       if (!cs) return false;
@@ -755,9 +770,6 @@
       if (cs.visibility === "hidden") return false;
       if (cs.display === "none") return false;
       if (cs.pointerEvents === "none" && cs.backgroundImage === "none") {
-        // pointer-events:none + no bg image is a strong signal for
-        // "this is just a transparent click-capture overlay" — common
-        // on Pinterest / Twitter / Instagram.
         const bgc = cs.backgroundColor || "";
         if (bgc === "rgba(0, 0, 0, 0)" || bgc === "transparent" || bgc === "") return false;
       }
