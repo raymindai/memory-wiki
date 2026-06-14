@@ -389,11 +389,16 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   // set-allowed-emails instead. Returns 204 on success, 404 if the
   // caller wasn't on the share to begin with.
   if (body.action === "leave-share") {
-    const callerEmailRaw = verified?.email
-      || req.headers.get("x-user-email")
-      || (typeof body.userEmail === "string" ? body.userEmail : "");
-    const callerEmail = (callerEmailRaw || "").trim().toLowerCase();
-    if (!callerEmail) return NextResponse.json({ error: "email required" }, { status: 400 });
+    // Only honour the JWT-verified email. The userEmail body field and
+    // x-user-email header are client-supplied and spoofable — without
+    // this restriction anyone who knew a doc id + a victim's email
+    // could kick that person off a share (griefing). The real client
+    // (a signed-in user clicking 'Remove from list') always sends a
+    // Bearer token, so verified.email is populated on the legit path.
+    const callerEmail = (verified?.email || "").trim().toLowerCase();
+    if (!callerEmail) {
+      return NextResponse.json({ error: "Sign in to leave a shared document" }, { status: 401 });
+    }
 
     const { data: doc } = await supabase
       .from("documents")
