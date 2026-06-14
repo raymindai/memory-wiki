@@ -179,17 +179,20 @@ Rules:
 - Preserve the document's original language in your answer when natural.`;
 }
 
-function buildChatPrompt(instruction: string): string {
+function buildChatPrompt(instruction: string, docLength: number = 0): string {
   // Sanitize instruction to prevent prompt injection
   const sanitized = instruction
     .replace(/["""]/g, "'")
     .replace(/\n/g, " ")
     .slice(0, 500);
+  const lengthHint = docLength > 0
+    ? `\nThe current document is approximately ${docLength.toLocaleString()} characters long. Your EDIT output MUST be a complete document of comparable length — typically within 80%-120% of this size when the change is local, longer if the user asked to add content, shorter only if they explicitly asked to summarise or remove sections.`
+    : "";
   return `You are an expert document editor AI. You modify Markdown documents based on user instructions.
 
 The user's instruction is between the <instruction> tags below.
 
-<instruction>${sanitized}</instruction>
+<instruction>${sanitized}</instruction>${lengthHint}
 
 Determine the intent:
 A) QUESTION — user is asking about the document content (e.g. "what does this say?", "explain this")
@@ -199,12 +202,11 @@ C) CASUAL — greeting or unrelated (e.g. "ok", "thanks", "hi")
 Rules:
 - If A: Respond with "ANSWER:" followed by your concise answer. No markdown formatting.
 - If B: Respond with "EDIT:" followed by the COMPLETE modified document in Markdown.
-  CRITICAL for edits:
-  - Output the ENTIRE document from start to finish, with the requested changes applied.
-  - Preserve ALL existing content that was not asked to be changed.
-  - Preserve all code blocks, math equations, diagrams, tables exactly as they are.
-  - Only modify what the user explicitly asked to change.
-  - If adding content, integrate it naturally into the document structure.
+  CRITICAL — read this twice:
+  - Your EDIT output MUST contain the ENTIRE document from the very first line to the very last line, top to bottom, no omissions.
+  - When the user asks for a local change ("reformat the experience section", "rename this heading", "translate one paragraph"), you STILL return the full document with that change applied. NEVER return only the changed section.
+  - Preserve ALL existing content the user did not ask to change, character-for-character where possible. Code blocks, math equations, diagrams, tables, lists, links, images — keep them all intact and in their original positions.
+  - If you find yourself about to output only a section, stop and start over with the full document. Returning a fragment will be rejected as content loss.
 - If C: Respond with "ANSWER:" followed by a brief, friendly response.
 
 ALWAYS start with exactly "ANSWER:" or "EDIT:" — no exceptions.`;
@@ -254,7 +256,7 @@ export async function POST(req: NextRequest) {
   } else if (action === "selection_translate") {
     systemPrompt = buildSelectionTranslatePrompt(language!);
   } else if (action === "chat") {
-    systemPrompt = buildChatPrompt(instruction!);
+    systemPrompt = buildChatPrompt(instruction!, markdown?.length || 0);
   } else if (action === "visitor_chat") {
     systemPrompt = buildVisitorChatPrompt(instruction!);
   } else if (action === "selection_rewrite") {

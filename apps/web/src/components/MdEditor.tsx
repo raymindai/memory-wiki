@@ -144,6 +144,49 @@ import {
   type ColorScheme,
 } from "@/lib/theme-options";
 
+/**
+ * When the AI's EDIT response looks like a section fragment (much
+ * shorter than the original), try to figure out which section it
+ * meant to replace and splice it into the original so the rest of
+ * the document survives.
+ *
+ * Strategy: take the first markdown heading in the fragment, find
+ * the same heading in the original, and replace from that heading
+ * up to (but not including) the next heading at the same or
+ * shallower depth. Returns null if either side has no usable
+ * heading anchor, or if the same heading appears more than once in
+ * the original (ambiguous — safer to refuse).
+ */
+function trySpliceFragmentIntoOriginal(original: string, fragment: string): string | null {
+  const headingRe = /^(#{1,6})\s+(.+?)\s*$/m;
+  const fragMatch = fragment.match(headingRe);
+  if (!fragMatch) return null;
+  const fragHeadingLine = fragMatch[0].trim();
+  const fragHeadingLevel = fragMatch[1].length;
+
+  const lines = original.split("\n");
+  const matches: number[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === fragHeadingLine) matches.push(i);
+  }
+  if (matches.length !== 1) return null;
+  const startIdx = matches[0];
+
+  let endIdx = lines.length;
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const m = lines[i].match(/^(#{1,6})\s/);
+    if (m && m[1].length <= fragHeadingLevel) {
+      endIdx = i;
+      break;
+    }
+  }
+
+  const before = lines.slice(0, startIdx).join("\n");
+  const after = lines.slice(endIdx).join("\n");
+  const middle = fragment.trim();
+  return [before, middle, after].filter((s) => s.length > 0).join("\n\n");
+}
+
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" ? window.innerWidth < 768 : false);
   useEffect(() => {
@@ -6607,22 +6650,28 @@ export default function MdEditor() {
           setAiProcessing(null);
           return;
         }
-        // (2) Heavy shrinkage. If the result is a fraction of the
-        // original on a non-trivial doc, the model almost certainly
-        // returned only the section it touched and dropped the rest.
-        // Always refuse — silent doc-wipe is way worse than asking the
-        // user to retry. They can still get the destructive behavior
-        // by explicitly asking "replace everything with X".
-        if (md.length > 500 && newMd.length < md.length * 0.3) {
-          const safeNewMd = newMd; // capture for the chat message
-          setAiChatHistory(prev => [...prev, {
-            role: "ai",
-            text:
-              `That edit would shrink the document from ${md.length.toLocaleString()} to ${safeNewMd.length.toLocaleString()} characters — I'd be dropping most of the content. ` +
-              `Tell me to "keep everything else and only change <section>", or paste the section you want me to focus on.`,
-          }]);
-          setAiProcessing(null);
-          return;
+        // (2) Heavy shrinkage. The model often returns only the
+        // section it edited when asked for a local change ("reformat
+        // experience"), and a blind replace drops the rest of the doc.
+        // Two-step recovery: first try to splice the fragment back
+        // into the original at the right place, only refuse if even
+        // that fails.
+        if (md.length > 500 && newMd.length < md.length * 0.4) {
+          const spliced = trySpliceFragmentIntoOriginal(md, newMd);
+          if (spliced) {
+            newMd = spliced;
+            // Fall through to the normal replace path below.
+          } else {
+            const safeNewMd = newMd; // capture for the chat message
+            setAiChatHistory(prev => [...prev, {
+              role: "ai",
+              text:
+                `I think I returned just the section instead of the full document (${safeNewMd.length.toLocaleString()} chars vs the original ${md.length.toLocaleString()}). ` +
+                `Try rephrasing as "return the full document with the experience section reformatted" and I'll keep everything else intact.`,
+            }]);
+            setAiProcessing(null);
+            return;
+          }
         }
         showToast("Document updated", "success");
       } else {
