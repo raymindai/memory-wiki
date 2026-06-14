@@ -6308,15 +6308,45 @@ export default function MdEditor() {
             anonymousId: anonId,
           }).then(result => {
             if (result) {
+              // Read the tab in the setTabs callback so we see any
+              // markdown the user mutated between import-start and
+              // createDocument-resolve (most common case: they hit
+              // "Structure" or "Format" while the create POST is still
+              // in flight). Without the catch-up save below, those AI
+              // edits sat in local state with no cloudId path to push
+              // them, and only the original imported body landed on
+              // the server.
+              let latestMarkdown = md;
+              let latestTitle = name;
               setTabs(prev => {
                 const withoutDup = prev.filter(t => !(t.cloudId === result.id && t.id !== tabId));
-                return withoutDup.map(t => t.id === tabId ? { ...t, cloudId: result.id, editToken: result.editToken } : t);
+                return withoutDup.map(t => {
+                  if (t.id !== tabId) return t;
+                  latestMarkdown = t.markdown;
+                  latestTitle = t.title;
+                  return { ...t, cloudId: result.id, editToken: result.editToken };
+                });
               });
+              // Catch-up save: if the user mutated the markdown while
+              // createDocument was in flight, push the latest now.
+              // scheduleSave's internal dedup (lastSavedMdRef) makes
+              // this a no-op when the body is still identical.
+              if (latestMarkdown && latestMarkdown !== md) {
+                autoSave.scheduleSave({
+                  cloudId: result.id,
+                  markdown: latestMarkdown,
+                  title: latestTitle,
+                  userId: user?.id,
+                  userEmail: user?.email,
+                  anonymousId: anonId,
+                  editToken: result.editToken,
+                });
+              }
               showToast(`Imported ${name}`, "success");
               // Refresh the sidebar's MDs section so it picks up the
               // freshly imported doc without a page reload. Without
               // this, dropped/picked imports only show up after the
-              // user refreshes — same fix as the modal flow above.
+              // user refreshes, same fix as the modal flow above.
               fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
                 .then((r) => (r.ok ? r.json() : null))
                 .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
@@ -8911,10 +8941,33 @@ ${clone.innerHTML}
                     anonymousId: anonId,
                   }).then(result => {
                     if (result) {
+                      // Catch-up save, see the drag-drop import path
+                      // above for the full story. Same bug: AI Structure
+                      // / Format runs during the in-flight create POST
+                      // and the AI-edited body never reaches the server
+                      // because triggerAutoSave needs cloudId.
+                      let latestMarkdown = md;
+                      let latestTitle = name;
                       setTabs(prev => {
                         const withoutDup = prev.filter(t => !(t.cloudId === result.id && t.id !== tabId));
-                        return withoutDup.map(t => t.id === tabId ? { ...t, cloudId: result.id, editToken: result.editToken } : t);
+                        return withoutDup.map(t => {
+                          if (t.id !== tabId) return t;
+                          latestMarkdown = t.markdown;
+                          latestTitle = t.title;
+                          return { ...t, cloudId: result.id, editToken: result.editToken };
+                        });
                       });
+                      if (latestMarkdown && latestMarkdown !== md) {
+                        autoSave.scheduleSave({
+                          cloudId: result.id,
+                          markdown: latestMarkdown,
+                          title: latestTitle,
+                          userId: user?.id,
+                          userEmail: user?.email,
+                          anonymousId: anonId,
+                          editToken: result.editToken,
+                        });
+                      }
                       showToast(`Imported ${name}`, "success");
                       // Refresh sidebar serverDocs so MDs section
                       // reflects the import without a page reload.
