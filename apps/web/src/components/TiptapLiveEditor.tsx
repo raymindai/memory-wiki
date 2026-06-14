@@ -769,11 +769,14 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
       }
       const domAtPos = editor.view.coordsAtPos(from);
       const domEnd = editor.view.coordsAtPos(to);
-      const editorRect = editor.view.dom.closest(".overflow-auto")?.getBoundingClientRect();
-      if (!editorRect) return;
+      // Viewport coordinates (no editorRect subtraction). The toolbar
+      // renders as position:fixed so it stays above every panel in
+      // the layout — chat sidebar, recents, sources, etc — instead
+      // of being clipped by whichever sibling has a higher
+      // z-index in the editor's stacking context.
       setPos({
-        top: domAtPos.top - editorRect.top - 44,
-        left: (domAtPos.left + domEnd.left) / 2 - editorRect.left,
+        top: domAtPos.top - 44,
+        left: (domAtPos.left + domEnd.left) / 2,
       });
     };
 
@@ -899,8 +902,11 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
   return (
     <div
       ref={toolbarRef}
-      className="absolute z-[9999] flex items-center gap-0.5 px-1.5 py-1 rounded-lg shadow-xl"
+      className="fixed z-[9999] flex items-center gap-0.5 px-1.5 py-1 rounded-lg shadow-xl"
       style={{
+        // pos.top / pos.left are viewport coordinates. Clamp so the
+        // toolbar can't drift off-screen at the top or left edge
+        // when the selection is near the boundary.
         top: Math.max(4, pos.top),
         left: Math.max(8, pos.left - 120),
         background: "var(--surface)",
@@ -1150,11 +1156,12 @@ function TableMenu({ editor }: { editor: Editor }) {
       const tableEl = (node.nodeType === 3 ? node.parentElement : node)?.closest("table");
       if (!tableEl) { setPos(null); return; }
       const tableRect = tableEl.getBoundingClientRect();
-      const editorRect = editor.view.dom.closest(".overflow-auto")?.getBoundingClientRect();
-      if (!editorRect) return;
+      // Viewport coordinates so the toolbar renders as position:fixed
+      // and stays above sibling panels (chat, sidebar) regardless of
+      // their stacking context.
       setPos({
-        top: tableRect.top - editorRect.top - 36,
-        left: tableRect.left - editorRect.left,
+        top: tableRect.top - 36,
+        left: tableRect.left,
       });
     };
 
@@ -1189,7 +1196,7 @@ function TableMenu({ editor }: { editor: Editor }) {
 
   return (
     <div
-      className="absolute z-[9998] flex items-center gap-0.5 px-1.5 py-1 rounded-lg shadow-xl"
+      className="fixed z-[9998] flex items-center gap-0.5 px-1.5 py-1 rounded-lg shadow-xl"
       style={{
         top: Math.max(4, pos.top),
         left: Math.max(8, pos.left),

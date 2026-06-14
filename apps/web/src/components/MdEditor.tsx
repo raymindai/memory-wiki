@@ -1138,6 +1138,16 @@ export default function MdEditor() {
 
   // Wrapper that tracks undo history + triggers auto-save + broadcasts via Yjs
   const setMarkdown = useCallback((val: string) => {
+    // CRITICAL: update markdownRef synchronously BEFORE triggering
+    // auto-save. triggerAutoSave's first guard is
+    // `if (val !== markdownRef.current) return` — meant to drop
+    // stale callbacks from tab-switch races — but React's setState
+    // hasn't committed yet at this point, so the ref still holds the
+    // OLD value. Without this assignment EVERY save from a non-
+    // TipTap path (AI Polish / Format / chat, paste, programmatic
+    // setMarkdown, undo/redo) would silently bail. handleTiptapChange
+    // sets the ref the same way for the same reason.
+    markdownRef.current = val;
     setMarkdownRaw(val);
     // Debounce undo snapshots (don't save every keystroke)
     if (undoTimer.current) clearTimeout(undoTimer.current);
