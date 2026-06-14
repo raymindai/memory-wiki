@@ -6217,6 +6217,96 @@ export default function MdEditor() {
     }, markdownRef.current.length > 50000 ? 500 : 150);
   }, [setMarkdown, cmSetDoc]);
 
+  // Shared file-import pipeline used by drag-drop, the hidden
+  // <input type=file>, and the ImportModal's Files card.
+  //
+  // The modal used to forward picked files into the parent's hidden
+  // input via DataTransfer + dispatchEvent('change'). React's event
+  // delegation didn't pick that up reliably (synthetic events from
+  // programmatic native dispatches drop the React fiber link on file
+  // inputs sometimes — the change handler never fired). Result: the
+  // "Files" card in the modal looked broken because nothing happened
+  // after the picker closed. Routing every entry path through a single
+  // callback removes the cross-input plumbing entirely and gives us a
+  // place to add the URL-push + sidebar-refresh in one spot.
+  const runFileImport = useCallback(async (files: File[]) => {
+    for (const file of files) {
+      const isPdf = /\.pdf$/i.test(file.name);
+      const isOffice = /\.(pptx?|xlsx?|od[pst]|rtf)$/i.test(file.name);
+      try {
+        if (isPdf) showToast(`Reading PDF: ${file.name}…`, "info");
+        else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
+        else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
+
+        const { markdown: md, title: name } = await importFile(file, authHeadersRef.current);
+        if (!md) {
+          showToast(`${file.name} appears to be empty`, "info");
+          continue;
+        }
+        const isPlainFormat = /\.(pdf|rtf|txt|csv|json|xml|pptx?|xlsx?|od[pst])$/i.test(file.name);
+        const tabId = `tab-${tabIdCounter++}`;
+        setTabs((prev) => [...prev, { id: tabId, title: name, markdown: md, isDraft: true, permission: "mine" }]);
+        setTimeout(() => switchTab(tabId), 50);
+        if (isPlainFormat && md.length > 50) {
+          setMdfyPrompt({ text: md, filename: file.name, tabId });
+        }
+        showToast(`Saving ${name}…`, "info");
+        const anonId = user?.id ? undefined : ensureAnonymousId();
+        autoSave.createDocument({
+          markdown: md,
+          title: name,
+          userId: user?.id,
+          anonymousId: anonId,
+        }).then((result) => {
+          if (!result) return;
+          // Catch-up save: the user may have hit Structure / Format
+          // while the create POST was in flight. Push the latest body.
+          let latestMarkdown = md;
+          let latestTitle = name;
+          setTabs((prev) => {
+            const withoutDup = prev.filter((t) => !(t.cloudId === result.id && t.id !== tabId));
+            return withoutDup.map((t) => {
+              if (t.id !== tabId) return t;
+              latestMarkdown = t.markdown;
+              latestTitle = t.title;
+              return { ...t, cloudId: result.id, editToken: result.editToken };
+            });
+          });
+          if (latestMarkdown && latestMarkdown !== md) {
+            autoSave.scheduleSave({
+              cloudId: result.id,
+              markdown: latestMarkdown,
+              title: latestTitle,
+              userId: user?.id,
+              userEmail: user?.email,
+              anonymousId: anonId,
+              editToken: result.editToken,
+            });
+          }
+          // Push the new doc's URL into the browser bar. switchTab
+          // already does this when a tab is loaded, but at that
+          // moment tab.cloudId was still null (createDocument hadn't
+          // resolved yet), so URL stayed at "/". Re-push now that
+          // we have the id. Switching tabs later will overwrite if
+          // needed, so no need to gate on "still active".
+          try {
+            window.history.replaceState(null, "", `/${result.id}`);
+          } catch { /* SSR / restricted environments, skip */ }
+          showToast(`Imported ${name}`, "success");
+          // Refresh sidebar docs.
+          fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => { if (data?.documents) { setServerDocs(data.documents); ingestDocAiMeta(data.documents); } })
+            .catch(() => {});
+        });
+      } catch (err) {
+        console.error(`Failed to import ${file.name}:`, err);
+        const message = err instanceof Error ? err.message : "Failed to import file";
+        showToast(`${file.name}: ${message}`, "error");
+      }
+    }
+  }, [autoSave, showToast, switchTab, user?.id, user?.email]);
+
   // File drop handler
   const handleDrop = useCallback(
     async (e: React.DragEvent) => {
@@ -6272,96 +6362,13 @@ export default function MdEditor() {
         return;
       }
 
-      for (let idx = 0; idx < files.length; idx++) {
-        const file = files[idx];
-        const isPdf = /\.pdf$/i.test(file.name);
-        const isOffice = /\.(pptx?|xlsx?|od[pst]|rtf)$/i.test(file.name);
-        try {
-          // Stage 1: parsing / extracting. PDF + Office hit a server
-          // route and can take several seconds — surface the stage
-          // so the user knows something is happening.
-          if (isPdf) showToast(`Reading PDF: ${file.name}…`, "info");
-          else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
-          else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
-
-          const { markdown: md, title: name } = await importFile(file, authHeadersRef.current);
-          if (!md) {
-            showToast(`${file.name} appears to be empty`, "info");
-            continue;
-          }
-          const isPlainFormat = /\.(pdf|rtf|txt|csv|json|xml|pptx?|xlsx?|od[pst])$/i.test(file.name);
-          // Always create a new tab for imports
-          const tabId = `tab-${tabIdCounter++}`;
-          setTabs((prev) => [...prev, { id: tabId, title: name, markdown: md, isDraft: true, permission: "mine" }]);
-          setTimeout(() => switchTab(tabId), 50);
-          /* viewMode preserved — user controls it */
-          if (isPlainFormat && md.length > 50) {
-            setMdfyPrompt({ text: md, filename: file.name, tabId });
-          }
-          // Stage 2: saving to cloud.
-          showToast(`Saving ${name}…`, "info");
-          const anonId = user?.id ? undefined : ensureAnonymousId();
-          autoSave.createDocument({
-            markdown: md,
-            title: name,
-            userId: user?.id,
-            anonymousId: anonId,
-          }).then(result => {
-            if (result) {
-              // Read the tab in the setTabs callback so we see any
-              // markdown the user mutated between import-start and
-              // createDocument-resolve (most common case: they hit
-              // "Structure" or "Format" while the create POST is still
-              // in flight). Without the catch-up save below, those AI
-              // edits sat in local state with no cloudId path to push
-              // them, and only the original imported body landed on
-              // the server.
-              let latestMarkdown = md;
-              let latestTitle = name;
-              setTabs(prev => {
-                const withoutDup = prev.filter(t => !(t.cloudId === result.id && t.id !== tabId));
-                return withoutDup.map(t => {
-                  if (t.id !== tabId) return t;
-                  latestMarkdown = t.markdown;
-                  latestTitle = t.title;
-                  return { ...t, cloudId: result.id, editToken: result.editToken };
-                });
-              });
-              // Catch-up save: if the user mutated the markdown while
-              // createDocument was in flight, push the latest now.
-              // scheduleSave's internal dedup (lastSavedMdRef) makes
-              // this a no-op when the body is still identical.
-              if (latestMarkdown && latestMarkdown !== md) {
-                autoSave.scheduleSave({
-                  cloudId: result.id,
-                  markdown: latestMarkdown,
-                  title: latestTitle,
-                  userId: user?.id,
-                  userEmail: user?.email,
-                  anonymousId: anonId,
-                  editToken: result.editToken,
-                });
-              }
-              showToast(`Imported ${name}`, "success");
-              // Refresh the sidebar's MDs section so it picks up the
-              // freshly imported doc without a page reload. Without
-              // this, dropped/picked imports only show up after the
-              // user refreshes, same fix as the modal flow above.
-              fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
-                .then((r) => (r.ok ? r.json() : null))
-                .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
-                .catch(() => {});
-            }
-          });
-        } catch (err) {
-          console.error(`Failed to import ${file.name}:`, err);
-          const message = err instanceof Error ? err.message : "Failed to import file";
-          showToast(`${file.name}: ${message}`, "error");
-        }
-      }
+      // Route the text-file branch through the shared importer so
+      // drag-drop, the hidden <input>, and the ImportModal all behave
+      // identically (URL push + catch-up save + sidebar refresh).
+      await runFileImport(files);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- saveInsertPosition/insertBlockAtCursor are stable refs defined later
-    [doRender, isMobile, markdown, uploadImage, cmSetDoc, autoSave, user?.id]
+    [doRender, isMobile, markdown, uploadImage, cmSetDoc, runFileImport]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -8909,81 +8916,8 @@ ${clone.innerHTML}
             className="hidden"
             onChange={async (e) => {
               const files = Array.from(e.target.files || []);
-              for (let idx = 0; idx < files.length; idx++) {
-                const file = files[idx];
-                const isPdf = /\.pdf$/i.test(file.name);
-                const isOffice = /\.(pptx?|xlsx?|od[pst]|rtf)$/i.test(file.name);
-                try {
-                  if (isPdf) showToast(`Reading PDF: ${file.name}…`, "info");
-                  else if (isOffice) showToast(`Parsing ${file.name}…`, "info");
-                  else if (file.size > 200_000) showToast(`Reading ${file.name}…`, "info");
-
-                  const { markdown: md, title: name } = await importFile(file, authHeadersRef.current);
-                  if (!md) {
-                    showToast(`${file.name} appears to be empty`, "info");
-                    continue;
-                  }
-                  const isPlainFormat = /\.(pdf|rtf|txt|csv|json|xml|pptx?|xlsx?|od[pst])$/i.test(file.name);
-                  // Always create a new tab for imports
-                  const tabId = `tab-${tabIdCounter++}`;
-                  setTabs((prev) => [...prev, { id: tabId, title: name, markdown: md, isDraft: true, permission: "mine" }]);
-                  setTimeout(() => switchTab(tabId), 50);
-                  /* viewMode preserved — user controls it */
-                  if (isPlainFormat && md.length > 50) {
-                    setMdfyPrompt({ text: md, filename: file.name, tabId });
-                  }
-                  showToast(`Saving ${name}…`, "info");
-                  const anonId = user?.id ? undefined : ensureAnonymousId();
-                  autoSave.createDocument({
-                    markdown: md,
-                    title: name,
-                    userId: user?.id,
-                    anonymousId: anonId,
-                  }).then(result => {
-                    if (result) {
-                      // Catch-up save, see the drag-drop import path
-                      // above for the full story. Same bug: AI Structure
-                      // / Format runs during the in-flight create POST
-                      // and the AI-edited body never reaches the server
-                      // because triggerAutoSave needs cloudId.
-                      let latestMarkdown = md;
-                      let latestTitle = name;
-                      setTabs(prev => {
-                        const withoutDup = prev.filter(t => !(t.cloudId === result.id && t.id !== tabId));
-                        return withoutDup.map(t => {
-                          if (t.id !== tabId) return t;
-                          latestMarkdown = t.markdown;
-                          latestTitle = t.title;
-                          return { ...t, cloudId: result.id, editToken: result.editToken };
-                        });
-                      });
-                      if (latestMarkdown && latestMarkdown !== md) {
-                        autoSave.scheduleSave({
-                          cloudId: result.id,
-                          markdown: latestMarkdown,
-                          title: latestTitle,
-                          userId: user?.id,
-                          userEmail: user?.email,
-                          anonymousId: anonId,
-                          editToken: result.editToken,
-                        });
-                      }
-                      showToast(`Imported ${name}`, "success");
-                      // Refresh sidebar serverDocs so MDs section
-                      // reflects the import without a page reload.
-                      fetch("/api/user/documents?includeDeleted=1", { headers: authHeadersRef.current })
-                        .then((r) => (r.ok ? r.json() : null))
-                        .then((data) => { if (data?.documents) setServerDocs(data.documents); ingestDocAiMeta(data.documents); })
-                        .catch(() => {});
-                    }
-                  });
-                } catch (err) {
-                  console.error(`Failed to import ${file.name}:`, err);
-                  const message = err instanceof Error ? err.message : "Failed to import file";
-                  showToast(`${file.name}: ${message}`, "error");
-                }
-              }
               e.target.value = "";
+              await runFileImport(files);
             }}
           />
           {/* Hidden file input for image upload */}
@@ -16769,15 +16703,13 @@ ${clone.innerHTML}
           }
         }}
         onPickFiles={(files) => {
-          // Reuse the parent's import pipeline by assigning the
-          // chosen files into the hidden importFileRef and firing
-          // its change handler. Avoids duplicating the multi-format
-          // import code inside the modal.
-          if (!importFileRef.current) return;
-          const dt = new DataTransfer();
-          for (const f of files) dt.items.add(f);
-          importFileRef.current.files = dt.files;
-          importFileRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+          // Run the import directly. The previous DataTransfer +
+          // dispatchEvent forwarding into importFileRef didn't fire
+          // React's onChange reliably for file inputs, so the modal's
+          // Files card looked broken (picker opened, file picked,
+          // nothing happened). runFileImport is the same code path
+          // the hidden input would have run.
+          void runFileImport(files);
         }}
       />
 
