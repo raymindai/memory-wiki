@@ -342,8 +342,14 @@ async function detectPlatform() {
       return null;
     }
 
-    // Check if on a GitHub .md file.
+    // Check if on a GitHub .md file. Skip the whole branch when the
+    // user is signed out — paintCaptureBtn would write "use the
+    // open-in-memory.wiki button on the page" into the hidden stubs,
+    // and on Safari macOS that string had been leaking visibly at the
+    // bottom of the signed-out popup. There's nothing actionable for a
+    // signed-out user here anyway.
     if (url.includes("github.com") && /\/blob\/.*\.(md|markdown|mdx)$/i.test(url)) {
+      if (document.body.classList.contains("signed-out")) return null;
       paintContext(null, true, "a github markdown file");
       paintCaptureBtn("capture this readme", "use the open-in-memory.wiki button on the page", "github");
       btnCapture.disabled = true;
@@ -671,22 +677,53 @@ async function fetchProfileAndApply(userId) {
   }
 }
 
-// In-extension sign-out: clear the Supabase cookies for memory.wiki
-// directly via chrome.cookies. Avoids a web round-trip (the prior
-// `/auth/signout` URL 404'd) and gives instant feedback.
+// In-extension sign-out.
+//
+// Two parallel paths so both Chrome and Safari actually drop the
+// session:
+//
+//   (a) chrome.cookies.remove for every sb-* cookie on memory.wiki.
+//       Works in Chrome. On Safari macOS, Storage Partitioning blocks
+//       chrome.cookies from seeing the page's first-party cookies, so
+//       this returns an empty list and silently no-ops.
+//
+//   (b) Broadcast {action:"force-signout"} to every memory.wiki tab.
+//       auth-bridge.js (content script, runs in page context) expires
+//       the sb-* cookies via document.cookie and wipes Supabase
+//       localStorage. This is the only path that actually drops the
+//       session on Safari, and it's harmless duplication on Chrome.
+//
+// Without (b), Safari users hit the "sign-out doesn't stick — refresh
+// brings me back" bug: chrome.storage cleared, page cookies survived,
+// next memory.wiki page load rehydrated everything.
 async function inExtensionSignOut() {
+  // (b) first — fire-and-forget broadcast so even if (a) succeeds in
+  // Chrome, the page-context cleanup still runs in case Supabase
+  // mirrored anything into localStorage.
+  try {
+    chrome.tabs.query({ url: ["https://memory.wiki/*", "https://memory.wiki.online/*"] }, (tabs) => {
+      for (const t of (tabs || [])) {
+        try { chrome.tabs.sendMessage(t.id, { action: "force-signout" }, () => void chrome.runtime.lastError); }
+        catch { /* tab gone — ignore */ }
+      }
+    });
+  } catch { /* no tabs permission shouldn't happen, but stay defensive */ }
+
+  // (a) — Chrome path. Safari's getAll returns [] and resolves instantly.
   return new Promise((resolve) => {
-    chrome.cookies.getAll({ domain: "memory.wiki" }, (cookies) => {
-      const sb = (cookies || []).filter((c) => c.name.startsWith("sb-"));
-      if (sb.length === 0) { resolve(); return; }
-      let pending = sb.length;
-      sb.forEach((c) => {
-        const url = "https://" + c.domain.replace(/^\./, "") + (c.path || "/");
-        chrome.cookies.remove({ url, name: c.name }, () => {
-          if (--pending === 0) resolve();
+    try {
+      chrome.cookies.getAll({ domain: "memory.wiki" }, (cookies) => {
+        const sb = (cookies || []).filter((c) => c.name.startsWith("sb-"));
+        if (sb.length === 0) { resolve(); return; }
+        let pending = sb.length;
+        sb.forEach((c) => {
+          const url = "https://" + c.domain.replace(/^\./, "") + (c.path || "/");
+          chrome.cookies.remove({ url, name: c.name }, () => {
+            if (--pending === 0) resolve();
+          });
         });
       });
-    });
+    } catch { resolve(); }
   });
 }
 
@@ -711,17 +748,37 @@ function renderAccountChip({ userId, email }) {
     if (actionLabel) actionLabel.textContent = "sign out";
     chip.onclick = async (e) => {
       e.preventDefault();
-      const prevText = info.textContent;
       info.textContent = "signing out…";
       chip.style.pointerEvents = "none";
       await inExtensionSignOut();
-      chrome.storage.local.remove(["mw-was-logged-in", "mw-profile"]);
+      // The OLD code only cleared "mw-was-logged-in" and "mw-profile",
+      // leaving "mw-auth-session" — the cache that getUserInfo actually
+      // reads — intact. Result: pop-up reopen showed signed-in again.
+      // Await the remove so Safari doesn't clip the write when the
+      // popover dismisses on the next click.
+      await new Promise((r) => chrome.storage.local.remove(
+        ["mw-auth-session", "mw-was-logged-in", "mw-profile"], r
+      ));
+      // Clear the GitHub-flow leftover that paintCaptureBtn / setStatus
+      // wrote into the hidden-stubs (and any unhidden mirrors) before
+      // we hide them. Avoids the "use the open-in-memory.wiki button
+      // on the page" line still showing at the bottom of the signed-out
+      // popup.
+      const stubIds = ["btn-capture-title", "btn-capture-sub", "status"];
+      for (const id of stubIds) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "";
+      }
       // Re-render as signed-out state
       renderAccountChip({ userId: null, email: null });
       chip.style.pointerEvents = "";
       setStatus("signed out", "info");
-      // Re-detect platform so the capture button picks up the new state
-      try { detectPlatform(); } catch {}
+      // Re-detect platform — but for any non-trivial platform (github
+      // markdown / ai chats / memory.wiki itself) the detector calls
+      // paintCaptureBtn which writes back the same leftover text. In
+      // signed-out state none of those messages help (nothing to do
+      // without an account) so just skip the re-detect entirely.
+      // The next popup open does a fresh detect anyway.
     };
 
     // Async-fetch profile and swap in the OAuth avatar + display

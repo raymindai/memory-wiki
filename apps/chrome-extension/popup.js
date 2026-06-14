@@ -123,7 +123,14 @@ function showResult({ url, source, title, isError, errorText }) {
   card.classList.add("visible");
   if (errorEl) { errorEl.style.display = "none"; errorEl.textContent = ""; }
   if (head) head.textContent = (source === "auth" ? "published" : "ready") + " · copied for AI";
-  if (urlText) urlText.textContent = url.replace(/^https?:\/\//, "");
+  if (urlText) {
+    urlText.textContent = url.replace(/^https?:\/\//, "");
+    urlText.style.cursor = "pointer";
+    urlText.onclick = (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url });
+    };
+  }
   card.dataset.url = url;
 
   // Copy button
@@ -239,17 +246,21 @@ async function openInMemoryWiki(markdown) {
       const titleMatch = markdown.match(/^#\s+(.+)/m);
       const title = titleMatch ? titleMatch[1].trim().slice(0, 100) : "Captured content";
 
-      // Intent capture branches inline rather than via a runtime
-      // sendMessage monkey-patch. Having both code paths active at
-      // once caused state-clearing races that intermittently dropped
-      // the AI-transform routing — the inline read here is the
-      // canonical source of truth.
+      // Intent capture branches directly here rather than relying on
+      // a popup-v25.js monkey-patch around chrome.runtime.sendMessage.
+      // Safari (especially iPadOS) sometimes rejects the reassignment
+      // and the patch silently no-ops, so capture would succeed but
+      // the AI-transform path was being skipped. Reading
+      // window.__captureIntent inline at the call site makes this
+      // bulletproof.
       const intent = (typeof window !== "undefined") ? window.__captureIntent : null;
       const targetUrl = intent ? MDFY_URL + "/api/docs/transform" : MDFY_URL + "/api/docs";
       const targetBody = intent
         ? { markdown, userId, intent, source: "chrome-intent" }
         : { markdown, userId, title, editMode: "account", source: "chrome" };
       if (intent) {
+        // one-shot — clear so the next plain capture isn't routed back
+        // through /transform.
         try { window.__captureIntent = null; } catch { /* noop */ }
       }
 
@@ -331,8 +342,14 @@ async function detectPlatform() {
       return null;
     }
 
-    // Check if on a GitHub .md file.
+    // Check if on a GitHub .md file. Skip the whole branch when the
+    // user is signed out — paintCaptureBtn would write "use the
+    // open-in-memory.wiki button on the page" into the hidden stubs,
+    // and on Safari macOS that string had been leaking visibly at the
+    // bottom of the signed-out popup. There's nothing actionable for a
+    // signed-out user here anyway.
     if (url.includes("github.com") && /\/blob\/.*\.(md|markdown|mdx)$/i.test(url)) {
+      if (document.body.classList.contains("signed-out")) return null;
       paintContext(null, true, "a github markdown file");
       paintCaptureBtn("capture this readme", "use the open-in-memory.wiki button on the page", "github");
       btnCapture.disabled = true;
@@ -361,6 +378,10 @@ function showOnMdfy() {
   paintCaptureBtn("you're already here", "create and edit documents in the app", "mdfy");
   btnCapture.disabled = true;
   paintRangesVisible(false);
+  // Disable the intent capture controls too — capturing memory.wiki
+  // through itself doesn't make sense, and without this the chip /
+  // submit path bypassed the disabled Capture button via the JS
+  // chain and fired the capture anyway.
   const ta = document.getElementById("ask-input");
   const sub = document.getElementById("ask-submit");
   if (ta) ta.disabled = true;
@@ -383,6 +404,42 @@ function showNotOnAiPage() {
 // timeout so the popup recovers instead of sitting on "Capturing"
 // forever. Returns the response, OR an error stub if either limit
 // hits.
+// Safari-friendly path: instead of chrome.tabs.sendMessage (which can
+// hang in Safari from popup → content-script), call the hook
+// content-page.js exposes on window.__mwCapture via executeScript
+// running in the page's isolated world. Returns the same
+// {markdown, title, pageType, error?} shape as the message path so
+// the caller is interchangeable.
+async function captureViaDirectHook(tabId, kind /* "page" | "selection" */) {
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (k) => {
+        try { return window.__mwCapture ? window.__mwCapture(k) : null; }
+        catch (e) { return { markdown: "", error: String(e && e.message || e) }; }
+      },
+      args: [kind],
+    });
+    return results && results[0] && results[0].result;
+  } catch (err) {
+    return { markdown: "", error: "executeScript failed: " + (err && err.message || err) };
+  }
+}
+
+// Make capture errors visible — popup-v25.html has #result for the
+// success card but setStatus() target #status doesn't exist, so
+// errors were silently dropped. This paints the error in the same
+// result card.
+function renderInlineError(text) {
+  const card = document.getElementById("result");
+  if (!card) { console.warn("[memory.wiki]", text); return; }
+  card.classList.add("visible", "error");
+  const head = document.getElementById("result-head-text");
+  const errEl = document.getElementById("result-error-text");
+  if (head) head.textContent = "couldn't capture";
+  if (errEl) { errEl.style.display = ""; errEl.textContent = text; }
+}
+
 function sendMessageWithTimeout(tabId, msg, ms) {
   return new Promise((resolve) => {
     let done = false;
@@ -427,13 +484,23 @@ btnCapture.addEventListener("click", async () => {
       // General web page — route through the content-page.js script
       // (manifest already injects it; we still ensure for first-load safety).
       await ensureContentScript(tab.id, "page");
-      const response = await sendMessageWithTimeout(tab.id, { action: "capture-page" }, 25000);
+      // Direct hook path — bypasses chrome.tabs.sendMessage which is
+      // unreliable in Safari (popup → content-script messaging can
+      // hang silently). content-page.js exposes window.__mwCapture
+      // for this. Try direct call first; fall back to messaging only
+      // if the hook isn't there (older content script versions).
+      let response = await captureViaDirectHook(tab.id, "page");
+      if (!response || (!response.markdown && !response.error)) {
+        response = await sendMessageWithTimeout(tab.id, { action: "capture-page" }, 25000);
+      }
       if (response && response.markdown) {
         await openInMemoryWiki(response.markdown);
       } else if (response && response.error) {
         setStatus("capture failed: " + response.error, "error");
+        renderInlineError("capture failed: " + response.error);
       } else {
         setStatus("no content found", "error");
+        renderInlineError("no content found on this page");
       }
     } else {
       // AI conversation — existing path.
@@ -445,8 +512,10 @@ btnCapture.addEventListener("click", async () => {
         await openInMemoryWiki(response.markdown);
       } else if (response && response.error) {
         setStatus("capture failed: " + response.error, "error");
+        renderInlineError("capture failed: " + response.error);
       } else {
         setStatus("no conversation found", "error");
+        renderInlineError("no conversation found on this page");
       }
     }
   } catch (err) {
@@ -608,22 +677,53 @@ async function fetchProfileAndApply(userId) {
   }
 }
 
-// In-extension sign-out: clear the Supabase cookies for memory.wiki
-// directly via chrome.cookies. Avoids a web round-trip (the prior
-// `/auth/signout` URL 404'd) and gives instant feedback.
+// In-extension sign-out.
+//
+// Two parallel paths so both Chrome and Safari actually drop the
+// session:
+//
+//   (a) chrome.cookies.remove for every sb-* cookie on memory.wiki.
+//       Works in Chrome. On Safari macOS, Storage Partitioning blocks
+//       chrome.cookies from seeing the page's first-party cookies, so
+//       this returns an empty list and silently no-ops.
+//
+//   (b) Broadcast {action:"force-signout"} to every memory.wiki tab.
+//       auth-bridge.js (content script, runs in page context) expires
+//       the sb-* cookies via document.cookie and wipes Supabase
+//       localStorage. This is the only path that actually drops the
+//       session on Safari, and it's harmless duplication on Chrome.
+//
+// Without (b), Safari users hit the "sign-out doesn't stick — refresh
+// brings me back" bug: chrome.storage cleared, page cookies survived,
+// next memory.wiki page load rehydrated everything.
 async function inExtensionSignOut() {
+  // (b) first — fire-and-forget broadcast so even if (a) succeeds in
+  // Chrome, the page-context cleanup still runs in case Supabase
+  // mirrored anything into localStorage.
+  try {
+    chrome.tabs.query({ url: ["https://memory.wiki/*", "https://memory.wiki.online/*"] }, (tabs) => {
+      for (const t of (tabs || [])) {
+        try { chrome.tabs.sendMessage(t.id, { action: "force-signout" }, () => void chrome.runtime.lastError); }
+        catch { /* tab gone — ignore */ }
+      }
+    });
+  } catch { /* no tabs permission shouldn't happen, but stay defensive */ }
+
+  // (a) — Chrome path. Safari's getAll returns [] and resolves instantly.
   return new Promise((resolve) => {
-    chrome.cookies.getAll({ domain: "memory.wiki" }, (cookies) => {
-      const sb = (cookies || []).filter((c) => c.name.startsWith("sb-"));
-      if (sb.length === 0) { resolve(); return; }
-      let pending = sb.length;
-      sb.forEach((c) => {
-        const url = "https://" + c.domain.replace(/^\./, "") + (c.path || "/");
-        chrome.cookies.remove({ url, name: c.name }, () => {
-          if (--pending === 0) resolve();
+    try {
+      chrome.cookies.getAll({ domain: "memory.wiki" }, (cookies) => {
+        const sb = (cookies || []).filter((c) => c.name.startsWith("sb-"));
+        if (sb.length === 0) { resolve(); return; }
+        let pending = sb.length;
+        sb.forEach((c) => {
+          const url = "https://" + c.domain.replace(/^\./, "") + (c.path || "/");
+          chrome.cookies.remove({ url, name: c.name }, () => {
+            if (--pending === 0) resolve();
+          });
         });
       });
-    });
+    } catch { resolve(); }
   });
 }
 
@@ -648,17 +748,37 @@ function renderAccountChip({ userId, email }) {
     if (actionLabel) actionLabel.textContent = "sign out";
     chip.onclick = async (e) => {
       e.preventDefault();
-      const prevText = info.textContent;
       info.textContent = "signing out…";
       chip.style.pointerEvents = "none";
       await inExtensionSignOut();
-      chrome.storage.local.remove(["mw-was-logged-in", "mw-profile"]);
+      // The OLD code only cleared "mw-was-logged-in" and "mw-profile",
+      // leaving "mw-auth-session" — the cache that getUserInfo actually
+      // reads — intact. Result: pop-up reopen showed signed-in again.
+      // Await the remove so Safari doesn't clip the write when the
+      // popover dismisses on the next click.
+      await new Promise((r) => chrome.storage.local.remove(
+        ["mw-auth-session", "mw-was-logged-in", "mw-profile"], r
+      ));
+      // Clear the GitHub-flow leftover that paintCaptureBtn / setStatus
+      // wrote into the hidden-stubs (and any unhidden mirrors) before
+      // we hide them. Avoids the "use the open-in-memory.wiki button
+      // on the page" line still showing at the bottom of the signed-out
+      // popup.
+      const stubIds = ["btn-capture-title", "btn-capture-sub", "status"];
+      for (const id of stubIds) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "";
+      }
       // Re-render as signed-out state
       renderAccountChip({ userId: null, email: null });
       chip.style.pointerEvents = "";
       setStatus("signed out", "info");
-      // Re-detect platform so the capture button picks up the new state
-      try { detectPlatform(); } catch {}
+      // Re-detect platform — but for any non-trivial platform (github
+      // markdown / ai chats / memory.wiki itself) the detector calls
+      // paintCaptureBtn which writes back the same leftover text. In
+      // signed-out state none of those messages help (nothing to do
+      // without an account) so just skip the re-detect entirely.
+      // The next popup open does a fresh detect anyway.
     };
 
     // Async-fetch profile and swap in the OAuth avatar + display
