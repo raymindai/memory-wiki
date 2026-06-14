@@ -627,7 +627,11 @@
     /* textarea sits above blob; submit keeps its absolute corner pos */
     .ask-input-wrap textarea { position: relative; z-index: 1; }
     .ask-input-wrap .ask-submit { z-index: 2; }
-    .ask-input-wrap:focus-within {
+    /* Focus-within highlight is gated on body.user-active so the
+       popup doesn't already look "asked for input" on first paint —
+       see popup-v25.js for why. The class flips on the first real
+       mouse / key / touch / input event. */
+    body.user-active .ask-input-wrap:focus-within {
       border-color: var(--hair-strong);
       background: rgba(13, 13, 17, 0.75);
     }

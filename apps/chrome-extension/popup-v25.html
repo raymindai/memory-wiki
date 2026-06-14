@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="auto">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:">
   <style>
     @font-face {
@@ -60,7 +61,18 @@
     body {
       width: 384px;
       margin: 0;
-      position: relative; /* containing block for .capturing-overlay */
+      /* Containing block for the position:absolute capturing overlay
+         so it scopes to the popup, not the host page's viewport. */
+      position: relative;
+      /* On touch devices (iOS / iPadOS Safari, Android Chrome) the
+         extension popup is hosted in a system sheet whose width is
+         set by the OS, not by us. Forcing a hard 384px makes content
+         spill horizontally on phones whose sheet sits at ~370pt and
+         leaves dead margin on tablets where the sheet is wider. Let
+         the popup fill the sheet on touch contexts; keep the fixed
+         desktop width so Chrome / Mac Safari popup window sizing is
+         unchanged. */
+      box-sizing: border-box;
       background: var(--bg);
       color: var(--body);
       font-family: var(--font-sans);
@@ -68,6 +80,36 @@
       line-height: 1.55;
       letter-spacing: -0.005em;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Touch contexts (Safari iOS / iPadOS, Android Chrome) — the
+       extension popup is hosted in a system sheet (iPhone) or
+       popover (iPad). The hard 384px width was spilling on iPhone and
+       — based on the iPad "popup never appears" report — likely
+       causing the iPad popover host to treat the content as
+       overflowed-or-unsized and skip presentation entirely.
+       Use width:auto so the popover sizes around our intrinsic
+       content, min-width:320px so we don't collapse, max-width:100%
+       so we never exceed the popover frame. Avoid 100vw — that
+       maps to full screen on iPad and pushes content off the popover. */
+    /* Touch hosts (iOS / iPadOS Safari, Android Chrome). Let the body
+       fill whatever width the host gives us — iPhone sheet is sized
+       to the screen, iPad popover defaults to ~400pt. */
+    @media (hover: none), (pointer: coarse) {
+      html, body {
+        width: 100% !important;
+        max-width: none !important;
+        overflow-x: hidden !important;
+      }
+      html { overflow: visible !important; }
+    }
+
+    /* iPad popover only — request a wider popup so the chip rail, the
+       intent input + capture pill, and the Also-on footer all fit on
+       one line. iPhone sheet would overflow at this width, so this
+       is GATED on html.is-ipad set by popup-v25.js's UA detection. */
+    html.is-ipad, html.is-ipad body {
+      min-width: 500px !important;
     }
 
     /* Body sizes to content; chrome popup auto-sizes to body.
@@ -473,10 +515,12 @@
     }
 
     /* ─── Capturing overlay: blur backdrop + animated blob + label ─── */
-    /* Use absolute (not fixed). iPad Safari extension popovers resolve
-       position:fixed against the host page viewport instead of the
-       popover's WKWebView, which made the overlay escape the popup.
-       Absolute scopes it to body (which has position: relative). */
+    /* Use position: absolute (not fixed). iPad Safari extension popovers
+       resolve position:fixed against the HOST PAGE'S viewport, not the
+       popover's WKWebView viewport — the result was the overlay
+       leaking out of the popup and the "Capturing..." label landing
+       on the underlying webpage below the popup. Absolute scopes the
+       overlay to the popup body which is what we want. */
     .capturing-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -497,16 +541,20 @@
       pointer-events: auto;
     }
     /* "Captured" state — same animated morph blob continues, label
-       swaps to "Captured", View / OK buttons appear so the user
-       dismisses manually. Monochrome — lime reserved for dot/badge
-       glyphs only. */
+       swaps to "Captured", and View / OK buttons appear so the user
+       dismisses on their own terms (no auto-fade). Monochrome — lime
+       is reserved for tiny dot/badge/icon glyphs. */
     .capturing-overlay .done-actions {
       display: none;
       gap: 10px;
       pointer-events: auto;
     }
-    .capturing-overlay.is-done .done-actions { display: flex; }
-    .capturing-overlay.is-done .label { color: var(--ink); }
+    .capturing-overlay.is-done .done-actions {
+      display: flex;
+    }
+    .capturing-overlay.is-done .label {
+      color: var(--ink);
+    }
     .capturing-overlay .done-view,
     .capturing-overlay .done-ok {
       display: inline-flex;
@@ -541,7 +589,8 @@
     .capturing-overlay .blob {
       width: 80px;
       height: 80px;
-      /* No CSS pulse — the SVG morphs itself via SMIL. */
+      /* No CSS pulse — the SVG is already morphing via SMIL, the
+         extra scale animation just made it feel busy. */
     }
     .capturing-overlay .blob img { width: 100%; height: 100%; display: block; }
     .capturing-overlay .label {
@@ -578,21 +627,36 @@
     /* textarea sits above blob; submit keeps its absolute corner pos */
     .ask-input-wrap textarea { position: relative; z-index: 1; }
     .ask-input-wrap .ask-submit { z-index: 2; }
-    .ask-input-wrap:focus-within {
+    /* Focus-within highlight is gated on body.user-active so the
+       popup doesn't already look "asked for input" on first paint —
+       see popup-v25.js for why. The class flips on the first real
+       mouse / key / touch / input event. */
+    body.user-active .ask-input-wrap:focus-within {
       border-color: var(--hair-strong);
       background: rgba(13, 13, 17, 0.75);
     }
     .ask-input-wrap textarea {
       width: 100%;
       color: var(--ink);
-      font-size: 12.5px; letter-spacing: -0.005em;
+      /* Use the GENERIC sans-serif family rather than -apple-system or
+         system-ui. Verified on iPadOS Safari simulator: both
+         -apple-system AND system-ui resolve to a Latin-only fallback
+         in the WKWebView extension popup context, so Korean /
+         Japanese / Chinese render as tofu. The bare `sans-serif`
+         keyword lets the OS pick the script-appropriate font (Apple
+         SD Gothic Neo for KR, Hiragino for JP, PingFang for CN) the
+         same way the browser default does for text without an
+         explicit font-family. Don't name -apple-system here even as
+         a "preferred" fallback — it short-circuits the resolver. */
+      font-family: sans-serif;
+      font-size: 14px; letter-spacing: 0;
       line-height: 1.4;
       padding: 9px 12px 32px;
       resize: none;
       min-height: 50px;
       display: block;
     }
-    .ask-input-wrap textarea::placeholder { color: var(--faint); opacity: 0.7; }
+    .ask-input-wrap textarea::placeholder { color: var(--faint); opacity: 0.7; font-family: sans-serif; }
     .ask-submit {
       position: absolute;
       right: 8px; bottom: 8px;
@@ -621,13 +685,15 @@
       z-index: 1;
       color: var(--faint);
       opacity: 0.75;
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 14px;
+      line-height: 1.4;
+      letter-spacing: 0;
       transition: opacity 320ms ease;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-family: var(--font-sans);
+      /* Same reason as the textarea — sans-serif so CJK glyphs work. */
+      font-family: sans-serif;
     }
     .ask-input-wrap .placeholder-cycle.fading { opacity: 0; }
     .ask-input-wrap.has-content .placeholder-cycle,
@@ -851,6 +917,29 @@
       color: var(--micro-amber, #f59e0b);
     }
     .intent-chip .chip-btn svg { width: 12px; height: 12px; display: block; fill: currentColor; flex-shrink: 0; }
+
+    /* Touch devices (iOS Safari, Android Chrome, iPadOS) — no hover,
+       so anything we revealed on :hover stays invisible. Make every
+       hover-revealed actionable element default-visible on coarse
+       pointers and bump hit targets up so they're tappable. */
+    @media (hover: none), (pointer: coarse) {
+      /* Intent chip fav / del buttons */
+      .intent-chip .chip-actions { gap: 6px; margin-left: 6px; }
+      .intent-chip .chip-btn {
+        width: 18px;
+        height: 18px;
+        opacity: 0.55;
+      }
+      .intent-chip .chip-btn svg { width: 14px; height: 14px; }
+      .intent-chip.is-favorite .chip-btn.fav { width: 18px; }
+      /* Recent section "clear all" */
+      .recent-wrap .recent-clear { opacity: 0.7; }
+      /* Recent item open-arrow — keep faint so the row stays clean,
+         but visible enough that it reads as "tappable to open" */
+      .recent-item .open-arrow { opacity: 0.55; }
+      /* Account foot row action button (sign-in / settings) */
+      .foot:not(.signin) .act { opacity: 1; background: var(--ink); }
+    }
 
     /* ─── Result card: hidden. Capture state shows in the primary CTA
        text ("Capturing..."), and the new doc highlights in Recent. ─── */

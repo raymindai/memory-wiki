@@ -1,6 +1,48 @@
 // popup-v25.html companion: headline rotation + free-form AI submit wiring.
 // Inline scripts are blocked by Manifest V3 CSP, so this lives in its own file.
 
+// ─── Suppress popup-open auto-focus (Safari macOS) ───────────────────
+// Safari on macOS 26 auto-focuses the first focusable element when an
+// extension popover opens. The intent textarea is the first such
+// element here, so it picks up :focus-within styling before the user
+// has typed anything — popup looks like it's already asking for input.
+//
+// Two-pronged fix:
+//   1. CSS-gated style: the popup-v25.html :focus-within rule for
+//      .ask-input-wrap is qualified by body.user-active. Until the
+//      user actually clicks/types, the highlight is suppressed even
+//      if the textarea technically has focus.
+//   2. Active-blur fallback: repeatedly blur whatever picked up
+//      auto-focus during the popup's first paint frames. Covers the
+//      case where Safari re-focuses AFTER DOMContentLoaded.
+//
+// On first real user interaction (mousedown/keydown/touchstart), we
+// add body.user-active so the focus-within highlight returns to its
+// normal job of confirming the user is in the right field.
+(function () {
+  const blurAuto = () => {
+    try {
+      const el = document.activeElement;
+      if (el && el !== document.body && el !== document.documentElement && typeof el.blur === "function") {
+        el.blur();
+      }
+    } catch { /* no-op */ }
+  };
+  // Run on DOM ready, next frame, and at 100ms — covers Safari's late
+  // auto-focus which fires after defer scripts have already run.
+  document.addEventListener("DOMContentLoaded", () => {
+    blurAuto();
+    requestAnimationFrame(blurAuto);
+    setTimeout(blurAuto, 100);
+  });
+  // First real interaction unlocks the focus highlight permanently
+  // (single listener, removed after firing so it doesn't leak).
+  const unlock = () => { document.body.classList.add("user-active"); };
+  ["mousedown", "keydown", "touchstart", "input"].forEach((t) => {
+    document.addEventListener(t, unlock, { once: true, capture: true });
+  });
+})();
+
 // ─── Device class for popup width ────────────────────────────────────
 // iPad Safari extension popover gives the popup room to expand; iPhone
 // extension sheet does not. The CSS uses html.is-ipad to opt into a

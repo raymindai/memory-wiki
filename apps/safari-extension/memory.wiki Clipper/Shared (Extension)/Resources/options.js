@@ -23,6 +23,22 @@ const IS_IOS = (() => {
 })();
 if (IS_IOS) document.body.classList.add("is-ios");
 
+// Detect macOS Safari separately. chrome.commands DOES exist in macOS
+// Safari extensions (so we can't reuse the IS_IOS heuristic), but
+// chrome://extensions/shortcuts is a Chrome-only URL — Safari just
+// shows "Safari cannot open the page" if we try to navigate to it.
+// Standard Safari/WebKit UA check: contains "Safari", does NOT contain
+// any Chrome / Chromium / Edge / Opera markers.
+const IS_SAFARI = (() => {
+  try {
+    if (IS_IOS) return true;
+    const ua = navigator.userAgent || "";
+    return /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR\//i.test(ua);
+  } catch {}
+  return false;
+})();
+if (IS_SAFARI) document.body.classList.add("is-safari");
+
 // Sign in lives in the popup chip only — the container app and this
 // Settings panel intentionally don't carry their own account section.
 // One canonical login surface = one source of truth.
@@ -58,11 +74,28 @@ function loadShortcuts() {
 }
 
 if (shortcutsLink) {
-  shortcutsLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    if (IS_IOS) return;
-    chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
-  });
+  // On Safari, swap the entire descriptor line out — there is no
+  // shortcuts-shortcuts page reachable from the extension, and Safari's
+  // own shortcut customization is a different surface (System Settings
+  // > Keyboard > Keyboard Shortcuts > App Shortcuts > Safari). Telling
+  // the user to click a link that 404's looks broken; telling them
+  // where the real surface is keeps the trust intact.
+  if (IS_SAFARI) {
+    const row = shortcutsLink.closest(".desc");
+    if (row) {
+      row.textContent =
+        "These bindings are fixed by the extension. To remap them, " +
+        "open System Settings > Keyboard > Keyboard Shortcuts > " +
+        "App Shortcuts > Safari and add a Menu Title that matches " +
+        "either capture command.";
+    }
+  } else {
+    shortcutsLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (IS_IOS) return;
+      chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
+    });
+  }
 }
 
 // ─── Floating button toggle (chrome only) ───

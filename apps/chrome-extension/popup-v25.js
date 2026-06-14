@@ -1,53 +1,69 @@
 // popup-v25.html companion: headline rotation + free-form AI submit wiring.
 // Inline scripts are blocked by Manifest V3 CSP, so this lives in its own file.
 
-// ─── Debug: popup auto-fit diagnostic (Cmd+Shift+D inside popup) ──
-// Press Cmd+Shift+D (Mac) or Ctrl+Shift+D (Win) to log current
-// document / body / window dimensions. Helps identify what's making
-// chrome allocate a popup viewport larger than visible content.
+// ─── Suppress popup-open auto-focus (Safari macOS) ───────────────────
+// Safari on macOS 26 auto-focuses the first focusable element when an
+// extension popover opens. The intent textarea is the first such
+// element here, so it picks up :focus-within styling before the user
+// has typed anything — popup looks like it's already asking for input.
+//
+// Two-pronged fix:
+//   1. CSS-gated style: the popup-v25.html :focus-within rule for
+//      .ask-input-wrap is qualified by body.user-active. Until the
+//      user actually clicks/types, the highlight is suppressed even
+//      if the textarea technically has focus.
+//   2. Active-blur fallback: repeatedly blur whatever picked up
+//      auto-focus during the popup's first paint frames. Covers the
+//      case where Safari re-focuses AFTER DOMContentLoaded.
+//
+// On first real user interaction (mousedown/keydown/touchstart), we
+// add body.user-active so the focus-within highlight returns to its
+// normal job of confirming the user is in the right field.
 (function () {
-  document.addEventListener("keydown", (e) => {
-    const cmdOrCtrl = e.metaKey || e.ctrlKey;
-    if (!cmdOrCtrl || !e.shiftKey || e.key.toLowerCase() !== "d") return;
-    e.preventDefault();
-    const b = document.body;
-    const h = document.documentElement;
-    const data = {
-      "body.scrollHeight":    b.scrollHeight,
-      "body.offsetHeight":    b.offsetHeight,
-      "body.clientHeight":    b.clientHeight,
-      "html.scrollHeight":    h.scrollHeight,
-      "html.offsetHeight":    h.offsetHeight,
-      "window.innerHeight":   window.innerHeight,
-      "window.outerHeight":   window.outerHeight,
-      tallestChild: (() => {
-        let maxH = 0, maxEl = null;
-        for (const el of b.querySelectorAll("*")) {
-          const r = el.getBoundingClientRect();
-          if (r.bottom > maxH) { maxH = r.bottom; maxEl = el; }
-        }
-        return maxEl ? `${maxEl.tagName}.${(maxEl.className||"").toString().slice(0,40)} bottom=${maxH}` : "none";
-      })(),
-      // EVERY element whose bottom edge sits past body.scrollHeight
-      // — the one(s) inflating html.scrollHeight past body.
-      overflowingElements: (() => {
-        const bsh = b.scrollHeight;
-        const out = [];
-        for (const el of document.documentElement.querySelectorAll("*")) {
-          const r = el.getBoundingClientRect();
-          if (r.bottom > bsh + 1) {
-            const cs = window.getComputedStyle(el);
-            out.push(`${el.tagName}.${(el.className||"").toString().slice(0,30)} ` +
-              `bottom=${Math.round(r.bottom)} pos=${cs.position} ` +
-              `display=${cs.display} parent=${el.parentElement?.tagName || "?"}`);
-          }
-        }
-        return out.length ? out : ["(none)"];
-      })(),
-    };
-    console.table(data);
-    alert(JSON.stringify(data, null, 2));
+  const blurAuto = () => {
+    try {
+      const el = document.activeElement;
+      if (el && el !== document.body && el !== document.documentElement && typeof el.blur === "function") {
+        el.blur();
+      }
+    } catch { /* no-op */ }
+  };
+  // Run on DOM ready, next frame, and at 100ms — covers Safari's late
+  // auto-focus which fires after defer scripts have already run.
+  document.addEventListener("DOMContentLoaded", () => {
+    blurAuto();
+    requestAnimationFrame(blurAuto);
+    setTimeout(blurAuto, 100);
   });
+  // First real interaction unlocks the focus highlight permanently
+  // (single listener, removed after firing so it doesn't leak).
+  const unlock = () => { document.body.classList.add("user-active"); };
+  ["mousedown", "keydown", "touchstart", "input"].forEach((t) => {
+    document.addEventListener(t, unlock, { once: true, capture: true });
+  });
+})();
+
+// ─── Device class for popup width ────────────────────────────────────
+// iPad Safari extension popover gives the popup room to expand; iPhone
+// extension sheet does not. The CSS uses html.is-ipad to opt into a
+// wider min-width on iPad only, so iPhone's sheet doesn't get content
+// pushed off the right edge.
+(function () {
+  try {
+    const ua = navigator.userAgent || "";
+    const isIPad =
+      /iPad/i.test(ua) ||
+      // iPadOS 13+ identifies as Macintosh; the multi-touch capability
+      // gives it away. Fallback to screen.width for any future devices
+      // that don't match either pattern but are tablet-sized.
+      (navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua)) ||
+      (navigator.maxTouchPoints > 1 && (screen.width || 0) >= 600);
+    if (isIPad) {
+      document.documentElement.classList.add("is-ipad");
+    } else {
+      document.documentElement.classList.add("is-iphone");
+    }
+  } catch (e) { /* before-DOMReady safety; ignore */ }
 })();
 
 (function () {
@@ -76,15 +92,21 @@
   if (!ta || !sub) return;
   ta.addEventListener("input", () => { sub.disabled = !ta.value.trim(); });
   sub.addEventListener("click", () => {
-    // Gate on Capture being usable — on memory.wiki / chrome:// tabs
-    // the btn-capture is disabled, intent path must respect that.
+    // Gate on btn-capture being usable. When the popup is on
+    // memory.wiki (or chrome:// / file:// / etc.) the Capture button
+    // is disabled — the intent path must respect that and bail
+    // instead of bypassing it through __captureIntent + btn.click().
     const btn = document.getElementById("btn-capture");
-    if (!btn || btn.disabled || sub.disabled) return;
+    if (!btn || btn.disabled) return;
+    if (sub.disabled) return;
     const v = ta.value.trim();
     if (!v) return;
-    // Reset any leftover "Captured" state from the previous run so
-    // the user doesn't see the prior capture's View URL during the
-    // new capture.
+    // Reset any leftover "Captured" state from the previous run.
+    // Without this, the overlay reopened still showing the prior
+    // capture's "Captured" label + View button pointing at the
+    // previous URL — the user perceived the new capture as "still
+    // showing the old result." markFresh will re-flip these to the
+    // new doc once the new capture lands.
     resetOverlay();
     window.__captureIntent = v;
     window.__intentCaptureActive = true;
@@ -94,6 +116,9 @@
     setTimeout(() => document.body.classList.remove("intent-active"), 60000);
   });
 
+  // Globally exposed so the basic btn-capture path (non-intent) can
+  // reset the overlay too — see the capture-click reset binding
+  // further down the file.
   function resetOverlay() {
     const overlay = document.querySelector(".capturing-overlay");
     if (!overlay) return;
@@ -354,7 +379,8 @@
     document.body.classList.remove("intent-active");
     // Flip the capturing overlay into the "Captured" state — same
     // animated morph blob continues, label swaps, View / OK buttons
-    // appear. User dismisses on their own terms.
+    // appear. User dismisses on their own terms instead of an
+    // auto-fade so the success beat is unmissable.
     const overlay = document.querySelector(".capturing-overlay");
     const overlayLabel = overlay && overlay.querySelector(".label");
     const viewBtn = document.getElementById("overlay-view");
@@ -817,16 +843,25 @@
     actions.appendChild(del);
     el.appendChild(actions);
 
-    // Click chip body → populate textarea
+    // Click chip body → fill the textarea, focus it, light up the
+    // submit arrow. The user reads what they're about to send and
+    // either tweaks it or taps submit. (Auto-firing capture on chip
+    // click felt too eager — it skipped the moment where the user
+    // sees the intent in the input.)
     el.addEventListener("click", (e) => {
       if (e.target.closest(".chip-btn")) return;   // ignore clicks on buttons
       const ta = document.getElementById("ask-input");
+      const sub = document.getElementById("ask-submit");
+      // Bail when capture is disabled (chrome:// tab, memory.wiki tab,
+      // etc.) — same surface lock as the submit handler.
       const captureBtn = document.getElementById("btn-capture");
       if (!ta || (captureBtn && captureBtn.disabled)) return;
       ta.value = text;
       ta.dispatchEvent(new Event("input", { bubbles: true }));
-      ta.focus();
-      try { ta.setSelectionRange(text.length, text.length); } catch {}
+      if (sub) sub.disabled = false;
+      // Focus the textarea so the cursor lands at the end and the
+      // user can immediately edit / extend.
+      try { ta.focus(); ta.setSelectionRange(text.length, text.length); } catch {}
     });
 
     // Marquee on hover when text overflows the clipped wrap
@@ -966,10 +1001,11 @@
   (function attachDragScroll() {
     const wrap = document.getElementById("intent-chips");
     if (!wrap) return;
-    // Touch devices have native horizontal scroll on overflow-x.
-    // The mouse-based drag-to-scroll handler misreads finger wiggle
-    // during a tap as a drag and suppresses the chip click. Skip on
-    // touch and let iOS native scroll handle the rail.
+    // Touch devices have native horizontal scroll on overflow-x; the
+    // mouse-based drag-to-scroll handler below misreads the tiny
+    // finger wiggle during a tap as a drag and suppresses the chip
+    // click, so the textarea never gets populated. Skip the drag
+    // wiring on touch and let iOS scroll handle it natively.
     const isTouch = (window.matchMedia && window.matchMedia("(hover: none), (pointer: coarse)").matches);
     if (isTouch) return;
     let isDown = false;
@@ -1075,7 +1111,12 @@
   }
 })();
 
-// Recent — clear-all (one-tap, no confirm dialog).
+// Recent — clear-all. One-tap clear (no confirm dialog — Safari
+// extension popups don't render system dialogs, and a two-tap state
+// machine was failing somehow on iPad; simplest path is just to
+// wipe immediately and let the user re-capture if they tapped by
+// mistake. Wrapped in capture-phase listener too in case a parent
+// element was eating the click.)
 function wipeRecent(e) {
   if (e) { e.preventDefault(); e.stopPropagation(); }
   try {
@@ -1090,8 +1131,12 @@ function wipeRecent(e) {
 (function () {
   const btn = document.getElementById("recent-clear");
   if (!btn) return;
+  // Bind on both bubble and capture phases so nothing upstream can
+  // swallow it.
   btn.addEventListener("click", wipeRecent, false);
   btn.addEventListener("click", wipeRecent, true);
+  // Touchstart as a belt-and-suspenders for iPad WKWebView which
+  // sometimes drops click on small toolbar buttons inside a popover.
   btn.addEventListener("touchend", wipeRecent, false);
 })();
 
@@ -1104,7 +1149,10 @@ function wipeRecent(e) {
   if (!btn) return;
   btn.addEventListener("click", () => {
     if (btn.disabled) return;
-    // Reset overlay's prior "Captured" state before the new run.
+    // Reset the overlay's previous-run state (Captured label, stale
+    // View URL) before adding capturing — otherwise the user sees
+    // the prior capture's result still on screen while the new one
+    // runs.
     try { if (typeof window.__mwResetOverlay === "function") window.__mwResetOverlay(); } catch {}
     document.body.classList.add("capturing");
     // Safety net — if capture hangs we still un-stick after 60s.
@@ -1219,10 +1267,16 @@ function startTransformProgress(mode) {
   setTimeout(stop, 45000);
 }
 
-// (Removed runtime sendMessage monkey-patch — popup.js inline branch
-// is the canonical /api/docs/transform router now. Both code paths
-// active at once caused state-clearing races that intermittently
-// dropped intent capture.)
+// (Removed the chrome.runtime.sendMessage monkey-patch that used to
+// own the /api/docs → /api/docs/transform rewrite. popup.js's
+// openInMemoryWiki now reads window.__captureIntent inline at the
+// call site and routes to the right URL directly — having both
+// code paths active at once caused state-clearing races where the
+// patch wiped __captureIntent before the inline branch finished
+// reading it, leading to intermittent "intent didn't apply"
+// results. The patched startTransformProgress was the only useful
+// side effect — drive it from popup.js openInMemoryWiki instead
+// once the result settles.)
 
 
 // Open the dedicated /auth/chrome handoff page instead of the bare home
@@ -1230,7 +1284,7 @@ function startTransformProgress(mode) {
 // Override after popup.js binds, and re-bind whenever the .signin class
 // flips (which is when popup.js re-renders the chip).
 (function () {
-  const AUTH_URL = "https://memory.wiki/auth/chrome";
+  const AUTH_URL = "https://memory.wiki/auth/safari";
   const chip = document.getElementById("account-chip");
   if (!chip) return;
   function bindSignInClick() {
@@ -1303,3 +1357,4 @@ function startTransformProgress(mode) {
   // Initial sync.
   setTimeout(syncBodyState, 50);
 })();
+
