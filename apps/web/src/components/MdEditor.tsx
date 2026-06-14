@@ -4180,7 +4180,14 @@ export default function MdEditor() {
               setIsOwner(false);
               setIsSharedDoc(true);
               setIsEditor(false);
-              setViewMode("preview"); // readonly users get the rendered view
+              // Don't force viewMode for readonly either. Forcing
+              // "preview" on every refresh dropped users out of
+              // whatever Live / Split / Source they had into the
+              // read-only viewer surface, even though the editor
+              // already disables editing via canEdit=false in
+              // every view. Reported as "shared doc refresh opens
+              // it in viewer." TipTap / CodeMirror render the body
+              // as text either way; canEdit handles the lock.
             }
 
             // Seed the conflict-detection timestamp from the bootstrap
