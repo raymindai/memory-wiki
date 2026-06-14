@@ -1171,6 +1171,11 @@ export default function MdEditor() {
   // showed the empty TipTap state.
   const applyHistoryEntry = useCallback((md: string) => {
     setMarkdownRaw(md);
+    // doRender is declared later in the file — keep it out of the
+    // deps array (used before declaration TDZ) but still callable
+    // inside the body at runtime. Same pattern the original undo
+    // used. Same goes for cmSetDocRef / tiptapRef / collabForceResetRef:
+    // all are refs whose .current is read at invoke time.
     doRender(md);
     cmSetDocRef.current?.(md);
     tiptapRef.current?.setMarkdown(md);
@@ -1180,7 +1185,7 @@ export default function MdEditor() {
     collabForceResetRef.current?.(md);
     triggerAutoSave(md);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doRender, triggerAutoSave]);
+  }, [triggerAutoSave]);
 
   const undo = useCallback(() => {
     if (undoStack.current.length <= 1) return;
