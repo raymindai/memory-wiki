@@ -2493,6 +2493,19 @@ export default function MdEditor() {
   // to the new tab's cloudId via triggerAutoSave, overwriting the new tab on the server.
   const tabSwitchInFlightRef = useRef(false);
 
+  // Watchdog: clear tabSwitchInFlightRef 1.5s after any activeTabId
+  // change. The loadTab finally-callbacks only clear when
+  // activeTabIdRef.current matches the tab they own — if the user
+  // switches tabs again before either load resolves, neither clears
+  // and the flag is stuck true. With the flag stuck, handleTiptapChange
+  // silently drops every keystroke and triggerAutoSave bails before
+  // scheduleSave. Reported symptom: typing in TipTap stops saving
+  // out of nowhere. 1.5s is way past any normal tab-load round-trip.
+  useEffect(() => {
+    const t = setTimeout(() => { tabSwitchInFlightRef.current = false; }, 1500);
+    return () => clearTimeout(t);
+  }, [activeTabId]);
+
   const loadTab = useCallback((tab: Tab) => {
     // Clear any placeholder overlay when loading a real document
     setEditorPlaceholder(null);
@@ -4897,6 +4910,17 @@ export default function MdEditor() {
               if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
               return;
             }
+            // Echo-of-our-own-save check. The realtime payload can land
+            // more than 5s after our PATCH on a slow connection, past
+            // isRecentSave's window. If the server's body matches what
+            // we last successfully sent, this UPDATE is just our own
+            // save reflected back — skip it. Without this the user
+            // gets a false "updated elsewhere" toast while their own
+            // edits are still in the editor.
+            if (serverMd === autoSave.getLastSavedMarkdown()) {
+              if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
+              return;
+            }
 
             // Local is dirty if EITHER an autosave is in flight OR the
             // live markdown differs from the baseline we know matches
@@ -4984,6 +5008,14 @@ export default function MdEditor() {
 
         const localMd = markdownRef.current;
         if (serverMd === localMd) {
+          if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
+          return;
+        }
+        // Echo-of-our-own-save check (same as realtime channel above).
+        // serverMd may match what we last successfully PATCH'd even
+        // if the user has typed more since — that's not an external
+        // advance, just our own save reflected back.
+        if (serverMd === autoSave.getLastSavedMarkdown()) {
           if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
           return;
         }
