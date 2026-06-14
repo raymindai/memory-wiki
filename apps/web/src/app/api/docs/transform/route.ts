@@ -28,9 +28,10 @@ Your job:
 - Return well-formed markdown. Use headings, lists, blockquotes, code blocks where they help.
 - Open with a single H1 title that names the transformed output (not the source page). The title should make the document scannable on a hub of saved memories.
 - Preserve concrete facts, names, numbers, URLs, quotes. Don't hallucinate.
-- If the instruction is "summarize", be ruthless — short, structured, lossless on the key facts.
-- If the instruction is "extract X", drop everything that isn't X.
-- If the instruction is "translate", translate the body but keep the H1 in the target language too.
+- **Preserve images.** Every \`![alt](url)\` in the source MUST appear in your output, verbatim, in roughly the same position relative to surrounding text. Do not drop, rename, summarize-into-text, or relocate them. The only exception is the explicit "extract X" / "just text" / "remove images" instructions where the user clearly asks for image removal.
+- If the instruction is "summarize", be ruthless — short, structured, lossless on the key facts (but still keep the images).
+- If the instruction is "extract X", drop everything that isn't X (images survive only if they belong to X).
+- If the instruction is "translate", translate the body but keep the H1 in the target language too. Images stay.
 - If the instruction is unclear or empty, return the source as-is with a brief one-line note.
 - No preamble like "Here is the transformed content:". Just the markdown.`;
 
