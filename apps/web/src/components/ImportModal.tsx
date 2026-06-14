@@ -20,8 +20,9 @@ import {
   Loader2,
 } from "lucide-react";
 
-// GitHub mark — inline SVG so we don't pull a Lucide alias that may
-// not be in the locked-down lucide-react version this app uses.
+// Real brand marks. fill="currentColor" so the icon takes the row's
+// ink tint, the rows themselves stay color-free.
+
 function GithubIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -57,35 +58,35 @@ interface SourceCard {
   label: string;
   desc: string;
   icon: React.ReactNode;
-  color: string;
 }
 
-// Obsidian's logo as a tiny inline SVG so we don't need an asset
-// pipeline for it. Matches the brand's purple gem outline.
+// Obsidian — outer gem outline + inner gem facet. Even-odd fill
+// rule gives the hollow ring + inner shape in a single path.
 function ObsidianIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-hidden>
-      <path d="M50 6 L88 32 L72 88 L28 88 L12 32 Z" stroke="currentColor" strokeWidth="6" strokeLinejoin="round" />
-      <path d="M50 30 L70 50 L60 76 L40 76 L30 50 Z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" opacity="0.55" />
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="currentColor" fillRule="evenodd" aria-hidden>
+      <path d="M50 10 L84 36 L74 86 H26 L16 36 Z M50 18 L24 38 L32 80 H68 L76 38 Z M50 32 L66 46 L60 72 H40 L34 46 Z" />
     </svg>
   );
 }
 
+// Notion — the page-glyph N with its two verticals + diagonal
+// spine. Solid currentColor so it inherits the row's ink tint.
 function NotionIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M8 8.5v7m0-7l8 7m0-7v7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="currentColor" aria-hidden>
+      <rect x="6" y="6" width="88" height="88" rx="6" fillOpacity="0.10" />
+      <path d="M22 26 L34 24 L66 64 V26 L78 24 V74 L66 76 L34 36 V74 L22 76 Z" />
     </svg>
   );
 }
 
 const SOURCES: SourceCard[] = [
-  { id: "files",    label: "Files",            desc: "PDF, DOCX, MD, code — drag in or pick",  color: "#fb923c", icon: <Upload width={18} height={18} /> },
-  { id: "github",   label: "GitHub",           desc: "Repo, folder, or single .md URL",         color: "#fbbf24", icon: <GithubIcon size={18} /> },
-  { id: "obsidian", label: "Obsidian vault",   desc: "Drop a .zip of your vault",               color: "#a78bfa", icon: <ObsidianIcon size={18} /> },
-  { id: "url",      label: "URL",              desc: "Any web page — we extract the article",  color: "#60a5fa", icon: <Globe width={18} height={18} /> },
-  { id: "notion",   label: "Notion",           desc: "Integration token + page URL",            color: "#f472b6", icon: <NotionIcon size={18} /> },
+  { id: "files",    label: "Files",            desc: "PDF, DOCX, MD, code, drag in or pick",  icon: <Upload width={18} height={18} strokeWidth={1.5} /> },
+  { id: "github",   label: "GitHub",           desc: "Repo, folder, or single .md URL",       icon: <GithubIcon size={18} /> },
+  { id: "obsidian", label: "Obsidian vault",   desc: "Drop a .zip of your vault",             icon: <ObsidianIcon size={18} /> },
+  { id: "url",      label: "URL",              desc: "Any web page, we extract the article",  icon: <Globe width={18} height={18} strokeWidth={1.5} /> },
+  { id: "notion",   label: "Notion",           desc: "Integration token + page URL",          icon: <NotionIcon size={18} /> },
 ];
 
 export default function ImportModal({
@@ -302,15 +303,12 @@ export default function ImportModal({
                 Pull markdown into your hub from anywhere. Every doc lands as a
                 draft you can review before publishing.
               </p>
-              <div className="grid grid-cols-1 gap-1.5">
-                {SOURCES.map((s) => (
+              <div className="grid grid-cols-1 gap-1">
+                {SOURCES.map((s, idx) => (
                   <button
                     key={s.id}
                     onClick={() => {
                       if (s.id === "files") {
-                        // Files reuses the parent's import pipeline.
-                        // Open the native picker; the modal closes via the
-                        // parent's onPickFiles callback.
                         fileRef.current?.click();
                       } else if (s.id === "obsidian") {
                         obsidianRef.current?.click();
@@ -318,17 +316,37 @@ export default function ImportModal({
                         setActive(s.id);
                       }
                     }}
-                    className="group flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all"
+                    className="group flex items-center gap-4 px-3 py-3 rounded-lg text-left transition-colors"
                     style={{
-                      background: "var(--background)",
-                      border: "1px solid var(--border-dim)",
+                      background: "transparent",
+                      border: "1px solid transparent",
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = s.color; (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${s.color}33`; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+                    onMouseEnter={(e) => {
+                      // Quiet ink lift on hover, no coloured glow.
+                      (e.currentTarget as HTMLElement).style.background = "var(--surface)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--border-dim)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
                   >
+                    {/* Faint mono ordinal in fixed slot. Matches the
+                        picker pattern established elsewhere in the
+                        product — order is for the user, not chrome. */}
+                    <span
+                      className="font-mono tabular-nums shrink-0"
+                      style={{ width: 18, color: "var(--text-faint)", fontSize: 10, letterSpacing: 0.5 }}
+                    >
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
                     <span
                       className="shrink-0 flex items-center justify-center rounded-md"
-                      style={{ width: 32, height: 32, background: `${s.color}1a`, color: s.color }}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        color: "var(--text-secondary)",
+                      }}
                     >
                       {s.icon}
                     </span>
