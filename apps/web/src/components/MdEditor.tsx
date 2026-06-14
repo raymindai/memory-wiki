@@ -16702,14 +16702,13 @@ ${clone.innerHTML}
             }
           }
         }}
-        onPickFiles={(files) => {
-          // Run the import directly. The previous DataTransfer +
-          // dispatchEvent forwarding into importFileRef didn't fire
-          // React's onChange reliably for file inputs, so the modal's
-          // Files card looked broken (picker opened, file picked,
-          // nothing happened). runFileImport is the same code path
-          // the hidden input would have run.
-          void runFileImport(files);
+        onPickFiles={() => {
+          // Modal closes itself, then we open the parent's native
+          // file picker. The parent's <input ref={importFileRef}>
+          // already routes through runFileImport on change, so this
+          // is a single code path with no cross-component picker
+          // plumbing to drop events on the way back.
+          requestAnimationFrame(() => importFileRef.current?.click());
         }}
       />
 

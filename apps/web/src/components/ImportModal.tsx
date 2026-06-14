@@ -44,10 +44,14 @@ interface ImportModalProps {
    *  its document list / lint / etc. When a docId is supplied, the
    *  parent should also open that doc as the active tab. */
   onImported?: (docId?: string) => void;
-  /** Called when the user picks "Files" + a list of File objects.
-   *  Files use the existing importFile() pipeline in the parent —
-   *  we just hand the files back. */
-  onPickFiles: (files: File[]) => void;
+  /** Called when the user clicks "Files". The parent owns the
+   *  native <input type="file"> + the import pipeline, so the modal
+   *  just closes and asks the parent to open its own picker. The
+   *  earlier "modal owns the picker and forwards files" design lost
+   *  events somewhere between the modal's input and the parent's
+   *  React tree (the user clicked Files, picked a file, and nothing
+   *  happened). */
+  onPickFiles: () => void;
   /** Source pre-selected when the modal opens. Use to deep-link the
    *  modal to a specific tab (e.g. Add → Import GitHub). */
   initialSource?: ImportSource | null;
@@ -104,7 +108,6 @@ export default function ImportModal({
   // Live progress for streaming imports (currently URL). { label, done, total }
   const [progress, setProgress] = useState<{ label: string; done?: number; total?: number } | null>(null);
   const obsidianRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const close = useCallback(() => {
     if (busy) return;
@@ -309,7 +312,12 @@ export default function ImportModal({
                     key={s.id}
                     onClick={() => {
                       if (s.id === "files") {
-                        fileRef.current?.click();
+                        // Hand off to the parent's import pipeline,
+                        // including the parent's native file picker.
+                        // Avoids the modal-owned picker that was
+                        // dropping events on the way back.
+                        close();
+                        onPickFiles();
                       } else if (s.id === "obsidian") {
                         obsidianRef.current?.click();
                       } else {
@@ -401,20 +409,6 @@ export default function ImportModal({
           const file = e.target.files?.[0];
           e.currentTarget.value = "";
           if (file) submitObsidianZip(file);
-        }}
-      />
-      <input
-        ref={fileRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={(e) => {
-          const files = Array.from(e.target.files || []);
-          e.currentTarget.value = "";
-          if (files.length === 0) return;
-          // Hand off to the parent's import pipeline; close the modal.
-          onPickFiles(files);
-          close();
         }}
       />
     </div>
