@@ -1292,12 +1292,27 @@ function startTransformProgress(mode) {
 // once the result settles.)
 
 
-// Open the dedicated /auth/chrome handoff page instead of the bare home
-// URL popup.js defaults to (popup.js sets chip.onclick = open MDFY_URL).
-// Override after popup.js binds, and re-bind whenever the .signin class
-// flips (which is when popup.js re-renders the chip).
+// Open the dedicated /auth/<channel> handoff page instead of the bare
+// home URL popup.js defaults to (popup.js sets chip.onclick = open
+// MDFY_URL). Override after popup.js binds, and re-bind whenever the
+// .signin class flips (which is when popup.js re-renders the chip).
+//
+// The handoff page must match the browser the user is actually in —
+// /auth/safari tells the user to click the Safari toolbar icon, which
+// reads bizarrely when they're sitting in Chrome. Detect Safari (the
+// only context where /auth/safari is correct) and route everything
+// else through /auth/chrome.
 (function () {
-  const AUTH_URL = "https://memory.wiki/auth/safari";
+  const IS_SAFARI = (() => {
+    try {
+      const ua = navigator.userAgent || "";
+      if (/iPhone|iPad|iPod/i.test(ua)) return true;
+      return /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR\//i.test(ua);
+    } catch { return false; }
+  })();
+  const AUTH_URL = IS_SAFARI
+    ? "https://memory.wiki/auth/safari"
+    : "https://memory.wiki/auth/chrome";
   const chip = document.getElementById("account-chip");
   if (!chip) return;
   function bindSignInClick() {

@@ -102,7 +102,17 @@ function getUserId() {
 // ─── Status (legacy element kept; new result card replaces it) ───
 
 function setStatus(text, type = "") {
-  if (statusEl) { statusEl.textContent = text; statusEl.className = "status " + type; }
+  if (!statusEl) return;
+  statusEl.textContent = text;
+  // Replace just the type tokens, never the whole class attribute — the
+  // popup-v25 markup tags this element with .hidden-stub to keep it
+  // invisible (it's a backing store, not a UI element). Overwriting
+  // className blew that away, and on Chrome the raw "signed out" /
+  // "use the open-in-memory.wiki…" strings leaked at the bottom of the
+  // popup.
+  statusEl.classList.add("status");
+  statusEl.classList.remove("info", "error");
+  if (type) statusEl.classList.add(type);
 }
 
 // ─── Result card (after-capture state) ───
@@ -772,7 +782,10 @@ function renderAccountChip({ userId, email }) {
       // Re-render as signed-out state
       renderAccountChip({ userId: null, email: null });
       chip.style.pointerEvents = "";
-      setStatus("signed out", "info");
+      // No setStatus("signed out") here — the chip flipping to the big
+      // "Sign in to memory.wiki" pill is already the signed-out signal.
+      // Pushing extra status text just risks resurrecting the leak that
+      // setStatus's old className-overwrite caused.
       // Re-detect platform — but for any non-trivial platform (github
       // markdown / ai chats / memory.wiki itself) the detector calls
       // paintCaptureBtn which writes back the same leftover text. In
