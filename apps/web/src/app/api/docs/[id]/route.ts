@@ -381,6 +381,48 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: true, allowedEmails: updates.allowed_emails, allowedEditors: updates.allowed_editors });
   }
 
+  // ─── Action: leave-share (recipient removes themselves) ───
+  // Anyone listed in allowed_emails / allowed_editors can drop
+  // themselves off the share without going through the owner. Caller's
+  // email must be verified (auth token or x-user-email header) and
+  // must already appear in one of the access lists; the owner uses
+  // set-allowed-emails instead. Returns 204 on success, 404 if the
+  // caller wasn't on the share to begin with.
+  if (body.action === "leave-share") {
+    const callerEmailRaw = verified?.email
+      || req.headers.get("x-user-email")
+      || (typeof body.userEmail === "string" ? body.userEmail : "");
+    const callerEmail = (callerEmailRaw || "").trim().toLowerCase();
+    if (!callerEmail) return NextResponse.json({ error: "email required" }, { status: 400 });
+
+    const { data: doc } = await supabase
+      .from("documents")
+      .select("user_id, allowed_emails, allowed_editors")
+      .eq("id", id)
+      .single();
+    if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    const allowedEmails: string[] = Array.isArray(doc.allowed_emails) ? doc.allowed_emails : [];
+    const allowedEditors: string[] = Array.isArray(doc.allowed_editors) ? doc.allowed_editors : [];
+    const wasViewer = allowedEmails.map((e) => e.toLowerCase()).includes(callerEmail);
+    const wasEditor = allowedEditors.map((e) => e.toLowerCase()).includes(callerEmail);
+    if (!wasViewer && !wasEditor) {
+      // Public doc with no email-restriction — nothing to leave from
+      // server-side. Client should still locally dismiss the row.
+      return NextResponse.json({ ok: true, removed: false });
+    }
+    const updates: Record<string, unknown> = {};
+    if (wasViewer) {
+      updates.allowed_emails = allowedEmails.filter((e) => e.toLowerCase() !== callerEmail);
+    }
+    if (wasEditor) {
+      updates.allowed_editors = allowedEditors.filter((e) => e.toLowerCase() !== callerEmail);
+    }
+    const { error } = await supabase.from("documents").update(updates).eq("id", id);
+    if (error) return NextResponse.json({ error: "Failed to leave share" }, { status: 500 });
+    return NextResponse.json({ ok: true, removed: true });
+  }
+
   // ─── Action: snapshot (create version history entry without updating content) ───
   if (body.action === "snapshot") {
     const { userId, anonymousId, editToken, changeSummary } = body;

@@ -11005,9 +11005,26 @@ ${clone.innerHTML}
                           </button>
                           <button onClick={async () => {
                             const isMine = !tab.permission || tab.permission === "mine";
-                            // Shared docs that the user just dismissed have no server-side delete —
-                            // remove from local list only.
+                            // Shared docs: actually leave the share on
+                            // the server (remove caller's email from
+                            // allowed_emails / allowed_editors), then
+                            // drop from local list. Used to be local-
+                            // only which left the row reappearing on
+                            // the next /api/user/recent hydration.
                             if (!isMine) {
+                              if (tab.cloudId && user?.email) {
+                                try {
+                                  await fetch(`/api/docs/${tab.cloudId}`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json", ...authHeaders },
+                                    body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
+                                  });
+                                } catch { /* best effort */ }
+                                fetch("/api/user/recent", { headers: authHeaders })
+                                  .then(r => (r.ok ? r.json() : null))
+                                  .then(d => { if (d?.recent) setRecentDocs(d.recent.filter((x: { isOwner: boolean }) => !x.isOwner)); })
+                                  .catch(() => {});
+                              }
                               setTabs(prev => prev.filter(t => t.id !== tab.id));
                               return;
                             }
@@ -14901,7 +14918,30 @@ ${clone.innerHTML}
                   URL.revokeObjectURL(url);
                 }
               }},
-              { label: "Remove from list", action: () => {
+              { label: "Remove from list", action: async () => {
+                // For shared docs (the user is a recipient, not the
+                // owner), 'Remove from list' must actually drop their
+                // email from allowed_emails on the server. Otherwise
+                // the doc keeps reappearing on the next /api/user/
+                // recent refresh, and the realtime channel still
+                // pushes 'updated elsewhere' toasts while it's open.
+                const target = tabs.find(t => t.id === docContextMenu.tabId);
+                if (target?.cloudId && user?.email) {
+                  try {
+                    await fetch(`/api/docs/${target.cloudId}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json", ...authHeaders },
+                      body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
+                    });
+                  } catch { /* best-effort, still dismiss locally */ }
+                  // Also refresh the Shared-with-me feed so the row
+                  // doesn't reappear from /api/user/recent on the next
+                  // hydration.
+                  fetch("/api/user/recent", { headers: authHeaders })
+                    .then(r => (r.ok ? r.json() : null))
+                    .then(d => { if (d?.recent) setRecentDocs(d.recent.filter((x: { isOwner: boolean }) => !x.isOwner)); })
+                    .catch(() => {});
+                }
                 setTabs(prev => prev.filter(t => t.id !== docContextMenu.tabId));
                 if (docContextMenu.tabId === activeTabId) {
                   const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
