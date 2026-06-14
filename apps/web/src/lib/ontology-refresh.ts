@@ -125,7 +125,7 @@ export async function runOntologyJob(
     const title = (job.payload?.title as string) || "Untitled";
     const markdown = (job.payload?.markdown as string) || "";
     if (!markdown || markdown.length < MIN_DELTA_CHARS) {
-      // Payload lost or trimmed away — fall back to re-fetching
+      // Payload lost or trimmed away, fall back to re-fetching
       // the doc body from the DB. Worth the round-trip so the job
       // doesn't silently no-op.
       const { data: row } = await supabase
@@ -135,6 +135,14 @@ export async function runOntologyJob(
         .maybeSingle();
       const fbMd = (row?.markdown || "").trim();
       if (fbMd.length < MIN_DELTA_CHARS) {
+        // Doc body is empty / near-empty. Strip this doc's id from
+        // any concept_index rows that still reference it, otherwise
+        // the 'Related in your hub' widget keeps surfacing it via
+        // stale concept overlap (the doc had content earlier, was
+        // ontologised, then the body was wiped, e.g., by the chat
+        // doc-wipe bug or a manual clear). Without this cleanup the
+        // empty doc still shows 5 related entries.
+        await pruneConceptRefsForDoc(supabase, userId, docId);
         await completeJob(supabase, job.id);
         return;
       }
@@ -158,6 +166,39 @@ export async function runOntologyJob(
       err: err instanceof Error ? err.message : String(err),
     }));
     await failJob(supabase, job, err);
+  }
+}
+
+/**
+ * Remove this doc's id from every concept_index row's doc_ids array
+ * for the given user. Rows whose doc_ids becomes empty are deleted
+ * outright (no other docs reference that concept anymore). Sibling
+ * concept_relations are not touched — they're scored on the concept
+ * graph itself, not per-doc; the unused-concept delete above already
+ * cascades through them via the FK.
+ *
+ * Called from runOntologyJob when the job sees an emptied / near-
+ * empty doc body. Without this the Related-in-hub widget keeps
+ * showing the wiped doc as a hub neighbor via stale concept overlap.
+ */
+async function pruneConceptRefsForDoc(
+  supabase: SupabaseClient,
+  userId: string,
+  docId: string,
+): Promise<void> {
+  const { data: rows } = await supabase
+    .from("concept_index")
+    .select("id, doc_ids")
+    .eq("user_id", userId)
+    .contains("doc_ids", [docId]);
+  if (!rows || rows.length === 0) return;
+  for (const row of rows as { id: string; doc_ids: string[] | null }[]) {
+    const remaining = (row.doc_ids || []).filter((d) => d !== docId);
+    if (remaining.length === 0) {
+      await supabase.from("concept_index").delete().eq("id", row.id);
+    } else {
+      await supabase.from("concept_index").update({ doc_ids: remaining }).eq("id", row.id);
+    }
   }
 }
 
