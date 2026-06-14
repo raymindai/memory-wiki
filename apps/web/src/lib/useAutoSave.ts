@@ -174,6 +174,11 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
       userEmail?: string;
       anonymousId?: string;
       editToken?: string;
+      /** Skip the debounce and fire on the next tick. Used by AI
+       *  actions (Polish / Auto-Format / chat) where the user just
+       *  saw a big edit land and may refresh the page within the
+       *  2.5s debounce window, losing the save. */
+      immediate?: boolean;
     }) => {
       // Never save empty content — protect against content loss
       if (!args.markdown || !args.markdown.trim()) return;
@@ -359,7 +364,7 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
             scheduleSave(pending);
           }
         }
-      }, debounceMs);
+      }, args.immediate ? 0 : debounceMs);
     },
     [debounceMs]
   );

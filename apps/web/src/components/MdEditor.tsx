@@ -6298,6 +6298,12 @@ export default function MdEditor() {
               userEmail: user?.email,
               anonymousId: anonId,
               editToken: result.editToken,
+              // Skip the 2.5s debounce. The user already made an
+              // intentional edit (likely Auto-Format / Structure)
+              // while the import's createDocument was in flight; if
+              // we wait the full debounce window they may refresh
+              // first and land on the raw imported body again.
+              immediate: true,
             });
           }
           // Push the new doc's URL into the browser bar. switchTab
@@ -6675,6 +6681,27 @@ export default function MdEditor() {
       cmSetDocRef.current?.(newMd);
       tiptapRef.current?.setMarkdown(newMd);
       setTabs(prev => prev.map(t => t.id === activeTabIdRef.current ? { ...t, markdown: newMd } : t));
+
+      // Force an immediate save (bypass the 2.5s debounce). AI edits
+      // are large, intentional changes — if the user refreshes the
+      // page within the debounce window the result vanishes because
+      // setMarkdown's triggerAutoSave was still waiting to fire.
+      // Reported case: user did Auto-Format after import, refreshed
+      // quickly, server still had the raw imported body. immediate:true
+      // schedules the PATCH on the next tick instead.
+      const activeTab = tabs.find(t => t.id === activeTabIdRef.current);
+      if (activeTab?.cloudId) {
+        autoSave.scheduleSave({
+          cloudId: activeTab.cloudId,
+          markdown: newMd,
+          title: extractTitleFromMd(newMd) || activeTab.title,
+          userId: user?.id,
+          userEmail: user?.email,
+          anonymousId,
+          editToken: activeTab.editToken,
+          immediate: true,
+        });
+      }
 
       // Highlight changes in preview after render
       highlightDiff(oldMd, newMd);
