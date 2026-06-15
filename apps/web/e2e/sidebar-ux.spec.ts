@@ -61,4 +61,20 @@ test.describe("Sidebar UX", () => {
     await page.getByText("Import…", { exact: true }).click();
     await expect(page.getByText("Import to your hub", { exact: false })).toBeVisible({ timeout: 2000 });
   });
+
+  test("MDs section collapsed state persists across reload", async ({ page }) => {
+    await seed(page);
+    const mdsHeader = page.locator('[data-section-id="mds"]');
+    await expect(mdsHeader).toBeVisible();
+
+    // Collapse the MDs section.
+    await mdsHeader.click();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem("mw-show-mydocs")), { timeout: 3000 }).toBe("false");
+
+    // Reload — it must stay collapsed.
+    await page.reload();
+    await page.waitForSelector(".ProseMirror[contenteditable='true']", { timeout: 20000 });
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => localStorage.getItem("mw-show-mydocs"))).toBe("false");
+  });
 });

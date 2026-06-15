@@ -429,8 +429,25 @@ export default function MdEditor() {
     try { const s = localStorage.getItem("mw-folders"); if (s) { const p = JSON.parse(s); if (Array.isArray(p) && p.length > 0) return p; } } catch { /* */ }
     return INITIAL_FOLDERS;
   });
-  const [showMyDocs, setShowMyDocs] = useState(true);
-  const [showMyBundles, setShowMyBundles] = useState(true);
+  // MDs + MD Bundles section fold state. Persisted like every other
+  // sidebar section (Recent / Starred / Examples) — default open, and a
+  // useEffect writes the choice back so a collapsed section stays
+  // collapsed across reloads. These two were previously plain
+  // useState(true) with no persistence, so they always sprang back open.
+  const [showMyDocs, setShowMyDocs] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("mw-show-mydocs") !== "false";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("mw-show-mydocs", String(showMyDocs));
+  }, [showMyDocs]);
+  const [showMyBundles, setShowMyBundles] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("mw-show-mybundles") !== "false";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("mw-show-mybundles", String(showMyBundles));
+  }, [showMyBundles]);
   const [bundleView, setBundleView] = useState<"overview" | "canvas" | "list">("overview");
   const [_showBundleChat, setShowBundleChat] = useState(false);
   // Conversational-query → canvas filter: BundleChat's "Show on
@@ -1817,7 +1834,13 @@ export default function MdEditor() {
   } | null>(null);
   const [conceptsLoading, setConceptsLoading] = useState(false);
   const [openedConceptId, setOpenedConceptId] = useState<string | null>(null);
-  const [showConcepts, setShowConcepts] = useState(false);
+  const [showConcepts, setShowConcepts] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("mw-show-concepts") === "true";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("mw-show-concepts", String(showConcepts));
+  }, [showConcepts]);
   // Single-doc concepts (docCount === 1) are noisy — they're not the "knowledge
   // compound" surface the section is selling. Hidden under a fold by default;
   // cross-linked concepts surface first.
