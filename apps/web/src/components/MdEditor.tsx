@@ -9735,7 +9735,10 @@ ${clone.innerHTML}
                       )}
                       {/* Section-level Sort — independent from MDs, so
                           bundles can be sorted by date while docs are
-                          A-Z (or vice versa). */}
+                          A-Z (or vice versa). Only shown when the section
+                          is open (matches Shared with me) — a sort/new
+                          action on a collapsed section is just clutter. */}
+                      {showMyBundles && (
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <Tooltip text={`Sort bundles: ${SECTION_SORT_OPTIONS.find((o) => o.value === bundlesSortMode)?.label}`}>
                           <button
@@ -9764,9 +9767,10 @@ ${clone.innerHTML}
                           </div>
                         </>)}
                       </div>
+                      )}
                       {/* Section-level New folder — creates a folder
-                          scoped to bundles. Owner-only. */}
-                      {user?.id && (
+                          scoped to bundles. Owner-only. Open-section only. */}
+                      {showMyBundles && user?.id && (
                         <Tooltip text="New folder">
                           <button
                             onClick={(e) => {
@@ -9785,9 +9789,8 @@ ${clone.innerHTML}
                         </Tooltip>
                       )}
                       {/* Section-level + — creates a bundle without bouncing
-                          through the Library + menu. Owner-only; only
-                          rendered for signed-in users. */}
-                      {user?.id && (
+                          through the Library + menu. Owner-only; open-section only. */}
+                      {showMyBundles && user?.id && (
                         <Tooltip text="New bundle">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowMyBundles(true); setBundleCreatorDocs([]); setShowBundleCreator(true); }}
@@ -10146,7 +10149,9 @@ ${clone.innerHTML}
                           </Tooltip>
                         )}
                         {/* Section-level Sort for MDs — independent
-                            from the bundles sort above. */}
+                            from the bundles sort above. Open-section only
+                            (matches Shared with me); hidden when collapsed. */}
+                        {showMyDocs && (
                         <div className="relative" onClick={(e) => e.stopPropagation()}>
                           <Tooltip text={`Sort docs: ${SECTION_SORT_OPTIONS.find((o) => o.value === mdsSortMode)?.label}`}>
                             <button
@@ -10175,8 +10180,10 @@ ${clone.innerHTML}
                             </div>
                           </>)}
                         </div>
+                        )}
                         {/* Section-level New folder — creates a folder
-                            scoped to MDs (section="my"). Owner-only. */}
+                            scoped to MDs (section="my"). Open-section only. */}
+                        {showMyDocs && (
                         <Tooltip text="New folder">
                           <button
                             onClick={(e) => {
@@ -10193,10 +10200,10 @@ ${clone.innerHTML}
                             <FolderPlus width={11} height={11} />
                           </button>
                         </Tooltip>
+                        )}
                         {/* Section-level + on MDs — creates a new doc
-                            inline. Same affordance as Library + → New
-                            document, just one click closer to where the
-                            user is looking. */}
+                            inline. Open-section only. */}
+                        {showMyDocs && (
                         <Tooltip text="New document">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowMyDocs(true); addTab(); }}
@@ -10206,6 +10213,7 @@ ${clone.innerHTML}
                             <Plus width={12} height={12} />
                           </button>
                         </Tooltip>
+                        )}
                         <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
                           {docFilter === "all" ? myTabCount : `${myTabs.length} / ${myTabCount}`}
                         </span>

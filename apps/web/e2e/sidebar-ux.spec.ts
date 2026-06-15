@@ -62,6 +62,22 @@ test.describe("Sidebar UX", () => {
     await expect(page.getByText("Import to your hub", { exact: false })).toBeVisible({ timeout: 2000 });
   });
 
+  test("MDs header action icons (sort/folder/new) show only when open", async ({ page }) => {
+    await seed(page);
+    const mds = page.locator('[data-section-id="mds"]');
+    await expect(mds).toBeVisible();
+    // Open by default → sort icon present.
+    await expect(mds.locator('[data-action="sort"]')).toHaveCount(1);
+    // Collapse → the sort/folder/new icons disappear (like Shared with me).
+    await mds.click();
+    await expect(mds.locator('[data-action="sort"]')).toHaveCount(0, { timeout: 3000 });
+    await expect(mds.locator('[data-action="folder"]')).toHaveCount(0);
+    await expect(mds.locator('[data-action="create"]')).toHaveCount(0);
+    // Re-open → back.
+    await mds.click();
+    await expect(mds.locator('[data-action="sort"]')).toHaveCount(1, { timeout: 3000 });
+  });
+
   test("MDs section collapsed state persists across reload", async ({ page }) => {
     await seed(page);
     const mdsHeader = page.locator('[data-section-id="mds"]');
