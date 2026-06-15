@@ -658,7 +658,7 @@ export default function MdEditor() {
     };
   }, []);
   // Cloud docs section removed — all docs auto-save to cloud
-  const [recentDocs, setRecentDocs] = useState<{ id: string; title: string; visitedAt: string; isOwner: boolean; editMode: string }[]>([]);
+  const [recentDocs, setRecentDocs] = useState<{ id: string; title: string; visitedAt: string; isOwner: boolean; editMode: string; sharedWithMe?: boolean; ownerEmail?: string }[]>([]);
   const [_serverDocs, setServerDocs] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   // v8 W4 — auto-organize metadata mirror keyed by doc id. Populated
   // from /api/user/documents responses (which JOIN
@@ -2700,6 +2700,7 @@ export default function MdEditor() {
             title: t,
             permission: freshPerm,
             shared: freshPerm !== "mine",
+            sharedWithMe: !!(doc.isEditor || doc.isAllowedViewer),
             editMode: doc.editMode || x.editMode,
             ownerEmail: doc.ownerEmail || x.ownerEmail,
             allowedEmails: Array.isArray(doc.allowedEmails) ? doc.allowedEmails : x.allowedEmails,
@@ -4286,6 +4287,7 @@ export default function MdEditor() {
               markdown: doc.markdown,
               title: doc.title || undefined,
               permission: perm,
+              sharedWithMe: !!(doc.isEditor || doc.isAllowedViewer),
               editToken: token || undefined,
               isDraft: doc.is_draft === false ? false : true,
               isSharedByMe: docIsSharedByMe || false,
@@ -7267,7 +7269,7 @@ ${html}
         : d.isEditor ? "editable"
         : "readonly";
       const newId = `tab-${Date.now()}`;
-      const newTab: Tab = { id: newId, title: d.title || doc.title || "Untitled", markdown: d.markdown, cloudId: doc.id, permission: perm, shared: perm !== "mine", ownerEmail: d.ownerEmail || undefined };
+      const newTab: Tab = { id: newId, title: d.title || doc.title || "Untitled", markdown: d.markdown, cloudId: doc.id, permission: perm, shared: perm !== "mine", sharedWithMe: !!(d.isEditor || d.isAllowedViewer), ownerEmail: d.ownerEmail || undefined };
       setTabs(prev => {
         const dup = prev.find(t => !t.deleted && t.cloudId === doc.id);
         if (dup) {
@@ -8534,7 +8536,7 @@ ${clone.innerHTML}
                                 : d.isEditor ? "editable"
                                 : "readonly";
                               const newId = `tab-${Date.now()}`;
-                              const newTab: Tab = { id: newId, title: d.title || n.documentTitle || "Untitled", markdown: d.markdown, cloudId: n.documentId, permission: perm, shared: perm !== "mine", ownerEmail: d.ownerEmail || n.fromUserName || undefined };
+                              const newTab: Tab = { id: newId, title: d.title || n.documentTitle || "Untitled", markdown: d.markdown, cloudId: n.documentId, permission: perm, shared: perm !== "mine", sharedWithMe: !!(d.isEditor || d.isAllowedViewer), ownerEmail: d.ownerEmail || n.fromUserName || undefined };
                               // Render immediately, then update tabs
                               setTabs(prev => {
                                 const dup = prev.find(t => t.cloudId === n.documentId);
@@ -10554,10 +10556,20 @@ ${clone.innerHTML}
             {/* ── Section 2: SHARED WITH ME ── */}
             {(() => {
               // Shared tabs: exclude examples (they have their own section)
+              // Ids the server confirmed are genuinely shared WITH me
+              // (my email is on the doc's allowed_emails / allowed_editors).
+              // "Shared with me" is now exactly these — a public doc I only
+              // opened read-only is NOT here; it lives in Recent.
+              const sharedWithMeIds = new Set(recentDocs.filter(d => d.sharedWithMe).map(d => d.id));
               const sharedTabs = tabs.filter(t => {
                 if (t.deleted || t.folderId) return false;
                 if (t.ownerEmail === EXAMPLE_OWNER) return false;
                 if (t.permission !== "readonly" && t.permission !== "editable") return false;
+                // Editor-role (allowed_editors) is always a real share.
+                // Read-only must be confirmed shared — either the tab's own
+                // server-fetched flag, or the server recent feed — otherwise
+                // a public doc opened read-only would masquerade as a share.
+                if (t.permission === "readonly" && !t.sharedWithMe && t.cloudId && !sharedWithMeIds.has(t.cloudId)) return false;
                 if (sidebarSearchDebounced) {
                   const q = sidebarSearchDebounced.toLowerCase();
                   if (!(t.title || "").toLowerCase().includes(q) && !(t.markdown || "").slice(0, 3000).toLowerCase().includes(q)) return false;
@@ -10584,6 +10596,9 @@ ${clone.innerHTML}
               // (e.g., visited under two contexts) which collides React keys.
               const recentSeen = new Set<string>();
               const extraShared = recentDocs.filter(d => {
+                // Only genuinely-shared docs belong here now. Public docs the
+                // user merely visited (sharedWithMe=false) stay in Recent.
+                if (!d.sharedWithMe) return false;
                 if (allCloudIds.has(d.id) || myCloudIds.has(d.id)) return false;
                 if (recentSeen.has(d.id)) return false;
                 recentSeen.add(d.id);

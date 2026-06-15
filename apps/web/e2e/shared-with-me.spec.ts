@@ -91,7 +91,7 @@ async function routeApi(page: Page): Promise<Calls> {
       calls.docGet++;
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
         id: SHARED_ID, markdown: SHARED_BODY, title: SHARED_TITLE, updated_at: "2026-01-01T00:00:00Z",
-        isOwner: false, isEditor: false, editMode: "view", ownerEmail: "owner@memory.wiki",
+        isOwner: false, isEditor: false, isAllowedViewer: true, editMode: "view", ownerEmail: "owner@memory.wiki",
         allowedEmails: [USER_EMAIL], allowedEditors: [],
       }) });
       return;
@@ -114,7 +114,7 @@ async function routeApi(page: Page): Promise<Calls> {
   // row, UNTIL the user leaves the share (visit_history row deleted).
   await page.route("**/api/user/recent**", async (route) => {
     calls.recentGets++;
-    const recent = calls.left ? [] : [{ id: SHARED_ID, title: SHARED_TITLE, visitedAt: "2026-01-01T00:00:00Z", isOwner: false, editMode: "view", ownerEmail: "owner@memory.wiki" }];
+    const recent = calls.left ? [] : [{ id: SHARED_ID, title: SHARED_TITLE, visitedAt: "2026-01-01T00:00:00Z", isOwner: false, sharedWithMe: true, editMode: "view", ownerEmail: "owner@memory.wiki" }];
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ recent }) });
   });
 
@@ -148,6 +148,21 @@ test.describe("Shared with me — not-yet-open rows", () => {
     const row = page.locator(`[data-shared-extra="${SHARED_ID}"]`);
     await expect(row).toBeVisible({ timeout: 10000 });
     await expect(row).toContainText(SHARED_TITLE);
+  });
+
+  test("a public doc only VISITED (not shared) does NOT appear in Shared with me", async ({ page, context }) => {
+    await seedAuthCookie(context);
+    await routeApi(page);
+    // Override recent to return a visited-but-not-shared public doc.
+    await page.route("**/api/user/recent**", (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ recent: [{ id: "public-visited-1", title: "Some Public Doc", visitedAt: "2026-01-01T00:00:00Z", isOwner: false, sharedWithMe: false, editMode: "view", ownerEmail: "stranger@x.com" }] }),
+    }));
+    await boot(page);
+
+    // It must NOT show up under Shared with me.
+    await expect(page.getByText("Shared with me", { exact: true })).toBeVisible();
+    await expect(page.locator('[data-shared-extra="public-visited-1"]')).toHaveCount(0);
   });
 
   test("clicking the row opens the document", async ({ page, context }) => {

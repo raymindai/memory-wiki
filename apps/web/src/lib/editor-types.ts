@@ -35,6 +35,11 @@ export interface Tab {
   shared?: boolean;        // opened from shared URL (not mine)
   isDraft?: boolean;       // auto-saved but not yet published
   permission?: "mine" | "editable" | "readonly";  // for sidebar badge
+  // True when the doc was explicitly shared WITH this user (their email
+  // is on allowed_emails / allowed_editors per the server fetch). Drives
+  // the "Shared with me" section so a public doc opened read-only doesn't
+  // masquerade as a real share. Editor-role docs are always shares.
+  sharedWithMe?: boolean;
   editMode?: string;       // "owner" | "token" | "view" | "public"
   // Cached server share state — populated whenever we fetch the doc
   // and used to open ShareModal instantly with the right defaults
