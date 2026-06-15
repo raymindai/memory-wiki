@@ -8848,7 +8848,7 @@ ${clone.innerHTML}
                 <Tooltip text="New document, bundle, or import">
                   <button
                     onClick={(e) => { e.stopPropagation(); setShowLibraryAddMenu(v => !v); }}
-                    className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
+                    className="mw-shdr-btn w-6 h-6 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
                     data-action="library-add"
                     style={{ color: showLibraryAddMenu ? "var(--text-primary)" : "var(--text-faint)", background: showLibraryAddMenu ? "var(--toggle-bg)" : "transparent" }}
                   >
@@ -9535,7 +9535,7 @@ ${clone.innerHTML}
                                 if (f.collapsed !== next) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: next }) }).catch(() => {});
                               });
                             }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
                             style={{ color: "var(--text-faint)" }}
                           >
                             {anyBundleFolderExpanded ? <ChevronsDownUp width={12} height={12} /> : <ChevronsUpDown width={12} height={12} />}
@@ -9549,7 +9549,7 @@ ${clone.innerHTML}
                         <Tooltip text={`Sort bundles: ${SECTION_SORT_OPTIONS.find((o) => o.value === bundlesSortMode)?.label}`}>
                           <button
                             onClick={() => setOpenSortMenu((m) => m === "bundles" ? null : "bundles")}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <ArrowUpDown width={11} height={11} />
@@ -9586,7 +9586,7 @@ ${clone.innerHTML}
                               fetch("/api/user/folders", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name: "New Folder", section: "bundles" }) }).catch(() => {});
                               setInlineInput({ label: "Folder name", defaultValue: "New Folder", onSubmit: (name) => { setFolders(prev => prev.map(f => f.id === id ? { ...f, name } : f)); fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name }) }).catch(() => {}); setInlineInput(null); }});
                             }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="folder"
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="folder"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <FolderPlus width={11} height={11} />
@@ -9600,7 +9600,7 @@ ${clone.innerHTML}
                         <Tooltip text="New bundle">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowMyBundles(true); setBundleCreatorDocs([]); setShowBundleCreator(true); }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="create"
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="create"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <Plus width={12} height={12} />
@@ -9942,7 +9942,7 @@ ${clone.innerHTML}
                                   if (f.collapsed !== next) fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id: f.id, collapsed: next }) }).catch(() => {});
                                 });
                               }}
-                              className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                              className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
                               style={{ color: "var(--text-faint)" }}
                             >
                               {anyMyFolderExpanded ? <ChevronsDownUp width={12} height={12} /> : <ChevronsUpDown width={12} height={12} />}
@@ -9955,7 +9955,7 @@ ${clone.innerHTML}
                           <Tooltip text={`Sort docs: ${SECTION_SORT_OPTIONS.find((o) => o.value === mdsSortMode)?.label}`}>
                             <button
                               onClick={() => setOpenSortMenu((m) => m === "mds" ? null : "mds")}
-                              className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
+                              className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
                               style={{ color: "var(--text-faint)" }}
                             >
                               <ArrowUpDown width={11} height={11} />
@@ -9991,7 +9991,7 @@ ${clone.innerHTML}
                               fetch("/api/user/folders", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name: "New Folder", section: "my" }) }).catch(() => {});
                               setInlineInput({ label: "Folder name", defaultValue: "New Folder", onSubmit: (name) => { setFolders(prev => prev.map(f => f.id === id ? { ...f, name } : f)); fetch("/api/user/folders", { method: "PATCH", headers: { "Content-Type": "application/json", ...authHeaders }, body: JSON.stringify({ id, name }) }).catch(() => {}); setInlineInput(null); }});
                             }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="folder"
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="folder"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <FolderPlus width={11} height={11} />
@@ -10004,7 +10004,7 @@ ${clone.innerHTML}
                         <Tooltip text="New document">
                           <button
                             onClick={(e) => { e.stopPropagation(); setShowMyDocs(true); addTab(); }}
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="create"
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="create"
                             style={{ color: "var(--text-faint)" }}
                           >
                             <Plus width={12} height={12} />

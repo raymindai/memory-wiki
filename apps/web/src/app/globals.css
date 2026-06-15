@@ -819,27 +819,13 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1;
 }
 
-/* ─── Sidebar inline-action hover micro colors ─── The small
-   right-aligned action icons in section headers (sort, new folder,
-   new doc, new bundle, etc.) light up with the section's own
-   semantic micro hue on hover so users know what's clickable AND
-   which section they're acting on. Targets buttons via a
-   `data-action` attribute so the chevron / label stay neutral. */
-[data-section-id="recent"]   [data-action]:hover { color: var(--micro-info)   !important; }
-[data-section-id="bundles"]  [data-action]:hover { color: var(--micro-lime)   !important; }
-[data-section-id="mds"]      [data-action]:hover { color: var(--micro-orange) !important; }
-[data-section-id="concepts"] [data-action]:hover { color: var(--micro-ai)     !important; }
-[data-section-id="shared"]   [data-action]:hover { color: var(--micro-pink)   !important; }
-[data-section-id="lint"]     [data-action]:hover { color: var(--micro-warn)   !important; }
-[data-section-id="guides"]   [data-action]:hover { color: var(--micro-ai)     !important; }
-[data-section-id="trash"]    [data-action]:hover { color: var(--micro-red)    !important; }
-/* Library header inline actions — each gets its own semantic hue so
-   the row reads as "four distinct tools" rather than a uniform gray
-   strip. Order in the markup: organize, import, refresh, help. */
-[data-library-header] [data-action="organize"]:hover { color: var(--micro-info) !important; }
-[data-library-header] [data-action="import"]:hover   { color: var(--micro-lime) !important; }
-[data-library-header] [data-action="refresh"]:hover  { color: var(--micro-ai)   !important; }
-[data-library-header] [data-action="help"]:hover     { color: var(--micro-warn) !important; }
+/* ─── Sidebar inline-action hover ─── The small right-aligned action
+   icons in section + library headers (sort, new folder, new doc, new
+   bundle, organize, import, refresh, help) sit at text-faint and go
+   full ink on hover. No per-section hue — uniform white reads as one
+   quiet toolbar instead of a rainbow strip. */
+[data-section-id] [data-action]:hover,
+[data-library-header] [data-action]:hover { color: var(--text-primary) !important; }
 
 /* ─── Max font-weight cap ─── Design rule: nothing thicker than 500
    anywhere in the UI. Cal Sans 600 exists in the bundle but is
@@ -2168,6 +2154,17 @@ textarea::selection {
 .mw-fold-hidden {
   display: none !important;
 }
+/* Sidebar section-header action buttons (sort / new folder / new doc /
+   new bundle / collapse-all). They sit at text-faint at rest; on hover
+   the glyph goes full ink. The inline color:var(--text-faint) is the
+   rest state, so the hover rule needs !important to win over it. */
+.mw-shdr-btn {
+  transition: color 0.12s ease, background-color 0.12s ease;
+}
+.mw-shdr-btn:hover {
+  color: var(--text-primary) !important;
+}
+
 /* Chevron toggle injected as a widget at the start of every heading in
    the LIVE editor. Sits in the left gutter, fades in on hover of the
    heading row so it doesn't clutter the writing surface. Rotated -90deg
