@@ -2621,6 +2621,9 @@ export default function MdEditor() {
           // tab was activated before the body arrived) and the next
           // external edit would false-flag dirty.
           lastSyncedMdRef.current = md;
+          // Seed the body-hash conflict baseline so the first edit's
+          // expectedHash matches the server body (not hash("")).
+          autoSave.setLastServerBody(md);
           // Reconcile permission from the server. Sidebar entries
           // populated from the recent-visit / notification feeds
           // didn't always have an up-to-date role (the cached tab
@@ -4193,6 +4196,8 @@ export default function MdEditor() {
             // toast for a user editing their own doc after a deep-
             // link entry.
             if (doc.updated_at) autoSave.setLastServerUpdatedAt(doc.updated_at as string);
+            // Seed the body-hash conflict baseline (deep-link bootstrap).
+            autoSave.setLastServerBody(doc.markdown as string);
 
             // "Shared by me" = the doc is published (visible to anyone
             // with the URL), regardless of edit_mode. Matching the
@@ -4819,12 +4824,19 @@ export default function MdEditor() {
     if (lastSyncedCloudIdRef.current !== t.cloudId) {
       lastSyncedMdRef.current = t.markdown !== "" ? t.markdown : null;
       lastSyncedCloudIdRef.current = t.cloudId;
+      // Seed the body-hash conflict baseline for tabs hydrated straight
+      // from localStorage (no server fetch ran, so loadTab's seeding
+      // never fired). Without this, lastSavedMd stays "" and the first
+      // edit sends expectedHash=hash("") which mismatches the real
+      // server body → a false conflict on the very first keystroke.
+      if (t.markdown !== "") autoSave.setLastServerBody(t.markdown);
       return;
     }
     if (lastSyncedMdRef.current === null && t.markdown !== "") {
       lastSyncedMdRef.current = t.markdown;
+      autoSave.setLastServerBody(t.markdown);
     }
-  }, [activeTabId, tabs]);
+  }, [activeTabId, tabs, autoSave]);
 
   // Subscribe to document updates when a cloud document is active in the editor.
   // If local is clean → auto-pull; if dirty → show toast with Pull/Ignore.
@@ -4954,6 +4966,7 @@ export default function MdEditor() {
               tiptapRef.current?.setMarkdown(serverMd);
               if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
               lastSyncedMdRef.current = serverMd;
+              autoSave.setLastServerBody(serverMd);
               setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: serverTitle || t.title } : t));
               markTabFresh(cloudId);
               highlightDiff(oldMd, serverMd);
@@ -5048,6 +5061,7 @@ export default function MdEditor() {
         tiptapRef.current?.setMarkdown(serverMd);
         if (serverUpdatedAt) autoSave.setLastServerUpdatedAt(serverUpdatedAt);
         lastSyncedMdRef.current = serverMd;
+        autoSave.setLastServerBody(serverMd);
         setTabs(prev => prev.map(t => t.cloudId === cloudId ? { ...t, markdown: serverMd, title: (doc.title as string) || t.title } : t));
         markTabFresh(cloudId);
         highlightDiff(oldMd, serverMd);
@@ -15943,6 +15957,9 @@ ${clone.innerHTML}
                     autoSave.setLastServerUpdatedAt(autoSave.conflict.serverUpdatedAt);
                     // User accepted server body — now the in-sync baseline.
                     lastSyncedMdRef.current = autoSave.conflict.serverMarkdown;
+                    autoSave.setLastServerBody(autoSave.conflict.serverMarkdown);
+                    cmSetDocRef.current?.(autoSave.conflict.serverMarkdown);
+                    tiptapRef.current?.setMarkdown(autoSave.conflict.serverMarkdown);
                     autoSave.dismissConflict();
                     setShowConflictModal(false);
                     showToast("Server version loaded", "info");

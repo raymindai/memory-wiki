@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { contentHash } from "@/lib/content-hash";
 
 interface AutoSaveOptions {
   debounceMs?: number;
@@ -179,6 +180,10 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
        *  saw a big edit land and may refresh the page within the
        *  2.5s debounce window, losing the save. */
       immediate?: boolean;
+      /** Overwrite the server regardless of divergence — used by the
+       *  conflict modal's "Keep mine". Omits expectedHash /
+       *  expectedUpdatedAt so the server skips the conflict check. */
+      force?: boolean;
     }) => {
       // Never save empty content — protect against content loss
       if (!args.markdown || !args.markdown.trim()) return;
@@ -222,9 +227,20 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
             anonymousId: args.anonymousId,
             editToken: args.editToken,
           };
-          // Send expectedUpdatedAt for conflict detection
-          if (lastServerUpdatedAtRef.current) {
-            patchBody.expectedUpdatedAt = lastServerUpdatedAtRef.current;
+          // Body-based conflict detection (preferred). expectedHash is
+          // the hash of the body we believe the server currently holds
+          // (= the last body we saved or were seeded with from a load).
+          // The server 409s only if its current body hashes differently
+          // — a real external edit — so timestamp races stop producing
+          // false "Document Conflict" dialogs. We still send
+          // expectedUpdatedAt for older server builds / belt-and-braces.
+          // force = the conflict modal's "Keep mine": omit both expected
+          // fields so the server overwrites without a conflict check.
+          if (!args.force) {
+            patchBody.expectedHash = contentHash(lastSavedMdRef.current || "");
+            if (lastServerUpdatedAtRef.current) {
+              patchBody.expectedUpdatedAt = lastServerUpdatedAtRef.current;
+            }
           }
 
           // Attach Authorization header from current Supabase session so the
@@ -402,7 +418,10 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
       lastServerUpdatedAtRef.current = "";
       // Clear lastSavedMd to bypass dedup (content may match the failed save attempt)
       lastSavedMdRef.current = "";
-      scheduleSave(args);
+      // force:true makes scheduleSave omit expectedHash too, so the
+      // body-based conflict check is skipped and the user's version
+      // overwrites the server.
+      scheduleSave({ ...args, force: true });
     },
     [scheduleSave]
   );
@@ -443,6 +462,22 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
   const getLastSavedMarkdown = useCallback(() => lastSavedMdRef.current, []);
 
   /**
+   * Seed the "last known server body" baseline. The editor calls this
+   * whenever it applies a body straight from the server (initial tab
+   * load, rehydrate, realtime/visibility auto-pull, conflict-resolve
+   * "keep theirs"). Without seeding, lastSavedMdRef is "" until the
+   * first save, so the body-hash conflict check would send hash("")
+   * for a freshly-loaded doc that actually has content on the server
+   * and 409 on the very first edit. Setting it to the loaded body
+   * makes expectedHash match the server's body, so the first edit
+   * saves cleanly. Shares lastSavedMdRef with the dedup logic — both
+   * mean "the body we believe the server currently holds."
+   */
+  const setLastServerBody = useCallback((md: string) => {
+    lastSavedMdRef.current = md;
+  }, []);
+
+  /**
    * Synchronous "did we save recently?" check. The realtime channel
    * uses this to ignore postgres_changes UPDATE payloads triggered by
    * our own PATCH — see the comment on lastSaveAttemptAtRef for why
@@ -473,6 +508,7 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
     setLastServerUpdatedAt,
     getLastServerUpdatedAt,
     getLastSavedMarkdown,
+    setLastServerBody,
     isRecentSave,
     clearError,
     cancel,

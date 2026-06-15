@@ -8,6 +8,7 @@ import { verifyAuthToken } from "@/lib/verify-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { extractTitleFromMd, spliceH1 } from "@/lib/extract-title";
 import { evaluateAntiTemplateGuard } from "@/lib/anti-template-guard";
+import { contentHash } from "@/lib/content-hash";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -274,6 +275,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     folderId?: string | null;
     sortOrder?: number;
     expectedUpdatedAt?: string;
+    expectedHash?: string;
     intent?: string | null;
     expiresInHours?: number | null;
   };
@@ -578,7 +580,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
   // ─── Action: auto-save (no version history) ───
   if (body.action === "auto-save") {
-    const { markdown, title, userId, anonymousId, editToken, expectedUpdatedAt } = body;
+    const { markdown, title, userId, anonymousId, editToken, expectedUpdatedAt, expectedHash } = body;
 
     const { data: doc } = await supabase
       .from("documents")
@@ -616,8 +618,30 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Only the owner can edit this document" }, { status: 403 });
     }
 
-    // Conflict detection: if expectedUpdatedAt is provided, compare with actual updated_at
-    if (expectedUpdatedAt && doc.updated_at) {
+    // Conflict detection.
+    //
+    // Preferred: BODY-based. The client sends `expectedHash` — a hash
+    // of the body it last knew was on the server. We conflict only
+    // when the server's CURRENT body hashes to something different,
+    // i.e. a real external content change. Timestamp races (out-of-
+    // order save responses, the realtime echo of the user's own save,
+    // side-channel writers that bump updated_at without touching
+    // markdown) no longer produce a false "Document Conflict" because
+    // they don't change the body. See lib/content-hash.ts.
+    //
+    // Fallback: when the client didn't send expectedHash (old client,
+    // or the sendBeacon path), keep the legacy timestamp check.
+    if (typeof expectedHash === "string" && expectedHash.length > 0) {
+      const serverHash = contentHash(doc.markdown || "");
+      if (serverHash !== expectedHash) {
+        return NextResponse.json({
+          error: "Conflict",
+          conflict: true,
+          serverMarkdown: doc.markdown || "",
+          serverUpdatedAt: doc.updated_at,
+        }, { status: 409 });
+      }
+    } else if (expectedUpdatedAt && doc.updated_at) {
       const expected = new Date(expectedUpdatedAt).getTime();
       const actual = new Date(doc.updated_at).getTime();
       if (actual > expected) {
