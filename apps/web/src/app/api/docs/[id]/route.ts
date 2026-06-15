@@ -428,24 +428,37 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     // (a signed-in user clicking 'Remove from list') always sends a
     // Bearer token, so verified.email is populated on the legit path.
     const callerEmail = (verified?.email || "").trim().toLowerCase();
-    const callerUserId = verified?.userId || null;
-    if (!callerEmail) {
-      return NextResponse.json({ error: "Sign in to leave a shared document" }, { status: 401 });
-    }
+    // visit_history deletion may fall back to the x-user-id header: a user
+    // can only ever remove their OWN "visited" marker, so the anti-grief
+    // restriction (JWT-only) that guards allowed_emails edits below is not
+    // needed here. Without this fallback, a stale/expired bearer made
+    // leave-share 401 and delete NOTHING — the client pruned the row
+    // locally but it came straight back on the next /api/user/recent
+    // refresh. That's the "I removed it but it reappears" bug.
+    const callerUserId = verified?.userId || req.headers.get("x-user-id") || null;
 
     // ALWAYS drop the visit_history row first. "Shared with me" is fed by
     // /api/user/recent, which reads visit_history — NOT the share lists.
     // If we only edited allowed_emails the doc would keep coming back on
     // the next recent refresh (it's still a doc the user once visited).
-    // This is the "removed it but it keeps reappearing" bug. Delete the
-    // visit row so the doc actually leaves the feed; do it even for
-    // public docs the user was never email-restricted on.
+    // Delete the visit row so the doc actually leaves the feed; do it even
+    // for public docs the user was never email-restricted on, and even
+    // when we couldn't verify an email for the allowed-lists edit below.
     if (callerUserId) {
       await supabase
         .from("visit_history")
         .delete()
         .eq("user_id", callerUserId)
         .eq("document_id", id);
+    }
+
+    // Editing the access lists (allowed_emails / allowed_editors) DOES
+    // require a JWT-verified email — that prevents someone from kicking
+    // another person off a share by spoofing a header. If we don't have a
+    // verified email we've still cleared the visit row above, so the row
+    // leaves the user's feed regardless.
+    if (!callerEmail) {
+      return NextResponse.json({ ok: true, removed: false });
     }
 
     const { data: doc } = await supabase

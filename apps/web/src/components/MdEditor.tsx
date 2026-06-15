@@ -7295,15 +7295,30 @@ ${html}
   // that feed the allExtra rows. Used by both the open-tab rows and the
   // not-yet-open allExtra rows.
   const removeSharedFromList = useCallback(async (docId: string) => {
-    if (user?.email) {
-      try {
-        await fetch(`/api/docs/${docId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", ...authHeaders },
-          body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
-        });
-      } catch { /* best-effort, still dismiss locally */ }
-    }
+    // Pull a FRESH bearer from the session — the React-state accessToken
+    // baked into authHeaders can be stale if the session refreshed since
+    // mount, and the server's leave-share authenticates from the verified
+    // JWT. A stale token used to 401 → nothing deleted server-side → the
+    // row reappeared on the next refresh.
+    let bearer: string | null = null;
+    try {
+      const supabase = getSupabaseBrowserClient();
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        bearer = data?.session?.access_token ?? null;
+      }
+    } catch { /* ignore — fall back to authHeaders' token */ }
+    try {
+      await fetch(`/api/docs/${docId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+          ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
+        },
+        body: JSON.stringify({ action: "leave-share", userEmail: user?.email }),
+      });
+    } catch { /* best-effort, still dismiss locally */ }
     // Prune local feeds so the row can't re-render from cached state.
     setRecentDocs(prev => prev.filter(d => d.id !== docId));
     setNotifications(prev => prev.filter(n => n.documentId !== docId));

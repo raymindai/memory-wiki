@@ -69,10 +69,10 @@ async function seedAuthCookie(context: BrowserContext) {
 }
 
 // Tracks server interactions so we can assert leave-share fired.
-type Calls = { docGet: number; leaveShare: Array<Record<string, unknown>>; recentGets: number; left: boolean };
+type Calls = { docGet: number; leaveShare: Array<Record<string, unknown>>; leaveShareAuth: string[]; recentGets: number; left: boolean };
 
 async function routeApi(page: Page): Promise<Calls> {
-  const calls: Calls = { docGet: 0, leaveShare: [], recentGets: 0, left: false };
+  const calls: Calls = { docGet: 0, leaveShare: [], leaveShareAuth: [], recentGets: 0, left: false };
 
   // Register the broad handlers FIRST so the specific ones below
   // (registered later → checked first by Playwright's LIFO order) win.
@@ -99,6 +99,9 @@ async function routeApi(page: Page): Promise<Calls> {
     let body: Record<string, unknown> = {};
     try { body = JSON.parse(req.postData() || "{}"); } catch { /* ignore */ }
     if (body.action === "leave-share") {
+      // Record the Authorization header so we can assert the client sends
+      // a fresh bearer (server authenticates leave-share from the JWT).
+      calls.leaveShareAuth.push(req.headers()["authorization"] || "");
       calls.leaveShare.push(body);
       // Mirror the real server: leave-share deletes the visit_history
       // row, so subsequent /api/user/recent no longer returns this doc.
@@ -210,6 +213,9 @@ test.describe("Shared with me — not-yet-open rows", () => {
     await expect(row).toHaveCount(0, { timeout: 5000 });
     expect(calls.leaveShare.length).toBeGreaterThan(0);
     expect(calls.leaveShare[0]).toMatchObject({ action: "leave-share", userEmail: USER_EMAIL });
+    // Client must send a fresh bearer so the server can authenticate the
+    // leave (a stale/missing token used to 401 and delete nothing).
+    expect(calls.leaveShareAuth[0]).toMatch(/^Bearer .+/);
 
     // And it must STAY gone: the client re-pulls /api/user/recent after
     // leave-share, and the server (now without the visit_history row)
