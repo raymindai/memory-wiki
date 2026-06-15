@@ -13525,6 +13525,8 @@ ${clone.innerHTML}
                       name: c.name,
                       color: c.color,
                     }))}
+                  onAiAction={(action) => handleAIAction(action)}
+                  onOpenAssistant={() => { setShowAIPanel(true); setShowOutlinePanel(false); setShowImagePanel(false); }}
                 />
                 {/* Related docs — under the body so the user
                     discovers it after they finish reading. Owner-

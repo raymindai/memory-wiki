@@ -810,6 +810,13 @@ export interface TiptapLiveEditorProps {
    *  by the parent whenever useCursorPresence's remoteCursors list
    *  changes. */
   remoteCursors?: TiptapRemoteCursor[];
+  /** Run a document-level AI action (polish / summary / tldr). Wired
+   *  to MdEditor's handleAIAction so the slash menu can surface AI
+   *  commands. Optional — when absent the slash menu shows blocks
+   *  only. */
+  onAiAction?: (action: string) => void;
+  /** Open the AI assistant panel (slash "Ask AI"). */
+  onOpenAssistant?: () => void;
 }
 
 export interface TiptapLiveEditorHandle {
@@ -1268,7 +1275,7 @@ const SLASH_COMMANDS: SlashCmd[] = [
   { id: "mermaid", label: "Mermaid diagram", hint: "Flowchart / graph", keywords: "mermaid diagram flowchart graph", icon: <Workflow width={15} height={15} />, run: (e) => e.chain().focus().insertContent("```mermaid\ngraph TD\n  A[Start] --> B[End]\n```").run() },
 ];
 
-function SlashMenu({ editor }: { editor: Editor }) {
+function SlashMenu({ editor, onAiAction, onOpenAssistant }: { editor: Editor; onAiAction?: (action: string) => void; onOpenAssistant?: () => void }) {
   const [state, setState] = useState<{ query: string; from: number; to: number; top: number; left: number } | null>(null);
   const [sel, setSel] = useState(0);
   const stateRef = useRef(state);
@@ -1276,8 +1283,27 @@ function SlashMenu({ editor }: { editor: Editor }) {
   const selRef = useRef(sel);
   selRef.current = sel;
 
+  // AI commands appended after the block commands, only when the parent
+  // wired the handlers. Labelled "AI:" + sparkle so they read clearly
+  // as AI actions, not plain block inserts. These run document-level
+  // transforms via MdEditor.handleAIAction (which carries the doc-wipe
+  // guards), so they don't insert at the caret — the "/query" text is
+  // removed and the action runs on the whole doc.
+  const aiCommands: SlashCmd[] = [];
+  if (onAiAction) {
+    aiCommands.push(
+      { id: "ai-polish", label: "AI: Polish writing", hint: "Tighten + fix the whole doc", keywords: "ai polish improve grammar rewrite", icon: <Sparkles width={15} height={15} />, run: () => onAiAction("polish") },
+      { id: "ai-summary", label: "AI: Summary", hint: "Add a summary at the top", keywords: "ai summary summarize", icon: <Sparkles width={15} height={15} />, run: () => onAiAction("summary") },
+      { id: "ai-tldr", label: "AI: TL;DR", hint: "Add a TL;DR section", keywords: "ai tldr tl;dr brief", icon: <Sparkles width={15} height={15} />, run: () => onAiAction("tldr") },
+    );
+  }
+  if (onOpenAssistant) {
+    aiCommands.push({ id: "ai-ask", label: "AI: Ask the assistant", hint: "Open the AI chat panel", keywords: "ai ask assistant chat", icon: <Sparkles width={15} height={15} />, run: () => onOpenAssistant() });
+  }
+  const allCommands = [...SLASH_COMMANDS, ...aiCommands];
+
   const filtered = state
-    ? SLASH_COMMANDS.filter((c) => {
+    ? allCommands.filter((c) => {
         const q = state.query.toLowerCase();
         return !q || c.label.toLowerCase().includes(q) || c.keywords.includes(q);
       })
@@ -1474,7 +1500,7 @@ const TiptapLiveEditor = forwardRef<TiptapLiveEditorHandle, TiptapLiveEditorProp
 
 // ─── Inner Component (client-only, safe to use useEditor) ───
 const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEditorProps>(
-  function TiptapLiveEditorInner({ markdown, onChange, canEdit, narrowView, onPasteImage, onDoubleClickCode, onDoubleClickMath, onDoubleClickMermaid, onSelectionUpdate, remoteCursors }, ref) {
+  function TiptapLiveEditorInner({ markdown, onChange, canEdit, narrowView, onPasteImage, onDoubleClickCode, onDoubleClickMath, onDoubleClickMermaid, onSelectionUpdate, remoteCursors, onAiAction, onOpenAssistant }, ref) {
     const frontmatterRef = useRef("");
     const isSettingContent = useRef(false);
     const onChangeRef = useRef(onChange);
@@ -1951,7 +1977,7 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
       <div className="flex-1 overflow-auto relative" style={{ background: "var(--canvas)" }}>
         {editor && canEdit && <SelectionToolbar editor={editor} />}
         {editor && canEdit && <TableMenu editor={editor} />}
-        {editor && canEdit && <SlashMenu editor={editor} />}
+        {editor && canEdit && <SlashMenu editor={editor} onAiAction={onAiAction} onOpenAssistant={onOpenAssistant} />}
         <div ref={containerRef} />
       </div>
     );

@@ -61,6 +61,29 @@ test.describe("Slash command menu", () => {
     await expect(editor).not.toContainText("/quote");
   });
 
+  test("shows AI commands clearly labelled, and runs one", async ({ page }) => {
+    let aiCalled = "";
+    await seed(page);
+    // Intercept the AI endpoint so picking an AI slash item is observable
+    // without a real model call.
+    await page.route("**/api/ai", async (route) => {
+      try { aiCalled = JSON.parse(route.request().postData() || "{}").action || ""; } catch { /* ignore */ }
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ result: "TL;DR\n\n- point one" }) });
+    });
+    const editor = page.locator(".ProseMirror[contenteditable='true']").first();
+    await editor.click();
+    await page.keyboard.press("ControlOrMeta+End");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("/ai");
+    // AI items visible, clearly prefixed "AI:"
+    await expect(page.getByText("AI: Polish writing", { exact: true })).toBeVisible({ timeout: 2000 });
+    await expect(page.getByText("AI: TL;DR", { exact: true })).toBeVisible();
+    // Pick TL;DR
+    await page.getByText("AI: TL;DR", { exact: true }).click();
+    await page.waitForTimeout(800);
+    expect(aiCalled).toBe("tldr");
+  });
+
   test("does NOT open mid-sentence", async ({ page }) => {
     await seed(page);
     const editor = page.locator(".ProseMirror[contenteditable='true']").first();
