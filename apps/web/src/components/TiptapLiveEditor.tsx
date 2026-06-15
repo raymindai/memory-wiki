@@ -14,7 +14,7 @@ import { TaskList } from "@tiptap/extension-task-list";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { Markdown as TiptapMarkdown } from "tiptap-markdown";
 import markdownItFootnote from "markdown-it-footnote";
@@ -780,6 +780,107 @@ const FoldExtension = Extension.create({
   addProseMirrorPlugins() { return [createFoldPlugin()]; },
 });
 
+// ─── In-document Find & Replace ───
+// ProseMirror's Live editor had no find/replace (only the Source/CM6 view
+// did, via its native panel). This plugin highlights all matches of a
+// query, tracks an "active" one, and the editor handle exposes
+// next/prev/replace/replaceAll. Matches are per-text-node (a match split
+// across mark boundaries is rare and skipped). getMarkdown is untouched —
+// highlights are view-only decorations.
+const searchKey = new PluginKey("mwSearch");
+
+function mwFindMatches(doc: any, query: string, caseSensitive: boolean) {
+  const matches: { from: number; to: number }[] = [];
+  if (!query) return matches;
+  const q = caseSensitive ? query : query.toLowerCase();
+  const qlen = query.length;
+  doc.descendants((node: any, pos: number) => {
+    if (!node.isText || !node.text) return;
+    const text = caseSensitive ? node.text : node.text.toLowerCase();
+    let i = 0;
+    while ((i = text.indexOf(q, i)) !== -1) {
+      matches.push({ from: pos + i, to: pos + i + qlen });
+      i += qlen;
+    }
+  });
+  return matches;
+}
+
+function mwBuildSearchDeco(doc: any, matches: { from: number; to: number }[], active: number) {
+  const decos = matches.map((m, idx) =>
+    Decoration.inline(m.from, m.to, { class: idx === active ? "mw-search-match mw-search-match-active" : "mw-search-match" }),
+  );
+  return DecorationSet.create(doc, decos);
+}
+
+function createSearchPlugin() {
+  return new Plugin({
+    key: searchKey,
+    state: {
+      init: () => ({ query: "", caseSensitive: false, matches: [] as { from: number; to: number }[], active: 0, deco: DecorationSet.empty }),
+      apply(tr: any, value: any, _old: any, newState: any) {
+        const meta = tr.getMeta(searchKey);
+        if (meta && meta.type === "set") {
+          const query = meta.query ?? value.query;
+          const caseSensitive = meta.caseSensitive ?? value.caseSensitive;
+          const matches = mwFindMatches(newState.doc, query, caseSensitive);
+          return { query, caseSensitive, matches, active: 0, deco: mwBuildSearchDeco(newState.doc, matches, 0) };
+        }
+        if (meta && meta.type === "active") {
+          const n = value.matches.length;
+          if (!n) return value;
+          const active = ((meta.active % n) + n) % n;
+          return { ...value, active, deco: mwBuildSearchDeco(newState.doc, value.matches, active) };
+        }
+        if (meta && meta.type === "clear") {
+          return { query: "", caseSensitive: value.caseSensitive, matches: [], active: 0, deco: DecorationSet.empty };
+        }
+        if (tr.docChanged && value.query) {
+          const matches = mwFindMatches(newState.doc, value.query, value.caseSensitive);
+          const active = Math.min(value.active, Math.max(0, matches.length - 1));
+          return { ...value, matches, active, deco: mwBuildSearchDeco(newState.doc, matches, active) };
+        }
+        return value;
+      },
+    },
+    props: {
+      decorations(state: any) { return searchKey.getState(state)?.deco; },
+    },
+  });
+}
+
+const SearchExtension = Extension.create({
+  name: "mwSearch",
+  addProseMirrorPlugins() { return [createSearchPlugin()]; },
+});
+
+function mwSearchState(editor: any) {
+  const s = searchKey.getState(editor.view.state);
+  return { count: s?.matches.length || 0, active: s?.matches.length ? s.active : -1 };
+}
+
+// Put the editor selection on the active match so it scrolls into view and
+// the next replace targets exactly that range.
+function mwSelectActive(editor: any) {
+  const s = searchKey.getState(editor.view.state);
+  if (!s || !s.matches.length) return;
+  const m = s.matches[s.active];
+  try {
+    const tr = editor.view.state.tr
+      .setSelection(TextSelection.create(editor.view.state.doc, m.from, m.to))
+      .scrollIntoView();
+    editor.view.dispatch(tr);
+  } catch { /* range may be stale after a concurrent edit */ }
+}
+
+function mwStep(editor: any, delta: number) {
+  const s = searchKey.getState(editor.view.state);
+  if (!s || !s.matches.length) return mwSearchState(editor);
+  editor.view.dispatch(editor.view.state.tr.setMeta(searchKey, { type: "active", active: s.active + delta }));
+  mwSelectActive(editor);
+  return mwSearchState(editor);
+}
+
 // ─── Frontmatter ───
 function extractFrontmatter(md: string): { frontmatter: string; body: string } {
   if (!md.startsWith("---")) return { frontmatter: "", body: md };
@@ -824,6 +925,14 @@ export interface TiptapLiveEditorHandle {
   getMarkdown: () => string;
   focus: () => void;
   getEditor: () => Editor | null;
+  // In-document find & replace (Live view). Each returns the current
+  // match state so the caller can render "N / total".
+  searchSetQuery: (query: string, opts?: { caseSensitive?: boolean }) => { count: number; active: number };
+  searchNext: () => { count: number; active: number };
+  searchPrev: () => { count: number; active: number };
+  searchReplace: (replacement: string) => { count: number; active: number };
+  searchReplaceAll: (replacement: string) => { replaced: number };
+  searchClear: () => void;
 }
 
 // ─── Selection Toolbar ───
@@ -1538,6 +1647,7 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
           CustomCodeBlock.configure({ lowlight, defaultLanguage: null }),
           MathExtension,
           FoldExtension,
+          SearchExtension,
           Table.configure({
           resizable: false,
           HTMLAttributes: { class: "tiptap-table" },
@@ -1758,6 +1868,42 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
       },
       focus: () => editor?.commands.focus(),
       getEditor: () => editor,
+      // ── Find & Replace ──
+      searchSetQuery: (query: string, opts?: { caseSensitive?: boolean }) => {
+        if (!editor) return { count: 0, active: -1 };
+        editor.view.dispatch(editor.view.state.tr.setMeta(searchKey, { type: "set", query, caseSensitive: !!opts?.caseSensitive }));
+        mwSelectActive(editor);
+        return mwSearchState(editor);
+      },
+      searchNext: () => { if (!editor) return { count: 0, active: -1 }; return mwStep(editor, +1); },
+      searchPrev: () => { if (!editor) return { count: 0, active: -1 }; return mwStep(editor, -1); },
+      searchReplace: (replacement: string) => {
+        if (!editor) return { count: 0, active: -1 };
+        const s = searchKey.getState(editor.view.state);
+        if (s && s.matches.length) {
+          const m = s.matches[s.active];
+          editor.view.dispatch(editor.view.state.tr.insertText(replacement, m.from, m.to));
+          mwSelectActive(editor);
+        }
+        return mwSearchState(editor);
+      },
+      searchReplaceAll: (replacement: string) => {
+        if (!editor) return { replaced: 0 };
+        const s = searchKey.getState(editor.view.state);
+        if (!s || !s.matches.length) return { replaced: 0 };
+        let tr = editor.view.state.tr;
+        for (let i = s.matches.length - 1; i >= 0; i--) {
+          const m = s.matches[i];
+          tr = tr.insertText(replacement, m.from, m.to);
+        }
+        const replaced = s.matches.length;
+        editor.view.dispatch(tr);
+        return { replaced };
+      },
+      searchClear: () => {
+        if (!editor) return;
+        try { editor.view.dispatch(editor.view.state.tr.setMeta(searchKey, { type: "clear" })); } catch { /* destroyed */ }
+      },
     }), [editor, markdown]);
 
     // Editor is mounted directly into containerRef via `element` option

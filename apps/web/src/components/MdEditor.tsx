@@ -2200,6 +2200,25 @@ export default function MdEditor() {
   const [toolbarHintDismissed, setToolbarHintDismissed] = useState(() => typeof window !== "undefined" ? !!localStorage.getItem("mw-toolbar-hint-dismissed") : true);
   // Document view count (owner only)
   const [viewCount, setViewCount] = useState(0);
+  // In-document Find & Replace (Live view; Cmd+F). Source view uses CM's
+  // own native search panel.
+  const [showFindBar, setShowFindBar] = useState(false);
+  const [findQuery, setFindQuery] = useState("");
+  const [replaceQuery, setReplaceQuery] = useState("");
+  const [showReplaceRow, setShowReplaceRow] = useState(false);
+  const [findCaseSensitive, setFindCaseSensitive] = useState(false);
+  const [findState, setFindState] = useState<{ count: number; active: number }>({ count: 0, active: -1 });
+  const findInputRef = useRef<HTMLInputElement>(null);
+  // Push the query into the editor's search plugin (debounced).
+  useEffect(() => {
+    if (!showFindBar) return;
+    const t = setTimeout(() => {
+      const st = tiptapRef.current?.searchSetQuery(findQuery, { caseSensitive: findCaseSensitive });
+      if (st) setFindState(st);
+    }, 120);
+    return () => clearTimeout(t);
+  }, [findQuery, findCaseSensitive, showFindBar]);
+
   // Command palette (Cmd+K)
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [cmdSearch, setCmdSearch] = useState("");
@@ -7662,6 +7681,18 @@ ${clone.innerHTML}
         const target = e.target as HTMLElement;
         if (target.closest("[role='dialog'], [data-modal]")) return;
         cmFocus();
+      }
+      // Find & Replace — Cmd+F. The Source (CodeMirror) view has its own
+      // native search panel, so when CM is focused we let it through.
+      if (mod && e.key === "f" && !e.shiftKey) {
+        if (document.activeElement?.closest(".cm-editor")) return; // CM native search
+        e.preventDefault();
+        setShowFindBar(true);
+        // Prefill from the current text selection, if any.
+        const sel = (typeof window !== "undefined" ? window.getSelection()?.toString() : "") || "";
+        if (sel && sel.length <= 200 && !sel.includes("\n")) setFindQuery(sel);
+        setTimeout(() => { findInputRef.current?.focus(); findInputRef.current?.select(); }, 0);
+        return;
       }
       // Command palette — Cmd+K (when NOT in contentEditable preview)
       const inPreview = document.activeElement?.closest("article.mdcore-rendered");
@@ -15101,6 +15132,81 @@ ${clone.innerHTML}
           position={inlineInput.position}
         />
       )}
+
+      {/* In-document Find & Replace bar (Live view). Floats top-center over
+          the editor; Enter / Shift+Enter step matches, Esc closes. */}
+      {showFindBar && (() => {
+        const closeFind = () => { setShowFindBar(false); tiptapRef.current?.searchClear(); };
+        const stepNext = () => { const s = tiptapRef.current?.searchNext(); if (s) setFindState(s); };
+        const stepPrev = () => { const s = tiptapRef.current?.searchPrev(); if (s) setFindState(s); };
+        const doReplace = () => { const s = tiptapRef.current?.searchReplace(replaceQuery); if (s) setFindState(s); };
+        const doReplaceAll = () => {
+          const r = tiptapRef.current?.searchReplaceAll(replaceQuery);
+          const st = tiptapRef.current?.searchSetQuery(findQuery, { caseSensitive: findCaseSensitive });
+          if (st) setFindState(st);
+          if (r) showToast(`Replaced ${r.replaced} match${r.replaced === 1 ? "" : "es"}`, "success");
+        };
+        return (
+          <div
+            data-find-bar
+            className="fixed z-[10040] top-16 right-6 rounded-lg p-2 flex flex-col gap-1.5"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 10px 32px rgba(0,0,0,0.4)", width: 320 }}
+          >
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setShowReplaceRow(v => !v)}
+                title={showReplaceRow ? "Hide replace" : "Show replace"}
+                className="shrink-0 w-6 h-6 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]"
+                style={{ color: "var(--text-faint)" }}
+              >
+                <ChevronDown width={13} height={13} style={{ transform: showReplaceRow ? "rotate(0deg)" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+              </button>
+              <input
+                ref={findInputRef}
+                value={findQuery}
+                onChange={(e) => setFindQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") { e.preventDefault(); closeFind(); }
+                  else if (e.key === "Enter") { e.preventDefault(); if (e.shiftKey) stepPrev(); else stepNext(); }
+                }}
+                placeholder="Find in document"
+                className="flex-1 min-w-0 px-2 py-1 rounded text-caption outline-none"
+                style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+              />
+              <span className="shrink-0 text-caption tabular-nums px-1" style={{ color: "var(--text-faint)", minWidth: 42, textAlign: "right" }}>
+                {findState.count ? `${findState.active + 1}/${findState.count}` : (findQuery ? "0/0" : "")}
+              </span>
+              <Tooltip text={findCaseSensitive ? "Case-sensitive: on" : "Case-sensitive: off"}>
+                <button
+                  onClick={() => setFindCaseSensitive(v => !v)}
+                  className="shrink-0 w-6 h-6 rounded flex items-center justify-center text-caption font-semibold hover:bg-[var(--toggle-bg)]"
+                  style={{ color: findCaseSensitive ? "var(--text-primary)" : "var(--text-faint)", background: findCaseSensitive ? "var(--toggle-bg)" : "transparent" }}
+                >
+                  Aa
+                </button>
+              </Tooltip>
+              <Tooltip text="Previous (Shift+Enter)"><button onClick={stepPrev} disabled={!findState.count} className="shrink-0 w-6 h-6 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)] disabled:opacity-40" style={{ color: "var(--text-secondary)" }}><ChevronDown width={13} height={13} style={{ transform: "rotate(180deg)" }} /></button></Tooltip>
+              <Tooltip text="Next (Enter)"><button onClick={stepNext} disabled={!findState.count} className="shrink-0 w-6 h-6 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)] disabled:opacity-40" style={{ color: "var(--text-secondary)" }}><ChevronDown width={13} height={13} /></button></Tooltip>
+              <Tooltip text="Close (Esc)"><button onClick={closeFind} className="shrink-0 w-6 h-6 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" style={{ color: "var(--text-faint)" }}><X width={13} height={13} /></button></Tooltip>
+            </div>
+            {showReplaceRow && (
+              <div className="flex items-center gap-1.5">
+                <span className="shrink-0 w-6" />
+                <input
+                  value={replaceQuery}
+                  onChange={(e) => setReplaceQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); closeFind(); } else if (e.key === "Enter") { e.preventDefault(); doReplace(); } }}
+                  placeholder="Replace with"
+                  className="flex-1 min-w-0 px-2 py-1 rounded text-caption outline-none"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                />
+                <button onClick={doReplace} disabled={!findState.count} className="shrink-0 px-2 py-1 rounded text-caption font-medium hover:bg-[var(--toggle-bg)] disabled:opacity-40" style={{ color: "var(--text-secondary)", border: "1px solid var(--border)" }}>Replace</button>
+                <button onClick={doReplaceAll} disabled={!findState.count} className="shrink-0 px-2 py-1 rounded text-caption font-medium hover:bg-[var(--toggle-bg)] disabled:opacity-40" style={{ color: "var(--text-secondary)", border: "1px solid var(--border)" }}>All</button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Styled confirm dialog (replaces window.confirm). Centered popup,
           backdrop click / Escape cancels, Enter confirms. */}
