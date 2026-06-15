@@ -11222,20 +11222,11 @@ ${clone.innerHTML}
                             // only which left the row reappearing on
                             // the next /api/user/recent hydration.
                             if (!isMine) {
-                              if (tab.cloudId && user?.email) {
-                                try {
-                                  await fetch(`/api/docs/${tab.cloudId}`, {
-                                    method: "PATCH",
-                                    headers: { "Content-Type": "application/json", ...authHeaders },
-                                    body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
-                                  });
-                                } catch { /* best effort */ }
-                                fetch("/api/user/shared", { headers: authHeaders })
-                                  .then(r => (r.ok ? r.json() : null))
-                                  .then(d => { if (d?.shared) setRecentDocs(d.shared); })
-                                  .catch(() => {});
-                              }
-                              setTabs(prev => prev.filter(t => t.id !== tab.id));
+                              // Shared doc: leave the share (fresh-bearer
+                              // PATCH + authoritative re-pull) via the
+                              // shared helper so it can't reappear.
+                              if (tab.cloudId) void removeSharedFromList(tab.cloudId);
+                              else setTabs(prev => prev.filter(t => t.id !== tab.id));
                               return;
                             }
                             const ok = await hardDeleteOnServer(tab);

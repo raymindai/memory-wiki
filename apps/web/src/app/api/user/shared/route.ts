@@ -31,11 +31,16 @@ export async function GET(req: NextRequest) {
 
   // allowed_emails / allowed_editors are text[] of lowercased emails.
   // `cs` (contains) does an array-contains match. OR across both lists.
+  // The email is double-quoted in the array literal so `@`/`.` can't
+  // confuse PostgREST's parser. Password-protected docs are excluded —
+  // the recipient can't open them without the password, so listing them
+  // here only produces "couldn't open" dead ends.
   const { data, error } = await supabase
     .from("documents")
     .select("id, title, updated_at, user_id, edit_mode, allowed_editors")
-    .or(`allowed_emails.cs.{${email}},allowed_editors.cs.{${email}}`)
+    .or(`allowed_emails.cs.{"${email}"},allowed_editors.cs.{"${email}"}`)
     .is("deleted_at", null)
+    .is("password_hash", null)
     .neq("is_draft", true)
     .order("updated_at", { ascending: false })
     .limit(100);
@@ -57,16 +62,21 @@ export async function GET(req: NextRequest) {
     } catch { /* ignore */ }
   }
 
-  const shared = rows.map((d) => ({
-    id: d.id,
-    title: d.title,
-    updatedAt: d.updated_at,
-    isOwner: false,
-    sharedWithMe: true,
-    canEdit: (d.allowed_editors || []).some((e: string) => (e || "").toLowerCase() === email),
-    editMode: d.edit_mode,
-    ownerEmail: ownerEmailMap.get(d.user_id) || undefined,
-  }));
+  const shared = rows
+    // Drop the user's OWN docs that happen to live under a different
+    // user_id (old anonymous / prior account) but whose owner email is
+    // this same person — those aren't "shared with me", they're mine.
+    .filter((d) => (ownerEmailMap.get(d.user_id) || "").toLowerCase() !== email)
+    .map((d) => ({
+      id: d.id,
+      title: d.title,
+      updatedAt: d.updated_at,
+      isOwner: false,
+      sharedWithMe: true,
+      canEdit: (d.allowed_editors || []).some((e: string) => (e || "").toLowerCase() === email),
+      editMode: d.edit_mode,
+      ownerEmail: ownerEmailMap.get(d.user_id) || undefined,
+    }));
 
   return NextResponse.json({ shared });
 }
