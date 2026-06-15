@@ -1771,18 +1771,13 @@ export default function MdEditor() {
     const t = setTimeout(() => setSidebarSearchDebounced(q), 200);
     return () => clearTimeout(t);
   }, [sidebarSearch]);
-  // ⌘K / Ctrl+K to focus the sidebar search input from anywhere in the app.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        sidebarSearchInputRef.current?.focus();
-        sidebarSearchInputRef.current?.select();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  // NOTE: ⌘K is the command palette (handled in the main keydown
+  // effect below). It used to ALSO focus the sidebar search here, so
+  // both handlers fired on every ⌘K — the palette opened AND focus
+  // jumped to the sidebar input, a race. The palette already does
+  // global doc search (server FTS at 3+ chars), so the separate
+  // sidebar-focus shortcut was redundant. The sidebar search input
+  // stays click-to-focus; ⌘K now unambiguously opens the palette.
   const [cloudSearchResults, setCloudSearchResults] = useState<Array<{ id: string; title: string; snippet: string; isDraft: boolean; viewCount: number; source: string | null; updatedAt: string }>>([]);
   const [isCloudSearching, setIsCloudSearching] = useState(false);
   const cloudSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -9012,13 +9007,13 @@ ${clone.innerHTML}
               </Tooltip>
             </div>
           </div>
-          {/* Search row — always visible under Library header. ⌘K focuses.
-              Sits on the sidebar's --background; sticky section headers below
-              use --surface so the visual rhythm goes:
-                background (sidebar wall, search row) → surface (section header).
-              Search input box itself stays unfilled (transparent) so it doesn't
-              collide with --surface section headers — only its border defines
-              the control. */}
+          {/* Search row — always visible under Library header. This is a
+              LOCAL filter over the sidebar tree (not global search; ⌘K
+              opens the command palette for that). Sits on the sidebar's
+              --background; sticky section headers below use --surface so
+              the visual rhythm goes: background (sidebar wall, search
+              row) → surface (section header). Search input box itself
+              stays unfilled (transparent). */}
           <div className="px-2 pb-1.5 flex items-center gap-1.5">
             <div className="flex items-center gap-1.5 flex-1 px-2 rounded" style={{ background: "transparent", border: `1px solid ${sidebarSearch ? "var(--text-primary)" : "var(--border-dim)"}` }}>
               <Search width={11} height={11} className="shrink-0" style={{ color: sidebarSearch ? "var(--text-primary)" : "var(--text-faint)" }} />
@@ -9046,13 +9041,7 @@ ${clone.innerHTML}
                     <X width={9} height={9} />
                   </button>
                 </>
-              ) : (
-                <kbd
-                  className="shrink-0 inline-flex items-center justify-center text-caption font-mono px-1 h-4 rounded leading-none"
-                  style={{ color: "var(--text-faint)", background: "var(--background)", border: "1px solid var(--border-dim)", letterSpacing: "0.02em" }}
-                  title="Press to focus search"
-                >⌘K</kbd>
-              )}
+              ) : null}
             </div>
           </div>
           </div>

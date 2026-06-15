@@ -47,6 +47,9 @@ import {
   Trash2,
   Sparkles,
   Loader2,
+  Table2,
+  Sigma,
+  Workflow,
 } from "lucide-react";
 
 const lowlight = createLowlight(common);
@@ -684,6 +687,99 @@ const MathExtension = Extension.create({
   addProseMirrorPlugins() { return [createMathPlugin()]; },
 });
 
+// ─── Heading folding ───
+// VIEW-ONLY collapse of a heading's section. Folding never touches the
+// document model — it only adds a `display:none` node decoration to the
+// blocks between a folded heading and the next heading of equal-or-
+// shallower level, plus a chevron widget on every heading. getMarkdown
+// reads the doc model, so the saved markdown is byte-identical whether
+// folded or not. Folded heading positions are remapped across edits via
+// the transaction mapping so folds survive typing.
+const foldKey = new PluginKey("mwFold");
+
+function createFoldPlugin() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buildFoldDeco = (doc: any, folded: Set<number>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const children: { node: any; pos: number }[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    doc.forEach((node: any, offset: number) => children.push({ node, pos: offset }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const decos: any[] = [];
+    for (let i = 0; i < children.length; i++) {
+      const { node, pos } = children[i];
+      if (node.type.name !== "heading") continue;
+      const level = node.attrs.level as number;
+      const isFolded = folded.has(pos);
+      // Chevron widget at the start of the heading content.
+      const widget = Decoration.widget(
+        pos + 1,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (view: any) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "mw-fold-toggle" + (isFolded ? " is-folded" : "");
+          btn.setAttribute("contenteditable", "false");
+          btn.setAttribute("aria-label", isFolded ? "Expand section" : "Collapse section");
+          btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+          btn.addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); });
+          btn.addEventListener("click", (e) => {
+            e.preventDefault(); e.stopPropagation();
+            view.dispatch(view.state.tr.setMeta(foldKey, { toggle: pos }));
+          });
+          return btn;
+        },
+        { side: -1, ignoreSelection: true, key: `fold-${pos}-${isFolded}` },
+      );
+      decos.push(widget);
+      if (isFolded) {
+        for (let j = i + 1; j < children.length; j++) {
+          const c = children[j];
+          if (c.node.type.name === "heading" && (c.node.attrs.level as number) <= level) break;
+          decos.push(Decoration.node(c.pos, c.pos + c.node.nodeSize, { class: "mw-fold-hidden" }));
+        }
+      }
+    }
+    return DecorationSet.create(doc, decos);
+  };
+
+  return new Plugin({
+    key: foldKey,
+    state: {
+      init: (_: unknown, { doc }: { doc: unknown }) => ({ folded: new Set<number>(), deco: buildFoldDeco(doc, new Set()) }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      apply(tr: any, value: { folded: Set<number>; deco: unknown }, _old: unknown, newState: any) {
+        let folded = value.folded;
+        const meta = tr.getMeta(foldKey);
+        if (meta && typeof meta.toggle === "number") {
+          folded = new Set(folded);
+          if (folded.has(meta.toggle)) folded.delete(meta.toggle);
+          else folded.add(meta.toggle);
+        } else if (tr.docChanged) {
+          const next = new Set<number>();
+          folded.forEach((p) => {
+            const r = tr.mapping.mapResult(p);
+            if (!r.deleted) next.add(r.pos);
+          });
+          folded = next;
+        } else {
+          return value;
+        }
+        return { folded, deco: buildFoldDeco(newState.doc, folded) };
+      },
+    },
+    props: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      decorations(state: any) { return foldKey.getState(state)?.deco; },
+    },
+  });
+}
+
+const FoldExtension = Extension.create({
+  name: "mwFold",
+  addProseMirrorPlugins() { return [createFoldPlugin()]; },
+});
+
 // ─── Frontmatter ───
 function extractFrontmatter(md: string): { frontmatter: string; body: string } {
   if (!md.startsWith("---")) return { frontmatter: "", body: md };
@@ -1140,6 +1236,147 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
   );
 }
 
+// ─── Slash command menu — Notion/Obsidian-style block inserter ───
+// Trigger: type "/" at the START of an empty-ish block. The text from
+// the block start to the cursor must be exactly "/<query>" (no
+// spaces) — that keeps it from firing mid-sentence. Selecting an item
+// deletes the "/<query>" text and runs the corresponding block
+// command. No new dependency: mirrors the hand-rolled SelectionToolbar
+// / TableMenu pattern already in this file, positioned via
+// coordsAtPos as a position:fixed popup (consistent with the toolbar).
+interface SlashCmd {
+  id: string;
+  label: string;
+  hint: string;
+  icon: React.ReactNode;
+  keywords: string;
+  run: (editor: Editor) => void;
+}
+
+const SLASH_COMMANDS: SlashCmd[] = [
+  { id: "h1", label: "Heading 1", hint: "Big section title", keywords: "h1 title heading", icon: <Heading1 width={15} height={15} />, run: (e) => e.chain().focus().toggleHeading({ level: 1 }).run() },
+  { id: "h2", label: "Heading 2", hint: "Section title", keywords: "h2 heading", icon: <Heading2 width={15} height={15} />, run: (e) => e.chain().focus().toggleHeading({ level: 2 }).run() },
+  { id: "h3", label: "Heading 3", hint: "Subsection", keywords: "h3 heading", icon: <Heading3 width={15} height={15} />, run: (e) => e.chain().focus().toggleHeading({ level: 3 }).run() },
+  { id: "ul", label: "Bullet list", hint: "Unordered list", keywords: "bullet list ul unordered", icon: <List width={15} height={15} />, run: (e) => e.chain().focus().toggleBulletList().run() },
+  { id: "ol", label: "Numbered list", hint: "Ordered list", keywords: "numbered ordered list ol", icon: <ListOrdered width={15} height={15} />, run: (e) => e.chain().focus().toggleOrderedList().run() },
+  { id: "task", label: "Task list", hint: "Checkboxes", keywords: "task todo checkbox check", icon: <CheckSquare width={15} height={15} />, run: (e) => e.chain().focus().toggleTaskList().run() },
+  { id: "quote", label: "Quote", hint: "Blockquote", keywords: "quote blockquote", icon: <Quote width={15} height={15} />, run: (e) => e.chain().focus().toggleBlockquote().run() },
+  { id: "code", label: "Code block", hint: "Fenced code", keywords: "code block fence pre", icon: <Code width={15} height={15} />, run: (e) => e.chain().focus().toggleCodeBlock().run() },
+  { id: "table", label: "Table", hint: "3 × 3 grid", keywords: "table grid", icon: <Table2 width={15} height={15} />, run: (e) => e.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
+  { id: "hr", label: "Divider", hint: "Horizontal rule", keywords: "divider rule hr line separator", icon: <Minus width={15} height={15} />, run: (e) => e.chain().focus().setHorizontalRule().run() },
+  { id: "math", label: "Math block", hint: "KaTeX $$ … $$", keywords: "math katex latex equation formula", icon: <Sigma width={15} height={15} />, run: (e) => e.chain().focus().insertContent("$$\n\n$$").run() },
+  { id: "mermaid", label: "Mermaid diagram", hint: "Flowchart / graph", keywords: "mermaid diagram flowchart graph", icon: <Workflow width={15} height={15} />, run: (e) => e.chain().focus().insertContent("```mermaid\ngraph TD\n  A[Start] --> B[End]\n```").run() },
+];
+
+function SlashMenu({ editor }: { editor: Editor }) {
+  const [state, setState] = useState<{ query: string; from: number; to: number; top: number; left: number } | null>(null);
+  const [sel, setSel] = useState(0);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const selRef = useRef(sel);
+  selRef.current = sel;
+
+  const filtered = state
+    ? SLASH_COMMANDS.filter((c) => {
+        const q = state.query.toLowerCase();
+        return !q || c.label.toLowerCase().includes(q) || c.keywords.includes(q);
+      })
+    : [];
+  const filteredRef = useRef(filtered);
+  filteredRef.current = filtered;
+
+  useEffect(() => {
+    if (!editor) return;
+    const update = () => {
+      const { state: pmState } = editor;
+      const { selection } = pmState;
+      if (!selection.empty || !editor.isFocused) { setState(null); return; }
+      const $from = selection.$from;
+      // Only inside a plain paragraph (don't hijack "/" in code blocks).
+      if ($from.parent.type.name !== "paragraph") { setState(null); return; }
+      const textBefore = $from.parent.textBetween(0, $from.parentOffset, "\n", "\n");
+      const m = textBefore.match(/^\/([\w-]*)$/);
+      if (!m) { setState(null); return; }
+      const from = $from.start();      // absolute start of the paragraph content
+      const to = $from.pos;            // cursor
+      try {
+        const coords = editor.view.coordsAtPos(to);
+        setState({ query: m[1], from, to, top: coords.bottom + 6, left: coords.left });
+        setSel(0);
+      } catch { setState(null); }
+    };
+    editor.on("selectionUpdate", update);
+    editor.on("update", update);
+    return () => { editor.off("selectionUpdate", update); editor.off("update", update); };
+  }, [editor]);
+
+  // Keyboard nav while the menu is open. Capture-phase on window so we
+  // intercept before ProseMirror handles the key.
+  useEffect(() => {
+    if (!state) return;
+    const onKey = (e: KeyboardEvent) => {
+      const list = filteredRef.current;
+      if (!list.length && e.key !== "Escape") return;
+      if (e.key === "ArrowDown") { e.preventDefault(); setSel((s) => (s + 1) % list.length); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setSel((s) => (s - 1 + list.length) % list.length); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        const cmd = list[selRef.current];
+        if (cmd) runCmd(cmd);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setState(null);
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const runCmd = (cmd: SlashCmd) => {
+    const st = stateRef.current;
+    if (!st) return;
+    // Remove the "/query" text, then run the block command.
+    editor.chain().focus().deleteRange({ from: st.from, to: st.to }).run();
+    cmd.run(editor);
+    setState(null);
+  };
+
+  if (!state || filtered.length === 0) return null;
+
+  return (
+    <div
+      className="fixed z-[9999] rounded-lg shadow-xl overflow-hidden"
+      style={{
+        top: Math.min(state.top, (typeof window !== "undefined" ? window.innerHeight : 800) - 320),
+        left: state.left,
+        width: 240,
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+      }}
+      onMouseDown={(e) => e.preventDefault()} // keep editor focus
+    >
+      <div className="py-1 max-h-[300px] overflow-y-auto">
+        {filtered.map((cmd, i) => (
+          <button
+            key={cmd.id}
+            onClick={() => runCmd(cmd)}
+            onMouseEnter={() => setSel(i)}
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left transition-colors"
+            style={{ background: i === sel ? "var(--border)" : "transparent" }}
+          >
+            <span className="shrink-0 flex items-center justify-center" style={{ width: 18, color: "var(--text-secondary)" }}>{cmd.icon}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-body" style={{ color: "var(--text-primary)", fontSize: 13 }}>{cmd.label}</span>
+              <span className="block text-caption truncate" style={{ color: "var(--text-faint)" }}>{cmd.hint}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Table Menu — floating toolbar shown when cursor is in a table cell ───
 function TableMenu({ editor }: { editor: Editor }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
@@ -1274,6 +1511,7 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
           }),
           CustomCodeBlock.configure({ lowlight, defaultLanguage: null }),
           MathExtension,
+          FoldExtension,
           Table.configure({
           resizable: false,
           HTMLAttributes: { class: "tiptap-table" },
@@ -1713,6 +1951,7 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
       <div className="flex-1 overflow-auto relative" style={{ background: "var(--canvas)" }}>
         {editor && canEdit && <SelectionToolbar editor={editor} />}
         {editor && canEdit && <TableMenu editor={editor} />}
+        {editor && canEdit && <SlashMenu editor={editor} />}
         <div ref={containerRef} />
       </div>
     );

@@ -2156,6 +2156,52 @@ textarea::selection {
 .tiptap .footnotes ol { padding-left: 1.5rem; }
 .tiptap .footnote-backref { color: var(--accent); text-decoration: none; margin-left: 4px; }
 
+/* ── Heading folding (view-only decorations) ── */
+/* Headings need a positioning context so the absolute chevron widget
+   anchors to the heading's own left gutter (LIVE editor only). */
+.tiptap h1, .tiptap h2, .tiptap h3,
+.tiptap h4, .tiptap h5, .tiptap h6 {
+  position: relative;
+}
+/* Blocks hidden under a folded heading. View-only — never affects the
+   saved markdown. */
+.mw-fold-hidden {
+  display: none !important;
+}
+/* Chevron toggle injected as a widget at the start of every heading in
+   the LIVE editor. Sits in the left gutter, fades in on hover of the
+   heading row so it doesn't clutter the writing surface. Rotated -90deg
+   when the section is folded. */
+.tiptap .mw-fold-toggle {
+  position: absolute;
+  margin-left: -1.4em;
+  margin-top: 0.15em;
+  width: 1.1em;
+  height: 1.1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s, transform 0.12s;
+}
+.tiptap h1:hover .mw-fold-toggle,
+.tiptap h2:hover .mw-fold-toggle,
+.tiptap h3:hover .mw-fold-toggle,
+.tiptap h4:hover .mw-fold-toggle,
+.tiptap h5:hover .mw-fold-toggle,
+.tiptap h6:hover .mw-fold-toggle,
+.tiptap .mw-fold-toggle:hover,
+.tiptap .mw-fold-toggle.is-folded {
+  opacity: 1;
+}
+.tiptap .mw-fold-toggle:hover { color: var(--text-primary); background: var(--toggle-bg); }
+.tiptap .mw-fold-toggle.is-folded { transform: rotate(-90deg); color: var(--text-secondary); }
+
 /* ── Tiptap math (KaTeX decorations) ── */
 .tiptap-math-source {
   display: none;
