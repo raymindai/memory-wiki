@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, memo, useRef, useLayoutEffect, type ReactNode } from "react";
-import { ChevronDown, Folder, FolderOpen, MoreHorizontal, FilePlus2, FolderPlus } from "lucide-react";
+import { ChevronDown, Folder, FolderOpen, MoreHorizontal, FilePlus2, FolderPlus, Star } from "lucide-react";
 import Tooltip from "@/components/Tooltip";
 
 // Synchronous drag state. React's state batching means the first dragover events
@@ -72,6 +72,8 @@ export interface SidebarFolderHandlers {
   onTabClick: (tabId: string, e: React.MouseEvent) => void;
   onTabContextMenu: (tabId: string, x: number, y: number) => void;
   onTabKebab: (tabId: string, anchorRect: DOMRect) => void;
+  /** Toggle a tab's starred (pinned) state from the row's hover star. */
+  onTabStar?: (tabId: string) => void;
   onDropTabIntoFolder: (tabId: string, folderId: string | null) => void;
   onDropFolderIntoFolder: (movedFolderId: string, newParentId: string | null) => void;
   // Reorder a folder before/after a sibling. siblingId is the anchor folder; position
@@ -110,6 +112,9 @@ export interface SidebarFolderTreeProps {
   // Always-visible right-side slot (between title and kebab). Hidden on hover so the
   // kebab can take its place. Used by the bundles tree to show document count.
   renderTabBadge?: (tab: SidebarTabItem) => ReactNode;
+  // Whether a tab is starred (pinned). When provided (with handlers.onTabStar),
+  // each row shows a star toggle on hover, left of the kebab.
+  isTabStarred?: (tab: SidebarTabItem) => boolean;
   rootFolderFilter?: (folder: SidebarFolderItem) => boolean;
   // When false, the tree skips rendering tabs that have no folderId — useful for
   // sections (like "MDs") that render root-level docs in their own block above the tree.
@@ -269,6 +274,8 @@ interface TabRowProps {
   onClick: (e: React.MouseEvent) => void;
   onContextMenu: (e: React.MouseEvent) => void;
   onKebab: (rect: DOMRect) => void;
+  onStar?: () => void;
+  starred?: boolean;
   onReorderTab?: SidebarFolderHandlers["onReorderTab"];
   isRenaming?: boolean;
   onCommitRename?: (value: string) => void;
@@ -498,6 +505,19 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
           </span>
         );
       })()}
+      {p.onStar && (
+        <Tooltip text={p.starred ? "Unstar" : "Star"}>
+          <button
+            onClick={(e) => { e.stopPropagation(); p.onStar!(); }}
+            data-action="star"
+            data-starred={p.starred ? "1" : "0"}
+            className="shrink-0 rounded flex items-center justify-center w-0 group-hover/tab:w-[22px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+            style={{ color: p.starred ? "var(--micro-warn)" : "var(--text-muted)" }}
+          >
+            <Star width={14} height={14} fill={p.starred ? "currentColor" : "none"} />
+          </button>
+        </Tooltip>
+      )}
       <Tooltip text="More options (rename, share, delete…)">
         <button
           onClick={(e) => {
@@ -535,6 +555,7 @@ interface FolderNodeProps {
   renderTabIcon: (tab: SidebarTabItem, isActive: boolean) => ReactNode;
   renderTabMeta?: (tab: SidebarTabItem) => ReactNode;
   renderTabBadge?: (tab: SidebarTabItem) => ReactNode;
+  isTabStarred?: (tab: SidebarTabItem) => boolean;
   freshCloudIds?: Set<string>;
   /** Controlled inline-rename state, threaded from the tree root. */
   renamingItem?: { kind: "folder" | "tab"; id: string } | null;
@@ -824,6 +845,8 @@ function FolderNode(props: FolderNodeProps) {
                 onClick={(e) => handlers.onTabClick(tab.id, e)}
                 onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); handlers.onTabContextMenu(tab.id, e.clientX, e.clientY); }}
                 onKebab={(rect) => handlers.onTabKebab(tab.id, rect)}
+                onStar={handlers.onTabStar ? () => handlers.onTabStar!(tab.id) : undefined}
+                starred={props.isTabStarred?.(tab)}
                 onReorderTab={handlers.onReorderTab}
                 isRenaming={tabRenaming}
                 onStartRename={handlers.onCommitTabRename && props.setRenamingItem
@@ -1071,6 +1094,7 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
             renderTabIcon={props.renderTabIcon}
             renderTabMeta={props.renderTabMeta}
             renderTabBadge={props.renderTabBadge}
+            isTabStarred={props.isTabStarred}
             freshCloudIds={props.freshCloudIds}
             renamingItem={props.renamingItem}
             setRenamingItem={props.setRenamingItem}
@@ -1112,6 +1136,8 @@ export default function SidebarFolderTree(props: SidebarFolderTreeProps) {
               onClick={(e) => props.handlers.onTabClick(tab.id, e)}
               onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); props.handlers.onTabContextMenu(tab.id, e.clientX, e.clientY); }}
               onKebab={(rect) => props.handlers.onTabKebab(tab.id, rect)}
+              onStar={props.handlers.onTabStar ? () => props.handlers.onTabStar!(tab.id) : undefined}
+              starred={props.isTabStarred?.(tab)}
               onReorderTab={props.handlers.onReorderTab}
               isRenaming={tabRenaming}
               onStartRename={props.handlers.onCommitTabRename && props.setRenamingItem

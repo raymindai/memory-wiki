@@ -3007,11 +3007,14 @@ export default function MdEditor() {
   const foldersRefForReveal = useRef(folders);
   tabsRefForReveal.current = tabs;
   foldersRefForReveal.current = folders;
-  const revealActiveInSidebar = useCallback(() => {
-    const id = activeTabIdRef.current;
+  const revealTabInSidebar = useCallback((id: string) => {
     if (!id) return;
     const tab = tabsRefForReveal.current.find((t) => t.id === id);
     if (!tab) return;
+    // Make sure the tab's home section is open first — a collapsed MDs /
+    // MD Bundles section means the row isn't in the DOM to scroll to.
+    if (tab.kind === "bundle") setShowMyBundles(true);
+    else setShowMyDocs(true);
     if (tab.folderId) {
       const expandAncestors = (fid: string | undefined | null) => {
         if (!fid) return;
@@ -3029,8 +3032,8 @@ export default function MdEditor() {
       };
       expandAncestors(tab.folderId);
     }
-    // 50ms gives the folder-expand state update time to paint the
-    // hidden row into the DOM before we query for it.
+    // 60ms gives the section/folder-expand state updates time to paint
+    // the hidden row into the DOM before we query for it.
     setTimeout(() => {
       const row = document.querySelector<HTMLElement>(`[data-sidebar-tab-id="${CSS.escape(id)}"]`);
       if (!row) return;
@@ -3039,8 +3042,11 @@ export default function MdEditor() {
       // class is cleared 1.4s later; the CSS rule lives in globals.css.
       row.classList.add("mw-sidebar-reveal-flash");
       setTimeout(() => row.classList.remove("mw-sidebar-reveal-flash"), 1400);
-    }, 50);
+    }, 60);
   }, []);
+  const revealActiveInSidebar = useCallback(() => {
+    revealTabInSidebar(activeTabIdRef.current);
+  }, [revealTabInSidebar]);
 
   // Track Home (dashboard) entries into nav history. Fires when
   // showOnboarding flips true via the Home button or Alt+H.
@@ -9632,6 +9638,11 @@ ${clone.innerHTML}
                               className={`flex items-center gap-1.5 py-1 rounded-md cursor-pointer text-xs transition-colors hover:bg-[var(--toggle-bg)] group/recent${recentEnteringIds.has(tab.id) ? " mw-recent-enter" : ""}`}
                               style={{ paddingLeft: 6, paddingRight: 6, color: "var(--text-secondary)" }}
                               onClick={(e) => handleDocClick(tab.id, e)}
+                              onContextMenu={(e) => {
+                                if (tab.kind === "bundle") return; // bundles use their own section menu
+                                e.preventDefault(); e.stopPropagation();
+                                setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: tab.id });
+                              }}
                               title={displayTitle}
                             >
                               {tab.kind === "bundle" ? renderBundleStatusIcon(tab.bundleId, 13) : <DocStatusIcon tab={tab} isActive={false} />}
@@ -10256,6 +10267,7 @@ ${clone.innerHTML}
                         renderTabBadge={(tab) => (tab.cloudId && isPinned("document", tab.cloudId)) ? (
                           <Star width={10} height={10} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
                         ) : null}
+                        isTabStarred={(tab) => !!(tab.cloudId && isPinned("document", tab.cloudId))}
                         renamingItem={renamingItem}
                         setRenamingItem={setRenamingItem}
                         handlers={{
@@ -10330,6 +10342,7 @@ ${clone.innerHTML}
                           onTabClick: handleDocClick,
                           onTabContextMenu: (tabId, x, y) => setDocContextMenu({ x, y, tabId }),
                           onTabKebab: (tabId, rect) => setDocContextMenu({ x: rect.right, y: rect.bottom, tabId }),
+                          onTabStar: (tabId) => { const t = tabs.find(x => x.id === tabId); if (t?.cloudId) void togglePin("document", t.cloudId); },
                           onDropTabIntoFolder: (tabId, folderId) => {
                             setTabs(prev => prev.map(t => t.id === tabId ? { ...t, folderId: folderId || undefined } : t));
                           },
@@ -15075,6 +15088,7 @@ ${clone.innerHTML}
                 }
               }},
             ] : isSharedWithMe ? [
+              { label: "Locate", action: () => { revealTabInSidebar(docContextMenu.tabId); } },
               { label: "Duplicate", action: () => {
                 if (targetTab) {
                   const id = `tab-${tabIdCounter++}`;
@@ -15138,6 +15152,7 @@ ${clone.innerHTML}
                 showToast("Removed from your list", "success");
               }, danger: true },
             ] : [
+              { label: "Locate", action: () => { revealTabInSidebar(docContextMenu.tabId); } },
               { label: "Rename", action: () => {
                 const tab = tabs.find(t => t.id === docContextMenu.tabId);
                 if (!tab) return;
