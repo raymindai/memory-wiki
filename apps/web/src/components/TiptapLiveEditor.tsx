@@ -859,18 +859,25 @@ function mwSearchState(editor: any) {
   return { count: s?.matches.length || 0, active: s?.matches.length ? s.active : -1 };
 }
 
-// Put the editor selection on the active match so it scrolls into view and
-// the next replace targets exactly that range.
+// Put the editor selection on the active match (so Replace targets it)
+// and scroll it into view. tr.scrollIntoView() no-ops when the editor
+// isn't focused (the Find input holds focus), so we also scroll the
+// match's DOM node directly — that works regardless of focus.
 function mwSelectActive(editor: any) {
   const s = searchKey.getState(editor.view.state);
   if (!s || !s.matches.length) return;
   const m = s.matches[s.active];
   try {
-    const tr = editor.view.state.tr
-      .setSelection(TextSelection.create(editor.view.state.doc, m.from, m.to))
-      .scrollIntoView();
-    editor.view.dispatch(tr);
+    editor.view.dispatch(editor.view.state.tr.setSelection(TextSelection.create(editor.view.state.doc, m.from, m.to)));
   } catch { /* range may be stale after a concurrent edit */ }
+  try {
+    const at = editor.view.domAtPos(m.from);
+    let node: any = at?.node;
+    if (node && node.nodeType === 3) node = node.parentElement; // text node → element
+    if (node && typeof node.scrollIntoView === "function") {
+      node.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  } catch { /* dom may not be ready */ }
 }
 
 function mwStep(editor: any, delta: number) {

@@ -796,6 +796,16 @@ export default function MdEditor() {
               return true;
             }).map((t: Tab) => {
               if (canonicalExampleIds.has(t.id)) { const { folderId: __, ...rest } = t; return rest; }
+              // Correct a stale/empty saved title from the body's H1 at
+              // hydration, BEFORE first paint — the title invariant is "first
+              // H1 = title". Without this, a tab saved as "Untitled" (or with
+              // no title) flashed "Untitled" until something later re-derived
+              // it. Doing it synchronously here means the real name shows from
+              // the first render. Only when the body actually has an H1.
+              if (t.markdown && (!t.title || t.title === "Untitled")) {
+                const h1 = extractTitleFromMd(t.markdown);
+                if (h1 && h1 !== "Untitled") t = { ...t, title: h1 };
+              }
               // Backfill lastOpenedAt for tabs that don't have it (random: 1-7 days ago)
               if (!t.lastOpenedAt) {
                 const now = Date.now();

@@ -33,10 +33,16 @@ test.describe("Find & Replace (Live editor)", () => {
     // 3 matches highlighted, counter shows 1/3.
     expect(await page.locator(".mw-search-match").count()).toBe(3);
     await expect(page.getByText("1/3", { exact: true })).toBeVisible();
-    // Next → 2/3.
+    // Next → 2/3, and the active highlight moves to the 2nd match.
+    const activeIndexOf = () => page.evaluate(() => {
+      const all = Array.from(document.querySelectorAll(".mw-search-match"));
+      return all.findIndex((el) => el.classList.contains("mw-search-match-active"));
+    });
+    expect(await activeIndexOf()).toBe(0);
     await page.keyboard.press("Enter");
     await page.waitForTimeout(200);
     await expect(page.getByText("2/3", { exact: true })).toBeVisible();
+    expect(await activeIndexOf()).toBe(1);
   });
 
   test("Replace All rewrites every match", async ({ page }) => {
