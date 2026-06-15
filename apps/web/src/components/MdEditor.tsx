@@ -658,7 +658,7 @@ export default function MdEditor() {
     };
   }, []);
   // Cloud docs section removed — all docs auto-save to cloud
-  const [recentDocs, setRecentDocs] = useState<{ id: string; title: string; visitedAt: string; isOwner: boolean; editMode: string; sharedWithMe?: boolean; ownerEmail?: string }[]>([]);
+  const [recentDocs, setRecentDocs] = useState<{ id: string; title: string; visitedAt?: string; updatedAt?: string; isOwner: boolean; editMode: string; sharedWithMe?: boolean; canEdit?: boolean; ownerEmail?: string }[]>([]);
   const [_serverDocs, setServerDocs] = useState<{ id: string; title: string; createdAt: string }[]>([]);
   // v8 W4 — auto-organize metadata mirror keyed by doc id. Populated
   // from /api/user/documents responses (which JOIN
@@ -4564,12 +4564,16 @@ export default function MdEditor() {
       setServerDocs([]);
       return;
     }
-    // Fetch recent visits — only for logged-in users (Shared With Me)
-    if (user?.id) fetch("/api/user/recent", { headers: authHeaders })
+    // Fetch "Shared with me" — docs explicitly shared with the user
+    // (allowed_emails / allowed_editors), NOT visit history. This is what
+    // feeds the Shared-with-me section: a public doc opened read-only is
+    // not here (it's only in Recent), opening a shared doc doesn't drop
+    // it, and leaving a share removes it for good.
+    if (user?.id) fetch("/api/user/shared", { headers: authHeaders })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
-        if (data?.recent) {
-          setRecentDocs(data.recent.filter((d: { isOwner: boolean }) => !d.isOwner));
+        if (data?.shared) {
+          setRecentDocs(data.shared);
         }
       })
       .catch(() => {});
@@ -7337,10 +7341,10 @@ ${html}
       const fb = pickFallbackTabAfterDelete(new Set([openTab.id]));
       if (fb) switchTab(fb); else switchToStartSurface();
     }
-    // Re-pull the shared feed authoritatively.
-    fetch("/api/user/recent", { headers: authHeaders })
+    // Re-pull the shared feed authoritatively (genuinely-shared docs).
+    fetch("/api/user/shared", { headers: authHeaders })
       .then(r => (r.ok ? r.json() : null))
-      .then(d => { if (d?.recent) setRecentDocs(d.recent.filter((x: { isOwner: boolean }) => !x.isOwner)); })
+      .then(d => { if (d?.shared) setRecentDocs(d.shared); })
       .catch(() => {});
   }, [user?.email, authHeaders, tabs, activeTabId, pickFallbackTabAfterDelete, switchTab, switchToStartSurface]);
 
@@ -11226,9 +11230,9 @@ ${clone.innerHTML}
                                     body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
                                   });
                                 } catch { /* best effort */ }
-                                fetch("/api/user/recent", { headers: authHeaders })
+                                fetch("/api/user/shared", { headers: authHeaders })
                                   .then(r => (r.ok ? r.json() : null))
-                                  .then(d => { if (d?.recent) setRecentDocs(d.recent.filter((x: { isOwner: boolean }) => !x.isOwner)); })
+                                  .then(d => { if (d?.shared) setRecentDocs(d.shared); })
                                   .catch(() => {});
                               }
                               setTabs(prev => prev.filter(t => t.id !== tab.id));

@@ -110,12 +110,12 @@ async function routeApi(page: Page): Promise<Calls> {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
   });
 
-  // Recent feed → one shared doc (isOwner:false) → renders as an allExtra
-  // row, UNTIL the user leaves the share (visit_history row deleted).
-  await page.route("**/api/user/recent**", async (route) => {
+  // Shared-with-me feed → one genuinely-shared doc, UNTIL the user leaves
+  // the share (then it no longer matches allowed_emails → drops out).
+  await page.route("**/api/user/shared**", async (route) => {
     calls.recentGets++;
-    const recent = calls.left ? [] : [{ id: SHARED_ID, title: SHARED_TITLE, visitedAt: "2026-01-01T00:00:00Z", isOwner: false, sharedWithMe: true, editMode: "view", ownerEmail: "owner@memory.wiki" }];
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ recent }) });
+    const shared = calls.left ? [] : [{ id: SHARED_ID, title: SHARED_TITLE, updatedAt: "2026-01-01T00:00:00Z", isOwner: false, sharedWithMe: true, canEdit: false, editMode: "view", ownerEmail: "owner@memory.wiki" }];
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ shared }) });
   });
 
   return calls;
@@ -153,10 +153,10 @@ test.describe("Shared with me — not-yet-open rows", () => {
   test("a public doc only VISITED (not shared) does NOT appear in Shared with me", async ({ page, context }) => {
     await seedAuthCookie(context);
     await routeApi(page);
-    // Override recent to return a visited-but-not-shared public doc.
-    await page.route("**/api/user/recent**", (route) => route.fulfill({
-      status: 200, contentType: "application/json",
-      body: JSON.stringify({ recent: [{ id: "public-visited-1", title: "Some Public Doc", visitedAt: "2026-01-01T00:00:00Z", isOwner: false, sharedWithMe: false, editMode: "view", ownerEmail: "stranger@x.com" }] }),
+    // A visited-but-not-shared public doc isn't a member of allowed_emails,
+    // so the shared endpoint never returns it → empty Shared-with-me.
+    await page.route("**/api/user/shared**", (route) => route.fulfill({
+      status: 200, contentType: "application/json", body: JSON.stringify({ shared: [] }),
     }));
     await boot(page);
 
@@ -179,6 +179,17 @@ test.describe("Shared with me — not-yet-open rows", () => {
     // necessarily the editable .ProseMirror).
     await expect(page.getByText("SHARED BODY CONTENT", { exact: false }).first()).toBeVisible({ timeout: 8000 });
     expect(calls.docGet).toBeGreaterThan(0);
+
+    // It must STAY in "Shared with me" after opening — a genuinely shared
+    // doc (isAllowedViewer) opened read-only should remain listed, just as
+    // an open tab now. (Regression: it used to vanish on click.)
+    await page.waitForTimeout(800);
+    const stillListed = await page.evaluate((title) => {
+      const header = document.querySelector('[data-section-id="shared"]');
+      const section = header?.parentElement; // the section wrapper div
+      return !!section && (section.textContent || "").includes(title);
+    }, SHARED_TITLE);
+    expect(stillListed).toBe(true);
   });
 
   test("right-click shows a context menu with Open + Remove from list", async ({ page, context }) => {
