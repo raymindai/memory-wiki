@@ -1425,6 +1425,16 @@ export default function MdEditor() {
   // Folder id whose emoji is currently being edited via the picker modal
   const [emojiPickerFolderId, setEmojiPickerFolderId] = useState<string | null>(null);
   const [inlineInput, setInlineInput] = useState<{ label: string; defaultValue?: string; onSubmit: (v: string) => void; position?: { x: number; y: number } } | null>(null);
+  // Styled confirm dialog — replaces native window.confirm() so the app
+  // never falls back to a browser system modal (founder preference). Set
+  // it to ask; onConfirm runs on the primary button.
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    body: React.ReactNode;
+    confirmLabel?: string;
+    danger?: boolean;
+    onConfirm: () => void;
+  } | null>(null);
   // Inline rename state for the sidebar. When non-null, the matching
   // row in <SidebarFolderTree> swaps its title for an in-place input.
   // Driven by double-click on the row OR the kebab/context-menu
@@ -11057,7 +11067,6 @@ ${clone.innerHTML}
                     if (!user?.id || !lintReport) return;
                     const total = totalVisible;
                     if (total === 0) return;
-                    if (!confirm(`Resolve all ${total} finding${total === 1 ? "" : "s"}?\n\n• Orphans (${visibleOrphans.length}) — concept extraction will re-run. If the doc shares concepts with another doc, it drops off the list.\n• Duplicates (${visibleDuplicates.length}) — the older copy of each pair moves to Trash; you can restore.`)) return;
                     setLintLoading(true);
                     let ok = 0;
                     let failed = 0;
@@ -11222,7 +11231,21 @@ ${clone.innerHTML}
                           {lintLoading ? "Re-scanning…" : "Re-scan"}
                         </button>
                         <button
-                          onClick={resolveAll}
+                          onClick={() => {
+                            const total = totalVisible;
+                            if (total === 0) return;
+                            setConfirmDialog({
+                              title: `Resolve all ${total} finding${total === 1 ? "" : "s"}?`,
+                              body: (
+                                <ul className="space-y-1.5">
+                                  <li>Orphans ({visibleOrphans.length}) — concept extraction re-runs. If the doc shares concepts with another, it drops off the list.</li>
+                                  <li>Duplicates ({visibleDuplicates.length}) — the older copy of each pair moves to Trash (restorable).</li>
+                                </ul>
+                              ),
+                              confirmLabel: "Resolve all",
+                              onConfirm: () => { void resolveAll(); },
+                            });
+                          }}
                           disabled={lintLoading || totalVisible === 0}
                           className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md text-caption font-medium transition-colors disabled:opacity-50"
                           style={{
@@ -14962,6 +14985,49 @@ ${clone.innerHTML}
           onCancel={() => setInlineInput(null)}
           position={inlineInput.position}
         />
+      )}
+
+      {/* Styled confirm dialog (replaces window.confirm). Centered popup,
+          backdrop click / Escape cancels, Enter confirms. */}
+      {confirmDialog && (
+        <div
+          className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={() => setConfirmDialog(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setConfirmDialog(null);
+            if (e.key === "Enter") { const d = confirmDialog; setConfirmDialog(null); d.onConfirm(); }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-sm rounded-xl p-5"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.45)" }}
+            onClick={(e) => e.stopPropagation()}
+            ref={(el) => el?.focus()}
+            tabIndex={-1}
+          >
+            <div className="text-body font-semibold mb-2" style={{ color: "var(--text-primary)" }}>{confirmDialog.title}</div>
+            <div className="text-caption mb-4" style={{ color: "var(--text-secondary)", lineHeight: 1.5 }}>{confirmDialog.body}</div>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="px-3 py-1.5 rounded-md text-caption font-medium transition-colors hover:bg-[var(--toggle-bg)]"
+                style={{ color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { const d = confirmDialog; setConfirmDialog(null); d.onConfirm(); }}
+                className="px-3 py-1.5 rounded-md text-caption font-semibold transition-opacity hover:opacity-90"
+                style={{ background: confirmDialog.danger ? "var(--micro-red)" : "var(--text-primary)", color: confirmDialog.danger ? "#fff" : "var(--background)" }}
+              >
+                {confirmDialog.confirmLabel || "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Footer — Left: Help + links, Right: stats + badges */}
