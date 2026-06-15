@@ -40,13 +40,13 @@ import {
 // user_metadata.avatar_url; the user changes it on that platform,
 // not here) and a deterministic generated avatar (DiceBear shapes).
 //
-// "shapes" replaces the earlier "identicon" style which DiceBear v9
-// renders in a muted brown palette that read as dull. Existing
-// profiles with avatar_style = "identicon" continue to work — see
-// resolveAvatar for the in-place mapping.
+// "Identicon" is the GitHub-style 5x5 symmetric pixel grid (generated
+// locally, see editor-helpers.githubIdenticon). "Shapes" is the DiceBear
+// generator. Both are deterministic from the email seed.
 const AVATAR_STYLES: { id: string; label: string; dicebearStyle?: string }[] = [
-  { id: "oauth",  label: "Photo" },
-  { id: "shapes", label: "Shapes", dicebearStyle: "shapes" },
+  { id: "oauth",     label: "Photo" },
+  { id: "identicon", label: "Identicon", dicebearStyle: "identicon" },
+  { id: "shapes",    label: "Shapes", dicebearStyle: "shapes" },
 ];
 
 // Heuristic for Google's stock initial avatar — a coloured circle
@@ -63,12 +63,13 @@ function isStockOAuthAvatar(url: string | null | undefined): boolean {
 }
 
 function dicebearStyleUrl(style: string, seed: string, size = 80): string {
+  if (style === "identicon") return githubIdenticon(seed, size);
   return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
 }
 
 // Shared with the editor header/profile menu so the avatar updates
 // everywhere as soon as the user changes Settings → Profile.
-import { dicebearUrl, resolveAvatar } from "@/lib/editor-helpers";
+import { dicebearUrl, resolveAvatar, githubIdenticon } from "@/lib/editor-helpers";
 import { showToast } from "@/components/Toast";
 import MemoryWikiLogo from "@/components/MemoryWikiLogo";
 

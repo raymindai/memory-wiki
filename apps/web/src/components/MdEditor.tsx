@@ -6759,11 +6759,8 @@ export default function MdEditor() {
     }
   }, [docId, previewVersion, markdown, doRender]);
 
-  const handleRestoreVersion = useCallback(async (versionId: number) => {
+  const performRestoreVersion = useCallback(async (versionId: number) => {
     if (!docId) return;
-    // Confirmation dialog
-    const confirmed = window.confirm("Restore this version? Your current content will be saved as a snapshot before restoring.");
-    if (!confirmed) return;
     const currentTab = tabs.find(t => t.id === activeTabIdRef.current);
     let token = currentTab?.editToken || getEditToken(docId);
     // If no local token, try fetching from server (owner may not have token locally)
@@ -6792,6 +6789,12 @@ export default function MdEditor() {
         const prevMd = markdownRef.current;
         await updateDocument(docId, token, data.version.markdown, data.version.title || undefined, { userId: user?.id, anonymousId: !user?.id ? getAnonymousId() : undefined, changeSummary: `Restored to version ${data.version.version_number}` });
         setMarkdown(data.version.markdown);
+        // Push into the Live (Tiptap) view too — it doesn't sync from the
+        // markdown prop after mount, so without this the restore lands in
+        // state / Source / Yjs but the visible MD editor still shows the old
+        // body (the default view → restore looked like a no-op). setContent
+        // suppresses onChange (isSettingContent), so no autosave loop.
+        tiptapRef.current?.setMarkdown(data.version.markdown);
         doRender(data.version.markdown);
         cmSetDocRef.current?.(data.version.markdown);
         // Force reset Y.Doc to prevent CRDT from reverting to old version
@@ -6800,6 +6803,7 @@ export default function MdEditor() {
         if (data.version.title) setTitle(data.version.title);
         setPreviewVersion(null);
         await loadVersions();
+        showToast(`Restored to version ${data.version.version_number}`, "success");
       }
     } catch {
       showToast("Failed to restore version", "error");
@@ -6807,6 +6811,18 @@ export default function MdEditor() {
     setRestoringVersion(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId, user, doRender, loadVersions]);
+
+  // Styled confirm (never window.confirm — founder rule: no system modals).
+  const handleRestoreVersion = useCallback((versionId: number) => {
+    if (!docId) return;
+    const v = versions.find(x => x.id === versionId);
+    setConfirmDialog({
+      title: v ? `Restore version ${v.version_number}?` : "Restore this version?",
+      body: "Your current content is snapshotted first, so you can always come back to it.",
+      confirmLabel: "Restore",
+      onConfirm: () => { void performRestoreVersion(versionId); },
+    });
+  }, [docId, versions, performRestoreVersion]);
 
   // Share — open modal for owners, quick copy for non-owners
   // ─── AI Actions ───
@@ -14030,6 +14046,24 @@ ${clone.innerHTML}
                   onAiAction={(action) => handleAIAction(action)}
                   onOpenAssistant={() => { setShowAIPanel(true); setShowOutlinePanel(false); setShowImagePanel(false); }}
                 />
+                {/* Version-history preview overlay — a read-only render of the
+                    selected past version, laid over the live editor. TipTap /
+                    CodeMirror stay mounted and untouched underneath, so no edit
+                    (and no autosave) can fire while previewing — the overlay
+                    intercepts all interaction. Shows the same `html` that
+                    handlePreviewVersion renders from the chosen version. */}
+                {previewVersion !== null && (
+                  <div
+                    data-version-preview
+                    className="absolute inset-0 z-30 overflow-auto body-scroll"
+                    style={{ background: "var(--canvas)" }}
+                  >
+                    <div
+                      className={`mdcore-rendered p-3 sm:p-6 ${narrowView ? "mx-auto max-w-3xl" : "max-w-none"}`}
+                      dangerouslySetInnerHTML={{ __html: html }}
+                    />
+                  </div>
+                )}
                 {/* Related docs — under the body so the user
                     discovers it after they finish reading. Owner-
                     only; gated on cloudId so non-cloud / sample
@@ -15118,13 +15152,14 @@ ${clone.innerHTML}
                 </div>
               </div>
             </div>
-            <div
-              className="flex-1 min-h-0"
-              style={narrowSource ? { paddingLeft: "max(0px, calc(50% - 384px))", paddingRight: "max(0px, calc(50% - 384px))" } : undefined}
-            >
+            <div className="flex-1 min-h-0">
+              {/* narrowSource caps the text column width but the padding
+                  lives on .cm-content (see globals.css .mw-cm-narrow), not
+                  this wrapper — so the CodeMirror scroller stays full-width
+                  and its scrollbar sits flush at the far right of the pane. */}
               <div
                 ref={editorContainerRef}
-                className="h-full"
+                className={`h-full${narrowSource ? " mw-cm-narrow" : ""}`}
               />
             </div>
           </div>

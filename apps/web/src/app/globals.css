@@ -2342,6 +2342,14 @@ textarea::selection {
 .cm-editor .cm-scroller {
   overflow: auto !important;
 }
+/* Narrow Source view: cap the text column to a comfortable measure by
+   padding the CONTENT, not the scroll container. The .cm-scroller stays
+   full-width so its vertical scrollbar sits flush at the far right of
+   the pane (founder request) while the text stays centred + narrow. */
+.mw-cm-narrow .cm-content {
+  padding-left: max(20px, calc(50% - 384px)) !important;
+  padding-right: max(20px, calc(50% - 384px)) !important;
+}
 
 /* ========================================
    Mobile optimizations
