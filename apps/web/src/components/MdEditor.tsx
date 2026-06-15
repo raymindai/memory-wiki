@@ -1666,9 +1666,11 @@ export default function MdEditor() {
   // tabId addresses an open tab. sharedDocId addresses a "Shared with
   // me" row that isn't an open tab yet (allExtra) — its menu is a small
   // Open / Remove-from-list variant keyed by cloudId, not tab id.
-  const [docContextMenu, setDocContextMenu] = useState<{ x: number; y: number; tabId: string; sharedDocId?: string; sharedDocTitle?: string } | null>(null);
+  // recentId: when the menu was opened from a Recent row, carries that
+  // row's id so the menu can offer "Remove from Recent".
+  const [docContextMenu, setDocContextMenu] = useState<{ x: number; y: number; tabId: string; sharedDocId?: string; sharedDocTitle?: string; recentId?: string } | null>(null);
   const [folderContextMenu, setFolderContextMenu] = useState<{ x: number; y: number; folderId: string; confirmDelete?: boolean } | null>(null);
-  const [bundleContextMenu, setBundleContextMenu] = useState<{ x: number; y: number; bundleId: string; confirmDelete?: boolean } | null>(null);
+  const [bundleContextMenu, setBundleContextMenu] = useState<{ x: number; y: number; bundleId: string; confirmDelete?: boolean; recentId?: string } | null>(null);
   const [bundleShareModal, setBundleShareModal] = useState<{ bundleId: string } | null>(null);
   const [dragFolderId, setDragFolderId] = useState<string | null>(null);
   // Global Library sort (legacy — drives the small Library-header
@@ -9542,26 +9544,51 @@ ${clone.innerHTML}
                       <div
                         key={`${p.kind}:${p.id}`}
                         onClick={onOpen}
+                        onContextMenu={(e) => {
+                          e.preventDefault(); e.stopPropagation();
+                          if (p.kind === "bundle") { setBundleContextMenu({ x: e.clientX, y: e.clientY, bundleId: p.id }); return; }
+                          const existing = tabs.find(t => t.cloudId === p.id && !t.deleted);
+                          if (existing) { setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: existing.id }); return; }
+                          const newId = `tab-${tabIdCounter++}`;
+                          setTabs(prev => [...prev, { id: newId, title, markdown: "", cloudId: p.id, permission: "mine" }]);
+                          setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: newId });
+                        }}
                         className="flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)] group/pin"
                         style={{ color: "var(--text-secondary)" }}
                         title={title}
                       >
                         <span className="shrink-0">{iconNode}</span>
                         <span className="flex-1 min-w-0 truncate text-body">{title}</span>
-                        {/* hidden/flex toggle (not opacity-0) so the unstar
-                            button is fully removed from layout when not
-                            hovered — the title above gets the entire row
-                            width. On hover the button takes its w-4 + gap
-                            slot and the title shrinks to accommodate.
-                            Matches Recent row behavior. */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); void togglePin(p.kind, p.id); }}
-                          className="shrink-0 w-4 h-4 rounded items-center justify-center transition-colors hover:bg-[var(--border)] hidden group-hover/pin:flex"
-                          style={{ color: "var(--text-faint)" }}
-                          title="Unstar"
-                        >
-                          <Star width={11} height={11} style={{ fill: "none" }} />
-                        </button>
+                        {/* Star (unstar) + More Options, mirroring the MDs /
+                            Recent rows. Hidden until hover so the title gets
+                            the full width otherwise. */}
+                        <Tooltip text="Unstar">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); void togglePin(p.kind, p.id); }}
+                            className="shrink-0 rounded flex items-center justify-center w-0 group-hover/pin:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+                            style={{ color: "var(--micro-warn)" }}
+                          >
+                            <Star width={11} height={11} style={{ fill: "none" }} />
+                          </button>
+                        </Tooltip>
+                        <Tooltip text="More options">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                              if (p.kind === "bundle") { setBundleContextMenu({ x: rect.right, y: rect.bottom, bundleId: p.id }); return; }
+                              const existing = tabs.find(t => t.cloudId === p.id && !t.deleted);
+                              if (existing) { setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: existing.id }); return; }
+                              const newId = `tab-${tabIdCounter++}`;
+                              setTabs(prev => [...prev, { id: newId, title, markdown: "", cloudId: p.id, permission: "mine" }]);
+                              setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: newId });
+                            }}
+                            className="shrink-0 rounded flex items-center justify-center w-0 group-hover/pin:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            <MoreHorizontal width={13} height={13} />
+                          </button>
+                        </Tooltip>
                       </div>
                     );
                   })}
@@ -9686,18 +9713,31 @@ ${clone.innerHTML}
                                   const alreadyOpen = activeTab?.kind === "bundle" && activeTab.bundleId === entry.bundleId;
                                   if (!alreadyOpen) openGhostBundle(entry.bundleId);
                                 }}
+                                onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setBundleContextMenu({ x: e.clientX, y: e.clientY, bundleId: entry.bundleId, recentId: entry.id }); }}
                                 title={bundle.title || "Untitled Bundle"}
                               >
                                 {renderBundleStatusIcon(entry.bundleId, 13)}
                                 <span className="truncate flex-1 text-body">{bundle.title || "Untitled Bundle"}</span>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); setRecentTabIds(prev => prev.filter(id => id !== entry.id)); }}
-                                  className="shrink-0 w-4 h-4 rounded items-center justify-center transition-colors hover:bg-[var(--border-dim)] hidden group-hover/recent:flex"
-                                  style={{ color: "var(--text-faint)" }}
-                                  title="Remove from recent"
-                                >
-                                  <X width={9} height={9} />
-                                </button>
+                                {(() => { const starred = isPinned("bundle", entry.bundleId); return (
+                                  <Tooltip text={starred ? "Unstar" : "Star"}>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); void togglePin("bundle", entry.bundleId); }}
+                                      className="shrink-0 rounded flex items-center justify-center w-0 group-hover/recent:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+                                      style={{ color: starred ? "var(--micro-warn)" : "var(--text-muted)" }}
+                                    >
+                                      <Star width={11} height={11} fill="none" />
+                                    </button>
+                                  </Tooltip>
+                                ); })()}
+                                <Tooltip text="More options">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); const rect = (e.currentTarget as HTMLElement).getBoundingClientRect(); setBundleContextMenu({ x: rect.right, y: rect.bottom, bundleId: entry.bundleId, recentId: entry.id }); }}
+                                    className="shrink-0 rounded flex items-center justify-center w-0 group-hover/recent:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+                                    style={{ color: "var(--text-muted)" }}
+                                  >
+                                    <MoreHorizontal width={13} height={13} />
+                                  </button>
+                                </Tooltip>
                               </div>
                             );
                           }
@@ -9716,22 +9756,48 @@ ${clone.innerHTML}
                               style={{ paddingLeft: 6, paddingRight: 6, color: "var(--text-secondary)" }}
                               onClick={(e) => handleDocClick(tab.id, e)}
                               onContextMenu={(e) => {
-                                if (tab.kind === "bundle") return; // bundles use their own section menu
                                 e.preventDefault(); e.stopPropagation();
-                                setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: tab.id });
+                                if (tab.kind === "bundle") { setBundleContextMenu({ x: e.clientX, y: e.clientY, bundleId: tab.bundleId!, recentId: tab.id }); return; }
+                                setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: tab.id, recentId: tab.id });
                               }}
                               title={displayTitle}
                             >
                               {tab.kind === "bundle" ? renderBundleStatusIcon(tab.bundleId, 13) : <DocStatusIcon tab={tab} isActive={false} />}
                               <span className="truncate flex-1 text-body">{displayTitle}</span>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setRecentTabIds(prev => prev.filter(id => id !== tab.id)); }}
-                                className="shrink-0 w-4 h-4 rounded items-center justify-center transition-colors hover:bg-[var(--border-dim)] hidden group-hover/recent:flex"
-                                style={{ color: "var(--text-faint)" }}
-                                title="Remove from recent"
-                              >
-                                <X width={9} height={9} />
-                              </button>
+                              {(() => {
+                                const pinKind: "document" | "bundle" | null = tab.kind === "bundle" ? "bundle" : (tab.cloudId ? "document" : null);
+                                const pinId = tab.kind === "bundle" ? tab.bundleId : tab.cloudId;
+                                const starred = !!(pinKind && pinId && isPinned(pinKind, pinId));
+                                return (
+                                  <>
+                                    {pinKind && pinId && (
+                                      <Tooltip text={starred ? "Unstar" : "Star"}>
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); void togglePin(pinKind, pinId); }}
+                                          className="shrink-0 rounded flex items-center justify-center w-0 group-hover/recent:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+                                          style={{ color: starred ? "var(--micro-warn)" : "var(--text-muted)" }}
+                                        >
+                                          <Star width={11} height={11} fill="none" />
+                                        </button>
+                                      </Tooltip>
+                                    )}
+                                    <Tooltip text="More options">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                          if (tab.kind === "bundle") { setBundleContextMenu({ x: rect.right, y: rect.bottom, bundleId: tab.bundleId!, recentId: tab.id }); return; }
+                                          setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: tab.id, recentId: tab.id });
+                                        }}
+                                        className="shrink-0 rounded flex items-center justify-center w-0 group-hover/recent:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
+                                        style={{ color: "var(--text-muted)" }}
+                                      >
+                                        <MoreHorizontal width={13} height={13} />
+                                      </button>
+                                    </Tooltip>
+                                  </>
+                                );
+                              })()}
                             </div>
                           );
                         })}
@@ -15224,7 +15290,11 @@ ${clone.innerHTML}
             if (r.bottom > vh) el.style.top = `${Math.max(4, vh - r.height - 4)}px`;
           }}
         >
-          {(() => {
+          {[
+            // When opened from a Recent row, offer "Remove from Recent"
+            // as the first item (the real file menu otherwise).
+            ...(docContextMenu.recentId ? [{ label: "Remove from Recent", action: () => { const rid = docContextMenu.recentId!; setRecentTabIds(prev => prev.filter(id => id !== rid)); } }] : []),
+            ...(() => {
             // "Shared with me" row that isn't an open tab yet (allExtra).
             // Addressed by cloudId — no tab to look up — so it gets its
             // own small Open / Remove-from-list menu.
@@ -15526,7 +15596,7 @@ ${clone.innerHTML}
                 }, danger: true },
               ] : []),
             ];
-          })().map((item, i) => {
+          })()].map((item, i) => {
             const it = item as { label: string; action: () => void; danger?: boolean; submenu?: { id?: string; label: string; action: () => void }[] };
             if (it.label === "---") {
               return <div key={`sep-${i}`} className="my-1" style={{ borderTop: "1px solid var(--border-dim)" }} />;
@@ -16005,6 +16075,7 @@ ${clone.innerHTML}
           ...extra,
         });
         const items: Array<{ label: string; action: () => void; danger?: boolean; noClose?: boolean }> = [
+          ...(bundleContextMenu.recentId ? [{ label: "Remove from Recent", action: () => { const rid = bundleContextMenu.recentId!; setRecentTabIds(prev => prev.filter(id => id !== rid)); } }] : []),
           { label: "Open", action: () => {
             const existingTab = tabs.find(t => t.kind === "bundle" && t.bundleId === b.id);
             if (existingTab) {
