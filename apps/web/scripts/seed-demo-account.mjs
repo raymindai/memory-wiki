@@ -22,9 +22,17 @@
 //   cd apps/web
 //   node --env-file=.env.local scripts/seed-demo-account.mjs
 //
+// After upserting rows it triggers embedding + graph analysis through
+// the canonical lifecycle endpoints (direct service-role inserts don't
+// fire those the way the user-facing routes do — see triggerAnalysis).
+//
 // Required env:
 //   NEXT_PUBLIC_SUPABASE_URL
 //   SUPABASE_SERVICE_ROLE_KEY
+// Optional env:
+//   DEMO_BASE_URL   target for analysis endpoints (default https://memory.wiki;
+//                   set to http://localhost:3002 to analyze against a local dev server)
+//   SKIP_ANALYSIS   set to skip the embedding + graph trigger entirely
 
 import { createClient } from "@supabase/supabase-js";
 import { createHash, randomUUID } from "node:crypto";
@@ -487,6 +495,7 @@ async function seedBundles(userId, docs) {
   for (const b of bundles) {
     const n = 3 + Math.floor(Math.random() * 6);
     const members = pick(docs, n);
+    b.memberCount = members.length;   // used by triggerAnalysis (graph needs ≥2)
     members.forEach((doc, idx) => {
       links.push({
         bundle_id: b.id,
@@ -504,6 +513,75 @@ async function seedBundles(userId, docs) {
     if (error) throw error;
   }
   console.log(`Seeded ${links.length} bundle members`);
+  return bundles;
+}
+
+// ─── embedding + graph backfill ───────────────────────────────
+// CRITICAL: this script writes rows via the service-role REST client,
+// which bypasses the user-facing creation routes (POST /api/bundles,
+// /api/docs) that normally fire embedding + graph analysis. The only
+// automatic paths left for direct inserts are (a) Supabase DB webhooks,
+// which fire on INSERT but NOT on a re-seed's UPDATE and silently drop
+// fire-and-forget failures, and (b) the daily lifecycle-sweep cron,
+// which ignores rows older than 30 days (the demo backdates content up
+// to 90 days). Net result: a freshly-seeded demo had bundles with no
+// graph_data and docs with no embedding.
+//
+// So we trigger the canonical lifecycle endpoints ourselves, exactly
+// like the cron does — owner identity via x-user-id, plus userId in the
+// graph body so DRAFT bundles authorize too. Idempotent (every endpoint
+// is hash-gated), so re-running is cheap.
+const BASE_URL = (process.env.DEMO_BASE_URL || "https://memory.wiki").replace(/\/$/, "");
+
+async function mapLimit(items, limit, fn) {
+  let done = 0;
+  const queue = [...items.entries()];
+  async function worker() {
+    for (;;) {
+      const next = queue.shift();
+      if (!next) return;
+      const [, item] = next;
+      if (await fn(item)) done++;
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return done;
+}
+
+async function postJson(path, headers, body) {
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...headers },
+      body: JSON.stringify(body || {})
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function triggerAnalysis(userId, docs, bundles) {
+  if (process.env.SKIP_ANALYSIS) {
+    console.log("\nSKIP_ANALYSIS set — leaving embedding + graph to webhooks/cron.");
+    return;
+  }
+  const headers = { "x-user-id": userId };
+  console.log(`\nTriggering embedding + graph analysis via ${BASE_URL} ...`);
+  console.log("(LLM-bound; ~10-20 min for a full corpus. Set SKIP_ANALYSIS=1 to skip.)");
+
+  const docsEmbedded = await mapLimit(docs, 5, (d) => postJson(`/api/embed/${d.id}`, headers));
+  console.log(`  docs embedded:    ${docsEmbedded}/${docs.length}`);
+
+  const bundlesEmbedded = await mapLimit(bundles, 5, (b) => postJson(`/api/embed/bundle/${b.id}`, headers));
+  console.log(`  bundles embedded: ${bundlesEmbedded}/${bundles.length}`);
+
+  const graphable = bundles.filter((b) => (b.memberCount || 0) >= 2);
+  // userId in the body so draft bundles authorize on every prod version;
+  // x-user-id header covers the post-fix path too.
+  const bundlesGraphed = await mapLimit(graphable, 2, (b) =>
+    postJson(`/api/bundles/${b.id}/graph`, headers, { userId }));
+  console.log(`  bundles graphed:  ${bundlesGraphed}/${graphable.length} (≥2 members)`);
 }
 
 // ─── main ─────────────────────────────────────────────────────
@@ -512,7 +590,8 @@ async function seedBundles(userId, docs) {
   await ensureProfile(user.id);
   await ensureFolders(user.id);
   const docs = await seedDocuments(user.id);
-  await seedBundles(user.id, docs);
+  const bundles = await seedBundles(user.id, docs);
+  await triggerAnalysis(user.id, docs, bundles);
   console.log("\nDONE.");
   console.log(`Demo email:    ${DEMO_EMAIL}`);
   console.log(`Demo password: ${DEMO_PASSWORD}`);

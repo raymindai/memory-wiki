@@ -101,10 +101,18 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     let body: { editToken?: string; userId?: string; anonymousId?: string };
     try { body = await req.json(); } catch { body = {}; }
     const verified = await verifyAuthToken(req.headers.get("authorization"));
-    if (verified) body.userId = verified.userId;
+    // Accept the owner identity from any of: a verified JWT, the request
+    // body, or the x-user-id / x-anonymous-id headers. The header path is
+    // how the server-to-server callers (lifecycle-sweep cron, admin
+    // backfill, the bundle webhooks) identify the owner — without it,
+    // every DRAFT bundle 403'd on automated graph backfill and could only
+    // be analyzed by opening it in the UI. That's why draft demo bundles
+    // sat with graph_data = NULL.
+    const requesterId = verified?.userId || body.userId || req.headers.get("x-user-id") || undefined;
+    const requesterAnonId = body.anonymousId || req.headers.get("x-anonymous-id") || undefined;
     const isOwner =
-      !!(body.userId && bundle.user_id && body.userId === bundle.user_id) ||
-      !!(body.anonymousId && bundle.anonymous_id && body.anonymousId === bundle.anonymous_id);
+      !!(requesterId && bundle.user_id && requesterId === bundle.user_id) ||
+      !!(requesterAnonId && bundle.anonymous_id && requesterAnonId === bundle.anonymous_id);
     const hasToken = !!(body.editToken && bundle.edit_token === body.editToken);
     if (!isOwner && !hasToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
