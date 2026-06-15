@@ -232,7 +232,11 @@ export async function softDeleteDocument(
       editToken: options?.editToken,
     }),
   });
-  if (!res.ok) throw new Error("Failed to trash document");
+  if (!res.ok) {
+    const err = new Error("Failed to trash document") as Error & { status?: number };
+    err.status = res.status;
+    throw err;
+  }
 }
 
 export async function restoreDocument(

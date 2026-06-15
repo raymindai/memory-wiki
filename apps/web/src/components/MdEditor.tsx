@@ -7304,6 +7304,32 @@ ${html}
     setShowSettings(false);
   }, []);
 
+  // Background-hydrate a tab we materialized only to host a context menu
+  // (e.g. a Starred pin that wasn't open). Without this the tab carries a
+  // guessed permission ("mine") + empty body, so the menu could show the
+  // wrong actions (owner vs shared) and Duplicate/Download would be empty.
+  // The menu re-renders reactively as the real fields land.
+  const hydrateTabFromCloud = useCallback(async (tabId: string, cloudId: string) => {
+    try {
+      const res = await fetch(`/api/docs/${cloudId}`, { headers: authHeadersRef.current });
+      if (!res.ok) return;
+      const d = await res.json();
+      const perm: "mine" | "editable" | "readonly" = d.isOwner ? "mine" : d.isEditor ? "editable" : "readonly";
+      setTabs(prev => prev.map(t => t.id === tabId ? {
+        ...t,
+        markdown: typeof d.markdown === "string" ? d.markdown : t.markdown,
+        title: d.title || t.title,
+        permission: perm,
+        shared: perm !== "mine",
+        sharedWithMe: !!(d.isEditor || d.isAllowedViewer),
+        ownerEmail: d.ownerEmail || t.ownerEmail,
+        editMode: d.editMode || t.editMode,
+        allowedEmails: Array.isArray(d.allowedEmails) ? d.allowedEmails : t.allowedEmails,
+        allowedEditors: Array.isArray(d.allowedEditors) ? d.allowedEditors : t.allowedEditors,
+      } : t));
+    } catch { /* ignore — menu falls back to the materialized defaults */ }
+  }, []);
+
   // Open a "Shared with me" entry that isn't an open tab yet (the
   // allExtra rows in the sidebar — recent shared docs + share
   // notifications). Materializes a readonly/editable tab, activates it,
@@ -7419,17 +7445,26 @@ ${html}
     if (!tab.cloudId) return true;
     const token = tab.editToken || getEditToken(tab.cloudId);
     try {
-      await softDeleteDocument(tab.cloudId, { userId: user?.id, editToken: token || undefined });
+      await softDeleteDocument(tab.cloudId, { userId: user?.id, editToken: token || undefined, accessToken: accessToken || undefined });
       return true;
-    } catch {
-      // Revert optimistic deletion locally and tell the user.
+    } catch (e) {
+      const status = (e as { status?: number })?.status;
+      // 404/410 — the doc is already gone server-side (deleted elsewhere
+      // or never synced). Keep it removed locally instead of reverting,
+      // so a stale Recent/Starred entry for a vanished doc can actually be
+      // cleared. Treat as success.
+      if (status === 404 || status === 410) {
+        showToast("Document no longer exists — removed", "info");
+        return true;
+      }
+      // Other errors: revert optimistic deletion and tell the user.
       if (tab.id) {
         setTabs(prev => prev.map(t => t.id === tab.id ? { ...t, deleted: false, deletedAt: undefined } : t));
       }
       showToast("Couldn't move to Trash — server refused", "error");
       return false;
     }
-  }, [user?.id]);
+  }, [user?.id, accessToken]);
   // Hard delete document from server (permanent). Returns a promise so
   // callers (Empty Trash, per-row Delete) can await and react to failure.
   // Falls back to userId-based ownership when no editToken is in localStorage —
@@ -9551,6 +9586,7 @@ ${clone.innerHTML}
                           if (existing) { setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: existing.id }); return; }
                           const newId = `tab-${tabIdCounter++}`;
                           setTabs(prev => [...prev, { id: newId, title, markdown: "", cloudId: p.id, permission: "mine" }]);
+                          void hydrateTabFromCloud(newId, p.id);
                           setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: newId });
                         }}
                         className="flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer text-caption transition-colors hover:bg-[var(--toggle-bg)] group/pin"
@@ -9581,6 +9617,7 @@ ${clone.innerHTML}
                               if (existing) { setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: existing.id }); return; }
                               const newId = `tab-${tabIdCounter++}`;
                               setTabs(prev => [...prev, { id: newId, title, markdown: "", cloudId: p.id, permission: "mine" }]);
+                              void hydrateTabFromCloud(newId, p.id);
                               setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: newId });
                             }}
                             className="shrink-0 rounded flex items-center justify-center w-0 group-hover/pin:w-[18px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
@@ -9718,6 +9755,9 @@ ${clone.innerHTML}
                               >
                                 {renderBundleStatusIcon(entry.bundleId, 13)}
                                 <span className="truncate flex-1 text-body">{bundle.title || "Untitled Bundle"}</span>
+                                {isPinned("bundle", entry.bundleId) && (
+                                  <Star width={11} height={11} className="shrink-0 group-hover/recent:hidden" style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                                )}
                                 {(() => { const starred = isPinned("bundle", entry.bundleId); return (
                                   <Tooltip text={starred ? "Unstar" : "Star"}>
                                     <button
@@ -9770,6 +9810,9 @@ ${clone.innerHTML}
                                 const starred = !!(pinKind && pinId && isPinned(pinKind, pinId));
                                 return (
                                   <>
+                                    {starred && (
+                                      <Star width={11} height={11} className="shrink-0 group-hover/recent:hidden" style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                                    )}
                                     {pinKind && pinId && (
                                       <Tooltip text={starred ? "Unstar" : "Star"}>
                                         <button
@@ -10879,6 +10922,9 @@ ${clone.innerHTML}
                               <span className="truncate block text-caption" style={{ color: "var(--text-faint)" }}>{tab.ownerEmail}</span>
                             )}
                           </div>
+                          {tab.cloudId && isPinned("document", tab.cloudId) && (
+                            <Star width={11} height={11} className="shrink-0 group-hover:hidden" style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                          )}
                           {tab.cloudId && (unreadDocIds.has(tab.cloudId) || tab.unread || !tab.lastOpenedAt) && (
                             <span
                               className="w-1.5 h-1.5 rounded-full shrink-0"
@@ -10969,6 +11015,9 @@ ${clone.innerHTML}
                               <span className="truncate block text-caption" style={{ color: "var(--text-faint)" }}>{(doc as { ownerEmail?: string }).ownerEmail || (doc as { ownerName?: string }).ownerName}</span>
                             )}
                           </div>
+                          {isPinned("document", doc.id) && (
+                            <Star width={11} height={11} className="shrink-0 group-hover:hidden" style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                          )}
                           {unreadDocIds.has(doc.id) && (
                             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--text-primary)" }} />
                           )}
@@ -15587,8 +15636,12 @@ ${clone.innerHTML}
                 { label: "---", action: () => {} },
                 { label: "Move to Trash", action: () => {
                   const trashTab = tabs.find(t => t.id === docContextMenu.tabId);
-                  if (trashTab) softDeleteOnServer(trashTab);
+                  if (trashTab) void softDeleteOnServer(trashTab);
                   setTabs(prev => prev.map(t => t.id === docContextMenu.tabId ? { ...t, deleted: true, deletedAt: Date.now() } : t));
+                  // A trashed doc shouldn't linger in Starred or Recent.
+                  if (trashTab?.cloudId && isPinned("document", trashTab.cloudId)) void togglePin("document", trashTab.cloudId);
+                  const rid = docContextMenu.recentId;
+                  if (rid) setRecentTabIds(prev => prev.filter(id => id !== rid));
                   if (docContextMenu.tabId === activeTabId) {
                     const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
                     if (fb) switchTab(fb); else switchToStartSurface();
