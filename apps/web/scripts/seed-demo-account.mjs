@@ -387,7 +387,10 @@ function visibilityForIndex(i) {
   if (r < 70) return { is_draft: true,  edit_mode: "account", allowed_emails: null };
   if (r < 90) return {
     is_draft: false, edit_mode: "view",
-    allowed_emails: ["reviewer@apple.com", "hi@raymind.ai"]
+    // Demo "shared" recipients only — never the founder's real address,
+    // or these demo docs land permanently in hi@raymind.ai's own
+    // "Shared with me" and can't be cleared (the seed re-adds them).
+    allowed_emails: ["reviewer@apple.com", "collaborator@memory.wiki"]
   };
   return {
     is_draft: false, edit_mode: "account",
@@ -449,7 +452,8 @@ function bundleVisibility(i) {
   if (i % 3 === 1) return { is_draft: true,  edit_mode: "account", allowed_emails: [] };
   return {
     is_draft: false, edit_mode: "view",
-    allowed_emails: ["reviewer@apple.com", "hi@raymind.ai"]
+    // Demo recipients only — not the founder's real address (see note above).
+    allowed_emails: ["reviewer@apple.com", "collaborator@memory.wiki"]
   };
 }
 
