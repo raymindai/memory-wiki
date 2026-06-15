@@ -2154,6 +2154,23 @@ textarea::selection {
 .mw-fold-hidden {
   display: none !important;
 }
+/* Sidebar section expand animation. The content unmounts on collapse, so
+   this is an enter-only animation: when a section opens, its rows fade +
+   slide down briefly. Pairs with the chevron's rotate transition for a
+   coherent open feel. prefers-reduced-motion users get the instant
+   appearance. */
+@keyframes mwSectionExpand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mw-section-content {
+  animation: mwSectionExpand 0.18s ease;
+  transform-origin: top;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mw-section-content { animation: none; }
+}
+
 /* Sidebar section-header action buttons (sort / new folder / new doc /
    new bundle / collapse-all). They sit at text-faint at rest; on hover
    the glyph goes full ink. The inline color:var(--text-faint) is the

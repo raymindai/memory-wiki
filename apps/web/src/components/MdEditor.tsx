@@ -9435,7 +9435,7 @@ ${clone.innerHTML}
                   </span>
                 </div>
                 {showStarred && (
-                <div className="px-2 pb-1 space-y-0.5">
+                <div className="mw-section-content px-2 pb-1 space-y-0.5">
                   {pins.map((p) => {
                     let title = "Untitled";
                     let onOpen: (() => void) | null = null;
@@ -9584,7 +9584,7 @@ ${clone.innerHTML}
                     recentEntries.length === 0 ? (
                       <div className="px-3 py-2 text-caption" style={{ color: "var(--text-faint)" }}>No recently opened documents</div>
                     ) : (
-                      <div className="pl-2 pr-2 pb-1 space-y-0.5">
+                      <div className="mw-section-content pl-2 pr-2 pb-1 space-y-0.5">
                         {recentEntries.map(entry => {
                           if (entry.kind === "ghost-bundle") {
                             const bundle = bundles.find(b => b.id === entry.bundleId)!;
@@ -9830,7 +9830,7 @@ ${clone.innerHTML}
                   //   wrapper.pr(8) + row.pr(6) + gap-1.5(6) = 20px
                   //     from sidebar outer right → badge right edge
                   //   header.pr-5(20) → same x ✓
-                  <div className="space-y-0.5 pb-1 pl-2 pr-2">
+                  <div className="mw-section-content space-y-0.5 pb-1 pl-2 pr-2">
                     {/* Bundles share the same SidebarFolderTree component as docs, with
                         bundle-specific handlers. Folders with section="bundles" group bundles. */}
                     <SidebarFolderTree
@@ -10183,7 +10183,7 @@ ${clone.innerHTML}
                     );
                   })()}
                   {showMyDocs && (
-                    <>
+                    <div className="mw-section-content">
                     {/* Filter pills — compact chips, active filled with accent-dim */}
                     <div className="shrink-0 px-2 pt-1.5 pb-1">
                       <div className="inline-flex items-center gap-0.5 p-0.5 rounded-md w-full" style={{ background: "var(--background)" }}>
@@ -10478,7 +10478,7 @@ ${clone.innerHTML}
                         </>
                       )}
                     </div>
-                  </>
+                  </div>
                   )}
                 </div>
               );
@@ -10652,7 +10652,7 @@ ${clone.innerHTML}
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{totalShared}</span>
                   </div>
                   {showSharedDocs && (
-                    <div className="overflow-x-hidden space-y-0.5 pt-1 pb-1 pl-2 pr-2">
+                    <div className="mw-section-content overflow-x-hidden space-y-0.5 pt-1 pb-1 pl-2 pr-2">
                       {/* Shared tabs already open — draggable to folders */}
                       {dedupedSharedTabs.map((tab) => (
                         <div
@@ -11187,7 +11187,7 @@ ${clone.innerHTML}
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{trashTabs.length}</span>
                   </div>
                   {showTrash && (
-                    <div className="space-y-0.5 pt-1 pb-1 pl-2">
+                    <div className="mw-section-content space-y-0.5 pt-1 pb-1 pl-2">
                       {trashTabs.map(tab => (
                         // Action buttons collapse to `hidden` (not just
                         // opacity-0) so they take no horizontal space when
