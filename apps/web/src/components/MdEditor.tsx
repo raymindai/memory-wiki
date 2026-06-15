@@ -9573,12 +9573,27 @@ ${clone.innerHTML}
                 switchTab(newId);
               };
               const recentEntries: RecentEntry[] = [];
+              // Dedup by the UNDERLYING identity, not the tab id. The same
+              // bundle/doc can be referenced by several recentTabIds entries
+              // (every open mints a fresh `bundle-<id>-<ts>` tab id; after a
+              // refresh the old id lingers as a ghost), which used to render
+              // the same row 2-3× in Recent. Key on bundleId / cloudId so it
+              // shows once. recentTabIds is most-recent-first, so the first
+              // occurrence wins.
+              const seenRecentKeys = new Set<string>();
               for (const id of recentTabIds) {
                 const r = resolveRecent(id);
                 if (!r) continue;
                 // Hub tabs are reachable from the dedicated toolbar
                 // button — never let one occupy a slot in Recent.
                 if (r.kind === "tab" && r.tab.kind === "hub") continue;
+                const key = r.kind === "ghost-bundle"
+                  ? `bundle:${r.bundleId}`
+                  : r.tab.kind === "bundle"
+                  ? `bundle:${r.tab.bundleId}`
+                  : `doc:${r.tab.cloudId || r.tab.id}`;
+                if (seenRecentKeys.has(key)) continue;
+                seenRecentKeys.add(key);
                 recentEntries.push(r);
                 if (recentEntries.length >= 7) break;
               }
