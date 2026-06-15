@@ -153,6 +153,34 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
   // Check if requester is an allowed editor (for non-owner edit access)
   const requesterEmail = verified?.email || _req.headers.get("x-user-email") || "";
   const isAllowedEditor = (data.allowed_editors || []).some((e: string) => e.toLowerCase() === requesterEmail.toLowerCase());
+  // Requester is a view-only recipient explicitly on allowed_emails (a
+  // doc shared *with them*, not a doc they merely can reach because it's
+  // public). The /d viewer uses this to send signed-in recipients back
+  // into their own editor on refresh instead of stranding them on the
+  // bare public viewer. Owner / editor are covered by their own flags.
+  const isAllowedViewer = !!requesterEmail && !isOwnedByRequester && !isAllowedEditor
+    && (data.allowed_emails || []).some((e: string) => e.toLowerCase() === requesterEmail.toLowerCase());
+
+  // Has this signed-in, non-owner requester visited the doc before? A
+  // visit_history row is exactly what surfaces the doc in their "Shared
+  // with me" / Recent list, so it's the precise signal that the doc
+  // belongs in *their workspace*. The /d viewer uses this to send them
+  // back into their editor on refresh — a public doc the user pulled
+  // into their library shouldn't strand them on the bare public viewer
+  // every reload, while a brand-new public link they've never opened
+  // still shows the clean viewer first.
+  let hasVisited = false;
+  if (requesterId && !isOwnedByRequester) {
+    try {
+      const { data: visit } = await supabase
+        .from("visit_history")
+        .select("document_id")
+        .eq("user_id", requesterId)
+        .eq("document_id", id)
+        .limit(1);
+      hasVisited = Array.isArray(visit) && visit.length > 0;
+    } catch { /* best-effort — don't block the read */ }
+  }
 
   // Resolve owner email + brand accent for non-owners (so the
   // viewer can show who owns the doc AND paint it in the owner's
@@ -240,6 +268,8 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
     isCompileStale,
     latestSourceUpdatedAt,
     isEditor: isAllowedEditor,
+    isAllowedViewer,
+    hasVisited,
     inBundles,
     ...(isOwnedByRequester ? { editToken: data.edit_token, allowedEmails: data.allowed_emails || [], allowedEditors: data.allowed_editors || [] } : {}),
     ...(ownerEmail ? { ownerEmail } : {}),

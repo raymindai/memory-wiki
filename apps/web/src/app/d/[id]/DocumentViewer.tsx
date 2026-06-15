@@ -120,13 +120,20 @@ export default function DocumentViewer({
 
         const doc = await res.json();
 
-        // Owner OR explicit editor → open in editor instead of viewer
-        // (don't flip authChecked, we're navigating away). The editor
-        // checks doc.isEditor on the same fetch and unlocks editing for
-        // allowed_editors; landing here on the read-only viewer for a
-        // user who was explicitly invited as an Editor would be a dead
-        // end.
-        if (doc.isOwner || doc.isEditor) {
+        // Send the doc into the user's editor instead of the bare public
+        // viewer when it belongs in *their* workspace:
+        //   - owner / explicit editor (allowed_editors)
+        //   - view-only recipient on allowed_emails
+        //   - any doc already in their "Shared with me" / Recent
+        //     (hasVisited — a visit_history row exists)
+        // `/{id}` is rewritten to `/d/{id}` by vercel.json, so without
+        // this a signed-in person who has the doc in their Shared-with-me
+        // gets dumped onto the standalone viewer every refresh — the
+        // reported "refreshed a shared doc and it went to the viewer."
+        // A brand-new public link they've never opened still shows the
+        // clean viewer first. The editor renders read-only via canEdit
+        // for view-only roles.
+        if (doc.isOwner || doc.isEditor || doc.isAllowedViewer || doc.hasVisited) {
           // KEEP the auth gate up — we're navigating away, the
           // editor will paint its own boot loader after the
           // window.location.replace fires. Lifting here would briefly
