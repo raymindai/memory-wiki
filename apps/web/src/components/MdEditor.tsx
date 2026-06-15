@@ -1614,7 +1614,10 @@ export default function MdEditor() {
   // appear in the same accept list as the document import picker.
   const obsidianFileRef = useRef<HTMLInputElement>(null);
   const imageFileRef = useRef<HTMLInputElement>(null);
-  const [docContextMenu, setDocContextMenu] = useState<{ x: number; y: number; tabId: string } | null>(null);
+  // tabId addresses an open tab. sharedDocId addresses a "Shared with
+  // me" row that isn't an open tab yet (allExtra) — its menu is a small
+  // Open / Remove-from-list variant keyed by cloudId, not tab id.
+  const [docContextMenu, setDocContextMenu] = useState<{ x: number; y: number; tabId: string; sharedDocId?: string; sharedDocTitle?: string } | null>(null);
   const [folderContextMenu, setFolderContextMenu] = useState<{ x: number; y: number; folderId: string; confirmDelete?: boolean } | null>(null);
   const [bundleContextMenu, setBundleContextMenu] = useState<{ x: number; y: number; bundleId: string; confirmDelete?: boolean } | null>(null);
   const [bundleShareModal, setBundleShareModal] = useState<{ bundleId: string } | null>(null);
@@ -1853,7 +1856,7 @@ export default function MdEditor() {
   // labels appear as substrings. Limited to top 80 most-cross-linked
   // concepts to keep the per-keystroke check cheap.
   const relatedConcepts = useMemo(() => {
-    if (!conceptIndex || !markdown) return [] as ConceptEntry[];
+    if (!conceptIndex || !Array.isArray(conceptIndex.concepts) || !markdown) return [] as ConceptEntry[];
     const text = markdown.toLowerCase();
     const candidates = conceptIndex.concepts.slice(0, 80);
     const found: ConceptEntry[] = [];
@@ -1877,7 +1880,21 @@ export default function MdEditor() {
       const res = await fetch("/api/user/concepts", { headers: authHeadersRef.current });
       if (res.ok) {
         const data = await res.json();
-        setConceptIndex(data);
+        // Normalize at the source: a malformed / partial payload (e.g.
+        // `{}` or `{concepts:null}`) must never reach the consumers, several
+        // of which do `conceptIndex.concepts.slice(...)` /
+        // `conceptIndex.stats.totalDocs` unguarded. Without this a single
+        // bad response crashed the whole editor the moment a doc with a
+        // non-empty body was opened (relatedConcepts memo).
+        setConceptIndex({
+          concepts: Array.isArray(data?.concepts) ? data.concepts : [],
+          stats: {
+            totalDocs: data?.stats?.totalDocs ?? 0,
+            decomposedDocs: data?.stats?.decomposedDocs ?? 0,
+            totalConcepts: data?.stats?.totalConcepts ?? 0,
+            crossLinkedConcepts: data?.stats?.crossLinkedConcepts ?? 0,
+          },
+        });
       }
     } catch { /* ignore */ }
     finally { setConceptsLoading(false); }
@@ -7188,6 +7205,83 @@ ${html}
     setShowSettings(false);
   }, []);
 
+  // Open a "Shared with me" entry that isn't an open tab yet (the
+  // allExtra rows in the sidebar — recent shared docs + share
+  // notifications). Materializes a readonly/editable tab, activates it,
+  // and loads it. Shared by the row's onClick AND the row's context-menu
+  // "Open" action so both paths behave identically.
+  const openSharedDocById = useCallback(async (doc: { id: string; title?: string }) => {
+    setShowOnboarding(false);
+    try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+    const existing = tabs.find(t => !t.deleted && t.cloudId === doc.id);
+    if (existing) { switchTab(existing.id); return; }
+    try {
+      const res = await fetch(`/api/docs/${doc.id}`, { headers: authHeaders });
+      if (!res.ok) {
+        console.error("[shared] Failed to load doc", doc.id, res.status, await res.text().catch(() => ""));
+        showToast("Couldn't open this shared document", "error");
+        return;
+      }
+      const d = await res.json();
+      const perm: "mine" | "editable" | "readonly" =
+        d.isOwner ? "mine"
+        : d.isEditor ? "editable"
+        : "readonly";
+      const newId = `tab-${Date.now()}`;
+      const newTab: Tab = { id: newId, title: d.title || doc.title || "Untitled", markdown: d.markdown, cloudId: doc.id, permission: perm, shared: perm !== "mine", ownerEmail: d.ownerEmail || undefined };
+      setTabs(prev => {
+        const dup = prev.find(t => !t.deleted && t.cloudId === doc.id);
+        if (dup) {
+          return prev.map(t => t.cloudId === doc.id ? { ...t, markdown: d.markdown, title: d.title || t.title } : t);
+        }
+        const saved = prev.map(t => t.id !== activeTabIdRef.current || t.readonly ? t : { ...t, markdown: markdownRef.current });
+        return [...saved, newTab];
+      });
+      activeTabIdRef.current = newTab.id;
+      setActiveTabId(newTab.id);
+      loadTab(newTab);
+      setDocId(doc.id);
+      setDocEditMode(d.editMode || "token");
+      setIsOwner(perm === "mine");
+      setIsSharedDoc(perm !== "mine");
+      setIsEditor(perm === "editable");
+      setTitle(d.title || doc.title || "Untitled");
+    } catch { window.location.href = `/?from=${doc.id}`; }
+  }, [tabs, switchTab, authHeaders, loadTab, showToast]);
+
+  // Drop a "Shared with me" doc the user is a recipient of. Removes
+  // their email from allowed_emails server-side (leave-share) so the
+  // row doesn't reappear on the next /api/user/recent hydration, closes
+  // any open tab for it, and prunes the local recent/notification feeds
+  // that feed the allExtra rows. Used by both the open-tab rows and the
+  // not-yet-open allExtra rows.
+  const removeSharedFromList = useCallback(async (docId: string) => {
+    if (user?.email) {
+      try {
+        await fetch(`/api/docs/${docId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", ...authHeaders },
+          body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
+        });
+      } catch { /* best-effort, still dismiss locally */ }
+    }
+    // Prune local feeds so the row can't re-render from cached state.
+    setRecentDocs(prev => prev.filter(d => d.id !== docId));
+    setNotifications(prev => prev.filter(n => n.documentId !== docId));
+    // Close any open tab for this doc.
+    const openTab = tabs.find(t => t.cloudId === docId);
+    setTabs(prev => prev.filter(t => t.cloudId !== docId));
+    if (openTab && openTab.id === activeTabId) {
+      const fb = pickFallbackTabAfterDelete(new Set([openTab.id]));
+      if (fb) switchTab(fb); else switchToStartSurface();
+    }
+    // Re-pull the shared feed authoritatively.
+    fetch("/api/user/recent", { headers: authHeaders })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d?.recent) setRecentDocs(d.recent.filter((x: { isOwner: boolean }) => !x.isOwner)); })
+      .catch(() => {});
+  }, [user?.email, authHeaders, tabs, activeTabId, pickFallbackTabAfterDelete, switchTab, switchToStartSurface]);
+
   // Delete document
   const [confirmDeleteDoc, setConfirmDeleteDoc] = useState(false);
   // Soft delete document on server. Returns a promise so callers can revert
@@ -10576,62 +10670,12 @@ ${clone.innerHTML}
                           key={`shared-${doc.id}`}
                           role="button"
                           tabIndex={0}
+                          data-shared-extra={doc.id}
                           className="flex items-center gap-1.5 px-2.5 py-1 rounded-md cursor-pointer group text-xs transition-colors hover:bg-[var(--toggle-bg)]"
                           style={{ color: "var(--text-secondary)" }}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            // Clicking a Shared-with-me entry should always
-                            // leave the Start surface — even if the doc is
-                            // already open, we're trying to view it now.
-                            setShowOnboarding(false);
-                            try { localStorage.setItem("mw-onboarded", "1"); } catch {}
-                            const existing = tabs.find(t => !t.deleted && t.cloudId === doc.id);
-                            if (existing) { switchTab(existing.id); return; }
-                            try {
-                              const res = await fetch(`/api/docs/${doc.id}`, { headers: authHeaders });
-                              if (!res.ok) {
-                                console.error("[shared] Failed to load doc", doc.id, res.status, await res.text().catch(() => ""));
-                                return;
-                              }
-                              const d = await res.json();
-                              // Editor-role docs (allowed_editors) come back
-                              // with isEditor=true. Default everyone else to
-                              // readonly. Without this branch the sidebar
-                              // entry opens as view-only even though the
-                              // server has the user in allowed_editors.
-                              const perm: "mine" | "editable" | "readonly" =
-                                d.isOwner ? "mine"
-                                : d.isEditor ? "editable"
-                                : "readonly";
-                              const newId = `tab-${Date.now()}`;
-                              const newTab: Tab = { id: newId, title: d.title || "Untitled", markdown: d.markdown, cloudId: doc.id, permission: perm, shared: perm !== "mine", ownerEmail: d.ownerEmail || undefined };
-                              // Render immediately, then update tabs
-                              setTabs(prev => {
-                                const dup = prev.find(t => !t.deleted && t.cloudId === doc.id);
-                                if (dup) {
-                                  return prev.map(t => t.cloudId === doc.id ? { ...t, markdown: d.markdown, title: d.title || t.title } : t);
-                                }
-                                const saved = prev.map(t => t.id !== activeTabIdRef.current || t.readonly ? t : { ...t, markdown: markdownRef.current });
-                                return [...saved, newTab];
-                              });
-                              // Activate the new tab BEFORE loading. Without
-                              // these two lines, the first click only added
-                              // the tab to state but left activeTabId on the
-                              // previous selection — so the editor canvas
-                              // kept rendering the old doc and the user had
-                              // to click a second time (which hit the
-                              // "existing" branch and switched correctly).
-                              activeTabIdRef.current = newTab.id;
-                              setActiveTabId(newTab.id);
-                              loadTab(newTab);
-                              setDocId(doc.id);
-                              setDocEditMode(d.editMode || "token");
-                              setIsOwner(perm === "mine");
-                              setIsSharedDoc(perm !== "mine");
-                              setIsEditor(perm === "editable");
-                              setTitle(d.title || "Untitled");
-                            } catch { window.location.href = `/?from=${doc.id}`; }
-                          }}
+                          onClick={(e) => { e.stopPropagation(); void openSharedDocById(doc); }}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void openSharedDocById(doc); } }}
+                          onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setDocContextMenu({ x: e.clientX, y: e.clientY, tabId: "", sharedDocId: doc.id, sharedDocTitle: doc.title || "Untitled" }); }}
                         >
                           <DocStatusIcon tab={{ permission: "readonly" }} isActive={false} />
                           <div className="flex-1 min-w-0">
@@ -10643,6 +10687,14 @@ ${clone.innerHTML}
                           {unreadDocIds.has(doc.id) && (
                             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--text-primary)" }} />
                           )}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); const rect = (e.currentTarget as HTMLElement).getBoundingClientRect(); setDocContextMenu({ x: rect.right, y: rect.bottom, tabId: "", sharedDocId: doc.id, sharedDocTitle: doc.title || "Untitled" }); }}
+                            className="shrink-0 rounded flex items-center justify-center w-0 group-hover:w-[18px] overflow-hidden transition-all duration-150"
+                            style={{ color: "var(--text-muted)", padding: "0" }}
+                            title="Document options"
+                          >
+                            <MoreHorizontal width={14} height={14} />
+                          </button>
                         </div>
                       ))}
                       {/* Drop zone for removing from shared folder */}
@@ -14907,6 +14959,17 @@ ${clone.innerHTML}
           }}
         >
           {(() => {
+            // "Shared with me" row that isn't an open tab yet (allExtra).
+            // Addressed by cloudId — no tab to look up — so it gets its
+            // own small Open / Remove-from-list menu.
+            if (docContextMenu.sharedDocId) {
+              const sid = docContextMenu.sharedDocId;
+              const stitle = docContextMenu.sharedDocTitle || "Untitled";
+              return [
+                { label: "Open", action: () => { void openSharedDocById({ id: sid, title: stitle }); } },
+                { label: "Remove from list", action: () => { void removeSharedFromList(sid); showToast("Removed from your list", "success"); }, danger: true },
+              ];
+            }
             const isExample = tabs.find(t => t.id === docContextMenu.tabId)?.ownerEmail === EXAMPLE_OWNER;
             const targetTab = tabs.find(t => t.id === docContextMenu.tabId);
             const isSharedWithMe = targetTab?.permission === "readonly" || targetTab?.permission === "editable";
@@ -14987,35 +15050,23 @@ ${clone.innerHTML}
                   URL.revokeObjectURL(url);
                 }
               }},
-              { label: "Remove from list", action: async () => {
-                // For shared docs (the user is a recipient, not the
-                // owner), 'Remove from list' must actually drop their
-                // email from allowed_emails on the server. Otherwise
-                // the doc keeps reappearing on the next /api/user/
-                // recent refresh, and the realtime channel still
-                // pushes 'updated elsewhere' toasts while it's open.
+              { label: "Remove from list", action: () => {
+                // Recipient (not owner): drop their email from
+                // allowed_emails server-side, close the tab, and prune
+                // the local feeds. Shared with the allExtra rows so both
+                // paths behave identically. If the tab has no cloudId
+                // (purely local), just close it.
                 const target = tabs.find(t => t.id === docContextMenu.tabId);
-                if (target?.cloudId && user?.email) {
-                  try {
-                    await fetch(`/api/docs/${target.cloudId}`, {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json", ...authHeaders },
-                      body: JSON.stringify({ action: "leave-share", userEmail: user.email }),
-                    });
-                  } catch { /* best-effort, still dismiss locally */ }
-                  // Also refresh the Shared-with-me feed so the row
-                  // doesn't reappear from /api/user/recent on the next
-                  // hydration.
-                  fetch("/api/user/recent", { headers: authHeaders })
-                    .then(r => (r.ok ? r.json() : null))
-                    .then(d => { if (d?.recent) setRecentDocs(d.recent.filter((x: { isOwner: boolean }) => !x.isOwner)); })
-                    .catch(() => {});
+                if (target?.cloudId) {
+                  void removeSharedFromList(target.cloudId);
+                } else {
+                  setTabs(prev => prev.filter(t => t.id !== docContextMenu.tabId));
+                  if (docContextMenu.tabId === activeTabId) {
+                    const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
+                    if (fb) switchTab(fb); else switchToStartSurface();
+                  }
                 }
-                setTabs(prev => prev.filter(t => t.id !== docContextMenu.tabId));
-                if (docContextMenu.tabId === activeTabId) {
-                  const fb = pickFallbackTabAfterDelete(new Set([docContextMenu.tabId]));
-                  if (fb) switchTab(fb); else switchToStartSurface();
-                }
+                showToast("Removed from your list", "success");
               }, danger: true },
             ] : [
               { label: "Rename", action: () => {
