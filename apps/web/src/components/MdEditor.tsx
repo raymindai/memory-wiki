@@ -7264,6 +7264,18 @@ ${html}
   const openSharedDocById = useCallback(async (doc: { id: string; title?: string }) => {
     setShowOnboarding(false);
     try { localStorage.setItem("mw-onboarded", "1"); } catch {}
+    // Opening the doc reads it — clear any unread share notification for it
+    // so the white "unread" dot doesn't linger after you've seen it.
+    const unreadIds = notifications.filter(n => !n.read && n.documentId === doc.id).map(n => n.id);
+    if (unreadIds.length > 0) {
+      setNotifications(prev => prev.map(n => n.documentId === doc.id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - unreadIds.length));
+      fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify({ ids: unreadIds }),
+      }).catch(() => {});
+    }
     const existing = tabs.find(t => !t.deleted && t.cloudId === doc.id);
     if (existing) { switchTab(existing.id); return; }
     try {
@@ -7298,7 +7310,7 @@ ${html}
       setIsEditor(perm === "editable");
       setTitle(d.title || doc.title || "Untitled");
     } catch { window.location.href = `/?from=${doc.id}`; }
-  }, [tabs, switchTab, authHeaders, loadTab, showToast]);
+  }, [tabs, switchTab, authHeaders, loadTab, showToast, notifications]);
 
   // Drop a "Shared with me" doc the user is a recipient of. Removes
   // their email from allowed_emails server-side (leave-share) so the
@@ -10628,18 +10640,14 @@ ${clone.innerHTML}
                 recentSeen.add(d.id);
                 return true;
               });
-              const notifSeen = new Set<string>();
-              const notifDocs = notifications
-                .filter(n => {
-                  if (n.type !== "share" || !n.documentId) return false;
-                  if (allCloudIds.has(n.documentId) || myCloudIds.has(n.documentId)) return false;
-                  if (recentSeen.has(n.documentId)) return false;
-                  if (notifSeen.has(n.documentId)) return false;
-                  notifSeen.add(n.documentId);
-                  return true;
-                })
-                .map(n => ({ id: n.documentId, title: n.documentTitle, isOwner: false, editMode: "view", ownerName: n.fromUserName }));
-              const allExtra = [...extraShared, ...notifDocs];
+              // NOTE: share *notifications* are intentionally NOT a source
+              // for this section anymore. A notification can exist for a doc
+              // that was never (or no longer) in allowed_emails — those
+              // showed up here as un-removable rows (often with a stale
+              // unread dot) even though the user isn't actually shared on
+              // them. /api/user/shared (extraShared) is the single source of
+              // truth; notifications live in the bell only.
+              const allExtra = extraShared;
               const totalShared = dedupedSharedTabs.length + allExtra.length;
               return (<>
                 <div className="shrink-0 flex flex-col">
