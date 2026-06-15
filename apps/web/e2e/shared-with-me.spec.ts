@@ -69,10 +69,10 @@ async function seedAuthCookie(context: BrowserContext) {
 }
 
 // Tracks server interactions so we can assert leave-share fired.
-type Calls = { docGet: number; leaveShare: Array<Record<string, unknown>> };
+type Calls = { docGet: number; leaveShare: Array<Record<string, unknown>>; recentGets: number; left: boolean };
 
 async function routeApi(page: Page): Promise<Calls> {
-  const calls: Calls = { docGet: 0, leaveShare: [] };
+  const calls: Calls = { docGet: 0, leaveShare: [], recentGets: 0, left: false };
 
   // Register the broad handlers FIRST so the specific ones below
   // (registered later → checked first by Playwright's LIFO order) win.
@@ -98,15 +98,21 @@ async function routeApi(page: Page): Promise<Calls> {
     }
     let body: Record<string, unknown> = {};
     try { body = JSON.parse(req.postData() || "{}"); } catch { /* ignore */ }
-    if (body.action === "leave-share") calls.leaveShare.push(body);
+    if (body.action === "leave-share") {
+      calls.leaveShare.push(body);
+      // Mirror the real server: leave-share deletes the visit_history
+      // row, so subsequent /api/user/recent no longer returns this doc.
+      calls.left = true;
+    }
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
   });
 
-  // Recent feed → one shared doc (isOwner:false) → renders as an allExtra row.
+  // Recent feed → one shared doc (isOwner:false) → renders as an allExtra
+  // row, UNTIL the user leaves the share (visit_history row deleted).
   await page.route("**/api/user/recent**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
-      recent: [{ id: SHARED_ID, title: SHARED_TITLE, visitedAt: "2026-01-01T00:00:00Z", isOwner: false, editMode: "view", ownerEmail: "owner@memory.wiki" }],
-    }) });
+    calls.recentGets++;
+    const recent = calls.left ? [] : [{ id: SHARED_ID, title: SHARED_TITLE, visitedAt: "2026-01-01T00:00:00Z", isOwner: false, editMode: "view", ownerEmail: "owner@memory.wiki" }];
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ recent }) });
   });
 
   return calls;
@@ -204,5 +210,34 @@ test.describe("Shared with me — not-yet-open rows", () => {
     await expect(row).toHaveCount(0, { timeout: 5000 });
     expect(calls.leaveShare.length).toBeGreaterThan(0);
     expect(calls.leaveShare[0]).toMatchObject({ action: "leave-share", userEmail: USER_EMAIL });
+
+    // And it must STAY gone: the client re-pulls /api/user/recent after
+    // leave-share, and the server (now without the visit_history row)
+    // returns an empty feed. This is the "removed but it keeps coming
+    // back" regression — the row must not reappear.
+    await expect.poll(() => calls.recentGets, { timeout: 5000 }).toBeGreaterThan(1);
+    await page.waitForTimeout(1000);
+    await expect(row).toHaveCount(0);
+  });
+
+  test("refresh on an opened shared doc stays in the editor, not the viewer", async ({ page, context }) => {
+    await seedAuthCookie(context);
+    await routeApi(page);
+    await boot(page);
+
+    // Open the shared doc from the row (URL → /{id}).
+    const row = page.locator(`[data-shared-extra="${SHARED_ID}"]`);
+    await expect(row).toBeVisible({ timeout: 10000 });
+    await row.click();
+    await expect(page.getByText("SHARED BODY CONTENT", { exact: false }).first()).toBeVisible({ timeout: 8000 });
+    expect(new URL(page.url()).pathname).toBe(`/${SHARED_ID}`);
+
+    // Refresh — the editor (sidebar + body) must come back; we must NOT
+    // get bounced to the bare public /d/{id} viewer.
+    await page.reload();
+    await page.waitForSelector(".ProseMirror", { timeout: 20000 });
+    await expect(page.getByText("LIBRARY", { exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("SHARED BODY CONTENT", { exact: false }).first()).toBeVisible({ timeout: 8000 });
+    expect(new URL(page.url()).pathname.startsWith("/d/")).toBe(false);
   });
 });

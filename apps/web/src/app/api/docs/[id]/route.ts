@@ -398,8 +398,24 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     // (a signed-in user clicking 'Remove from list') always sends a
     // Bearer token, so verified.email is populated on the legit path.
     const callerEmail = (verified?.email || "").trim().toLowerCase();
+    const callerUserId = verified?.userId || null;
     if (!callerEmail) {
       return NextResponse.json({ error: "Sign in to leave a shared document" }, { status: 401 });
+    }
+
+    // ALWAYS drop the visit_history row first. "Shared with me" is fed by
+    // /api/user/recent, which reads visit_history — NOT the share lists.
+    // If we only edited allowed_emails the doc would keep coming back on
+    // the next recent refresh (it's still a doc the user once visited).
+    // This is the "removed it but it keeps reappearing" bug. Delete the
+    // visit row so the doc actually leaves the feed; do it even for
+    // public docs the user was never email-restricted on.
+    if (callerUserId) {
+      await supabase
+        .from("visit_history")
+        .delete()
+        .eq("user_id", callerUserId)
+        .eq("document_id", id);
     }
 
     const { data: doc } = await supabase
@@ -414,8 +430,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const wasViewer = allowedEmails.map((e) => e.toLowerCase()).includes(callerEmail);
     const wasEditor = allowedEditors.map((e) => e.toLowerCase()).includes(callerEmail);
     if (!wasViewer && !wasEditor) {
-      // Public doc with no email-restriction — nothing to leave from
-      // server-side. Client should still locally dismiss the row.
+      // Public doc with no email-restriction — nothing to leave from the
+      // access lists, but the visit_history row is already gone so the
+      // row drops out of the feed.
       return NextResponse.json({ ok: true, removed: false });
     }
     const updates: Record<string, unknown> = {};
