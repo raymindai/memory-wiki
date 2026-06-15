@@ -1478,8 +1478,26 @@ export default function MdEditor() {
   const mathSourceIndexRef = useRef<number>(-1); // character offset of the math block in markdown
   const [showMathModal, setShowMathModal] = useState(false);
   const [codeEditState, setCodeEditState] = useState<{ lang: string; code: string } | null>(null);
-  const [showSidebar, setShowSidebar] = useState(!isMobile);
+  const [showSidebar, setShowSidebar] = useState(() => {
+    // Mobile: sidebar is an overlay, always start closed.
+    // Desktop: remember the user's last open/closed choice.
+    if (isMobile) return false;
+    if (typeof window === "undefined") return true;
+    try {
+      const v = localStorage.getItem("mw-sidebar-open");
+      return v === null ? true : v === "true";
+    } catch { return true; }
+  });
   const [sidebarClosing, setSidebarClosing] = useState(false);
+  // Library header "+" menu (New document / New bundle / Import).
+  const [showLibraryAddMenu, setShowLibraryAddMenu] = useState(false);
+  // Persist the desktop sidebar open/closed state so a reload restores
+  // it. Mobile is excluded — its sidebar is a transient overlay that
+  // should always reopen closed.
+  useEffect(() => {
+    if (isMobile) return;
+    try { localStorage.setItem("mw-sidebar-open", String(showSidebar)); } catch { /* quota */ }
+  }, [showSidebar, isMobile]);
   const closeSidebar = useCallback(() => {
     if (isMobile) {
       setSidebarClosing(true);
@@ -8822,19 +8840,58 @@ ${clone.innerHTML}
                   </Tooltip>
                 );
               })()}
-              {/* Direct Import button — replaces the old + dropdown.
-                  New document / New bundle are now reachable from
-                  each section's own + button, so the Library header
-                  doesn't need to mediate them. One click → modal. */}
-              <Tooltip text="Import from Files, GitHub, Obsidian, URL, or Notion">
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowImportModal(true); }}
-                  className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]" data-action="import"
-                  style={{ color: "var(--text-faint)" }}
-                >
-                  <Download width={12} height={12} />
-                </button>
-              </Tooltip>
+              {/* "+" menu — one entry point for creating / bringing in
+                  content: New document, New bundle, Import. Per-section
+                  "+" buttons still exist; this is the library-level
+                  shortcut the founder asked for in the header. */}
+              <div className="relative flex items-stretch">
+                <Tooltip text="New document, bundle, or import">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowLibraryAddMenu(v => !v); }}
+                    className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[var(--toggle-bg)]"
+                    data-action="library-add"
+                    style={{ color: showLibraryAddMenu ? "var(--text-primary)" : "var(--text-faint)", background: showLibraryAddMenu ? "var(--toggle-bg)" : "transparent" }}
+                  >
+                    <Plus width={13} height={13} />
+                  </button>
+                </Tooltip>
+                {showLibraryAddMenu && (
+                  <>
+                    {/* click-away backdrop */}
+                    <div className="fixed inset-0 z-[60]" onClick={(e) => { e.stopPropagation(); setShowLibraryAddMenu(false); }} />
+                    <div
+                      className="absolute right-0 top-7 z-[61] rounded-lg overflow-hidden py-1"
+                      style={{ minWidth: 190, background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 8px 28px rgba(0,0,0,0.35)" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => { setShowLibraryAddMenu(false); addTab(); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <FileText width={13} height={13} style={{ color: "var(--text-secondary)" }} />
+                        <span className="text-caption">New document</span>
+                      </button>
+                      <button
+                        onClick={() => { setShowLibraryAddMenu(false); setBundleCreatorDocs([]); setShowBundleCreator(true); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <Layers width={13} height={13} style={{ color: "var(--text-secondary)" }} />
+                        <span className="text-caption">New bundle</span>
+                      </button>
+                      <button
+                        onClick={() => { setShowLibraryAddMenu(false); setShowImportModal(true); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 text-left transition-colors hover:bg-[var(--toggle-bg)]"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <Download width={13} height={13} style={{ color: "var(--text-secondary)" }} />
+                        <span className="text-caption">Import…</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
               <Tooltip text="Refresh from server">
                 <button
                   id="sidebar-refresh-btn"
