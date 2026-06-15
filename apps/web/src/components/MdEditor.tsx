@@ -157,6 +157,28 @@ import {
  * heading anchor, or if the same heading appears more than once in
  * the original (ambiguous — safer to refuse).
  */
+// Render `text` with every occurrence of the search query's terms wrapped
+// in a <mark> so the user can see WHY a result matched. Case-insensitive,
+// multi-term (splits on whitespace), longest-first so overlapping terms
+// don't double-wrap. Returns plain text when there's no query.
+function highlightSearch(text: string, query: string): React.ReactNode {
+  const q = (query || "").trim();
+  if (!q || !text) return text;
+  const terms = Array.from(new Set(q.toLowerCase().split(/\s+/).filter(t => t.length > 1)))
+    .sort((a, b) => b.length - a.length)
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (terms.length === 0) return text;
+  // Capturing group → String.split keeps the matches at odd indices.
+  const re = new RegExp(`(${terms.join("|")})`, "gi");
+  const parts = text.split(re);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1
+      ? <mark key={i} className="mw-search-hit">{part}</mark>
+      : <span key={i}>{part}</span>
+  );
+}
+
 function trySpliceFragmentIntoOriginal(original: string, fragment: string): string | null {
   const headingRe = /^(#{1,6})\s+(.+?)\s*$/m;
   const fragMatch = fragment.match(headingRe);
@@ -10498,7 +10520,11 @@ ${clone.innerHTML}
                                   Cloud results ({uniqueResults.length})
                                 </div>
                                 {uniqueResults.map(r => {
-                                  const snippet = (r.snippet || "").slice(0, 80);
+                                  // Server already returns a match-context
+                                  // snippet (window around the first hit);
+                                  // keep it whole so the highlighted term is
+                                  // visible instead of slicing it off.
+                                  const snippet = r.snippet || "";
                                   const ago = r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : "";
                                   return (
                                     <div
@@ -10517,10 +10543,10 @@ ${clone.innerHTML}
                                         }
                                       }}
                                     >
-                                      <Search width={11} height={11} className="shrink-0" style={{ color: "var(--text-primary)" }} />
+                                      <Search width={11} height={11} className="shrink-0 mt-0.5 self-start" style={{ color: "var(--text-faint)" }} />
                                       <div className="flex-1 min-w-0">
-                                        <div className="text-caption font-medium truncate" style={{ color: "var(--text-primary)" }}>{r.title}</div>
-                                        <div className="text-caption truncate" style={{ color: "var(--text-faint)" }}>{snippet || ago}</div>
+                                        <div className="text-caption font-medium truncate" style={{ color: "var(--text-primary)" }}>{highlightSearch(r.title, sidebarSearchDebounced)}</div>
+                                        <div className="text-caption line-clamp-2" style={{ color: "var(--text-faint)" }}>{snippet ? highlightSearch(snippet, sidebarSearchDebounced) : ago}</div>
                                       </div>
                                     </div>
                                   );
@@ -16967,6 +16993,11 @@ ${clone.innerHTML}
           id: string;
           label: string;
           hint?: string;
+          // Optional pre-rendered label/hint (e.g. with search-term
+          // highlights). When present they render instead of the plain
+          // strings; label/hint stay for matching / a11y.
+          labelNode?: React.ReactNode;
+          hintNode?: React.ReactNode;
           icon: React.ReactNode;
           kbd?: string;
           action: () => void;
@@ -17059,7 +17090,9 @@ ${clone.innerHTML}
         const matchedDocs: PaletteItem[] = cmdSearchResults.map(r => ({
           id: `doc-${r.id}`,
           label: r.title || "Untitled",
-          hint: (r.snippet || "").slice(0, 80),
+          hint: r.snippet || "",
+          labelNode: highlightSearch(r.title || "Untitled", cmdSearch),
+          hintNode: r.snippet ? highlightSearch(r.snippet, cmdSearch) : undefined,
           icon: <FileText width={13} height={13} />,
           action: () => openDocById(r.id, r.title),
         }));
@@ -17139,8 +17172,8 @@ ${clone.innerHTML}
                             >
                               <span className="shrink-0" style={{ color: active ? "var(--text-primary)" : "var(--text-muted)" }}>{item.icon}</span>
                               <span className="flex-1 min-w-0 flex items-baseline gap-2">
-                                <span className="truncate">{item.label}</span>
-                                {item.hint && <span className="text-caption truncate" style={{ color: "var(--text-faint)" }}>{item.hint}</span>}
+                                <span className="truncate">{item.labelNode ?? item.label}</span>
+                                {(item.hintNode ?? item.hint) && <span className="text-caption truncate" style={{ color: "var(--text-faint)" }}>{item.hintNode ?? item.hint}</span>}
                               </span>
                               {item.kbd && <span className="text-caption font-mono px-1.5 py-0.5 rounded shrink-0" style={{ color: "var(--text-faint)", background: "var(--toggle-bg)" }}>{item.kbd}</span>}
                             </button>

@@ -2154,6 +2154,17 @@ textarea::selection {
 .mw-fold-hidden {
   display: none !important;
 }
+/* Search-hit highlight — wraps matched query terms in sidebar / palette
+   search results. Subtle accent wash + full ink so the matched word reads
+   without shouting. */
+.mw-search-hit {
+  background: var(--accent-dim);
+  color: var(--text-primary);
+  border-radius: 3px;
+  padding: 0 1px;
+  font-weight: 600;
+}
+
 /* Sidebar section expand animation. The content unmounts on collapse, so
    this is an enter-only animation: when a section opens, its rows fade +
    slide down briefly. Pairs with the chevron's rotate transition for a
