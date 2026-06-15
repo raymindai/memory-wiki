@@ -2571,22 +2571,18 @@ export default function MdEditor() {
     const h1Title = tab.markdown ? extractTitleFromMd(tab.markdown) : "";
     const initialTitle = (h1Title && h1Title !== "Untitled") ? h1Title : tab.title;
     setTitle(initialTitle || undefined);
-    // Backfill the in-memory tab + auto-save when the stored title was
-    // out of sync with the H1. Without this the next save would still
-    // carry the stale title; with this, server + UI converge on H1.
+    // Backfill the in-memory tab title when the stored title was out of
+    // sync with the H1 — LOCAL ONLY. We deliberately do NOT auto-save on
+    // open: pushing a PATCH the instant a doc is opened (just because the
+    // stored title lagged the H1) is exactly what produced phantom
+    // "Document Conflict" dialogs on docs the user never typed in — and a
+    // surprise write to a shared doc you merely viewed. The sibling fetch
+    // branch already dropped this save for the same reason (see its
+    // comment). The local title set below keeps MDs / Recent / the header
+    // correct for the session; the next real edit converges the server
+    // naturally.
     if (h1Title && h1Title !== "Untitled" && h1Title !== tab.title) {
       setTabs(prev => prev.map(t => t.id === tab.id ? { ...t, title: h1Title } : t));
-      if (tab.cloudId) {
-        autoSave.scheduleSave({
-          cloudId: tab.cloudId,
-          markdown: tab.markdown,
-          title: h1Title,
-          userId: user?.id,
-          userEmail: user?.email,
-          anonymousId,
-          editToken: tab.editToken,
-        });
-      }
     }
     // Cancel any pending debounced render from CodeMirror
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -2728,6 +2724,26 @@ export default function MdEditor() {
       redoStack.current = [];
       doRenderRef.current(tab.markdown);
       tiptapRef.current?.setMarkdown(tab.markdown);
+      // CRITICAL conflict-detection seed for the "tab already has its
+      // body" path (tab switch, Shared-with-me open, restored tab). The
+      // sibling branch above (cloud tab with no cached body) seeds these
+      // after its fetch, but THIS branch used to skip it entirely — so
+      // the body-hash baseline kept the PREVIOUS tab's body (or ""), and
+      // the very next save sent a wrong expectedHash → a false "Document
+      // Conflict" on a doc nobody else touched. tab.markdown is exactly
+      // the body we believe the server holds (it came from the server on
+      // open or was written by our own last save), so it's the correct
+      // baseline.
+      if (tab.cloudId) {
+        autoSave.setLastServerBody(tab.markdown);
+        lastSyncedMdRef.current = tab.markdown;
+        // We don't carry the server's updated_at on a cached tab, and a
+        // stale timestamp from the previously-active doc would mis-gate
+        // the external-update check. Clear it — the next realtime /
+        // visibility fetch re-seeds it from the server, and conflict
+        // detection keys on the body hash regardless.
+        autoSave.setLastServerUpdatedAt("");
+      }
       queueMicrotask(() => {
         if (activeTabIdRef.current === tab.id) {
           tabSwitchInFlightRef.current = false;

@@ -113,3 +113,89 @@ test.describe("Body-hash conflict detection", () => {
     expect(s.conflicts).toBeGreaterThan(0);
   });
 });
+
+// Regression: switching to a second doc (whose body is already cached on
+// the tab — the loadTab "else" branch) used to NOT re-seed the conflict
+// baseline, so it kept the FIRST doc's body. The first edit on doc B then
+// sent expectedHash(docA) and the server 409'd a phantom "Document
+// Conflict" on a doc nobody else touched.
+const A_BODY = "# Doc A\n\nalpha body\n";
+const B_BODY = "# Doc B\n\nbravo body\n";
+
+function seedTwoTabs(page: Page) {
+  return page.addInitScript((args) => {
+    localStorage.setItem("mw-onboarded", "1");
+    localStorage.setItem("mw-welcome-seen", "1");
+    localStorage.setItem("mw-welcome-seen-v7", "1");
+    localStorage.setItem("mw-editor-opened", "1");
+    localStorage.setItem("mw-tabs-version", "10");
+    localStorage.setItem("sb-e2e-auth-token", JSON.stringify({ access_token: "e2e-fake", user: { id: "e2e-user" } }));
+    localStorage.setItem("mw-tabs", JSON.stringify([
+      { id: "tab-a", title: "Doc A", markdown: args.a, readonly: false, permission: "mine", isDraft: false, cloudId: "doc-a" },
+      { id: "tab-b", title: "Doc B", markdown: args.b, readonly: false, permission: "mine", isDraft: false, cloudId: "doc-b" },
+    ]));
+    localStorage.setItem("mw-active-tab", "tab-a");
+  }, { a: A_BODY, b: B_BODY });
+}
+
+// Two-doc server stub, each with its own body-hash conflict check.
+function stubTwo(page: Page) {
+  const docs: Record<string, { body: string; updatedAt: string }> = {
+    "doc-a": { body: A_BODY, updatedAt: "2020-01-01T00:00:00Z" },
+    "doc-b": { body: B_BODY, updatedAt: "2020-01-01T00:00:00Z" },
+  };
+  const tally = { conflicts: 0, savesB: 0 };
+  page.route("**/api/docs/**", async (route) => {
+    const req = route.request();
+    const m = req.url().match(/\/api\/docs\/(doc-[ab])/);
+    const id = m?.[1];
+    const d = id ? docs[id] : undefined;
+    if (!d) { await route.fulfill({ status: 200, contentType: "application/json", body: "{}" }); return; }
+    if (req.method() === "GET") {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ id, markdown: d.body, title: id, updated_at: d.updatedAt, isOwner: true, isEditor: false, editMode: "account", allowedEmails: [], allowedEditors: [] }) });
+      return;
+    }
+    let b: Record<string, unknown> = {};
+    try { b = JSON.parse(req.postData() || "{}"); } catch { /* ignore */ }
+    if (b.action === "auto-save") {
+      if (typeof b.expectedHash === "string" && b.expectedHash.length > 0 && b.expectedHash !== contentHash(d.body)) {
+        tally.conflicts++;
+        await route.fulfill({ status: 409, contentType: "application/json", body: JSON.stringify({ error: "Conflict", conflict: true, serverMarkdown: d.body, serverUpdatedAt: d.updatedAt }) });
+        return;
+      }
+      if (typeof b.markdown === "string") { d.body = b.markdown; d.updatedAt = new Date().toISOString(); if (id === "doc-b") tally.savesB++; }
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, id, editToken: "t", updated_at: d.updatedAt }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, id, updated_at: new Date().toISOString() }) });
+  });
+  return tally;
+}
+
+test.describe("Body-hash conflict detection — tab switch", () => {
+  test.describe.configure({ timeout: 70_000 });
+
+  test("editing a doc opened via tab switch does NOT raise a phantom conflict", async ({ page }) => {
+    const tally = stubTwo(page);
+    await seedTwoTabs(page);
+    await page.goto("/?e2e=1");
+    await page.waitForSelector(".ProseMirror[contenteditable='true']", { timeout: 20000 });
+    await page.waitForTimeout(500);
+
+    // Switch from Doc A to Doc B via the sidebar.
+    await page.getByText("Doc B", { exact: true }).first().click();
+    await page.waitForTimeout(700);
+
+    // Edit Doc B.
+    const editor = page.locator(".ProseMirror[contenteditable='true']").first();
+    await editor.click();
+    await page.keyboard.press("ControlOrMeta+End");
+    await page.keyboard.type(" EDITED-IN-B", { delay: 15 });
+    await page.waitForTimeout(3500);
+
+    // No phantom conflict; the edit saved to Doc B with a correct hash.
+    await expect(page.getByText("Document Conflict", { exact: false })).toHaveCount(0);
+    expect(tally.conflicts).toBe(0);
+    expect(tally.savesB).toBeGreaterThan(0);
+  });
+});
