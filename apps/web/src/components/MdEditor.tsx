@@ -1671,10 +1671,19 @@ export default function MdEditor() {
     const s = localStorage.getItem("mw-bundles-sort");
     return (s && SECTION_SORT_OPTIONS.find((o) => o.value === s)) ? (s as SectionSortMode) : "newest";
   });
+  // Shared-with-me sort. No "custom" — you can't drag-reorder docs other
+  // people shared with you, so the drag option is omitted for this section.
+  const SHARED_SORT_OPTIONS = SECTION_SORT_OPTIONS.filter((o) => o.value !== "custom");
+  const [sharedSortMode, setSharedSortMode] = useState<SectionSortMode>(() => {
+    if (typeof window === "undefined") return "newest";
+    const s = localStorage.getItem("mw-shared-sort");
+    return (s && SHARED_SORT_OPTIONS.find((o) => o.value === s)) ? (s as SectionSortMode) : "newest";
+  });
   useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mw-mds-sort", mdsSortMode); }, [mdsSortMode]);
   useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mw-bundles-sort", bundlesSortMode); }, [bundlesSortMode]);
+  useEffect(() => { if (typeof window !== "undefined") localStorage.setItem("mw-shared-sort", sharedSortMode); }, [sharedSortMode]);
   // Which section's sort menu is currently open (null = none).
-  const [openSortMenu, setOpenSortMenu] = useState<"mds" | "bundles" | null>(null);
+  const [openSortMenu, setOpenSortMenu] = useState<"mds" | "bundles" | "shared" | null>(null);
   // Recently visited tabs (max 7, most-recent-first). Stored separately from
   // `tabs` so clicking a tab does NOT re-sort the main tree (jumpy UX).
   const [recentTabIds, setRecentTabIds] = useState<string[]>(() => {
@@ -3279,6 +3288,11 @@ export default function MdEditor() {
         if (!isDraggingSidebarRef.current) {
           if (recentTabIds.includes(tabId) && recentTabIds[0] !== tabId) captureRecentRects();
           setRecentTabIds(prev => [tabId, ...prev.filter(id => id !== tabId)].slice(0, 25));
+          // Bump lastOpenedAt so the doc rises to the top in the MDs /
+          // Bundles "Newest" sort — same recency behaviour Recent has.
+          // SidebarFolder's FLIP pass animates the slide automatically;
+          // other sort modes (A-Z / custom / oldest) are unaffected.
+          setTabs(prev => prev.map(t => t.id === tabId ? { ...t, lastOpenedAt: Date.now() } : t));
         }
       } else if (recentTabIds.includes(tabId) && recentTabIds[0] !== tabId) {
         // Already active and already in Recent but not at the top —
@@ -10615,11 +10629,21 @@ ${clone.innerHTML}
               });
               // Deduplicate sharedTabs by cloudId (prevent duplicate entries)
               const seenCloudIds = new Set<string>();
-              const dedupedSharedTabs = sharedTabs.filter(t => {
+              const dedupedSharedTabsUnsorted = sharedTabs.filter(t => {
                 if (!t.cloudId) return true;
                 if (seenCloudIds.has(t.cloudId)) return false;
                 seenCloudIds.add(t.cloudId);
                 return true;
+              });
+              // Shared-with-me sort (newest/oldest/az/za). Open tabs sort by
+              // lastOpenedAt; the not-open rows below sort by updatedAt — same
+              // mode, applied per group so the section reads as one sorted list.
+              const sharedCmpTitle = (a: string, b: string) =>
+                sharedSortMode === "za" ? (b || "").localeCompare(a || "") : (a || "").localeCompare(b || "");
+              const dedupedSharedTabs = [...dedupedSharedTabsUnsorted].sort((a, b) => {
+                if (sharedSortMode === "az" || sharedSortMode === "za") return sharedCmpTitle(a.title || "", b.title || "");
+                const at = a.lastOpenedAt ?? 0, bt = b.lastOpenedAt ?? 0;
+                return sharedSortMode === "oldest" ? at - bt : bt - at;
               });
               // Include deleted tabs' cloudIds so they don't reappear in extraShared
               const allCloudIds = new Set(tabs.filter(t => t.cloudId).map(t => t.cloudId!));
@@ -10639,6 +10663,11 @@ ${clone.innerHTML}
                 if (recentSeen.has(d.id)) return false;
                 recentSeen.add(d.id);
                 return true;
+              }).sort((a, b) => {
+                if (sharedSortMode === "az" || sharedSortMode === "za") return sharedCmpTitle(a.title || "", b.title || "");
+                const at = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+                const bt = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+                return sharedSortMode === "oldest" ? at - bt : bt - at;
               });
               // NOTE: share *notifications* are intentionally NOT a source
               // for this section anymore. A notification can exist for a doc
@@ -10663,6 +10692,36 @@ ${clone.innerHTML}
                       style={{ transform: showSharedDocs ? "rotate(0deg)" : "rotate(-90deg)" }}
                     />
                     <span className={`flex-1 text-caption font-medium transition-colors ${showSharedDocs ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] group-hover/sec:text-[var(--text-primary)]"}`}>Shared with me</span>
+                    {showSharedDocs && totalShared > 0 && (
+                      <div className="relative" onClick={(e) => e.stopPropagation()}>
+                        <Tooltip text={`Sort: ${SHARED_SORT_OPTIONS.find((o) => o.value === sharedSortMode)?.label}`}>
+                          <button
+                            onClick={() => setOpenSortMenu((m) => m === "shared" ? null : "shared")}
+                            className="mw-shdr-btn w-5 h-5 rounded flex items-center justify-center hover:bg-[var(--toggle-bg)]" data-action="sort"
+                            style={{ color: "var(--text-faint)" }}
+                          >
+                            <ArrowUpDown width={11} height={11} />
+                          </button>
+                        </Tooltip>
+                        {openSortMenu === "shared" && (<>
+                          <div className="fixed inset-0 z-[9997]" onClick={() => setOpenSortMenu(null)} />
+                          <div className="absolute top-full right-0 mt-1 w-36 rounded-lg py-1 z-[9998]"
+                            style={{ background: "var(--menu-bg)", border: "1px solid var(--border)", boxShadow: "0 8px 24px rgba(0,0,0,0.45)" }}
+                          >
+                            {SHARED_SORT_OPTIONS.map((opt) => (
+                              <button
+                                key={opt.value}
+                                onClick={() => { setSharedSortMode(opt.value); setOpenSortMenu(null); }}
+                                className="w-full text-left px-3 py-1.5 text-caption hover:bg-[var(--menu-hover)]"
+                                style={{ color: sharedSortMode === opt.value ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: sharedSortMode === opt.value ? 600 : 400 }}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </>)}
+                      </div>
+                    )}
                     <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>{totalShared}</span>
                   </div>
                   {showSharedDocs && (
