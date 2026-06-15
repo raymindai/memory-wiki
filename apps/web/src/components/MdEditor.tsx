@@ -9498,7 +9498,7 @@ ${clone.innerHTML}
                           style={{ color: "var(--text-faint)" }}
                           title="Unstar"
                         >
-                          <Star width={10} height={10} style={{ fill: "currentColor" }} />
+                          <Star width={11} height={11} style={{ fill: "none" }} />
                         </button>
                       </div>
                     );
@@ -9875,7 +9875,7 @@ ${clone.innerHTML}
                         return (
                           <span className="inline-flex items-center gap-1.5">
                             {starred && (
-                              <Star width={10} height={10} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                              <Star width={11} height={11} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
                             )}
                             <Tooltip text={`${bundle.documentCount} document${bundle.documentCount === 1 ? "" : "s"} in this bundle`}>
                               <span className="text-caption tabular-nums" style={{ color: "var(--text-faint)", opacity: 0.6 }}>
@@ -9885,6 +9885,7 @@ ${clone.innerHTML}
                           </span>
                         );
                       }}
+                      isTabStarred={(item) => !!(item.cloudId && isPinned("bundle", item.cloudId))}
                       renamingItem={renamingItem}
                       setRenamingItem={setRenamingItem}
                       handlers={{
@@ -10018,6 +10019,10 @@ ${clone.innerHTML}
                         onTabKebab: (itemId, rect) => {
                           const bundleId = itemId.replace(/^bundle-item-/, "");
                           setBundleContextMenu({ x: rect.right, y: rect.bottom, bundleId });
+                        },
+                        onTabStar: (itemId) => {
+                          const bundleId = itemId.replace(/^bundle-item-/, "");
+                          if (bundleId) void togglePin("bundle", bundleId);
                         },
                         onDropTabIntoFolder: (itemId, folderId) => {
                           const bundleId = itemId.replace(/^bundle-item-/, "");
@@ -10265,7 +10270,7 @@ ${clone.innerHTML}
                           </span>
                         ) : null}
                         renderTabBadge={(tab) => (tab.cloudId && isPinned("document", tab.cloudId)) ? (
-                          <Star width={10} height={10} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
+                          <Star width={11} height={11} style={{ color: "var(--micro-warn)", fill: "var(--micro-warn)" }} aria-label="Starred" />
                         ) : null}
                         isTabStarred={(tab) => !!(tab.cloudId && isPinned("document", tab.cloudId))}
                         renamingItem={renamingItem}

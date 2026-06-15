@@ -514,7 +514,11 @@ const TabRow = memo(function TabRow(p: TabRowProps) {
             className="shrink-0 rounded flex items-center justify-center w-0 group-hover/tab:w-[22px] overflow-hidden transition-all duration-150 hover:bg-[var(--toggle-bg)]"
             style={{ color: p.starred ? "var(--micro-warn)" : "var(--text-muted)" }}
           >
-            <Star width={14} height={14} fill={p.starred ? "currentColor" : "none"} />
+            {/* Always an OUTLINE star on hover — it's the toggle action
+                ("click to star / unstar"); the filled state is shown by
+                the always-on badge when not hovering. Sized to match the
+                badge so there's no jump. */}
+            <Star width={11} height={11} fill="none" />
           </button>
         </Tooltip>
       )}
