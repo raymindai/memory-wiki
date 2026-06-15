@@ -10587,11 +10587,13 @@ ${clone.innerHTML}
                 if (t.deleted || t.folderId) return false;
                 if (t.ownerEmail === EXAMPLE_OWNER) return false;
                 if (t.permission !== "readonly" && t.permission !== "editable") return false;
-                // Editor-role (allowed_editors) is always a real share.
-                // Read-only must be confirmed shared — either the tab's own
-                // server-fetched flag, or the server recent feed — otherwise
-                // a public doc opened read-only would masquerade as a share.
-                if (t.permission === "readonly" && !t.sharedWithMe && t.cloudId && !sharedWithMeIds.has(t.cloudId)) return false;
+                // The server's /api/user/shared list is the single source of
+                // truth for "shared with me". A tab shows here ONLY if that
+                // list still includes its cloudId — so stale local tabs for
+                // docs that were un-shared or deleted (the "couldn't open"
+                // rows that kept coming back from localStorage) drop out, and
+                // we don't trust a possibly-stale cached t.sharedWithMe flag.
+                if (!t.cloudId || !sharedWithMeIds.has(t.cloudId)) return false;
                 if (sidebarSearchDebounced) {
                   const q = sidebarSearchDebounced.toLowerCase();
                   if (!(t.title || "").toLowerCase().includes(q) && !(t.markdown || "").slice(0, 3000).toLowerCase().includes(q)) return false;
