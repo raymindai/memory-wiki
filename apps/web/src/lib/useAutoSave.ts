@@ -138,8 +138,13 @@ export function useAutoSave(opts: AutoSaveOptions = {}) {
           });
           if (!res.ok) return null;
           const data = await res.json();
-          lastSavedMdRef.current = args.markdown;
+          // Baseline on what the SERVER actually stored (it may H1-prefix a
+          // capture hint), not on what we sent — otherwise the next save's
+          // expectedHash mismatches and 409s with a phantom "Document
+          // Conflict" on a doc nobody else is editing.
+          lastSavedMdRef.current = typeof data.markdown === "string" ? data.markdown : args.markdown;
           if (data.updated_at) lastServerUpdatedAtRef.current = data.updated_at;
+          else if (data.created_at) lastServerUpdatedAtRef.current = data.created_at;
           // Mark createDocument too so the realtime guard sees the
           // initial INSERT-as-UPDATE bump and doesn't surface the
           // user's own create as an "external update".

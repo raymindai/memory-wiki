@@ -78,7 +78,13 @@ export async function POST(req: NextRequest) {
   // we prepend once, mirroring mw_create / PDF import. After that
   // first write, no save ever rewrites the body.
   const incomingMd = typeof body.markdown === "string" ? body.markdown : "";
-  const incomingHint = typeof body.title === "string" ? body.title.trim() : "";
+  const rawHint = typeof body.title === "string" ? body.title.trim() : "";
+  // "Untitled" is the editor's placeholder, never a real title — treat it
+  // as no hint so we don't inject "# Untitled" into the user's body. That
+  // injection both corrupted pasted content and broke the save baseline
+  // (client stored the un-prefixed body → next save 409'd as a phantom
+  // "Document Conflict").
+  const incomingHint = rawHint === "Untitled" ? "" : rawHint;
   const detectedH1 = extractTitleFromMd(incomingMd);
   let markdown: string = incomingMd;
   if ((!detectedH1 || detectedH1 === "Untitled") && incomingHint) {
@@ -364,7 +370,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const res = NextResponse.json({ id, editToken, created_at: new Date().toISOString() });
+  // Return the STORED markdown + a timestamp so the client baselines its
+  // conflict-detection refs on what the server actually persisted (the
+  // body may have been H1-prefixed for a capture hint), not on what it
+  // sent. Without this the first edit after create 409s spuriously.
+  const nowIso = new Date().toISOString();
+  const res = NextResponse.json({ id, editToken, markdown, created_at: nowIso, updated_at: nowIso });
   // CORS for cross-origin captures
   for (const [k, v] of Object.entries(corsHeaders(req))) res.headers.set(k, v);
   // Issue / refresh the anonymous cookie so subsequent captures from this
