@@ -56,6 +56,16 @@ export async function POST(req: NextRequest) {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  // Ensure the demo user exists before generating a link. App Review
+  // (Guideline 5.1.1(v)) may exercise the in-app "Delete Account" flow on
+  // this account — without re-creation, the next sign-in (theirs or the
+  // next reviewer's) would fail and the app would be rejected again.
+  // createUser is idempotent for our purpose: an "already registered"
+  // error is the normal case and is ignored; any real failure resurfaces
+  // at generateLink below.
+  await admin.auth.admin.createUser({ email, email_confirm: true });
+
   const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email,
