@@ -644,7 +644,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const { data: doc } = await supabase
       .from("documents")
-      .select("edit_token, user_id, anonymous_id, edit_mode, expires_at, allowed_editors, updated_at, markdown, title")
+      .select("edit_token, user_id, anonymous_id, edit_mode, expires_at, allowed_editors, updated_at, markdown, title, last_editor_id, last_editor_email")
       .eq("id", id)
       .single();
 
@@ -694,6 +694,19 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (typeof expectedHash === "string" && expectedHash.length > 0) {
       const serverHash = contentHash(doc.markdown || "");
       if (serverHash !== expectedHash) {
+        // Diagnostic: phantom "Document Conflict" on solo edits has been hard
+        // to reproduce. Log enough to see whether the server body truly
+        // diverged from what the client expected, by how much, and the
+        // incoming vs stored sizes — so the next real occurrence is solvable.
+        console.warn("[auto-save] body-hash conflict (409)", {
+          id,
+          serverLen: (doc.markdown || "").length,
+          incomingLen: typeof markdown === "string" ? markdown.length : -1,
+          serverUpdatedAt: doc.updated_at,
+          expectedHash: expectedHash.slice(0, 12),
+          serverHash: serverHash.slice(0, 12),
+          lastEditor: doc.last_editor_email ?? null,
+        });
         return NextResponse.json({
           error: "Conflict",
           conflict: true,
