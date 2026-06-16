@@ -80,6 +80,7 @@ const WORKSPACE_PATH = path.join(USER_DATA_DIR, "workspace.json");
 // ─── App State ───
 
 let mainWindow = null;
+let authWindow = null;        // in-app sign-in window (see openAuthWindow)
 let currentFilePath = null;
 let currentWorkspaceFolder = null;
 let fileWatcher = null;
@@ -1262,6 +1263,10 @@ function handleMdfyUrl(url) {
     // Auth callback: memorywiki://auth?token=...&refresh_token=...
     if (parsed.hostname === "auth" || parsed.pathname.startsWith("/auth")) {
       AuthManager.handleAuthCallback(url);
+      // Close the in-app sign-in window once the token round-trips —
+      // whether it arrived via the window's will-navigate intercept or
+      // the OS protocol handler.
+      if (authWindow && !authWindow.isDestroyed()) authWindow.close();
       return;
     }
 
@@ -1311,6 +1316,19 @@ async function openCloudDocumentInApp(docId) {
 }
 
 // ─── Create Window ───
+
+// Show / recreate the main window. Wired to a Window-menu item so a
+// closed main window is reopenable from the menu bar, not only the Dock
+// — Apple Guideline 4 (Design) flagged the missing menu affordance.
+function showMainWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    createWindow();
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -1590,13 +1608,74 @@ ipcMain.handle("get-recent-files", () => {
 
 // --- Auth ---
 
+// A standard Chrome User-Agent with the Electron + app tokens stripped.
+// OAuth providers (Google / Sign in with Apple) refuse to authenticate
+// inside an "embedded webview" they can fingerprint, so the in-app sign-in
+// window must present itself as a plain browser.
+function cleanChromeUserAgent() {
+  try {
+    return app.userAgentFallback
+      .replace(/ Electron\/[^ ]+/g, "")
+      .replace(/ memory\.wiki(?:-desktop)?\/[^ ]+/gi, "")
+      .replace(new RegExp(` ${app.getName().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\/[^ ]+`, "g"), "")
+      .trim();
+  } catch {
+    return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+  }
+}
+
+// In-app sign-in window. Apple Guideline 4 (Design) rejects handing users
+// off to the default web browser to sign in; this keeps the flow inside
+// the app. The web auth page finishes by redirecting to
+// memorywiki://auth?token=... — we intercept that (or let the OS protocol
+// handler catch it), run the same callback the deep-link path uses, and
+// close the window (see handleMdfyUrl).
+function openAuthWindow(url) {
+  const ua = cleanChromeUserAgent();
+  if (authWindow && !authWindow.isDestroyed()) {
+    authWindow.focus();
+    authWindow.webContents.userAgent = ua;
+    authWindow.loadURL(url);
+    return;
+  }
+  const hasParent = !!(mainWindow && !mainWindow.isDestroyed());
+  authWindow = new BrowserWindow({
+    width: 460,
+    height: 760,
+    parent: hasParent ? mainWindow : undefined,
+    title: "Sign in to memory.wiki",
+    autoHideMenuBar: true,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#09090b" : "#faf9f7",
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      // Dedicated, persisted session so provider cookies survive between
+      // sign-ins and never mingle with the app's own session.
+      partition: "persist:memorywiki-auth",
+    },
+  });
+  // Apply the clean UA to every navigation in this window (provider
+  // redirects included), not just the first load.
+  authWindow.webContents.userAgent = ua;
+  const consume = (target) => {
+    if (typeof target === "string" && target.startsWith("memorywiki://")) {
+      handleMdfyUrl(target);   // stores the token + closes this window
+      return true;
+    }
+    return false;
+  };
+  authWindow.webContents.on("will-redirect", (e, target) => { if (consume(target)) e.preventDefault(); });
+  authWindow.webContents.on("will-navigate", (e, target) => { if (consume(target)) e.preventDefault(); });
+  authWindow.webContents.setWindowOpenHandler(({ url: u }) => (consume(u) ? { action: "deny" } : { action: "allow" }));
+  authWindow.on("closed", () => { authWindow = null; });
+  authWindow.loadURL(url);
+}
+
 ipcMain.handle("login", () => {
   const callbackUrl = encodeURIComponent("memorywiki://auth");
   const url = `${MDFY_URL}/auth/desktop?redirect=${callbackUrl}`;
-  console.log("[login] Opening:", url);
-  shell.openExternal(url).catch((err) => {
-    console.error("[login] openExternal error:", err);
-  });
+  console.log("[login] Opening in-app sign-in window:", url);
+  openAuthWindow(url);
 });
 
 ipcMain.handle("logout", () => {
@@ -1613,6 +1692,72 @@ ipcMain.handle("get-auth-state", () => {
     userId: AuthManager.getUserId(),
   };
 });
+
+// Account deletion. Apple Guideline 5.1.1(v): an app that supports account
+// creation must let users initiate deletion from within the app. Native
+// two-step confirmation, then DELETE /api/user/delete (erases all cloud
+// data + the auth user server-side), then the same teardown as sign-out.
+async function promptDeleteAccount() {
+  const parent = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
+  if (!AuthManager.isLoggedIn()) {
+    await dialog.showMessageBox(parent, {
+      type: "info",
+      message: "You're not signed in.",
+      detail: "Sign in first if you want to delete your account.",
+    });
+    return;
+  }
+  const email = AuthManager.getEmail() || "your account";
+  const first = await dialog.showMessageBox(parent, {
+    type: "warning",
+    buttons: ["Cancel", "Delete Account"],
+    defaultId: 0,
+    cancelId: 0,
+    title: "Delete Account",
+    message: `Permanently delete ${email}?`,
+    detail: "This erases your account and every document, folder, and bundle stored in your memory.wiki cloud. It cannot be undone.",
+  });
+  if (first.response !== 1) return;
+  const second = await dialog.showMessageBox(parent, {
+    type: "warning",
+    buttons: ["Cancel", "Delete Everything"],
+    defaultId: 0,
+    cancelId: 0,
+    title: "This is permanent",
+    message: "Are you absolutely sure?",
+    detail: "All your cloud data will be deleted immediately, with no recovery.",
+  });
+  if (second.response !== 1) return;
+  try {
+    const headers = await AuthManager.getHeadersWithRefresh();
+    const resp = await net.fetch(`${MDFY_URL}/api/user/delete`, { method: "DELETE", headers });
+    if (!resp.ok) {
+      let detail = `The server returned ${resp.status}.`;
+      try { const j = await resp.json(); if (j?.error) detail = j.error; } catch {}
+      await dialog.showMessageBox(parent, { type: "error", message: "Couldn't delete your account", detail });
+      return;
+    }
+    // Same teardown as logout.
+    AuthManager.clear();
+    profileCache = null;
+    try { SyncEngine.stopPolling(); } catch {}
+    try { CollaborationManager.stop(); } catch {}
+    sendToRenderer("auth-changed", { loggedIn: false });
+    await dialog.showMessageBox(parent, {
+      type: "info",
+      message: "Account deleted",
+      detail: "Your memory.wiki account and all its data have been permanently deleted.",
+    });
+  } catch (err) {
+    await dialog.showMessageBox(parent, {
+      type: "error",
+      message: "Couldn't delete your account",
+      detail: String((err && err.message) || err),
+    });
+  }
+}
+
+ipcMain.handle("delete-account", () => promptDeleteAccount());
 
 // Pins (starred docs). Renderer CSP blocks cross-origin fetch to
 // memory.wiki, so all three pin verbs route through the main process,
@@ -2208,6 +2353,8 @@ function buildMenu() {
       submenu: [
         { role: "about" },
         { type: "separator" },
+        { label: "Delete Account…", click: () => promptDeleteAccount() },
+        { type: "separator" },
         { role: "services" },
         { type: "separator" },
         { role: "hide" }, { role: "hideOthers" }, { role: "unhide" },
@@ -2312,6 +2459,10 @@ function buildMenu() {
       label: "Window",
       submenu: [
         { role: "minimize" }, { role: "zoom" },
+        { type: "separator" },
+        // Reopen the main window after it's been closed (Apple Guideline 4:
+        // a closed window must be recoverable from the menu, not just Dock).
+        { label: "memory.wiki", accelerator: "CmdOrCtrl+Shift+0", click: () => showMainWindow() },
         ...(isMac ? [{ type: "separator" }, { role: "front" }] : []),
       ],
     },

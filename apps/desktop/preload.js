@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld("mwDesktop", {
   // ─── Auth ───
   login: () => ipcRenderer.invoke("login"),
   logout: () => ipcRenderer.invoke("logout"),
+  deleteAccount: () => ipcRenderer.invoke("delete-account"),
   getAuthState: () => ipcRenderer.invoke("get-auth-state"),
   getUserProfile: () => ipcRenderer.invoke("get-user-profile"),
   getPins: () => ipcRenderer.invoke("get-pins"),
