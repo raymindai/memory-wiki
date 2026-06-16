@@ -1672,7 +1672,13 @@ const TiptapLiveEditorInner = forwardRef<TiptapLiveEditorHandle, TiptapLiveEdito
           Placeholder.configure({ placeholder: "Start writing..." }),
           TiptapMarkdown.configure({
             html: true,
-            transformPastedText: false,
+            // Parse pasted plain-text as Markdown. This is a Markdown editor —
+            // pasting "# Heading\n\n[link](url)" must become a real heading +
+            // link, not literal text that the serializer then escapes to
+            // "\# Heading" / mangled links (which also wiped the H1, so the
+            // server prepended "# Untitled"). Image/HTML paste is unaffected
+            // (handlePaste catches images; rich HTML still parses via PM).
+            transformPastedText: true,
             transformCopiedText: true,
           }),
           // Remote-cursor decorations live in their own ProseMirror

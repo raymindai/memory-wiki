@@ -762,7 +762,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (resolvedEmail) updates.last_editor_email = resolvedEmail;
 
     const { error } = await supabase.from("documents").update(updates).eq("id", id);
-    if (error) return NextResponse.json({ error: "Failed to save" }, { status: 500 });
+    if (error) {
+      // Log the real Postgres error — this 500 ("Failed to save") used to
+      // be returned with no trace, leaving prod failures undiagnosable.
+      console.error("[auto-save] documents.update failed", { id, code: error.code, message: error.message, details: (error as { details?: string }).details });
+      return NextResponse.json({ error: "Failed to save" }, { status: 500 });
+    }
 
     // Re-sync backlinks + per-doc summary if the body changed.
     // Title-only updates also splice the body, so updates.markdown is
