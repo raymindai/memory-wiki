@@ -49,22 +49,30 @@ Code references (all committed):
 >
 > We own the domain memory.wiki, the web application at
 > https://memory.wiki, and the brand, name, icon, and visual assets used
-> in the app. The app refers to "memory.wiki" because that is our own
-> service: the desktop client signs the user in to their own memory.wiki
-> account and syncs their own documents.
->
-> We are glad to provide any proof of ownership you need. For example, we
-> can show the domain registration record, or publish a verification
-> string at a URL we control on https://memory.wiki. Please tell us which
-> form is most useful and we will provide it right away.
+> in the app. Evidence of ownership:
+>   - The contact email in the footer of https://memory.wiki/about is
+>     hi@raymind.ai, which is the same email as this Apple Developer
+>     account, showing the website and this account are the same party.
+>   - Attached is a screenshot from our domain registrar (GoDaddy)
+>     confirming that we own the memory.wiki domain.
+> The app references "memory.wiki" because that is our own service: the
+> desktop client signs the user in to their own memory.wiki account and
+> syncs their own documents. We are happy to provide any further proof
+> needed.
 >
 > Thank you.
 
-If the reviewer asks for proof, fastest options:
-- Domain registrar record for memory.wiki showing the owner.
-- A short verification file we control, for example
-  `https://memory.wiki/apple-developer-merchantid-domain-association` or a
-  one-off note page, linked back in the reply.
+Proof attached to the Resolution Center message: the GoDaddy domain
+ownership screenshot. The footer contact on https://memory.wiki/about
+(hi@raymind.ai) matches the Apple Developer account email, so the site and
+the account are demonstrably the same party. If the reviewer wants more, a
+verification string can be published at a URL we control on
+https://memory.wiki (for example a one-off note page) and linked back.
+
+NOTE: for the live resubmission these replies (sections 2 and 3) were
+posted as ONE consolidated Resolution Center message covering all five
+points (name, ownership, sign-in, window, deletion), since the Center is a
+single thread.
 
 ---
 
