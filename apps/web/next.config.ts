@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Bake the deploy's git SHA into the client bundle so VersionWatcher
+  // can detect when a long-open tab is running stale code (the
+  // /api/version route reports the runtime SHA of the live deployment;
+  // a mismatch means "reload"). Falls back to "dev" locally, which makes
+  // the watcher a no-op off Vercel.
+  env: {
+    NEXT_PUBLIC_BUILD_ID: process.env.VERCEL_GIT_COMMIT_SHA || "dev",
+  },
   // Text extraction goes through unpdf (self-contained serverless
   // build, no worker needed). Image extraction still uses
   // pdfjs-dist directly via extractPdfImages, and pdfjs-dist loads

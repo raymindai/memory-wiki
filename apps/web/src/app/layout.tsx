@@ -3,6 +3,7 @@ import { Geist, JetBrains_Mono, Noto_Sans, Noto_Sans_KR } from "next/font/google
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import VersionWatcher from "@/components/VersionWatcher";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -197,6 +198,7 @@ export default function RootLayout({
           <span>Loading</span>
         </div>
         {children}
+        <VersionWatcher />
         <Analytics />
         <SpeedInsights />
       </body>
