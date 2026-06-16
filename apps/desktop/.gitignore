@@ -5,3 +5,7 @@ dist/
 # v3.0: vendored copy of @mdcore/editor, regenerated each build
 vendor-editor/
 renderer/vendor-editor/
+
+# Apple MAS provisioning profile — account/cert-specific + expires (~1yr).
+# Keep it local; regenerate from the Apple Developer portal when needed.
+build/*.provisionprofile

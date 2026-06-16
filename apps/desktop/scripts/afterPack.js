@@ -15,10 +15,15 @@
 //
 //   MAS (Apple Distribution, provisioning profile + App Store review):
 //     Embed .appex inside Contents/PlugIns/ — required by Apple. The bundle
-//     id must be a child of the host (wiki.memory.desktop.qlextension). We
-//     re-sign in-place with Apple Distribution + the MAS entitlements. App
-//     Store review is the implicit "notarization" that lets the embedded
-//     extension load on user machines.
+//     id must be a child of the host (<hostId>.qlextension, e.g.
+//     wiki.memory.mac.qlextension). We re-sign in-place with Apple
+//     Distribution + the MAS entitlements. App Store review is the implicit
+//     "notarization" that lets the embedded extension load on user machines.
+//
+// The host bundle id differs per channel (DMG = wiki.memory.desktop, MAS =
+// wiki.memory.mac, set via -c.appId in the build:* scripts). The QL child
+// id is DERIVED from the actual host id below — never hardcode it, or a
+// channel switch silently ships a mismatched (rejected) extension.
 //
 // The .appex / standalone host is pre-built by Xcode (apps/quicklook/MemoryWikiQuickLook).
 
@@ -67,8 +72,13 @@ module.exports = async function afterPack(context) {
 
   const target = (context.targets || []).map((t) => t.name).join(",");
 
+  // Whatever appId this build actually used (DMG ⇒ wiki.memory.desktop,
+  // MAS ⇒ wiki.memory.mac via -c.appId). The QL child id is derived from
+  // it so neither channel needs a manual edit in this file.
+  const hostId = context.packager.appInfo.id;
+
   if (target.includes("mas") || platform === "mas") {
-    embedForMas({ hostApp, qlHostSrc });
+    embedForMas({ hostApp, qlHostSrc, hostId });
   } else {
     sidecarForDmg({ hostApp, qlHostSrc });
   }
@@ -84,7 +94,7 @@ function sidecarForDmg({ hostApp, qlHostSrc }) {
   console.log(`[afterPack] DMG: bundled QL host at ${qlDest}`);
 }
 
-function embedForMas({ hostApp, qlHostSrc }) {
+function embedForMas({ hostApp, qlHostSrc, hostId }) {
   const pluginsDir = path.join(hostApp, "Contents", "PlugIns");
   const appexSrc = path.join(qlHostSrc, "Contents", "PlugIns", "MemoryWikiQLExtension.appex");
   const appexDest = path.join(pluginsDir, "MemoryWikiQLExtension.appex");
@@ -99,8 +109,10 @@ function embedForMas({ hostApp, qlHostSrc }) {
   execSync(`cp -R "${appexSrc}" "${appexDest}"`);
 
   // Rewrite bundle id to be a child of the MAS host id, then re-sign +
-  // sync CFBundleVersion with host so App Store validation passes.
-  const masChildId = "wiki.memory.desktop.qlextension";
+  // sync CFBundleVersion with host so App Store validation passes. Derived
+  // from the actual host appId (never hardcoded) so a DMG/MAS appId switch
+  // can't ship a mismatched extension.
+  const masChildId = `${hostId}.qlextension`;
   const hostPlistPath = path.join(hostApp, "Contents", "Info.plist");
   const hostShortVer = execSync(`/usr/bin/plutil -extract CFBundleShortVersionString raw "${hostPlistPath}"`).toString().trim();
   const buildVersion = `${hostShortVer.split(".").slice(0, 2).join(".")}.${Math.floor(Date.now() / 1000)}`;

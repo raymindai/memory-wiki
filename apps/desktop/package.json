@@ -9,11 +9,11 @@
     "prebuild": "./scripts/vendor-editor.sh",
     "start": "electron .",
     "build": "electron-builder",
-    "build:dmg": "./scripts/vendor-editor.sh && electron-builder --mac dmg && ./scripts/notarize-dmg.sh",
-    "build:mas": "./scripts/vendor-editor.sh && electron-builder --mac mas",
+    "build:dmg": "./scripts/vendor-editor.sh && electron-builder --mac dmg -c.appId=wiki.memory.desktop && ./scripts/notarize-dmg.sh",
+    "build:mas": "./scripts/vendor-editor.sh && electron-builder --mac mas -c.appId=wiki.memory.mac",
     "build:mas:pkg": "./scripts/build-mas.sh",
-    "build:all": "./scripts/vendor-editor.sh && electron-builder --mac dmg mas",
-    "build:universal": "./scripts/vendor-editor.sh && electron-builder --mac --universal"
+    "build:all": "./scripts/vendor-editor.sh && electron-builder --mac dmg -c.appId=wiki.memory.desktop && electron-builder --mac mas -c.appId=wiki.memory.mac",
+    "build:universal": "./scripts/vendor-editor.sh && electron-builder --mac --universal -c.appId=wiki.memory.desktop"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
