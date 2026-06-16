@@ -662,7 +662,7 @@ export default function AdminPage() {
                 {([
                   { name: "openai",    label: "OpenAI",    primary: aiOpenaiPrimary,    setPrimary: setAiOpenaiPrimary,    lite: aiOpenaiLite,    setLite: setAiOpenaiLite,    hint: "e.g. gpt-4o-mini / gpt-5-nano" },
                   { name: "gemini",    label: "Gemini",    primary: aiGeminiPrimary,    setPrimary: setAiGeminiPrimary,    lite: aiGeminiLite,    setLite: setAiGeminiLite,    hint: "e.g. gemini-3-flash-preview / gemini-3.1-flash-lite" },
-                  { name: "anthropic", label: "Anthropic", primary: aiAnthropicPrimary, setPrimary: setAiAnthropicPrimary, lite: aiAnthropicLite, setLite: setAiAnthropicLite, hint: "e.g. claude-sonnet-4 / claude-haiku-4-5" },
+                  { name: "anthropic", label: "Anthropic", primary: aiAnthropicPrimary, setPrimary: setAiAnthropicPrimary, lite: aiAnthropicLite, setLite: setAiAnthropicLite, hint: "e.g. claude-sonnet-4-6 / claude-haiku-4-5" },
                 ] as const).map((p) => (
                   <div key={p.name} style={{ display: "flex", flexDirection: "column", gap: 8, padding: 16, border: "1px solid #27272a", borderRadius: 8, background: "#0e0e10" }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: "#fafafa" }}>{p.label}</div>

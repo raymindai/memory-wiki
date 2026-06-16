@@ -32,11 +32,18 @@ const PRICE_TABLE: Record<string, ModelPrice> = {
 
   // ─── Anthropic ────────────────────────────────────────────
   // claude-haiku-4-5 is the cost-first cascade's anthropic stop.
+  // Current models first; the older IDs below are kept so historical
+  // ai_usage rows (logged while a now-retired model was live) still
+  // price correctly — the table is additive, never prune live history.
   "claude-haiku-4-5":              { input: 0.25,  output: 1.25 },
   "claude-haiku-4-5-20251001":     { input: 0.25,  output: 1.25 },
+  "claude-sonnet-4-6":             { input: 3.00,  output: 15.00 },
+  "claude-opus-4-8":               { input: 15.00, output: 75.00 },
+  "claude-opus-4-7":               { input: 15.00, output: 75.00 },
+  // Retired / historical — pricing retained for past-usage cost display.
   "claude-haiku-3-5":              { input: 0.80,  output: 4.00 },
   "claude-sonnet-4":               { input: 3.00,  output: 15.00 },
-  "claude-sonnet-4-20250514":      { input: 3.00,  output: 15.00 },
+  "claude-sonnet-4-20250514":      { input: 3.00,  output: 15.00 },  // retired 2026-06-16
   "claude-sonnet-4-5":             { input: 3.00,  output: 15.00 },
   "claude-opus-4":                 { input: 15.00, output: 75.00 },
 
