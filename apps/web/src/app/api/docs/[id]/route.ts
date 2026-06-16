@@ -766,6 +766,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       // Log the real Postgres error — this 500 ("Failed to save") used to
       // be returned with no trace, leaving prod failures undiagnosable.
       console.error("[auto-save] documents.update failed", { id, code: error.code, message: error.message, details: (error as { details?: string }).details });
+      // 23505 from the legacy strict dup-lock index (migration 029, dropped
+      // in 030): the edit made this doc identical to another live doc the
+      // user owns. Surface a clear, non-conflict message (422 → the editor
+      // shows the text rather than the Keep-mine/theirs conflict modal)
+      // instead of a mystifying "Failed to save". 030 removes the guard.
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "This document is now identical to another of your documents. Change a word to save, or delete the duplicate.", code: "duplicate_doc" }, { status: 422 });
+      }
       return NextResponse.json({ error: "Failed to save" }, { status: 500 });
     }
 
