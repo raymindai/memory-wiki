@@ -11,7 +11,7 @@
 // same content into two drafts, two notes that converge) are legitimate and
 // must NOT be silently merged. The previous "unbounded for authenticated
 // users" mode merged identical creates HOURS/DAYS apart and — together with
-// the migration-029 unique index (dropped in 030) — made it impossible to
+// the migration-029 unique index (dropped in 063) — made it impossible to
 // keep two same-content docs, which is bizarre for a notes tool.
 //   - Exact (byte-identical) match → short window (DEDUP_WINDOW_MS), all callers.
 //   - Loose (whitespace-diff) match → anon only, slightly longer, for
