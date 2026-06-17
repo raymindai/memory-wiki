@@ -1386,3 +1386,64 @@ function startTransformProgress(mode) {
   setTimeout(syncBodyState, 50);
 })();
 
+// ─── Quick controls: auto-capture / inject / this-site / pause ───
+// Status shows on the AI page (the capture pill); these chips are the
+// convenient toggles. Default off. They write the SAME storage keys
+// content.js reads (sync: autoCapture / autoInject / mw-disabled-sites;
+// local: mw-paused), so toggling here flips the page live.
+(function () {
+  const AI_HOSTS = ["chatgpt.com", "chat.openai.com", "claude.ai", "gemini.google.com"];
+  const elCapture = document.getElementById("ctl-capture");
+  const elInject = document.getElementById("ctl-inject");
+  const elSite = document.getElementById("ctl-site");
+  const elPause = document.getElementById("ctl-pause");
+  if (!elCapture || typeof chrome === "undefined" || !chrome.storage) return;
+
+  let host = "";
+  const isAiHost = (h) => AI_HOSTS.some((a) => h === a || h.endsWith("." + a));
+  const setOn = (el, on) => { if (el) el.classList.toggle("on", !!on); };
+
+  function reflect() {
+    chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [] }, (s) => {
+      chrome.storage.local.get({ "mw-paused": false }, (l) => {
+        setOn(elCapture, s.autoCapture);
+        setOn(elInject, s.autoInject);
+        setOn(elPause, !!l["mw-paused"]);
+        const disabled = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
+        if (host && isAiHost(host)) {
+          elSite.style.display = "";
+          setOn(elSite, !disabled.includes(host)); // ON = extension runs on this site
+        } else {
+          elSite.style.display = "none";
+        }
+      });
+    });
+  }
+
+  elCapture.addEventListener("click", () => {
+    chrome.storage.sync.get({ autoCapture: false }, (s) => chrome.storage.sync.set({ autoCapture: !s.autoCapture }, reflect));
+  });
+  elInject.addEventListener("click", () => {
+    chrome.storage.sync.get({ autoInject: false }, (s) => chrome.storage.sync.set({ autoInject: !s.autoInject }, reflect));
+  });
+  elPause.addEventListener("click", () => {
+    chrome.storage.local.get({ "mw-paused": false }, (l) => chrome.storage.local.set({ "mw-paused": !l["mw-paused"] }, reflect));
+  });
+  elSite.addEventListener("click", () => {
+    if (!host) return;
+    chrome.storage.sync.get({ "mw-disabled-sites": [] }, (s) => {
+      let list = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"].slice() : [];
+      list = list.includes(host) ? list.filter((h) => h !== host) : list.concat(host);
+      chrome.storage.sync.set({ "mw-disabled-sites": list }, reflect);
+    });
+  });
+
+  // Resolve the active tab host (for the per-site toggle), then reflect state.
+  try {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      try { host = tabs && tabs[0] && tabs[0].url ? new URL(tabs[0].url).hostname : ""; } catch { host = ""; }
+      reflect();
+    });
+  } catch { reflect(); }
+})();
+

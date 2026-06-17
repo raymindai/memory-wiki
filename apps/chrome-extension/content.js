@@ -1086,6 +1086,7 @@
   // ─── Floating Button ───
 
   function createFloatingButton() {
+    if (!extActive()) return; // dormant when paused / disabled on this site
     const container = document.createElement("div");
     container.id = "mw-float-container";
 
@@ -1248,6 +1249,9 @@
   }
 
   function addMiniButtons() {
+    // Paused or disabled on this site → the extension goes dormant: clear any
+    // injected per-message buttons and don't add more.
+    if (!extActive()) { document.querySelectorAll(".mw-mini-btn").forEach((b) => b.remove()); return; }
     const assistantSelector = getAssistantMessageSelector();
     const userSelector = getUserMessageSelector();
 
@@ -1451,11 +1455,28 @@
   // so memory forms without a per-conversation click. Keyed by the thread
   // URL so re-syncs UPDATE the same doc instead of spawning duplicates, and
   // debounced so we only sync after a response settles (never mid-stream).
-  let autoCaptureEnabled = false;
+  let autoCaptureEnabled = false; // global default (the "capture everything" switch)
   let autoSyncTimer = null;
   let lastSyncedHash = null;
   let lastSyncedKey = null;
   const AUTO_SYNC_SETTLE_MS = 6000;
+
+  // Gating layers. Precedence: paused > site-disabled > per-thread override
+  // > global autoCapture. `mwPaused` (local) is the temporary master kill;
+  // `disabledSites` (sync) turns the extension off on specific hosts;
+  // `threadOverrides` (local) is per-thread capture on/off set via the pill.
+  let mwPaused = false;
+  let disabledSites = [];
+  let threadOverrides = {};
+
+  function currentHost() { try { return location.hostname; } catch { return ""; } }
+  function extActive() { return !mwPaused && !disabledSites.includes(currentHost()); }
+  function shouldCaptureThread() {
+    if (!extActive()) return false;
+    const k = threadKey();
+    if (k && Object.prototype.hasOwnProperty.call(threadOverrides, k)) return !!threadOverrides[k];
+    return autoCaptureEnabled;
+  }
 
   function threadKey() {
     // The conversation's own URL path. The transient new-chat state ("/")
@@ -1499,7 +1520,7 @@
   }
 
   async function autoSyncThread() {
-    if (!autoCaptureEnabled) return;
+    if (!shouldCaptureThread()) return;
     const key = threadKey();
     if (!key) return;
     const userId = await getUserId();
@@ -1574,9 +1595,53 @@
   }
 
   function scheduleAutoSync() {
-    if (!autoCaptureEnabled) return;
+    if (!shouldCaptureThread()) return;
     if (autoSyncTimer) clearTimeout(autoSyncTimer);
     autoSyncTimer = setTimeout(autoSyncThread, AUTO_SYNC_SETTLE_MS);
+  }
+
+  // ─── Page status badge for capture (+ quick per-thread toggle) ───
+  // Toggling is primarily done in the popup; this badge lets the user SEE,
+  // on the page, whether the current thread is being captured — and click to
+  // flip just this thread. Reflects shouldCaptureThread() (paused / site /
+  // override / global all folded in).
+  function updateCapturePill() {
+    const pill = document.getElementById("mw-capture-pill");
+    if (!pill) return;
+    const on = shouldCaptureThread();
+    pill.textContent = on ? "● capturing" : "○ capture";
+    pill.classList.toggle("mw-on", on);
+    pill.title = on
+      ? "This thread is syncing to memory.wiki. Click to stop capturing it."
+      : "Click to capture this thread to memory.wiki (or toggle globally in the popup).";
+  }
+  function initCapturePill() {
+    // Only on a real thread, and only when the extension is active here.
+    if (!extActive() || !threadKey()) { removeCapturePill(); return; }
+    injectInjectStyles();
+    let pill = document.getElementById("mw-capture-pill");
+    if (!pill) {
+      pill = document.createElement("button");
+      pill.id = "mw-capture-pill";
+      pill.type = "button";
+      pill.addEventListener("click", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const k = threadKey();
+        if (!k) return;
+        const next = !shouldCaptureThread();
+        threadOverrides[k] = next;
+        try { chrome.storage.local.set({ "mw-thread-capture": threadOverrides }); } catch { /* */ }
+        updateCapturePill();
+        if (next) { showToast("capturing this thread to memory.wiki", 2500); scheduleAutoSync(); }
+        else { showToast("stopped capturing this thread", 2000); }
+      });
+      document.body.appendChild(pill);
+    }
+    updateCapturePill();
+  }
+  function removeCapturePill() {
+    const p = document.getElementById("mw-capture-pill");
+    if (p) p.remove();
   }
 
   // ─── Auto-inject relevant memory (#1) ───
@@ -1640,6 +1705,9 @@
     s.textContent = [
       '#mw-inject-pill{position:fixed;left:16px;bottom:96px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.85}',
       '#mw-inject-pill:hover{opacity:1}',
+      '#mw-capture-pill{position:fixed;left:16px;bottom:136px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.85}',
+      '#mw-capture-pill:hover{opacity:1}',
+      '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
       '.mw-inject-panel{z-index:2147483601;width:320px;max-height:340px;overflow:auto;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.4);padding:6px;font:13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
       '.mw-inject-head{font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}',
       '.mw-inject-empty{padding:12px;color:#a1a1aa;font-size:12px;line-height:1.5}',
@@ -1756,24 +1824,48 @@
     closeInjectPanel();
   }
 
-  // Load the opt-in flags + react to changes without a reload.
+  // Apply the current state to the page: status pills + injected buttons +
+  // (re)schedule sync. Idempotent — safe to call on every observer tick and
+  // on every storage change, so the popup's toggles flip the page live.
+  function refreshExtUI() {
+    if (!extActive()) {
+      // Paused or disabled on this site → go fully dormant.
+      removeCapturePill();
+      removeAutoInject();
+      const fc = document.getElementById("mw-float-container");
+      if (fc) fc.remove();
+      document.querySelectorAll(".mw-mini-btn").forEach((b) => b.remove());
+      return;
+    }
+    initCapturePill();
+    if (autoInjectEnabled) initAutoInject(); else removeAutoInject();
+    addMiniButtons();
+    scheduleAutoSync();
+  }
+
+  // Load all flags — sync: prefs (autoCapture / autoInject / disabled sites),
+  // local: paused + per-thread overrides — and react to changes live.
   try {
-    chrome.storage.sync.get({ autoCapture: false, autoInject: false }, (data) => {
+    chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [] }, (data) => {
       autoCaptureEnabled = !!(data && data.autoCapture);
       autoInjectEnabled = !!(data && data.autoInject);
-      if (autoCaptureEnabled) scheduleAutoSync();
-      if (autoInjectEnabled) initAutoInject();
+      disabledSites = Array.isArray(data && data["mw-disabled-sites"]) ? data["mw-disabled-sites"] : [];
+      chrome.storage.local.get({ "mw-paused": false, "mw-thread-capture": {} }, (loc) => {
+        mwPaused = !!(loc && loc["mw-paused"]);
+        threadOverrides = (loc && loc["mw-thread-capture"]) || {};
+        refreshExtUI();
+      });
     });
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== "sync") return;
-      if (changes.autoCapture) {
-        autoCaptureEnabled = !!changes.autoCapture.newValue;
-        if (autoCaptureEnabled) scheduleAutoSync();
-      }
-      if (changes.autoInject) {
-        autoInjectEnabled = !!changes.autoInject.newValue;
-        if (autoInjectEnabled) initAutoInject(); else removeAutoInject();
-      }
+      if (area === "sync") {
+        if (changes.autoCapture) autoCaptureEnabled = !!changes.autoCapture.newValue;
+        if (changes.autoInject) autoInjectEnabled = !!changes.autoInject.newValue;
+        if (changes["mw-disabled-sites"]) disabledSites = Array.isArray(changes["mw-disabled-sites"].newValue) ? changes["mw-disabled-sites"].newValue : [];
+      } else if (area === "local") {
+        if (changes["mw-paused"]) mwPaused = !!changes["mw-paused"].newValue;
+        if (changes["mw-thread-capture"]) threadOverrides = changes["mw-thread-capture"].newValue || {};
+      } else return;
+      refreshExtUI();
     });
   } catch { /* storage unavailable — features stay off */ }
 
@@ -1783,10 +1875,8 @@
   const observer = new MutationObserver(() => {
     if (observerTimer) clearTimeout(observerTimer);
     observerTimer = setTimeout(() => {
-      addMiniButtons();
       measureContentRight();
-      scheduleAutoSync(); // ambient capture: sync ~6s after the thread settles
-      if (autoInjectEnabled) initAutoInject(); // re-ensure the pill if the site re-rendered
+      refreshExtUI(); // re-applies status pill + inject pill + buttons + reschedules sync (idempotent)
     }, 300);
   });
 
