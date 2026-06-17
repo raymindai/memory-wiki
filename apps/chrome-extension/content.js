@@ -900,16 +900,19 @@
     }
     md += "> Captured from " + platformName() + " on " + new Date().toLocaleDateString() + "\n\n---\n\n";
 
+    md += formatMessages(messages);
+    return md;
+  }
+
+  // The per-message blocks only (## User / ## AI ...), --- separated. Shared by
+  // formatConversation (full doc) and the incremental append (delta only).
+  function formatMessages(messages) {
+    let md = "";
     messages.forEach((msg) => {
       const roleLabel = msg.role === "user" ? "User" : platformName();
-      md += "## " + roleLabel + "\n\n";
-      md += msg.content + "\n\n---\n\n";
+      md += "## " + roleLabel + "\n\n" + msg.content + "\n\n---\n\n";
     });
-
-    // Remove trailing separator
-    md = md.replace(/\n---\n\n$/, "\n");
-
-    return md;
+    return md.replace(/\n---\n\n$/, "\n");
   }
 
   // ─── Image Upload ───
@@ -1446,11 +1449,7 @@
   // URL so re-syncs UPDATE the same doc instead of spawning duplicates, and
   // debounced so we only sync after a response settles (never mid-stream).
   let autoCaptureEnabled = false; // global default (the "capture everything" switch)
-  let autoSyncTimer = null;
-  let lastSyncedHash = null;
-  let lastSyncedKey = null;
-  const AUTO_SYNC_SETTLE_MS = 3000; // sync ~3s after the thread settles
-  const AUTO_SYNC_POLL_MS = 12000;  // fallback poll so constant page animations can't starve capture
+  const AUTO_SYNC_SETTLE_MS = 1500; // conversation content stable this long = response done → sync
 
   // Gating layers. Precedence: paused > site-disabled > per-thread override
   // > global autoCapture. `mwPaused` (local) is the temporary master kill;
@@ -1515,63 +1514,69 @@
     } catch { /* noop */ }
   }
 
-  async function autoSyncThread() {
+  // Event-driven incremental sync. Fired once the conversation content has
+  // been STABLE for AUTO_SYNC_SETTLE_MS (= a response finished streaming).
+  // Creates the thread's doc on the first exchange, then APPENDS only the new
+  // exchanges (delta) — no polling, no whole-thread re-PATCH.
+  async function syncThreadIncremental() {
     if (!shouldCaptureThread()) return;
     const key = threadKey();
     if (!key) return;
-    const userId = await getUserId();
-    if (!userId) return; // ambient capture requires sign-in; stay silent
 
     let messages;
     try { messages = extractConversation(); } catch { return; }
     if (!messages || messages.length < 2) return; // need at least one full exchange
-    const markdown = formatConversation(messages);
-    if (!markdown || markdown.trim().length < 40) return;
-
-    const hash = cheapHash(markdown);
-    if (key === lastSyncedKey && hash === lastSyncedHash) return; // unchanged since last sync
+    const fullMd = formatConversation(messages);
+    if (!fullMd || fullMd.trim().length < 40) return;
+    const hash = cheapHash(fullMd);
 
     const map = await getThreadMap();
     const existing = map[key];
-    // Persisted-hash guard: re-opening an UNCHANGED thread (new page load, so
-    // the in-memory lastSyncedHash is null) must not fire a redundant PATCH.
-    if (existing && existing.hash === hash) { lastSyncedKey = key; lastSyncedHash = hash; return; }
-    const titleMatch = markdown.match(/^#\s+(.+)/m);
+    if (existing && existing.hash === hash) return; // nothing new since last sync
+
+    const userId = await getUserId();
+    if (!userId) return; // ambient capture requires sign-in; stay silent
+
+    const titleMatch = fullMd.match(/^#\s+(.+)/m);
     const title = (titleMatch ? titleMatch[1].trim() : "captured from " + platformName()).slice(0, 100);
 
     try {
       if (existing && existing.id) {
-        // Update the thread's doc in place — quiet, no new window.
-        const res = await proxyFetch(MDFY_URL + "/api/docs/" + existing.id, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          // userId authorizes the edit (PATCH checks doc.user_id === body.userId);
-          // editToken is a belt-and-suspenders for the owner check. No
-          // expectedHash → the server skips conflict detection and just
-          // overwrites, which is correct: the extension is the source of
-          // truth for an auto-captured thread.
-          body: JSON.stringify({ markdown, title, source: "chrome-auto", userId, editToken: existing.editToken }),
-        });
+        const synced = existing.syncedCount || 0;
+        let res;
+        if (messages.length > synced && synced > 0) {
+          // Append ONLY the new exchanges since last sync (incremental).
+          const delta = formatMessages(messages.slice(synced));
+          res = await proxyFetch(MDFY_URL + "/api/docs/" + existing.id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "append", append: delta, separator: "\n\n---\n\n", title, source: "chrome-auto", userId, editToken: existing.editToken }),
+          });
+        } else {
+          // Count shrank or diverged (regenerated / edited thread) → full re-sync.
+          res = await proxyFetch(MDFY_URL + "/api/docs/" + existing.id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ markdown: fullMd, title, source: "chrome-auto", userId, editToken: existing.editToken }),
+          });
+        }
         if (res.ok) {
-          lastSyncedKey = key; lastSyncedHash = hash;
-          setThreadEntry(key, { ...existing, title, hash, ts: Date.now() });
+          setThreadEntry(key, { ...existing, title, hash, syncedCount: messages.length, ts: Date.now() });
         } else if (res.status === 404) {
-          // The doc was deleted server-side — drop the stale mapping so the
-          // next tick re-creates it.
-          setThreadEntry(key, undefined);
+          setThreadEntry(key, undefined); // doc deleted server-side → re-create next time
         }
       } else {
+        // First sync of this thread → create the doc with the full conversation.
         const res = await proxyFetch(MDFY_URL + "/api/docs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ markdown, userId, title, editMode: "account", source: "chrome-auto" }),
+          body: JSON.stringify({ markdown: fullMd, userId, title, editMode: "account", source: "chrome-auto" }),
         });
         if (res.ok) {
           let parsed = {};
           try { parsed = JSON.parse(res.body); } catch { /* */ }
           if (parsed.id) {
-            lastSyncedKey = key; lastSyncedHash = hash;
-            setThreadEntry(key, { id: parsed.id, editToken: parsed.editToken, title, hash, ts: Date.now() });
+            setThreadEntry(key, { id: parsed.id, editToken: parsed.editToken, title, hash, syncedCount: messages.length, ts: Date.now() });
             try {
               const docUrl = MDFY_URL + "/" + parsed.id;
               chrome.storage.local.get(["mw-recent"], (data) => {
@@ -1590,10 +1595,22 @@
     }
   }
 
-  function scheduleAutoSync() {
+  // Event-driven trigger. Content-based (not raw DOM mutations): the settle
+  // timer restarts ONLY when the EXTRACTED conversation actually changes
+  // (while a response streams), so page chrome animations can't reset it or
+  // starve capture. It fires once the content stops changing = response done.
+  let lastActivityHash = null;
+  let doneTimer = null;
+  function onConversationActivity() {
     if (!shouldCaptureThread()) return;
-    if (autoSyncTimer) clearTimeout(autoSyncTimer);
-    autoSyncTimer = setTimeout(autoSyncThread, AUTO_SYNC_SETTLE_MS);
+    let md;
+    try { md = formatConversation(extractConversation()); } catch { return; }
+    if (!md || md.trim().length < 40) return;
+    const h = cheapHash(md);
+    if (h === lastActivityHash) return; // content unchanged (just page chrome) — ignore
+    lastActivityHash = h;               // content changed (streaming) — restart the settle timer
+    if (doneTimer) clearTimeout(doneTimer);
+    doneTimer = setTimeout(syncThreadIncremental, AUTO_SYNC_SETTLE_MS);
   }
 
   // ─── Page status badge for capture (+ quick per-thread toggle) ───
@@ -1635,7 +1652,7 @@
         threadOverrides[k] = next;
         try { chrome.storage.local.set({ "mw-thread-capture": threadOverrides }); } catch { /* */ }
         updateCapturePill();
-        if (next) { showToast("capturing this thread to memory.wiki", 2500); scheduleAutoSync(); }
+        if (next) { showToast("capturing this thread to memory.wiki", 2500); lastActivityHash = null; syncThreadIncremental(); }
         else { showToast("stopped capturing this thread", 2000); }
       });
       document.body.appendChild(pill);
@@ -1914,7 +1931,7 @@
     if (showFloat) createFloatingButton();
     else { const fc = document.getElementById("mw-float-container"); if (fc) fc.remove(); }
     addMiniButtons();
-    scheduleAutoSync();
+    onConversationActivity(); // event-driven incremental capture (no polling)
   }
 
   // Load all flags — sync: prefs (autoCapture / autoInject / disabled sites),
@@ -1965,16 +1982,10 @@
     subtree: true,
   });
 
-  // Fallback poll: the observer-settle path can be starved on AI pages that
-  // animate constantly (the DOM never goes quiet for AUTO_SYNC_SETTLE_MS).
-  // This periodic check syncs whenever the thread content actually changed —
-  // autoSyncThread is gated + hash-skipped, so it's a cheap no-op otherwise.
-  const autoSyncPoll = setInterval(autoSyncThread, AUTO_SYNC_POLL_MS);
-
   // Disconnect observer on page unload to prevent memory leaks
   window.addEventListener("beforeunload", () => {
     observer.disconnect();
     if (observerTimer) clearTimeout(observerTimer);
-    clearInterval(autoSyncPoll);
+    if (doneTimer) clearTimeout(doneTimer);
   });
 })();

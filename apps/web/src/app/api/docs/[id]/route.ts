@@ -293,6 +293,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     action?: string;
     editToken?: string;
     markdown?: string;
+    append?: string;
+    separator?: string;
     title?: string;
     userId?: string;
     userEmail?: string;
@@ -345,6 +347,20 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         if (user) body.userId = user.id;
       } catch { /* ignore */ }
     }
+  }
+
+  // ─── Action: append (incremental) ───
+  // The extension's auto-capture appends only the NEW exchange instead of
+  // re-sending the whole thread. Load current markdown, append the delta,
+  // then fall through to the normal auto-save path (auth + save + hooks).
+  if (body.action === "append") {
+    const { data: cur } = await supabase.from("documents").select("markdown").eq("id", id).single();
+    if (!cur) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const sep = typeof body.separator === "string" ? body.separator : "\n\n";
+    const delta = typeof body.append === "string" ? body.append : "";
+    if (!delta.trim()) return NextResponse.json({ ok: true, noop: true });
+    body.markdown = (cur.markdown || "") + sep + delta;
+    body.action = "auto-save"; // reuse the save path + post-update hooks below
   }
 
   // Size limit (same as POST)
