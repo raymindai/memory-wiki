@@ -224,18 +224,8 @@
     }
     .brand-settings:hover { color: var(--ink); background: var(--bg-card); }
     .brand-settings svg { width: 15px; height: 15px; }
-    .brand-actions { display: inline-flex; align-items: center; gap: 2px; }
-    .brand-pause {
-      width: 24px; height: 24px;
-      display: inline-flex; align-items: center; justify-content: center;
-      color: var(--faint); cursor: pointer; border-radius: 6px;
-      background: transparent; border: none;
-      transition: color 140ms, background 140ms;
-    }
-    .brand-pause:hover { color: var(--ink); background: var(--bg-card); }
-    .brand-pause svg { width: 14px; height: 14px; }
-    .brand-pause.is-paused { color: var(--micro-orange); }
-    .brand-pause.is-paused:hover { color: var(--micro-orange); }
+    .brand-actions { display: inline-flex; align-items: center; gap: 10px; }
+    .brand-master { margin-right: 2px; }
     .brand-left {
       display: inline-flex; align-items: baseline; gap: 5px;
       text-decoration: none;
@@ -1241,15 +1231,16 @@
     .foot.signin:hover { background: transparent; }
     .foot.signin:hover .act { filter: brightness(0.94); }
 
-    /* ─── Quick controls — compact rows + switches. Toggle here; status
-       shows on the AI page (the capture pill). Default off. Signed-in only.
-       Pause is the master, lives in the header. ─── */
-    .mw-ctl { margin: 4px 24px 0; }
+    /* ─── Quick controls. The header master toggle dims + locks all of this
+       when off. Default off. Signed-in only. ─── */
+    .mw-ctl { margin: 6px 24px 0; }
     body.signed-out .mw-ctl { display: none !important; }
-    /* The old standalone "capturing from <AI>" line is merged into the
-       per-site row below — hide it to avoid the duplicate. */
+    /* Master OFF → dim + lock everything below the header. */
+    body.mw-off > *:not(.brand-bar) { opacity: 0.4; pointer-events: none; filter: saturate(0.7); transition: opacity 160ms; }
+    /* Old standalone "capturing from <AI>" line merged into the per-site row. */
     .page-context { display: none !important; }
-    .ctl-site-line { display: flex; align-items: center; gap: 8px; padding: 7px 0; }
+
+    .ctl-site-line { display: flex; align-items: center; gap: 9px; padding: 7px 0; }
     .ctl-site-dot {
       width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
       background: var(--micro-lime); box-shadow: 0 0 0 3px rgba(181,255,26,0.12);
@@ -1257,38 +1248,44 @@
     }
     .ctl-site-line.off .ctl-site-dot { background: var(--faint); box-shadow: none; }
     .ctl-site-name {
-      flex: 1; min-width: 0;
       font-family: var(--font-mono); font-size: 11px;
       letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .ctl-site-line.off .ctl-site-name { color: var(--muted); }
-    .ctl-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 7px 0; border-top: 1px solid var(--hair);
+    .ctl-site-sub { font-size: 10.5px; color: var(--muted); line-height: 1.3; }
+
+    /* Automatic group — a card that sets the auto features apart from the
+       manual Capture button below. */
+    .ctl-group {
+      margin-top: 8px;
+      border: 1px solid var(--hair); border-radius: var(--r-md);
+      background: var(--bg-card); padding: 2px 12px 8px;
     }
-    .ctl-row-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .ctl-group-head {
+      font-family: var(--font-mono); font-size: 9px;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--faint); padding: 9px 0 3px;
+    }
+    .ctl-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; }
+    .ctl-group .ctl-row + .ctl-row { border-top: 1px solid var(--hair); }
+    .ctl-row-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
     .ctl-title {
       font-family: var(--font-mono); font-size: 11px;
       letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
     }
     .ctl-dest { font-family: var(--font-mono); font-size: 10px; color: var(--faint); transition: color 120ms; }
     .ctl-dest:hover { color: var(--body); }
-    /* Toggle switch */
-    .sw { position: relative; width: 38px; height: 22px; flex-shrink: 0; cursor: pointer; }
+
+    /* Toggle switch — ONE unified small size everywhere (header + rows). */
+    .sw { position: relative; width: 30px; height: 18px; flex-shrink: 0; cursor: pointer; display: inline-block; }
     .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .sw .track { position: absolute; inset: 0; background: var(--hair-strong); border-radius: 11px; transition: background 150ms; }
+    .sw .track { position: absolute; inset: 0; background: var(--hair-strong); border-radius: 9px; transition: background 150ms; }
     .sw .track::after {
       content: ""; position: absolute; top: 2px; left: 2px;
-      width: 18px; height: 18px; border-radius: 50%;
+      width: 14px; height: 14px; border-radius: 50%;
       background: var(--muted); transition: transform 150ms, background 150ms;
     }
     .sw input:checked + .track { background: var(--ink); }
-    .sw input:checked + .track::after { transform: translateX(16px); background: var(--bg); }
-    .sw-sm { width: 32px; height: 18px; }
-    .sw-sm .track { border-radius: 9px; }
-    .sw-sm .track::after { width: 14px; height: 14px; }
-    .sw-sm input:checked + .track::after { transform: translateX(14px); }
+    .sw input:checked + .track::after { transform: translateX(12px); background: var(--bg); }
 
     .hidden-stub { display: none !important; }
   </style>
@@ -1304,9 +1301,9 @@
       <span class="brand-product">Clipper</span>
     </a>
     <div class="brand-actions">
-      <button class="brand-pause" id="btn-pause-hdr" type="button" title="Pause memory.wiki everywhere">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></svg>
-      </button>
+      <label class="sw brand-master" id="master-toggle" title="memory.wiki is on — turn it off everywhere">
+        <input type="checkbox" id="sw-master" checked><span class="track"></span>
+      </label>
       <a class="brand-settings" id="link-settings" href="#" title="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </a>
@@ -1326,24 +1323,31 @@
        AI / target site. Sits between hero and Capture. -->
   <div class="page-context" id="page-context"></div>
 
-  <!-- Quick controls. Toggle here; status shows on the AI page (capture
-       pill). Default off. Signed-in only. Pause is in the header. -->
+  <!-- Quick controls. The header master toggle dims + locks all of this
+       when off. Default off. Signed-in only. -->
   <div class="mw-ctl" id="mw-ctl">
     <div class="ctl-site-line" id="ctl-page-sec" style="display:none">
       <span class="ctl-site-dot"></span>
-      <span class="ctl-site-name" id="ctl-site-title">this site</span>
-      <label class="sw sw-sm" title="Run memory.wiki on this site"><input type="checkbox" id="sw-site"><span class="track"></span></label>
-    </div>
-    <div class="ctl-row">
       <div class="ctl-row-main">
-        <span class="ctl-title">Auto-capture</span>
-        <a class="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
+        <span class="ctl-site-name" id="ctl-site-title">this site</span>
+        <span class="ctl-site-sub" id="ctl-site-sub">memory.wiki runs on this site</span>
       </div>
-      <label class="sw" title="Sync AI threads to your hub"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
+      <label class="sw" title="Run memory.wiki on this site"><input type="checkbox" id="sw-site"><span class="track"></span></label>
     </div>
-    <div class="ctl-row">
-      <span class="ctl-title">Auto-inject</span>
-      <label class="sw" title="Show the memory pill on AI pages"><input type="checkbox" id="sw-inject"><span class="track"></span></label>
+
+    <div class="ctl-group">
+      <div class="ctl-group-head">automatic</div>
+      <div class="ctl-row">
+        <div class="ctl-row-main">
+          <span class="ctl-title">Auto-capture</span>
+          <a class="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
+        </div>
+        <label class="sw" title="Sync AI threads to your hub"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
+      </div>
+      <div class="ctl-row">
+        <span class="ctl-title">Auto-inject</span>
+        <label class="sw" title="Show the memory pill on AI pages"><input type="checkbox" id="sw-inject"><span class="track"></span></label>
+      </div>
     </div>
   </div>
 

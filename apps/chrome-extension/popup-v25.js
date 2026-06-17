@@ -1386,8 +1386,8 @@ function startTransformProgress(mode) {
   setTimeout(syncBodyState, 50);
 })();
 
-// ─── Quick controls: Pause (header) + per-site + Auto-capture / Auto-inject ───
-// Toggle here; status shows on the AI page (the capture pill). Default off.
+// ─── Quick controls: master on/off (header) + per-site + Auto-capture /
+// Auto-inject. Master OFF dims + locks everything below. Default off.
 // Writes the SAME storage keys content.js reads (sync: autoCapture /
 // autoInject / mw-disabled-sites; local: mw-paused) so the page flips live.
 (function () {
@@ -1395,9 +1395,11 @@ function startTransformProgress(mode) {
   const swCapture = document.getElementById("sw-capture");
   const swInject = document.getElementById("sw-inject");
   const swSite = document.getElementById("sw-site");
+  const swMaster = document.getElementById("sw-master");
+  const masterToggle = document.getElementById("master-toggle");
   const siteLine = document.getElementById("ctl-page-sec");
   const siteTitle = document.getElementById("ctl-site-title");
-  const btnPause = document.getElementById("btn-pause-hdr");
+  const siteSub = document.getElementById("ctl-site-sub");
   if (!swCapture || typeof chrome === "undefined" || !chrome.storage) return;
 
   let host = "";
@@ -1409,22 +1411,26 @@ function startTransformProgress(mode) {
   function reflect() {
     chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [] }, (s) => {
       chrome.storage.local.get({ "mw-paused": false }, (l) => {
+        const paused = !!l["mw-paused"];
         swCapture.checked = !!s.autoCapture;
         swInject.checked = !!s.autoInject;
-        const paused = !!l["mw-paused"];
-        if (btnPause) {
-          btnPause.classList.toggle("is-paused", paused);
-          btnPause.title = paused ? "Resume memory.wiki (paused)" : "Pause memory.wiki everywhere";
-        }
+        if (swMaster) swMaster.checked = !paused; // master ON = active (not paused)
+        if (masterToggle) masterToggle.title = paused
+          ? "memory.wiki is off — turn it back on"
+          : "memory.wiki is on — turn it off everywhere";
+        document.body.classList.toggle("mw-off", paused); // dim + lock everything below
+
         const name = host ? aiName(host) : null;
         if (name && siteLine) {
           siteLine.style.display = "";
           const disabled = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
           const runHere = !disabled.includes(host);
           siteTitle.textContent = name;
+          if (siteSub) siteSub.textContent = runHere
+            ? "memory.wiki is active on this site"
+            : "memory.wiki is off on this site";
           swSite.checked = runHere;
-          // Dim the dot/name when this site is off OR everything is paused.
-          siteLine.classList.toggle("off", !runHere || paused);
+          siteLine.classList.toggle("off", !runHere);
         } else if (siteLine) {
           siteLine.style.display = "none";
         }
@@ -1434,8 +1440,8 @@ function startTransformProgress(mode) {
 
   swCapture.addEventListener("change", () => chrome.storage.sync.set({ autoCapture: swCapture.checked }));
   swInject.addEventListener("change", () => chrome.storage.sync.set({ autoInject: swInject.checked }));
-  if (btnPause) btnPause.addEventListener("click", () => {
-    chrome.storage.local.get({ "mw-paused": false }, (l) => chrome.storage.local.set({ "mw-paused": !l["mw-paused"] }, reflect));
+  if (swMaster) swMaster.addEventListener("change", () => {
+    chrome.storage.local.set({ "mw-paused": !swMaster.checked }, reflect); // ON = active, OFF = paused
   });
   if (swSite) swSite.addEventListener("change", () => {
     if (!host) return;
