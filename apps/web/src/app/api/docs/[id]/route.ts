@@ -4,6 +4,7 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { syncBacklinks } from "@/lib/backlinks";
 import { syncDocumentSummary } from "@/lib/document-summary";
 import { syncDocAIGraph } from "@/lib/doc-ai-graph";
+import { refreshBundleGraphsForDoc } from "@/lib/bundle-graph-refresh";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { extractTitleFromMd, spliceH1 } from "@/lib/extract-title";
@@ -824,6 +825,24 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
             } catch { /* one bundle's failure shouldn't block others */ }
           }
         } catch { /* best-effort */ }
+      });
+    }
+
+    // A member doc changing makes every bundle containing it stale on the
+    // graph side (the /b/<id> payload graph is a snapshot, otherwise only
+    // flagged analysis_stale). Re-analyze those bundles in the background —
+    // throttled (15-min per-bundle cooldown), capped (fan-out), and
+    // flag-gated (site_config auto_analyze_enabled) inside the helper, so an
+    // autosave burst can't re-bill the LLM. (#4 memory-loop freshness)
+    if (markdown !== undefined) {
+      const graphOrigin = req.nextUrl.origin;
+      const graphAuth = req.headers.get("authorization");
+      after(async () => {
+        try {
+          await refreshBundleGraphsForDoc({ supabase, origin: graphOrigin, authHeader: graphAuth, docId: id });
+        } catch (err) {
+          console.warn("Bundle graph auto-refresh failed:", err);
+        }
       });
     }
 
