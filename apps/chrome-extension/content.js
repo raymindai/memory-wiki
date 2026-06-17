@@ -1469,10 +1469,10 @@
   // flashes on a paused / disabled page before we know the real state.
   function extActive() { return stateLoaded && !mwPaused && !disabledSites.includes(currentHost()); }
   function shouldCaptureThread() {
-    if (!extActive()) return false;
-    const k = threadKey();
-    if (k && Object.prototype.hasOwnProperty.call(threadOverrides, k)) return !!threadOverrides[k];
-    return autoCaptureEnabled;
+    // Pure reflection of the popup: capture only when the global toggle is on
+    // (and the extension is active on this site). No per-thread override, so
+    // the page pill always matches the popup state.
+    return extActive() && autoCaptureEnabled;
   }
 
   function threadKey() {
@@ -1650,14 +1650,10 @@
       pill.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
         if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
-        const k = threadKey();
-        if (!k) return;
-        const next = !shouldCaptureThread();
-        threadOverrides[k] = next;
-        try { chrome.storage.local.set({ "mw-thread-capture": threadOverrides }); } catch { /* */ }
-        updateCapturePill();
-        if (next) { showToast("capturing this thread to memory.wiki", 2500); lastActivityHash = null; syncThreadIncremental(); }
-        else { showToast("stopped capturing this thread", 2000); }
+        // The pill is a live status indicator; clicking it stops auto-capture.
+        // Turn it back on from the popup. Keeps the page in sync with the popup.
+        try { chrome.storage.sync.set({ autoCapture: false }); } catch { /* */ }
+        showToast("auto-capture stopped", 2000);
       });
       document.body.appendChild(pill);
       makeDraggable(pill);
@@ -1790,9 +1786,9 @@
     s.id = "mw-inject-style";
     s.textContent = [
       fontUrl ? '@font-face{font-family:"MW JetBrains Mono";src:url("' + fontUrl + '") format("woff2");font-weight:400 600;font-display:swap}' : '',
-      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #3a3a40;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-inject-pill:hover{opacity:1}',
-      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #3a3a40;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-capture-pill:hover{opacity:1}',
       '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
       '#mw-capture-pill .mw-cap-dot{width:8px;height:8px;border-radius:50%;background:#6a6a72;flex-shrink:0}',
