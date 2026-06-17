@@ -1461,6 +1461,8 @@
   let showFloat = false;     // showFloatingButton pref, managed via refreshExtUI
   let stateLoaded = false;   // until flags load, render NOTHING (no button flash)
   let pillPos = {};          // { pillId: {left, top} } — user-dragged pill positions
+  // Drag-handle glyph (6-dot grip) prefixed on the pills as a "draggable" hint.
+  const MW_GRIP = '<span class="mw-grip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><circle cx="9" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg></span>';
 
   function currentHost() { try { return location.hostname; } catch { return ""; } }
   // extActive is false until the flags are loaded, so no capture UI ever
@@ -1632,8 +1634,10 @@
       : "Click to capture this thread to memory.wiki (or toggle globally in the popup).";
   }
   function initCapturePill() {
-    // Only on a real thread, and only when the extension is active here.
-    if (!extActive() || !threadKey()) { removeCapturePill(); return; }
+    // Show the pill ONLY while this thread is actually being captured (so the
+    // page indicator matches the popup: auto-capture off ⇒ no pill). It is a
+    // live "● capturing" status + a click-to-stop for this thread.
+    if (!shouldCaptureThread() || !threadKey()) { removeCapturePill(); return; }
     injectInjectStyles();
     let pill = document.getElementById("mw-capture-pill");
     if (!pill) {
@@ -1642,7 +1646,7 @@
       pill.type = "button";
       // Dot (recording pulse when on) + label, built once so the animation
       // is stable across refreshes.
-      pill.innerHTML = '<span class="mw-cap-dot"></span><span class="mw-cap-label"></span>';
+      pill.innerHTML = MW_GRIP + '<span class="mw-cap-dot"></span><span class="mw-cap-label"></span>';
       pill.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
         if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
@@ -1780,17 +1784,23 @@
 
   function injectInjectStyles() {
     if (document.getElementById("mw-inject-style")) return;
+    const fontUrl = (chrome.runtime && chrome.runtime.getURL) ? chrome.runtime.getURL("fonts/JetBrainsMono-Regular.woff2") : "";
+    const PILL_FONT = 'font:600 11px/1 "MW JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.06em';
     const s = document.createElement("style");
     s.id = "mw-inject-style";
     s.textContent = [
-      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      fontUrl ? '@font-face{font-family:"MW JetBrains Mono";src:url("' + fontUrl + '") format("woff2");font-weight:400 600;font-display:swap}' : '',
+      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-inject-pill:hover{opacity:1}',
-      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-capture-pill:hover{opacity:1}',
       '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
       '#mw-capture-pill .mw-cap-dot{width:8px;height:8px;border-radius:50%;background:#6a6a72;flex-shrink:0}',
       '#mw-capture-pill.mw-on .mw-cap-dot{background:#B5FF1A;animation:mw-rec 1.4s ease-in-out infinite}',
       '@keyframes mw-rec{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(181,255,26,.5)}50%{opacity:.35;box-shadow:0 0 0 5px rgba(181,255,26,0)}}',
+      '#mw-capture-pill .mw-grip,#mw-inject-pill .mw-grip{display:inline-flex;align-items:center;color:#5a5a62;margin-right:1px;flex-shrink:0}',
+      '#mw-capture-pill .mw-grip svg,#mw-inject-pill .mw-grip svg{width:10px;height:13px;display:block}',
+      '#mw-capture-pill:hover .mw-grip,#mw-inject-pill:hover .mw-grip{color:#a1a1aa}',
       '.mw-inject-panel{z-index:2147483601;width:320px;max-height:340px;overflow:auto;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.4);padding:6px;font:13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
       '.mw-inject-head{font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}',
       '.mw-inject-empty{padding:12px;color:#a1a1aa;font-size:12px;line-height:1.5}',
@@ -1890,7 +1900,7 @@
     const pill = document.createElement("button");
     pill.id = "mw-inject-pill";
     pill.type = "button";
-    pill.textContent = "✦ memory";
+    pill.innerHTML = MW_GRIP + '<span>✦ memory</span>';
     pill.title = "Insert relevant memory.wiki context into this chat";
     pill.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
