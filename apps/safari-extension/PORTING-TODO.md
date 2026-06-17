@@ -18,18 +18,21 @@ Source: `apps/chrome-extension/`. Target: `memory.wiki Clipper/Shared (Extension
   AI thread to ONE doc (keyed by `chrome.storage.local["mw-thread-map"]`; POST to
   create, then `action:"append"` for deltas). Event-driven (content-stable settle
   timer), no polling.
-- **Gating + controls** (GLOBAL only — no per-thread override): the gating state
-  (`mwPaused`, `disabledSites`) + `extActive()` / `shouldCaptureThread()`; the
-  on-page capture STATUS pill (`initCapturePill` / `updateCapturePill` /
-  `removeCapturePill`, "● capturing" / "capture", with the recording-pulse dot,
-  draggable, click-to-stop), styled in `injectPillStyles` as `#mw-capture-pill`
-  (also defines the JetBrains Mono `@font-face`); the `extActive()` guards in
-  `addMiniButtons` + `createFloatingButton`; `refreshExtUI()`. Precedence:
-  paused > site-disabled > global autoCapture.
+- **Gating + controls.** The popup `autoCapture` toggle ONLY shows/hides the
+  pill; the PILL starts/stops capture per thread (click to arm/disarm). Bring
+  `mwPaused`/`disabledSites` + `extActive()` + `shouldShowPill()` (extActive &&
+  autoCapture && threadKey) + `threadArmed()` (`mw-thread-capture[key]`) +
+  `shouldCaptureThread()` (shown && armed) + `toggleThreadCapture()`; the
+  capture pill (`initCapturePill` / `updateCapturePill` / `removeCapturePill`,
+  "● capturing" with recording-pulse / "capture", draggable, click=arm/disarm),
+  styled in `injectPillStyles` as `#mw-capture-pill` (also defines the JetBrains
+  Mono `@font-face`); the `extActive()` guards in `addMiniButtons` +
+  `createFloatingButton`; `refreshExtUI()`. Precedence: paused > site-disabled
+  > popup-shows-pill > thread-armed.
 - The MutationObserver hook calls `measureContentRight()` + `refreshExtUI()`.
 - The storage-init block loads sync (`autoCapture` / `mw-disabled-sites`) + local
-  (`mw-paused` / `mw-thread-map` / `mw-pill-pos`) with a unified
-  `storage.onChanged` (sync + local) → `refreshExtUI()`.
+  (`mw-paused` / `mw-thread-map` / `mw-thread-capture` / `mw-pill-pos`) with a
+  unified `storage.onChanged` (sync + local) → `refreshExtUI()`.
 
 **Before porting, confirm the Safari content.js has the helpers these depend
 on**: `getUserId`, `proxyFetch`, `extractConversation`, `formatMessages`,
@@ -58,10 +61,11 @@ resolution if so.
 - Bump version; mirror the description (capture-only, no inject).
 
 ## Keep identical across both extensions
-- `storage.sync` keys: `autoCapture`, `mw-disabled-sites`
-- `storage.local` keys: `mw-thread-map`, `mw-paused`, `mw-pill-pos`
-- Default OFF; popup = toggles; page = status. Precedence: paused >
-  site-disabled > global autoCapture.
+- `storage.sync` keys: `autoCapture` (= show pill), `mw-disabled-sites`
+- `storage.local` keys: `mw-thread-map`, `mw-thread-capture` (per-thread armed),
+  `mw-paused`, `mw-pill-pos`
+- Default OFF; popup toggle = show/hide pill; the PILL = start/stop capture per
+  thread. Precedence: paused > site-disabled > popup-shows-pill > thread-armed.
 
 ## Then
 - Test load-on-device on ChatGPT / Claude / Gemini while signed in.
