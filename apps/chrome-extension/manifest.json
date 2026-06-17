@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "memory.wiki Clipper",
-  "version": "2.7.6",
-  "description": "Capture pages, AI chats, social posts. Type an AI intent and get a memory.wiki URL any AI reads.",
+  "version": "2.8.0",
+  "description": "Capture pages, AI chats, social posts. Auto-capture threads and inject your memory into any AI. One memory.wiki URL every AI reads.",
   "permissions": [
     "activeTab",
     "tabs",

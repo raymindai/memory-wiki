@@ -1576,11 +1576,190 @@
     autoSyncTimer = setTimeout(autoSyncThread, AUTO_SYNC_SETTLE_MS);
   }
 
+  // ─── Auto-inject relevant memory (#1) ───
+  // The extension already runs on the AI page. With auto-inject on, a small
+  // "memory" pill near the composer pulls the user's RELEVANT memory into the
+  // chat: it runs the ontology-grounded deep search (the same recall MCP
+  // agents use, /api/search?deep=1) against what they're typing and inserts
+  // the matching memory.wiki URL into the input. The AI then fetches that URL
+  // as clean markdown — cross-AI, no plugin. Opt-in; never injects silently.
+  let autoInjectEnabled = false;
+
+  function getInputEl() {
+    if (platform === "chatgpt")
+      return document.querySelector("#prompt-textarea") || document.querySelector("main form textarea");
+    if (platform === "claude")
+      return document.querySelector('div[contenteditable="true"].ProseMirror') ||
+             document.querySelector('div[contenteditable="true"]') ||
+             document.querySelector("textarea");
+    if (platform === "gemini")
+      return document.querySelector('div[contenteditable="true"][role="textbox"]') ||
+             document.querySelector('rich-textarea div[contenteditable="true"]') ||
+             document.querySelector("textarea");
+    return null;
+  }
+
+  function readInput(el) {
+    if (!el) return "";
+    if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return el.value || "";
+    return el.textContent || "";
+  }
+
+  function insertIntoInput(text) {
+    const el = getInputEl();
+    if (!el) { showToast("couldn't find the chat input", 3000); return false; }
+    el.focus();
+    if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") {
+      const cur = el.value || "";
+      el.value = cur ? cur.replace(/\s*$/, "") + "\n\n" + text : text;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    } else {
+      // contenteditable (ProseMirror etc.) — execCommand fires the
+      // beforeinput/input events React/ProseMirror listen for.
+      try {
+        const sel = window.getSelection();
+        sel.selectAllChildren(el);
+        sel.collapseToEnd();
+        const prefix = readInput(el).trim() ? "\n\n" : "";
+        if (!document.execCommand("insertText", false, prefix + text)) throw new Error("execCommand failed");
+      } catch {
+        el.textContent = (el.textContent ? el.textContent + "\n\n" : "") + text;
+        el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+      }
+    }
+    return true;
+  }
+
+  function injectInjectStyles() {
+    if (document.getElementById("mw-inject-style")) return;
+    const s = document.createElement("style");
+    s.id = "mw-inject-style";
+    s.textContent = [
+      '#mw-inject-pill{position:fixed;left:16px;bottom:96px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.85}',
+      '#mw-inject-pill:hover{opacity:1}',
+      '.mw-inject-panel{z-index:2147483601;width:320px;max-height:340px;overflow:auto;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.4);padding:6px;font:13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
+      '.mw-inject-head{font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}',
+      '.mw-inject-empty{padding:12px;color:#a1a1aa;font-size:12px;line-height:1.5}',
+      '.mw-inject-row{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;color:inherit;padding:8px;border-radius:8px;cursor:pointer}',
+      '.mw-inject-row:hover{background:rgba(255,255,255,.06)}',
+      '.mw-inject-title{font-size:13px;color:#e4e4e7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}',
+      '.mw-inject-meta{font-size:11px;color:#71717a}',
+    ].join("");
+    document.head.appendChild(s);
+  }
+
+  function closeInjectPanel() {
+    const p = document.getElementById("mw-inject-panel");
+    if (p) p.remove();
+  }
+
+  function positionPanel(panel, anchor) {
+    const rect = anchor.getBoundingClientRect();
+    panel.style.position = "fixed";
+    panel.style.bottom = (window.innerHeight - rect.top + 8) + "px";
+    panel.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 336)) + "px";
+  }
+
+  async function openInjectPanel(anchor) {
+    closeInjectPanel();
+    const panel = document.createElement("div");
+    panel.id = "mw-inject-panel";
+    panel.className = "mw-inject-panel";
+    const userId = await getUserId();
+    if (!userId) {
+      panel.innerHTML = '<div class="mw-inject-empty">Sign in at memory.wiki to inject your memory.</div>';
+      document.body.appendChild(panel); positionPanel(panel, anchor);
+      return;
+    }
+    panel.innerHTML = '<div class="mw-inject-empty">Searching your memory…</div>';
+    document.body.appendChild(panel); positionPanel(panel, anchor);
+
+    // Query = what the user is typing, else their last turn in this thread.
+    let query = readInput(getInputEl()).trim();
+    if (!query) {
+      try {
+        const lastUser = extractConversation().filter((m) => m.role === "user").slice(-1)[0];
+        query = (lastUser?.content || "").trim();
+      } catch { /* */ }
+    }
+    if (!query) {
+      panel.innerHTML = '<div class="mw-inject-empty">Type what you need help with, then tap memory to find relevant context.</div>';
+      return;
+    }
+
+    let results = [];
+    try {
+      const res = await proxyFetch(MDFY_URL + "/api/search?q=" + encodeURIComponent(query.slice(0, 400)) + "&deep=1", {
+        method: "GET",
+        headers: { "x-user-id": userId },
+      });
+      if (res.ok) { const data = JSON.parse(res.body); results = data.results || []; }
+    } catch { /* */ }
+
+    if (!results.length) {
+      panel.innerHTML = '<div class="mw-inject-empty">No matching memory found for that.</div>';
+      return;
+    }
+    panel.innerHTML = "";
+    const head = document.createElement("div");
+    head.className = "mw-inject-head";
+    head.textContent = "Insert memory as context";
+    panel.appendChild(head);
+    results.slice(0, 6).forEach((r) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "mw-inject-row";
+      const titleEl = document.createElement("span");
+      titleEl.className = "mw-inject-title";
+      titleEl.textContent = r.title || "Untitled";
+      const metaEl = document.createElement("span");
+      metaEl.className = "mw-inject-meta";
+      const graphOnly = Array.isArray(r.via) && r.via.includes("concept") && !r.via.includes("text") && !r.via.includes("semantic");
+      metaEl.textContent = graphOnly && r.viaConcept ? "related via " + r.viaConcept : "";
+      row.appendChild(titleEl);
+      if (metaEl.textContent) row.appendChild(metaEl);
+      row.addEventListener("click", () => {
+        insertIntoInput("Use " + MDFY_URL + "/" + r.id + " as context: " + (r.title || "memory.wiki doc") + ".");
+        closeInjectPanel();
+        showToast("context added — the AI will read it as markdown", 3000);
+      });
+      panel.appendChild(row);
+    });
+  }
+
+  function initAutoInject() {
+    if (document.getElementById("mw-inject-pill")) return;
+    injectInjectStyles();
+    const pill = document.createElement("button");
+    pill.id = "mw-inject-pill";
+    pill.type = "button";
+    pill.textContent = "✦ memory";
+    pill.title = "Insert relevant memory.wiki context into this chat";
+    pill.addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (document.getElementById("mw-inject-panel")) { closeInjectPanel(); return; }
+      openInjectPanel(pill);
+    });
+    document.body.appendChild(pill);
+    document.addEventListener("click", (e) => {
+      const panel = document.getElementById("mw-inject-panel");
+      if (panel && !panel.contains(e.target) && e.target !== pill) closeInjectPanel();
+    });
+  }
+
+  function removeAutoInject() {
+    const pill = document.getElementById("mw-inject-pill");
+    if (pill) pill.remove();
+    closeInjectPanel();
+  }
+
   // Load the opt-in flags + react to changes without a reload.
   try {
-    chrome.storage.sync.get({ autoCapture: false }, (data) => {
+    chrome.storage.sync.get({ autoCapture: false, autoInject: false }, (data) => {
       autoCaptureEnabled = !!(data && data.autoCapture);
+      autoInjectEnabled = !!(data && data.autoInject);
       if (autoCaptureEnabled) scheduleAutoSync();
+      if (autoInjectEnabled) initAutoInject();
     });
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== "sync") return;
@@ -1588,8 +1767,12 @@
         autoCaptureEnabled = !!changes.autoCapture.newValue;
         if (autoCaptureEnabled) scheduleAutoSync();
       }
+      if (changes.autoInject) {
+        autoInjectEnabled = !!changes.autoInject.newValue;
+        if (autoInjectEnabled) initAutoInject(); else removeAutoInject();
+      }
     });
-  } catch { /* storage unavailable — auto-capture stays off */ }
+  } catch { /* storage unavailable — features stay off */ }
 
   // Re-run mini button injection when new messages appear (MutationObserver)
   // Debounced to avoid performance issues during streaming responses
@@ -1600,6 +1783,7 @@
       addMiniButtons();
       measureContentRight();
       scheduleAutoSync(); // ambient capture: sync ~6s after the thread settles
+      if (autoInjectEnabled) initAutoInject(); // re-ensure the pill if the site re-rendered
     }, 300);
   });
 
