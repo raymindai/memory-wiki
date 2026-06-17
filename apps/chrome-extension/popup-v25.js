@@ -82,8 +82,9 @@
   const p = HEADLINES[Math.floor(Math.random() * HEADLINES.length)];
   const l1 = document.getElementById("hero-l1");
   const l2 = document.getElementById("hero-l2");
-  if (l1) l1.textContent = p[0];
-  if (l2) l2.textContent = p[1];
+  // One line now (was two): join the phrase, hide the second line.
+  if (l1) l1.textContent = p.join(" ");
+  if (l2) l2.style.display = "none";
 })();
 
 (function () {

@@ -249,13 +249,14 @@
       margin-left: 2px;
     }
 
-    /* ─── Hero (compact) ─── */
-    .hero { padding: 4px 24px 0; }
+    /* ─── Hero — one line now, with a little breathing room ─── */
+    .hero { padding: 14px 24px 12px; }
     .hero .line {
       font-family: var(--font-display);
-      font-size: 22px; font-weight: 600;
-      line-height: 1.05; letter-spacing: -0.025em;
+      font-size: 21px; font-weight: 600;
+      line-height: 1.1; letter-spacing: -0.025em;
       color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     /* ─── Primary CTA — ink fill, /about hero glow on hover ─── */
@@ -1276,16 +1277,16 @@
     .ctl-dest:hover { color: var(--body); }
 
     /* Toggle switch — ONE unified small size everywhere (header + rows). */
-    .sw { position: relative; width: 30px; height: 18px; flex-shrink: 0; cursor: pointer; display: inline-block; }
+    .sw { position: relative; width: 26px; height: 15px; flex-shrink: 0; cursor: pointer; display: inline-block; }
     .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .sw .track { position: absolute; inset: 0; background: var(--hair-strong); border-radius: 9px; transition: background 150ms; }
+    .sw .track { position: absolute; inset: 0; background: var(--hair-strong); border-radius: 8px; transition: background 150ms; }
     .sw .track::after {
       content: ""; position: absolute; top: 2px; left: 2px;
-      width: 14px; height: 14px; border-radius: 50%;
+      width: 11px; height: 11px; border-radius: 50%;
       background: var(--muted); transition: transform 150ms, background 150ms;
     }
     .sw input:checked + .track { background: var(--ink); }
-    .sw input:checked + .track::after { transform: translateX(12px); background: var(--bg); }
+    .sw input:checked + .track::after { transform: translateX(11px); background: var(--bg); }
 
     /* Manual group — mirrors the AUTOMATIC card so the manual captures read
        as their own labeled section. Inner elements drop their page-rail side
