@@ -1087,6 +1087,7 @@
 
   function createFloatingButton() {
     if (!extActive()) return; // dormant when paused / disabled on this site
+    if (document.getElementById("mw-float-container")) return; // idempotent
     const container = document.createElement("div");
     container.id = "mw-float-container";
 
@@ -1369,12 +1370,8 @@
 
     if (request.action === "toggle-float-button") {
       try {
-        const existing = document.getElementById("mw-float-container");
-        if (request.show && !existing) {
-          createFloatingButton();
-        } else if (!request.show && existing) {
-          existing.remove();
-        }
+        showFloat = !!request.show;
+        refreshExtUI(); // creates/removes the float, respecting paused / site gating
         sendResponse({ ok: true });
       } catch (err) {
         sendResponse({ ok: false, error: String(err && err.message || err) });
@@ -1437,17 +1434,10 @@
 
   // ─── Initialize ───
 
-  // Only show floating "memory.wiki all" button if user opted in (default: hidden)
-  try {
-    chrome.storage.sync.get({ showFloatingButton: false }, (data) => {
-      if (data && data.showFloatingButton) {
-        createFloatingButton();
-      }
-    });
-  } catch (e) {
-    console.warn("[Memory.Wiki] storage access failed, skipping float button", e);
-  }
-  addMiniButtons();
+  // The floating button + per-message buttons + pills are ALL applied by
+  // refreshExtUI() once the flags load (below). Nothing renders before we
+  // know the paused / disabled-site state, so no capture UI ever flashes on
+  // a paused or disabled page.
 
   // ─── Ambient auto-capture (#2) ───
   // When the user opts in, each AI thread continuously syncs to a SINGLE
@@ -1468,9 +1458,13 @@
   let mwPaused = false;
   let disabledSites = [];
   let threadOverrides = {};
+  let showFloat = false;     // showFloatingButton pref, managed via refreshExtUI
+  let stateLoaded = false;   // until flags load, render NOTHING (no button flash)
 
   function currentHost() { try { return location.hostname; } catch { return ""; } }
-  function extActive() { return !mwPaused && !disabledSites.includes(currentHost()); }
+  // extActive is false until the flags are loaded, so no capture UI ever
+  // flashes on a paused / disabled page before we know the real state.
+  function extActive() { return stateLoaded && !mwPaused && !disabledSites.includes(currentHost()); }
   function shouldCaptureThread() {
     if (!extActive()) return false;
     const k = threadKey();
@@ -1733,6 +1727,9 @@
 
   async function openInjectPanel(anchor) {
     closeInjectPanel();
+    // Defense-in-depth: never inject when paused or disabled on this site,
+    // even if a stale pill lingers.
+    if (!extActive()) { removeAutoInject(); return; }
     const panel = document.createElement("div");
     panel.id = "mw-inject-panel";
     panel.className = "mw-inject-panel";
@@ -1839,6 +1836,8 @@
     }
     initCapturePill();
     if (autoInjectEnabled) initAutoInject(); else removeAutoInject();
+    if (showFloat) createFloatingButton();
+    else { const fc = document.getElementById("mw-float-container"); if (fc) fc.remove(); }
     addMiniButtons();
     scheduleAutoSync();
   }
@@ -1846,13 +1845,15 @@
   // Load all flags — sync: prefs (autoCapture / autoInject / disabled sites),
   // local: paused + per-thread overrides — and react to changes live.
   try {
-    chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [] }, (data) => {
+    chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [], showFloatingButton: false }, (data) => {
       autoCaptureEnabled = !!(data && data.autoCapture);
       autoInjectEnabled = !!(data && data.autoInject);
       disabledSites = Array.isArray(data && data["mw-disabled-sites"]) ? data["mw-disabled-sites"] : [];
+      showFloat = !!(data && data.showFloatingButton);
       chrome.storage.local.get({ "mw-paused": false, "mw-thread-capture": {} }, (loc) => {
         mwPaused = !!(loc && loc["mw-paused"]);
         threadOverrides = (loc && loc["mw-thread-capture"]) || {};
+        stateLoaded = true; // flags known — now (and only now) render
         refreshExtUI();
       });
     });
@@ -1861,6 +1862,7 @@
         if (changes.autoCapture) autoCaptureEnabled = !!changes.autoCapture.newValue;
         if (changes.autoInject) autoInjectEnabled = !!changes.autoInject.newValue;
         if (changes["mw-disabled-sites"]) disabledSites = Array.isArray(changes["mw-disabled-sites"].newValue) ? changes["mw-disabled-sites"].newValue : [];
+        if (changes.showFloatingButton) showFloat = !!changes.showFloatingButton.newValue;
       } else if (area === "local") {
         if (changes["mw-paused"]) mwPaused = !!changes["mw-paused"].newValue;
         if (changes["mw-thread-capture"]) threadOverrides = changes["mw-thread-capture"].newValue || {};
