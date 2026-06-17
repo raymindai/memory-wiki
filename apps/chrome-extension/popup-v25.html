@@ -1296,6 +1296,28 @@
     .sw input:checked + .track { background: var(--ink); }
     .sw input:checked + .track::after { transform: translateX(11px); background: var(--bg); }
 
+    /* Help "?" icon with an instant hover tooltip. */
+    .help {
+      display: inline-flex; align-items: center; vertical-align: middle;
+      margin-left: 5px; color: var(--faint); cursor: help; position: relative;
+    }
+    .help svg { width: 12px; height: 12px; }
+    .help:hover { color: var(--body); }
+    .help::after {
+      content: attr(data-tip);
+      position: absolute; left: 0; bottom: calc(100% + 7px);
+      width: max-content; max-width: 210px;
+      background: rgb(30, 30, 34); color: var(--body);
+      border: 1px solid var(--hair-strong); border-radius: 8px;
+      padding: 7px 9px;
+      font-family: var(--font-sans); font-size: 11px; font-weight: 400;
+      line-height: 1.45; letter-spacing: 0; text-transform: none; text-align: left;
+      white-space: normal;
+      opacity: 0; pointer-events: none; transition: opacity 120ms; z-index: 99999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .help:hover::after { opacity: 1; }
+
     /* Manual group — mirrors the AUTOMATIC card so the manual captures read
        as their own labeled section. Inner elements drop their page-rail side
        margins to sit inside the card padding. */
@@ -1372,20 +1394,20 @@
       <div class="ctl-group-head">automatic</div>
       <div class="ctl-row">
         <div class="ctl-row-main">
-          <span class="ctl-title">Auto-capture</span>
+          <span class="ctl-title">Auto-capture<span class="help" data-tip="Saves each AI thread to one memory.wiki doc as it grows, no clicks. A status pill on the page lets you see and stop it."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></span>
           <a class="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
         </div>
         <label class="sw" title="Sync AI threads to your hub"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
       </div>
       <div class="ctl-row">
-        <span class="ctl-title">Auto-inject</span>
+        <span class="ctl-title">Auto-inject<span class="help" data-tip="Adds a memory pill by the chat box. Tap it to find your relevant memory.wiki docs and drop the URL into the chat, so any AI reads it as context."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></span>
         <label class="sw" title="Show the memory pill on AI pages"><input type="checkbox" id="sw-inject"><span class="track"></span></label>
       </div>
     </div>
   </div>
 
   <div class="manual-group">
-    <div class="manual-group-head">manual</div>
+    <div class="manual-group-head">manual<span class="help" data-tip="Capture on demand with one tap: this page, the whole AI conversation, or your selected text."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></div>
   <div class="cta-group">
     <div class="cta-row">
       <button class="cta" id="btn-capture">
@@ -1420,6 +1442,7 @@
 
   <div class="ask-head">
     <span>or capture with intent</span>
+    <span class="help" data-tip="Type an instruction like 'summarize as bullets'. memory.wiki captures the page, transforms it that way, and returns one URL."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
   </div>
   <div class="ask-input-wrap" id="ask-input-wrap">
     <span class="placeholder-cycle" id="placeholder-cycle" aria-hidden="true"></span>
