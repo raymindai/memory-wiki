@@ -317,20 +317,29 @@ server.tool(
 
 server.tool(
   "mw_search",
-  "Search your documents on memory.wiki by keyword (full-text search)",
-  { query: z.string().describe("Search query (keywords to find in your documents)") },
+  "Search your documents on memory.wiki. Ontology-grounded hybrid recall: " +
+    "full-text + semantic (meaning) + a concept-graph bridge that also surfaces " +
+    "docs about concepts RELATED to your query (one hop in the knowledge graph), " +
+    "so you find relevant memory even when the wording doesn't match.",
+  { query: z.string().describe("What to find in your knowledge (keywords or a natural-language description)") },
   async ({ query }) => {
     if (!isLoggedIn()) return loginRequiredResult();
     try {
-      const data = await api<{ results: Array<{ id: string; title: string; snippet: string; isDraft: boolean; viewCount: number; source: string | null; updatedAt: string }> }>(
-        `/api/search?q=${encodeURIComponent(query)}`
-      );
+      const data = await api<{
+        results: Array<{ id: string; title: string; snippet: string; isDraft: boolean; viewCount: number; source: string | null; updatedAt: string; via?: string[]; viaConcept?: string | null }>;
+        concepts?: string | null;
+      }>(`/api/search?q=${encodeURIComponent(query)}&deep=1`);
       const results = data.results || [];
       if (results.length === 0) return textResult(`No documents found matching "${query}".`);
-      const lines = results.map((r, i) =>
-        `${i + 1}. **${r.title}** (${r.id}) / ${r.isDraft ? "private" : "shared"} / ${r.viewCount} views / ${r.updatedAt}\n   ${r.snippet}`
-      );
-      return textResult(`Found ${results.length} document(s) matching "${query}":\n\n${lines.join("\n\n")}`);
+      const lines = results.map((r, i) => {
+        // Flag docs that surfaced only through the concept graph (not text/semantic).
+        const via = r.via || [];
+        const graphOnly = via.includes("concept") && !via.includes("text") && !via.includes("semantic");
+        const tag = graphOnly && r.viaConcept ? ` / related via concept: ${r.viaConcept}` : "";
+        return `${i + 1}. **${r.title}** (${r.id}) / ${r.isDraft ? "private" : "shared"} / ${r.viewCount} views / ${r.updatedAt}${tag}\n   ${r.snippet}`;
+      });
+      const header = data.concepts ? `${data.concepts}\n\n` : "";
+      return textResult(`${header}Found ${results.length} document(s) for "${query}":\n\n${lines.join("\n\n")}`);
     } catch (err) { return errorResult(err); }
   }
 );
