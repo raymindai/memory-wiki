@@ -1516,6 +1516,9 @@
 
     const map = await getThreadMap();
     const existing = map[key];
+    // Persisted-hash guard: re-opening an UNCHANGED thread (new page load, so
+    // the in-memory lastSyncedHash is null) must not fire a redundant PATCH.
+    if (existing && existing.hash === hash) { lastSyncedKey = key; lastSyncedHash = hash; return; }
     const titleMatch = markdown.match(/^#\s+(.+)/m);
     const title = (titleMatch ? titleMatch[1].trim() : "captured from " + platformName()).slice(0, 100);
 
@@ -1534,7 +1537,7 @@
         });
         if (res.ok) {
           lastSyncedKey = key; lastSyncedHash = hash;
-          setThreadEntry(key, { ...existing, title, ts: Date.now() });
+          setThreadEntry(key, { ...existing, title, hash, ts: Date.now() });
         } else if (res.status === 404) {
           // The doc was deleted server-side — drop the stale mapping so the
           // next tick re-creates it.
@@ -1551,7 +1554,7 @@
           try { parsed = JSON.parse(res.body); } catch { /* */ }
           if (parsed.id) {
             lastSyncedKey = key; lastSyncedHash = hash;
-            setThreadEntry(key, { id: parsed.id, editToken: parsed.editToken, title, ts: Date.now() });
+            setThreadEntry(key, { id: parsed.id, editToken: parsed.editToken, title, hash, ts: Date.now() });
             try {
               const docUrl = MDFY_URL + "/" + parsed.id;
               chrome.storage.local.get(["mw-recent"], (data) => {

@@ -181,7 +181,10 @@
     .toggle input:checked + .track { background: var(--text-primary); }
     .toggle input:checked + .track::after {
       transform: translateX(16px);
-      background: var(--accent);
+      /* dark knob so it stays visible on the light ON track — --accent is
+         also near-white (#e4e4e7) here, which made ON read as a solid white
+         blob (no visible knob). */
+      background: var(--bg);
     }
 
     .footer {
