@@ -1603,8 +1603,11 @@
     const pill = document.getElementById("mw-capture-pill");
     if (!pill) return;
     const on = shouldCaptureThread();
-    pill.textContent = on ? "● capturing" : "○ capture";
     pill.classList.toggle("mw-on", on);
+    // Update the label text only — leave the .mw-cap-dot element in place so
+    // its recording-pulse animation never restarts on a refresh tick.
+    const label = pill.querySelector(".mw-cap-label");
+    if (label) label.textContent = on ? "capturing" : "capture";
     pill.title = on
       ? "This thread is syncing to memory.wiki. Click to stop capturing it."
       : "Click to capture this thread to memory.wiki (or toggle globally in the popup).";
@@ -1618,6 +1621,9 @@
       pill = document.createElement("button");
       pill.id = "mw-capture-pill";
       pill.type = "button";
+      // Dot (recording pulse when on) + label, built once so the animation
+      // is stable across refreshes.
+      pill.innerHTML = '<span class="mw-cap-dot"></span><span class="mw-cap-label"></span>';
       pill.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
         const k = threadKey();
@@ -1697,11 +1703,14 @@
     const s = document.createElement("style");
     s.id = "mw-inject-style";
     s.textContent = [
-      '#mw-inject-pill{position:fixed;left:16px;bottom:96px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.85}',
+      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-inject-pill:hover{opacity:1}',
-      '#mw-capture-pill{position:fixed;left:16px;bottom:136px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.85}',
+      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-capture-pill:hover{opacity:1}',
       '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
+      '#mw-capture-pill .mw-cap-dot{width:8px;height:8px;border-radius:50%;background:#6a6a72;flex-shrink:0}',
+      '#mw-capture-pill.mw-on .mw-cap-dot{background:#B5FF1A;animation:mw-rec 1.4s ease-in-out infinite}',
+      '@keyframes mw-rec{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(181,255,26,.5)}50%{opacity:.35;box-shadow:0 0 0 5px rgba(181,255,26,0)}}',
       '.mw-inject-panel{z-index:2147483601;width:320px;max-height:340px;overflow:auto;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.4);padding:6px;font:13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
       '.mw-inject-head{font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}',
       '.mw-inject-empty{padding:12px;color:#a1a1aa;font-size:12px;line-height:1.5}',
