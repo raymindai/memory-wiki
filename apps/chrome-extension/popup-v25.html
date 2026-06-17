@@ -1236,13 +1236,16 @@
        when off. Default off. Signed-in only. ─── */
     .mw-ctl { margin: 6px 24px 0; }
     body.signed-out .mw-ctl { display: none !important; }
-    /* Master OFF → dim + lock everything below the header. */
-    body.mw-off > *:not(.brand-bar) { opacity: 0.4; pointer-events: none; filter: saturate(0.7); transition: opacity 160ms; }
-    /* This site OFF → dim + lock everything below the per-site row (the
-       automatic + manual cards and below), but keep the per-site toggle
-       itself live so it can be turned back on. */
+    /* Master OFF → HIDE everything from below the header down to (but not
+       including) Recent. The header (master toggle) + Recent + account stay
+       visible. */
+    body.mw-off .hero,
+    body.mw-off .mw-ctl,
+    body.mw-off .manual-group { display: none !important; }
+    /* This site OFF → HIDE from below the per-site row down to Recent (the
+       automatic + manual cards). The per-site toggle itself + Recent stay. */
     body.mw-site-off .ctl-group,
-    body.mw-site-off .mw-ctl ~ * { opacity: 0.4; pointer-events: none; filter: saturate(0.7); transition: opacity 160ms; }
+    body.mw-site-off .manual-group { display: none !important; }
     /* Old standalone "capturing from <AI>" line merged into the per-site row. */
     .page-context { display: none !important; }
 
