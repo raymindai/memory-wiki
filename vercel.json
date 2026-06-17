@@ -76,7 +76,7 @@
     {
       "source": "/hub/:slug([a-z0-9_-]{3,32})",
       "missing": [
-        { "type": "header", "key": "user-agent", "value": ".*(GPTBot|OAI-SearchBot|Claude-Web|ClaudeBot|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" },
+        { "type": "header", "key": "user-agent", "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|Claude-Web|ClaudeBot|Claude-User|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|Perplexity-User|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" },
         { "type": "header", "key": "accept", "value": ".*text\\/(markdown|plain).*" }
       ],
       "destination": "/@:slug",
@@ -147,7 +147,7 @@
     },
     {
       "source": "/:id([A-Za-z0-9_-]{6,12})",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|OAI-SearchBot|Claude-Web|ClaudeBot|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|Claude-Web|ClaudeBot|Claude-User|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|Perplexity-User|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
       "destination": "/raw/:id"
     },
     {
@@ -165,7 +165,7 @@
     },
     {
       "source": "/b/:id([A-Za-z0-9_-]{6,12})",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|OAI-SearchBot|Claude-Web|ClaudeBot|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|Claude-Web|ClaudeBot|Claude-User|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|Perplexity-User|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
       "destination": "/raw/bundle/:id"
     },
     {
@@ -215,7 +215,7 @@
     },
     {
       "source": "/@:slug([a-z0-9_-]{3,32})",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|OAI-SearchBot|Claude-Web|ClaudeBot|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|Claude-Web|ClaudeBot|Claude-User|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|Perplexity-User|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
       "destination": "/raw/hub/:slug"
     },
     {
@@ -249,7 +249,7 @@
     },
     {
       "source": "/hub/:slug([a-z0-9_-]{3,32})",
-      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|OAI-SearchBot|Claude-Web|ClaudeBot|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
+      "has": [{ "type": "header", "key": "user-agent", "value": ".*(GPTBot|ChatGPT-User|OAI-SearchBot|Claude-Web|ClaudeBot|Claude-User|anthropic-ai|Anthropic|Google-Extended|GoogleOther|PerplexityBot|Perplexity-User|cohere-ai|YouBot|Bytespider|Bingbot|DuckDuckBot|Applebot-Extended|MistralAI|Meta-ExternalAgent).*" }],
       "destination": "/raw/hub/:slug"
     },
     {
