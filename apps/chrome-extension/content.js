@@ -1445,6 +1445,152 @@
   }
   addMiniButtons();
 
+  // ─── Ambient auto-capture (#2) ───
+  // When the user opts in, each AI thread continuously syncs to a SINGLE
+  // memory.wiki doc (created once, then updated) as the conversation grows,
+  // so memory forms without a per-conversation click. Keyed by the thread
+  // URL so re-syncs UPDATE the same doc instead of spawning duplicates, and
+  // debounced so we only sync after a response settles (never mid-stream).
+  let autoCaptureEnabled = false;
+  let autoSyncTimer = null;
+  let lastSyncedHash = null;
+  let lastSyncedKey = null;
+  const AUTO_SYNC_SETTLE_MS = 6000;
+
+  function threadKey() {
+    // The conversation's own URL path. The transient new-chat state ("/")
+    // has no thread id yet, so skip it — otherwise we'd create a doc for an
+    // empty chat. Require a thread-shaped path per platform.
+    const p = location.pathname || "/";
+    if (p === "/" || p === "") return null;
+    if (platform === "chatgpt" && !/\/c\//.test(p)) return null;
+    if (platform === "claude" && !/\/chat\//.test(p)) return null;
+    if (platform === "gemini" && !/\/app\b/.test(p) && !/\/[a-z0-9]{6,}/i.test(p)) return null;
+    return platform + ":" + p;
+  }
+
+  function cheapHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return h + ":" + s.length;
+  }
+
+  function getThreadMap() {
+    return new Promise((resolve) => {
+      try { chrome.storage.local.get({ "mw-thread-map": {} }, (d) => resolve(d["mw-thread-map"] || {})); }
+      catch { resolve({}); }
+    });
+  }
+  function setThreadEntry(key, entry) {
+    try {
+      chrome.storage.local.get({ "mw-thread-map": {} }, (d) => {
+        const map = d["mw-thread-map"] || {};
+        map[key] = entry;
+        const keys = Object.keys(map);
+        if (keys.length > 50) {
+          keys.map((k) => [k, map[k]])
+            .sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0))
+            .slice(50)
+            .forEach(([k]) => delete map[k]);
+        }
+        chrome.storage.local.set({ "mw-thread-map": map });
+      });
+    } catch { /* noop */ }
+  }
+
+  async function autoSyncThread() {
+    if (!autoCaptureEnabled) return;
+    const key = threadKey();
+    if (!key) return;
+    const userId = await getUserId();
+    if (!userId) return; // ambient capture requires sign-in; stay silent
+
+    let messages;
+    try { messages = extractConversation(); } catch { return; }
+    if (!messages || messages.length < 2) return; // need at least one full exchange
+    const markdown = formatConversation(messages);
+    if (!markdown || markdown.trim().length < 40) return;
+
+    const hash = cheapHash(markdown);
+    if (key === lastSyncedKey && hash === lastSyncedHash) return; // unchanged since last sync
+
+    const map = await getThreadMap();
+    const existing = map[key];
+    const titleMatch = markdown.match(/^#\s+(.+)/m);
+    const title = (titleMatch ? titleMatch[1].trim() : "captured from " + platformName()).slice(0, 100);
+
+    try {
+      if (existing && existing.id) {
+        // Update the thread's doc in place — quiet, no new window.
+        const res = await proxyFetch(MDFY_URL + "/api/docs/" + existing.id, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          // userId authorizes the edit (PATCH checks doc.user_id === body.userId);
+          // editToken is a belt-and-suspenders for the owner check. No
+          // expectedHash → the server skips conflict detection and just
+          // overwrites, which is correct: the extension is the source of
+          // truth for an auto-captured thread.
+          body: JSON.stringify({ markdown, title, source: "chrome-auto", userId, editToken: existing.editToken }),
+        });
+        if (res.ok) {
+          lastSyncedKey = key; lastSyncedHash = hash;
+          setThreadEntry(key, { ...existing, title, ts: Date.now() });
+        } else if (res.status === 404) {
+          // The doc was deleted server-side — drop the stale mapping so the
+          // next tick re-creates it.
+          setThreadEntry(key, undefined);
+        }
+      } else {
+        const res = await proxyFetch(MDFY_URL + "/api/docs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ markdown, userId, title, editMode: "account", source: "chrome-auto" }),
+        });
+        if (res.ok) {
+          let parsed = {};
+          try { parsed = JSON.parse(res.body); } catch { /* */ }
+          if (parsed.id) {
+            lastSyncedKey = key; lastSyncedHash = hash;
+            setThreadEntry(key, { id: parsed.id, editToken: parsed.editToken, title, ts: Date.now() });
+            try {
+              const docUrl = MDFY_URL + "/" + parsed.id;
+              chrome.storage.local.get(["mw-recent"], (data) => {
+                const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
+                const entry = { url: docUrl, title, source: "chrome-auto-" + platformName().toLowerCase(), ts: Date.now() };
+                const next = [entry, ...prev.filter((p) => p.url !== docUrl)].slice(0, 5);
+                chrome.storage.local.set({ "mw-recent": next });
+              });
+            } catch { /* noop */ }
+            showToast("auto-syncing this thread to memory.wiki", 3500);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[Memory.Wiki] auto-sync failed:", err);
+    }
+  }
+
+  function scheduleAutoSync() {
+    if (!autoCaptureEnabled) return;
+    if (autoSyncTimer) clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(autoSyncThread, AUTO_SYNC_SETTLE_MS);
+  }
+
+  // Load the opt-in flags + react to changes without a reload.
+  try {
+    chrome.storage.sync.get({ autoCapture: false }, (data) => {
+      autoCaptureEnabled = !!(data && data.autoCapture);
+      if (autoCaptureEnabled) scheduleAutoSync();
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== "sync") return;
+      if (changes.autoCapture) {
+        autoCaptureEnabled = !!changes.autoCapture.newValue;
+        if (autoCaptureEnabled) scheduleAutoSync();
+      }
+    });
+  } catch { /* storage unavailable — auto-capture stays off */ }
+
   // Re-run mini button injection when new messages appear (MutationObserver)
   // Debounced to avoid performance issues during streaming responses
   let observerTimer;
@@ -1453,6 +1599,7 @@
     observerTimer = setTimeout(() => {
       addMiniButtons();
       measureContentRight();
+      scheduleAutoSync(); // ambient capture: sync ~6s after the thread settles
     }, 300);
   });
 
