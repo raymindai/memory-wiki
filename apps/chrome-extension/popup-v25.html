@@ -224,6 +224,18 @@
     }
     .brand-settings:hover { color: var(--ink); background: var(--bg-card); }
     .brand-settings svg { width: 15px; height: 15px; }
+    .brand-actions { display: inline-flex; align-items: center; gap: 2px; }
+    .brand-pause {
+      width: 24px; height: 24px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--faint); cursor: pointer; border-radius: 6px;
+      background: transparent; border: none;
+      transition: color 140ms, background 140ms;
+    }
+    .brand-pause:hover { color: var(--ink); background: var(--bg-card); }
+    .brand-pause svg { width: 14px; height: 14px; }
+    .brand-pause.is-paused { color: var(--micro-orange); }
+    .brand-pause.is-paused:hover { color: var(--micro-orange); }
     .brand-left {
       display: inline-flex; align-items: baseline; gap: 5px;
       text-decoration: none;
@@ -1229,31 +1241,39 @@
     .foot.signin:hover { background: transparent; }
     .foot.signin:hover .act { filter: brightness(0.94); }
 
-    /* ─── Quick controls — sections + switches. Toggle here; status shows
-       on the AI page (the capture pill). Default off. Signed-in only. ─── */
-    .mw-ctl { margin: 6px 24px 0; }
+    /* ─── Quick controls — compact rows + switches. Toggle here; status
+       shows on the AI page (the capture pill). Default off. Signed-in only.
+       Pause is the master, lives in the header. ─── */
+    .mw-ctl { margin: 4px 24px 0; }
     body.signed-out .mw-ctl { display: none !important; }
-    .ctl-sec { padding: 9px 0; border-top: 1px solid var(--hair); }
-    .ctl-sec:first-child { border-top: none; }
-    .ctl-eyebrow {
-      font-family: var(--font-mono); font-size: 9.5px;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--faint); margin-bottom: 7px;
+    /* The old standalone "capturing from <AI>" line is merged into the
+       per-site row below — hide it to avoid the duplicate. */
+    .page-context { display: none !important; }
+    .ctl-site-line { display: flex; align-items: center; gap: 8px; padding: 7px 0; }
+    .ctl-site-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: var(--micro-lime); box-shadow: 0 0 0 3px rgba(181,255,26,0.12);
+      transition: background 140ms, box-shadow 140ms;
     }
-    .ctl-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ctl-site-line.off .ctl-site-dot { background: var(--faint); box-shadow: none; }
+    .ctl-site-name {
+      flex: 1; min-width: 0;
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ctl-site-line.off .ctl-site-name { color: var(--muted); }
+    .ctl-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 7px 0; border-top: 1px solid var(--hair);
+    }
+    .ctl-row-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
     .ctl-title {
       font-family: var(--font-mono); font-size: 11px;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--ink);
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
     }
-    .ctl-desc { margin-top: 4px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
-    .ctl-dest {
-      display: inline-block; margin-top: 3px;
-      font-family: var(--font-mono); font-size: 10.5px;
-      color: var(--faint); transition: color 120ms;
-    }
+    .ctl-dest { font-family: var(--font-mono); font-size: 10px; color: var(--faint); transition: color 120ms; }
     .ctl-dest:hover { color: var(--body); }
-    .ctl-pause-sec .ctl-title { color: var(--body); }
     /* Toggle switch */
     .sw { position: relative; width: 38px; height: 22px; flex-shrink: 0; cursor: pointer; }
     .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -1265,7 +1285,10 @@
     }
     .sw input:checked + .track { background: var(--ink); }
     .sw input:checked + .track::after { transform: translateX(16px); background: var(--bg); }
-    .sw.pause input:checked + .track { background: var(--micro-orange); }
+    .sw-sm { width: 32px; height: 18px; }
+    .sw-sm .track { border-radius: 9px; }
+    .sw-sm .track::after { width: 14px; height: 14px; }
+    .sw-sm input:checked + .track::after { transform: translateX(14px); }
 
     .hidden-stub { display: none !important; }
   </style>
@@ -1280,9 +1303,14 @@
       <span class="brand-word">memory.wiki</span>
       <span class="brand-product">Clipper</span>
     </a>
-    <a class="brand-settings" id="link-settings" href="#" title="settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </a>
+    <div class="brand-actions">
+      <button class="brand-pause" id="btn-pause-hdr" type="button" title="Pause memory.wiki everywhere">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></svg>
+      </button>
+      <a class="brand-settings" id="link-settings" href="#" title="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
+    </div>
   </div>
 
   <div class="hero">
@@ -1299,39 +1327,23 @@
   <div class="page-context" id="page-context"></div>
 
   <!-- Quick controls. Toggle here; status shows on the AI page (capture
-       pill). Default off. Signed-in only. Wired in popup-v25.js. -->
+       pill). Default off. Signed-in only. Pause is in the header. -->
   <div class="mw-ctl" id="mw-ctl">
-    <div class="ctl-sec ctl-page" id="ctl-page-sec" style="display:none">
-      <div class="ctl-eyebrow">on this page</div>
-      <div class="ctl-head">
-        <span class="ctl-title" id="ctl-site-title">this site</span>
-        <label class="sw" title="Run memory.wiki on this site"><input type="checkbox" id="sw-site"><span class="track"></span></label>
-      </div>
+    <div class="ctl-site-line" id="ctl-page-sec" style="display:none">
+      <span class="ctl-site-dot"></span>
+      <span class="ctl-site-name" id="ctl-site-title">this site</span>
+      <label class="sw sw-sm" title="Run memory.wiki on this site"><input type="checkbox" id="sw-site"><span class="track"></span></label>
     </div>
-
-    <div class="ctl-sec">
-      <div class="ctl-head">
+    <div class="ctl-row">
+      <div class="ctl-row-main">
         <span class="ctl-title">Auto-capture</span>
-        <label class="sw" title="Auto-capture AI threads"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
+        <a class="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
       </div>
-      <div class="ctl-desc">Sync each AI thread to one doc</div>
-      <a class="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
+      <label class="sw" title="Sync AI threads to your hub"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
     </div>
-
-    <div class="ctl-sec">
-      <div class="ctl-head">
-        <span class="ctl-title">Auto-inject</span>
-        <label class="sw" title="Show the memory pill on AI pages"><input type="checkbox" id="sw-inject"><span class="track"></span></label>
-      </div>
-      <div class="ctl-desc">Pull relevant memory into the chat &mdash; a &ldquo;memory&rdquo; pill by the input box</div>
-    </div>
-
-    <div class="ctl-sec ctl-pause-sec">
-      <div class="ctl-head">
-        <span class="ctl-title">Pause memory.wiki everywhere</span>
-        <label class="sw pause" title="Temporarily turn the extension off on every site"><input type="checkbox" id="sw-pause"><span class="track"></span></label>
-      </div>
-      <div class="ctl-desc">temporarily turn the extension off on every site</div>
+    <div class="ctl-row">
+      <span class="ctl-title">Auto-inject</span>
+      <label class="sw" title="Show the memory pill on AI pages"><input type="checkbox" id="sw-inject"><span class="track"></span></label>
     </div>
   </div>
 

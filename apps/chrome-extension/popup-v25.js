@@ -1386,19 +1386,18 @@ function startTransformProgress(mode) {
   setTimeout(syncBodyState, 50);
 })();
 
-// ─── Quick controls: Auto-capture / Auto-inject / this-site / Pause ───
-// Sections + real toggle switches. Toggle here; status shows on the AI page
-// (the capture pill). Default off. Writes the SAME storage keys content.js
-// reads (sync: autoCapture / autoInject / mw-disabled-sites; local:
-// mw-paused), so toggling here flips the page live.
+// ─── Quick controls: Pause (header) + per-site + Auto-capture / Auto-inject ───
+// Toggle here; status shows on the AI page (the capture pill). Default off.
+// Writes the SAME storage keys content.js reads (sync: autoCapture /
+// autoInject / mw-disabled-sites; local: mw-paused) so the page flips live.
 (function () {
   const AI = { "chatgpt.com": "ChatGPT", "chat.openai.com": "ChatGPT", "claude.ai": "Claude", "gemini.google.com": "Gemini" };
   const swCapture = document.getElementById("sw-capture");
   const swInject = document.getElementById("sw-inject");
   const swSite = document.getElementById("sw-site");
-  const swPause = document.getElementById("sw-pause");
-  const pageSec = document.getElementById("ctl-page-sec");
+  const siteLine = document.getElementById("ctl-page-sec");
   const siteTitle = document.getElementById("ctl-site-title");
+  const btnPause = document.getElementById("btn-pause-hdr");
   if (!swCapture || typeof chrome === "undefined" || !chrome.storage) return;
 
   let host = "";
@@ -1412,15 +1411,22 @@ function startTransformProgress(mode) {
       chrome.storage.local.get({ "mw-paused": false }, (l) => {
         swCapture.checked = !!s.autoCapture;
         swInject.checked = !!s.autoInject;
-        swPause.checked = !!l["mw-paused"];
+        const paused = !!l["mw-paused"];
+        if (btnPause) {
+          btnPause.classList.toggle("is-paused", paused);
+          btnPause.title = paused ? "Resume memory.wiki (paused)" : "Pause memory.wiki everywhere";
+        }
         const name = host ? aiName(host) : null;
-        if (name) {
-          pageSec.style.display = "";
-          siteTitle.textContent = name + " detected";
+        if (name && siteLine) {
+          siteLine.style.display = "";
           const disabled = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
-          swSite.checked = !disabled.includes(host); // checked = runs on this site
-        } else {
-          pageSec.style.display = "none";
+          const runHere = !disabled.includes(host);
+          siteTitle.textContent = name;
+          swSite.checked = runHere;
+          // Dim the dot/name when this site is off OR everything is paused.
+          siteLine.classList.toggle("off", !runHere || paused);
+        } else if (siteLine) {
+          siteLine.style.display = "none";
         }
       });
     });
@@ -1428,19 +1434,21 @@ function startTransformProgress(mode) {
 
   swCapture.addEventListener("change", () => chrome.storage.sync.set({ autoCapture: swCapture.checked }));
   swInject.addEventListener("change", () => chrome.storage.sync.set({ autoInject: swInject.checked }));
-  swPause.addEventListener("change", () => chrome.storage.local.set({ "mw-paused": swPause.checked }));
-  swSite.addEventListener("change", () => {
+  if (btnPause) btnPause.addEventListener("click", () => {
+    chrome.storage.local.get({ "mw-paused": false }, (l) => chrome.storage.local.set({ "mw-paused": !l["mw-paused"] }, reflect));
+  });
+  if (swSite) swSite.addEventListener("change", () => {
     if (!host) return;
     chrome.storage.sync.get({ "mw-disabled-sites": [] }, (s) => {
       let list = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"].slice() : [];
       // checked = run here → host NOT in the disabled list
       if (swSite.checked) list = list.filter((h) => h !== host);
       else if (!list.includes(host)) list.push(host);
-      chrome.storage.sync.set({ "mw-disabled-sites": list });
+      chrome.storage.sync.set({ "mw-disabled-sites": list }, reflect);
     });
   });
 
-  // Resolve the active tab host (for the per-site section), then reflect state.
+  // Resolve the active tab host (for the per-site line), then reflect state.
   try {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       try { host = tabs && tabs[0] && tabs[0].url ? new URL(tabs[0].url).hostname : ""; } catch { host = ""; }
