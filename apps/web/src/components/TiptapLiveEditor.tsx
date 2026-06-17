@@ -50,6 +50,8 @@ import {
   Table2,
   Sigma,
   Workflow,
+  Copy,
+  Check,
 } from "lucide-react";
 
 const lowlight = createLowlight(common);
@@ -957,6 +959,7 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [copied, setCopied] = useState(false);
   const [aiMenu, setAiMenu] = useState<null | "root" | "translate">(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -1103,6 +1106,21 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
     setLinkUrl("");
   }, [editor, linkUrl]);
 
+  // Copy the selection as PLAIN TEXT — the visible words only, no markdown
+  // syntax and no rich formatting. textBetween() already gives us the bare
+  // text content (marks stripped); newlines for block + hard breaks.
+  const copyPlainText = useCallback(async () => {
+    const { from, to } = editor.state.selection;
+    if (from === to) return;
+    const text = editor.state.doc.textBetween(from, to, "\n", "\n").trim();
+    if (!text || typeof navigator === "undefined" || !navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch { /* clipboard blocked — silent */ }
+  }, [editor]);
+
   if (!pos) return null;
 
   const btn = (active: boolean) => ({
@@ -1176,6 +1194,10 @@ function SelectionToolbar({ editor }: { editor: Editor }) {
           </button>
           <button onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} style={btn(false)} title="Clear formatting">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          </button>
+          <div style={{ width: 1, height: 16, background: "var(--border-dim)", margin: "0 2px" }} />
+          <button onClick={copyPlainText} style={btn(copied)} title="Copy as plain text">
+            {copied ? <Check width={14} height={14} /> : <Copy width={14} height={14} />}
           </button>
           <div style={{ width: 1, height: 16, background: "var(--border-dim)", margin: "0 2px" }} />
           <button
