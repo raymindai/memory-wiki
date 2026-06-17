@@ -1449,7 +1449,8 @@
   let autoSyncTimer = null;
   let lastSyncedHash = null;
   let lastSyncedKey = null;
-  const AUTO_SYNC_SETTLE_MS = 6000;
+  const AUTO_SYNC_SETTLE_MS = 3000; // sync ~3s after the thread settles
+  const AUTO_SYNC_POLL_MS = 12000;  // fallback poll so constant page animations can't starve capture
 
   // Gating layers. Precedence: paused > site-disabled > per-thread override
   // > global autoCapture. `mwPaused` (local) is the temporary master kill;
@@ -1460,6 +1461,7 @@
   let threadOverrides = {};
   let showFloat = false;     // showFloatingButton pref, managed via refreshExtUI
   let stateLoaded = false;   // until flags load, render NOTHING (no button flash)
+  let pillPos = {};          // { pillId: {left, top} } — user-dragged pill positions
 
   function currentHost() { try { return location.hostname; } catch { return ""; } }
   // extActive is false until the flags are loaded, so no capture UI ever
@@ -1626,6 +1628,7 @@
       pill.innerHTML = '<span class="mw-cap-dot"></span><span class="mw-cap-label"></span>';
       pill.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
+        if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
         const k = threadKey();
         if (!k) return;
         const next = !shouldCaptureThread();
@@ -1636,12 +1639,72 @@
         else { showToast("stopped capturing this thread", 2000); }
       });
       document.body.appendChild(pill);
+      makeDraggable(pill);
+      applySavedPillPos(pill);
     }
     updateCapturePill();
   }
   function removeCapturePill() {
     const p = document.getElementById("mw-capture-pill");
     if (p) p.remove();
+  }
+
+  // ─── Draggable pills ───
+  // Both on-page pills (capturing + memory) can be dragged anywhere; the
+  // position persists. A drag (pointer moved past a small threshold) does
+  // NOT fire the pill's click action — checked via pill._mwDragged.
+  function applySavedPillPos(pill) {
+    const p = pillPos[pill.id];
+    if (!p || typeof p.left !== "number" || typeof p.top !== "number") return;
+    const w = pill.offsetWidth || 120, h = pill.offsetHeight || 32;
+    const left = Math.max(4, Math.min(p.left, window.innerWidth - w - 4));
+    const top = Math.max(4, Math.min(p.top, window.innerHeight - h - 4));
+    pill.style.left = left + "px";
+    pill.style.top = top + "px";
+    pill.style.right = "auto";
+    pill.style.bottom = "auto";
+  }
+
+  function makeDraggable(pill) {
+    let startX = 0, startY = 0, origLeft = 0, origTop = 0, dragging = false, moved = false;
+    pill.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      dragging = true; moved = false;
+      const rect = pill.getBoundingClientRect();
+      origLeft = rect.left; origTop = rect.top;
+      startX = e.clientX; startY = e.clientY;
+      try { pill.setPointerCapture(e.pointerId); } catch { /* */ }
+      pill.style.transition = "none";
+      pill.style.cursor = "grabbing";
+    });
+    pill.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      if (!moved && Math.hypot(dx, dy) > 4) moved = true;
+      if (!moved) return;
+      const w = pill.offsetWidth, h = pill.offsetHeight;
+      const left = Math.max(4, Math.min(origLeft + dx, window.innerWidth - w - 4));
+      const top = Math.max(4, Math.min(origTop + dy, window.innerHeight - h - 4));
+      pill.style.left = left + "px";
+      pill.style.top = top + "px";
+      pill.style.right = "auto";
+      pill.style.bottom = "auto";
+    });
+    const end = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      pill.style.cursor = "";
+      pill.style.transition = "";
+      try { pill.releasePointerCapture(e.pointerId); } catch { /* */ }
+      if (moved) {
+        pill._mwDragged = true; // suppress the click that follows this drag
+        const rect = pill.getBoundingClientRect();
+        pillPos[pill.id] = { left: Math.round(rect.left), top: Math.round(rect.top) };
+        try { chrome.storage.local.set({ "mw-pill-pos": pillPos }); } catch { /* */ }
+      }
+    };
+    pill.addEventListener("pointerup", end);
+    pill.addEventListener("pointercancel", end);
   }
 
   // ─── Auto-inject relevant memory (#1) ───
@@ -1703,9 +1766,9 @@
     const s = document.createElement("style");
     s.id = "mw-inject-style";
     s.textContent = [
-      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-inject-pill:hover{opacity:1}',
-      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#8a8a92;border:1px solid #2a2a2e;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-capture-pill:hover{opacity:1}',
       '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
       '#mw-capture-pill .mw-cap-dot{width:8px;height:8px;border-radius:50%;background:#6a6a72;flex-shrink:0}',
@@ -1814,10 +1877,13 @@
     pill.title = "Insert relevant memory.wiki context into this chat";
     pill.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
+      if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
       if (document.getElementById("mw-inject-panel")) { closeInjectPanel(); return; }
       openInjectPanel(pill);
     });
     document.body.appendChild(pill);
+    makeDraggable(pill);
+    applySavedPillPos(pill);
     document.addEventListener("click", (e) => {
       const panel = document.getElementById("mw-inject-panel");
       if (panel && !panel.contains(e.target) && e.target !== pill) closeInjectPanel();
@@ -1859,9 +1925,10 @@
       autoInjectEnabled = !!(data && data.autoInject);
       disabledSites = Array.isArray(data && data["mw-disabled-sites"]) ? data["mw-disabled-sites"] : [];
       showFloat = !!(data && data.showFloatingButton);
-      chrome.storage.local.get({ "mw-paused": false, "mw-thread-capture": {} }, (loc) => {
+      chrome.storage.local.get({ "mw-paused": false, "mw-thread-capture": {}, "mw-pill-pos": {} }, (loc) => {
         mwPaused = !!(loc && loc["mw-paused"]);
         threadOverrides = (loc && loc["mw-thread-capture"]) || {};
+        pillPos = (loc && loc["mw-pill-pos"]) || {};
         stateLoaded = true; // flags known — now (and only now) render
         refreshExtUI();
       });
@@ -1898,9 +1965,16 @@
     subtree: true,
   });
 
+  // Fallback poll: the observer-settle path can be starved on AI pages that
+  // animate constantly (the DOM never goes quiet for AUTO_SYNC_SETTLE_MS).
+  // This periodic check syncs whenever the thread content actually changed —
+  // autoSyncThread is gated + hash-skipped, so it's a cheap no-op otherwise.
+  const autoSyncPoll = setInterval(autoSyncThread, AUTO_SYNC_POLL_MS);
+
   // Disconnect observer on page unload to prevent memory leaks
   window.addEventListener("beforeunload", () => {
     observer.disconnect();
     if (observerTimer) clearTimeout(observerTimer);
+    clearInterval(autoSyncPoll);
   });
 })();
