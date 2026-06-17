@@ -1638,7 +1638,7 @@
     // page indicator matches the popup: auto-capture off ⇒ no pill). It is a
     // live "● capturing" status + a click-to-stop for this thread.
     if (!shouldCaptureThread() || !threadKey()) { removeCapturePill(); return; }
-    injectInjectStyles();
+    injectPillStyles();
     let pill = document.getElementById("mw-capture-pill");
     if (!pill) {
       pill = document.createElement("button");
@@ -1724,200 +1724,28 @@
     pill.addEventListener("pointercancel", end);
   }
 
-  // ─── Auto-inject relevant memory (#1) ───
-  // The extension already runs on the AI page. With auto-inject on, a small
-  // "memory" pill near the composer pulls the user's RELEVANT memory into the
-  // chat: it runs the ontology-grounded deep search (the same recall MCP
-  // agents use, /api/search?deep=1) against what they're typing and inserts
-  // the matching memory.wiki URL into the input. The AI then fetches that URL
-  // as clean markdown — cross-AI, no plugin. Opt-in; never injects silently.
-  let autoInjectEnabled = false;
-
-  function getInputEl() {
-    if (platform === "chatgpt")
-      return document.querySelector("#prompt-textarea") || document.querySelector("main form textarea");
-    if (platform === "claude")
-      return document.querySelector('div[contenteditable="true"].ProseMirror') ||
-             document.querySelector('div[contenteditable="true"]') ||
-             document.querySelector("textarea");
-    if (platform === "gemini")
-      return document.querySelector('div[contenteditable="true"][role="textbox"]') ||
-             document.querySelector('rich-textarea div[contenteditable="true"]') ||
-             document.querySelector("textarea");
-    return null;
-  }
-
-  function readInput(el) {
-    if (!el) return "";
-    if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return el.value || "";
-    return el.textContent || "";
-  }
-
-  function insertIntoInput(text) {
-    const el = getInputEl();
-    if (!el) { showToast("couldn't find the chat input", 3000); return false; }
-    el.focus();
-    if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") {
-      const cur = el.value || "";
-      el.value = cur ? cur.replace(/\s*$/, "") + "\n\n" + text : text;
-      el.dispatchEvent(new Event("input", { bubbles: true }));
-    } else {
-      // contenteditable (ProseMirror etc.) — execCommand fires the
-      // beforeinput/input events React/ProseMirror listen for.
-      try {
-        const sel = window.getSelection();
-        sel.selectAllChildren(el);
-        sel.collapseToEnd();
-        const prefix = readInput(el).trim() ? "\n\n" : "";
-        if (!document.execCommand("insertText", false, prefix + text)) throw new Error("execCommand failed");
-      } catch {
-        el.textContent = (el.textContent ? el.textContent + "\n\n" : "") + text;
-        el.dispatchEvent(new InputEvent("input", { bubbles: true }));
-      }
-    }
-    return true;
-  }
-
-  function injectInjectStyles() {
-    if (document.getElementById("mw-inject-style")) return;
+  // ─── Capture-pill styles (font + the live "● capturing" pill) ───
+  function injectPillStyles() {
+    if (document.getElementById("mw-pill-style")) return;
     const fontUrl = (chrome.runtime && chrome.runtime.getURL) ? chrome.runtime.getURL("fonts/JetBrainsMono-Regular.woff2") : "";
     const PILL_FONT = 'font:600 11px/1 "MW JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.06em';
     const s = document.createElement("style");
-    s.id = "mw-inject-style";
+    s.id = "mw-pill-style";
     s.textContent = [
       fontUrl ? '@font-face{font-family:"MW JetBrains Mono";src:url("' + fontUrl + '") format("woff2");font-weight:400 600;font-display:swap}' : '',
-      '#mw-inject-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #3a3a40;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
-      '#mw-inject-pill:hover{opacity:1}',
-      '#mw-capture-pill{position:fixed;right:16px;bottom:132px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #3a3a40;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
+      '#mw-capture-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #3a3a40;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
       '#mw-capture-pill:hover{opacity:1}',
       '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
       '#mw-capture-pill .mw-cap-dot{width:8px;height:8px;border-radius:50%;background:#6a6a72;flex-shrink:0}',
       '#mw-capture-pill.mw-on .mw-cap-dot{background:#B5FF1A;animation:mw-rec 1.4s ease-in-out infinite}',
       '@keyframes mw-rec{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(181,255,26,.5)}50%{opacity:.35;box-shadow:0 0 0 5px rgba(181,255,26,0)}}',
-      '#mw-capture-pill .mw-grip,#mw-inject-pill .mw-grip{display:inline-flex;align-items:center;color:#5a5a62;margin-right:1px;flex-shrink:0}',
-      '#mw-capture-pill .mw-grip svg,#mw-inject-pill .mw-grip svg{width:10px;height:13px;display:block}',
-      '#mw-capture-pill:hover .mw-grip,#mw-inject-pill:hover .mw-grip{color:#a1a1aa}',
-      '.mw-inject-panel{z-index:2147483601;width:320px;max-height:340px;overflow:auto;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.4);padding:6px;font:13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
-      '.mw-inject-head{font-family:"MW JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:#71717a;text-transform:uppercase;letter-spacing:.1em;padding:7px 8px}',
-      '.mw-inject-empty{padding:12px;color:#a1a1aa;font-size:12px;line-height:1.5}',
-      '.mw-inject-row{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;color:inherit;padding:8px;border-radius:8px;cursor:pointer}',
-      '.mw-inject-row:hover{background:rgba(255,255,255,.06)}',
-      '.mw-inject-title{font-size:13px;color:#e4e4e7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px}',
-      '.mw-inject-meta{font-size:11px;color:#71717a}',
+      '#mw-capture-pill .mw-grip{display:inline-flex;align-items:center;color:#5a5a62;margin-right:1px;flex-shrink:0}',
+      '#mw-capture-pill .mw-grip svg{width:10px;height:13px;display:block}',
+      '#mw-capture-pill:hover .mw-grip{color:#a1a1aa}',
     ].join("");
     document.head.appendChild(s);
   }
 
-  function closeInjectPanel() {
-    const p = document.getElementById("mw-inject-panel");
-    if (p) p.remove();
-  }
-
-  function positionPanel(panel, anchor) {
-    const rect = anchor.getBoundingClientRect();
-    panel.style.position = "fixed";
-    panel.style.bottom = (window.innerHeight - rect.top + 8) + "px";
-    panel.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 336)) + "px";
-  }
-
-  async function openInjectPanel(anchor) {
-    closeInjectPanel();
-    // Defense-in-depth: never inject when paused or disabled on this site,
-    // even if a stale pill lingers.
-    if (!extActive()) { removeAutoInject(); return; }
-    const panel = document.createElement("div");
-    panel.id = "mw-inject-panel";
-    panel.className = "mw-inject-panel";
-    const userId = await getUserId();
-    if (!userId) {
-      panel.innerHTML = '<div class="mw-inject-empty">Sign in at memory.wiki to inject your memory.</div>';
-      document.body.appendChild(panel); positionPanel(panel, anchor);
-      return;
-    }
-    panel.innerHTML = '<div class="mw-inject-empty">Searching your memory…</div>';
-    document.body.appendChild(panel); positionPanel(panel, anchor);
-
-    // Query = what the user is typing, else their last turn in this thread.
-    let query = readInput(getInputEl()).trim();
-    if (!query) {
-      try {
-        const lastUser = extractConversation().filter((m) => m.role === "user").slice(-1)[0];
-        query = (lastUser?.content || "").trim();
-      } catch { /* */ }
-    }
-    if (!query) {
-      panel.innerHTML = '<div class="mw-inject-empty">Type what you need help with, then tap memory to find relevant context.</div>';
-      return;
-    }
-
-    let results = [];
-    try {
-      const res = await proxyFetch(MDFY_URL + "/api/search?q=" + encodeURIComponent(query.slice(0, 400)) + "&deep=1", {
-        method: "GET",
-        headers: { "x-user-id": userId },
-      });
-      if (res.ok) { const data = JSON.parse(res.body); results = data.results || []; }
-    } catch { /* */ }
-
-    if (!results.length) {
-      panel.innerHTML = '<div class="mw-inject-empty">No matching memory found for that.</div>';
-      return;
-    }
-    panel.innerHTML = "";
-    const head = document.createElement("div");
-    head.className = "mw-inject-head";
-    head.textContent = "Insert memory as context";
-    panel.appendChild(head);
-    results.slice(0, 6).forEach((r) => {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "mw-inject-row";
-      const titleEl = document.createElement("span");
-      titleEl.className = "mw-inject-title";
-      titleEl.textContent = r.title || "Untitled";
-      const metaEl = document.createElement("span");
-      metaEl.className = "mw-inject-meta";
-      const graphOnly = Array.isArray(r.via) && r.via.includes("concept") && !r.via.includes("text") && !r.via.includes("semantic");
-      metaEl.textContent = graphOnly && r.viaConcept ? "related via " + r.viaConcept : "";
-      row.appendChild(titleEl);
-      if (metaEl.textContent) row.appendChild(metaEl);
-      row.addEventListener("click", () => {
-        insertIntoInput("Use " + MDFY_URL + "/" + r.id + " as context: " + (r.title || "memory.wiki doc") + ".");
-        closeInjectPanel();
-        showToast("context added — the AI will read it as markdown", 3000);
-      });
-      panel.appendChild(row);
-    });
-  }
-
-  function initAutoInject() {
-    if (document.getElementById("mw-inject-pill")) return;
-    injectInjectStyles();
-    const pill = document.createElement("button");
-    pill.id = "mw-inject-pill";
-    pill.type = "button";
-    pill.innerHTML = MW_GRIP + '<span>✦ memory</span>';
-    pill.title = "Insert relevant memory.wiki context into this chat";
-    pill.addEventListener("click", (e) => {
-      e.preventDefault(); e.stopPropagation();
-      if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
-      if (document.getElementById("mw-inject-panel")) { closeInjectPanel(); return; }
-      openInjectPanel(pill);
-    });
-    document.body.appendChild(pill);
-    makeDraggable(pill);
-    applySavedPillPos(pill);
-    document.addEventListener("click", (e) => {
-      const panel = document.getElementById("mw-inject-panel");
-      if (panel && !panel.contains(e.target) && e.target !== pill) closeInjectPanel();
-    });
-  }
-
-  function removeAutoInject() {
-    const pill = document.getElementById("mw-inject-pill");
-    if (pill) pill.remove();
-    closeInjectPanel();
-  }
 
   // Apply the current state to the page: status pills + injected buttons +
   // (re)schedule sync. Idempotent — safe to call on every observer tick and
@@ -1926,26 +1754,23 @@
     if (!extActive()) {
       // Paused or disabled on this site → go fully dormant.
       removeCapturePill();
-      removeAutoInject();
       const fc = document.getElementById("mw-float-container");
       if (fc) fc.remove();
       document.querySelectorAll(".mw-mini-btn").forEach((b) => b.remove());
       return;
     }
     initCapturePill();
-    if (autoInjectEnabled) initAutoInject(); else removeAutoInject();
     if (showFloat) createFloatingButton();
     else { const fc = document.getElementById("mw-float-container"); if (fc) fc.remove(); }
     addMiniButtons();
     onConversationActivity(); // event-driven incremental capture (no polling)
   }
 
-  // Load all flags — sync: prefs (autoCapture / autoInject / disabled sites),
+  // Load all flags — sync: prefs (autoCapture / disabled sites),
   // local: paused + per-thread overrides — and react to changes live.
   try {
-    chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [], showFloatingButton: false }, (data) => {
+    chrome.storage.sync.get({ autoCapture: false, "mw-disabled-sites": [], showFloatingButton: false }, (data) => {
       autoCaptureEnabled = !!(data && data.autoCapture);
-      autoInjectEnabled = !!(data && data.autoInject);
       disabledSites = Array.isArray(data && data["mw-disabled-sites"]) ? data["mw-disabled-sites"] : [];
       showFloat = !!(data && data.showFloatingButton);
       chrome.storage.local.get({ "mw-paused": false, "mw-thread-capture": {}, "mw-pill-pos": {} }, (loc) => {
@@ -1959,7 +1784,6 @@
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === "sync") {
         if (changes.autoCapture) autoCaptureEnabled = !!changes.autoCapture.newValue;
-        if (changes.autoInject) autoInjectEnabled = !!changes.autoInject.newValue;
         if (changes["mw-disabled-sites"]) disabledSites = Array.isArray(changes["mw-disabled-sites"].newValue) ? changes["mw-disabled-sites"].newValue : [];
         if (changes.showFloatingButton) showFloat = !!changes.showFloatingButton.newValue;
       } else if (area === "local") {
@@ -1977,7 +1801,7 @@
     if (observerTimer) clearTimeout(observerTimer);
     observerTimer = setTimeout(() => {
       measureContentRight();
-      refreshExtUI(); // re-applies status pill + inject pill + buttons + reschedules sync (idempotent)
+      refreshExtUI(); // re-applies status pill + buttons + reschedules sync (idempotent)
     }, 300);
   });
 

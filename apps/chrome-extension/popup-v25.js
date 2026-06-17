@@ -1387,14 +1387,13 @@ function startTransformProgress(mode) {
   setTimeout(syncBodyState, 50);
 })();
 
-// ─── Quick controls: master on/off (header) + per-site + Auto-capture /
-// Auto-inject. Master OFF dims + locks everything below. Default off.
+// ─── Quick controls: master on/off (header) + per-site + Auto-capture.
+// Master OFF dims + locks everything below. Default off.
 // Writes the SAME storage keys content.js reads (sync: autoCapture /
-// autoInject / mw-disabled-sites; local: mw-paused) so the page flips live.
+// mw-disabled-sites; local: mw-paused) so the page flips live.
 (function () {
   const AI = { "chatgpt.com": "ChatGPT", "chat.openai.com": "ChatGPT", "claude.ai": "Claude", "gemini.google.com": "Gemini" };
   const swCapture = document.getElementById("sw-capture");
-  const swInject = document.getElementById("sw-inject");
   const swSite = document.getElementById("sw-site");
   const swMaster = document.getElementById("sw-master");
   const masterToggle = document.getElementById("master-toggle");
@@ -1410,11 +1409,10 @@ function startTransformProgress(mode) {
   }
 
   function reflect() {
-    chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [] }, (s) => {
+    chrome.storage.sync.get({ autoCapture: false, "mw-disabled-sites": [] }, (s) => {
       chrome.storage.local.get({ "mw-paused": false }, (l) => {
         const paused = !!l["mw-paused"];
         swCapture.checked = !!s.autoCapture;
-        swInject.checked = !!s.autoInject;
         if (swMaster) swMaster.checked = !paused; // master ON = active (not paused)
         if (masterToggle) masterToggle.title = paused
           ? "memory.wiki is off — turn it back on"
@@ -1443,7 +1441,6 @@ function startTransformProgress(mode) {
   }
 
   swCapture.addEventListener("change", () => chrome.storage.sync.set({ autoCapture: swCapture.checked }));
-  swInject.addEventListener("change", () => chrome.storage.sync.set({ autoInject: swInject.checked }));
   if (swMaster) swMaster.addEventListener("change", () => {
     chrome.storage.local.set({ "mw-paused": !swMaster.checked }, reflect); // ON = active, OFF = paused
   });

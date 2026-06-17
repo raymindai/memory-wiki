@@ -47,7 +47,6 @@ const kbdSel = document.getElementById("kbd-sel");
 const shortcutsLink = document.getElementById("shortcuts-link");
 const chkFloat = document.getElementById("chk-float");
 const chkAutoCapture = document.getElementById("chk-autocapture");
-const chkAutoInject = document.getElementById("chk-autoinject");
 const versionPill = document.getElementById("version-pill");
 const versionDesc = document.getElementById("version-desc");
 
@@ -131,16 +130,6 @@ if (!IS_IOS && chkAutoCapture && chrome.storage && chrome.storage.sync) {
   });
   chkAutoCapture.addEventListener("change", () => {
     chrome.storage.sync.set({ autoCapture: chkAutoCapture.checked });
-  });
-}
-
-// ─── Auto-inject toggle (chrome only) ───
-if (!IS_IOS && chkAutoInject && chrome.storage && chrome.storage.sync) {
-  chrome.storage.sync.get({ autoInject: false }, (data) => {
-    chkAutoInject.checked = !!data.autoInject;
-  });
-  chkAutoInject.addEventListener("change", () => {
-    chrome.storage.sync.set({ autoInject: chkAutoInject.checked });
   });
 }
 
