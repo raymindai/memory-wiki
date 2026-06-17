@@ -1287,6 +1287,30 @@
     .sw input:checked + .track { background: var(--ink); }
     .sw input:checked + .track::after { transform: translateX(12px); background: var(--bg); }
 
+    /* Manual group — mirrors the AUTOMATIC card so the manual captures read
+       as their own labeled section. Inner elements drop their page-rail side
+       margins to sit inside the card padding. */
+    .manual-group {
+      margin: 10px 24px 0;
+      border: 1px solid var(--hair); border-radius: var(--r-md);
+      background: var(--bg-card); padding: 2px 12px 12px;
+    }
+    body.signed-out .manual-group { display: none !important; }
+    .manual-group-head {
+      font-family: var(--font-mono); font-size: 9px;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--faint); padding: 9px 0 3px;
+    }
+    .manual-group .cta-group { margin: 8px 0 0; width: 100%; }
+    .manual-group .cta-secondary-wrap { margin: 8px 0 0; }
+    .manual-group .ask-head { margin: 10px 0 4px; }
+    .manual-group .ask-input-wrap { margin: 8px 0 0; }
+    .manual-group .intent-chips-rail { padding: 8px 0 0; }
+    .manual-group .intent-chips-rail::before { left: 0; }
+    .manual-group .intent-chips-rail::after { right: 0; }
+    .manual-group .chip-nav.left { left: 0; }
+    .manual-group .chip-nav.right { right: 0; }
+
     .hidden-stub { display: none !important; }
   </style>
 </head>
@@ -1351,6 +1375,8 @@
     </div>
   </div>
 
+  <div class="manual-group">
+    <div class="manual-group-head">manual</div>
   <div class="cta-group">
     <div class="cta-row">
       <button class="cta" id="btn-capture">
@@ -1407,6 +1433,7 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 4 10 8 6 12"/></svg>
     </button>
   </div>
+  </div><!-- /.manual-group -->
 
   <div class="result" id="result">
     <div class="result-head">
