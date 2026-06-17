@@ -1798,7 +1798,7 @@
       '#mw-capture-pill .mw-grip svg,#mw-inject-pill .mw-grip svg{width:10px;height:13px;display:block}',
       '#mw-capture-pill:hover .mw-grip,#mw-inject-pill:hover .mw-grip{color:#a1a1aa}',
       '.mw-inject-panel{z-index:2147483601;width:320px;max-height:340px;overflow:auto;background:#141416;color:#e4e4e7;border:1px solid #2a2a2e;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.4);padding:6px;font:13px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}',
-      '.mw-inject-head{font-size:11px;color:#71717a;text-transform:uppercase;letter-spacing:.08em;padding:6px 8px}',
+      '.mw-inject-head{font-family:"MW JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:#71717a;text-transform:uppercase;letter-spacing:.1em;padding:7px 8px}',
       '.mw-inject-empty{padding:12px;color:#a1a1aa;font-size:12px;line-height:1.5}',
       '.mw-inject-row{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;color:inherit;padding:8px;border-radius:8px;cursor:pointer}',
       '.mw-inject-row:hover{background:rgba(255,255,255,.06)}',
