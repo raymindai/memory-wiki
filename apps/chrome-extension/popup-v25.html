@@ -1238,6 +1238,11 @@
     body.signed-out .mw-ctl { display: none !important; }
     /* Master OFF → dim + lock everything below the header. */
     body.mw-off > *:not(.brand-bar) { opacity: 0.4; pointer-events: none; filter: saturate(0.7); transition: opacity 160ms; }
+    /* This site OFF → dim + lock everything below the per-site row (the
+       automatic + manual cards and below), but keep the per-site toggle
+       itself live so it can be turned back on. */
+    body.mw-site-off .ctl-group,
+    body.mw-site-off .mw-ctl ~ * { opacity: 0.4; pointer-events: none; filter: saturate(0.7); transition: opacity 160ms; }
     /* Old standalone "capturing from <AI>" line merged into the per-site row. */
     .page-context { display: none !important; }
 

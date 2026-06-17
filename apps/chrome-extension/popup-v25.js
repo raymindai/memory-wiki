@@ -1432,8 +1432,11 @@ function startTransformProgress(mode) {
             : "memory.wiki is off on this site";
           swSite.checked = runHere;
           siteLine.classList.toggle("off", !runHere);
+          // Off on this site → dim + lock everything below the per-site row.
+          document.body.classList.toggle("mw-site-off", !runHere);
         } else if (siteLine) {
           siteLine.style.display = "none";
+          document.body.classList.remove("mw-site-off");
         }
       });
     });
