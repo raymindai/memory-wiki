@@ -1386,59 +1386,61 @@ function startTransformProgress(mode) {
   setTimeout(syncBodyState, 50);
 })();
 
-// ─── Quick controls: auto-capture / inject / this-site / pause ───
-// Status shows on the AI page (the capture pill); these chips are the
-// convenient toggles. Default off. They write the SAME storage keys
-// content.js reads (sync: autoCapture / autoInject / mw-disabled-sites;
-// local: mw-paused), so toggling here flips the page live.
+// ─── Quick controls: Auto-capture / Auto-inject / this-site / Pause ───
+// Sections + real toggle switches. Toggle here; status shows on the AI page
+// (the capture pill). Default off. Writes the SAME storage keys content.js
+// reads (sync: autoCapture / autoInject / mw-disabled-sites; local:
+// mw-paused), so toggling here flips the page live.
 (function () {
-  const AI_HOSTS = ["chatgpt.com", "chat.openai.com", "claude.ai", "gemini.google.com"];
-  const elCapture = document.getElementById("ctl-capture");
-  const elInject = document.getElementById("ctl-inject");
-  const elSite = document.getElementById("ctl-site");
-  const elPause = document.getElementById("ctl-pause");
-  if (!elCapture || typeof chrome === "undefined" || !chrome.storage) return;
+  const AI = { "chatgpt.com": "ChatGPT", "chat.openai.com": "ChatGPT", "claude.ai": "Claude", "gemini.google.com": "Gemini" };
+  const swCapture = document.getElementById("sw-capture");
+  const swInject = document.getElementById("sw-inject");
+  const swSite = document.getElementById("sw-site");
+  const swPause = document.getElementById("sw-pause");
+  const pageSec = document.getElementById("ctl-page-sec");
+  const siteTitle = document.getElementById("ctl-site-title");
+  if (!swCapture || typeof chrome === "undefined" || !chrome.storage) return;
 
   let host = "";
-  const isAiHost = (h) => AI_HOSTS.some((a) => h === a || h.endsWith("." + a));
-  const setOn = (el, on) => { if (el) el.classList.toggle("on", !!on); };
+  function aiName(h) {
+    for (const k in AI) { if (h === k || h.endsWith("." + k)) return AI[k]; }
+    return null;
+  }
 
   function reflect() {
     chrome.storage.sync.get({ autoCapture: false, autoInject: false, "mw-disabled-sites": [] }, (s) => {
       chrome.storage.local.get({ "mw-paused": false }, (l) => {
-        setOn(elCapture, s.autoCapture);
-        setOn(elInject, s.autoInject);
-        setOn(elPause, !!l["mw-paused"]);
-        const disabled = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
-        if (host && isAiHost(host)) {
-          elSite.style.display = "";
-          setOn(elSite, !disabled.includes(host)); // ON = extension runs on this site
+        swCapture.checked = !!s.autoCapture;
+        swInject.checked = !!s.autoInject;
+        swPause.checked = !!l["mw-paused"];
+        const name = host ? aiName(host) : null;
+        if (name) {
+          pageSec.style.display = "";
+          siteTitle.textContent = name + " detected";
+          const disabled = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
+          swSite.checked = !disabled.includes(host); // checked = runs on this site
         } else {
-          elSite.style.display = "none";
+          pageSec.style.display = "none";
         }
       });
     });
   }
 
-  elCapture.addEventListener("click", () => {
-    chrome.storage.sync.get({ autoCapture: false }, (s) => chrome.storage.sync.set({ autoCapture: !s.autoCapture }, reflect));
-  });
-  elInject.addEventListener("click", () => {
-    chrome.storage.sync.get({ autoInject: false }, (s) => chrome.storage.sync.set({ autoInject: !s.autoInject }, reflect));
-  });
-  elPause.addEventListener("click", () => {
-    chrome.storage.local.get({ "mw-paused": false }, (l) => chrome.storage.local.set({ "mw-paused": !l["mw-paused"] }, reflect));
-  });
-  elSite.addEventListener("click", () => {
+  swCapture.addEventListener("change", () => chrome.storage.sync.set({ autoCapture: swCapture.checked }));
+  swInject.addEventListener("change", () => chrome.storage.sync.set({ autoInject: swInject.checked }));
+  swPause.addEventListener("change", () => chrome.storage.local.set({ "mw-paused": swPause.checked }));
+  swSite.addEventListener("change", () => {
     if (!host) return;
     chrome.storage.sync.get({ "mw-disabled-sites": [] }, (s) => {
       let list = Array.isArray(s["mw-disabled-sites"]) ? s["mw-disabled-sites"].slice() : [];
-      list = list.includes(host) ? list.filter((h) => h !== host) : list.concat(host);
-      chrome.storage.sync.set({ "mw-disabled-sites": list }, reflect);
+      // checked = run here → host NOT in the disabled list
+      if (swSite.checked) list = list.filter((h) => h !== host);
+      else if (!list.includes(host)) list.push(host);
+      chrome.storage.sync.set({ "mw-disabled-sites": list });
     });
   });
 
-  // Resolve the active tab host (for the per-site toggle), then reflect state.
+  // Resolve the active tab host (for the per-site section), then reflect state.
   try {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       try { host = tabs && tabs[0] && tabs[0].url ? new URL(tabs[0].url).hostname : ""; } catch { host = ""; }

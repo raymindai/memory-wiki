@@ -1229,31 +1229,43 @@
     .foot.signin:hover { background: transparent; }
     .foot.signin:hover .act { filter: brightness(0.94); }
 
-    /* ─── Quick controls (auto-capture / inject / this-site / pause) ───
-       The page shows status (the capture pill on ChatGPT/Claude/Gemini);
-       these chips are the convenient toggles. Default off. Signed-in only. */
-    .mw-ctl-bar { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 24px 0; }
-    body.signed-out .mw-ctl-bar { display: none !important; }
-    .mw-ctl {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 5px 10px; border-radius: var(--r-pill);
-      border: 1px solid var(--hair); background: var(--bg-card);
-      color: var(--muted);
-      font-family: var(--font-mono); font-size: 10px;
-      letter-spacing: 0.04em; text-transform: uppercase;
-      cursor: pointer;
-      transition: color 120ms, border-color 120ms, background 120ms;
+    /* ─── Quick controls — sections + switches. Toggle here; status shows
+       on the AI page (the capture pill). Default off. Signed-in only. ─── */
+    .mw-ctl { margin: 6px 24px 0; }
+    body.signed-out .mw-ctl { display: none !important; }
+    .ctl-sec { padding: 9px 0; border-top: 1px solid var(--hair); }
+    .ctl-sec:first-child { border-top: none; }
+    .ctl-eyebrow {
+      font-family: var(--font-mono); font-size: 9.5px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--faint); margin-bottom: 7px;
     }
-    .mw-ctl:hover { color: var(--ink); border-color: var(--hair-strong); }
-    .mw-ctl .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--faint);
-      transition: background 120ms, box-shadow 120ms;
+    .ctl-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ctl-title {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ink);
     }
-    .mw-ctl.on { color: var(--ink); border-color: var(--hair-strong); }
-    .mw-ctl.on .dot { background: var(--micro-lime); box-shadow: 0 0 0 3px rgba(181,255,26,0.12); }
-    .mw-ctl.pause.on { color: var(--micro-orange); }
-    .mw-ctl.pause.on .dot { background: var(--micro-orange); box-shadow: 0 0 0 3px rgba(255,107,26,0.12); }
+    .ctl-desc { margin-top: 4px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+    .ctl-dest {
+      display: inline-block; margin-top: 3px;
+      font-family: var(--font-mono); font-size: 10.5px;
+      color: var(--faint); transition: color 120ms;
+    }
+    .ctl-dest:hover { color: var(--body); }
+    .ctl-pause-sec .ctl-title { color: var(--body); }
+    /* Toggle switch */
+    .sw { position: relative; width: 38px; height: 22px; flex-shrink: 0; cursor: pointer; }
+    .sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .sw .track { position: absolute; inset: 0; background: var(--hair-strong); border-radius: 11px; transition: background 150ms; }
+    .sw .track::after {
+      content: ""; position: absolute; top: 2px; left: 2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--muted); transition: transform 150ms, background 150ms;
+    }
+    .sw input:checked + .track { background: var(--ink); }
+    .sw input:checked + .track::after { transform: translateX(16px); background: var(--bg); }
+    .sw.pause input:checked + .track { background: var(--micro-orange); }
 
     .hidden-stub { display: none !important; }
   </style>
@@ -1286,13 +1298,41 @@
        AI / target site. Sits between hero and Capture. -->
   <div class="page-context" id="page-context"></div>
 
-  <!-- Quick toggles. Status shows on the AI page (capture pill); these are
-       the convenient on/off. Wired in popup-v25.js. -->
-  <div class="mw-ctl-bar" id="mw-ctl-bar">
-    <button class="mw-ctl" id="ctl-capture" type="button" title="Auto-capture AI threads to memory.wiki"><span class="dot"></span><span>auto-capture</span></button>
-    <button class="mw-ctl" id="ctl-inject" type="button" title="Show the memory-inject pill on AI pages"><span class="dot"></span><span>inject</span></button>
-    <button class="mw-ctl" id="ctl-site" type="button" style="display:none" title="Run the extension on this site"><span class="dot"></span><span>this site</span></button>
-    <button class="mw-ctl pause" id="ctl-pause" type="button" title="Pause memory.wiki everywhere"><span class="dot"></span><span>pause</span></button>
+  <!-- Quick controls. Toggle here; status shows on the AI page (capture
+       pill). Default off. Signed-in only. Wired in popup-v25.js. -->
+  <div class="mw-ctl" id="mw-ctl">
+    <div class="ctl-sec ctl-page" id="ctl-page-sec" style="display:none">
+      <div class="ctl-eyebrow">on this page</div>
+      <div class="ctl-head">
+        <span class="ctl-title" id="ctl-site-title">this site</span>
+        <label class="sw" title="Run memory.wiki on this site"><input type="checkbox" id="sw-site"><span class="track"></span></label>
+      </div>
+    </div>
+
+    <div class="ctl-sec">
+      <div class="ctl-head">
+        <span class="ctl-title">Auto-capture</span>
+        <label class="sw" title="Auto-capture AI threads"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
+      </div>
+      <div class="ctl-desc">Sync each AI thread to one doc</div>
+      <a class="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
+    </div>
+
+    <div class="ctl-sec">
+      <div class="ctl-head">
+        <span class="ctl-title">Auto-inject</span>
+        <label class="sw" title="Show the memory pill on AI pages"><input type="checkbox" id="sw-inject"><span class="track"></span></label>
+      </div>
+      <div class="ctl-desc">Pull relevant memory into the chat &mdash; a &ldquo;memory&rdquo; pill by the input box</div>
+    </div>
+
+    <div class="ctl-sec ctl-pause-sec">
+      <div class="ctl-head">
+        <span class="ctl-title">Pause memory.wiki everywhere</span>
+        <label class="sw pause" title="Temporarily turn the extension off on every site"><input type="checkbox" id="sw-pause"><span class="track"></span></label>
+      </div>
+      <div class="ctl-desc">temporarily turn the extension off on every site</div>
+    </div>
   </div>
 
   <div class="cta-group">
