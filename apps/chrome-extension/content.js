@@ -1468,12 +1468,12 @@
   // extActive is false until the flags are loaded, so no capture UI ever
   // flashes on a paused / disabled page before we know the real state.
   function extActive() { return stateLoaded && !mwPaused && !disabledSites.includes(currentHost()); }
-  function shouldCaptureThread() {
-    // Pure reflection of the popup: capture only when the global toggle is on
-    // (and the extension is active on this site). No per-thread override, so
-    // the page pill always matches the popup state.
-    return extActive() && autoCaptureEnabled;
-  }
+  // The popup toggle ONLY controls whether the capture pill is shown. Capture
+  // itself is armed/disarmed by clicking the pill, per thread, tracked in
+  // mw-thread-capture (local) → threadOverrides.
+  function shouldShowPill() { return extActive() && autoCaptureEnabled && !!threadKey(); }
+  function threadArmed() { const k = threadKey(); return !!(k && threadOverrides[k]); }
+  function shouldCaptureThread() { return shouldShowPill() && threadArmed(); }
 
   function threadKey() {
     // The conversation's own URL path. The transient new-chat state ("/")
@@ -1615,45 +1615,56 @@
     doneTimer = setTimeout(syncThreadIncremental, AUTO_SYNC_SETTLE_MS);
   }
 
-  // ─── Page status badge for capture (+ quick per-thread toggle) ───
-  // Toggling is primarily done in the popup; this badge lets the user SEE,
-  // on the page, whether the current thread is being captured — and click to
-  // flip just this thread. Reflects shouldCaptureThread() (paused / site /
-  // override / global all folded in).
+  // ─── On-page capture pill (the actual start/stop control) ───
+  // The popup toggle only SHOWS or HIDES this pill. Capture itself is started
+  // and stopped HERE, per thread: idle = "capture" (click to start), armed =
+  // "● capturing" (click to stop). Armed state lives in mw-thread-capture.
   function updateCapturePill() {
     const pill = document.getElementById("mw-capture-pill");
     if (!pill) return;
-    const on = shouldCaptureThread();
+    const on = threadArmed();
     pill.classList.toggle("mw-on", on);
     // Update the label text only — leave the .mw-cap-dot element in place so
     // its recording-pulse animation never restarts on a refresh tick.
     const label = pill.querySelector(".mw-cap-label");
     if (label) label.textContent = on ? "capturing" : "capture";
     pill.title = on
-      ? "This thread is syncing to memory.wiki. Click to stop capturing it."
-      : "Click to capture this thread to memory.wiki (or toggle globally in the popup).";
+      ? "Capturing this thread to memory.wiki. Click to stop."
+      : "Click to start capturing this thread to memory.wiki.";
+  }
+  function toggleThreadCapture() {
+    const k = threadKey();
+    if (!k) return;
+    const now = !threadArmed();
+    threadOverrides = { ...threadOverrides, [k]: now };
+    try { chrome.storage.local.set({ "mw-thread-capture": threadOverrides }); } catch { /* */ }
+    updateCapturePill();
+    if (now) {
+      showToast("capturing this thread to memory.wiki", 2000);
+      lastActivityHash = ""; // force the next check to sync the current content
+      onConversationActivity();
+    } else {
+      showToast("stopped capturing this thread", 2000);
+    }
   }
   function initCapturePill() {
-    // Show the pill ONLY while this thread is actually being captured (so the
-    // page indicator matches the popup: auto-capture off ⇒ no pill). It is a
-    // live "● capturing" status + a click-to-stop for this thread.
-    if (!shouldCaptureThread() || !threadKey()) { removeCapturePill(); return; }
+    // The popup toggle decides whether the pill is SHOWN; the pill itself
+    // starts/stops capture for this thread. Shown whenever the feature is on
+    // for this site + we're on a real thread — idle until the user clicks it.
+    if (!shouldShowPill()) { removeCapturePill(); return; }
     injectPillStyles();
     let pill = document.getElementById("mw-capture-pill");
     if (!pill) {
       pill = document.createElement("button");
       pill.id = "mw-capture-pill";
       pill.type = "button";
-      // Dot (recording pulse when on) + label, built once so the animation
+      // Dot (recording pulse when armed) + label, built once so the animation
       // is stable across refreshes.
       pill.innerHTML = MW_GRIP + '<span class="mw-cap-dot"></span><span class="mw-cap-label"></span>';
       pill.addEventListener("click", (e) => {
         e.preventDefault(); e.stopPropagation();
         if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
-        // The pill is a live status indicator; clicking it stops auto-capture.
-        // Turn it back on from the popup. Keeps the page in sync with the popup.
-        try { chrome.storage.sync.set({ autoCapture: false }); } catch { /* */ }
-        showToast("auto-capture stopped", 2000);
+        toggleThreadCapture();
       });
       document.body.appendChild(pill);
       makeDraggable(pill);

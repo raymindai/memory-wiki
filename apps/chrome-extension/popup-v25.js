@@ -1400,15 +1400,62 @@ function startTransformProgress(mode) {
   const siteLine = document.getElementById("ctl-page-sec");
   const siteTitle = document.getElementById("ctl-site-title");
   const siteSub = document.getElementById("ctl-site-sub");
+  const destEl = document.getElementById("ctl-dest");
   if (!swCapture || typeof chrome === "undefined" || !chrome.storage) return;
 
   let host = "";
+  let tabUrl = "";
+
+  // The Auto-capture row's link points at the doc THIS thread is captured to,
+  // once it exists (mw-thread-map[threadKey].id, written by content.js). Mirror
+  // content.js's threadKey() so the popup resolves the same key.
+  function platformFor(h) {
+    if (!h) return null;
+    if (h === "chatgpt.com" || h.endsWith(".chatgpt.com") || h === "chat.openai.com") return "chatgpt";
+    if (h === "claude.ai" || h.endsWith(".claude.ai")) return "claude";
+    if (h === "gemini.google.com") return "gemini";
+    return null;
+  }
+  function threadKeyForUrl(url) {
+    let u; try { u = new URL(url); } catch { return null; }
+    const platform = platformFor(u.hostname);
+    if (!platform) return null;
+    const p = u.pathname || "/";
+    if (p === "/" || p === "") return null;
+    if (platform === "chatgpt" && !/\/c\//.test(p)) return null;
+    if (platform === "claude" && !/\/chat\//.test(p)) return null;
+    if (platform === "gemini" && !/\/app\b/.test(p) && !/\/[a-z0-9]{6,}/i.test(p)) return null;
+    return platform + ":" + p;
+  }
+  function resetDest() {
+    if (!destEl) return;
+    destEl.href = "https://memory.wiki";
+    destEl.textContent = "→ your memory.wiki hub";
+    destEl.title = "open your memory.wiki hub";
+  }
+  function updateCaptureDest() {
+    if (!destEl) return;
+    const key = threadKeyForUrl(tabUrl);
+    if (!key) { resetDest(); return; }
+    chrome.storage.local.get({ "mw-thread-map": {} }, (d) => {
+      const entry = (d["mw-thread-map"] || {})[key];
+      if (entry && entry.id) {
+        const t = (entry.title || "").trim();
+        destEl.href = "https://memory.wiki/" + entry.id;
+        destEl.textContent = "→ " + (t ? (t.length > 30 ? t.slice(0, 29) + "…" : t) : "this capture");
+        destEl.title = t ? "open: " + t : "open the doc this thread is captured to";
+      } else {
+        resetDest();
+      }
+    });
+  }
   function aiName(h) {
     for (const k in AI) { if (h === k || h.endsWith("." + k)) return AI[k]; }
     return null;
   }
 
   function reflect() {
+    updateCaptureDest();
     chrome.storage.sync.get({ autoCapture: false, "mw-disabled-sites": [] }, (s) => {
       chrome.storage.local.get({ "mw-paused": false }, (l) => {
         const paused = !!l["mw-paused"];
@@ -1458,9 +1505,20 @@ function startTransformProgress(mode) {
   // Resolve the active tab host (for the per-site line), then reflect state.
   try {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      try { host = tabs && tabs[0] && tabs[0].url ? new URL(tabs[0].url).hostname : ""; } catch { host = ""; }
+      try {
+        tabUrl = tabs && tabs[0] && tabs[0].url ? tabs[0].url : "";
+        host = tabUrl ? new URL(tabUrl).hostname : "";
+      } catch { host = ""; tabUrl = ""; }
       reflect();
     });
   } catch { reflect(); }
+
+  // Live-refresh the capture link if the thread's doc is created/updated while
+  // the popup is open.
+  try {
+    chrome.storage.onChanged.addListener((c, area) => {
+      if (area === "local" && c["mw-thread-map"]) updateCaptureDest();
+    });
+  } catch { /* */ }
 })();
 
