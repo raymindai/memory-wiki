@@ -366,22 +366,42 @@ async function buildLayout(
     docs.forEach(d => nodeColorMap.set(`doc:${d.id}`, "#fb923c"));
     showNodes.forEach(n => nodeColorMap.set(n.id, TYPE_COLORS[n.type]?.border || "#38bdf8"));
 
+    // Passive "…in" verbs read backwards once we re-orient an edge to
+    // doc → concept; map them to the active form so the label still reads L→R.
+    const FLIP_LABEL: Record<string, string> = {
+      "mentioned in": "mentions", "tagged in": "tags", "stated in": "states",
+      "discussed in": "discusses", "advocated in": "advocates", "made in": "makes",
+      "referenced in": "references", "defined in": "defines", "used in": "used by",
+    };
     for (const e of aiGraph.edges) {
-      const src = resolve(e.source);
-      const tgt = resolve(e.target);
+      let eSource = e.source;
+      let eTarget = e.target;
+      let eLabel = e.label;
+      // Re-orient concept→doc into doc→concept so documents always sit LEFT of
+      // their concepts (ELK RIGHT places sources on the left). The AI phrases
+      // relations both ways ("doc mentions concept" vs "concept mentioned in
+      // doc"); without this the whole graph flips and the concepts land on the
+      // wrong side of the documents.
+      if (eTarget.startsWith("doc:") && !eSource.startsWith("doc:")) {
+        const t = eSource; eSource = eTarget; eTarget = t;
+        const key = (eLabel || "").toLowerCase().trim();
+        if (key && FLIP_LABEL[key]) eLabel = FLIP_LABEL[key];
+      }
+      const src = resolve(eSource);
+      const tgt = resolve(eTarget);
       if (!nodeSet.has(src) || !nodeSet.has(tgt)) continue;
-      const isDocToDoc = e.source.startsWith("doc:") && e.target.startsWith("doc:");
+      const isDocToDoc = eSource.startsWith("doc:") && eTarget.startsWith("doc:");
       // Edge color = source node's color
-      const sourceColor = nodeColorMap.get(e.source) || "var(--text-primary)";
+      const sourceColor = nodeColorMap.get(eSource) || "var(--text-primary)";
       const edgeColor = isDocToDoc ? "#60a5fa" : sourceColor;
       const edgeStyle = {
         stroke: edgeColor, strokeWidth: 1,
         opacity: isDocToDoc ? 0.3 : 0.2,
       };
 
-      if (e.label) {
+      if (eLabel) {
         const labelId = `label-${src}-${tgt}`;
-        addNode(labelId, "edgeLabel", { label: e.label, color: edgeColor });
+        addNode(labelId, "edgeLabel", { label: eLabel, color: edgeColor });
         elkEdges.push({ id: `ai-${src}-${labelId}`, sources: [src], targets: [labelId] });
         elkEdges.push({ id: `ai-${labelId}-${tgt}`, sources: [labelId], targets: [tgt] });
         edges.push({ id: `ai-${src}-${labelId}`, source: src, target: labelId, type: "default", style: edgeStyle });
