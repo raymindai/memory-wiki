@@ -160,6 +160,22 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     : "";
   const fullPrompt = EXTRACTION_PROMPT + intentPrefix;
 
+  // ── Model-comparison debug knobs (query params; TEMPORARY) ──
+  //   ?provider=openai|gemini|anthropic  force ONE provider (no fallback, so the
+  //                                       result is unambiguously that model)
+  //   ?tier=primary|lite                 pick the tier (default lite)
+  //   ?dryRun=1                          run the AI + return the graph WITHOUT
+  //                                       persisting (compare LLMs without
+  //                                       clobbering the stored graph / ontology)
+  const sp = req.nextUrl.searchParams;
+  const provParam = sp.get("provider");
+  const providerOverride: ("openai" | "gemini" | "anthropic")[] =
+    provParam === "openai" || provParam === "gemini" || provParam === "anthropic"
+      ? [provParam]
+      : ["anthropic", "openai", "gemini"];
+  const liteOverride = sp.get("tier") === "primary" ? false : true;
+  const dryRun = sp.get("dryRun") === "1";
+
   // Bundle graph extraction → Anthropic first. Currently on the LITE tier
   // (claude-haiku-4-5) — trying a leaner/cheaper analysis after Sonnet's output
   // felt too dense. Flip useLiteModel back to false to return to Sonnet 4.6
@@ -168,8 +184,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
     const aiResult = await callAI({
       prompt: `${fullPrompt}\n\nDocuments:\n${excerpts}`,
-      useLiteModel: true,
-      providerOrder: ["anthropic", "openai", "gemini"],
+      useLiteModel: liteOverride,
+      providerOrder: providerOverride,
       temperature: 0.3,
       // The full graph JSON for a multi-doc bundle (nodes + edges + themes +
       // insights + decisions + shifts + per-doc summaries) routinely exceeds
@@ -235,6 +251,18 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     graphData.version = 1;
+
+    // dryRun (model comparison): return the freshly-built graph without
+    // persisting or touching the concept index.
+    if (dryRun) {
+      return NextResponse.json({
+        graphData,
+        generatedAt: new Date().toISOString(),
+        dryRun: true,
+        provider: providerOverride[0],
+        tier: liteOverride ? "lite" : "primary",
+      });
+    }
 
     // Cache in database
     const now = new Date().toISOString();
