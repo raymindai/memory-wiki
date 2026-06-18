@@ -158,6 +158,22 @@ const NODE_SIZES: Record<string, { w: number; h: number }> = {
   chunkNode: { w: 280, h: 124 },
 };
 
+// The summary card ("Bundle Analysis") has NO line-clamp — it grows with the
+// summary paragraph + up to 3 insight bullets. ELK must get the REAL height or
+// it packs neighbours underneath and they overlap (it was pinned at 190 but
+// routinely renders 280-360+). Estimate generously: under-estimating overlaps,
+// slight over just adds harmless gap.
+function estimateSummaryHeight(summary: string, insights: string[]): number {
+  let h = 44 + 20; // header + body padding
+  if (summary) h += Math.ceil(summary.length / 44) * 19; // ~44 chars/line @300px, 12px/1.6
+  const ins = (insights || []).slice(0, 3);
+  if (ins.length) {
+    h += 8; // gap before the list
+    for (const s of ins) h += Math.ceil((s.length || 1) / 40) * 18 + 4;
+  }
+  return Math.max(190, Math.min(Math.round(h), 560));
+}
+
 const CHUNK_TYPE_COLORS: Record<string, { border: string; text: string; bg: string }> = {
   concept: { border: "#38bdf8", text: "#38bdf8", bg: "rgba(56,189,248,0.06)" },
   claim: { border: "#fb923c", text: "#fb923c", bg: "rgba(251,146,60,0.06)" },
@@ -189,10 +205,10 @@ async function buildLayout(
   const docNodeAliases = new Map<string, string>();
   const resolve = (id: string) => docNodeAliases.get(id) ?? id;
 
-  function addNode(id: string, type: string, data: any) {
+  function addNode(id: string, type: string, data: any, sizeOverride?: { w: number; h: number }) {
     if (nodeSet.has(id)) return;
     nodeSet.add(id);
-    const size = NODE_SIZES[type] || NODE_SIZES.conceptTag;
+    const size = sizeOverride || NODE_SIZES[type] || NODE_SIZES.conceptTag;
     elkNodes.push({ id, width: size.w, height: size.h });
     nodes.push({ id, type, position: { x: 0, y: 0 }, data });
   }
@@ -204,7 +220,7 @@ async function buildLayout(
       insights: aiGraph?.insights || [],
       docCount: docs.length,
       totalWords: docs.reduce((s, d) => s + d.markdown.split(/\s+/).filter(Boolean).length, 0),
-    });
+    }, { w: 300, h: estimateSummaryHeight(aiGraph?.summary || "", aiGraph?.insights || []) });
 
     // ── 2. Themes (detail >= 3) ──
     if (aiGraph?.themes && detail >= 3) {
