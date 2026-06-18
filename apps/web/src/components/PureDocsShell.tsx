@@ -140,6 +140,41 @@ export default function PureDocsShell({
     setActiveId(id);
   }
 
+  // Honor an initial URL #hash on load (and on later hashchange). The TOC
+  // CLICK path scrolls explicitly above, but landing on /plugins#chrome
+  // directly had nothing and relied on the browser's native scroll — which
+  // is unreliable here (fixed-nav offset + content above shifting as
+  // images/fonts load), so the page appeared to "not jump". Scroll
+  // explicitly with the same 80px nav offset as handleTocClick.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const scrollToHash = (behavior: ScrollBehavior) => {
+      const id = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior });
+      setActiveId(id);
+    };
+    let raf = 0;
+    const onLoad = () => scrollToHash("auto");
+    if (window.location.hash) {
+      // After first paint, then again once images/fonts finish (they shift
+      // the layout above the target).
+      raf = requestAnimationFrame(() => scrollToHash("auto"));
+      if (document.readyState === "complete") window.setTimeout(() => scrollToHash("auto"), 80);
+      else window.addEventListener("load", onLoad, { once: true });
+    }
+    const onHashChange = () => scrollToHash("smooth");
+    window.addEventListener("hashchange", onHashChange);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("load", onLoad);
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, []);
+
   // For sidebar nav active check: strip /ko prefix so both locales
   // hit the same comparison.
   const stripLocale = (p: string) => p.replace(/^\/ko/, "") || "/";
