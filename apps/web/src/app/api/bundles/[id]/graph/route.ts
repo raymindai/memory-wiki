@@ -154,14 +154,18 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     : "";
   const fullPrompt = EXTRACTION_PROMPT + intentPrefix;
 
-  // Bundle graph extraction routed through the unified cascade.
-  // Quality task (structured JSON, doc-id grounded), so primary tier.
-  // The system prompt forces JSON-only output; parseGraphJson is
-  // tolerant of fences regardless.
+  // Bundle graph extraction is a quality task (structured JSON, doc-id
+  // grounded). The default cost-first cascade puts gpt-4o-mini first, which
+  // routinely produced incomplete graphs (edges to concepts it never declared
+  // as nodes). Force Anthropic first so this runs on claude-haiku-4-5 — much
+  // more faithful to the schema — and fall back to openai/gemini only if
+  // Anthropic is unavailable. Primary tier; the system prompt forces JSON-only
+  // output and parseGraphJson tolerates fences regardless.
   try {
     const aiResult = await callAI({
       prompt: `${fullPrompt}\n\nDocuments:\n${excerpts}`,
       useLiteModel: false,
+      providerOrder: ["anthropic", "openai", "gemini"],
       temperature: 0.3,
       maxOutputTokens: 16384,
       userId: (bundle.user_id as string | null) || undefined,
