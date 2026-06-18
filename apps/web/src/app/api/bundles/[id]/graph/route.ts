@@ -160,17 +160,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     : "";
   const fullPrompt = EXTRACTION_PROMPT + intentPrefix;
 
-  // Bundle graph extraction is a quality task (structured JSON, doc-id
-  // grounded). The default cost-first cascade puts gpt-4o-mini first, which
-  // produced incomplete, shallow graphs. Route to Anthropic first + primary
-  // tier so this runs on Claude Sonnet 4.6 (anthropic primary; the model the
-  // pre-2026-06-04 path used); fall back to openai/gemini only if Anthropic is
-  // unavailable. The system prompt forces JSON-only and parseGraphJson tolerates
-  // fences.
+  // Bundle graph extraction → Anthropic first. Currently on the LITE tier
+  // (claude-haiku-4-5) — trying a leaner/cheaper analysis after Sonnet's output
+  // felt too dense. Flip useLiteModel back to false to return to Sonnet 4.6
+  // (anthropic primary). Falls back to openai/gemini only if Anthropic is
+  // unavailable. JSON-only via the system prompt; parseGraphJson tolerates fences.
   try {
     const aiResult = await callAI({
       prompt: `${fullPrompt}\n\nDocuments:\n${excerpts}`,
-      useLiteModel: false,
+      useLiteModel: true,
       providerOrder: ["anthropic", "openai", "gemini"],
       temperature: 0.3,
       // The full graph JSON for a multi-doc bundle (nodes + edges + themes +
