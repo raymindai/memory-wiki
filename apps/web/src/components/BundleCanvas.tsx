@@ -189,6 +189,18 @@ function estimateSummaryHeight(summary: string, insights: string[]): number {
   return Math.max(190, Math.min(Math.round(h), 560));
 }
 
+// Derive a readable concept label + type from an edge-referenced id like
+// "concept:long_context_models" / "tag:branding" / "entity:cursor". Used when
+// an analysis emits edges to concepts it never declared in `nodes`.
+function conceptFromId(id: string): { label: string; type: string } {
+  const m = id.match(/^([a-z]+):(.+)$/i);
+  const prefix = m ? m[1].toLowerCase() : "";
+  const body = (m ? m[2] : id).replace(/[_-]+/g, " ").trim();
+  const label = body ? body.charAt(0).toUpperCase() + body.slice(1) : id;
+  const type = prefix === "tag" || prefix === "entity" ? prefix : "concept";
+  return { label, type };
+}
+
 const CHUNK_TYPE_COLORS: Record<string, { border: string; text: string; bg: string }> = {
   concept: { border: "#38bdf8", text: "#38bdf8", bg: "rgba(56,189,248,0.06)" },
   claim: { border: "#fb923c", text: "#fb923c", bg: "rgba(251,146,60,0.06)" },
@@ -355,8 +367,26 @@ async function buildLayout(
 
   // ── 4. Concepts (detail >= 4) ──
   if (aiGraph && detail >= 4) {
-    const conceptNodes = aiGraph.nodes.filter(n => n.type !== "document");
-    const showNodes = detail >= 5 ? conceptNodes : conceptNodes.sort((a, b) => b.weight - a.weight).slice(0, Math.ceil(conceptNodes.length / 2));
+    const declared = aiGraph.nodes
+      .filter(n => n.type !== "document")
+      .map(n => ({ id: n.id, label: n.label, type: n.type, weight: n.weight }));
+    // Some analyses emit edges that reference concepts but DON'T list those
+    // concepts in `nodes` (nodes = documents only). Synthesize the missing
+    // concept nodes from the edge endpoints — otherwise the entire right-hand
+    // concept layer is silently dropped: the edges to undeclared concepts fail
+    // the nodeSet check below and vanish along with the concepts.
+    const seen = new Set<string>(declared.map(n => n.id));
+    const synth: { id: string; label: string; type: string; weight: number }[] = [];
+    for (const e of aiGraph.edges || []) {
+      for (const ep of [e.source, e.target]) {
+        if (!ep || ep.startsWith("doc:") || ep.startsWith("doc-root:") || seen.has(ep)) continue;
+        seen.add(ep);
+        const c = conceptFromId(ep);
+        synth.push({ id: ep, label: c.label, type: c.type, weight: 1 });
+      }
+    }
+    const conceptNodes = [...declared, ...synth];
+    const showNodes = detail >= 5 ? conceptNodes : conceptNodes.slice().sort((a, b) => b.weight - a.weight).slice(0, Math.ceil(conceptNodes.length / 2));
     for (const n of showNodes) {
       addNode(n.id, "conceptTag", { label: n.label, type: n.type, weight: n.weight });
     }
