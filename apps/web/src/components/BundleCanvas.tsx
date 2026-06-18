@@ -10,6 +10,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useNodesInitialized,
   ReactFlowProvider,
   getBezierPath,
   type Node,
@@ -146,6 +147,20 @@ const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> 
 // ─── Layout with ELK — advanced overlap-free positioning ───
 
 const elk = new ELK();
+
+// Shared so the first (estimated-size) pass and the post-measure relayout pass
+// produce the SAME arrangement — only the node sizes differ between them.
+const ELK_LAYOUT_OPTIONS: Record<string, string> = {
+  "elk.algorithm": "layered",
+  "elk.direction": "RIGHT",
+  "elk.layered.spacing.nodeNodeBetweenLayers": "50",
+  "elk.layered.spacing.edgeNodeBetweenLayers": "30",
+  "elk.spacing.nodeNode": "40",
+  "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
+  "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
+  "elk.padding": "[top=30,left=30,bottom=30,right=30]",
+  "elk.edgeRouting": "SPLINES",
+};
 
 const NODE_SIZES: Record<string, { w: number; h: number }> = {
   documentCard: { w: 270, h: 150 },
@@ -402,17 +417,7 @@ async function buildLayout(
   try {
     const elkGraph = await elk.layout({
       id: "root",
-      layoutOptions: {
-        "elk.algorithm": "layered",
-        "elk.direction": "RIGHT",
-        "elk.layered.spacing.nodeNodeBetweenLayers": "50",
-        "elk.layered.spacing.edgeNodeBetweenLayers": "30",
-        "elk.spacing.nodeNode": "40",
-        "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
-        "elk.layered.crossingMinimization.strategy": "LAYER_SWEEP",
-        "elk.padding": "[top=30,left=30,bottom=30,right=30]",
-        "elk.edgeRouting": "SPLINES",
-      },
+      layoutOptions: ELK_LAYOUT_OPTIONS,
       children: elkNodes,
       edges: elkEdges,
     });
@@ -981,6 +986,9 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
 
   const [nodes, setNodes, onNodesChange] = useNodesState([] as any[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as any[]);
+  const nodesInitialized = useNodesInitialized();
+  // Guards the post-measure relayout so it runs once per built graph.
+  const relaidOutRef = useRef<string>("");
 
   useEffect(() => {
     let cancelled = false;
@@ -988,6 +996,7 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
       if (cancelled) return;
       setNodes(n);
       setEdges(e);
+      relaidOutRef.current = ""; // new graph → allow a fresh measured relayout
       // ELK is async, so by the time setNodes runs ReactFlow has already
       // rendered with empty nodes — its `fitView` prop only fits on first
       // render. Refit after the layout populates so the freshly placed nodes
@@ -1001,6 +1010,44 @@ function BundleCanvasInner({ documents, aiGraph, isAnalyzing, graphGeneratedAt, 
     });
     return () => { cancelled = true; };
   }, [documents, aiGraph, selectedDocId, detail, expandedDocId, decomposition, setNodes, setEdges, rfFitView]);
+
+  // ── Pass 2: relayout with the MEASURED node sizes ──
+  // Pass 1 (buildLayout) positions nodes using ESTIMATED card heights. The
+  // summary card especially varies with content, so estimates drift — ELK then
+  // either overlaps neighbours (under-estimate) or spreads them out with long
+  // floating edges (over-estimate). Once ReactFlow has measured the real DOM
+  // sizes, re-run ELK with them so the graph snaps to a clean, tight layout
+  // (no overlaps, short connected edges) regardless of what re-analysis emits.
+  useEffect(() => {
+    if (!nodesInitialized || nodes.length === 0) return;
+    const sig = nodes.length + "::" + nodes.map((n) => n.id).join("|");
+    if (relaidOutRef.current === sig) return; // already relaid out this graph
+    const elkNodes = nodes.map((n: any) => ({
+      id: n.id,
+      width: Math.round(n.measured?.width ?? n.width ?? 200),
+      height: Math.round(n.measured?.height ?? n.height ?? 100),
+    }));
+    const elkEdges = edges.map((e: any) => ({ id: e.id, sources: [e.source], targets: [e.target] }));
+    let cancelled = false;
+    elk
+      .layout({ id: "root", layoutOptions: ELK_LAYOUT_OPTIONS, children: elkNodes, edges: elkEdges })
+      .then((g) => {
+        if (cancelled) return;
+        const posMap = new Map<string, { x: number; y: number }>();
+        for (const c of g.children || []) posMap.set(c.id, { x: c.x ?? 0, y: c.y ?? 0 });
+        relaidOutRef.current = sig;
+        setNodes((prev) => prev.map((n) => {
+          const p = posMap.get(n.id);
+          return p ? { ...n, position: p } : n;
+        }));
+        requestAnimationFrame(() => {
+          if (cancelled) return;
+          try { rfFitView({ padding: 0.15, maxZoom: 1.2, duration: 0 }); } catch { /* ignore */ }
+        });
+      })
+      .catch(() => { /* keep the pass-1 layout */ });
+    return () => { cancelled = true; };
+  }, [nodesInitialized, nodes, edges, setNodes, rfFitView]);
 
   const [focusedNode, setFocusedNode] = useState<string | null>(null);
 
