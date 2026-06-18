@@ -77,13 +77,14 @@ export type AICallResult = AICallSuccess | AICallFailure;
 // still pricier per token than nano / flash-lite for short replies.
 const DEFAULT_ORDER: ProviderName[] = ["openai", "gemini", "anthropic"];
 
-// Per-provider defaults. Primary = "slightly better cheap model"
-// (used for polish / translate / chat). Lite = "cheapest" (used for
-// summary / tldr / format / Chrome-ext intent transform).
+// Per-provider defaults. Primary = the quality model (polish / translate /
+// chat / graph analysis). Lite = "cheapest" (summary / tldr / format /
+// Chrome-ext intent transform). Anthropic's primary is Sonnet 4.6 (graph
+// Analyze routes here for faithful structured output); its lite stays Haiku 4.5.
 const DEFAULTS = {
   openai:    { primary: "gpt-4o-mini",            lite: "gpt-5-nano" },
   gemini:    { primary: "gemini-3-flash-preview", lite: "gemini-3.1-flash-lite" },
-  anthropic: { primary: "claude-haiku-4-5",       lite: "claude-haiku-4-5" },
+  anthropic: { primary: "claude-sonnet-4-6",      lite: "claude-haiku-4-5" },
 } as const;
 
 export interface AIConfig {
