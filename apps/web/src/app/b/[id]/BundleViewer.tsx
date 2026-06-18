@@ -61,6 +61,8 @@ export default function BundleViewer({
   const [documents, setDocuments] = useState<BundleDocument[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [aiGraph, setAiGraph] = useState<any>(null);
+  const [graphGeneratedAt, setGraphGeneratedAt] = useState<string | null>(null);
+  const [embeddingUpdatedAt, setEmbeddingUpdatedAt] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [editToken, setEditToken] = useState<string | null>(null);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -202,6 +204,13 @@ export default function BundleViewer({
         setDocuments(docs);
         if (data.editToken) setEditToken(data.editToken);
 
+        // Status timestamps for the canvas pills (Analyzed / Embedded). The
+        // API returns these even to public viewers; without wiring them
+        // through they were never read, so the pills always said "Not yet"
+        // even when the bundle was analyzed + embedded long ago.
+        setGraphGeneratedAt(data.graph_generated_at || null);
+        setEmbeddingUpdatedAt(data.embedding_updated_at || null);
+
         // Use cached AI graph if available
         if (data.graph_data) {
           setAiGraph(data.graph_data);
@@ -230,6 +239,7 @@ export default function BundleViewer({
             if (graphRes.ok) {
               const graphData = await graphRes.json();
               setAiGraph(graphData.graphData);
+              setGraphGeneratedAt(graphData.generatedAt || new Date().toISOString());
             }
           } catch { /* AI not available */ }
           setIsAnalyzing(false);
@@ -600,6 +610,8 @@ export default function BundleViewer({
               onDocumentClick={handleNodeClick}
               onCopyContext={handleCopyContext}
               onRegenerate={handleRegenerate}
+              graphGeneratedAt={graphGeneratedAt}
+              embeddingUpdatedAt={embeddingUpdatedAt}
             />
           ) : (
             <div className="flex items-center justify-center h-full" style={{ color: "var(--text-muted)" }}>
