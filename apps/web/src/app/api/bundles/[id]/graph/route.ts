@@ -196,6 +196,32 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Ensure every concept referenced by an edge also exists as a node. Some
+    // model outputs emit edges to concepts (e.g. "concept:long_context_models")
+    // but omit those concepts from `nodes` — which renders as documents with
+    // nothing on their right (the edges get dropped for want of a target node)
+    // and leaves the stored graph internally inconsistent. Synthesize the
+    // missing ones, deriving a label + type from the id.
+    {
+      const existing = new Set<string>(graphData.nodes.map((n: { id: string }) => n.id));
+      const labelFromId = (cid: string): string => {
+        const m = cid.match(/^[a-z]+:(.+)$/i);
+        const body = (m ? m[1] : cid).replace(/[_-]+/g, " ").trim();
+        return body ? body.charAt(0).toUpperCase() + body.slice(1) : cid;
+      };
+      const typeFromId = (cid: string): string => {
+        const p = (cid.match(/^([a-z]+):/i)?.[1] || "").toLowerCase();
+        return p === "tag" || p === "entity" ? p : "concept";
+      };
+      for (const e of (graphData.edges || []) as Array<{ source?: string; target?: string }>) {
+        for (const ep of [e.source, e.target]) {
+          if (!ep || ep.startsWith("doc:") || existing.has(ep)) continue;
+          existing.add(ep);
+          graphData.nodes.push({ id: ep, label: labelFromId(ep), type: typeFromId(ep), weight: 1 });
+        }
+      }
+    }
+
     graphData.version = 1;
 
     // Cache in database
