@@ -42,6 +42,9 @@ export interface AICallOptions {
   useLiteModel?: boolean;
   /** Override provider order for this call. Otherwise reads site_config. */
   providerOrder?: ProviderName[];
+  /** Force a specific model per provider for THIS call (e.g. A/B testing a
+   *  model). Providers not listed fall back to their configured primary/lite. */
+  modelOverride?: Partial<Record<ProviderName, string>>;
   /** Identity for usage tracking. Pass userId when the caller has a
    *  signed-in user; anonymousId when the caller is on the
    *  unsigned-in path (anon chrome-ext captures + their transforms).
@@ -184,7 +187,7 @@ export async function callAI(opts: AICallOptions): Promise<AICallResult> {
   for (const provider of order) {
     const key = providerKey(provider);
     if (!key) continue;
-    const model = lite ? config.models[provider].lite : config.models[provider].primary;
+    const model = opts.modelOverride?.[provider] ?? (lite ? config.models[provider].lite : config.models[provider].primary);
     const startedAt = Date.now();
     try {
       const { result, usage } = await callProvider(provider, key, model, {
@@ -399,7 +402,7 @@ export async function streamText(opts: AICallOptions): Promise<StreamTextResult>
   for (const provider of order) {
     const key = providerKey(provider);
     if (!key) continue;
-    const model = lite ? config.models[provider].lite : config.models[provider].primary;
+    const model = opts.modelOverride?.[provider] ?? (lite ? config.models[provider].lite : config.models[provider].primary);
     const startedAt = Date.now();
     // Each provider streams its own SSE event shape; the extractor
     // pair below pulls (text chunks, usage tokens) per event. Usage

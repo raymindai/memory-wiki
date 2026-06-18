@@ -174,6 +174,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       ? [provParam]
       : ["anthropic", "openai", "gemini"];
   const liteOverride = sp.get("tier") === "primary" ? false : true;
+  const modelParam = sp.get("model");
+  const modelOverride = modelParam
+    ? ({ [providerOverride[0]]: modelParam } as Partial<Record<"openai" | "gemini" | "anthropic", string>>)
+    : undefined;
   const dryRun = sp.get("dryRun") === "1";
 
   // Bundle graph extraction → Anthropic first. Currently on the LITE tier
@@ -186,6 +190,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       prompt: `${fullPrompt}\n\nDocuments:\n${excerpts}`,
       useLiteModel: liteOverride,
       providerOrder: providerOverride,
+      modelOverride,
       temperature: 0.3,
       // The full graph JSON for a multi-doc bundle (nodes + edges + themes +
       // insights + decisions + shifts + per-doc summaries) routinely exceeds
