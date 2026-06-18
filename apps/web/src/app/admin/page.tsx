@@ -950,7 +950,7 @@ const ACTION_CATALOG: ActionGroup[] = [
   {
     surface: "Bundles (the thinking surface)",
     actions: [
-      { action: "bundle-graph",         description: "Generate the bundle's knowledge graph (nodes + edges).", tier: "primary" },
+      { action: "bundle-graph",         description: "Generate the bundle's knowledge graph (nodes + edges). Pinned to gpt-5-nano.", tier: "lite" },
       { action: "bundle-tension",       description: "Resolve a contradiction / tension identified in a bundle.", tier: "primary" },
       { action: "bundle-generate",      description: "Auto-build a bundle for a query — pulls relevant docs.",   tier: "primary" },
       { action: "bundle-suggest-title", description: "Suggest a title for an unnamed bundle.",                   tier: "lite" },
