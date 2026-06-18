@@ -12,7 +12,7 @@
  *
  * site_config keys (all optional, defaults apply when missing):
  *   ai_provider_order          comma-separated, e.g. "openai,gemini,anthropic"
- *   ai_openai_primary          e.g. "gpt-4o-mini"
+ *   ai_openai_primary          e.g. "gpt-5-mini"
  *   ai_openai_lite             e.g. "gpt-5-nano"
  *   ai_gemini_primary          e.g. "gemini-3-flash-preview"
  *   ai_gemini_lite             e.g. "gemini-3.1-flash-lite"
@@ -85,7 +85,7 @@ const DEFAULT_ORDER: ProviderName[] = ["openai", "gemini", "anthropic"];
 // Chrome-ext intent transform). Anthropic's primary is Sonnet 4.6 (graph
 // Analyze routes here for faithful structured output); its lite stays Haiku 4.5.
 const DEFAULTS = {
-  openai:    { primary: "gpt-4o-mini",            lite: "gpt-5-nano" },
+  openai:    { primary: "gpt-5-mini",             lite: "gpt-5-nano" },
   gemini:    { primary: "gemini-3-flash-preview", lite: "gemini-3.1-flash-lite" },
   anthropic: { primary: "claude-sonnet-4-6",      lite: "claude-haiku-4-5" },
 } as const;
