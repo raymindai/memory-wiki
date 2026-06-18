@@ -366,7 +366,10 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
   }, [bundleId]);
 
   const handleRegenerate = useCallback(async () => {
-    setAiGraph(null);
+    // Keep the existing graph on screen under the busy state — Sonnet can take
+    // 30-60s, and blanking it up front (then leaving it blank on failure) read
+    // as "re-analyze did nothing". Replace only on success; surface failures
+    // instead of swallowing them.
     setIsAnalyzing(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json", ...(parentAuthHeaders || {}) };
@@ -382,8 +385,13 @@ export default function BundleEmbed({ bundleId, view = "canvas", onChangeView, o
         setGraphGeneratedAt(g.generatedAt || new Date().toISOString());
         // Just regenerated — no longer stale.
         setIsAnalysisStale(false);
+      } else {
+        const j = await res.json().catch(() => ({} as { error?: string }));
+        showToast(j.error ? `Re-analyze failed: ${j.error}` : `Re-analyze failed (${res.status})`, "error");
       }
-    } catch { /* error */ }
+    } catch {
+      showToast("Re-analyze failed — network error", "error");
+    }
     setIsAnalyzing(false);
   }, [bundleId, editToken, parentAuthHeaders]);
 

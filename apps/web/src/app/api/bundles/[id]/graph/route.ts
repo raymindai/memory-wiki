@@ -3,6 +3,12 @@ import { getSupabaseClient } from "@/lib/supabase";
 import { verifyAuthToken } from "@/lib/verify-auth";
 import { callAI } from "@/lib/ai-providers";
 
+// Claude Sonnet 4.6 (the Analyze model) can take 30-60s+ to emit the full graph
+// JSON for a multi-doc bundle. With no raised ceiling the function timed out
+// before persisting, so Re-analyze silently did nothing (POST returned non-ok →
+// the client skipped the update). 300s is the platform max.
+export const maxDuration = 300;
+
 type RouteParams = { params: Promise<{ id: string }> };
 
 const EXTRACTION_PROMPT = `You are an expert document analyst and knowledge graph builder. Analyze a collection of documents deeply and produce a comprehensive analysis.
