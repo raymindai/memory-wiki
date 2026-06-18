@@ -160,37 +160,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     : "";
   const fullPrompt = EXTRACTION_PROMPT + intentPrefix;
 
-  // ── Model-comparison debug knobs (query params; TEMPORARY) ──
-  //   ?provider=openai|gemini|anthropic  force ONE provider (no fallback, so the
-  //                                       result is unambiguously that model)
-  //   ?tier=primary|lite                 pick the tier (default lite)
-  //   ?dryRun=1                          run the AI + return the graph WITHOUT
-  //                                       persisting (compare LLMs without
-  //                                       clobbering the stored graph / ontology)
-  const sp = req.nextUrl.searchParams;
-  const provParam = sp.get("provider");
-  const providerOverride: ("openai" | "gemini" | "anthropic")[] =
-    provParam === "openai" || provParam === "gemini" || provParam === "anthropic"
-      ? [provParam]
-      : ["anthropic", "openai", "gemini"];
-  const liteOverride = sp.get("tier") === "primary" ? false : true;
-  const modelParam = sp.get("model");
-  const modelOverride = modelParam
-    ? ({ [providerOverride[0]]: modelParam } as Partial<Record<"openai" | "gemini" | "anthropic", string>>)
-    : undefined;
-  const dryRun = sp.get("dryRun") === "1";
-
-  // Bundle graph extraction → Anthropic first. Currently on the LITE tier
-  // (claude-haiku-4-5) — trying a leaner/cheaper analysis after Sonnet's output
-  // felt too dense. Flip useLiteModel back to false to return to Sonnet 4.6
-  // (anthropic primary). Falls back to openai/gemini only if Anthropic is
-  // unavailable. JSON-only via the system prompt; parseGraphJson tolerates fences.
+  // Bundle graph extraction runs on gpt-5-nano (openai lite): cheapest model in
+  // the matrix (~$0.008/analyze) and — in the model bake-off vs Sonnet / Haiku /
+  // gpt-4o-mini / gemini — it produced the cleanest, correctly-typed graph
+  // (concept/entity/tag, no decision/shift clutter). Pinned explicitly so a
+  // lite-default change can't silently swap it; openai-first, then
+  // anthropic/gemini as fallback. JSON-only via the system prompt;
+  // parseGraphJson tolerates fences.
   try {
     const aiResult = await callAI({
       prompt: `${fullPrompt}\n\nDocuments:\n${excerpts}`,
-      useLiteModel: liteOverride,
-      providerOrder: providerOverride,
-      modelOverride,
+      useLiteModel: true,
+      providerOrder: ["openai", "anthropic", "gemini"],
+      modelOverride: { openai: "gpt-5-nano" },
       temperature: 0.3,
       // The full graph JSON for a multi-doc bundle (nodes + edges + themes +
       // insights + decisions + shifts + per-doc summaries) routinely exceeds
@@ -256,18 +238,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     graphData.version = 1;
-
-    // dryRun (model comparison): return the freshly-built graph without
-    // persisting or touching the concept index.
-    if (dryRun) {
-      return NextResponse.json({
-        graphData,
-        generatedAt: new Date().toISOString(),
-        dryRun: true,
-        provider: providerOverride[0],
-        tier: liteOverride ? "lite" : "primary",
-      });
-    }
 
     // Cache in database
     const now = new Date().toISOString();
