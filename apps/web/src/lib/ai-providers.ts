@@ -295,7 +295,7 @@ async function callAnthropic(apiKey: string, model: string, ctx: CallContext): P
     },
     body: JSON.stringify({
       model,
-      max_tokens: Math.min(ctx.maxOutputTokens, 8192),
+      max_tokens: Math.min(ctx.maxOutputTokens, 64000),
       temperature: ctx.temperature,
       messages: [{ role: "user", content: ctx.prompt }],
     }),

@@ -173,7 +173,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       useLiteModel: false,
       providerOrder: ["anthropic", "openai", "gemini"],
       temperature: 0.3,
-      maxOutputTokens: 16384,
+      // The full graph JSON for a multi-doc bundle (nodes + edges + themes +
+      // insights + decisions + shifts + per-doc summaries) routinely exceeds
+      // 16k tokens on Sonnet; too low and the JSON truncates → parse fails →
+      // "AI extraction failed". Sonnet 4.6 supports 64k output.
+      maxOutputTokens: 32000,
       userId: (bundle.user_id as string | null) || undefined,
       action: "bundle-graph",
     });
