@@ -753,6 +753,7 @@
   }
 
   function attachToVisiblePosts() {
+    if (!mwActive) return; // clipper off (paused / site-disabled) — no pills
     const nodes = document.querySelectorAll(adapter.selector);
     nodes.forEach((el) => {
       // Threads sometimes replaces the host's children on re-render
@@ -780,10 +781,35 @@
     });
   }
 
+  // Gate the post pills on the global on/off state (same as the AI-site +
+  // general-page scripts). Off (mw-paused / mw-disabled-sites) ⇒ no pills.
+  let mwActive = false;
+  function removeSocialPills() {
+    document.querySelectorAll(".mw-social-btn").forEach((b) => b.remove());
+    document.querySelectorAll(".mw-social-host").forEach((h) => { h.classList.remove("mw-social-host"); delete h.dataset.mwSocialAttached; });
+  }
+  function refreshMwActive() {
+    try {
+      chrome.storage.sync.get({ "mw-disabled-sites": [] }, (s) => {
+        chrome.storage.local.get({ "mw-paused": false }, (l) => {
+          const paused = !!(l && l["mw-paused"]);
+          const disabled = Array.isArray(s && s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
+          mwActive = !paused && !disabled.includes(HOST);
+          if (mwActive) attachToVisiblePosts(); else removeSocialPills();
+        });
+      });
+    } catch { /* storage unavailable — stay inactive */ }
+  }
+
   function start() {
     injectStyles();
     if (isThreads) document.documentElement.classList.add("mw-social-threads");
-    attachToVisiblePosts();
+    refreshMwActive();
+    try {
+      chrome.storage.onChanged.addListener((c, area) => {
+        if ((area === "local" && c["mw-paused"]) || (area === "sync" && c["mw-disabled-sites"])) refreshMwActive();
+      });
+    } catch { /* */ }
     const obs = new MutationObserver(() => {
       if (start._t) return;
       start._t = setTimeout(() => { start._t = null; attachToVisiblePosts(); }, 200);
