@@ -323,6 +323,29 @@
     let currentImg = null;
     let hideTimer = null;
     let positionRaf = 0;
+    // Gate the per-image hover button on the global on/off state, same as the
+    // AI-site content script. Popup master toggle writes mw-paused (local);
+    // per-site off writes mw-disabled-sites (sync). When off, NO capture UI may
+    // appear on the page (this icon was showing through an off toggle).
+    let mwActive = false;
+    function refreshMwActive() {
+      try {
+        chrome.storage.sync.get({ "mw-disabled-sites": [] }, (s) => {
+          chrome.storage.local.get({ "mw-paused": false }, (l) => {
+            const paused = !!(l && l["mw-paused"]);
+            const disabled = Array.isArray(s && s["mw-disabled-sites"]) ? s["mw-disabled-sites"] : [];
+            mwActive = !paused && !disabled.includes(location.hostname);
+            if (!mwActive) hideNow();
+          });
+        });
+      } catch { /* storage unavailable — stay inactive */ }
+    }
+    refreshMwActive();
+    try {
+      chrome.storage.onChanged.addListener((c, area) => {
+        if ((area === "local" && c["mw-paused"]) || (area === "sync" && c["mw-disabled-sites"])) refreshMwActive();
+      });
+    } catch { /* */ }
 
     function injectStyles() {
       if (document.getElementById("mw-save-img-style")) return;
@@ -673,6 +696,7 @@
     }
 
     function showFor(img) {
+      if (!mwActive) return; // clipper off (paused / site-disabled) — no capture UI
       if (!btn) btn = makeButton();
       currentImg = img;
       btn.dataset.state = "idle";
