@@ -189,7 +189,21 @@ const AuthManager = {
     return this.getHeaders();
   },
 
+  // Single-flight refresh. Supabase refresh tokens are SINGLE-USE and rotate on
+  // every refresh, so two concurrent refreshes with the SAME token make the
+  // second fail ("refresh token already used") → spurious sign-out. When
+  // several API calls hit an expired token at once (sync + sidebar + publish on
+  // window focus), they must share ONE refresh, not race. _refreshPromise
+  // dedupes them; it's cleared when the single refresh settles.
+  _refreshPromise: null,
   async refreshToken() {
+    if (this._refreshPromise) return this._refreshPromise;
+    this._refreshPromise = this._doRefresh();
+    try { return await this._refreshPromise; }
+    finally { this._refreshPromise = null; }
+  },
+
+  async _doRefresh() {
     const data = this.load();
     if (!data?.refreshToken) {
       this.notifySessionExpired();
