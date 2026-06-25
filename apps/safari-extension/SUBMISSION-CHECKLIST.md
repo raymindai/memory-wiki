@@ -54,6 +54,15 @@ Create **two** separate apps:
 > objectionable third-party content. Rewritten to a personal "save your own
 > pages as links" utility. Apply to BOTH the iOS and Mac Clipper apps.
 
+> NOTE (2026-06-26): Mac submission rejected again on 3 counts. Fixes:
+> (5.2.5) App Store **Name** must not contain "Mac"/"Safari" → "memory.wiki Web
+> Clipper". (5 / China DST) removed "ChatGPT"/"GPT" from keywords + description
+> below (kept Claude/Gemini/Cursor — only ChatGPT/OpenAI were flagged); China
+> stays available. (5.1.1(v)) account deletion already exists at
+> memory.wiki/settings — added an in-app "Delete account" link in the popup
+> (Shared Resources popup-v25.html) + demo it via a screen recording in the
+> App Review Notes (demo account self-heals via demo-signin if deleted).
+
 **Subtitle (max 30 chars)**
 
 ```
@@ -71,7 +80,7 @@ Save a page or a passage as a clean memory.wiki link, ready to revisit later or 
 ```
 memory.wiki Clipper saves a web page, or a passage you select, as a clean, private memory.wiki link you can revisit later or bring into your AI assistant.
 
-Reading something worth keeping? Save it in one tap and get a tidy memory.wiki link. Open it anytime, or paste it into your own AI workflow (ChatGPT, Claude, Gemini, Cursor) instead of copy-pasting text.
+Reading something worth keeping? Save it in one tap and get a tidy memory.wiki link. Open it anytime, or paste it into your own AI workflow (Claude, Gemini, Cursor) instead of copy-pasting text.
 
 What it does:
 - One tap saves the current page, or the passage you select, as a clean Markdown note at a short memory.wiki link.
@@ -87,7 +96,7 @@ Privacy:
 **Keywords (max 100 chars)**
 
 ```
-markdown,ai,context,clipper,save page,chatgpt,claude,gemini,perplexity,cursor,memory,knowledge
+markdown,ai,context,clipper,save page,claude,gemini,perplexity,cursor,memory,knowledge,notes
 ```
 
 **Support URL**: `https://memory.wiki/plugins#safari`**Marketing URL**: `https://memory.wiki`**Privacy Policy URL**: `https://memory.wiki/privacy`
