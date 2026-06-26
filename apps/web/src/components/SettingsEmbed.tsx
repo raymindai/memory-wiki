@@ -92,6 +92,15 @@ export default function SettingsEmbed({ onClose, initialSection }: { onClose?: (
   const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
     if (initialSection) return initialSection;
     if (typeof window === "undefined") return "profile";
+    // Deep link: /settings?section=danger (or #danger) opens that tab directly.
+    // Used by the browser-extension "Delete account" links so the user (and an
+    // App Review reviewer) lands straight on the Danger section. Read here in the
+    // initializer — it runs during render, before MdEditor's replaceState effect
+    // strips the query back to "/settings".
+    const valid: SettingsSection[] = ["profile", "appearance", "auto-management", "hub", "danger"];
+    const fromUrl = (new URLSearchParams(window.location.search).get("section")
+      || window.location.hash.replace(/^#/, "")) as SettingsSection;
+    if (fromUrl && valid.includes(fromUrl)) return fromUrl;
     return (localStorage.getItem("mw-settings-section") as SettingsSection) || "profile";
   });
   // If parent passes a fresh initialSection mid-mount (e.g. Hub's
