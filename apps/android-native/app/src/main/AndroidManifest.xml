@@ -9,8 +9,18 @@
     <!-- Capture -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
+    <!-- Image capture (OCR mode) uses the Android Photo Picker
+         (ActivityResultContracts.PickVisualMedia), which grants per-item access
+         with NO permission. We deliberately do NOT hold the broad photo/video
+         media permissions — our access is one-time, not a core media-gallery use
+         case (Google Play "Photo and Video Permissions" policy, rejected
+         2026-06-18 when READ_MEDIA_IMAGES was declared). tools:node="remove"
+         also strips any copy a dependency tries to merge into the final manifest. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
 
     <!-- Optional — banners + sync notifications post-launch -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
