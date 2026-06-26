@@ -17,17 +17,17 @@
     "<all_urls>"
   ],
   "icons": {
-    "16": "icons/toolbar-16.png",
-    "48": "icons/toolbar-48.png",
-    "128": "icons/toolbar-128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "action": {
     "default_popup": "popup-v25.html",
     "default_icon": {
-      "16": "icons/toolbar-16.png",
-      "19": "icons/toolbar-19.png",
-      "32": "icons/toolbar-32.png",
-      "38": "icons/toolbar-38.png"
+      "16": "icons/icon16.png",
+      "19": "icons/icon19.png",
+      "32": "icons/icon32.png",
+      "38": "icons/icon38.png"
     }
   },
   "options_ui": {
