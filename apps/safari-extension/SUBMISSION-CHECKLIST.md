@@ -54,15 +54,24 @@ Create **two** separate apps:
 > objectionable third-party content. Rewritten to a personal "save your own
 > pages as links" utility. Apply to BOTH the iOS and Mac Clipper apps.
 
-> NOTE (2026-06-26): Mac submission rejected again on 3 counts. Fixes:
+> NOTE (2026-06-26): Mac submission rejected again on 3 counts — all fixed in
+> **build 1.0 (4)**:
 > (5.2.5) App Store **Name** must not contain "Mac"/"Safari" → "memory.wiki Web
-> Clipper". (5 / China DST) removed ALL foreign-AI brand names (ChatGPT, GPT,
-> Claude, Gemini, Cursor, Perplexity) from keywords + description below →
-> generic "your AI assistant" wording, so China stays available without
-> re-rejection risk on the other AIs (which also lack a China license). (5.1.1(v)) account deletion already exists at
-> memory.wiki/settings — added an in-app "Delete account" link in the popup
-> (Shared Resources popup-v25.html) + demo it via a screen recording in the
-> App Review Notes (demo account self-heals via demo-signin if deleted).
+> Clipper".
+> (5 / China DST) removed ALL foreign-AI brand names (ChatGPT, GPT, Claude,
+> Gemini, Cursor, Perplexity) — not just from keywords + description below, but
+> from the **binary** too: the popup's post-capture "send this to" launcher was
+> dropped and the options "on AI pages" copy is now generic. Keeps China
+> available without re-rejection risk (the other AIs also lack a China license).
+> (5.1.1(v)) account deletion lives at memory.wiki/settings — added an in-app
+> "Delete account" link in BOTH the popup (Shared Resources popup-v25.html) and
+> the extension settings page (options.html → "account" section); both deep-link
+> to memory.wiki/settings?section=danger so the Danger tab opens directly. Demo
+> it in the App Review Notes / screen recording (demo account self-heals via
+> demo-signin if deleted).
+>
+> Build .pkg: `apps/safari-extension/memory.wiki Clipper/build/export-appstore/memory.wiki Clipper.pkg`
+> — upload via Transporter, then attach 1.0 (4) in App Store Connect.
 
 **Subtitle (max 30 chars)**
 
