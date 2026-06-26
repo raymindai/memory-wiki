@@ -1334,25 +1334,11 @@
       <span class="text" id="result-url-text">memory.wiki/…</span>
       <button class="result-url-copy" id="result-url-copy" type="button">copy</button>
     </div>
-    <div class="result-cont">send this to</div>
-    <div class="result-ai">
-      <a class="ai-pill" id="ai-chatgpt" data-ai="chatgpt" href="https://chatgpt.com" target="_blank" rel="noopener">
-        <span class="ai-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5c2.3 0 4.4 1.3 5.4 3.4 2.3.3 4.2 2 4.7 4.3.5 2.3-.7 4.6-2.8 5.5.3 2.3-1 4.5-3.1 5.4-2.1.9-4.6.3-6.1-1.5-2.3-.3-4.2-2-4.7-4.3-.5-2.3.7-4.6 2.8-5.5-.3-2.3 1-4.5 3.1-5.4.7-.3 1.5-.4 2.7-.4z"/></svg></span>
-        <span class="ai-name">ChatGPT</span>
-      </a>
-      <a class="ai-pill" id="ai-claude" data-ai="claude" href="https://claude.ai/new" target="_blank" rel="noopener">
-        <span class="ai-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.3 0 .5.2.6.4l1.7 4.7 4.7 1.7c.3.1.4.3.4.6 0 .3-.2.5-.4.6l-4.7 1.7-1.7 4.7c-.1.3-.3.4-.6.4s-.5-.2-.6-.4l-1.7-4.7-4.7-1.7c-.3-.1-.4-.3-.4-.6 0-.3.2-.5.4-.6l4.7-1.7 1.7-4.7c.1-.2.3-.4.6-.4z"/></svg></span>
-        <span class="ai-name">Claude</span>
-      </a>
-      <a class="ai-pill" id="ai-gemini" data-ai="gemini" href="https://gemini.google.com/app" target="_blank" rel="noopener">
-        <span class="ai-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 4.4 3.6 8 8 8 .6 0 1 .4 1 1s-.4 1-1 1c-4.4 0-8 3.6-8 8 0 .6-.4 1-1 1s-1-.4-1-1c0-4.4-3.6-8-8-8-.6 0-1-.4-1-1s.4-1 1-1c4.4 0 8-3.6 8-8 0-.6.4-1 1-1s1 .4 1 1z"/></svg></span>
-        <span class="ai-name">Gemini</span>
-      </a>
-      <a class="ai-pill" id="ai-perplexity" data-ai="perplexity" href="https://www.perplexity.ai" target="_blank" rel="noopener">
-        <span class="ai-mark"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="11" y="3" width="2" height="18" rx="1"/><rect x="3" y="11" width="18" height="2" rx="1"/><rect x="11" y="3" width="2" height="18" rx="1" transform="rotate(45 12 12)"/><rect x="11" y="3" width="2" height="18" rx="1" transform="rotate(-45 12 12)"/></svg></span>
-        <span class="ai-name">Perplexity</span>
-      </a>
-    </div>
+    <!-- The "send this to" foreign-AI launcher (ChatGPT / Claude / Gemini /
+         Perplexity) was removed so the extension stays available in every
+         region including China (App Store Guideline 5 / China DST — same
+         reason the listing metadata dropped those brand names). The captured
+         URL is copied to the clipboard; users open it in whatever AI they use. -->
     <div class="result-error-text" id="result-error-text" style="display:none"></div>
   </div>
 
@@ -1376,7 +1362,7 @@
     <span class="act" id="account-action-label">Sign in to memory.wiki</span>
   </a>
 
-  <a class="acct-delete" id="acct-delete" href="https://memory.wiki/settings" target="_blank" rel="noopener">Delete account</a>
+  <a class="acct-delete" id="acct-delete" href="https://memory.wiki/settings?section=danger" target="_blank" rel="noopener">Delete account</a>
 
   <div class="promo-strip">
     <span class="label">Also on</span>
