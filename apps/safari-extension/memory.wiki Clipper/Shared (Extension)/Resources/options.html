@@ -173,6 +173,12 @@
     }
     .btn.primary:hover { background: #c8ff45; border-color: #c8ff45; }
 
+    /* Destructive: restrained red tint (opens the web Danger tab where the
+       actual deletion is confirmed). nowrap so it keeps its shape in the
+       narrow iOS settings panel. */
+    .btn.danger { color: #f87171; flex-shrink: 0; white-space: nowrap; }
+    .btn.danger:hover { color: #fca5a5; border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.08); }
+
     .toggle {
       position: relative;
       width: 36px;
@@ -258,12 +264,9 @@
       <div class="row">
         <div class="body">
           <div class="title">delete account</div>
-          <div class="desc">
-            permanently delete your memory.wiki account and every page you have
-            saved. this cannot be undone.
-            <a href="https://memory.wiki/settings?section=danger" target="_blank" rel="noopener">open account settings</a>
-          </div>
+          <div class="desc">permanently delete your memory.wiki account and all saved pages. this cannot be undone.</div>
         </div>
+        <a class="btn danger" href="https://memory.wiki/settings?section=danger" target="_blank" rel="noopener">Delete account</a>
       </div>
     </section>
 

@@ -224,12 +224,6 @@
     }
     .brand-settings:hover { color: var(--ink); background: var(--bg-card); }
     .brand-settings svg { width: 15px; height: 15px; }
-    /* Delete-account link — App Store 5.1.1(v) requires an in-app way to
-       initiate account deletion. Opens the web settings page (which has the
-       Delete account flow). Signed-in only. */
-    .acct-delete { display: block; text-align: center; font-size: 11px; color: var(--faint); text-decoration: none; padding: 7px 0 3px; }
-    .acct-delete:hover { color: var(--ink); text-decoration: underline; }
-    body.signed-out .acct-delete { display: none; }
     .brand-left {
       display: inline-flex; align-items: baseline; gap: 5px;
       text-decoration: none;
@@ -1361,8 +1355,6 @@
     </span>
     <span class="act" id="account-action-label">Sign in to memory.wiki</span>
   </a>
-
-  <a class="acct-delete" id="acct-delete" href="https://memory.wiki/settings?section=danger" target="_blank" rel="noopener">Delete account</a>
 
   <div class="promo-strip">
     <span class="label">Also on</span>
