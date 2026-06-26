@@ -46,7 +46,6 @@ const kbdPage = document.getElementById("kbd-page");
 const kbdSel = document.getElementById("kbd-sel");
 const shortcutsLink = document.getElementById("shortcuts-link");
 const chkFloat = document.getElementById("chk-float");
-const chkAutoCapture = document.getElementById("chk-autocapture");
 const versionPill = document.getElementById("version-pill");
 const versionDesc = document.getElementById("version-desc");
 
@@ -118,18 +117,6 @@ if (!IS_IOS && chkFloat && chrome.storage && chrome.storage.sync) {
         }).catch(() => { /* tab has no content script — fine */ });
       });
     });
-  });
-}
-
-// ─── Auto-capture toggle (chrome only) ───
-// The content script reads storage.sync.autoCapture + listens for changes,
-// so just persisting the flag flips behavior live on open AI tabs.
-if (!IS_IOS && chkAutoCapture && chrome.storage && chrome.storage.sync) {
-  chrome.storage.sync.get({ autoCapture: false }, (data) => {
-    chkAutoCapture.checked = !!data.autoCapture;
-  });
-  chkAutoCapture.addEventListener("change", () => {
-    chrome.storage.sync.set({ autoCapture: chkAutoCapture.checked });
   });
 }
 

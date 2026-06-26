@@ -1442,364 +1442,53 @@
   // know the paused / disabled-site state, so no capture UI ever flashes on
   // a paused or disabled page.
 
-  // ─── Ambient auto-capture (#2) ───
-  // When the user opts in, each AI thread continuously syncs to a SINGLE
-  // memory.wiki doc (created once, then updated) as the conversation grows,
-  // so memory forms without a per-conversation click. Keyed by the thread
-  // URL so re-syncs UPDATE the same doc instead of spawning duplicates, and
-  // debounced so we only sync after a response settles (never mid-stream).
-  let autoCaptureEnabled = false; // global default (the "capture everything" switch)
-  const AUTO_SYNC_SETTLE_MS = 1500; // conversation content stable this long = response done → sync
 
-  // Gating layers. Precedence: paused > site-disabled > per-thread override
-  // > global autoCapture. `mwPaused` (local) is the temporary master kill;
-  // `disabledSites` (sync) turns the extension off on specific hosts;
-  // `threadOverrides` (local) is per-thread capture on/off set via the pill.
+  // Gating layers. `mwPaused` (local) is the temporary master kill;
+  // `disabledSites` (sync) turns the extension off on specific hosts. Together
+  // they gate every on-page affordance (float dock, image-hover, social pills).
   let mwPaused = false;
   let disabledSites = [];
-  let threadOverrides = {};
   let showFloat = false;     // showFloatingButton pref, managed via refreshExtUI
   let stateLoaded = false;   // until flags load, render NOTHING (no button flash)
-  let pillPos = {};          // { pillId: {left, top} } — user-dragged pill positions
-  // Drag-handle glyph (6-dot grip) prefixed on the pills as a "draggable" hint.
-  const MW_GRIP = '<span class="mw-grip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><circle cx="9" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg></span>';
 
   function currentHost() { try { return location.hostname; } catch { return ""; } }
   // extActive is false until the flags are loaded, so no capture UI ever
   // flashes on a paused / disabled page before we know the real state.
   function extActive() { return stateLoaded && !mwPaused && !disabledSites.includes(currentHost()); }
-  // The popup toggle ONLY controls whether the capture pill is shown. Capture
-  // itself is armed/disarmed by clicking the pill, per thread, tracked in
-  // mw-thread-capture (local) → threadOverrides.
-  function shouldShowPill() { return extActive() && autoCaptureEnabled && !!threadKey(); }
-  function threadArmed() { const k = threadKey(); return !!(k && threadOverrides[k]); }
-  function shouldCaptureThread() { return shouldShowPill() && threadArmed(); }
-
-  function threadKey() {
-    // The conversation's own URL path. The transient new-chat state ("/")
-    // has no thread id yet, so skip it — otherwise we'd create a doc for an
-    // empty chat. Require a thread-shaped path per platform.
-    const p = location.pathname || "/";
-    if (p === "/" || p === "") return null;
-    if (platform === "chatgpt" && !/\/c\//.test(p)) return null;
-    if (platform === "claude" && !/\/chat\//.test(p)) return null;
-    if (platform === "gemini" && !/\/app\b/.test(p) && !/\/[a-z0-9]{6,}/i.test(p)) return null;
-    return platform + ":" + p;
-  }
-
-  function cheapHash(s) {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-    return h + ":" + s.length;
-  }
-
-  function getThreadMap() {
-    return new Promise((resolve) => {
-      try { chrome.storage.local.get({ "mw-thread-map": {} }, (d) => resolve(d["mw-thread-map"] || {})); }
-      catch { resolve({}); }
-    });
-  }
-  function setThreadEntry(key, entry) {
-    try {
-      chrome.storage.local.get({ "mw-thread-map": {} }, (d) => {
-        const map = d["mw-thread-map"] || {};
-        map[key] = entry;
-        const keys = Object.keys(map);
-        if (keys.length > 50) {
-          keys.map((k) => [k, map[k]])
-            .sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0))
-            .slice(50)
-            .forEach(([k]) => delete map[k]);
-        }
-        chrome.storage.local.set({ "mw-thread-map": map });
-      });
-    } catch { /* noop */ }
-  }
-
-  // Event-driven incremental sync. Fired once the conversation content has
-  // been STABLE for AUTO_SYNC_SETTLE_MS (= a response finished streaming).
-  // Creates the thread's doc on the first exchange, then APPENDS only the new
-  // exchanges (delta) — no polling, no whole-thread re-PATCH.
-  async function syncThreadIncremental() {
-    if (!shouldCaptureThread()) return;
-    const key = threadKey();
-    if (!key) return;
-
-    let messages;
-    try { messages = extractConversation(); } catch { return; }
-    if (!messages || messages.length < 2) return; // need at least one full exchange
-    const fullMd = formatConversation(messages);
-    if (!fullMd || fullMd.trim().length < 40) return;
-    const hash = cheapHash(fullMd);
-
-    const map = await getThreadMap();
-    const existing = map[key];
-    if (existing && existing.hash === hash) return; // nothing new since last sync
-
-    const userId = await getUserId();
-    if (!userId) return; // ambient capture requires sign-in; stay silent
-
-    const titleMatch = fullMd.match(/^#\s+(.+)/m);
-    const title = (titleMatch ? titleMatch[1].trim() : "captured from " + platformName()).slice(0, 100);
-
-    try {
-      if (existing && existing.id) {
-        const synced = existing.syncedCount || 0;
-        let res;
-        if (messages.length > synced && synced > 0) {
-          // Append ONLY the new exchanges since last sync (incremental).
-          const delta = formatMessages(messages.slice(synced));
-          res = await proxyFetch(MDFY_URL + "/api/docs/" + existing.id, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "append", append: delta, separator: "\n\n---\n\n", title, source: "chrome-auto", userId, editToken: existing.editToken }),
-          });
-        } else {
-          // Count shrank or diverged (regenerated / edited thread) → full re-sync.
-          res = await proxyFetch(MDFY_URL + "/api/docs/" + existing.id, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ markdown: fullMd, title, source: "chrome-auto", userId, editToken: existing.editToken }),
-          });
-        }
-        if (res.ok) {
-          setThreadEntry(key, { ...existing, title, hash, syncedCount: messages.length, ts: Date.now() });
-        } else if (res.status === 404) {
-          setThreadEntry(key, undefined); // doc deleted server-side → re-create next time
-        }
-      } else {
-        // First sync of this thread → create the doc with the full conversation.
-        const res = await proxyFetch(MDFY_URL + "/api/docs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ markdown: fullMd, userId, title, editMode: "account", source: "chrome-auto" }),
-        });
-        if (res.ok) {
-          let parsed = {};
-          try { parsed = JSON.parse(res.body); } catch { /* */ }
-          if (parsed.id) {
-            setThreadEntry(key, { id: parsed.id, editToken: parsed.editToken, title, hash, syncedCount: messages.length, ts: Date.now() });
-            try {
-              const docUrl = MDFY_URL + "/" + parsed.id;
-              chrome.storage.local.get(["mw-recent"], (data) => {
-                const prev = Array.isArray(data["mw-recent"]) ? data["mw-recent"] : [];
-                const entry = { url: docUrl, title, source: "chrome-auto-" + platformName().toLowerCase(), ts: Date.now() };
-                const next = [entry, ...prev.filter((p) => p.url !== docUrl)].slice(0, 5);
-                chrome.storage.local.set({ "mw-recent": next });
-              });
-            } catch { /* noop */ }
-            showToast("auto-syncing this thread to memory.wiki", 3500);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("[Memory.Wiki] auto-sync failed:", err);
-    }
-  }
-
-  // Event-driven trigger. Content-based (not raw DOM mutations): the settle
-  // timer restarts ONLY when the EXTRACTED conversation actually changes
-  // (while a response streams), so page chrome animations can't reset it or
-  // starve capture. It fires once the content stops changing = response done.
-  let lastActivityHash = null;
-  let doneTimer = null;
-  function onConversationActivity() {
-    if (!shouldCaptureThread()) return;
-    let md;
-    try { md = formatConversation(extractConversation()); } catch { return; }
-    if (!md || md.trim().length < 40) return;
-    const h = cheapHash(md);
-    if (h === lastActivityHash) return; // content unchanged (just page chrome) — ignore
-    lastActivityHash = h;               // content changed (streaming) — restart the settle timer
-    if (doneTimer) clearTimeout(doneTimer);
-    doneTimer = setTimeout(syncThreadIncremental, AUTO_SYNC_SETTLE_MS);
-  }
-
-  // ─── On-page capture pill (the actual start/stop control) ───
-  // The popup toggle only SHOWS or HIDES this pill. Capture itself is started
-  // and stopped HERE, per thread: idle = "capture" (click to start), armed =
-  // "● capturing" (click to stop). Armed state lives in mw-thread-capture.
-  function updateCapturePill() {
-    const pill = document.getElementById("mw-capture-pill");
-    if (!pill) return;
-    const on = threadArmed();
-    pill.classList.toggle("mw-on", on);
-    // Update the label text only — leave the .mw-cap-dot element in place so
-    // its recording-pulse animation never restarts on a refresh tick.
-    const label = pill.querySelector(".mw-cap-label");
-    if (label) label.textContent = on ? "capturing" : "capture";
-    pill.title = on
-      ? "Capturing this thread to memory.wiki. Click to stop."
-      : "Click to start capturing this thread to memory.wiki.";
-  }
-  function toggleThreadCapture() {
-    const k = threadKey();
-    if (!k) return;
-    const now = !threadArmed();
-    threadOverrides = { ...threadOverrides, [k]: now };
-    try { chrome.storage.local.set({ "mw-thread-capture": threadOverrides }); } catch { /* */ }
-    updateCapturePill();
-    if (now) {
-      showToast("capturing this thread to memory.wiki", 2000);
-      lastActivityHash = ""; // force the next check to sync the current content
-      onConversationActivity();
-    } else {
-      showToast("stopped capturing this thread", 2000);
-    }
-  }
-  function initCapturePill() {
-    // The popup toggle decides whether the pill is SHOWN; the pill itself
-    // starts/stops capture for this thread. Shown whenever the feature is on
-    // for this site + we're on a real thread — idle until the user clicks it.
-    if (!shouldShowPill()) { removeCapturePill(); return; }
-    injectPillStyles();
-    let pill = document.getElementById("mw-capture-pill");
-    if (!pill) {
-      pill = document.createElement("button");
-      pill.id = "mw-capture-pill";
-      pill.type = "button";
-      // Dot (recording pulse when armed) + label, built once so the animation
-      // is stable across refreshes.
-      pill.innerHTML = MW_GRIP + '<span class="mw-cap-dot"></span><span class="mw-cap-label"></span>';
-      pill.addEventListener("click", (e) => {
-        e.preventDefault(); e.stopPropagation();
-        if (pill._mwDragged) { pill._mwDragged = false; return; } // was a drag, not a click
-        toggleThreadCapture();
-      });
-      document.body.appendChild(pill);
-      makeDraggable(pill);
-      applySavedPillPos(pill);
-    }
-    updateCapturePill();
-  }
-  function removeCapturePill() {
-    const p = document.getElementById("mw-capture-pill");
-    if (p) p.remove();
-  }
-
-  // ─── Draggable pills ───
-  // Both on-page pills (capturing + memory) can be dragged anywhere; the
-  // position persists. A drag (pointer moved past a small threshold) does
-  // NOT fire the pill's click action — checked via pill._mwDragged.
-  function applySavedPillPos(pill) {
-    const p = pillPos[pill.id];
-    if (!p || typeof p.left !== "number" || typeof p.top !== "number") return;
-    const w = pill.offsetWidth || 120, h = pill.offsetHeight || 32;
-    const left = Math.max(4, Math.min(p.left, window.innerWidth - w - 4));
-    const top = Math.max(4, Math.min(p.top, window.innerHeight - h - 4));
-    pill.style.left = left + "px";
-    pill.style.top = top + "px";
-    pill.style.right = "auto";
-    pill.style.bottom = "auto";
-  }
-
-  function makeDraggable(pill) {
-    let startX = 0, startY = 0, origLeft = 0, origTop = 0, dragging = false, moved = false;
-    pill.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0) return;
-      dragging = true; moved = false;
-      const rect = pill.getBoundingClientRect();
-      origLeft = rect.left; origTop = rect.top;
-      startX = e.clientX; startY = e.clientY;
-      try { pill.setPointerCapture(e.pointerId); } catch { /* */ }
-      pill.style.transition = "none";
-      pill.style.cursor = "grabbing";
-    });
-    pill.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      const dx = e.clientX - startX, dy = e.clientY - startY;
-      if (!moved && Math.hypot(dx, dy) > 4) moved = true;
-      if (!moved) return;
-      const w = pill.offsetWidth, h = pill.offsetHeight;
-      const left = Math.max(4, Math.min(origLeft + dx, window.innerWidth - w - 4));
-      const top = Math.max(4, Math.min(origTop + dy, window.innerHeight - h - 4));
-      pill.style.left = left + "px";
-      pill.style.top = top + "px";
-      pill.style.right = "auto";
-      pill.style.bottom = "auto";
-    });
-    const end = (e) => {
-      if (!dragging) return;
-      dragging = false;
-      pill.style.cursor = "";
-      pill.style.transition = "";
-      try { pill.releasePointerCapture(e.pointerId); } catch { /* */ }
-      if (moved) {
-        pill._mwDragged = true; // suppress the click that follows this drag
-        const rect = pill.getBoundingClientRect();
-        pillPos[pill.id] = { left: Math.round(rect.left), top: Math.round(rect.top) };
-        try { chrome.storage.local.set({ "mw-pill-pos": pillPos }); } catch { /* */ }
-      }
-    };
-    pill.addEventListener("pointerup", end);
-    pill.addEventListener("pointercancel", end);
-  }
-
-  // ─── Capture-pill styles (font + the live "● capturing" pill) ───
-  function injectPillStyles() {
-    if (document.getElementById("mw-pill-style")) return;
-    const fontUrl = (chrome.runtime && chrome.runtime.getURL) ? chrome.runtime.getURL("fonts/JetBrainsMono-Regular.woff2") : "";
-    const PILL_FONT = 'font:600 11px/1 "MW JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.06em';
-    const s = document.createElement("style");
-    s.id = "mw-pill-style";
-    s.textContent = [
-      fontUrl ? '@font-face{font-family:"MW JetBrains Mono";src:url("' + fontUrl + '") format("woff2");font-weight:400 600;font-display:swap}' : '',
-      '#mw-capture-pill{position:fixed;right:16px;bottom:92px;z-index:2147483600;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#141416;color:#e4e4e7;border:1px solid #3a3a40;' + PILL_FONT + ';cursor:grab;box-shadow:0 4px 14px rgba(0,0,0,.3);opacity:.9}',
-      '#mw-capture-pill:hover{opacity:1}',
-      '#mw-capture-pill.mw-on{color:#e4e4e7;border-color:#3a3a40}',
-      '#mw-capture-pill .mw-cap-dot{width:8px;height:8px;border-radius:50%;background:#6a6a72;flex-shrink:0}',
-      '#mw-capture-pill.mw-on .mw-cap-dot{background:#B5FF1A;animation:mw-rec 1.4s ease-in-out infinite}',
-      '@keyframes mw-rec{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(181,255,26,.5)}50%{opacity:.35;box-shadow:0 0 0 5px rgba(181,255,26,0)}}',
-      '#mw-capture-pill .mw-grip{display:inline-flex;align-items:center;color:#5a5a62;margin-right:1px;flex-shrink:0}',
-      '#mw-capture-pill .mw-grip svg{width:10px;height:13px;display:block}',
-      '#mw-capture-pill:hover .mw-grip{color:#a1a1aa}',
-    ].join("");
-    document.head.appendChild(s);
-  }
-
-
   // Apply the current state to the page: status pills + injected buttons +
   // (re)schedule sync. Idempotent — safe to call on every observer tick and
   // on every storage change, so the popup's toggles flip the page live.
   function refreshExtUI() {
     if (!extActive()) {
       // Paused or disabled on this site → go fully dormant.
-      removeCapturePill();
       const fc = document.getElementById("mw-float-container");
       if (fc) fc.remove();
       document.querySelectorAll(".mw-mini-btn").forEach((b) => b.remove());
       return;
     }
-    initCapturePill();
     if (showFloat) createFloatingButton();
     else { const fc = document.getElementById("mw-float-container"); if (fc) fc.remove(); }
     addMiniButtons();
-    onConversationActivity(); // event-driven incremental capture (no polling)
   }
 
-  // Load all flags — sync: prefs (autoCapture / disabled sites),
-  // local: paused + per-thread overrides — and react to changes live.
+  // Load flags — sync: disabled sites + float-button pref; local: paused —
+  // and react to changes live.
   try {
-    chrome.storage.sync.get({ autoCapture: false, "mw-disabled-sites": [], showFloatingButton: false }, (data) => {
-      autoCaptureEnabled = !!(data && data.autoCapture);
+    chrome.storage.sync.get({ "mw-disabled-sites": [], showFloatingButton: false }, (data) => {
       disabledSites = Array.isArray(data && data["mw-disabled-sites"]) ? data["mw-disabled-sites"] : [];
       showFloat = !!(data && data.showFloatingButton);
-      chrome.storage.local.get({ "mw-paused": false, "mw-thread-capture": {}, "mw-pill-pos": {} }, (loc) => {
+      chrome.storage.local.get({ "mw-paused": false }, (loc) => {
         mwPaused = !!(loc && loc["mw-paused"]);
-        threadOverrides = (loc && loc["mw-thread-capture"]) || {};
-        pillPos = (loc && loc["mw-pill-pos"]) || {};
         stateLoaded = true; // flags known — now (and only now) render
         refreshExtUI();
       });
     });
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === "sync") {
-        if (changes.autoCapture) autoCaptureEnabled = !!changes.autoCapture.newValue;
         if (changes["mw-disabled-sites"]) disabledSites = Array.isArray(changes["mw-disabled-sites"].newValue) ? changes["mw-disabled-sites"].newValue : [];
         if (changes.showFloatingButton) showFloat = !!changes.showFloatingButton.newValue;
       } else if (area === "local") {
         if (changes["mw-paused"]) mwPaused = !!changes["mw-paused"].newValue;
-        if (changes["mw-thread-capture"]) threadOverrides = changes["mw-thread-capture"].newValue || {};
       } else return;
       refreshExtUI();
     });

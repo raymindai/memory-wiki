@@ -1281,8 +1281,6 @@
       font-family: var(--font-mono); font-size: 11px;
       letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
     }
-    .ctl-dest { font-family: var(--font-mono); font-size: 10px; color: var(--faint); transition: color 120ms; }
-    .ctl-dest:hover { color: var(--body); }
 
     /* Toggle switch — ONE unified small size everywhere (header + rows). */
     .sw { position: relative; width: 26px; height: 15px; flex-shrink: 0; cursor: pointer; display: inline-block; }
@@ -1390,16 +1388,6 @@
       <label class="sw" title="Run memory.wiki on this site"><input type="checkbox" id="sw-site"><span class="track"></span></label>
     </div>
 
-    <div class="ctl-group">
-      <div class="ctl-group-head">automatic</div>
-      <div class="ctl-row">
-        <div class="ctl-row-main">
-          <span class="ctl-title">Auto-capture<span class="help" data-tip="Shows a capture pill on AI pages. Click the pill to start capturing that thread to memory.wiki; click it again to stop."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></span>
-          <a class="ctl-dest" id="ctl-dest" href="https://memory.wiki" target="_blank" rel="noopener">&#8594; your memory.wiki hub</a>
-        </div>
-        <label class="sw" title="Show the capture pill on AI pages"><input type="checkbox" id="sw-capture"><span class="track"></span></label>
-      </div>
-    </div>
   </div>
 
   <div class="manual-group">
