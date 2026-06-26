@@ -48,36 +48,9 @@ Create **two** separate apps:
 
 ## 3. Listing metadata (paste into both apps)
 
-> NOTE (2026-06-17): the original copy below was REJECTED under Guideline 1.1
-> (Safety / Objectionable Content) — Apple read the broad "capture any page /
-> AI conversations / social posts" framing as a service that could capture
-> objectionable third-party content. Rewritten to a personal "save your own
-> pages as links" utility. Apply to BOTH the iOS and Mac Clipper apps.
+> NOTE (2026-06-17): the original copy below was REJECTED under Guideline 1.1 (Safety / Objectionable Content) — Apple read the broad "capture any page / AI conversations / social posts" framing as a service that could capture objectionable third-party content. Rewritten to a personal "save your own pages as links" utility. Apply to BOTH the iOS and Mac Clipper apps.
 
-> NOTE (2026-06-26): Mac submission rejected again on 3 counts — all fixed in
-> **build 1.0 (5)** (build 4 had the same fixes but a square macOS app icon; 5
-> corrects the icon):
-> (5.2.5) App Store **Name** must not contain "Mac"/"Safari" → "memory.wiki Web
-> Clipper".
-> (5 / China DST) removed ALL foreign-AI brand names (ChatGPT, GPT, Claude,
-> Gemini, Cursor, Perplexity) — not just from keywords + description below, but
-> from the **binary** too: the popup's post-capture "send this to" launcher was
-> dropped and the options "on AI pages" copy is now generic. Keeps China
-> available without re-rejection risk (the other AIs also lack a China license).
-> (5.1.1(v)) account deletion lives at memory.wiki/settings — added an in-app
-> "Delete account" link in BOTH the popup (Shared Resources popup-v25.html) and
-> the extension settings page (options.html → "account" section); both deep-link
-> to memory.wiki/settings?section=danger so the Danger tab opens directly. Demo
-> it in the App Review Notes / screen recording (demo account self-heals via
-> demo-signin if deleted).
-> (icon, not a rejection count) the AppIcon mac slots held the full-bleed iOS
-> square (opaque, 0 padding) — macOS does not mask, so the Dock showed ~90°
-> corners. Regenerated the macOS slots as the Apple grid squircle (824/1024
-> tile, ~10% padding, flat) via `scripts/build-app-icons.mjs`; iOS/universal
-> stays full-bleed (Apple rejects iOS icons with alpha).
->
-> Build .pkg: `apps/safari-extension/memory.wiki Clipper/build/export-appstore/memory.wiki Clipper.pkg`
-> — upload via Transporter, then attach 1.0 (5) in App Store Connect.
+> NOTE (2026-06-26): Mac submission rejected again on 3 counts → fixed in build 1.0 (6). (5.2.5) App Store **Name** must not contain "Mac"/"Safari" → "memory.wiki Web Clipper". (5 / China DST) removed "ChatGPT"/"GPT" from keywords + description below (kept Claude/Gemini/Cursor — only ChatGPT/OpenAI were flagged); China stays available. The popup's post-capture AI launcher is also hidden in the binary. (5.1.1(v)) account deletion already exists at memory.wiki/settings — exposed in-app via the extension Settings page (options.html → account → "Delete account" button) which deep-links to memory.wiki/settings?section=danger; demo it in the App Review Notes (demo account self-heals via demo-signin if deleted). Also fixed: the macOS app icon was a full-bleed square (sharp corners in the Dock) → regenerated as the Apple squircle via scripts/build-app-icons.mjs. Build .pkg: build/export-appstore/memory.wiki Clipper.pkg → upload via Transporter, attach 1.0 (6).
 
 **Subtitle (max 30 chars)**
 
@@ -96,7 +69,7 @@ Save a page or a passage as a clean memory.wiki link, ready to revisit later or 
 ```
 memory.wiki Clipper saves a web page, or a passage you select, as a clean, private memory.wiki link you can revisit later or bring into your AI assistant.
 
-Reading something worth keeping? Save it in one tap and get a tidy memory.wiki link. Open it anytime, or paste it into your own AI assistant instead of copy-pasting text.
+Reading something worth keeping? Save it in one tap and get a tidy memory.wiki link. Open it anytime, or paste it into your own AI workflow (Claude, Gemini, Cursor) instead of copy-pasting text.
 
 What it does:
 - One tap saves the current page, or the passage you select, as a clean Markdown note at a short memory.wiki link.
@@ -112,7 +85,7 @@ Privacy:
 **Keywords (max 100 chars)**
 
 ```
-markdown,ai,context,clipper,save page,save text,memory,knowledge,notes,ai assistant
+markdown,ai,context,clipper,save page,claude,gemini,perplexity,cursor,memory,knowledge,notes
 ```
 
 **Support URL**: `https://memory.wiki/plugins#safari`**Marketing URL**: `https://memory.wiki`**Privacy Policy URL**: `https://memory.wiki/privacy`
