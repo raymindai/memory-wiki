@@ -809,9 +809,9 @@
       cursor: pointer;
       color: var(--muted);
       background: var(--surface, rgba(255,255,255,0.025));
-      transition: color 140ms, background 140ms, border-color 140ms, transform 80ms, box-shadow 140ms, width 200ms ease;
+      transition: color 140ms, background 140ms, border-color 140ms, transform 80ms, box-shadow 140ms, max-width 200ms ease;
       user-select: none;
-      width: 150px;            /* FIXED chip width */
+      max-width: 150px;        /* cap — chip shrinks to its content below this */
       flex-shrink: 0;
       box-shadow: 0 1px 0 rgba(0,0,0,0.02);
       overflow: hidden;
@@ -838,7 +838,7 @@
        pseudo) so it scales with currentColor. */
     .intent-chip.is-site {
       color: var(--ink);
-      width: 180px;
+      max-width: 180px;
     }
     .intent-chip .chip-site-icon {
       flex-shrink: 0;
@@ -871,7 +871,7 @@
        mask only applies while the chip is actively marqueeing so the
        text fades cleanly into the scroll instead of stopping abruptly. */
     .intent-chip .chip-label-wrap {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-width: 0;
       overflow: hidden;
     }
