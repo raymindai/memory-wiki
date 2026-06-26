@@ -55,7 +55,8 @@ Create **two** separate apps:
 > pages as links" utility. Apply to BOTH the iOS and Mac Clipper apps.
 
 > NOTE (2026-06-26): Mac submission rejected again on 3 counts — all fixed in
-> **build 1.0 (4)**:
+> **build 1.0 (5)** (build 4 had the same fixes but a square macOS app icon; 5
+> corrects the icon):
 > (5.2.5) App Store **Name** must not contain "Mac"/"Safari" → "memory.wiki Web
 > Clipper".
 > (5 / China DST) removed ALL foreign-AI brand names (ChatGPT, GPT, Claude,
@@ -69,9 +70,14 @@ Create **two** separate apps:
 > to memory.wiki/settings?section=danger so the Danger tab opens directly. Demo
 > it in the App Review Notes / screen recording (demo account self-heals via
 > demo-signin if deleted).
+> (icon, not a rejection count) the AppIcon mac slots held the full-bleed iOS
+> square (opaque, 0 padding) — macOS does not mask, so the Dock showed ~90°
+> corners. Regenerated the macOS slots as the Apple grid squircle (824/1024
+> tile, ~10% padding, flat) via `scripts/build-app-icons.mjs`; iOS/universal
+> stays full-bleed (Apple rejects iOS icons with alpha).
 >
 > Build .pkg: `apps/safari-extension/memory.wiki Clipper/build/export-appstore/memory.wiki Clipper.pkg`
-> — upload via Transporter, then attach 1.0 (4) in App Store Connect.
+> — upload via Transporter, then attach 1.0 (5) in App Store Connect.
 
 **Subtitle (max 30 chars)**
 
