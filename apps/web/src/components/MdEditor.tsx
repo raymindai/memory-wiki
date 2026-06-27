@@ -8402,12 +8402,9 @@ ${clone.innerHTML}
                       setShowOnboarding(false);
                       setShowSettings(false);
                       setShowHub(false);
-                      // Galaxy wants the full canvas — collapse every
-                      // side panel so the cosmos breathes.
-                      setShowSidebar(false);
-                      setShowAIPanel(false);
-                      setShowImagePanel(false);
-                      setShowOutlinePanel(false);
+                      // Galaxy no longer collapses the side panels —
+                      // opening it leaves the existing layout untouched
+                      // (founder: sidebar must stay; no layout side-effect).
                       setShowGalaxy(true);
                     }}
                     className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
@@ -8533,8 +8530,15 @@ ${clone.innerHTML}
               <button
                 onClick={() => {
                   if (!isAuthenticated) { setShowAuthMenu(true); return; }
-                  setShowImagePanel(prev => {
-                    if (!prev && !imagesLoading) {
+                  const opening = !showImagePanel;
+                  if (opening) {
+                    // The image panel lives in the editor row, which the
+                    // Start / Hub / Galaxy / Settings overlays cover — leave
+                    // them so the gallery is actually visible (founder: on
+                    // Start the button toggled but the panel stayed hidden
+                    // behind the overlay).
+                    setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(false);
+                    if (!imagesLoading) {
                       setImagesLoading(true);
                       fetch("/api/upload/list", { headers: authHeaders })
                         .then(r => r.ok ? r.json() : null)
@@ -8542,8 +8546,8 @@ ${clone.innerHTML}
                         .catch(() => {})
                         .finally(() => setImagesLoading(false));
                     }
-                    return !prev;
-                  });
+                  }
+                  setShowImagePanel(opening);
                   setShowAIPanel(false); setShowHistory(false); setShowExportMenu(false); setShowOutlinePanel(false);
                 }}
                 className="flex items-center justify-center px-2 h-6 text-caption font-medium transition-colors"
@@ -17366,7 +17370,7 @@ ${clone.innerHTML}
         const surfaces: PaletteItem[] = [
           { id: "surface-start", label: "Start", hint: "Personal workspace", icon: <Smile width={13} height={13} />, action: () => { setShowOnboarding(true); setShowHub(false); setShowGalaxy(false); setShowSettings(false); } },
           ...(hubSlug ? [{ id: "surface-hub", label: "Hub", hint: `/hub/${hubSlug}`, icon: <LayoutDashboard width={13} height={13} />, action: () => { setShowOnboarding(false); setShowSettings(false); setShowGalaxy(false); setShowHub(true); } }] : []),
-          ...(hubSlug ? [{ id: "surface-galaxy", label: "Galaxy", hint: "Your hub as a constellation", icon: <Atom width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowSettings(false); setShowSidebar(false); setShowAIPanel(false); setShowImagePanel(false); setShowOutlinePanel(false); setShowGalaxy(true); } }] : []),
+          ...(hubSlug ? [{ id: "surface-galaxy", label: "Galaxy", hint: "Your hub as a constellation", icon: <Atom width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowSettings(false); setShowGalaxy(true); } }] : []),
           { id: "surface-settings", label: "Settings", hint: "Profile, appearance, auto-management", icon: <Settings width={13} height={13} />, action: () => { setShowOnboarding(false); setShowHub(false); setShowGalaxy(false); setShowSettings(true); } },
         ];
 
