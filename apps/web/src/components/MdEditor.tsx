@@ -1343,6 +1343,10 @@ export default function MdEditor() {
     return (localStorage.getItem("mw-ai-panel-mode") as "auto" | "hub") || "auto";
   });
   useEffect(() => { try { localStorage.setItem("mw-ai-panel-mode", aiPanelMode); } catch {} }, [aiPanelMode]);
+  // The Start landing "ask anything" box hands its query to the hub chat,
+  // which auto-sends it once the side panel opens (initialQuery prop).
+  const [startHubInput, setStartHubInput] = useState("");
+  const [pendingHubQuery, setPendingHubQuery] = useState<string | null>(null);
   // Concept count for the hub — surfaced in HubChat's empty state.
   const [hubConceptCount, setHubConceptCount] = useState<number>(0);
   const [showOutlinePanel, setShowOutlinePanel] = useState(() => {
@@ -8803,16 +8807,29 @@ ${clone.innerHTML}
                 AI surface, not a Bundle/Doc primitive (Layers belongs to the
                 Bundle icon family used in the sidebar). */}
             {(() => {
-              const isBundle = activeTab?.kind === "bundle" && !!activeTab.bundleId;
-              const isDoc = !!activeTab && activeTab.kind !== "bundle" && canEdit && !showOnboarding;
-              const enabled = !showOnboarding && (isBundle || isDoc);
+              const onTop = showHub || showOnboarding || showGalaxy || showSettings;
+              const isBundle = activeTab?.kind === "bundle" && !!activeTab.bundleId && !onTop;
+              const isDoc = !!activeTab && activeTab.kind !== "bundle" && canEdit && !onTop;
+              // Start / Hub / Galaxy / Settings, or no active doc → hub chat
+              // (same destination as the Start "ask anything" box). Needs a hub.
+              const isHubCtx = !!hubSlug && !isBundle && !isDoc;
+              const enabled = isBundle || isDoc || isHubCtx;
               const tip = enabled
-                ? (isBundle ? "Bundle Assistant" : "Document Assistant")
+                ? (isHubCtx ? "Chat with your hub" : isBundle ? "Bundle Assistant" : "Document Assistant")
                 : "Open a document or bundle to use the Assistant";
               return (
                 <Tooltip text={tip} position="left">
                   <button
-                    onClick={() => { if (!enabled) return; setShowAIPanel(prev => !prev); setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false); }}
+                    onClick={() => {
+                      if (!enabled) return;
+                      if (isHubCtx) {
+                        setShowOnboarding(false); setShowGalaxy(false); setShowSettings(false);
+                        setShowHub(true); setAiPanelMode("hub"); setShowAIPanel(true);
+                      } else {
+                        setShowAIPanel(prev => !prev);
+                      }
+                      setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false);
+                    }}
                     disabled={!enabled}
                     className="px-2 h-6 rounded-md transition-colors flex items-center gap-1.5 text-caption font-medium"
                     style={{
@@ -12444,48 +12461,46 @@ ${clone.innerHTML}
                   );
                 })()}
 
-                {/* Hero — talk to your hub. Founder ask: when you land,
-                    chatting with your memory is the main surface (like other
-                    AI apps). Reuses the same HubChat the AI side-panel renders.
-                    Only for signed-in users who actually have a hub to talk to;
-                    new / empty accounts fall through to the quick-start content
-                    below (cold-start guard). */}
+                {/* Hero — when you land, an "ask anything" box is the main
+                    surface (founder ask, like other AI apps). Submitting it is
+                    the same as the top-right Chat on a hub: it opens the hub
+                    chat side panel and auto-sends the query (pendingHubQuery →
+                    HubChat initialQuery). Only for signed-in users who have a
+                    hub; new / empty accounts fall through to the quick-start
+                    content below. */}
                 {isAuthenticated && hubSlug && (
                   <section className="mb-8">
-                    <div className="text-caption font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-primary)" }}>
-                      Talk to your hub
-                    </div>
-                    <div
-                      className="rounded-xl overflow-hidden flex flex-col"
-                      style={{ border: "1px solid var(--border-dim)", background: "var(--surface)", height: "min(62vh, 560px)" }}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const q = startHubInput.trim();
+                        if (!q) return;
+                        setStartHubInput("");
+                        setPendingHubQuery(q);
+                        // Same as clicking the top-right Chat on a hub.
+                        setShowOnboarding(false); setShowGalaxy(false); setShowSettings(false);
+                        setShowHub(true); setAiPanelMode("hub"); setShowAIPanel(true);
+                      }}
+                      className="flex items-center gap-2 rounded-xl px-4 py-3"
+                      style={{ border: "1px solid var(--border-dim)", background: "var(--surface)" }}
                     >
-                      <HubChat
-                        slug={hubSlug}
-                        hubName={profile?.display_name || hubSlug}
-                        conceptCount={hubConceptCount}
-                        accent="var(--text-primary)"
-                        accentDim="var(--border)"
-                        onCitationClick={(docId) => {
-                          setShowOnboarding(false);
-                          const existing = tabs.find(t => t.cloudId === docId);
-                          if (existing) { switchTab(existing.id); return; }
-                          fetch(`/api/docs/${docId}`, { headers: authHeaders }).then(r => r.ok ? r.json() : null).then(d => {
-                            if (!d) return;
-                            const newId = `doc-${docId}-${Date.now()}`;
-                            const newTab: Tab = { id: newId, kind: "doc", title: d.title || "Untitled", markdown: d.markdown || "", cloudId: docId, isDraft: d.is_draft };
-                            setTabs(prev => [...prev, newTab]);
-                            switchTab(newId);
-                          }).catch(() => {});
-                        }}
-                        onDocCreated={(docId) => {
-                          fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
-                            .then((r) => (r.ok ? r.json() : null))
-                            .then((data) => { if (data?.documents) { setServerDocs(data.documents); ingestDocAiMeta(data.documents); } })
-                            .catch(() => {});
-                          void docId;
-                        }}
+                      <input
+                        value={startHubInput}
+                        onChange={(e) => setStartHubInput(e.target.value)}
+                        placeholder="Ask anything across your hub..."
+                        className="flex-1 bg-transparent outline-none text-body"
+                        style={{ color: "var(--text-primary)" }}
                       />
-                    </div>
+                      <button
+                        type="submit"
+                        disabled={!startHubInput.trim()}
+                        aria-label="Ask your hub"
+                        className="shrink-0 transition-opacity disabled:opacity-40"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                      </button>
+                    </form>
                   </section>
                 )}
 
@@ -14420,6 +14435,8 @@ ${clone.innerHTML}
                           .catch(() => {});
                         void docId;
                       }}
+                      initialQuery={pendingHubQuery}
+                      onInitialQuerySent={() => setPendingHubQuery(null)}
                     />
                   )}
                   {/* Bundle mode → render BundleChat in place of doc tools */}

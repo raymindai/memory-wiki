@@ -33,6 +33,12 @@ interface HubChatProps {
    *  appears on the next manual refresh — still safe, just less
    *  immediate. */
   onDocCreated?: (docId: string) => void;
+  /** A query injected from outside (e.g. the Start landing's "ask anything"
+   *  box). When it changes to a non-empty string the chat sends it as if the
+   *  user typed it, then calls onInitialQuerySent so the parent can clear it
+   *  (fires once). */
+  initialQuery?: string | null;
+  onInitialQuerySent?: () => void;
 }
 
 const QUICK_ACTIONS = [
@@ -42,7 +48,7 @@ const QUICK_ACTIONS = [
   { label: "Gaps", icon: <HelpCircle width={11} height={11} />, question: "Based on my docs, what important questions am I NOT answering yet?" },
 ];
 
-export default function HubChat({ slug, hubName, conceptCount, accent, accentDim, onCitationClick, onDocCreated }: HubChatProps) {
+export default function HubChat({ slug, hubName, conceptCount, accent, accentDim, onCitationClick, onDocCreated, initialQuery, onInitialQuerySent }: HubChatProps) {
   const themeAccent = accent || "var(--text-primary)";
   const themeAccentDim = accentDim || "var(--border)";
 
@@ -117,6 +123,17 @@ export default function HubChat({ slug, hubName, conceptCount, accent, accentDim
     e.preventDefault();
     sendMessage(input);
   };
+
+  // External query injection (e.g. the Start landing "ask anything" box):
+  // when initialQuery flips to a non-empty value, send it as if typed, then
+  // let the parent clear it so it fires exactly once.
+  useEffect(() => {
+    if (initialQuery && initialQuery.trim()) {
+      sendMessage(initialQuery);
+      onInitialQuerySent?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]);
 
   const clearChat = useCallback((skipConfirm = false) => {
     if (!skipConfirm && !confirm("Start a new chat? Current conversation will be cleared.")) return;
