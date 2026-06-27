@@ -8429,8 +8429,11 @@ ${clone.innerHTML}
               Describes how the current tab is rendered. Bundle tabs get
               [Bundle | Canvas | List]; everything else gets
               [MD | Split | Source] so the toolbar slot count stays
-              consistent across kinds. */}
-          {!showGalaxy && <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
+              consistent across kinds. Hidden entirely on the overlay
+              surfaces (Start / Hub / Galaxy / Settings): no doc or bundle
+              is rendered there, so the doc/bundle view-mode pills must not
+              appear (they previously leaked as greyed-out disabled pills). */}
+          {!showGalaxy && !showOnboarding && !showHub && !showSettings && <div className="flex items-center rounded-lg overflow-hidden" style={{ border: "1px solid var(--border-dim)" }}>
           {/* View buttons — different per tab kind. Bundle tabs get
               [Canvas | List]; everything else (doc + hub + onboarding)
               keeps [MD | Split | Source] so the toolbar layout stays
