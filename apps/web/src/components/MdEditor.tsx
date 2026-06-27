@@ -8803,39 +8803,16 @@ ${clone.innerHTML}
                 AI surface, not a Bundle/Doc primitive (Layers belongs to the
                 Bundle icon family used in the sidebar). */}
             {(() => {
-              // "Talk to your X" — the AI panel, labelled by the surface it
-              // will be scoped to. Bundle/doc context come from the active
-              // tab (when no overlay is on top); otherwise (Start / Hub /
-              // Galaxy / Settings, or no active doc) it's the hub. Hub
-              // context needs a hub to exist.
-              const onTop = showHub || showOnboarding || showGalaxy || showSettings;
-              const isBundle = activeTab?.kind === "bundle" && !!activeTab.bundleId && !onTop;
-              const isDoc = !!activeTab && activeTab.kind !== "bundle" && canEdit && !onTop;
-              const isHubCtx = !!hubSlug && !isBundle && !isDoc;
-              const enabled = isBundle || isDoc || isHubCtx;
-              const ctx = isBundle ? "bundle" : isDoc ? "doc" : "hub";
-              const label = ctx === "bundle" ? "Talk to your Bundle" : ctx === "doc" ? "Talk to your MD" : "Talk to your Hub";
-              const tip = enabled ? label : "Create a hub, doc, or bundle to chat";
+              const isBundle = activeTab?.kind === "bundle" && !!activeTab.bundleId;
+              const isDoc = !!activeTab && activeTab.kind !== "bundle" && canEdit && !showOnboarding;
+              const enabled = !showOnboarding && (isBundle || isDoc);
+              const tip = enabled
+                ? (isBundle ? "Bundle Assistant" : "Document Assistant")
+                : "Open a document or bundle to use the Assistant";
               return (
                 <Tooltip text={tip} position="left">
                   <button
-                    onClick={() => {
-                      if (!enabled) return;
-                      const opening = !showAIPanel;
-                      if (opening) {
-                        if (ctx === "hub") {
-                          // Surface the hub so the chat's scope is visible,
-                          // then snap the panel to hub mode.
-                          setShowOnboarding(false); setShowGalaxy(false); setShowSettings(false);
-                          setShowHub(true);
-                          setAiPanelMode("hub");
-                        } else {
-                          setAiPanelMode("auto");
-                        }
-                        setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false);
-                      }
-                      setShowAIPanel(opening);
-                    }}
+                    onClick={() => { if (!enabled) return; setShowAIPanel(prev => !prev); setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false); }}
                     disabled={!enabled}
                     className="px-2 h-6 rounded-md transition-colors flex items-center gap-1.5 text-caption font-medium"
                     style={{
@@ -8846,7 +8823,7 @@ ${clone.innerHTML}
                     }}
                   >
                     {aiProcessing ? <Loader2 width={11} height={11} className="animate-spin" /> : <Sparkles width={11} height={11} />}
-                    <span className="hidden sm:inline">{label}</span>
+                    <span className="hidden sm:inline">Chat</span>
                   </button>
                 </Tooltip>
               );
@@ -12408,7 +12385,7 @@ ${clone.innerHTML}
                   midpoint reads as a "destination" rather than a
                   half-empty top-aligned panel. Width + padding still
                   match Hub / Bundle so the three share one frame. */}
-              <div className="flex-1 w-full max-w-3xl mx-auto px-6 py-10 mw-start-backdrop-content flex flex-col justify-center">
+              <div className={`flex-1 w-full max-w-3xl mx-auto px-6 py-10 mw-start-backdrop-content flex flex-col ${(isAuthenticated && hubSlug) ? "justify-start" : "justify-center"}`}>
 
                 {/* Growing-knowledge-hub surface (Pulse / Constellation /
                     Frontier) HIDDEN by founder request 2026-05-17 — the
@@ -12466,6 +12443,51 @@ ${clone.innerHTML}
                     </header>
                   );
                 })()}
+
+                {/* Hero — talk to your hub. Founder ask: when you land,
+                    chatting with your memory is the main surface (like other
+                    AI apps). Reuses the same HubChat the AI side-panel renders.
+                    Only for signed-in users who actually have a hub to talk to;
+                    new / empty accounts fall through to the quick-start content
+                    below (cold-start guard). */}
+                {isAuthenticated && hubSlug && (
+                  <section className="mb-8">
+                    <div className="text-caption font-mono uppercase tracking-wider mb-3" style={{ color: "var(--text-primary)" }}>
+                      Talk to your hub
+                    </div>
+                    <div
+                      className="rounded-xl overflow-hidden flex flex-col"
+                      style={{ border: "1px solid var(--border-dim)", background: "var(--surface)", height: "min(62vh, 560px)" }}
+                    >
+                      <HubChat
+                        slug={hubSlug}
+                        hubName={profile?.display_name || hubSlug}
+                        conceptCount={hubConceptCount}
+                        accent="var(--text-primary)"
+                        accentDim="var(--border)"
+                        onCitationClick={(docId) => {
+                          setShowOnboarding(false);
+                          const existing = tabs.find(t => t.cloudId === docId);
+                          if (existing) { switchTab(existing.id); return; }
+                          fetch(`/api/docs/${docId}`, { headers: authHeaders }).then(r => r.ok ? r.json() : null).then(d => {
+                            if (!d) return;
+                            const newId = `doc-${docId}-${Date.now()}`;
+                            const newTab: Tab = { id: newId, kind: "doc", title: d.title || "Untitled", markdown: d.markdown || "", cloudId: docId, isDraft: d.is_draft };
+                            setTabs(prev => [...prev, newTab]);
+                            switchTab(newId);
+                          }).catch(() => {});
+                        }}
+                        onDocCreated={(docId) => {
+                          fetch("/api/user/documents?includeDeleted=1", { headers: authHeaders })
+                            .then((r) => (r.ok ? r.json() : null))
+                            .then((data) => { if (data?.documents) { setServerDocs(data.documents); ingestDocAiMeta(data.documents); } })
+                            .catch(() => {});
+                          void docId;
+                        }}
+                      />
+                    </div>
+                  </section>
+                )}
 
                 {/* Knowledge-compounds stats — gated on the thinking-surface
                     flag because it surfaces concept counts that don't make
