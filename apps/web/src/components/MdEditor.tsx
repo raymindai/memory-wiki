@@ -8803,16 +8803,39 @@ ${clone.innerHTML}
                 AI surface, not a Bundle/Doc primitive (Layers belongs to the
                 Bundle icon family used in the sidebar). */}
             {(() => {
-              const isBundle = activeTab?.kind === "bundle" && !!activeTab.bundleId;
-              const isDoc = !!activeTab && activeTab.kind !== "bundle" && canEdit && !showOnboarding;
-              const enabled = !showOnboarding && (isBundle || isDoc);
-              const tip = enabled
-                ? (isBundle ? "Bundle Assistant" : "Document Assistant")
-                : "Open a document or bundle to use the Assistant";
+              // "Talk to your X" — the AI panel, labelled by the surface it
+              // will be scoped to. Bundle/doc context come from the active
+              // tab (when no overlay is on top); otherwise (Start / Hub /
+              // Galaxy / Settings, or no active doc) it's the hub. Hub
+              // context needs a hub to exist.
+              const onTop = showHub || showOnboarding || showGalaxy || showSettings;
+              const isBundle = activeTab?.kind === "bundle" && !!activeTab.bundleId && !onTop;
+              const isDoc = !!activeTab && activeTab.kind !== "bundle" && canEdit && !onTop;
+              const isHubCtx = !!hubSlug && !isBundle && !isDoc;
+              const enabled = isBundle || isDoc || isHubCtx;
+              const ctx = isBundle ? "bundle" : isDoc ? "doc" : "hub";
+              const label = ctx === "bundle" ? "Talk to your Bundle" : ctx === "doc" ? "Talk to your MD" : "Talk to your Hub";
+              const tip = enabled ? label : "Create a hub, doc, or bundle to chat";
               return (
                 <Tooltip text={tip} position="left">
                   <button
-                    onClick={() => { if (!enabled) return; setShowAIPanel(prev => !prev); setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false); }}
+                    onClick={() => {
+                      if (!enabled) return;
+                      const opening = !showAIPanel;
+                      if (opening) {
+                        if (ctx === "hub") {
+                          // Surface the hub so the chat's scope is visible,
+                          // then snap the panel to hub mode.
+                          setShowOnboarding(false); setShowGalaxy(false); setShowSettings(false);
+                          setShowHub(true);
+                          setAiPanelMode("hub");
+                        } else {
+                          setAiPanelMode("auto");
+                        }
+                        setShowExportMenu(false); setShowHistory(false); setShowImagePanel(false); setShowOutlinePanel(false);
+                      }
+                      setShowAIPanel(opening);
+                    }}
                     disabled={!enabled}
                     className="px-2 h-6 rounded-md transition-colors flex items-center gap-1.5 text-caption font-medium"
                     style={{
@@ -8823,7 +8846,7 @@ ${clone.innerHTML}
                     }}
                   >
                     {aiProcessing ? <Loader2 width={11} height={11} className="animate-spin" /> : <Sparkles width={11} height={11} />}
-                    <span className="hidden sm:inline">Chat</span>
+                    <span className="hidden sm:inline">{label}</span>
                   </button>
                 </Tooltip>
               );
